@@ -1,0 +1,14 @@
+<h2 class="text-xl font-bold mb-4">Players</h2>
+<div class="bg-white p-4 rounded-lg shadow max-h-[31.5rem] overflow-y-auto">
+  <div class="space-y-2">
+    <div *ngFor="let entry of getPlayerEntries()"
+         class="flex justify-between items-center p-2 rounded"
+         [ngClass]="playerColors[entry.player]">
+      <span class="font-medium">{{ entry.player }}</span>
+      <div class="text-right">
+        <div>Squares: {{ entry.stats.squares }}</div>
+        <div>Total: ${{ entry.stats.total }}</div>
+      </div>
+    </div>
+  </div>
+</div> 

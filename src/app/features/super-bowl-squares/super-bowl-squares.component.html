@@ -1,0 +1,90 @@
+<div class="container mx-auto p-4">
+  <div class="space-y-6">
+    <!-- Team Names -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <input type="text" [(ngModel)]="homeTeam" 
+             (ngModelChange)="onTeamNameChange()"
+             placeholder="Home Team" 
+             class="bg-gray-100 text-gray-900 border border-gray-300 rounded p-2">
+      <input type="text" [(ngModel)]="awayTeam" 
+             (ngModelChange)="onTeamNameChange()"
+             placeholder="Away Team"
+             class="bg-gray-100 text-gray-900 border border-gray-300 rounded p-2">
+    </div>
+
+    <!-- Player Controls -->
+    <div class="flex flex-wrap gap-4 items-center">
+      <div class="w-full sm:w-auto flex gap-2">
+        <input type="text" [(ngModel)]="currentPlayer" 
+               placeholder="Enter your name" 
+               [disabled]="isLocked"
+               class="bg-gray-100 text-gray-900 border border-gray-300 rounded p-2 disabled:opacity-50 disabled:cursor-not-allowed">
+        <div class="flex items-center gap-2">
+          <span class="text-gray-400">$</span>
+          <input type="number" [(ngModel)]="currentPrice" 
+                 [disabled]="isLocked"
+                 class="w-20 bg-gray-100 text-gray-900 border border-gray-300 rounded p-2 disabled:opacity-50 disabled:cursor-not-allowed">
+          <span class="text-gray-400">per square</span>
+        </div>
+      </div>
+      <button (click)="randomizeNumbers()" 
+              [disabled]="isLocked"
+              class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+        <span *ngIf="!isRandomized">🎲</span>
+        <svg *ngIf="isRandomized" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+        </svg>
+        {{ isRandomized ? 'Clear Numbers' : 'Randomize Numbers' }}
+      </button>
+      <button (click)="toggleLock()" 
+              class="w-full sm:w-auto bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded flex items-center gap-2">
+        <ng-icon *ngIf="!isLocked" name="heroLockOpen" class="w-5 h-5"></ng-icon>
+        <ng-icon *ngIf="isLocked" name="heroLockClosed" class="w-5 h-5"></ng-icon>
+        {{ isLocked ? 'Unlock Game' : 'Lock Game' }}
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Game Board -->
+      <div class="md:col-span-2">
+        <app-game-board
+          [homeTeam]="homeTeam"
+          [awayTeam]="awayTeam"
+          [homeNumbers]="homeNumbers"
+          [awayNumbers]="awayNumbers"
+          [selectedSquares]="selectedSquares"
+          [playerColors]="playerColors"
+          (squareClick)="onSquareClick($event)">
+        </app-game-board>
+      </div>
+
+      <!-- Players List -->
+      <div>
+        <app-players-list
+          [playerStats]="playerStats"
+          [playerColors]="playerColors">
+        </app-players-list>
+      </div>
+    </div>
+
+    <!-- Score Inputs -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <app-score-input
+        *ngFor="let quarter of [1, 2, 3, 4]"
+        [quarter]="quarter.toString()"
+        [scores]="getQuarterScores(quarter)"
+        [homeTeam]="homeTeam"
+        [awayTeam]="awayTeam"
+        (scoreChange)="onScoreChange($event)">
+      </app-score-input>
+    </div>
+
+    <!-- Winners and Payouts -->
+    <app-winners-and-payouts
+      [winners]="winners"
+      [quarterPayouts]="quarterPayouts"
+      [playerColors]="playerColors"
+      [totalPot]="totalPot">
+    </app-winners-and-payouts>
+  </div>
+</div> 
