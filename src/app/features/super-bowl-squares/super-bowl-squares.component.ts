@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FirebaseService } from '../../core/services/firebase.service';
@@ -10,6 +10,7 @@ import { WinnersAndPayoutsComponent } from './components/winners-and-payouts/win
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroLockOpen, heroLockClosed } from '@ng-icons/heroicons/outline';
 import { GameStatusComponent } from './components/game-status/game-status.component';
+import { PasswordDialogComponent } from './components/password-dialog/password-dialog.component';
 
 @Component({
   selector: 'app-super-bowl-squares',
@@ -22,7 +23,8 @@ import { GameStatusComponent } from './components/game-status/game-status.compon
     ScoreInputComponent,
     WinnersAndPayoutsComponent,
     NgIconComponent,
-    GameStatusComponent
+    GameStatusComponent,
+    PasswordDialogComponent
   ],
   providers: [
     provideIcons({ heroLockOpen, heroLockClosed })
@@ -31,6 +33,8 @@ import { GameStatusComponent } from './components/game-status/game-status.compon
   styleUrls: ['./super-bowl-squares.component.scss']
 })
 export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
+  @ViewChild('passwordDialog') passwordDialog!: PasswordDialogComponent;
+  
   homeTeam: string = '';
   awayTeam: string = '';
   selectedSquares: { [key: string]: string } = {};
@@ -280,14 +284,31 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   }
 
   async toggleLock(): Promise<void> {
-    const password = prompt('Enter password to lock/unlock game:');
-    if (!password) return;
-    
-    if (password === 'chattanooga' || password === 'password') {
-      this.isLocked = !this.isLocked;
-      await this.firebaseService.updateGameData({ isLocked: this.isLocked });
-    } else {
-      alert('Incorrect password');
+    try {
+      const password = await new Promise<string>((resolve, reject) => {
+        const submitSub = this.passwordDialog.passwordSubmit.subscribe(pwd => {
+          submitSub.unsubscribe();
+          cancelSub.unsubscribe();
+          resolve(pwd);
+        });
+        
+        const cancelSub = this.passwordDialog.cancel.subscribe(() => {
+          submitSub.unsubscribe();
+          cancelSub.unsubscribe();
+          reject();
+        });
+        
+        this.passwordDialog.open();
+      });
+
+      if (password === 'chattanooga' || password === 'password') {
+        this.isLocked = !this.isLocked;
+        await this.firebaseService.updateGameData({ isLocked: this.isLocked });
+      } else {
+        alert('Incorrect password');
+      }
+    } catch {
+      // User cancelled
     }
   }
 
