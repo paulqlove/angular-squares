@@ -92,6 +92,9 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   isRandomized: boolean = false;
   isLocked: boolean = false;
   isPlayersListVisible: boolean = true;
+  showAlert: boolean = false;
+  alertMessage: string = '';
+  takenByPlayer: string = '';
 
   constructor(private firebaseService: FirebaseService) {}
 
@@ -171,12 +174,45 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     
     const key = `${event.row}-${event.col}`;
     
+    // Check if square is already taken
+    if (this.selectedSquares[key]) {
+      // If it's the same player, remove the selection
+      if (this.selectedSquares[key] === this.currentPlayer) {
+        const newSelectedSquares = { ...this.selectedSquares };
+        delete newSelectedSquares[key];
+        
+        // Update Firebase with the new state
+        this.selectedSquares = newSelectedSquares;
+        this.calculatePlayerStats();
+        this.firebaseService.updateGameData({
+          selectedSquares: newSelectedSquares
+        });
+        return;
+      }
+      
+      // If it's a different player, show alert
+      this.takenByPlayer = this.selectedSquares[key];
+      this.showAlert = true;
+      this.alertMessage = `Square already taken by ${this.takenByPlayer}`;
+      setTimeout(() => {
+        this.showAlert = false;
+      }, 3000);
+      return;
+    }
+    
+    // If square is available, select it
+    const newSelectedSquares = {
+      ...this.selectedSquares,
+      [key]: this.currentPlayer
+    };
+    
+    // Update local state first
+    this.selectedSquares = newSelectedSquares;
+    this.calculatePlayerStats();
+    
+    // Then update Firebase
     this.firebaseService.updateGameData({
-      selectedSquares: {
-        ...this.selectedSquares,
-        [key]: this.currentPlayer
-      },
-      playerColors: this.playerColors
+      selectedSquares: newSelectedSquares
     });
   }
 
