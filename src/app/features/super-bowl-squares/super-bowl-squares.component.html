@@ -51,14 +51,42 @@
     </div>
 
     <!-- Score Inputs -->
-    <div class="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
-      <app-score-input *ngFor="let quarter of [1, 2, 3, 4]" 
-          [quarter]="quarter.toString()"
-          [scores]="getQuarterScores(quarter)" 
-          [homeTeam]="homeTeam" 
-          [awayTeam]="awayTeam"
-          (scoreChange)="onScoreChange($event)">
-      </app-score-input>
+    <div class="w-full mt-4">
+      <!-- Mobile view with horizontal scroll -->
+      <div class="sm:hidden relative">
+        <!-- Hint text -->
+        <div class="text-sm text-gray-500 mb-2 flex items-center justify-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+          Swipe to see more quarters
+        </div>
+
+        <div class="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory">
+          <app-score-input *ngFor="let quarter of [1, 2, 3, 4]" 
+              class="flex-none w-[85vw] snap-center"
+              [quarter]="quarter.toString()"
+              [scores]="getQuarterScores(quarter)" 
+              [homeTeam]="homeTeam" 
+              [awayTeam]="awayTeam"
+              (scoreChange)="onScoreChange($event)">
+          </app-score-input>
+        </div>
+
+        <!-- Gradient fade -->
+        <div class="absolute right-0 top-8 bottom-4 w-12 bg-gradient-to-l from-white pointer-events-none"></div>
+      </div>
+
+      <!-- Desktop grid view -->
+      <div class="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <app-score-input *ngFor="let quarter of [1, 2, 3, 4]"
+            [quarter]="quarter.toString()"
+            [scores]="getQuarterScores(quarter)" 
+            [homeTeam]="homeTeam" 
+            [awayTeam]="awayTeam"
+            (scoreChange)="onScoreChange($event)">
+        </app-score-input>
+      </div>
     </div>
 
     <!-- Grid container for board and players -->
@@ -79,7 +107,6 @@
       <!-- Players List -->
       <div class="lg:col-span-2 col-span-1">
         <div class="bg-white rounded-lg shadow h-full flex flex-col justify-between">
-          <!-- Players List Header -->
           <button (click)="isPlayersListVisible = !isPlayersListVisible"
                   class="w-full p-4 flex justify-between items-center text-left">
             <span class="font-bold text-lg">Players</span>
@@ -102,7 +129,7 @@
           </div>
           <app-game-status [selectedSquares]="selectedSquares"></app-game-status>
         </div>
-    </div>
+      </div>
     </div>
 
     <!-- Winners and Payouts -->
