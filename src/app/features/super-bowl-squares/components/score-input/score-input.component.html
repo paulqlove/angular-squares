@@ -5,13 +5,13 @@
       <span class="w-32">{{ homeTeam || 'Home' }}</span>
       <input type="number" [(ngModel)]="scores.home" 
              (ngModelChange)="onScoreChange()"
-             class="w-20 bg-gray-100 text-gray-900 border border-gray-300 rounded p-2">
+             class="w-16 bg-gray-100 text-gray-900 border border-gray-300 rounded p-2 text-center">
     </div>
     <div class="flex items-center justify-between gap-2">
       <span class="w-32">{{ awayTeam || 'Away' }}</span>
       <input type="number" [(ngModel)]="scores.away" 
              (ngModelChange)="onScoreChange()"
-             class="w-20 bg-gray-100 text-gray-900 border border-gray-300 rounded p-2">
+             class="w-16 bg-gray-100 text-gray-900 border border-gray-300 rounded p-2 text-center">
     </div>
   </div>
 </div> 
