@@ -172,25 +172,44 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
   onSquareClick(event: { row: number; col: number }): void {
     if (!this.currentPlayer) {
-      alert('Please enter your name first');
+      this.showAlert = true;
+      this.alertMessage = 'Please enter your name first';
+      setTimeout(() => {
+        this.showAlert = false;
+      }, 3000);
+      return;
+    }
+
+    if (this.isLocked) {
       return;
     }
     
     const key = `${event.row}-${event.col}`;
     
     // Check if square is already taken
-    if (this.selectedSquares[key] === this.currentPlayer) {
-      const newSelectedSquares = { ...this.selectedSquares };
-      delete newSelectedSquares[key];
-      
-      // Update local state
-      this.selectedSquares = newSelectedSquares;
-      this.calculatePlayerStats();
+    if (this.selectedSquares[key]) {
+      if (this.selectedSquares[key] === this.currentPlayer) {
+        // Allow user to deselect their own square
+        const newSelectedSquares = { ...this.selectedSquares };
+        delete newSelectedSquares[key];
+        
+        // Update local state
+        this.selectedSquares = newSelectedSquares;
+        this.calculatePlayerStats();
 
-      // Update Firebase - use selectedSquares instead of squares
-      this.firebaseService.updateGameData({
-        selectedSquares: newSelectedSquares
-      });
+        // Update Firebase
+        this.firebaseService.updateGameData({
+          selectedSquares: newSelectedSquares
+        });
+      } else {
+        // Show alert if square is taken by another player
+        this.takenByPlayer = this.selectedSquares[key];
+        this.showAlert = true;
+        this.alertMessage = `Square already taken by ${this.takenByPlayer}`;
+        setTimeout(() => {
+          this.showAlert = false;
+        }, 3000);
+      }
       return;
     }
     
@@ -200,11 +219,11 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       [key]: this.currentPlayer
     };
     
-    // Update local state first
+    // Update local state
     this.selectedSquares = newSelectedSquares;
     this.calculatePlayerStats();
     
-    // Then update Firebase
+    // Update Firebase
     this.firebaseService.updateGameData({
       selectedSquares: newSelectedSquares
     });
