@@ -9,7 +9,7 @@
         <span class="text-sm text-gray-600 ml-2">({{ getPayoutAmount(quarter) }})</span>
       </div>
       <div class="font-medium">
-        {{ winners[quarter] ? '🏆 ' + winners[quarter] : 'TBD' }}
+        {{ (hasAnyScores() && winners[quarter]) ? '🏆 ' + winners[quarter] : 'TBD' }}
         <div *ngIf="winners[quarter] && totalPot" class="text-sm font-normal text-gray-600 text-right">
           ${{ (totalPot * quarterPayouts[quarter]).toFixed(2) }}
         </div>
@@ -19,7 +19,7 @@
     <!-- Total Pot Section -->
     <div class="flex justify-between items-center p-2 mt-2 bg-gray-100 rounded">
       <span class="font-medium">Total Pot</span>
-      <span class="font-medium">${{ totalPot?.toFixed(2) || '0.00' }}</span>
+      <span class="font-medium">${{ totalPot.toFixed(2) || '0.00' }}</span>
     </div>
   </div>
 </div> 

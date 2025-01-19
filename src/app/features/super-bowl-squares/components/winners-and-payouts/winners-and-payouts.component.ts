@@ -8,15 +8,16 @@ import { CommonModule } from '@angular/common';
   templateUrl: './winners-and-payouts.component.html'
 })
 export class WinnersAndPayoutsComponent {
-  @Input() winners!: { [key: string]: string };
-  @Input() quarterPayouts!: { [key: string]: number };
-  @Input() playerColors!: { [key: string]: string };
-  @Input() totalPot?: number;
+  @Input() winners: { [key: string]: string } = {};
+  @Input() quarterPayouts: { [key: string]: number } = {};
+  @Input() playerColors: { [key: string]: string } = {};
+  @Input() totalPot: number = 0;
+  @Input() scores: { [key: string]: { home: number; away: number } } = {};
 
   ngOnChanges() {
     if (this.winners && this.totalPot) {
       Object.entries(this.winners).forEach(([quarter, winner]) => {
-        const payout = this.totalPot! * this.quarterPayouts[quarter];
+        const payout = this.totalPot * this.quarterPayouts[quarter];
       });
     }
   }
@@ -38,5 +39,11 @@ export class WinnersAndPayoutsComponent {
   getPayoutAmount(quarter: string): string {
     const percentage = this.quarterPayouts[quarter] * 100;
     return `${percentage}%`;
+  }
+
+  hasAnyScores(): boolean {
+    return Object.values(this.scores).some(score => 
+      score.home > 0 || score.away > 0
+    );
   }
 } 

@@ -1,14 +1,14 @@
 <div class="bg-white p-4 rounded-lg shadow">
-  <h2 class="text-xl font-bold mb-4">Quarter {{ quarter }}</h2>
-  <div class="space-y-4">
-    <div class="flex items-center gap-2">
-      <span class="w-20">{{ homeTeam || 'Home' }}</span>
+  <h2 class="text-base sm:text-xl font-bold mb-2 sm:mb-4">Quarter {{ quarter }}</h2>
+  <div class="space-y-2 sm:space-y-4">
+    <div class="flex items-center justify-between gap-2">
+      <span class="w-32">{{ homeTeam || 'Home' }}</span>
       <input type="number" [(ngModel)]="scores.home" 
              (ngModelChange)="onScoreChange()"
              class="w-20 bg-gray-100 text-gray-900 border border-gray-300 rounded p-2">
     </div>
-    <div class="flex items-center gap-2">
-      <span class="w-20">{{ awayTeam || 'Away' }}</span>
+    <div class="flex items-center justify-between gap-2">
+      <span class="w-32">{{ awayTeam || 'Away' }}</span>
       <input type="number" [(ngModel)]="scores.away" 
              (ngModelChange)="onScoreChange()"
              class="w-20 bg-gray-100 text-gray-900 border border-gray-300 rounded p-2">

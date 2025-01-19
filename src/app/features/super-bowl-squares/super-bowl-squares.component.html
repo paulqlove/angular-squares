@@ -14,14 +14,15 @@
 
     <!-- Player Controls -->
     <div class="flex flex-wrap gap-4 items-center">
-      <div class="w-full sm:w-auto flex gap-2">
+      <div class="w-full sm:w-auto flex flex-wrap gap-2">
         <input type="text" [(ngModel)]="currentPlayer" 
                placeholder="Enter your name" 
                [disabled]="isLocked"
-               class="bg-gray-100 text-gray-900 border border-gray-300 rounded p-2 disabled:opacity-50 disabled:cursor-not-allowed">
+               class="w-full sm:w-auto bg-gray-100 text-gray-900 border border-gray-300 rounded p-2 disabled:opacity-50 disabled:cursor-not-allowed">
         <div class="flex items-center gap-2">
           <span class="text-gray-400">$</span>
           <input type="number" [(ngModel)]="currentPrice" 
+                 (ngModelChange)="onPriceChange()"
                  [disabled]="isLocked"
                  class="w-20 bg-gray-100 text-gray-900 border border-gray-300 rounded p-2 disabled:opacity-50 disabled:cursor-not-allowed">
           <span class="text-gray-400">per square</span>
@@ -44,7 +45,19 @@
       </button>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Score Inputs -->
+    <div class="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+      <app-score-input *ngFor="let quarter of [1, 2, 3, 4]" 
+          [quarter]="quarter.toString()"
+          [scores]="getQuarterScores(quarter)" 
+          [homeTeam]="homeTeam" 
+          [awayTeam]="awayTeam"
+          (scoreChange)="onScoreChange($event)">
+      </app-score-input>
+    </div>
+
+    <!-- Grid container for board and players -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
       <!-- Game Board -->
       <div class="md:col-span-2">
         <app-game-board
@@ -59,24 +72,27 @@
       </div>
 
       <!-- Players List -->
-      <div>
-        <app-players-list
-          [playerStats]="playerStats"
-          [playerColors]="playerColors">
-        </app-players-list>
+      <div class="md:col-span-2">
+        <div class="bg-white rounded-lg shadow h-full flex flex-col">
+          <button (click)="isPlayersListVisible = !isPlayersListVisible"
+                  class="w-full p-4 flex justify-between items-center text-left">
+            <span class="font-bold text-lg">Players</span>
+            <svg xmlns="http://www.w3.org/2000/svg" 
+                 [class.rotate-180]="!isPlayersListVisible"
+                 class="w-5 h-5 transform transition-transform duration-200" 
+                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          
+          <div *ngIf="isPlayersListVisible" class="p-4 pt-0 flex-1">
+            <app-players-list
+              [playerStats]="playerStats"
+              [playerColors]="playerColors">
+            </app-players-list>
+          </div>
+        </div>
       </div>
-    </div>
-
-    <!-- Score Inputs -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <app-score-input
-        *ngFor="let quarter of [1, 2, 3, 4]"
-        [quarter]="quarter.toString()"
-        [scores]="getQuarterScores(quarter)"
-        [homeTeam]="homeTeam"
-        [awayTeam]="awayTeam"
-        (scoreChange)="onScoreChange($event)">
-      </app-score-input>
     </div>
 
     <!-- Winners and Payouts -->
@@ -84,7 +100,8 @@
       [winners]="winners"
       [quarterPayouts]="quarterPayouts"
       [playerColors]="playerColors"
-      [totalPot]="totalPot">
+      [totalPot]="totalPot"
+      [scores]="scores">
     </app-winners-and-payouts>
   </div>
 </div> 

@@ -9,6 +9,7 @@ import {
   update 
 } from 'firebase/database';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 interface GameData {
   selectedSquares: { [key: string]: string };
@@ -30,13 +31,13 @@ interface GameData {
 }
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBij6Rm7noCjgQVLvclvqRc34UtY2wQLsE",
-  authDomain: "squares-4e4f7.firebaseapp.com",
-  databaseURL: "https://squares-4e4f7-default-rtdb.firebaseio.com",
-  projectId: "squares-4e4f7",
-  storageBucket: "squares-4e4f7.firebasestorage.app",
-  messagingSenderId: "138190069880",
-  appId: "1:138190069880:web:57e20b7d6db4112b3c0d8d"
+  apiKey: environment.firebase.apiKey,
+  authDomain: environment.firebase.authDomain,
+  databaseURL: environment.firebase.databaseURL,
+  projectId: environment.firebase.projectId,
+  storageBucket: environment.firebase.storageBucket,
+  messagingSenderId: environment.firebase.messagingSenderId,
+  appId: environment.firebase.appId
 };
 
 @Injectable({
@@ -64,7 +65,8 @@ export class FirebaseService {
         q4: { home: 0, away: 0 }
       },
       playerColors: {},
-      winners: {}
+      winners: {},
+      isLocked: false
     };
 
     try {
@@ -94,8 +96,9 @@ export class FirebaseService {
             },
             playerColors: rawData.playerColors || {},
             winners: rawData.winners || {},
-            pricePerSquare: rawData.pricePerSquare,
+            pricePerSquare: rawData.pricePerSquare || 10,
             isRandomized: rawData.isRandomized || false,
+            isLocked: rawData.isLocked || false,
             homeTeam: rawData.homeTeam || '',
             awayTeam: rawData.awayTeam || ''
           };
@@ -146,6 +149,9 @@ export class FirebaseService {
       }
       if (data.isRandomized !== undefined) {
         updateData.isRandomized = data.isRandomized;
+      }
+      if (data.isLocked !== undefined) {
+        updateData.isLocked = data.isLocked;
       }
       if (data.homeTeam !== undefined) {
         updateData.homeTeam = data.homeTeam;

@@ -89,6 +89,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   currentPlayer: string = '';
   isRandomized: boolean = false;
   isLocked: boolean = false;
+  isPlayersListVisible: boolean = true;
 
   constructor(private firebaseService: FirebaseService) {}
 
@@ -113,6 +114,10 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           });
 
           this.calculatePlayerStats();
+          
+          if (Object.values(this.scores).some(score => score.home > 0 || score.away > 0)) {
+            this.calculateWinners();
+          }
         }
       })
     );
@@ -263,5 +268,12 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       homeTeam: this.homeTeam,
       awayTeam: this.awayTeam
     });
+  }
+
+  onPriceChange(): void {
+    this.firebaseService.updateGameData({
+      pricePerSquare: this.currentPrice
+    });
+    this.calculatePlayerStats(); // Recalculate totals when price changes
   }
 } 
