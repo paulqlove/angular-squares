@@ -13,6 +13,7 @@ import { environment } from '../../../environments/environment';
 
 interface GameData {
   selectedSquares: { [key: string]: string };
+  squares?: { [key: string]: string | null };
   homeNumbers: (number | null)[];
   awayNumbers: (number | null)[];
   scores: {
@@ -125,9 +126,7 @@ export class FirebaseService {
       
       const updateData: any = {};
       if (data.selectedSquares) {
-        Object.entries(data.selectedSquares).forEach(([key, value]) => {
-          updateData[`squares/${key}`] = value;
-        });
+        updateData.squares = data.selectedSquares;
       }
       if (data.pricePerSquare) {
         updateData.pricePerSquare = data.pricePerSquare;

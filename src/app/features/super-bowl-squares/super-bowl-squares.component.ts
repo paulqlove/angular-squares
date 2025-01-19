@@ -175,28 +175,18 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     const key = `${event.row}-${event.col}`;
     
     // Check if square is already taken
-    if (this.selectedSquares[key]) {
-      // If it's the same player, remove the selection
-      if (this.selectedSquares[key] === this.currentPlayer) {
-        const newSelectedSquares = { ...this.selectedSquares };
-        delete newSelectedSquares[key];
-        
-        // Update Firebase with the new state
-        this.selectedSquares = newSelectedSquares;
-        this.calculatePlayerStats();
-        this.firebaseService.updateGameData({
-          selectedSquares: newSelectedSquares
-        });
-        return;
-      }
+    if (this.selectedSquares[key] === this.currentPlayer) {
+      const newSelectedSquares = { ...this.selectedSquares };
+      delete newSelectedSquares[key];
       
-      // If it's a different player, show alert
-      this.takenByPlayer = this.selectedSquares[key];
-      this.showAlert = true;
-      this.alertMessage = `Square already taken by ${this.takenByPlayer}`;
-      setTimeout(() => {
-        this.showAlert = false;
-      }, 3000);
+      // Update local state
+      this.selectedSquares = newSelectedSquares;
+      this.calculatePlayerStats();
+
+      // Update Firebase - use selectedSquares instead of squares
+      this.firebaseService.updateGameData({
+        selectedSquares: newSelectedSquares
+      });
       return;
     }
     
