@@ -9,6 +9,7 @@ import { ScoreInputComponent } from './components/score-input/score-input.compon
 import { WinnersAndPayoutsComponent } from './components/winners-and-payouts/winners-and-payouts.component';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroLockOpen, heroLockClosed } from '@ng-icons/heroicons/outline';
+import { GameStatusComponent } from './components/game-status/game-status.component';
 
 @Component({
   selector: 'app-super-bowl-squares',
@@ -20,7 +21,8 @@ import { heroLockOpen, heroLockClosed } from '@ng-icons/heroicons/outline';
     PlayersListComponent,
     ScoreInputComponent,
     WinnersAndPayoutsComponent,
-    NgIconComponent
+    NgIconComponent,
+    GameStatusComponent
   ],
   providers: [
     provideIcons({ heroLockOpen, heroLockClosed })
