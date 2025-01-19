@@ -8,7 +8,13 @@ import { PlayersListComponent } from './components/players-list/players-list.com
 import { ScoreInputComponent } from './components/score-input/score-input.component';
 import { WinnersAndPayoutsComponent } from './components/winners-and-payouts/winners-and-payouts.component';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { heroLockOpen, heroLockClosed } from '@ng-icons/heroicons/outline';
+import { 
+  heroLockOpen, 
+  heroLockClosed, 
+  heroChevronDown, 
+  heroChevronRight, 
+  heroTrash 
+} from '@ng-icons/heroicons/outline';
 import { GameStatusComponent } from './components/game-status/game-status.component';
 import { PasswordDialogComponent } from './components/password-dialog/password-dialog.component';
 
@@ -27,7 +33,13 @@ import { PasswordDialogComponent } from './components/password-dialog/password-d
     PasswordDialogComponent
   ],
   providers: [
-    provideIcons({ heroLockOpen, heroLockClosed })
+    provideIcons({ 
+      heroLockOpen, 
+      heroLockClosed, 
+      heroChevronDown,
+      heroChevronRight,
+      heroTrash
+    })
   ],
   templateUrl: './super-bowl-squares.component.html',
   styleUrls: ['./super-bowl-squares.component.scss']
