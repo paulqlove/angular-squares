@@ -57,9 +57,9 @@
     </div>
 
     <!-- Grid container for board and players -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
       <!-- Game Board -->
-      <div class="md:col-span-2">
+      <div class="lg:col-span-2 col-span-1">
         <app-game-board
           [homeTeam]="homeTeam"
           [awayTeam]="awayTeam"
@@ -72,17 +72,21 @@
       </div>
 
       <!-- Players List -->
-      <div class="md:col-span-2">
+      <div class="lg:col-span-2 col-span-1">
         <div class="bg-white rounded-lg shadow h-full flex flex-col">
+          <!-- Players List Header -->
           <button (click)="isPlayersListVisible = !isPlayersListVisible"
                   class="w-full p-4 flex justify-between items-center text-left">
             <span class="font-bold text-lg">Players</span>
-            <svg xmlns="http://www.w3.org/2000/svg" 
-                 [class.rotate-180]="!isPlayersListVisible"
-                 class="w-5 h-5 transform transition-transform duration-200" 
-                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-            </svg>
+            <span class="flex items-center gap-2 text-sm text-gray-600">
+              {{ isPlayersListVisible ? 'Hide' : 'Show' }}
+              <svg xmlns="http://www.w3.org/2000/svg" 
+                   [class.rotate-180]="!isPlayersListVisible"
+                   class="w-5 h-5 transform transition-transform duration-200" 
+                   fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </span>
           </button>
           
           <div *ngIf="isPlayersListVisible" class="p-4 pt-0 flex-1">
