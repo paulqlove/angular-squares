@@ -1,8 +1,8 @@
-<div class="bg-card rounded-lg shadow p-4">
+<div class="bg-card rounded-lg p-4">
   <div class="space-y-2">
     @if (getPlayerEntries().length > 0) {
       @for (entry of getPlayerEntries(); track entry.player) {
-        <div class="flex items-center justify-between p-2 rounded bg-card-hover">
+        <div class="flex items-center justify-between p-2 rounded bg-card">
           <div class="flex items-center gap-2">
             <div class="w-4 h-4 rounded" [class]="playerColors[entry.player]"></div>
             <span class="text-default">{{ entry.player }}</span>
