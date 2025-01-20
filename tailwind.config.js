@@ -49,6 +49,12 @@ const colors = {
     orange: '#fed7aa',
     teal: '#99f6e4',
     cyan: '#a5f3fc'
+  },
+  warm: {
+    // DEFAULT: 'hsl(18.75deg 26.02% 51.76%)',
+    DEFAULT: 'hsl(150, 15%, 50%)',
+    hover: 'hsl(150, 15%, 45%)',
+    // hover: 'hsl(18.75deg 26.02% 46.76%)'
   }
 };
 
@@ -92,7 +98,7 @@ module.exports = {
         'card': colors.primary[200],
       },
       ringColor: {
-        'focus': colors.secondary[500],
+        'focus': colors.warm.DEFAULT,
       }
     },
   },
