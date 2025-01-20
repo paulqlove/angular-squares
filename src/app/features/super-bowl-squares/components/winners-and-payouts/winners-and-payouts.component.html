@@ -13,7 +13,10 @@
               <h3 class="font-medium text-heading">{{ getQuarterLabel(quarter) }}</h3>
               <div class="mt-2">
                 @if (winners[quarter]) {
-                  <span class="text-default">{{ winners[quarter] }}</span>
+                  <div class="flex items-center gap-2">
+                    <span>🏆</span>
+                    <span class="text-default">{{ winners[quarter] }}</span>
+                  </div>
                 } @else {
                   <span class="text-muted">No winner yet</span>
                 }
