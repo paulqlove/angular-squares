@@ -41,7 +41,7 @@
         {{ isRandomized ? 'Clear Numbers' : 'Randomize Numbers' }}
       </button>
       <button (click)="toggleLock()" 
-              class="w-full sm:w-auto bg-card-hover hover:bg-card text-default px-4 py-2 rounded flex items-center gap-2">
+              class="w-full sm:w-auto bg-control hover:bg-control-hover text-default px-4 py-2 rounded flex items-center gap-2">
         <ng-icon *ngIf="!isLocked" name="heroLockOpen" class="text-2xl"></ng-icon>
         <ng-icon *ngIf="isLocked" name="heroLockClosed" class="text-2xl"></ng-icon>
         {{ isLocked ? 'Unlock Game' : 'Lock Game' }}
