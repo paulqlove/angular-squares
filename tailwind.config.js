@@ -70,8 +70,8 @@ module.exports = {
         'button-hover': colors.secondary[700],
         'dialog': colors.primary[50],
         'dialog-overlay': 'rgba(0, 0, 0, 0.5)',
-        'square': colors.primary[900],
-        'square-hover': colors.primary[800],
+        'square': colors.primary[700],
+        'square-hover': colors.primary[300],
       },
       textColor: {
         'default': colors.primary[900],
@@ -79,7 +79,7 @@ module.exports = {
         'link': colors.secondary[600],
         'link-hover': colors.secondary[700],
         'button': colors.primary[50],
-        'heading': colors.primary[900],
+        'heading': colors.primary[700],
         'label': colors.primary[700],
       },
       borderColor: {

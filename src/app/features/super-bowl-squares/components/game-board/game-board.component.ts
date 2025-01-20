@@ -34,7 +34,7 @@ export class GameBoardComponent {
     const key = `${row}-${col}`;
     const player = this.selectedSquares[key];
     const color = player ? this.playerColors[player] : '';
-    return color || 'bg-gray-900';
+    return color || 'bg-square';
   }
 
   getSquarePlayer(row: number, col: number): string {

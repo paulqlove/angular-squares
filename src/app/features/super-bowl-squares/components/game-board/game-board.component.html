@@ -4,7 +4,7 @@
     <div class="flex">
       <div class="w-8 h-8 sm:w-12 sm:h-12"></div>
       <div *ngFor="let num of homeNumbers; let i = index"
-           class="w-8 h-8 sm:w-12 sm:h-12 border border-gray-300 flex items-center justify-center bg-gray-100 text-gray-900 text-sm sm:text-base">
+           class="w-8 h-8 sm:w-12 sm:h-12 border border-input flex items-center justify-center bg-input text-default text-sm sm:text-base">
         {{ num !== null ? num : '' }}
       </div>
     </div>
@@ -12,13 +12,13 @@
     <!-- Grid rows -->
     <div *ngFor="let awayNum of awayNumbers; let row = index" class="flex">
       <!-- Left side away numbers -->
-      <div class="w-8 h-8 sm:w-12 sm:h-12 border border-gray-300 flex items-center justify-center bg-gray-100 text-gray-900 text-sm sm:text-base">
+      <div class="w-8 h-8 sm:w-12 sm:h-12 border border-input flex items-center justify-center bg-input text-default text-sm sm:text-base">
         {{ awayNum !== null ? awayNum : '' }}
       </div>
 
       <!-- Square cells -->
       <div *ngFor="let homeNum of homeNumbers; let col = index"
-           [ngClass]="[getSquareClass(row, col), 'w-8 h-8 sm:w-12 sm:h-12 border border-gray-300 text-gray-900 flex items-center justify-center cursor-pointer text-[8px] sm:text-xs p-1 text-center truncate overflow-hidden whitespace-nowrap']"
+           [ngClass]="[getSquareClass(row, col), 'w-8 h-8 sm:w-12 sm:h-12 border border-input text-default flex items-center justify-center cursor-pointer text-[8px] sm:text-xs p-1 text-center truncate overflow-hidden whitespace-nowrap']"
            (click)="onSquareClick(row, col)">
         {{ getSquarePlayer(row, col) }}
       </div>
@@ -26,11 +26,11 @@
 
     <!-- Team Labels -->
     <div class="absolute top-8 left-0 h-full flex items-center">
-      <div class="transform -rotate-90 origin-top-left whitespace-nowrap -translate-y-8">
+      <div class="transform -rotate-90 origin-top-left whitespace-nowrap -translate-y-8 text-default">
         {{ awayTeam }}
       </div>
     </div>
-    <div class="absolute top-0 left-8 w-full text-center">
+    <div class="absolute top-0 left-8 w-full text-center text-default">
       {{ homeTeam }}
     </div>
   </div>
