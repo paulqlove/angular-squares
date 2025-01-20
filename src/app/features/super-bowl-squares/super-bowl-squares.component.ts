@@ -106,6 +106,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   private subscription: Subscription = new Subscription();
   currentPlayer: string = '';
   isRandomized: boolean = false;
+  isRandomizing: boolean = false;
   isLocked: boolean = false;
   isPlayersListVisible: boolean = true;
   showAlert: boolean = false;
@@ -282,32 +283,36 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     return this.scores[key];
   }
 
-  randomizeNumbers(): void {
-    console.log('Before toggle - isRandomized:', this.isRandomized);
-    
+  async randomizeNumbers(): Promise<void> {
     if (this.isRandomized) {
-      // Clear numbers
+      this.isRandomizing = false;  // Ensure it's false when clearing
       this.homeNumbers = Array(10).fill(null);
       this.awayNumbers = Array(10).fill(null);
       this.isRandomized = false;
-    } else {
-      // Randomize numbers
-      const numbers = Array.from({length: 10}, (_, i) => i);
-      const homeNumbers = [...numbers].sort(() => Math.random() - 0.5);
-      const awayNumbers = [...numbers].sort(() => Math.random() - 0.5);
-      this.homeNumbers = homeNumbers;
-      this.awayNumbers = awayNumbers;
-      this.isRandomized = true;
+      
+      await this.firebaseService.updateGameData({
+        homeNumbers: this.homeNumbers,
+        awayNumbers: this.awayNumbers,
+        isRandomized: this.isRandomized
+      });
+      return;
     }
 
-    console.log('After toggle - isRandomized:', this.isRandomized);
-    console.log('Updating Firebase with:', {
-      homeNumbers: this.homeNumbers,
-      awayNumbers: this.awayNumbers,
-      isRandomized: this.isRandomized
-    });
+    this.isRandomizing = true;
+    
+    const numbers = Array.from({length: 10}, (_, i) => i);
+    const homeNumbers = [...numbers].sort(() => Math.random() - 0.5);
+    const awayNumbers = [...numbers].sort(() => Math.random() - 0.5);
+    
+    this.homeNumbers = homeNumbers;
+    this.awayNumbers = awayNumbers;
+    
+    await new Promise(resolve => setTimeout(resolve, 1000));  // Match animation duration
+    
+    this.isRandomized = true;
+    this.isRandomizing = false;
 
-    this.firebaseService.updateGameData({
+    await this.firebaseService.updateGameData({
       homeNumbers: this.homeNumbers,
       awayNumbers: this.awayNumbers,
       isRandomized: this.isRandomized

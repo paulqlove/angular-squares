@@ -5,7 +5,7 @@
       <div class="w-8 h-8 sm:w-12 sm:h-12"></div>
       <div *ngFor="let num of homeNumbers; let i = index"
            class="w-8 h-8 sm:w-12 sm:h-12 border border-input flex items-center justify-center bg-input text-default text-sm sm:text-base">
-        {{ num !== null ? num : '' }}
+        <app-animated-number [number]="num" [animate]="isAnimating"></app-animated-number>
       </div>
     </div>
 
@@ -13,7 +13,7 @@
     <div *ngFor="let awayNum of awayNumbers; let row = index" class="flex justify-center">
       <!-- Left side away numbers -->
       <div class="w-8 h-8 sm:w-12 sm:h-12 border border-input flex items-center justify-center bg-input text-default text-sm sm:text-base">
-        {{ awayNum !== null ? awayNum : '' }}
+        <app-animated-number [number]="awayNum" [animate]="isAnimating"></app-animated-number>
       </div>
 
       <!-- Square cells -->
