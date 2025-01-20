@@ -35,13 +35,13 @@
       </div>
       <button (click)="randomizeNumbers()" 
               [disabled]="isLocked"
-              class="w-full sm:w-auto bg-warm hover:bg-warm-hover text-white px-4 py-2 rounded flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+              class="w-full sm:w-auto bg-warm hover:bg-warm-hover text-white px-4 py-2 justify-center rounded flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
         <span *ngIf="!isRandomized">🎲</span>
         <ng-icon *ngIf="isRandomized" name="heroTrash" class="text-2xl"></ng-icon>
         {{ isRandomized ? 'Clear Numbers' : 'Randomize Numbers' }}
       </button>
       <button (click)="toggleLock()" 
-              class="w-full sm:w-auto bg-control hover:bg-control-hover text-default px-4 py-2 rounded flex items-center gap-2">
+              class="w-full sm:w-auto bg-control hover:bg-control-hover text-default justify-center px-4 py-2 rounded flex items-center gap-2">
         <ng-icon *ngIf="!isLocked" name="heroLockOpen" class="text-2xl"></ng-icon>
         <ng-icon *ngIf="isLocked" name="heroLockClosed" class="text-2xl"></ng-icon>
         {{ isLocked ? 'Unlock Game' : 'Lock Game' }}
