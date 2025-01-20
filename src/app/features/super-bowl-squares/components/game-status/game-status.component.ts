@@ -6,23 +6,23 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="bg-white rounded-lg shadow p-4">
-      <h2 class="text-lg font-bold mb-4">Game Status</h2>
-      <div class="grid grid-cols-3 gap-4 text-center">
-        <div>
-          <div class="text-2xl font-bold text-grey-600">{{ filledSquares }}</div>
-          <div class="text-sm text-gray-600">Filled</div>
-        </div>
-        <div>
-          <div class="text-2xl font-bold text-grey-600">{{ remainingSquares }}</div>
-          <div class="text-sm text-gray-600">Remaining</div>
-        </div>
-        <div>
-          <div class="text-2xl font-bold text-grey-600">{{ percentageFilled }}%</div>
-          <div class="text-sm text-gray-600">Complete</div>
-        </div>
-      </div>
+   <div class="bg-card rounded-lg shadow p-4">
+  <h2 class="text-heading text-lg font-bold mb-4">Game Status</h2>
+  <div class="grid grid-cols-3 gap-4 text-center">
+    <div>
+      <div class="text-2xl font-bold text-default">{{ filledSquares }}</div>
+      <div class="text-sm text-muted">Filled</div>
     </div>
+    <div>
+      <div class="text-2xl font-bold text-default">{{ remainingSquares }}</div>
+      <div class="text-sm text-muted">Remaining</div>
+    </div>
+    <div>
+      <div class="text-2xl font-bold text-default">{{ percentageFilled }}%</div>
+      <div class="text-sm text-muted">Complete</div>
+    </div>
+  </div>
+</div>
   `
 })
 export class GameStatusComponent {

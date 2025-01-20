@@ -5,11 +5,11 @@
         <input type="text" [(ngModel)]="awayTeam" 
                (ngModelChange)="onTeamNameChange()"
                placeholder="Away Team"
-               class="bg-gray-100 text-gray-900 border border-gray-300 rounded p-2">
+               class="bg-input text-default border border-input rounded p-2 focus:ring-2 ring-focus">
       <input type="text" [(ngModel)]="homeTeam" 
              (ngModelChange)="onTeamNameChange()"
              placeholder="Home Team" 
-             class="bg-gray-100 text-gray-900 border border-gray-300 rounded p-2">
+             class="bg-input text-default border border-input rounded p-2 focus:ring-2 ring-focus">
     </div>
 
     <!-- Add this after the Team Names section -->
@@ -23,25 +23,25 @@
         <input type="text" [(ngModel)]="currentPlayer" 
                placeholder="Enter your name" 
                [disabled]="isLocked"
-               class="w-full sm:w-auto bg-gray-100 text-gray-900 border border-gray-300 rounded p-2 disabled:opacity-50 disabled:cursor-not-allowed">
+               class="w-full sm:w-auto bg-input text-default border border-input rounded p-2 disabled:opacity-50 disabled:cursor-not-allowed">
         <div class="flex items-center gap-2 ml-auto sm:ml-0">
-          <span class="text-gray-400">$</span>
+          <span class="text-muted">$</span>
           <input type="number" [(ngModel)]="currentPrice" 
                  (ngModelChange)="onPriceChange()"
                  [disabled]="isLocked"
-                 class="w-20 bg-gray-100 text-gray-900 border border-gray-300 rounded p-2 disabled:opacity-50 disabled:cursor-not-allowed">
-          <span class="text-gray-400">per square</span>
+                 class="w-20 bg-input text-default border border-input rounded p-2 disabled:opacity-50 disabled:cursor-not-allowed">
+          <span class="text-muted">per square</span>
         </div>
       </div>
       <button (click)="randomizeNumbers()" 
               [disabled]="isLocked"
-              class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+              class="w-full sm:w-auto bg-button hover:bg-button-hover text-button px-4 py-2 rounded flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
         <span *ngIf="!isRandomized">🎲</span>
         <ng-icon *ngIf="isRandomized" name="heroTrash" class="text-2xl"></ng-icon>
         {{ isRandomized ? 'Clear Numbers' : 'Randomize Numbers' }}
       </button>
       <button (click)="toggleLock()" 
-              class="w-full sm:w-auto bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded flex items-center gap-2">
+              class="w-full sm:w-auto bg-card-hover hover:bg-card text-default px-4 py-2 rounded flex items-center gap-2">
         <ng-icon *ngIf="!isLocked" name="heroLockOpen" class="text-2xl"></ng-icon>
         <ng-icon *ngIf="isLocked" name="heroLockClosed" class="text-2xl"></ng-icon>
         {{ isLocked ? 'Unlock Game' : 'Lock Game' }}
@@ -70,7 +70,7 @@
         </div>
 
         <!-- Gradient fade -->
-        <div class="absolute right-0 top-8 bottom-4 w-12 bg-gradient-to-l from-white pointer-events-none"></div>
+        <div class="absolute right-0 top-8 bottom-4 w-12 bg-gradient-to-l from-primary-50 pointer-events-none"></div>
       </div>
 
       <!-- Desktop grid view -->
@@ -101,29 +101,26 @@
       </div>
 
       <!-- Players List -->
-      <div class="lg:col-span-2 col-span-1">
-        <div class="bg-white rounded-lg shadow h-full flex flex-col justify-between">
-          <button (click)="isPlayersListVisible = !isPlayersListVisible"
-                  class="w-full p-4 flex justify-between items-center text-left">
-            <span class="font-bold text-lg">Players</span>
-            <span class="flex items-center gap-2 text-sm text-gray-600">
-              {{ isPlayersListVisible ? 'Hide' : 'Show' }}
-              <ng-icon name="heroChevronDown" 
-                       [class.rotate-180]="!isPlayersListVisible"
-                       class="text-2xl transform transition-transform duration-200">
-              </ng-icon>
-            </span>
-          </button>
-          
-          <div *ngIf="isPlayersListVisible" class="p-4 pt-0 flex-1">
-            <app-players-list
-              [playerStats]="playerStats"
-              [playerColors]="playerColors">
-            </app-players-list>
-          </div>
-          <app-game-status [selectedSquares]="selectedSquares"></app-game-status>
+    <div class="lg:col-span-2 col-span-1">
+        <div class="bg-card rounded-lg shadow h-full flex flex-col justify-between">
+            <button (click)="isPlayersListVisible = !isPlayersListVisible"
+                class="w-full p-4 flex justify-between items-center text-left">
+                <span class="font-bold text-lg text-heading">Players</span>
+                <span class="flex items-center gap-2 text-sm text-muted">
+                    {{ isPlayersListVisible ? 'Hide' : 'Show' }}
+                    <ng-icon name="heroChevronDown" [class.rotate-180]="!isPlayersListVisible"
+                        class="text-2xl transform transition-transform duration-200">
+                    </ng-icon>
+                </span>
+            </button>
+    
+            <div *ngIf="isPlayersListVisible" class="p-4 pt-0 flex-1">
+                <app-players-list [playerStats]="playerStats" [playerColors]="playerColors">
+                </app-players-list>
+            </div>
+            <app-game-status [selectedSquares]="selectedSquares"></app-game-status>
         </div>
-      </div>
+    </div>
     </div>
 
     <!-- Winners and Payouts -->

@@ -1,13 +1,20 @@
-<div class="bg-white p-4 rounded-lg max-h-[22rem] overflow-y-auto">
+<div class="bg-card rounded-lg shadow p-4">
   <div class="space-y-2">
-    <div *ngFor="let entry of getPlayerEntries()"
-         class="flex justify-between items-center p-2 rounded"
-         [ngClass]="playerColors[entry.player]">
-      <span class="font-medium">{{ entry.player }}</span>
-      <div class="text-right">
-        <div>Squares: {{ entry.stats.squares }}</div>
-        <div>Total: ${{ entry.stats.total }}</div>
-      </div>
-    </div>
+    @if (getPlayerEntries().length > 0) {
+      @for (entry of getPlayerEntries(); track entry.player) {
+        <div class="flex items-center justify-between p-2 rounded bg-card-hover">
+          <div class="flex items-center gap-2">
+            <div class="w-4 h-4 rounded" [class]="playerColors[entry.player]"></div>
+            <span class="text-default">{{ entry.player }}</span>
+          </div>
+          <div class="text-right">
+            <div class="text-default font-medium">{{ entry.stats.squares }} squares</div>
+            <div class="text-muted text-sm">${{ entry.stats.total.toFixed(2) }}</div>
+          </div>
+        </div>
+      }
+    } @else {
+      <p class="text-muted text-center py-4">No players yet</p>
+    }
   </div>
 </div> 
