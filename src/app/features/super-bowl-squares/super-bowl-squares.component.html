@@ -90,12 +90,11 @@
       <!-- Game Board -->
       <div class="lg:col-span-2 col-span-1">
         <app-game-board
-          [homeTeam]="homeTeam"
-          [awayTeam]="awayTeam"
-          [homeNumbers]="homeNumbers"
-          [awayNumbers]="awayNumbers"
           [selectedSquares]="selectedSquares"
           [playerColors]="playerColors"
+          [homeNumbers]="homeNumbers"
+          [awayNumbers]="awayNumbers"
+          [selectedPlayer]="selectedPlayer"
           [isRandomizing]="isRandomizing"
           (squareClick)="onSquareClick($event)">
         </app-game-board>
@@ -116,7 +115,10 @@
             </button>
     
             <div *ngIf="isPlayersListVisible" class="p-4 pt-0 flex-1">
-                <app-players-list [playerStats]="playerStats" [playerColors]="playerColors">
+                <app-players-list 
+                  [playerStats]="playerStats" 
+                  [playerColors]="playerColors"
+                  (playerSelected)="onPlayerSelected($event)">
                 </app-players-list>
             </div>
             <app-game-status [selectedSquares]="selectedSquares"></app-game-status>

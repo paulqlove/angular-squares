@@ -112,6 +112,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   showAlert: boolean = false;
   alertMessage: string = '';
   takenByPlayer: string = '';
+  selectedPlayer: string | null = null;
 
   constructor(private firebaseService: FirebaseService) {}
 
@@ -360,5 +361,9 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       pricePerSquare: this.currentPrice
     });
     this.calculatePlayerStats(); // Recalculate totals when price changes
+  }
+
+  onPlayerSelected(player: string | null): void {
+    this.selectedPlayer = player;
   }
 } 

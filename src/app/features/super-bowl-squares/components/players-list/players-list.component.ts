@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 interface PlayerStat {
@@ -21,6 +21,18 @@ type PlayerEntry = {
 export class PlayersListComponent {
   @Input() playerStats!: { [key: string]: PlayerStat };
   @Input() playerColors!: { [key: string]: string };
+  @Output() playerSelected = new EventEmitter<string | null>();
+  
+  selectedPlayer: string | null = null;
+
+  onPlayerClick(player: string): void {
+    if (this.selectedPlayer === player) {
+      this.selectedPlayer = null;
+    } else {
+      this.selectedPlayer = player;
+    }
+    this.playerSelected.emit(this.selectedPlayer);
+  }
 
   getPlayerEntries(): PlayerEntry[] {
     return Object.entries(this.playerStats).map(([player, stats]) => ({

@@ -13,24 +13,11 @@ export class GameBoardComponent {
   @Input() awayTeam!: string;
   @Input() homeNumbers!: (number | null)[];
   @Input() awayNumbers!: (number | null)[];
+  @Input() selectedSquares!: { [key: string]: string };
+  @Input() playerColors!: { [key: string]: string };
+  @Input() selectedPlayer: string | null = null;
   
   isAnimating = false;
-
-  @Input() set selectedSquares(value: { [key: string]: string }) {
-    this._selectedSquares = value;
-  }
-  get selectedSquares(): { [key: string]: string } {
-    return this._selectedSquares;
-  }
-  private _selectedSquares!: { [key: string]: string };
-
-  @Input() set playerColors(value: { [key: string]: string }) {
-    this._playerColors = value;
-  }
-  get playerColors(): { [key: string]: string } {
-    return this._playerColors;
-  }
-  private _playerColors!: { [key: string]: string };
 
   @Output() squareClick = new EventEmitter<{ row: number; col: number }>();
 
@@ -41,8 +28,13 @@ export class GameBoardComponent {
   getSquareClass(row: number, col: number): string {
     const key = `${row}-${col}`;
     const player = this.selectedSquares[key];
-    const color = player ? this.playerColors[player] : '';
-    return color || 'bg-square';
+    const baseColor = player ? this.playerColors[player] : 'bg-square';
+    
+    if (this.selectedPlayer && player !== this.selectedPlayer) {
+      return `${baseColor} opacity-25`;
+    }
+    
+    return baseColor;
   }
 
   getSquarePlayer(row: number, col: number): string {
