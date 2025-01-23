@@ -18,6 +18,7 @@ import {
 import { GameStatusComponent } from './components/game-status/game-status.component';
 import { PasswordDialogComponent } from './components/password-dialog/password-dialog.component';
 import { HeaderComponent } from './components/header/header.component';
+import { PaymentDialogComponent } from './components/payment-dialog/payment-dialog.component';
 
 @Component({
   selector: 'app-super-bowl-squares',
@@ -32,7 +33,8 @@ import { HeaderComponent } from './components/header/header.component';
     NgIconComponent,
     GameStatusComponent,
     PasswordDialogComponent,
-    HeaderComponent
+    HeaderComponent,
+    PaymentDialogComponent
   ],
   providers: [
     FirebaseService,
@@ -49,6 +51,7 @@ import { HeaderComponent } from './components/header/header.component';
 })
 export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   @ViewChild('passwordDialog') passwordDialog!: PasswordDialogComponent;
+  @ViewChild('paymentDialog') paymentDialog!: PaymentDialogComponent;
   
   homeTeam: string = '';
   awayTeam: string = '';
@@ -123,6 +126,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   takenByPlayer: string = '';
   selectedPlayer: string | null = null;
   venmoUsername = '';
+  paidPlayers: Set<string> = new Set();
 
   constructor(private firebaseService: FirebaseService) {}
 
@@ -140,6 +144,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           this.homeTeam = data.homeTeam || '';
           this.awayTeam = data.awayTeam || '';
           this.venmoUsername = data.venmoUsername || '';
+          this.paidPlayers = new Set(data.paidPlayers || []);
 
           Object.values(this.selectedSquares).forEach(playerName => {
             if (!this.playerColors[playerName]) {
@@ -392,6 +397,47 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     this.venmoUsername = username;
     this.firebaseService.updateGameData({
       venmoUsername: username
+    });
+  }
+
+  onManagePayments() {
+    // First verify password
+    this.verifyPassword().then(isValid => {
+      if (isValid) {
+        this.paymentDialog.setData(this.playerStats, this.playerColors, this.paidPlayers);
+        this.paymentDialog.open();
+      }
+    });
+  }
+
+  private async verifyPassword(): Promise<boolean> {
+    try {
+      const password = await new Promise<string>((resolve, reject) => {
+        const submitSub = this.passwordDialog.passwordSubmit.subscribe(pwd => {
+          submitSub.unsubscribe();
+          cancelSub.unsubscribe();
+          resolve(pwd);
+        });
+        
+        const cancelSub = this.passwordDialog.cancel.subscribe(() => {
+          submitSub.unsubscribe();
+          cancelSub.unsubscribe();
+          reject();
+        });
+        
+        this.passwordDialog.open();
+      });
+
+      return password === 'chattanooga' || password === 'password';
+    } catch {
+      return false;
+    }
+  }
+
+  onPaidPlayersChange(paidPlayers: string[]) {
+    this.paidPlayers = new Set(paidPlayers);
+    this.firebaseService.updateGameData({
+      paidPlayers: Array.from(this.paidPlayers)
     });
   }
 } 

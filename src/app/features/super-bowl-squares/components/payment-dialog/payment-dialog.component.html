@@ -1,0 +1,37 @@
+<div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"
+     [class.hidden]="!isOpen">
+  <div class="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4 overflow-hidden">
+    <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+      <h2 class="text-xl font-bold text-heading">Manage Payments</h2>
+      <button (click)="close()" class="text-gray-500 hover:text-gray-700">
+        <ng-icon name="heroXMark" class="w-6 h-6"></ng-icon>
+      </button>
+    </div>
+
+    <div class="p-4 max-h-[60vh] overflow-y-auto">
+      <div class="space-y-2">
+        @for (player of getPlayersList(); track player.name) {
+          <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
+            <div class="flex items-center gap-2">
+              <div class="w-4 h-4 rounded-full"
+                   [style.backgroundColor]="player.color">
+              </div>
+              <span>{{ player.name }}</span>
+              <span class="text-sm text-gray-500">
+                ({{ player.squares }} squares - ${{ player.total }})
+              </span>
+            </div>
+            <button (click)="togglePaidStatus(player.name)"
+                    [class.bg-green-100]="player.paid"
+                    [class.text-green-700]="player.paid"
+                    [class.bg-gray-100]="!player.paid"
+                    [class.text-gray-700]="!player.paid"
+                    class="px-3 py-1 rounded-full text-sm font-medium">
+              {{ player.paid ? 'Paid' : 'Mark as Paid' }}
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div> 

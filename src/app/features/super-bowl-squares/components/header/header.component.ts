@@ -6,7 +6,8 @@ import {
   heroTrash, 
   heroLockOpen, 
   heroLockClosed,
-  heroArrowTopRightOnSquare 
+  heroArrowTopRightOnSquare,
+  heroCreditCard
 } from '@ng-icons/heroicons/outline';
 import { FormsModule } from '@angular/forms';
 
@@ -20,7 +21,8 @@ import { FormsModule } from '@angular/forms';
       heroTrash,
       heroLockOpen,
       heroLockClosed,
-      heroArrowTopRightOnSquare
+      heroArrowTopRightOnSquare,
+      heroCreditCard
     })
   ],
   template: `
@@ -105,6 +107,17 @@ import { FormsModule } from '@angular/forms';
               </div>
             </div>
 
+            <!-- Add this before the Game Controls section -->
+            <div class="mb-8">
+              <button 
+                (click)="onManagePayments.emit()"
+                class="w-full bg-control hover:bg-control-hover text-default px-4 py-2 rounded flex items-center justify-center gap-2"
+              >
+                <ng-icon name="heroCreditCard" class="text-2xl"></ng-icon>
+                Manage Payments
+              </button>
+            </div>
+
             <!-- Game Controls -->
             <div class="space-y-4 mb-8">
               <button (click)="onRandomize.emit()" 
@@ -172,6 +185,7 @@ export class HeaderComponent {
   @Output() onVenmoUsernameChange = new EventEmitter<string>();
   @Output() onTeamNameChange = new EventEmitter<{team: 'home' | 'away', name: string}>();
   @Output() onPriceChange = new EventEmitter<number>();
+  @Output() onManagePayments = new EventEmitter<void>();
   
   isSettingsOpen = false;
 

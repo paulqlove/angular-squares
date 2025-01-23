@@ -22,6 +22,7 @@ export class PlayersListComponent {
   @Input() playerStats!: { [key: string]: PlayerStat };
   @Input() playerColors!: { [key: string]: string };
   @Output() playerSelected = new EventEmitter<string | null>();
+  @Input() paidPlayers: Set<string> = new Set();
   
   selectedPlayer: string | null = null;
 

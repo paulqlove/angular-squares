@@ -8,6 +8,11 @@
           <div class="flex items-center gap-2">
             <div class="w-4 h-4 rounded" [class]="playerColors[entry.player]"></div>
             <span class="text-default">{{ entry.player }}</span>
+            @if (paidPlayers.has(entry.player)) {
+              <span class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                Paid
+              </span>
+            }
           </div>
           <div class="text-right">
             <div class="text-default font-medium">{{ entry.stats.squares }} squares</div>
