@@ -107,7 +107,13 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   };
 
   private subscription: Subscription = new Subscription();
-  currentPlayer: string = '';
+  private _currentPlayer = '';
+  get currentPlayer(): string {
+    return this._currentPlayer;
+  }
+  set currentPlayer(value: string) {
+    this._currentPlayer = this.sanitizePlayerName(value);
+  }
   isRandomized: boolean = false;
   isRandomizing: boolean = false;
   isLocked: boolean = false;
@@ -189,6 +195,13 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     return this.availableColors[0];
   }
 
+  private sanitizePlayerName(name: string): string {
+    // Trim whitespace from ends and replace multiple spaces with single space
+    return name
+      .trim()                     // Remove leading/trailing whitespace
+      .replace(/\s+/g, ' ');      // Replace multiple spaces with single space
+  }
+
   onSquareClick(event: { row: number; col: number }): void {
     if (!this.currentPlayer) {
       this.showAlert = true;
@@ -204,19 +217,18 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     }
     
     const key = `${event.row}-${event.col}`;
+    const sanitizedPlayer = this.sanitizePlayerName(this.currentPlayer);
     
     // Check if square is already taken
     if (this.selectedSquares[key]) {
-      if (this.selectedSquares[key] === this.currentPlayer) {
+      if (this.selectedSquares[key] === sanitizedPlayer) {
         // Allow user to deselect their own square
         const newSelectedSquares = { ...this.selectedSquares };
         delete newSelectedSquares[key];
         
-        // Update local state
         this.selectedSquares = newSelectedSquares;
         this.calculatePlayerStats();
 
-        // Update Firebase
         this.firebaseService.updateGameData({
           selectedSquares: newSelectedSquares
         });
@@ -235,14 +247,12 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     // If square is available, select it
     const newSelectedSquares = {
       ...this.selectedSquares,
-      [key]: this.currentPlayer
+      [key]: sanitizedPlayer
     };
     
-    // Update local state
     this.selectedSquares = newSelectedSquares;
     this.calculatePlayerStats();
     
-    // Update Firebase
     this.firebaseService.updateGameData({
       selectedSquares: newSelectedSquares
     });
