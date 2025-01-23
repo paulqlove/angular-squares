@@ -43,21 +43,24 @@ import { FormsModule } from '@angular/forms';
            [class.opacity-0]="!isSettingsOpen"
            [class.pointer-events-none]="!isSettingsOpen"
            (click)="closeSettings()">
-        <div class="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-lg transform transition-transform duration-200"
+        <div class="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-lg transform transition-transform duration-200 flex flex-col"
              [class.translate-x-0]="isSettingsOpen"
              [class.translate-x-full]="!isSettingsOpen"
              (click)="$event.stopPropagation()">
-          <div class="p-4">
-            <div class="flex justify-between items-center mb-6">
-              <h2 class="text-xl font-bold">Settings</h2>
-              <button (click)="closeSettings()" class="text-gray-500 hover:text-gray-700">
-                <span class="sr-only">Close menu</span>
-                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
+          
+          <!-- Header -->
+          <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+            <h2 class="text-xl font-bold">Settings</h2>
+            <button (click)="closeSettings()" class="text-gray-500 hover:text-gray-700">
+              <span class="sr-only">Close menu</span>
+              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
 
+          <!-- Content -->
+          <div class="flex-1 p-4 overflow-y-auto">
             <!-- Team Names -->
             <div class="space-y-4 mb-8">
               <div>
@@ -137,7 +140,7 @@ import { FormsModule } from '@angular/forms';
             </div>
 
             <!-- Venmo input -->
-            <div class="mb-6">
+            <div class="mb-8">
               <label for="venmoUsername" class="block text-label text-sm font-medium mb-2">
                 Venmo Username
               </label>
@@ -168,6 +171,20 @@ import { FormsModule } from '@angular/forms';
               </div>
             </div>
           </div>
+
+          <!-- Footer with Clear Game button -->
+          <div class="p-4 border-t border-gray-200 mt-auto">
+            <button 
+              (click)="onClearGame.emit(); closeSettings()"
+              class="w-full bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded flex items-center justify-center gap-2"
+            >
+              <ng-icon name="heroTrash" class="text-2xl"></ng-icon>
+              Clear Game
+            </button>
+            <p class="text-xs text-gray-500 text-center mt-2">
+              This will reset all game data. Requires password.
+            </p>
+          </div>
         </div>
       </div>
     </header>
@@ -186,6 +203,7 @@ export class HeaderComponent {
   @Output() onTeamNameChange = new EventEmitter<{team: 'home' | 'away', name: string}>();
   @Output() onPriceChange = new EventEmitter<number>();
   @Output() onManagePayments = new EventEmitter<void>();
+  @Output() onClearGame = new EventEmitter<void>();
   
   isSettingsOpen = false;
 

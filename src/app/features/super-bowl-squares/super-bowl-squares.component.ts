@@ -440,4 +440,39 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       paidPlayers: Array.from(this.paidPlayers)
     });
   }
+
+  async onClearGame() {
+    // First verify password
+    const isValid = await this.verifyPassword();
+    if (!isValid) return;
+
+    // Double check with confirmation
+    if (!confirm('Are you sure you want to clear all game data? This cannot be undone.')) {
+      return;
+    }
+
+    // Reset all game data
+    const defaultGameState: Partial<GameData> = {
+      selectedSquares: {},
+      homeNumbers: Array(10).fill(null),
+      awayNumbers: Array(10).fill(null),
+      scores: {
+        q1: { home: 0, away: 0 },
+        q2: { home: 0, away: 0 },
+        q3: { home: 0, away: 0 },
+        q4: { home: 0, away: 0 }
+      },
+      winners: {},
+      playerColors: {},
+      pricePerSquare: 10,
+      isRandomized: false,
+      isLocked: false,
+      homeTeam: '',
+      awayTeam: '',
+      venmoUsername: '',
+      paidPlayers: []
+    };
+
+    await this.firebaseService.updateGameData(defaultGameState);
+  }
 } 
