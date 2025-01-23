@@ -26,7 +26,7 @@ import { FormsModule } from '@angular/forms';
     })
   ],
   template: `
-    <header class="bg-page shadow-sm relative">
+    <header class="bg-page relative">
       <div class="container mx-auto px-4 py-4 flex justify-between items-center">
         <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-heading">Football Squares</h1>
         
