@@ -354,14 +354,20 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     }
   }
 
-  onTeamNameChange(): void {
+  onTeamNameChange(event: {team: 'home' | 'away', name: string}): void {
+    if (event.team === 'home') {
+      this.homeTeam = event.name;
+    } else {
+      this.awayTeam = event.name;
+    }
     this.firebaseService.updateGameData({
       homeTeam: this.homeTeam,
       awayTeam: this.awayTeam
     });
   }
 
-  onPriceChange(): void {
+  onPriceChange(price: number): void {
+    this.currentPrice = price;
     this.firebaseService.updateGameData({
       pricePerSquare: this.currentPrice
     });

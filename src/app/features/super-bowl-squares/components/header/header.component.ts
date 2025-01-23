@@ -56,6 +56,55 @@ import { FormsModule } from '@angular/forms';
               </button>
             </div>
 
+            <!-- Team Names -->
+            <div class="space-y-4 mb-8">
+              <div>
+                <label for="awayTeam" class="block text-label text-sm font-medium mb-2">
+                  Away Team
+                </label>
+                <input
+                  type="text"
+                  id="awayTeam"
+                  [ngModel]="awayTeam"
+                  (ngModelChange)="onTeamChange('away', $event)"
+                  class="w-full px-3 py-2 bg-input border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-focus"
+                  placeholder="Enter away team"
+                />
+              </div>
+              
+              <div>
+                <label for="homeTeam" class="block text-label text-sm font-medium mb-2">
+                  Home Team
+                </label>
+                <input
+                  type="text"
+                  id="homeTeam"
+                  [ngModel]="homeTeam"
+                  (ngModelChange)="onTeamChange('home', $event)"
+                  class="w-full px-3 py-2 bg-input border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-focus"
+                  placeholder="Enter home team"
+                />
+              </div>
+            </div>
+
+            <!-- Price Per Square -->
+            <div class="mb-8">
+              <label for="pricePerSquare" class="block text-label text-sm font-medium mb-2">
+                Price Per Square
+              </label>
+              <div class="flex items-center gap-2">
+                <span class="text-muted">$</span>
+                <input
+                  type="number"
+                  id="pricePerSquare"
+                  [ngModel]="pricePerSquare"
+                  (ngModelChange)="handlePriceChange($event)"
+                  [disabled]="isLocked"
+                  class="w-full px-3 py-2 bg-input border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-focus disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+              </div>
+            </div>
+
             <!-- Game Controls -->
             <div class="space-y-4 mb-8">
               <button (click)="onRandomize.emit()" 
@@ -115,9 +164,14 @@ export class HeaderComponent {
   @Input() isRandomized = false;
   @Input() isLocked = false;
   @Input() venmoUsername = '';
+  @Input() homeTeam = '';
+  @Input() awayTeam = '';
+  @Input() pricePerSquare = 10;
   @Output() onRandomize = new EventEmitter<void>();
   @Output() onToggleLock = new EventEmitter<void>();
   @Output() onVenmoUsernameChange = new EventEmitter<string>();
+  @Output() onTeamNameChange = new EventEmitter<{team: 'home' | 'away', name: string}>();
+  @Output() onPriceChange = new EventEmitter<number>();
   
   isSettingsOpen = false;
 
@@ -136,5 +190,13 @@ export class HeaderComponent {
   onVenmoChange(username: string): void {
     this.venmoUsername = username;
     this.onVenmoUsernameChange.emit(username);
+  }
+
+  onTeamChange(team: 'home' | 'away', name: string) {
+    this.onTeamNameChange.emit({ team, name });
+  }
+
+  handlePriceChange(price: number) {
+    this.onPriceChange.emit(price);
   }
 } 
