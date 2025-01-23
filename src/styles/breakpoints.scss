@@ -1,0 +1,70 @@
+// Breakpoint variables
+$breakpoints: (
+  'xs': 0,
+  'sm': 640px,
+  'md': 768px,
+  'lg': 1024px,
+  'xl': 1280px,
+  '2xl': 1536px
+);
+
+// Mixin for min-width queries
+@mixin breakpoint($size) {
+  @media (min-width: map-get($breakpoints, $size)) {
+    @content;
+  }
+}
+
+// Mixin for max-width queries
+@mixin breakpoint-max($size) {
+  @media (max-width: map-get($breakpoints, $size)) {
+    @content;
+  }
+}
+
+// Common device mixins
+@mixin mobile {
+  @media (max-width: map-get($breakpoints, 'sm')) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media (min-width: map-get($breakpoints, 'md')) and (max-width: map-get($breakpoints, 'lg') - 1px) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (min-width: map-get($breakpoints, 'lg')) {
+    @content;
+  }
+}
+
+// Between breakpoints mixin
+@mixin between($min, $max) {
+  @media (min-width: map-get($breakpoints, $min)) and (max-width: map-get($breakpoints, $max) - 1px) {
+    @content;
+  }
+}
+
+// Only at specific breakpoint
+@mixin only($size) {
+  @if $size == 'xs' {
+    @media (max-width: map-get($breakpoints, 'sm') - 1px) {
+      @content;
+    }
+  } @else {
+    $next-breakpoint: null;
+    @each $breakpoint, $value in $breakpoints {
+      @if $next-breakpoint {
+        @if $size == $breakpoint {
+          @media (min-width: map-get($breakpoints, $size)) and (max-width: $value - 1px) {
+            @content;
+          }
+        }
+      }
+      $next-breakpoint: $value;
+    }
+  }
+} 

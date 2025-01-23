@@ -1,1 +1,53 @@
-// Empty file for now - styles are handled by Tailwind 
+/* postcss-scss */
+
+@import 'breakpoints';
+
+.winners-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.quarter-card {
+  border-radius: 0.5rem;
+  border-width: 2px;
+  padding: 1rem;
+
+  &--no-winner {
+    border-opacity: 50%;
+  }
+
+  &.bg-square {
+    grid-column: span 2;
+
+    @include tablet {
+      grid-column: 1 / -1;
+    }
+
+    @include desktop {
+      grid-column: auto;
+    }
+
+  }
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.winner-section {
+    
+  .winner-info {
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+
+.payout-section {
+  text-align: right;
+}

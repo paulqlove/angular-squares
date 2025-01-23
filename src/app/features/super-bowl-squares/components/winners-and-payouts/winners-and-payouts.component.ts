@@ -5,7 +5,8 @@ import { CommonModule } from '@angular/common';
   selector: 'app-winners-and-payouts',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './winners-and-payouts.component.html'
+  templateUrl: './winners-and-payouts.component.html',
+  styleUrls: ['./winners-and-payouts.component.scss']
 })
 export class WinnersAndPayoutsComponent {
   @Input() winners: { [key: string]: string } = {};
