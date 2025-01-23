@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { FirebaseService } from '../../core/services/firebase.service';
+import { FirebaseService, GameData } from '../../core/services/firebase.service';
 import { Subscription } from 'rxjs';
 import { GameBoardComponent } from './components/game-board/game-board.component';
 import { PlayersListComponent } from './components/players-list/players-list.component';
@@ -17,6 +17,7 @@ import {
 } from '@ng-icons/heroicons/outline';
 import { GameStatusComponent } from './components/game-status/game-status.component';
 import { PasswordDialogComponent } from './components/password-dialog/password-dialog.component';
+import { HeaderComponent } from './components/header/header.component';
 
 @Component({
   selector: 'app-super-bowl-squares',
@@ -30,9 +31,11 @@ import { PasswordDialogComponent } from './components/password-dialog/password-d
     WinnersAndPayoutsComponent,
     NgIconComponent,
     GameStatusComponent,
-    PasswordDialogComponent
+    PasswordDialogComponent,
+    HeaderComponent
   ],
   providers: [
+    FirebaseService,
     provideIcons({ 
       heroLockOpen, 
       heroLockClosed, 
@@ -113,12 +116,13 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   alertMessage: string = '';
   takenByPlayer: string = '';
   selectedPlayer: string | null = null;
+  venmoUsername = '';
 
   constructor(private firebaseService: FirebaseService) {}
 
   ngOnInit(): void {
     this.subscription.add(
-      this.firebaseService.getGameData().subscribe(data => {
+      this.firebaseService.getGameData().subscribe((data: GameData) => {
         if (data) {
           this.selectedSquares = data.selectedSquares || {};
           this.homeNumbers = data.homeNumbers || Array(10).fill(null);
@@ -129,6 +133,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           this.isLocked = data.isLocked || false;
           this.homeTeam = data.homeTeam || '';
           this.awayTeam = data.awayTeam || '';
+          this.venmoUsername = data.venmoUsername || '';
 
           Object.values(this.selectedSquares).forEach(playerName => {
             if (!this.playerColors[playerName]) {
@@ -365,5 +370,12 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
   onPlayerSelected(player: string | null): void {
     this.selectedPlayer = player;
+  }
+
+  onVenmoUsernameChange(username: string) {
+    this.venmoUsername = username;
+    this.firebaseService.updateGameData({
+      venmoUsername: username
+    });
   }
 } 

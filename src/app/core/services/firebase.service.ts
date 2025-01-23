@@ -11,9 +11,8 @@ import {
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
-interface GameData {
+export interface GameData {
   selectedSquares: { [key: string]: string };
-  squares?: { [key: string]: string | null };
   homeNumbers: (number | null)[];
   awayNumbers: (number | null)[];
   scores: {
@@ -22,13 +21,14 @@ interface GameData {
     q3: { home: number; away: number };
     q4: { home: number; away: number };
   };
+  pricePerSquare: number;
+  isRandomized: boolean;
+  isLocked: boolean;
+  homeTeam: string;
+  awayTeam: string;
   winners?: { [key: string]: string };
-  playerColors: { [key: string]: string };
-  pricePerSquare?: number;
-  isRandomized?: boolean;
-  isLocked?: boolean;
-  homeTeam?: string;
-  awayTeam?: string;
+  playerColors?: { [key: string]: string };
+  venmoUsername?: string;
 }
 
 const firebaseConfig = {
@@ -67,7 +67,11 @@ export class FirebaseService {
       },
       playerColors: {},
       winners: {},
-      isLocked: false
+      isLocked: false,
+      pricePerSquare: 10,
+      isRandomized: false,
+      homeTeam: '',
+      awayTeam: ''
     };
 
     try {
@@ -101,7 +105,8 @@ export class FirebaseService {
             isRandomized: rawData.isRandomized || false,
             isLocked: rawData.isLocked || false,
             homeTeam: rawData.homeTeam || '',
-            awayTeam: rawData.awayTeam || ''
+            awayTeam: rawData.awayTeam || '',
+            venmoUsername: rawData.venmoUsername || ''
           };
 
           if (rawData.squares) {
@@ -157,6 +162,9 @@ export class FirebaseService {
       }
       if (data.awayTeam !== undefined) {
         updateData.awayTeam = data.awayTeam;
+      }
+      if (data.venmoUsername !== undefined) {
+        updateData.venmoUsername = data.venmoUsername;
       }
 
       await update(gameRef, updateData);

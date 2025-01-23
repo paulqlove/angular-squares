@@ -1,14 +1,27 @@
-import { Component } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { heroCog6Tooth } from '@ng-icons/heroicons/outline';
+import { 
+  heroCog6Tooth, 
+  heroTrash, 
+  heroLockOpen, 
+  heroLockClosed,
+  heroArrowTopRightOnSquare 
+} from '@ng-icons/heroicons/outline';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, NgIconComponent],
+  imports: [CommonModule, NgIconComponent, FormsModule],
   providers: [
-    provideIcons({ heroCog6Tooth })
+    provideIcons({ 
+      heroCog6Tooth,
+      heroTrash,
+      heroLockOpen,
+      heroLockClosed,
+      heroArrowTopRightOnSquare
+    })
   ],
   template: `
     <header class="bg-page shadow-sm relative">
@@ -42,8 +55,56 @@ import { heroCog6Tooth } from '@ng-icons/heroicons/outline';
                 </svg>
               </button>
             </div>
-            <!-- Settings content goes here -->
-            <ng-content></ng-content>
+
+            <!-- Game Controls -->
+            <div class="space-y-4 mb-8">
+              <button (click)="onRandomize.emit()" 
+                      [disabled]="isLocked"
+                      class="w-full bg-warm hover:bg-warm-hover text-white px-4 py-2 rounded flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                <span *ngIf="!isRandomized">🎲</span>
+                <ng-icon *ngIf="isRandomized" name="heroTrash" class="text-2xl"></ng-icon>
+                {{ isRandomized ? 'Clear Numbers' : 'Randomize Numbers' }}
+              </button>
+
+              <button (click)="onToggleLock.emit()" 
+                      class="w-full bg-control hover:bg-control-hover text-default px-4 py-2 rounded flex items-center justify-center gap-2">
+                <ng-icon *ngIf="!isLocked" name="heroLockOpen" class="text-2xl"></ng-icon>
+                <ng-icon *ngIf="isLocked" name="heroLockClosed" class="text-2xl"></ng-icon>
+                {{ isLocked ? 'Unlock Game' : 'Lock Game' }}
+              </button>
+            </div>
+
+            <!-- Venmo input -->
+            <div class="mb-6">
+              <label for="venmoUsername" class="block text-label text-sm font-medium mb-2">
+                Venmo Username
+              </label>
+              <input
+                type="text"
+                id="venmoUsername"
+                [ngModel]="venmoUsername"
+                (ngModelChange)="onVenmoChange($event)"
+                class="w-full px-3 py-2 bg-input border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-focus"
+                placeholder="@username"
+              />
+              
+              <div class="flex items-center justify-center gap-2 mt-3">
+                <a
+                  [href]="getVenmoLink()"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-link hover:text-link-hover text-sm inline-flex items-center gap-1"
+                  *ngIf="venmoUsername"
+                >
+                  Open Venmo Profile
+                  <ng-icon 
+                    name="heroArrowTopRightOnSquare" 
+                    class="w-4 h-4"
+                    aria-hidden="true">
+                  </ng-icon>
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -51,6 +112,13 @@ import { heroCog6Tooth } from '@ng-icons/heroicons/outline';
   `
 })
 export class HeaderComponent {
+  @Input() isRandomized = false;
+  @Input() isLocked = false;
+  @Input() venmoUsername = '';
+  @Output() onRandomize = new EventEmitter<void>();
+  @Output() onToggleLock = new EventEmitter<void>();
+  @Output() onVenmoUsernameChange = new EventEmitter<string>();
+  
   isSettingsOpen = false;
 
   toggleSettings(): void {
@@ -59,5 +127,14 @@ export class HeaderComponent {
 
   closeSettings(): void {
     this.isSettingsOpen = false;
+  }
+
+  getVenmoLink(): string {
+    return `https://venmo.com/${this.venmoUsername.replace('@', '')}`;
+  }
+
+  onVenmoChange(username: string): void {
+    this.venmoUsername = username;
+    this.onVenmoUsernameChange.emit(username);
   }
 } 

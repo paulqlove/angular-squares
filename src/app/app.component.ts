@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { SuperBowlSquaresComponent } from './features/super-bowl-squares/super-bowl-squares.component';
-import { HeaderComponent } from './features/super-bowl-squares/components/header/header.component';
 
 @Component({
   selector: 'app-root',
@@ -10,13 +9,9 @@ import { HeaderComponent } from './features/super-bowl-squares/components/header
   imports: [
     CommonModule,
     RouterOutlet, 
-    SuperBowlSquaresComponent, 
-    HeaderComponent
+    SuperBowlSquaresComponent
   ],
   template: `
-    <app-header>
-      <!-- Settings content goes here -->
-    </app-header>
     <main class="container mx-auto p-4 bg-page">
       <app-super-bowl-squares></app-super-bowl-squares>
     </main>
