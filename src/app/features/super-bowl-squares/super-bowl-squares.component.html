@@ -102,7 +102,11 @@
                   (playerSelected)="onPlayerSelected($event)">
                 </app-players-list>
             </div>
-            <app-game-status [selectedSquares]="selectedSquares"></app-game-status>
+            <app-game-status 
+              [selectedSquares]="selectedSquares"
+              [playerStats]="playerStats"
+              [paidPlayers]="paidPlayers">
+            </app-game-status>
         </div>
     </div>
     </div>

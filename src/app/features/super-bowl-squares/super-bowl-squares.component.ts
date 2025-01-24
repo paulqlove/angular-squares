@@ -26,11 +26,11 @@ import { PaymentDialogComponent } from './components/payment-dialog/payment-dial
   imports: [
     CommonModule,
     FormsModule,
+    NgIconComponent,
     GameBoardComponent,
     PlayersListComponent,
     ScoreInputComponent,
     WinnersAndPayoutsComponent,
-    NgIconComponent,
     GameStatusComponent,
     PasswordDialogComponent,
     HeaderComponent,
