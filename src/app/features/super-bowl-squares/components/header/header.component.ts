@@ -126,36 +126,7 @@ import { FormsModule } from '@angular/forms';
               </div>
             </div>
 
-            <!-- Add this before the Game Controls section -->
-            <div class="mb-8">
-              <button 
-                (click)="onManagePayments.emit()"
-                class="w-full bg-control hover:bg-control-hover text-default px-4 py-2 rounded flex items-center justify-center gap-2"
-              >
-                <ng-icon name="heroCreditCard" class="text-2xl"></ng-icon>
-                Manage Payments
-              </button>
-            </div>
-
-            <!-- Game Controls -->
-            <div class="space-y-4 mb-8">
-              <button (click)="onRandomize.emit()" 
-                      [disabled]="isLocked"
-                      class="w-full bg-warm hover:bg-warm-hover text-white px-4 py-2 rounded flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                <span *ngIf="!isRandomized">🎲</span>
-                <ng-icon *ngIf="isRandomized" name="heroTrash" class="text-2xl"></ng-icon>
-                {{ isRandomized ? 'Clear Numbers' : 'Randomize Numbers' }}
-              </button>
-
-              <button (click)="onToggleLock.emit()" 
-                      class="w-full bg-control hover:bg-control-hover text-default px-4 py-2 rounded flex items-center justify-center gap-2">
-                <ng-icon *ngIf="!isLocked" name="heroLockOpen" class="text-2xl"></ng-icon>
-                <ng-icon *ngIf="isLocked" name="heroLockClosed" class="text-2xl"></ng-icon>
-                {{ isLocked ? 'Unlock Game' : 'Lock Game' }}
-              </button>
-            </div>
-
-            <!-- Venmo input -->
+             <!-- Venmo input -->
             <div class="mb-8">
               <label for="venmoUsername" class="block text-label text-sm font-medium mb-2">
                 Venmo Username
@@ -186,6 +157,37 @@ import { FormsModule } from '@angular/forms';
                 </a>
               </div>
             </div>
+
+            <!-- Add this before the Game Controls section -->
+            <div class="mb-8">
+              </div>
+              
+              <!-- Game Controls -->
+              <div class="space-y-4 mb-8">
+              <button 
+                (click)="onManagePayments.emit()"
+                class="w-full bg-control hover:bg-control-hover text-default px-4 py-2 rounded flex items-center justify-center gap-2"
+              >
+                <ng-icon name="heroCreditCard" class="text-2xl"></ng-icon>
+                Manage Payments
+              </button>
+              <button (click)="onRandomize.emit()" 
+                      [disabled]="isLocked"
+                      class="w-full bg-warm hover:bg-warm-hover text-white px-4 py-2 rounded flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                <span *ngIf="!isRandomized">🎲</span>
+                <ng-icon *ngIf="isRandomized" name="heroTrash" class="text-2xl"></ng-icon>
+                {{ isRandomized ? 'Clear Numbers' : 'Randomize Numbers' }}
+              </button>
+
+              <button (click)="onToggleLock.emit()" 
+                      class="w-full bg-control hover:bg-control-hover text-default px-4 py-2 rounded flex items-center justify-center gap-2">
+                <ng-icon *ngIf="!isLocked" name="heroLockOpen" class="text-2xl"></ng-icon>
+                <ng-icon *ngIf="isLocked" name="heroLockClosed" class="text-2xl"></ng-icon>
+                {{ isLocked ? 'Unlock Game' : 'Lock Game' }}
+              </button>
+            </div>
+
+           
           </div>
 
           <!-- Footer with Clear Game button -->
