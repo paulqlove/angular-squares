@@ -147,8 +147,8 @@ import { PasswordDialogComponent } from '../../components/password-dialog/passwo
                   id="venmoUsername"
                   [(ngModel)]="tempVenmoUsername"
                   (blur)="onVenmoBlur()"
+                  [placeholder]="venmoUsername ? '@' + venmoUsername.replace('@', '') : '@username'"
                   class="w-full px-3 py-2 bg-input border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-focus"
-                  placeholder="@username"
                 />
               </div>
               
@@ -245,7 +245,7 @@ export class HeaderComponent {
   tempVenmoUsername = '';
 
   ngOnInit() {
-    this.tempVenmoUsername = this.venmoUsername;
+    this.tempVenmoUsername = this.venmoUsername || '';
   }
 
   toggleSettings(): void {
