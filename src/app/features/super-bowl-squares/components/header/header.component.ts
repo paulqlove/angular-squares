@@ -40,7 +40,7 @@ import { PasswordDialogComponent } from '../../components/password-dialog/passwo
             @if (venmoUsername) {
               <button 
                 (click)="showVenmoDialog = true"
-                class="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-[#008CFF] hover:bg-[#0074D4] rounded-lg transition-colors"
+                class="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-[#008CFF] hover:bg-[#0074D4] rounded-lg transition-colors "
               >
                 <ng-icon name="heroCreditCard" class="text-lg"></ng-icon>
                 <span class="hidden sm:inline">Pay with Venmo</span>
@@ -98,7 +98,7 @@ import { PasswordDialogComponent } from '../../components/password-dialog/passwo
                   id="awayTeam"
                   [ngModel]="awayTeam"
                   (ngModelChange)="onTeamChange('away', $event)"
-                  class="w-full px-3 py-2 bg-input border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-focus"
+                  class="w-full px-3 py-2 bg-input border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-focus capitalize"
                   placeholder="Enter away team"
                 />
               </div>
@@ -112,7 +112,7 @@ import { PasswordDialogComponent } from '../../components/password-dialog/passwo
                   id="homeTeam"
                   [ngModel]="homeTeam"
                   (ngModelChange)="onTeamChange('home', $event)"
-                  class="w-full px-3 py-2 bg-input border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-focus"
+                  class="w-full px-3 py-2 bg-input border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-focus capitalize"
                   placeholder="Enter home team"
                 />
               </div>
