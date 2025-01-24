@@ -30,22 +30,38 @@ import { FormsModule } from '@angular/forms';
       <div class="container mx-auto px-4 py-4 flex justify-between items-center">
         <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-heading">Football Squares</h1>
         
-        <div class="relative">
-          <button class="w-12 h-12 flex items-center justify-center rounded-full bg-primary-100 hover:bg-primary-200 transition-colors"
-                  (click)="toggleSettings()">
-            <ng-icon name="heroCog6Tooth" class="text-2xl text-primary-600"></ng-icon>
+        <div class="flex items-center gap-2">
+          <!-- Venmo Button -->
+          @if (venmoUsername) {
+            <a 
+              [href]="'https://venmo.com/' + venmoUsername"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-[#008CFF] hover:bg-[#0074D4] rounded-lg transition-colors"
+            >
+              <ng-icon name="heroCreditCard" class="text-lg"></ng-icon>
+              <span class="hidden sm:inline">Pay with Venmo</span>
+            </a>
+          }
+
+          <!-- Settings Button -->
+          <button 
+            (click)="toggleSettings()"
+            class="p-2 text-muted hover:text-heading rounded-lg hover:bg-card transition-colors"
+          >
+            <ng-icon name="heroCog6Tooth" class="text-2xl"></ng-icon>
           </button>
         </div>
       </div>
 
       <!-- Off-canvas menu -->
       <div class="fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity duration-200"
-           [class.opacity-0]="!isSettingsOpen"
-           [class.pointer-events-none]="!isSettingsOpen"
+           [class.opacity-0]="!showSettings"
+           [class.pointer-events-none]="!showSettings"
            (click)="closeSettings()">
         <div class="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-lg transform transition-transform duration-200 flex flex-col"
-             [class.translate-x-0]="isSettingsOpen"
-             [class.translate-x-full]="!isSettingsOpen"
+             [class.translate-x-0]="showSettings"
+             [class.translate-x-full]="!showSettings"
              (click)="$event.stopPropagation()">
           
           <!-- Header -->
@@ -205,14 +221,14 @@ export class HeaderComponent {
   @Output() onManagePayments = new EventEmitter<void>();
   @Output() onClearGame = new EventEmitter<void>();
   
-  isSettingsOpen = false;
+  showSettings = false;
 
   toggleSettings(): void {
-    this.isSettingsOpen = !this.isSettingsOpen;
+    this.showSettings = !this.showSettings;
   }
 
   closeSettings(): void {
-    this.isSettingsOpen = false;
+    this.showSettings = false;
   }
 
   getVenmoLink(): string {
