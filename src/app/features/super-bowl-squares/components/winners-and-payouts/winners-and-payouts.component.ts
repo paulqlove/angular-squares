@@ -32,7 +32,7 @@ export class WinnersAndPayoutsComponent {
       q1: '1st Quarter',
       q2: '2nd Quarter',
       q3: '3rd Quarter',
-      q4: '4th Quarter'
+      q4: 'Final Score'
     };
     return quarterMap[quarter] || quarter;
   }
