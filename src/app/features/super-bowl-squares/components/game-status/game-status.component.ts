@@ -49,4 +49,13 @@ export class GameStatusComponent {
   getFormattedAmount(value: number): string {
     return value.toFixed(2);
   }
+
+  get unpaidPlayers(): string[] {
+    return Object.keys(this.playerStats)
+      .filter(player => !this.paidPlayers.has(player));
+  }
+
+  get lastUnpaidPlayer(): string | null {
+    return this.unpaidPlayers.length === 1 ? this.unpaidPlayers[0] : null;
+  }
 } 

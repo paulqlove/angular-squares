@@ -26,6 +26,9 @@ export class PlayersListComponent {
   
   selectedPlayer: string | null = null;
 
+  private shameEmojis = ['🤢', '🤮', '💩', '🙈', '😱', '🤦', '😤', '🫣', '🤑', '🗑️'];
+  private playerEmojis: Map<string, string> = new Map();
+
   onPlayerClick(player: string): void {
     if (this.selectedPlayer === player) {
       this.selectedPlayer = null;
@@ -40,5 +43,32 @@ export class PlayersListComponent {
       player,
       stats
     }));
+  }
+
+  get totalPlayers(): number {
+    return Object.keys(this.playerStats).length;
+  }
+
+  get unpaidPlayers(): string[] {
+    return Object.keys(this.playerStats)
+      .filter(player => !this.paidPlayers.has(player));
+  }
+
+  get lastUnpaidPlayers(): string[] {
+    return this.totalPlayers >= 9 ? 
+      (this.unpaidPlayers.length <= 3 ? this.unpaidPlayers : []) : 
+      [];
+  }
+
+  shouldShowShame(player: string): boolean {
+    return this.lastUnpaidPlayers.includes(player);
+  }
+
+  getShameEmoji(player: string): string {
+    if (!this.playerEmojis.has(player)) {
+      const randomIndex = Math.floor(Math.random() * this.shameEmojis.length);
+      this.playerEmojis.set(player, this.shameEmojis[randomIndex]);
+    }
+    return this.playerEmojis.get(player) || '🤢';
   }
 } 
