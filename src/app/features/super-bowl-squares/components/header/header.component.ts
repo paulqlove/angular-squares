@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { 
@@ -13,11 +13,12 @@ import {
 import { FormsModule } from '@angular/forms';
 import { ToggleComponent } from '../../../../components/ui/toggle/toggle.component';
 import { DialogComponent } from '../../../../components/ui/dialog/dialog.component';
+import { PasswordDialogComponent } from '../../components/password-dialog/password-dialog.component';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, NgIconComponent, FormsModule, ToggleComponent, DialogComponent],
+  imports: [CommonModule, NgIconComponent, FormsModule, ToggleComponent, DialogComponent, PasswordDialogComponent],
   providers: [
     provideIcons({ 
       heroCog6Tooth,
@@ -140,14 +141,16 @@ import { DialogComponent } from '../../../../components/ui/dialog/dialog.compone
               <label for="venmoUsername" class="block text-label text-sm font-medium mb-2">
                 Venmo Username
               </label>
-              <input
-                type="text"
-                id="venmoUsername"
-                [ngModel]="venmoUsername"
-                (ngModelChange)="onVenmoChange($event)"
-                class="w-full px-3 py-2 bg-input border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-focus"
-                placeholder="@username"
-              />
+              <div class="relative">
+                <input
+                  type="text"
+                  id="venmoUsername"
+                  [(ngModel)]="tempVenmoUsername"
+                  (blur)="onVenmoBlur()"
+                  class="w-full px-3 py-2 bg-input border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-focus"
+                  placeholder="@username"
+                />
+              </div>
               
               <div class="flex items-center justify-center gap-2 mt-3">
                 <a
@@ -216,6 +219,9 @@ import { DialogComponent } from '../../../../components/ui/dialog/dialog.compone
         </div>
       </div>
     </div>
+
+    <!-- Add this at the end of the template -->
+    <app-password-dialog #passwordDialog></app-password-dialog>
   `
 })
 export class HeaderComponent {
@@ -235,6 +241,12 @@ export class HeaderComponent {
   
   showSettings = false;
   showVenmoDialog = false;
+  @ViewChild('passwordDialog') passwordDialog!: PasswordDialogComponent;
+  tempVenmoUsername = '';
+
+  ngOnInit() {
+    this.tempVenmoUsername = this.venmoUsername;
+  }
 
   toggleSettings(): void {
     this.showSettings = !this.showSettings;
@@ -248,9 +260,39 @@ export class HeaderComponent {
     return `https://venmo.com/${this.venmoUsername.replace('@', '')}`;
   }
 
-  onVenmoChange(username: string): void {
-    this.venmoUsername = username;
-    this.onVenmoUsernameChange.emit(username);
+  async onVenmoBlur(): Promise<void> {
+    if (this.tempVenmoUsername === this.venmoUsername) {
+      return; // No change, don't show password dialog
+    }
+
+    try {
+      const password = await new Promise<string>((resolve, reject) => {
+        const submitSub = this.passwordDialog.passwordSubmit.subscribe((pwd: string) => {
+          submitSub.unsubscribe();
+          cancelSub.unsubscribe();
+          resolve(pwd);
+        });
+        
+        const cancelSub = this.passwordDialog.cancel.subscribe(() => {
+          submitSub.unsubscribe();
+          cancelSub.unsubscribe();
+          reject();
+        });
+        
+        this.passwordDialog.open();
+      });
+
+      if (password === 'chattanooga' || password === 'password') {
+        this.venmoUsername = this.tempVenmoUsername;
+        this.onVenmoUsernameChange.emit(this.tempVenmoUsername);
+      } else {
+        alert('Incorrect password');
+        this.tempVenmoUsername = this.venmoUsername; // Reset on invalid password
+      }
+    } catch {
+      // User cancelled
+      this.tempVenmoUsername = this.venmoUsername; // Reset on cancel
+    }
   }
 
   onTeamChange(team: 'home' | 'away', name: string) {
