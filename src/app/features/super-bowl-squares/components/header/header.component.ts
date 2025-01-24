@@ -7,14 +7,17 @@ import {
   heroLockOpen, 
   heroLockClosed,
   heroArrowTopRightOnSquare,
-  heroCreditCard
+  heroCreditCard,
+  heroXMark
 } from '@ng-icons/heroicons/outline';
 import { FormsModule } from '@angular/forms';
+import { ToggleComponent } from '../../../../components/ui/toggle/toggle.component';
+import { DialogComponent } from '../../../../components/ui/dialog/dialog.component';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, NgIconComponent, FormsModule],
+  imports: [CommonModule, NgIconComponent, FormsModule, ToggleComponent, DialogComponent],
   providers: [
     provideIcons({ 
       heroCog6Tooth,
@@ -22,39 +25,48 @@ import { FormsModule } from '@angular/forms';
       heroLockOpen,
       heroLockClosed,
       heroArrowTopRightOnSquare,
-      heroCreditCard
+      heroCreditCard,
+      heroXMark
     })
   ],
   template: `
-    <header class="bg-page relative">
-      <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-        <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-heading">Football Squares</h1>
-        
-        <div class="flex items-center gap-2">
-          <!-- Venmo Button -->
-          @if (venmoUsername) {
-            <a 
-              [href]="'https://venmo.com/' + venmoUsername"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-[#008CFF] hover:bg-[#0074D4] rounded-lg transition-colors"
+    <div class="relative">
+      <header class="bg-page">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+          <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-heading">Football Squares</h1>
+          <div class="flex items-center gap-2">
+            <!-- Venmo Button -->
+            @if (venmoUsername) {
+              <button 
+                (click)="showVenmoDialog = true"
+                class="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-[#008CFF] hover:bg-[#0074D4] rounded-lg transition-colors"
+              >
+                <ng-icon name="heroCreditCard" class="text-lg"></ng-icon>
+                <span class="hidden sm:inline">Pay with Venmo</span>
+              </button>
+            }
+
+            <!-- Settings Button -->
+            <button 
+              (click)="toggleSettings()"
+              class="p-2 text-muted hover:text-heading rounded-lg hover:bg-card transition-colors"
             >
-              <ng-icon name="heroCreditCard" class="text-lg"></ng-icon>
-              <span class="hidden sm:inline">Pay with Venmo</span>
-            </a>
-          }
-
-          <!-- Settings Button -->
-          <button 
-            (click)="toggleSettings()"
-            class="p-2 text-muted hover:text-heading rounded-lg hover:bg-card transition-colors"
-          >
-            <ng-icon name="heroCog6Tooth" class="text-2xl"></ng-icon>
-          </button>
+              <ng-icon name="heroCog6Tooth" class="text-2xl"></ng-icon>
+            </button>
+          </div>
         </div>
-      </div>
+      </header>
 
-      <!-- Off-canvas menu -->
+      <!-- Venmo Confirmation Dialog -->
+      <app-dialog
+        [isOpen]="showVenmoDialog"
+        title="Leave Site?"
+        [message]="venmoMessage"
+        (onConfirm)="onVenmoConfirm()"
+        (onCancel)="showVenmoDialog = false"
+      ></app-dialog>
+
+      <!-- Settings Panel -->
       <div class="fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity duration-200"
            [class.opacity-0]="!showSettings"
            [class.pointer-events-none]="!showSettings"
@@ -64,18 +76,15 @@ import { FormsModule } from '@angular/forms';
              [class.translate-x-full]="!showSettings"
              (click)="$event.stopPropagation()">
           
-          <!-- Header -->
-          <div class="p-4 border-b border-gray-200 flex justify-between items-center">
-            <h2 class="text-xl font-bold">Settings</h2>
-            <button (click)="closeSettings()" class="text-gray-500 hover:text-gray-700">
-              <span class="sr-only">Close menu</span>
-              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+          <!-- Settings Header -->
+          <div class="flex items-center justify-between p-4 border-b">
+            <h2 class="text-lg font-bold text-heading">Settings</h2>
+            <button (click)="closeSettings()" class="text-muted hover:text-heading">
+              <ng-icon name="heroXMark" class="text-2xl"></ng-icon>
             </button>
           </div>
 
-          <!-- Content -->
+          <!-- Settings Content -->
           <div class="flex-1 p-4 overflow-y-auto">
             <!-- Team Names -->
             <div class="space-y-4 mb-8">
@@ -179,12 +188,13 @@ import { FormsModule } from '@angular/forms';
                 {{ isRandomized ? 'Clear Numbers' : 'Randomize Numbers' }}
               </button>
 
-              <button (click)="onToggleLock.emit()" 
-                      class="w-full bg-control hover:bg-control-hover text-default px-4 py-2 rounded flex items-center justify-center gap-2">
-                <ng-icon *ngIf="!isLocked" name="heroLockOpen" class="text-2xl"></ng-icon>
-                <ng-icon *ngIf="isLocked" name="heroLockClosed" class="text-2xl"></ng-icon>
-                {{ isLocked ? 'Unlock Game' : 'Lock Game' }}
-              </button>
+              <div class="flex items-center justify-between p-4 rounded">
+                <span class="text-default">Lock Game</span>
+                <app-toggle 
+                  [checked]="isLocked"
+                  (onChange)="onToggleLock.emit()"
+                ></app-toggle>
+              </div>
             </div>
 
            
@@ -205,7 +215,7 @@ import { FormsModule } from '@angular/forms';
           </div>
         </div>
       </div>
-    </header>
+    </div>
   `
 })
 export class HeaderComponent {
@@ -224,6 +234,7 @@ export class HeaderComponent {
   @Output() onClearGame = new EventEmitter<void>();
   
   showSettings = false;
+  showVenmoDialog = false;
 
   toggleSettings(): void {
     this.showSettings = !this.showSettings;
@@ -248,5 +259,14 @@ export class HeaderComponent {
 
   handlePriceChange(price: number) {
     this.onPriceChange.emit(price);
+  }
+
+  onVenmoConfirm() {
+    window.open(`https://venmo.com/${this.venmoUsername}`, '_blank');
+    this.showVenmoDialog = false;
+  }
+
+  get venmoMessage(): string {
+    return `You will be redirected to <strong class="text-[#008CFF]">Venmo</strong> to pay <strong>${this.venmoUsername}</strong>`;
   }
 } 
