@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { calculateWinProbability } from '../../utils/probability.utils';
 
 interface PlayerStat {
   squares: number;
@@ -9,6 +10,7 @@ interface PlayerStat {
 type PlayerEntry = {
   player: string;
   stats: PlayerStat;
+  probability: number | null;
 }
 
 @Component({
@@ -23,6 +25,9 @@ export class PlayersListComponent {
   @Input() playerColors!: { [key: string]: string };
   @Output() playerSelected = new EventEmitter<string | null>();
   @Input() paidPlayers: Set<string> = new Set();
+  @Input() homeNumbers: (number | null)[] = [];
+  @Input() awayNumbers: (number | null)[] = [];
+  @Input() selectedSquares: { [key: string]: string } = {};
   
   selectedPlayer: string | null = null;
 
@@ -39,10 +44,26 @@ export class PlayersListComponent {
   }
 
   getPlayerEntries(): PlayerEntry[] {
-    return Object.entries(this.playerStats).map(([player, stats]) => ({
-      player,
-      stats
-    }));
+    return Object.entries(this.playerStats).map(([player, stats]) => {
+      const coordinates = Object.entries(this.selectedSquares)
+        .filter(([_, name]) => name === player)
+        .map(([key]) => {
+          const [row, col] = key.split('-').map(Number);
+          return [row, col] as [number, number];
+        });
+
+      const probability = calculateWinProbability(
+        coordinates,
+        this.homeNumbers,
+        this.awayNumbers
+      );
+
+      return {
+        player,
+        stats,
+        probability
+      };
+    });
   }
 
   get totalPlayers(): number {
