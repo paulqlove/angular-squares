@@ -19,6 +19,7 @@ import { GameStatusComponent } from './components/game-status/game-status.compon
 import { PasswordDialogComponent } from './components/password-dialog/password-dialog.component';
 import { HeaderComponent } from './components/header/header.component';
 import { PaymentDialogComponent } from './components/payment-dialog/payment-dialog.component';
+import { ProbabilityHeatmapComponent } from './components/probability-heatmap/probability-heatmap.component';
 
 @Component({
   selector: 'app-super-bowl-squares',
@@ -34,7 +35,8 @@ import { PaymentDialogComponent } from './components/payment-dialog/payment-dial
     GameStatusComponent,
     PasswordDialogComponent,
     HeaderComponent,
-    PaymentDialogComponent
+    PaymentDialogComponent,
+    ProbabilityHeatmapComponent
   ],
   providers: [
     FirebaseService,
@@ -127,6 +129,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   selectedPlayer: string | null = null;
   venmoUsername = '';
   paidPlayers: Set<string> = new Set();
+  activeTab: 'board' | 'probabilities' = 'board';
 
   constructor(private firebaseService: FirebaseService) {}
 

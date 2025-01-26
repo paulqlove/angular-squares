@@ -67,17 +67,49 @@
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
       <!-- Game Board -->
       <div class="lg:col-span-2 col-span-1">
-        <app-game-board
-          [selectedSquares]="selectedSquares"
-          [playerColors]="playerColors"
-          [homeNumbers]="homeNumbers"
-          [awayNumbers]="awayNumbers"
-          [homeTeam]="homeTeam"
-          [awayTeam]="awayTeam"
-          [selectedPlayer]="selectedPlayer"
-          [isRandomizing]="isRandomizing"
-          (squareClick)="onSquareClick($event)">
-        </app-game-board>
+        <div class="bg-card rounded-lg shadow p-4">
+          <!-- Tabs -->
+          <div class="flex border-b mb-4">
+            <button 
+              (click)="activeTab = 'board'"
+              [class.border-b-2]="activeTab === 'board'"
+              [class.border-blue-500]="activeTab === 'board'"
+              [class.text-blue-600]="activeTab === 'board'"
+              class="px-4 py-2 font-medium hover:text-blue-600 transition-colors">
+              Game Board
+            </button>
+            <button 
+              (click)="activeTab = 'probabilities'"
+              [class.border-b-2]="activeTab === 'probabilities'"
+              [class.border-blue-500]="activeTab === 'probabilities'"
+              [class.text-blue-600]="activeTab === 'probabilities'"
+              class="px-4 py-2 font-medium hover:text-blue-600 transition-colors">
+              Probabilities
+            </button>
+          </div>
+
+          <!-- Tab Content -->
+          @if (activeTab === 'board') {
+            <app-game-board
+              [selectedSquares]="selectedSquares"
+              [playerColors]="playerColors"
+              [homeNumbers]="homeNumbers"
+              [awayNumbers]="awayNumbers"
+              [homeTeam]="homeTeam"
+              [awayTeam]="awayTeam"
+              [selectedPlayer]="selectedPlayer"
+              [isRandomizing]="isRandomizing"
+              (squareClick)="onSquareClick($event)">
+            </app-game-board>
+          } @else {
+            <app-probability-heatmap
+              [homeNumbers]="homeNumbers"
+              [awayNumbers]="awayNumbers"
+              [homeTeam]="homeTeam"
+              [awayTeam]="awayTeam">
+            </app-probability-heatmap>
+          }
+        </div>
       </div>
 
       <!-- Players List -->
