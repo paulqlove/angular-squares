@@ -34,7 +34,8 @@ import { SQUARES_PROBABILITIES } from '../../utils/probability.utils';
             <!-- Probability cells -->
             @for (homeNum of homeNumbers; track homeNum; let col = $index) {
               <div [class]="getCellClass(row, col)"
-                   class="w-8 h-8 sm:w-12 sm:h-12 border border-input flex items-center justify-center text-[8px] sm:text-xs">
+                   [class.opacity-25]="shouldDimSquare(row, col)"
+                   class="w-8 h-8 sm:w-12 sm:h-12 border border-input flex items-center justify-center text-[8px] sm:text-xs relative">
                 {{ getProbability(row, col) }}%
               </div>
             }
@@ -58,6 +59,8 @@ export class ProbabilityHeatmapComponent {
   @Input() awayNumbers: (number | null)[] = [];
   @Input() homeTeam: string = '';
   @Input() awayTeam: string = '';
+  @Input() selectedSquares: { [key: string]: string } = {};
+  @Input() selectedPlayer: string | null = null;
 
   getProbability(row: number, col: number): string {
     if (this.homeNumbers[col] === null || this.awayNumbers[row] === null) {
@@ -81,5 +84,17 @@ export class ProbabilityHeatmapComponent {
     if (prob >= 1.0) return 'bg-green-100';
     if (prob >= 0.5) return 'bg-yellow-100';
     return 'bg-red-50';
+  }
+
+  isSelectedPlayerSquare(row: number, col: number): boolean {
+    if (!this.selectedPlayer) return false;
+    const key = `${row}-${col}`;
+    return this.selectedSquares[key] === this.selectedPlayer;
+  }
+
+  shouldDimSquare(row: number, col: number): boolean {
+    if (!this.selectedPlayer) return false;
+    const key = `${row}-${col}`;
+    return this.selectedSquares[key] !== this.selectedPlayer;
   }
 } 
