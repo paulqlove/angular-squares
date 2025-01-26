@@ -9,7 +9,7 @@ import { SQUARES_PROBABILITIES } from '../../utils/probability.utils';
   template: `
     <div class="relative">
       <!-- Grid Container -->
-      <div class="ml-8 mt-8">
+      <div class="">
         <!-- Numbers row -->
         <div class="grid grid-cols-[auto_repeat(10,minmax(0,1fr))] gap-0.5">
           <!-- Empty cell for top-left corner -->
@@ -40,6 +40,15 @@ import { SQUARES_PROBABILITIES } from '../../utils/probability.utils';
             }
           </div>
         }
+
+        <!-- Source attribution -->
+        <div class="mt-4 text-xs text-muted text-center">
+          Source: <a href="https://www.eldo.co/super-bowl-squares-odds-probabilities-best-worst-numbers.html" 
+                     target="_blank" 
+                     class="text-blue-600 hover:underline">
+            ELDORADO Super Bowl Squares Odds & Probabilities
+          </a>
+        </div>
       </div>
     </div>
   `
