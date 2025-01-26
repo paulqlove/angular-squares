@@ -13,7 +13,7 @@ import { SQUARES_PROBABILITIES } from '../../utils/probability.utils';
         <!-- Numbers row -->
         <div class="grid grid-cols-[auto_repeat(10,minmax(0,1fr))] gap-0">
           <!-- Empty cell for top-left corner -->
-          <div class="number-cell"></div>
+          <div class="number-cell empty-cell"></div>
           
           <!-- Top numbers (home) -->
           @for (num of homeNumbers; track num) {

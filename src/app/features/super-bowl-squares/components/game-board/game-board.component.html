@@ -2,7 +2,7 @@
   <div class="pt-8 pl-8">
     <!-- Top row with home numbers -->
     <div class="grid grid-cols-[auto_repeat(10,minmax(0,1fr))] gap-0">
-      <div class="number-cell"></div>
+      <div class="number-cell empty-cell"></div>
       <div *ngFor="let num of homeNumbers; let i = index"
            class="number-cell ">
         <app-animated-number [number]="num" [animate]="isAnimating"></app-animated-number>

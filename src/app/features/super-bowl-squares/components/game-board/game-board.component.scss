@@ -8,6 +8,10 @@
   width: -moz-available;
   height: 2rem; // Default height
 
+  &.empty-cell {
+    @apply w-4;
+  }
+
   @include tablet {
     height: 3rem;
   }

@@ -29,8 +29,12 @@
 }
 
 .number-cell {
-  @extend .grid-cell;
-  @apply font-medium text-heading;
+    @extend .grid-cell;
+    @apply font-medium text-heading;
+    min-width: 2rem;
+    &.empty-cell {
+        @apply w-4;
+    }
 }
 
 .probability-cell {
