@@ -1,24 +1,25 @@
 <div class="relative">
   <div class="pt-8 pl-8">
     <!-- Top row with home numbers -->
-    <div class="flex justify-center">
-      <div class="w-8 h-8 sm:w-12 sm:h-12"></div>
+    <div class="grid grid-cols-[auto_repeat(10,minmax(0,1fr))] gap-0">
+      <div class="number-cell"></div>
       <div *ngFor="let num of homeNumbers; let i = index"
-           class="w-8 h-8 sm:w-12 sm:h-12 border border-input flex items-center justify-center bg-input text-default text-sm sm:text-base">
+           class="number-cell ">
         <app-animated-number [number]="num" [animate]="isAnimating"></app-animated-number>
       </div>
     </div>
 
     <!-- Grid rows -->
-    <div *ngFor="let awayNum of awayNumbers; let row = index" class="flex justify-center">
+    <div *ngFor="let awayNum of awayNumbers; let row = index" 
+         class="grid grid-cols-[auto_repeat(10,minmax(0,1fr))] gap-0">
       <!-- Left side away numbers -->
-      <div class="w-8 h-8 sm:w-12 sm:h-12 border border-input flex items-center justify-center bg-input text-default text-sm sm:text-base">
+      <div class="number-cell  pr-4 label-width">
         <app-animated-number [number]="awayNum" [animate]="isAnimating"></app-animated-number>
       </div>
 
       <!-- Square cells -->
       <div *ngFor="let homeNum of homeNumbers; let col = index"
-           [ngClass]="[getSquareClass(row, col), 'w-8 h-8 sm:w-12 sm:h-12 border border-input text-default flex items-center justify-center cursor-pointer text-[8px] sm:text-xs p-1 text-center truncate overflow-hidden whitespace-nowrap hover:bg-square-hover']"
+           [ngClass]="[getSquareClass(row, col), 'square-cell hover:bg-square-hover']"
            (click)="onSquareClick(row, col)">
         {{ getSquarePlayer(row, col) }}
       </div>

@@ -4,12 +4,14 @@
       @for (entry of getPlayerEntries(); track entry.player) {
         <div class="flex items-center justify-between p-2 rounded bg-card cursor-pointer hover:bg-card-hover"
              [class.bg-card-hover]="selectedPlayer === entry.player"
-             (click)="onPlayerClick(entry.player)">
+             (click)="onPlayerClick(entry.player)"
+             [appTooltip]="'Click to highlight squares on the board'">
           <div class="flex flex-wrap items-center gap-2">
             <div class="w-4 h-4 rounded" [class]="playerColors[entry.player]"></div>
             <span class="text-default">{{ entry.player }}</span>
             @if (entry.probability !== null) {
-              <span class="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+              <span class="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full"
+                    [appTooltip]="'Probability of winning based on owned squares'">
                 {{ entry.probability }}%
               </span>
             }

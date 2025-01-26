@@ -115,37 +115,44 @@
       </div>
 
       <!-- Players List -->
-    <div class="lg:col-span-2 col-span-1">
-        <div class="bg-card rounded-lg shadow h-full flex flex-col justify-between">
-            <button (click)="isPlayersListVisible = !isPlayersListVisible"
-                class="w-full p-4 flex justify-between items-center text-left">
-                <span class="font-bold text-lg text-heading">Players</span>
-                <span class="flex items-center gap-2 text-sm text-muted">
-                    {{ isPlayersListVisible ? 'Hide' : 'Show' }}
-                    <ng-icon name="heroChevronDown" [class.rotate-180]="!isPlayersListVisible"
-                        class="text-2xl transform transition-transform duration-200">
-                    </ng-icon>
-                </span>
-            </button>
-    
-            <div *ngIf="isPlayersListVisible" class="p-4 pt-0 flex-1">
-                <app-players-list 
-                  [playerStats]="playerStats" 
-                  [playerColors]="playerColors"
-                  [paidPlayers]="paidPlayers"
-                  [homeNumbers]="homeNumbers"
-                  [awayNumbers]="awayNumbers"
+      <div class="lg:col-span-2 col-span-1">
+          <div class="bg-card rounded-lg shadow h-full flex flex-col justify-between">
+              <!-- Header with toggle button -->
+              <div class="w-full border-b">
+                  <div class="flex items-center justify-between p-4">
+                      <span class="text-lg font-bold text-heading">Players</span>
+                      <button 
+                          (click)="isPlayersListVisible = !isPlayersListVisible"
+                          class="lg:hidden flex items-center gap-1 text-sm text-muted">
+                          {{ isPlayersListVisible ? 'Hide' : 'Show' }}
+                          <ng-icon name="heroChevronDown" 
+                                  [class.rotate-180]="!isPlayersListVisible"
+                                  class="text-2xl transform transition-transform duration-200">
+                          </ng-icon>
+                      </button>
+                  </div>
+              </div>
+
+              <!-- Players list content -->
+              <div [class.hidden]="!isPlayersListVisible" class="lg:block p-4 pt-0 flex-1">
+                  <app-players-list 
+                      [playerStats]="playerStats" 
+                      [playerColors]="playerColors"
+                      [paidPlayers]="paidPlayers"
+                      [homeNumbers]="homeNumbers"
+                      [awayNumbers]="awayNumbers"
+                      [selectedSquares]="selectedSquares"
+                      (playerSelected)="onPlayerSelected($event)">
+                  </app-players-list>
+              </div>
+
+              <app-game-status 
                   [selectedSquares]="selectedSquares"
-                  (playerSelected)="onPlayerSelected($event)">
-                </app-players-list>
-            </div>
-            <app-game-status 
-              [selectedSquares]="selectedSquares"
-              [playerStats]="playerStats"
-              [paidPlayers]="paidPlayers">
-            </app-game-status>
-        </div>
-    </div>
+                  [playerStats]="playerStats"
+                  [paidPlayers]="paidPlayers">
+              </app-game-status>
+          </div>
+      </div>
     </div>
 
     <!-- Winners and Payouts -->

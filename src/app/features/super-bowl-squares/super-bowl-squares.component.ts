@@ -478,4 +478,8 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
     await this.firebaseService.updateGameData(defaultGameState);
   }
+
+  togglePlayersList(): void {
+    this.isPlayersListVisible = !this.isPlayersListVisible;
+  }
 } 

@@ -1,1 +1,30 @@
-// Empty file for now - styles are handled by Tailwind 
+@import 'breakpoints';
+
+.number-cell {
+  @apply h-8 flex items-center justify-center text-default text-sm sm:text-base;
+  border-right: 1px solid var(--color-input);
+  border-bottom: 1px solid var(--color-input);
+  width: -webkit-fill-available;
+  width: -moz-available;
+
+  @include mobile {
+    height: 2rem;
+  }
+
+  @include tablet {
+    height: 3rem;
+  }
+
+  @include desktop {
+    height: 3rem;
+  }
+}
+
+.square-cell {
+  @extend .number-cell;
+  @apply text-[8px] sm:text-xs cursor-pointer p-1 text-center truncate overflow-hidden whitespace-nowrap;
+} 
+
+.label-width {
+  @apply w-4;
+}

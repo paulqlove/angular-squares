@@ -6,7 +6,8 @@ import { AnimatedNumberComponent } from '../animated-number/animated-number.comp
   selector: 'app-game-board',
   standalone: true,
   imports: [CommonModule, AnimatedNumberComponent],
-  templateUrl: './game-board.component.html'
+  templateUrl: './game-board.component.html',
+  styleUrls: ['./game-board.component.scss']
 })
 export class GameBoardComponent {
   @Input() homeTeam!: string;

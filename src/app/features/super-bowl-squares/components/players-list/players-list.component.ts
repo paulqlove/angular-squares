@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { calculateWinProbability } from '../../utils/probability.utils';
+import { TooltipDirective } from '../../../../shared/directives/tooltip.directive';
 
 interface PlayerStat {
   squares: number;
@@ -16,7 +17,7 @@ type PlayerEntry = {
 @Component({
   selector: 'app-players-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TooltipDirective],
   templateUrl: './players-list.component.html',
   styleUrls: ['./players-list.component.scss']
 })
