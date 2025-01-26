@@ -1,15 +1,12 @@
 @import 'breakpoints';
 
 .number-cell {
-  @apply h-8 flex items-center justify-center text-default text-sm sm:text-base;
+  @apply flex items-center justify-center text-default text-sm sm:text-base;
   border-right: 1px solid var(--color-input);
   border-bottom: 1px solid var(--color-input);
   width: -webkit-fill-available;
   width: -moz-available;
-
-  @include mobile {
-    height: 2rem;
-  }
+  height: 2rem; // Default height
 
   @include tablet {
     height: 3rem;
@@ -23,6 +20,8 @@
 .square-cell {
   @extend .number-cell;
   @apply text-[8px] sm:text-xs cursor-pointer p-1 text-center truncate overflow-hidden whitespace-nowrap;
+  outline: 1px solid theme('backgroundColor.card');
+  outline-offset: -1px;
 } 
 
 .label-width {

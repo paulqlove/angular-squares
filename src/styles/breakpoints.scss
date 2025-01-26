@@ -29,7 +29,7 @@ $breakpoints: (
 }
 
 @mixin tablet {
-  @media (min-width: map-get($breakpoints, 'md')) and (max-width: map-get($breakpoints, 'lg') - 1px) {
+  @media (min-width: map-get($breakpoints, 'sm')) and (max-width: map-get($breakpoints, 'lg') - 1px) {
     @content;
   }
 }
