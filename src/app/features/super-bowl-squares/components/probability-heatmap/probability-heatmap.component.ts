@@ -13,11 +13,11 @@ import { SQUARES_PROBABILITIES } from '../../utils/probability.utils';
         <!-- Numbers row -->
         <div class="grid grid-cols-[auto_repeat(10,minmax(0,1fr))] gap-0.5">
           <!-- Empty cell for top-left corner -->
-          <div class="w-8 h-8 sm:w-12 sm:h-12"></div>
+          <div class="w-8 h-8 sm:w-16 sm:h-12"></div>
           
           <!-- Top numbers (home) -->
           @for (num of homeNumbers; track num) {
-            <div class="w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center text-xs sm:text-sm font-medium text-heading">
+            <div class="w-8 h-8 sm:w-16 sm:h-12 flex items-center justify-center text-xs sm:text-sm font-medium text-heading">
               {{ num !== null ? num : '' }}
             </div>
           }
@@ -27,7 +27,7 @@ import { SQUARES_PROBABILITIES } from '../../utils/probability.utils';
         @for (awayNum of awayNumbers; track awayNum; let row = $index) {
           <div class="grid grid-cols-[auto_repeat(10,minmax(0,1fr))] gap-0.5">
             <!-- Side number (away) -->
-            <div class="w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center text-xs sm:text-sm font-medium text-heading">
+            <div class="w-8 h-8 sm:w-16 sm:h-12 flex items-center justify-center text-xs sm:text-sm font-medium text-heading">
               {{ awayNum !== null ? awayNum : '' }}
             </div>
             
@@ -35,7 +35,7 @@ import { SQUARES_PROBABILITIES } from '../../utils/probability.utils';
             @for (homeNum of homeNumbers; track homeNum; let col = $index) {
               <div [class]="getCellClass(row, col)"
                    [class.opacity-25]="shouldDimSquare(row, col)"
-                   class="w-8 h-8 sm:w-12 sm:h-12 border border-input flex items-center justify-center text-[8px] sm:text-xs relative">
+                   class="w-8 h-8 sm:w-16 sm:h-12 border border-input flex items-center justify-center text-[8px] sm:text-xs relative">
                 {{ getProbability(row, col) }}%
               </div>
             }
