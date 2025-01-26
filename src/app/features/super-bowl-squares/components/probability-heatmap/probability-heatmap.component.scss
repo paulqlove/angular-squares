@@ -1,0 +1,42 @@
+@import 'breakpoints';
+
+.grid-cell {
+  @apply h-8 flex items-center justify-center;
+  @apply text-[8px] sm:text-xs;
+  border-right: 1px solid var(--color-input);
+  border-bottom: 1px solid var(--color-input);
+  width: -webkit-fill-available;
+  width: -moz-available;
+
+  @include mobile {
+    height: 2rem;
+  }
+
+  @include tablet {
+    height: 3rem;
+  }
+
+  @include desktop {
+    height: 3rem;
+  }
+
+//   @include xl-desktop {
+//     width: 4rem; // 64px
+//     height: 3rem;
+//   }
+}
+
+.grid-container {
+  width: -webkit-fill-available;
+  width: -moz-available;
+}
+
+.number-cell {
+  @extend .grid-cell;
+  @apply font-medium text-heading;
+}
+
+.probability-cell {
+  @extend .grid-cell;
+  @apply relative;
+} 

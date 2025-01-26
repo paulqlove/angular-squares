@@ -9,15 +9,15 @@ import { SQUARES_PROBABILITIES } from '../../utils/probability.utils';
   template: `
     <div class="relative">
       <!-- Grid Container -->
-      <div class="">
+      <div class="grid-container">
         <!-- Numbers row -->
-        <div class="grid grid-cols-[auto_repeat(10,minmax(0,1fr))] gap-0.5">
+        <div class="grid grid-cols-[auto_repeat(10,minmax(0,1fr))] gap-0">
           <!-- Empty cell for top-left corner -->
-          <div class="w-8 h-8 sm:w-16 sm:h-12"></div>
+          <div class="number-cell"></div>
           
           <!-- Top numbers (home) -->
           @for (num of homeNumbers; track num) {
-            <div class="w-8 h-8 sm:w-16 sm:h-12 flex items-center justify-center text-xs sm:text-sm font-medium text-heading">
+            <div class="number-cell">
               {{ num !== null ? num : '' }}
             </div>
           }
@@ -25,9 +25,9 @@ import { SQUARES_PROBABILITIES } from '../../utils/probability.utils';
 
         <!-- Grid rows -->
         @for (awayNum of awayNumbers; track awayNum; let row = $index) {
-          <div class="grid grid-cols-[auto_repeat(10,minmax(0,1fr))] gap-0.5">
+          <div class="grid grid-cols-[auto_repeat(10,minmax(0,1fr))] gap-0">
             <!-- Side number (away) -->
-            <div class="w-8 h-8 sm:w-16 sm:h-12 flex items-center justify-center text-xs sm:text-sm font-medium text-heading">
+            <div class="number-cell pr-4">
               {{ awayNum !== null ? awayNum : '' }}
             </div>
             
@@ -35,7 +35,7 @@ import { SQUARES_PROBABILITIES } from '../../utils/probability.utils';
             @for (homeNum of homeNumbers; track homeNum; let col = $index) {
               <div [class]="getCellClass(row, col)"
                    [class.opacity-25]="shouldDimSquare(row, col)"
-                   class="w-8 h-8 sm:w-16 sm:h-12 border border-input flex items-center justify-center text-[8px] sm:text-xs relative">
+                   class="probability-cell">
                 {{ getProbability(row, col) }}%
               </div>
             }
@@ -52,7 +52,8 @@ import { SQUARES_PROBABILITIES } from '../../utils/probability.utils';
         </div>
       </div>
     </div>
-  `
+  `,
+  styleUrls: ['./probability-heatmap.component.scss']
 })
 export class ProbabilityHeatmapComponent {
   @Input() homeNumbers: (number | null)[] = [];
