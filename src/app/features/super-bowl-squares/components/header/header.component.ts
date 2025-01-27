@@ -88,7 +88,7 @@ import { PasswordDialogComponent } from '../../components/password-dialog/passwo
           <!-- Settings Content -->
           <div class="flex-1 p-4 overflow-y-auto">
             <!-- Team Names -->
-            <div class="space-y-4 mb-8">
+            <div class="space-y-4 mb-4">
               <div>
                 <label for="awayTeam" class="block text-label text-sm font-medium mb-2">
                   Away Team
@@ -98,7 +98,10 @@ import { PasswordDialogComponent } from '../../components/password-dialog/passwo
                   id="awayTeam"
                   [ngModel]="awayTeam"
                   (ngModelChange)="onTeamChange('away', $event)"
-                  class="w-full px-3 py-2 bg-input border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-focus capitalize"
+                  class="w-full px-3 py-2 bg-input border border-input rounded-md 
+                         focus:outline-none focus:ring-2 
+                         focus:ring-gradient-to-r focus:from-secondary-500 focus:via-secondary-600 focus:to-accent-600 
+                         capitalize"
                   placeholder="Enter away team"
                 />
               </div>
@@ -112,14 +115,17 @@ import { PasswordDialogComponent } from '../../components/password-dialog/passwo
                   id="homeTeam"
                   [ngModel]="homeTeam"
                   (ngModelChange)="onTeamChange('home', $event)"
-                  class="w-full px-3 py-2 bg-input border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-focus capitalize"
+                  class="w-full px-3 py-2 bg-input border border-input rounded-md 
+                         focus:outline-none focus:ring-2 
+                         focus:ring-gradient-to-r focus:from-secondary-500 focus:via-secondary-600 focus:to-accent-600 
+                         capitalize"
                   placeholder="Enter home team"
                 />
               </div>
             </div>
 
             <!-- Price Per Square -->
-            <div class="mb-8">
+            <div class="mb-4">
               <label for="pricePerSquare" class="block text-label text-sm font-medium mb-2">
                 Price Per Square
               </label>
@@ -131,13 +137,16 @@ import { PasswordDialogComponent } from '../../components/password-dialog/passwo
                   [ngModel]="pricePerSquare"
                   (ngModelChange)="handlePriceChange($event)"
                   [disabled]="isLocked"
-                  class="w-full px-3 py-2 bg-input border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-focus disabled:opacity-50 disabled:cursor-not-allowed"
+                  class="w-full px-3 py-2 bg-input border border-input rounded-md 
+                         focus:outline-none focus:ring-2 
+                         focus:ring-gradient-to-r focus:from-secondary-500 focus:via-secondary-600 focus:to-accent-600 
+                         disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
             </div>
 
              <!-- Venmo input -->
-            <div class="mb-8">
+            <div class="">
               <label for="venmoUsername" class="block text-label text-sm font-medium mb-2">
                 Venmo Username
               </label>
@@ -148,7 +157,9 @@ import { PasswordDialogComponent } from '../../components/password-dialog/passwo
                   [(ngModel)]="tempVenmoUsername"
                   (blur)="onVenmoBlur()"
                   [placeholder]="venmoUsername ? '@' + venmoUsername.replace('@', '') : '@username'"
-                  class="w-full px-3 py-2 bg-input border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-focus"
+                  class="w-full px-3 py-2 bg-input border border-input rounded-md 
+                         focus:outline-none focus:ring-2 
+                         focus:ring-gradient-to-r focus:from-secondary-500 focus:via-secondary-600 focus:to-accent-600"
                 />
               </div>
               
@@ -172,6 +183,13 @@ import { PasswordDialogComponent } from '../../components/password-dialog/passwo
 
             <!-- Add this before the Game Controls section -->
             <div class="mb-8">
+              <div class="flex items-center justify-between p-4 rounded space-y-4">
+                <span class="text-default">Lock Game</span>
+                <app-toggle 
+                [checked]="isLocked"
+                (onChange)="onToggleLock.emit()"
+                ></app-toggle>
+              </div>
               </div>
               
               <!-- Game Controls -->
@@ -194,13 +212,7 @@ import { PasswordDialogComponent } from '../../components/password-dialog/passwo
                 {{ isRandomized ? 'Clear Numbers' : 'Randomize Numbers' }}
               </button>
 
-              <div class="flex items-center justify-between p-4 rounded">
-                <span class="text-default">Lock Game</span>
-                <app-toggle 
-                  [checked]="isLocked"
-                  (onChange)="onToggleLock.emit()"
-                ></app-toggle>
-              </div>
+           
             </div>
 
            
