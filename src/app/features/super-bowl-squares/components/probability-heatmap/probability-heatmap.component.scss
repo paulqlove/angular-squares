@@ -30,8 +30,9 @@
 
 .number-cell {
     @extend .grid-cell;
-    @apply font-medium text-heading;
+    // @apply font-medium;
     min-width: 2rem;
+    font-size: 1rem;
     &.empty-cell {
         @apply w-4;
     }
