@@ -69,17 +69,17 @@ import { PasswordDialogComponent } from '../../components/password-dialog/passwo
     ></app-dialog>
 
     <!-- Settings Panel -->
-    <div class="fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity duration-200"
+    <div class="fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity duration-200 overflow-hidden"
          [class.opacity-0]="!showSettings"
          [class.pointer-events-none]="!showSettings"
          (click)="closeSettings()">
-      <div class="absolute right-0 top-0 h-full w-[90%] sm:w-full sm:max-w-md bg-white shadow-lg transform transition-transform duration-200 flex flex-col"
+      <div class="fixed right-0 top-0 bottom-0 w-[90%] sm:w-full sm:max-w-md bg-white shadow-lg transform transition-transform duration-200 flex flex-col overflow-hidden"
            [class.translate-x-0]="showSettings"
            [class.translate-x-full]="!showSettings"
            (click)="$event.stopPropagation()">
         
         <!-- Settings Header -->
-        <div class="flex items-center justify-between p-4 border-b">
+        <div class="flex-none flex items-center justify-between p-4 border-b">
           <h2 class="text-lg font-bold text-heading">Settings</h2>
           <button (click)="closeSettings()" class="text-muted hover:text-heading">
             <ng-icon name="heroXMark" class="text-2xl"></ng-icon>
@@ -87,7 +87,7 @@ import { PasswordDialogComponent } from '../../components/password-dialog/passwo
         </div>
 
         <!-- Settings Content -->
-        <div class="flex-1 p-4 pt-8 bg-page">
+        <div class="flex-1 overflow-y-auto p-4 pt-8 bg-page">
           <!-- Team Names -->
           <div class="space-y-4 mb-4">
             <div>
