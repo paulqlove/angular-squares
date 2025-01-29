@@ -33,7 +33,9 @@ export class PlayersListComponent {
   selectedPlayer: string | null = null;
 
   private shameEmojis = ['🤢', '🤮', '💩', '🙈', '😱', '🤦', '😤', '🫣', '🤑', '🗑️'];
+  private shameLabels = ['Mooch', 'Shame!', 'Pay Up', 'Freeloader'];
   private playerEmojis: Map<string, string> = new Map();
+  private playerShameLabels: Map<string, string> = new Map();
 
   onPlayerClick(player: string): void {
     if (this.selectedPlayer === player) {
@@ -92,5 +94,13 @@ export class PlayersListComponent {
       this.playerEmojis.set(player, this.shameEmojis[randomIndex]);
     }
     return this.playerEmojis.get(player) || '🤢';
+  }
+
+  getShameLabel(player: string): string {
+    if (!this.playerShameLabels.has(player)) {
+      const randomIndex = Math.floor(Math.random() * this.shameLabels.length);
+      this.playerShameLabels.set(player, this.shameLabels[randomIndex]);
+    }
+    return this.playerShameLabels.get(player) || 'Pay Up';
   }
 } 
