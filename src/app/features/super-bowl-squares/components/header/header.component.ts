@@ -73,7 +73,7 @@ import { PasswordDialogComponent } from '../../components/password-dialog/passwo
          [class.opacity-0]="!showSettings"
          [class.pointer-events-none]="!showSettings"
          (click)="closeSettings()">
-      <div class="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-lg transform transition-transform duration-200 flex flex-col"
+      <div class="absolute right-0 top-0 h-full w-[90%] sm:w-full sm:max-w-md bg-white shadow-lg transform transition-transform duration-200 flex flex-col"
            [class.translate-x-0]="showSettings"
            [class.translate-x-full]="!showSettings"
            (click)="$event.stopPropagation()">
