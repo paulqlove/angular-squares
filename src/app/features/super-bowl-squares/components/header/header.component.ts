@@ -87,7 +87,7 @@ import { PasswordDialogComponent } from '../../components/password-dialog/passwo
         </div>
 
         <!-- Settings Content -->
-        <div class="flex-1 p-4 pt-8">
+        <div class="flex-1 p-4 pt-8 bg-page">
           <!-- Team Names -->
           <div class="space-y-4 mb-4">
             <div>
