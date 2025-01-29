@@ -18,13 +18,16 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
         <div class="flex justify-end gap-2">
           <button 
             (click)="onCancel.emit()"
-            class="px-4 py-2 text-sm font-medium text-default bg-control hover:bg-control-hover rounded-lg"
+            class="px-4 py-2 text-muted hover:text-default"
           >
             Cancel
           </button>
           <button 
             (click)="onConfirm.emit()"
-            class="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg"
+            class="px-4 py-2 rounded shadow-md hover:shadow-lg transition-all duration-200
+                   bg-gradient-to-r from-secondary-500 via-secondary-600 to-accent-600 
+                   hover:from-secondary-600 hover:via-secondary-700 hover:to-accent-700
+                   text-white"
           >
             Continue to Venmo
           </button>
