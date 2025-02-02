@@ -3,3 +3,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+// Add this to apply Roboto to all elements
+@layer base {
+  html {
+    font-family: Roboto, system-ui, sans-serif;
+  }
+  
+  h2 {
+    @apply font-thin;
+  }
+}

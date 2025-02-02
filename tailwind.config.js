@@ -67,7 +67,7 @@ module.exports = {
     extend: {
       colors: colors,
       backgroundColor: {
-        'page': colors.primary[50],
+        'page': colors.primary[100],
         'card': colors.primary[100],
         'card-hover': colors.primary[300],
         'input': colors.primary[50],
@@ -99,7 +99,10 @@ module.exports = {
       },
       ringColor: {
         'focus': colors.warm.DEFAULT,
-      }
+      },
+      fontFamily: {
+        sans: ['Roboto', 'sans-serif'],
+      },
     },
   },
   safelist: [

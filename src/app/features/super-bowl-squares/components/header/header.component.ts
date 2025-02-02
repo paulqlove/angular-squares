@@ -31,7 +31,7 @@ import { PasswordDialogComponent } from '../../components/password-dialog/passwo
     })
   ],
   template: `
-    <div class="fixed top-0 left-0 right-0 z-[100] bg-page border-input shadow-sm">
+    <div class="fixed top-0 left-0 right-0 z-[100] bg-page">
       <div class="container mx-auto px-4 py-4 flex justify-between items-center">
         <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-heading">Football Squares</h1>
         <div class="flex items-center gap-2">
@@ -220,7 +220,7 @@ import { PasswordDialogComponent } from '../../components/password-dialog/passwo
         </div>
 
         <!-- Footer with Clear Game button -->
-        <div class="p-4 border-t border-gray-200 mt-auto">
+        <div class="p-4 border-t border-gray-200 mt-auto bg-card">
           <button 
             (click)="onClearGame.emit(); closeSettings()"
             class="w-full bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded flex items-center justify-center gap-2"

@@ -67,9 +67,9 @@
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
       <!-- Game Board -->
       <div class="lg:col-span-2 col-span-1">
-        <div class="bg-card rounded-lg shadow p-4">
+        <div class="bg-card rounded-lg p-4">
           <!-- Tabs -->
-          <div class="flex border-b mb-4">
+          <div class="flex mb-4">
             <button 
               (click)="activeTab = 'board'"
               [class.border-b-2]="activeTab === 'board'"
@@ -116,9 +116,9 @@
 
       <!-- Players List -->
       <div class="lg:col-span-2 col-span-1">
-          <div class="bg-card rounded-lg shadow h-full flex flex-col justify-between">
+          <div class="bg-card rounded-lg h-full flex flex-col justify-between">
               <!-- Header with toggle button -->
-              <div class="w-full border-b">
+              <div class="w-full">
                   <div class="flex items-center justify-between p-4">
                       <span class="text-lg font-bold text-heading">Players</span>
                       <button 
