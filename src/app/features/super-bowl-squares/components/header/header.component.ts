@@ -187,9 +187,10 @@ import { PasswordDialogComponent } from '../../components/password-dialog/passwo
 
           <!-- Add this before the Game Controls section -->
           <div class="mb-8">
-            <div class="flex items-center justify-between p-4 rounded space-y-4">
+            <div class="flex items-center justify-between p-4 rounded">
               <span class="text-default">Lock Game</span>
               <app-toggle 
+              class="flex"
               [checked]="isLocked"
               (onChange)="onToggleLock.emit()"
               ></app-toggle>
