@@ -33,7 +33,10 @@ import { PasswordDialogComponent } from '../../components/password-dialog/passwo
   template: `
     <div class="fixed top-0 left-0 right-0 z-[100] bg-page">
       <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-        <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-heading">Football Squares</h1>
+        <div class="flex items-center gap-2">
+          <img src="assets/logo.png" alt="Logo" class="h-8 w-auto">
+          <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-heading">Football Squares</h1>
+        </div>
         <div class="flex items-center gap-2">
           <!-- Venmo Button -->
           @if (venmoUsername) {
