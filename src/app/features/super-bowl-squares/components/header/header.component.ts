@@ -49,7 +49,7 @@ import { PasswordDialogComponent } from '../../components/password-dialog/passwo
           <!-- Settings Button -->
           <button 
             (click)="toggleSettings()"
-            class="p-2 text-muted hover:text-heading rounded-lg hover:bg-card transition-colors"
+            class="p-2 text-muted hover:text-heading rounded-lg hover:bg-card transition-colors flex"
           >
             <ng-icon name="heroCog6Tooth" class="text-2xl"></ng-icon>
           </button>
