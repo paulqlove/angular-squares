@@ -45,7 +45,7 @@ import { PasswordDialogComponent } from '../../components/password-dialog/passwo
               class="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-[#008CFF] hover:bg-[#0074D4] rounded-lg transition-colors"
             >
               <ng-icon name="heroCreditCard" class="text-lg"></ng-icon>
-              <span class="hidden sm:inline">Pay with Venmo</span>
+              <span class="sm:inline">Pay</span>
             </button>
           }
 
