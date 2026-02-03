@@ -1,193 +1,332 @@
-<app-header
-  [isRandomized]="isRandomized"
-  [isLocked]="isLocked"
-  [venmoUsername]="venmoUsername"
-  [homeTeam]="homeTeam"
-  [awayTeam]="awayTeam"
-  [pricePerSquare]="currentPrice"
-  (onRandomize)="randomizeNumbers()"
-  (onToggleLock)="toggleLock()"
-  (onVenmoUsernameChange)="onVenmoUsernameChange($event)"
-  (onTeamNameChange)="onTeamNameChange($event)"
-  (onPriceChange)="onPriceChange($event)"
-  (onManagePayments)="onManagePayments()"
-  (onClearGame)="onClearGame()">
-</app-header>
-
-<div class="container mx-auto">
-  <div class="space-y-6">
-    <!-- Player Controls -->
-    <div class="flex flex-wrap gap-4 items-center w-full">
-      <div class="w-full">
-        <input type="text" [(ngModel)]="currentPlayer" 
-               placeholder="Enter your name" 
-               [disabled]="isLocked"
-               class="w-full bg-input text-default border rounded p-2 focus:outline-none focus:ring-2 focus:ring-gradient-to-r focus:from-secondary-500 focus:via-secondary-600 focus:to-accent-600 disabled:opacity-50 disabled:cursor-not-allowed">
-      </div>
+<!-- Loading State -->
+@if (isLoading()) {
+  <div class="min-h-screen bg-page flex items-center justify-center">
+    <div class="text-center">
+      <svg class="animate-spin h-12 w-12 text-secondary-500 mx-auto mb-4" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+      </svg>
+      <p class="text-muted">Loading game...</p>
     </div>
+  </div>
+}
 
-    <!-- Score Inputs -->
-    <div class="w-full mt-4">
-      <!-- Mobile view with horizontal scroll -->
-      <div class="sm:hidden relative">
-        <!-- Hint text -->
-        <div class="text-sm text-gray-500 mb-2 flex items-center justify-center gap-1">
-          <ng-icon name="heroChevronRight" class="text-2xl"></ng-icon>
-          Swipe to see more quarters
+<!-- Game Not Found State -->
+@else if (gameNotFound()) {
+  <div class="min-h-screen bg-page flex items-center justify-center p-4">
+    <div class="text-center max-w-md">
+      <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+        <svg class="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </div>
+      <h1 class="text-2xl font-bold text-heading mb-2">Game Not Found</h1>
+      <p class="text-muted mb-6">
+        The game code <code class="bg-gray-100 px-2 py-1 rounded font-mono">{{ gameId }}</code> doesn't exist or has been deleted.
+      </p>
+      <button
+        (click)="goBack()"
+        class="px-6 py-3 bg-secondary-500 hover:bg-secondary-600 text-white rounded-lg transition-colors"
+      >
+        Go Back
+      </button>
+    </div>
+  </div>
+}
+
+<!-- Main Game View -->
+@else {
+  <app-header
+    [isRandomized]="isRandomized"
+    [isLocked]="isLocked"
+    [venmoUsername]="venmoUsername"
+    [homeTeam]="homeTeam"
+    [awayTeam]="awayTeam"
+    [pricePerSquare]="currentPrice"
+    (onRandomize)="randomizeNumbers()"
+    (onToggleLock)="toggleLock()"
+    (onVenmoUsernameChange)="onVenmoUsernameChange($event)"
+    (onTeamNameChange)="onTeamNameChange($event)"
+    (onPriceChange)="onPriceChange($event)"
+    (onManagePayments)="onManagePayments()"
+    (onClearGame)="onClearGame()">
+  </app-header>
+
+  <div class="container mx-auto">
+    <div class="space-y-6">
+      <!-- Game Info Bar -->
+      <div class="flex flex-wrap items-center justify-between gap-4 bg-white rounded-lg p-3 shadow-sm">
+        <div class="flex items-center gap-3">
+          <button
+            (click)="goBack()"
+            class="p-2 text-muted hover:text-heading hover:bg-gray-100 rounded-lg transition-colors"
+            title="Back to dashboard"
+          >
+            <ng-icon name="heroArrowLeft" class="text-xl"></ng-icon>
+          </button>
+          <div>
+            <h2 class="font-semibold text-heading">{{ gameName }}</h2>
+            <p class="text-sm text-muted">
+              Code: <code class="bg-gray-100 px-1.5 py-0.5 rounded font-mono text-xs">{{ gameId }}</code>
+            </p>
+          </div>
         </div>
 
-        <div class="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory">
-          <app-score-input *ngFor="let quarter of [1, 2, 3, 4]" 
-              class="flex-none w-[85vw] snap-center"
+        <button
+          (click)="openShareModal()"
+          class="flex items-center gap-2 px-4 py-2 bg-secondary-500 hover:bg-secondary-600 text-white rounded-lg transition-colors"
+        >
+          <ng-icon name="heroShare" class="text-lg"></ng-icon>
+          <span class="hidden sm:inline">Share Game</span>
+        </button>
+      </div>
+
+      <!-- Player Controls -->
+      <div class="flex flex-wrap gap-4 items-center w-full">
+        <div class="w-full">
+          <input type="text" [(ngModel)]="currentPlayer"
+                 placeholder="Enter your name"
+                 [disabled]="isLocked"
+                 class="w-full bg-input text-default border rounded p-2 focus:outline-none focus:ring-2 focus:ring-gradient-to-r focus:from-secondary-500 focus:via-secondary-600 focus:to-accent-600 disabled:opacity-50 disabled:cursor-not-allowed">
+        </div>
+      </div>
+
+      <!-- Score Inputs -->
+      <div class="w-full mt-4">
+        <!-- Mobile view with horizontal scroll -->
+        <div class="sm:hidden relative">
+          <!-- Hint text -->
+          <div class="text-sm text-gray-500 mb-2 flex items-center justify-center gap-1">
+            <ng-icon name="heroChevronRight" class="text-2xl"></ng-icon>
+            Swipe to see more quarters
+          </div>
+
+          <div class="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory">
+            <app-score-input *ngFor="let quarter of [1, 2, 3, 4]"
+                class="flex-none w-[85vw] snap-center"
+                [quarter]="quarter.toString()"
+                [scores]="getQuarterScores(quarter)"
+                [homeTeam]="homeTeam"
+                [awayTeam]="awayTeam"
+                (scoreChange)="onScoreChange($event)">
+            </app-score-input>
+          </div>
+
+          <!-- Gradient fade -->
+          <div class="absolute right-0 top-8 bottom-4 w-12 bg-gradient-to-l from-primary-50 pointer-events-none"></div>
+        </div>
+
+        <!-- Desktop grid view -->
+        <div class="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <app-score-input *ngFor="let quarter of [1, 2, 3, 4]"
               [quarter]="quarter.toString()"
-              [scores]="getQuarterScores(quarter)" 
-              [homeTeam]="homeTeam" 
+              [scores]="getQuarterScores(quarter)"
+              [homeTeam]="homeTeam"
               [awayTeam]="awayTeam"
               (scoreChange)="onScoreChange($event)">
           </app-score-input>
         </div>
-
-        <!-- Gradient fade -->
-        <div class="absolute right-0 top-8 bottom-4 w-12 bg-gradient-to-l from-primary-50 pointer-events-none"></div>
       </div>
 
-      <!-- Desktop grid view -->
-      <div class="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <app-score-input *ngFor="let quarter of [1, 2, 3, 4]"
-            [quarter]="quarter.toString()"
-            [scores]="getQuarterScores(quarter)" 
-            [homeTeam]="homeTeam" 
-            [awayTeam]="awayTeam"
-            (scoreChange)="onScoreChange($event)">
-        </app-score-input>
+      <!-- Grid container for board and players -->
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <!-- Game Board -->
+        <div class="lg:col-span-2 col-span-1">
+          <div class="bg-card rounded-lg p-4">
+            <!-- Tabs -->
+            <div class="flex mb-4">
+              <button
+                (click)="activeTab = 'board'"
+                [class.border-b-2]="activeTab === 'board'"
+                [class.border-blue-500]="activeTab === 'board'"
+                [class.text-blue-600]="activeTab === 'board'"
+                class="px-4 py-2 text-lg font-bold hover:text-blue-600 transition-colors">
+                Game Board
+              </button>
+              <button
+                (click)="activeTab = 'probabilities'"
+                [class.border-b-2]="activeTab === 'probabilities'"
+                [class.border-blue-500]="activeTab === 'probabilities'"
+                [class.text-blue-600]="activeTab === 'probabilities'"
+                class="px-4 py-2 text-lg font-bold hover:text-blue-600 transition-colors">
+                Odds
+              </button>
+            </div>
+
+            <!-- Tab Content -->
+            @if (activeTab === 'board') {
+              <app-game-board
+                [selectedSquares]="selectedSquares"
+                [playerColors]="playerColors"
+                [homeNumbers]="homeNumbers"
+                [awayNumbers]="awayNumbers"
+                [homeTeam]="homeTeam"
+                [awayTeam]="awayTeam"
+                [selectedPlayer]="selectedPlayer"
+                [isRandomizing]="isRandomizing"
+                (squareClick)="onSquareClick($event)">
+              </app-game-board>
+            } @else {
+              <app-probability-heatmap
+                [homeNumbers]="homeNumbers"
+                [awayNumbers]="awayNumbers"
+                [homeTeam]="homeTeam"
+                [awayTeam]="awayTeam"
+                [selectedSquares]="selectedSquares"
+                [selectedPlayer]="selectedPlayer">
+              </app-probability-heatmap>
+            }
+          </div>
+        </div>
+
+        <!-- Players List -->
+        <div class="lg:col-span-2 col-span-1">
+            <div class="bg-card rounded-lg h-full flex flex-col justify-between">
+                <!-- Header with toggle button -->
+                <div class="w-full">
+                    <div class="flex items-center justify-between p-4">
+                        <span class="text-lg font-bold text-heading">Players</span>
+                        <button
+                            (click)="isPlayersListVisible = !isPlayersListVisible"
+                            class="lg:hidden flex items-center gap-1 text-sm text-muted">
+                            {{ isPlayersListVisible ? 'Hide' : 'Show' }}
+                            <ng-icon name="heroChevronDown"
+                                    [class.rotate-180]="!isPlayersListVisible"
+                                    class="text-2xl transform transition-transform duration-200">
+                            </ng-icon>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Players list content -->
+                <div [class.hidden]="!isPlayersListVisible" class="lg:block p-4 pt-0 flex-1">
+                    <app-players-list
+                        [playerStats]="playerStats"
+                        [playerColors]="playerColors"
+                        [paidPlayers]="paidPlayers"
+                        [homeNumbers]="homeNumbers"
+                        [awayNumbers]="awayNumbers"
+                        [selectedSquares]="selectedSquares"
+                        (playerSelected)="onPlayerSelected($event)">
+                    </app-players-list>
+                </div>
+
+                <app-game-status
+                    [selectedSquares]="selectedSquares"
+                    [playerStats]="playerStats"
+                    [paidPlayers]="paidPlayers">
+                </app-game-status>
+            </div>
+        </div>
       </div>
+
+      <!-- Winners and Payouts -->
+      <app-winners-and-payouts
+        [winners]="winners"
+        [quarterPayouts]="quarterPayouts"
+        [playerColors]="playerColors"
+        [totalPot]="totalPot"
+        [scores]="scores">
+      </app-winners-and-payouts>
+
+      <!-- Alert notifications -->
+      <div *ngIf="showAlert"
+           class="fixed bottom-40 left-1/2 -translate-x-1/2 w-72 bg-red-50 border-l-4 border-red-400 p-4 shadow-lg rounded-lg"
+           role="alert">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="ml-3">
+            <p class="text-sm text-red-700">
+              {{ alertMessage }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add this near the end of the template -->
+      <app-password-dialog #passwordDialog></app-password-dialog>
+
+      <app-payment-dialog
+        #paymentDialog
+        (onPaidStatusChange)="onPaidPlayersChange($event)">
+      </app-payment-dialog>
     </div>
+  </div>
 
-    <!-- Grid container for board and players -->
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-      <!-- Game Board -->
-      <div class="lg:col-span-2 col-span-1">
-        <div class="bg-card rounded-lg p-4">
-          <!-- Tabs -->
-          <div class="flex mb-4">
-            <button 
-              (click)="activeTab = 'board'"
-              [class.border-b-2]="activeTab === 'board'"
-              [class.border-blue-500]="activeTab === 'board'"
-              [class.text-blue-600]="activeTab === 'board'"
-              class="px-4 py-2 text-lg font-bold hover:text-blue-600 transition-colors">
-              Game Board
-            </button>
-            <button 
-              (click)="activeTab = 'probabilities'"
-              [class.border-b-2]="activeTab === 'probabilities'"
-              [class.border-blue-500]="activeTab === 'probabilities'"
-              [class.text-blue-600]="activeTab === 'probabilities'"
-              class="px-4 py-2 text-lg font-bold hover:text-blue-600 transition-colors">
-              Odds
-            </button>
+  <!-- Share Modal -->
+  @if (showShareModal()) {
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" (click)="closeShareModal()">
+      <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6" (click)="$event.stopPropagation()">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-xl font-semibold text-heading">Share This Game</h3>
+          <button
+            (click)="closeShareModal()"
+            class="p-2 text-muted hover:text-heading hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="space-y-6">
+          <!-- Game Code -->
+          <div>
+            <label class="block text-sm font-medium text-label mb-2">Game Code</label>
+            <div class="flex items-center gap-2">
+              <div class="flex-1 bg-gray-100 px-4 py-3 rounded-lg font-mono text-2xl tracking-widest text-center font-bold">
+                {{ gameId }}
+              </div>
+              <button
+                (click)="copyGameCode()"
+                class="p-3 bg-secondary-500 hover:bg-secondary-600 text-white rounded-lg transition-colors"
+                title="Copy code"
+              >
+                <ng-icon name="heroClipboard" class="text-xl"></ng-icon>
+              </button>
+            </div>
+            <p class="text-xs text-muted mt-2">Share this code with friends to join the game</p>
           </div>
 
-          <!-- Tab Content -->
-          @if (activeTab === 'board') {
-            <app-game-board
-              [selectedSquares]="selectedSquares"
-              [playerColors]="playerColors"
-              [homeNumbers]="homeNumbers"
-              [awayNumbers]="awayNumbers"
-              [homeTeam]="homeTeam"
-              [awayTeam]="awayTeam"
-              [selectedPlayer]="selectedPlayer"
-              [isRandomizing]="isRandomizing"
-              (squareClick)="onSquareClick($event)">
-            </app-game-board>
-          } @else {
-            <app-probability-heatmap
-              [homeNumbers]="homeNumbers"
-              [awayNumbers]="awayNumbers"
-              [homeTeam]="homeTeam"
-              [awayTeam]="awayTeam"
-              [selectedSquares]="selectedSquares"
-              [selectedPlayer]="selectedPlayer">
-            </app-probability-heatmap>
+          <!-- Share Link -->
+          <div>
+            <label class="block text-sm font-medium text-label mb-2">Direct Link</label>
+            <div class="flex items-center gap-2">
+              <input
+                type="text"
+                [value]="getShareableLink()"
+                readonly
+                class="flex-1 px-3 py-2 bg-gray-100 rounded-lg text-sm truncate"
+              />
+              <button
+                (click)="copyShareLink()"
+                class="p-2 bg-secondary-500 hover:bg-secondary-600 text-white rounded-lg transition-colors"
+                title="Copy link"
+              >
+                <ng-icon name="heroClipboard" class="text-lg"></ng-icon>
+              </button>
+            </div>
+          </div>
+
+          <!-- Copied notification -->
+          @if (copiedToClipboard()) {
+            <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-2 rounded-lg text-sm text-center">
+              Copied to clipboard!
+            </div>
           }
         </div>
-      </div>
 
-      <!-- Players List -->
-      <div class="lg:col-span-2 col-span-1">
-          <div class="bg-card rounded-lg h-full flex flex-col justify-between">
-              <!-- Header with toggle button -->
-              <div class="w-full">
-                  <div class="flex items-center justify-between p-4">
-                      <span class="text-lg font-bold text-heading">Players</span>
-                      <button 
-                          (click)="isPlayersListVisible = !isPlayersListVisible"
-                          class="lg:hidden flex items-center gap-1 text-sm text-muted">
-                          {{ isPlayersListVisible ? 'Hide' : 'Show' }}
-                          <ng-icon name="heroChevronDown" 
-                                  [class.rotate-180]="!isPlayersListVisible"
-                                  class="text-2xl transform transition-transform duration-200">
-                          </ng-icon>
-                      </button>
-                  </div>
-              </div>
-
-              <!-- Players list content -->
-              <div [class.hidden]="!isPlayersListVisible" class="lg:block p-4 pt-0 flex-1">
-                  <app-players-list 
-                      [playerStats]="playerStats" 
-                      [playerColors]="playerColors"
-                      [paidPlayers]="paidPlayers"
-                      [homeNumbers]="homeNumbers"
-                      [awayNumbers]="awayNumbers"
-                      [selectedSquares]="selectedSquares"
-                      (playerSelected)="onPlayerSelected($event)">
-                  </app-players-list>
-              </div>
-
-              <app-game-status 
-                  [selectedSquares]="selectedSquares"
-                  [playerStats]="playerStats"
-                  [paidPlayers]="paidPlayers">
-              </app-game-status>
-          </div>
+        <button
+          (click)="closeShareModal()"
+          class="w-full mt-6 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors font-medium"
+        >
+          Done
+        </button>
       </div>
     </div>
-
-    <!-- Winners and Payouts -->
-    <app-winners-and-payouts
-      [winners]="winners"
-      [quarterPayouts]="quarterPayouts"
-      [playerColors]="playerColors"
-      [totalPot]="totalPot"
-      [scores]="scores">
-    </app-winners-and-payouts>
-
-    <!-- Alert notifications -->
-    <div *ngIf="showAlert" 
-         class="fixed bottom-40 left-1/2 -translate-x-1/2 w-72 bg-red-50 border-l-4 border-red-400 p-4 shadow-lg rounded-lg"
-         role="alert">
-      <div class="flex">
-        <div class="flex-shrink-0">
-          <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-          </svg>
-        </div>
-        <div class="ml-3">
-          <p class="text-sm text-red-700">
-            {{ alertMessage }}
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Add this near the end of the template -->
-    <app-password-dialog #passwordDialog></app-password-dialog>
-
-    <app-payment-dialog 
-      #paymentDialog
-      (onPaidStatusChange)="onPaidPlayersChange($event)">
-    </app-payment-dialog>
-  </div>
-</div> 
+  }
+}

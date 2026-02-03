@@ -1,19 +1,24 @@
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { FirebaseService, GameData } from '../../core/services/firebase.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { GameService, GameData } from '../../core/services/game.service';
+import { AuthService } from '../../core/services/auth.service';
 import { Subscription } from 'rxjs';
 import { GameBoardComponent } from './components/game-board/game-board.component';
 import { PlayersListComponent } from './components/players-list/players-list.component';
 import { ScoreInputComponent } from './components/score-input/score-input.component';
 import { WinnersAndPayoutsComponent } from './components/winners-and-payouts/winners-and-payouts.component';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { 
-  heroLockOpen, 
-  heroLockClosed, 
-  heroChevronDown, 
-  heroChevronRight, 
-  heroTrash 
+import {
+  heroLockOpen,
+  heroLockClosed,
+  heroChevronDown,
+  heroChevronRight,
+  heroTrash,
+  heroShare,
+  heroArrowLeft,
+  heroClipboard
 } from '@ng-icons/heroicons/outline';
 import { GameStatusComponent } from './components/game-status/game-status.component';
 import { PasswordDialogComponent } from './components/password-dialog/password-dialog.component';
@@ -39,13 +44,15 @@ import { ProbabilityHeatmapComponent } from './components/probability-heatmap/pr
     ProbabilityHeatmapComponent
   ],
   providers: [
-    FirebaseService,
-    provideIcons({ 
-      heroLockOpen, 
-      heroLockClosed, 
+    provideIcons({
+      heroLockOpen,
+      heroLockClosed,
       heroChevronDown,
       heroChevronRight,
-      heroTrash
+      heroTrash,
+      heroShare,
+      heroArrowLeft,
+      heroClipboard
     })
   ],
   templateUrl: './super-bowl-squares.component.html',
@@ -54,7 +61,11 @@ import { ProbabilityHeatmapComponent } from './components/probability-heatmap/pr
 export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   @ViewChild('passwordDialog') passwordDialog!: PasswordDialogComponent;
   @ViewChild('paymentDialog') paymentDialog!: PaymentDialogComponent;
-  
+
+  // Game state
+  gameId: string = '';
+  gameName: string = 'Football Squares';
+  gameOwnerId: string = '';
   homeTeam: string = '';
   awayTeam: string = '';
   selectedSquares: { [key: string]: string } = {};
@@ -131,12 +142,61 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   paidPlayers: Set<string> = new Set();
   activeTab: 'board' | 'probabilities' = 'board';
 
-  constructor(private firebaseService: FirebaseService) {}
+  // UI state
+  isLoading = signal(true);
+  gameNotFound = signal(false);
+  showShareModal = signal(false);
+  copiedToClipboard = signal(false);
+
+  // Auth state
+  currentUser = this.authService.currentUser;
+  isGameOwner = signal(false);
+
+  constructor(
+    private gameService: GameService,
+    private authService: AuthService,
+    private route: ActivatedRoute,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
+    // Set current player from auth if available
+    const user = this.authService.currentUser();
+    if (user?.displayName) {
+      this._currentPlayer = user.displayName;
+    }
+
+    // Get game ID from route
     this.subscription.add(
-      this.firebaseService.getGameData().subscribe((data: GameData) => {
+      this.route.params.subscribe(params => {
+        const gameId = params['gameId'];
+        if (gameId) {
+          this.gameId = gameId;
+          this.loadGame(gameId);
+        }
+      })
+    );
+  }
+
+  private async loadGame(gameId: string): Promise<void> {
+    this.isLoading.set(true);
+
+    // Check if game exists
+    const exists = await this.gameService.gameExists(gameId);
+    if (!exists) {
+      this.gameNotFound.set(true);
+      this.isLoading.set(false);
+      return;
+    }
+
+    // Subscribe to game updates
+    this.subscription.add(
+      this.gameService.subscribeToGame(gameId).subscribe((data: GameData | null) => {
+        this.isLoading.set(false);
+
         if (data) {
+          this.gameName = data.name || 'Football Squares';
+          this.gameOwnerId = data.ownerId || '';
           this.selectedSquares = data.selectedSquares || {};
           this.homeNumbers = data.homeNumbers || Array(10).fill(null);
           this.awayNumbers = data.awayNumbers || Array(10).fill(null);
@@ -148,6 +208,11 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           this.awayTeam = data.awayTeam || '';
           this.venmoUsername = data.venmoUsername || '';
           this.paidPlayers = new Set(data.paidPlayers || []);
+          this.playerColors = data.playerColors || {};
+
+          // Check if current user is the game owner
+          const user = this.authService.currentUser();
+          this.isGameOwner.set(user?.uid === data.ownerId);
 
           Object.values(this.selectedSquares).forEach(playerName => {
             if (!this.playerColors[playerName]) {
@@ -156,10 +221,12 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           });
 
           this.calculatePlayerStats();
-          
+
           if (Object.values(this.scores).some(score => score.home > 0 || score.away > 0)) {
             this.calculateWinners();
           }
+        } else {
+          this.gameNotFound.set(true);
         }
       })
     );
@@ -167,12 +234,13 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
+    this.gameService.unsubscribe();
   }
 
   private calculatePlayerStats(): void {
     const stats: { [key: string]: { squares: number, total: number } } = {};
     let totalPot = 0;
-    
+
     Object.entries(this.selectedSquares).forEach(([key, player]) => {
       if (!stats[player]) {
         stats[player] = { squares: 0, total: 0 };
@@ -181,7 +249,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       stats[player].total += this.currentPrice;
       totalPot += this.currentPrice;
     });
-    
+
     this.playerStats = stats;
     this.totalPot = totalPot;
   }
@@ -193,10 +261,10 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
     const usedColors = Object.values(this.playerColors);
     const availableColor = this.availableColors.find(color => !usedColors.includes(color));
-    
+
     if (availableColor) {
       this.playerColors[playerName] = availableColor;
-      this.firebaseService.updateGameData({ playerColors: this.playerColors });
+      this.gameService.updateGame(this.gameId, { playerColors: this.playerColors });
       return availableColor;
     }
 
@@ -204,10 +272,9 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   }
 
   private sanitizePlayerName(name: string): string {
-    // Trim whitespace from ends and replace multiple spaces with single space
     return name
-      .trim()                     // Remove leading/trailing whitespace
-      .replace(/\s+/g, ' ');      // Replace multiple spaces with single space
+      .trim()
+      .replace(/\s+/g, ' ');
   }
 
   onSquareClick(event: { row: number; col: number }): void {
@@ -223,25 +290,22 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     if (this.isLocked) {
       return;
     }
-    
+
     const key = `${event.row}-${event.col}`;
     const sanitizedPlayer = this.sanitizePlayerName(this.currentPlayer);
-    
-    // Check if square is already taken
+
     if (this.selectedSquares[key]) {
       if (this.selectedSquares[key] === sanitizedPlayer) {
-        // Allow user to deselect their own square
         const newSelectedSquares = { ...this.selectedSquares };
         delete newSelectedSquares[key];
-        
+
         this.selectedSquares = newSelectedSquares;
         this.calculatePlayerStats();
 
-        this.firebaseService.updateGameData({
+        this.gameService.updateGame(this.gameId, {
           selectedSquares: newSelectedSquares
         });
       } else {
-        // Show alert if square is taken by another player
         this.takenByPlayer = this.selectedSquares[key];
         this.showAlert = true;
         this.alertMessage = `Square already taken by ${this.takenByPlayer}`;
@@ -251,17 +315,16 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       }
       return;
     }
-    
-    // If square is available, select it
+
     const newSelectedSquares = {
       ...this.selectedSquares,
       [key]: sanitizedPlayer
     };
-    
+
     this.selectedSquares = newSelectedSquares;
     this.calculatePlayerStats();
-    
-    this.firebaseService.updateGameData({
+
+    this.gameService.updateGame(this.gameId, {
       selectedSquares: newSelectedSquares
     });
   }
@@ -269,7 +332,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   onScoreChange(event: { quarter: string; scores: { home: number; away: number } }): void {
     const quarter = `q${event.quarter}` as keyof typeof this.scores;
     this.scores[quarter] = event.scores;
-    this.firebaseService.updateGameData({
+    this.gameService.updateGame(this.gameId, {
       scores: this.scores
     });
     this.calculateWinners();
@@ -277,17 +340,17 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
   private calculateWinners(): void {
     const newWinners: { [key: string]: string } = {};
-    
+
     const getWinner = (homeScore: number, awayScore: number): string | null => {
       const homeLastDigit = homeScore % 10;
       const awayLastDigit = awayScore % 10;
-      
+
       const winningSquare = Object.entries(this.selectedSquares).find(([key]) => {
         const [row, col] = key.split('-').map(Number);
-        return this.awayNumbers[row] === awayLastDigit && 
+        return this.awayNumbers[row] === awayLastDigit &&
                this.homeNumbers[col] === homeLastDigit;
       });
-      
+
       return winningSquare ? winningSquare[1] : null;
     };
 
@@ -299,7 +362,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     });
 
     this.winners = newWinners;
-    this.firebaseService.updateGameData({ winners: newWinners });
+    this.gameService.updateGame(this.gameId, { winners: newWinners });
   }
 
   getQuarterScores(quarter: number): { home: number; away: number } {
@@ -309,12 +372,12 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
   async randomizeNumbers(): Promise<void> {
     if (this.isRandomized) {
-      this.isRandomizing = false;  // Ensure it's false when clearing
+      this.isRandomizing = false;
       this.homeNumbers = Array(10).fill(null);
       this.awayNumbers = Array(10).fill(null);
       this.isRandomized = false;
-      
-      await this.firebaseService.updateGameData({
+
+      await this.gameService.updateGame(this.gameId, {
         homeNumbers: this.homeNumbers,
         awayNumbers: this.awayNumbers,
         isRandomized: this.isRandomized
@@ -323,20 +386,20 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     }
 
     this.isRandomizing = true;
-    
+
     const numbers = Array.from({length: 10}, (_, i) => i);
     const homeNumbers = [...numbers].sort(() => Math.random() - 0.5);
     const awayNumbers = [...numbers].sort(() => Math.random() - 0.5);
-    
+
     this.homeNumbers = homeNumbers;
     this.awayNumbers = awayNumbers;
-    
-    await new Promise(resolve => setTimeout(resolve, 1000));  // Match animation duration
-    
+
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
     this.isRandomized = true;
     this.isRandomizing = false;
 
-    await this.firebaseService.updateGameData({
+    await this.gameService.updateGame(this.gameId, {
       homeNumbers: this.homeNumbers,
       awayNumbers: this.awayNumbers,
       isRandomized: this.isRandomized
@@ -344,6 +407,14 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   }
 
   async toggleLock(): Promise<void> {
+    // Check if user is game owner
+    if (this.isGameOwner()) {
+      this.isLocked = !this.isLocked;
+      await this.gameService.updateGame(this.gameId, { isLocked: this.isLocked });
+      return;
+    }
+
+    // Fall back to password for legacy games
     try {
       const password = await new Promise<string>((resolve, reject) => {
         const submitSub = this.passwordDialog.passwordSubmit.subscribe(pwd => {
@@ -351,19 +422,19 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           cancelSub.unsubscribe();
           resolve(pwd);
         });
-        
+
         const cancelSub = this.passwordDialog.cancel.subscribe(() => {
           submitSub.unsubscribe();
           cancelSub.unsubscribe();
           reject();
         });
-        
+
         this.passwordDialog.open();
       });
 
       if (password === 'chattanooga' || password === 'password') {
         this.isLocked = !this.isLocked;
-        await this.firebaseService.updateGameData({ isLocked: this.isLocked });
+        await this.gameService.updateGame(this.gameId, { isLocked: this.isLocked });
       } else {
         alert('Incorrect password');
       }
@@ -378,7 +449,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     } else {
       this.awayTeam = event.name;
     }
-    this.firebaseService.updateGameData({
+    this.gameService.updateGame(this.gameId, {
       homeTeam: this.homeTeam,
       awayTeam: this.awayTeam
     });
@@ -386,10 +457,10 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
   onPriceChange(price: number): void {
     this.currentPrice = price;
-    this.firebaseService.updateGameData({
+    this.gameService.updateGame(this.gameId, {
       pricePerSquare: this.currentPrice
     });
-    this.calculatePlayerStats(); // Recalculate totals when price changes
+    this.calculatePlayerStats();
   }
 
   onPlayerSelected(player: string | null): void {
@@ -398,13 +469,20 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
   onVenmoUsernameChange(username: string) {
     this.venmoUsername = username;
-    this.firebaseService.updateGameData({
+    this.gameService.updateGame(this.gameId, {
       venmoUsername: username
     });
   }
 
   onManagePayments() {
-    // First verify password
+    // Check if user is game owner
+    if (this.isGameOwner()) {
+      this.paymentDialog.setData(this.playerStats, this.playerColors, this.paidPlayers);
+      this.paymentDialog.open();
+      return;
+    }
+
+    // Fall back to password for legacy games
     this.verifyPassword().then(isValid => {
       if (isValid) {
         this.paymentDialog.setData(this.playerStats, this.playerColors, this.paidPlayers);
@@ -421,13 +499,13 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           cancelSub.unsubscribe();
           resolve(pwd);
         });
-        
+
         const cancelSub = this.passwordDialog.cancel.subscribe(() => {
           submitSub.unsubscribe();
           cancelSub.unsubscribe();
           reject();
         });
-        
+
         this.passwordDialog.open();
       });
 
@@ -439,22 +517,22 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
   onPaidPlayersChange(paidPlayers: string[]) {
     this.paidPlayers = new Set(paidPlayers);
-    this.firebaseService.updateGameData({
+    this.gameService.updateGame(this.gameId, {
       paidPlayers: Array.from(this.paidPlayers)
     });
   }
 
   async onClearGame() {
-    // First verify password
-    const isValid = await this.verifyPassword();
-    if (!isValid) return;
+    // Check if user is game owner
+    if (!this.isGameOwner()) {
+      const isValid = await this.verifyPassword();
+      if (!isValid) return;
+    }
 
-    // Double check with confirmation
     if (!confirm('Are you sure you want to clear all game data? This cannot be undone.')) {
       return;
     }
 
-    // Reset all game data
     const defaultGameState: Partial<GameData> = {
       selectedSquares: {},
       homeNumbers: Array(10).fill(null),
@@ -476,10 +554,52 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       paidPlayers: []
     };
 
-    await this.firebaseService.updateGameData(defaultGameState);
+    await this.gameService.updateGame(this.gameId, defaultGameState);
   }
 
   togglePlayersList(): void {
     this.isPlayersListVisible = !this.isPlayersListVisible;
   }
-} 
+
+  // Share functionality
+  openShareModal(): void {
+    this.showShareModal.set(true);
+    this.copiedToClipboard.set(false);
+  }
+
+  closeShareModal(): void {
+    this.showShareModal.set(false);
+  }
+
+  getShareableLink(): string {
+    return this.gameService.getShareableLink(this.gameId);
+  }
+
+  async copyGameCode(): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(this.gameId);
+      this.copiedToClipboard.set(true);
+      setTimeout(() => this.copiedToClipboard.set(false), 2000);
+    } catch (error) {
+      console.error('Failed to copy:', error);
+    }
+  }
+
+  async copyShareLink(): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(this.getShareableLink());
+      this.copiedToClipboard.set(true);
+      setTimeout(() => this.copiedToClipboard.set(false), 2000);
+    } catch (error) {
+      console.error('Failed to copy:', error);
+    }
+  }
+
+  goBack(): void {
+    if (this.authService.isAuthenticated()) {
+      this.router.navigate(['/dashboard']);
+    } else {
+      this.router.navigate(['/']);
+    }
+  }
+}

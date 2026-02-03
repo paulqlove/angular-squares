@@ -1,0 +1,292 @@
+import { Injectable, signal, computed } from '@angular/core';
+import {
+  getAuth,
+  signInWithPopup,
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  User,
+  Auth,
+  updateProfile
+} from 'firebase/auth';
+import { initializeApp, getApps } from 'firebase/app';
+import { environment } from '../../../environments/environment';
+
+export interface AuthUser {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  photoURL: string | null;
+  isGuest: boolean;
+}
+
+export interface GuestUser {
+  name: string;
+  createdAt: number;
+}
+
+const GUEST_COOKIE_KEY = 'squares_guest_user';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AuthService {
+  private auth: Auth;
+  private _currentUser = signal<AuthUser | null>(null);
+  private _isLoading = signal<boolean>(true);
+  private _authError = signal<string | null>(null);
+
+  // Public signals
+  currentUser = this._currentUser.asReadonly();
+  isLoading = this._isLoading.asReadonly();
+  authError = this._authError.asReadonly();
+
+  // Computed values
+  isAuthenticated = computed(() => this._currentUser() !== null);
+  isGuest = computed(() => this._currentUser()?.isGuest ?? false);
+  canCreateGame = computed(() => {
+    const user = this._currentUser();
+    return user !== null && !user.isGuest;
+  });
+
+  constructor() {
+    // Initialize Firebase if not already initialized
+    if (getApps().length === 0) {
+      initializeApp(environment.firebase);
+    }
+    this.auth = getAuth();
+    this.initializeAuthState();
+  }
+
+  private initializeAuthState(): void {
+    // Check for guest user in cookie first
+    const guestUser = this.getGuestFromCookie();
+    if (guestUser) {
+      this._currentUser.set({
+        uid: `guest_${guestUser.createdAt}`,
+        email: null,
+        displayName: guestUser.name,
+        photoURL: null,
+        isGuest: true
+      });
+    }
+
+    // Listen for Firebase auth state changes
+    onAuthStateChanged(this.auth, (user) => {
+      this._isLoading.set(false);
+      if (user) {
+        // Firebase user takes precedence over guest
+        this._currentUser.set({
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          photoURL: user.photoURL,
+          isGuest: false
+        });
+        // Clear guest cookie if signed in with real account
+        this.clearGuestCookie();
+      } else if (!this.getGuestFromCookie()) {
+        // Only clear if no guest user either
+        this._currentUser.set(null);
+      } else {
+        this._isLoading.set(false);
+      }
+    });
+  }
+
+  // Google Sign In
+  async signInWithGoogle(): Promise<AuthUser> {
+    this._isLoading.set(true);
+    this._authError.set(null);
+
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(this.auth, provider);
+      const user = result.user;
+
+      const authUser: AuthUser = {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+        isGuest: false
+      };
+
+      this._currentUser.set(authUser);
+      this.clearGuestCookie();
+      return authUser;
+    } catch (error: any) {
+      this._authError.set(this.getErrorMessage(error.code));
+      throw error;
+    } finally {
+      this._isLoading.set(false);
+    }
+  }
+
+  // Email/Password Sign Up
+  async signUpWithEmail(email: string, password: string, displayName: string): Promise<AuthUser> {
+    this._isLoading.set(true);
+    this._authError.set(null);
+
+    try {
+      const result = await createUserWithEmailAndPassword(this.auth, email, password);
+
+      // Update display name
+      if (displayName) {
+        await updateProfile(result.user, { displayName });
+      }
+
+      const authUser: AuthUser = {
+        uid: result.user.uid,
+        email: result.user.email,
+        displayName: displayName || result.user.email,
+        photoURL: null,
+        isGuest: false
+      };
+
+      this._currentUser.set(authUser);
+      this.clearGuestCookie();
+      return authUser;
+    } catch (error: any) {
+      this._authError.set(this.getErrorMessage(error.code));
+      throw error;
+    } finally {
+      this._isLoading.set(false);
+    }
+  }
+
+  // Email/Password Sign In
+  async signInWithEmail(email: string, password: string): Promise<AuthUser> {
+    this._isLoading.set(true);
+    this._authError.set(null);
+
+    try {
+      const result = await signInWithEmailAndPassword(this.auth, email, password);
+      const user = result.user;
+
+      const authUser: AuthUser = {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName || user.email,
+        photoURL: user.photoURL,
+        isGuest: false
+      };
+
+      this._currentUser.set(authUser);
+      this.clearGuestCookie();
+      return authUser;
+    } catch (error: any) {
+      this._authError.set(this.getErrorMessage(error.code));
+      throw error;
+    } finally {
+      this._isLoading.set(false);
+    }
+  }
+
+  // Guest Sign In (cookie-based)
+  signInAsGuest(name: string): AuthUser {
+    const guestUser: GuestUser = {
+      name: name.trim(),
+      createdAt: Date.now()
+    };
+
+    // Store in cookie (expires in 30 days)
+    this.setGuestCookie(guestUser);
+
+    const authUser: AuthUser = {
+      uid: `guest_${guestUser.createdAt}`,
+      email: null,
+      displayName: guestUser.name,
+      photoURL: null,
+      isGuest: true
+    };
+
+    this._currentUser.set(authUser);
+    return authUser;
+  }
+
+  // Update guest name
+  updateGuestName(name: string): void {
+    const currentUser = this._currentUser();
+    if (currentUser?.isGuest) {
+      const guestUser: GuestUser = {
+        name: name.trim(),
+        createdAt: parseInt(currentUser.uid.replace('guest_', ''))
+      };
+      this.setGuestCookie(guestUser);
+      this._currentUser.set({
+        ...currentUser,
+        displayName: name.trim()
+      });
+    }
+  }
+
+  // Sign Out
+  async signOut(): Promise<void> {
+    this._isLoading.set(true);
+
+    try {
+      const currentUser = this._currentUser();
+
+      if (currentUser?.isGuest) {
+        this.clearGuestCookie();
+      } else {
+        await signOut(this.auth);
+      }
+
+      this._currentUser.set(null);
+    } finally {
+      this._isLoading.set(false);
+    }
+  }
+
+  // Cookie helpers
+  private setGuestCookie(guestUser: GuestUser): void {
+    const expires = new Date();
+    expires.setDate(expires.getDate() + 30); // 30 days
+    document.cookie = `${GUEST_COOKIE_KEY}=${encodeURIComponent(JSON.stringify(guestUser))}; expires=${expires.toUTCString()}; path=/; SameSite=Strict`;
+  }
+
+  private getGuestFromCookie(): GuestUser | null {
+    const cookies = document.cookie.split(';');
+    for (const cookie of cookies) {
+      const [name, value] = cookie.trim().split('=');
+      if (name === GUEST_COOKIE_KEY && value) {
+        try {
+          return JSON.parse(decodeURIComponent(value));
+        } catch {
+          return null;
+        }
+      }
+    }
+    return null;
+  }
+
+  private clearGuestCookie(): void {
+    document.cookie = `${GUEST_COOKIE_KEY}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+  }
+
+  // Error message helper
+  private getErrorMessage(errorCode: string): string {
+    switch (errorCode) {
+      case 'auth/user-not-found':
+        return 'No account found with this email address.';
+      case 'auth/wrong-password':
+        return 'Incorrect password. Please try again.';
+      case 'auth/email-already-in-use':
+        return 'An account with this email already exists.';
+      case 'auth/weak-password':
+        return 'Password should be at least 6 characters.';
+      case 'auth/invalid-email':
+        return 'Please enter a valid email address.';
+      case 'auth/popup-closed-by-user':
+        return 'Sign in was cancelled.';
+      case 'auth/network-request-failed':
+        return 'Network error. Please check your connection.';
+      default:
+        return 'An error occurred. Please try again.';
+    }
+  }
+}
