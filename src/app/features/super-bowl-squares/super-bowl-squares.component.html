@@ -9,10 +9,8 @@
       <p class="text-muted">Loading game...</p>
     </div>
   </div>
-}
-
+} @else if (gameNotFound()) {
 <!-- Game Not Found State -->
-@else if (gameNotFound()) {
   <div class="min-h-screen bg-page flex items-center justify-center p-4">
     <div class="text-center max-w-md">
       <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -32,10 +30,8 @@
       </button>
     </div>
   </div>
-}
-
+} @else {
 <!-- Main Game View -->
-@else {
   <app-header
     [isRandomized]="isRandomized"
     [isLocked]="isLocked"
@@ -91,42 +87,143 @@
         </div>
       </div>
 
-      <!-- Score Inputs -->
-      <div class="w-full mt-4">
-        <!-- Mobile view with horizontal scroll -->
-        <div class="sm:hidden relative">
-          <!-- Hint text -->
-          <div class="text-sm text-gray-500 mb-2 flex items-center justify-center gap-1">
-            <ng-icon name="heroChevronRight" class="text-2xl"></ng-icon>
-            Swipe to see more quarters
-          </div>
+      <!-- ESPN Live Scores (Owner Only) -->
+      @if (isGameOwner()) {
+        <div class="bg-white rounded-lg shadow-sm">
+          <button
+            (click)="toggleEspnSection()"
+            class="w-full flex items-center justify-between px-3 py-2 text-left"
+          >
+            <div class="flex items-center gap-2">
+              <span class="text-sm font-semibold text-heading">ESPN Live Scores</span>
+              @if (linkedEspnGame()) {
+                <span class="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full">Linked</span>
+              }
+            </div>
+            <ng-icon
+              name="heroChevronDown"
+              [class.rotate-180]="showEspnSection()"
+              class="text-xl text-muted transform transition-transform duration-200">
+            </ng-icon>
+          </button>
 
-          <div class="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory">
-            <app-score-input *ngFor="let quarter of [1, 2, 3, 4]"
-                class="flex-none w-[85vw] snap-center"
-                [quarter]="quarter.toString()"
-                [scores]="getQuarterScores(quarter)"
-                [homeTeam]="homeTeam"
-                [awayTeam]="awayTeam"
-                (scoreChange)="onScoreChange($event)">
-            </app-score-input>
-          </div>
+          @if (showEspnSection()) {
+            <div class="px-3 pb-3 border-t border-gray-100 pt-3">
+              @if (espnSyncError()) {
+                <div class="bg-red-50 border border-red-200 text-red-700 px-2 py-1.5 rounded text-xs mb-2">
+                  {{ espnSyncError() }}
+                </div>
+              }
 
-          <!-- Gradient fade -->
-          <div class="absolute right-0 top-8 bottom-4 w-12 bg-gradient-to-l from-primary-50 pointer-events-none"></div>
+              @if (linkedEspnGame(); as game) {
+                <!-- Scoreboard Display -->
+                <div class="bg-gray-900 rounded-lg p-3 mb-3 text-white">
+                  <!-- Status bar -->
+                  <div class="flex items-center justify-between text-xs mb-2">
+                    <span class="text-gray-400">ESPN</span>
+                    <span class="px-1.5 py-0.5 rounded text-xs"
+                      [class.bg-yellow-500]="game.status === 'in'"
+                      [class.animate-pulse]="game.status === 'in'"
+                      [class.bg-green-600]="game.status === 'post'"
+                      [class.bg-gray-600]="game.status === 'pre'"
+                    >
+                      @if (game.status === 'pre') { Upcoming }
+                      @else if (game.status === 'in') { Q{{ game.period }} {{ game.clock }} }
+                      @else { Final }
+                    </span>
+                  </div>
+                  <!-- Scoreboard table -->
+                  <table class="w-full text-xs">
+                    <thead>
+                      <tr class="text-gray-400 border-b border-gray-700">
+                        <th class="text-left py-1 w-16"></th>
+                        <th class="text-center py-1 w-8">1</th>
+                        <th class="text-center py-1 w-8">2</th>
+                        <th class="text-center py-1 w-8">3</th>
+                        <th class="text-center py-1 w-8">4</th>
+                        <th class="text-center py-1 w-10 font-bold">T</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr class="border-b border-gray-800">
+                        <td class="py-1 font-semibold">{{ game.awayTeam }}</td>
+                        <td class="text-center py-1 text-gray-300">{{ getQuarterScore(game, 0, 'away') }}</td>
+                        <td class="text-center py-1 text-gray-300">{{ getQuarterScore(game, 1, 'away') }}</td>
+                        <td class="text-center py-1 text-gray-300">{{ getQuarterScore(game, 2, 'away') }}</td>
+                        <td class="text-center py-1 text-gray-300">{{ getQuarterScore(game, 3, 'away') }}</td>
+                        <td class="text-center py-1 font-bold text-white">{{ game.awayScore }}</td>
+                      </tr>
+                      <tr>
+                        <td class="py-1 font-semibold">{{ game.homeTeam }}</td>
+                        <td class="text-center py-1 text-gray-300">{{ getQuarterScore(game, 0, 'home') }}</td>
+                        <td class="text-center py-1 text-gray-300">{{ getQuarterScore(game, 1, 'home') }}</td>
+                        <td class="text-center py-1 text-gray-300">{{ getQuarterScore(game, 2, 'home') }}</td>
+                        <td class="text-center py-1 text-gray-300">{{ getQuarterScore(game, 3, 'home') }}</td>
+                        <td class="text-center py-1 font-bold text-white">{{ game.homeScore }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <!-- Actions -->
+                <div class="flex gap-2">
+                  <button
+                    (click)="syncFromEspn()"
+                    [disabled]="isSyncingEspn()"
+                    class="flex-1 px-3 py-1.5 text-sm bg-secondary-500 hover:bg-secondary-600 disabled:bg-secondary-300 text-white rounded transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    @if (isSyncingEspn()) {
+                      <svg class="animate-spin h-3 w-3" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                      </svg>
+                      Syncing...
+                    } @else {
+                      Sync Scores
+                    }
+                  </button>
+                  <button
+                    (click)="unlinkEspnGame()"
+                    class="px-3 py-1.5 text-sm bg-gray-200 hover:bg-gray-300 text-gray-700 rounded transition-colors"
+                  >
+                    Unlink
+                  </button>
+                </div>
+              } @else {
+                <!-- Game Selection -->
+                <div class="space-y-2">
+                  <div class="flex items-center gap-1.5">
+                    <select
+                      #espnSelect
+                      class="flex-1 bg-input text-default text-sm border rounded px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-secondary-500"
+                    >
+                      <option value="">Select ESPN game...</option>
+                      @for (game of espnGames(); track game.id) {
+                        <option [value]="game.id">{{ getEspnGameDisplay(game) }}</option>
+                      }
+                    </select>
+                    <button
+                      (click)="fetchEspnGames()"
+                      class="p-1.5 text-muted hover:text-heading hover:bg-gray-100 rounded transition-colors"
+                      title="Refresh"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                    </button>
+                    <button
+                      (click)="linkEspnGame(espnSelect.value)"
+                      [disabled]="!espnSelect.value"
+                      class="px-3 py-1.5 text-sm bg-secondary-500 hover:bg-secondary-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded transition-colors"
+                    >
+                      Link
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
         </div>
-
-        <!-- Desktop grid view -->
-        <div class="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <app-score-input *ngFor="let quarter of [1, 2, 3, 4]"
-              [quarter]="quarter.toString()"
-              [scores]="getQuarterScores(quarter)"
-              [homeTeam]="homeTeam"
-              [awayTeam]="awayTeam"
-              (scoreChange)="onScoreChange($event)">
-          </app-score-input>
-        </div>
-      </div>
+      }
 
       <!-- Grid container for board and players -->
       <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">

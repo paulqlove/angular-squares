@@ -39,6 +39,7 @@ export interface GameData {
   playerColors?: { [key: string]: string };
   venmoUsername?: string;
   paidPlayers?: string[];
+  espnEventId?: string;
 }
 
 export interface GameListItem {
@@ -186,7 +187,8 @@ export class GameService {
           homeTeam: rawData.homeTeam || '',
           awayTeam: rawData.awayTeam || '',
           venmoUsername: rawData.venmoUsername || '',
-          paidPlayers: rawData.paidPlayers || []
+          paidPlayers: rawData.paidPlayers || [],
+          espnEventId: rawData.espnEventId || undefined
         };
 
         // Convert squares from Firebase format
@@ -254,6 +256,9 @@ export class GameService {
     if (data.paidPlayers !== undefined) {
       updateData.paidPlayers = data.paidPlayers;
     }
+    if (data.espnEventId !== undefined) {
+      updateData.espnEventId = data.espnEventId;
+    }
 
     await update(gameRef, updateData);
   }
@@ -289,7 +294,8 @@ export class GameService {
         homeTeam: rawData.homeTeam || '',
         awayTeam: rawData.awayTeam || '',
         venmoUsername: rawData.venmoUsername || '',
-        paidPlayers: rawData.paidPlayers || []
+        paidPlayers: rawData.paidPlayers || [],
+        espnEventId: rawData.espnEventId || undefined
       };
     }
 

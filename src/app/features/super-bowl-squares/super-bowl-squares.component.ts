@@ -4,10 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GameService, GameData } from '../../core/services/game.service';
 import { AuthService } from '../../core/services/auth.service';
+import { EspnService, EspnGame } from '../../core/services/espn.service';
 import { Subscription } from 'rxjs';
 import { GameBoardComponent } from './components/game-board/game-board.component';
 import { PlayersListComponent } from './components/players-list/players-list.component';
-import { ScoreInputComponent } from './components/score-input/score-input.component';
 import { WinnersAndPayoutsComponent } from './components/winners-and-payouts/winners-and-payouts.component';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
@@ -35,7 +35,6 @@ import { ProbabilityHeatmapComponent } from './components/probability-heatmap/pr
     NgIconComponent,
     GameBoardComponent,
     PlayersListComponent,
-    ScoreInputComponent,
     WinnersAndPayoutsComponent,
     GameStatusComponent,
     PasswordDialogComponent,
@@ -145,6 +144,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   // Injected services
   private gameService = inject(GameService);
   private authService = inject(AuthService);
+  private espnService = inject(EspnService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
@@ -157,6 +157,14 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   // Auth state
   currentUser = this.authService.currentUser;
   isGameOwner = signal(false);
+
+  // ESPN sync state
+  espnGames = signal<EspnGame[]>([]);
+  linkedEspnGame = signal<EspnGame | null>(null);
+  espnEventId: string | undefined;
+  isSyncingEspn = signal(false);
+  espnSyncError = signal<string | null>(null);
+  showEspnSection = signal(false);
 
   ngOnInit(): void {
     // Set current player from auth if available
@@ -215,6 +223,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           this.venmoUsername = data.venmoUsername || '';
           this.paidPlayers = new Set(data.paidPlayers || []);
           this.playerColors = data.playerColors || {};
+          this.espnEventId = data.espnEventId;
 
           // Check if current user is the game owner
           const user = this.authService.currentUser();
@@ -607,5 +616,104 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     } else {
       this.router.navigate(['/']);
     }
+  }
+
+  // ESPN Sync Methods
+  toggleEspnSection(): void {
+    this.showEspnSection.set(!this.showEspnSection());
+    if (this.showEspnSection() && this.espnGames().length === 0) {
+      this.fetchEspnGames();
+    }
+  }
+
+  async fetchEspnGames(): Promise<void> {
+    this.espnSyncError.set(null);
+    const games = await this.espnService.getGames();
+    this.espnGames.set(games);
+
+    // If we have a linked game, update its data
+    if (this.espnEventId) {
+      const linked = games.find(g => g.id === this.espnEventId);
+      this.linkedEspnGame.set(linked || null);
+    }
+  }
+
+  async linkEspnGame(eventId: string): Promise<void> {
+    this.espnEventId = eventId;
+    await this.gameService.updateGame(this.gameId, { espnEventId: eventId });
+
+    const game = this.espnGames().find(g => g.id === eventId);
+    this.linkedEspnGame.set(game || null);
+
+    // Auto-populate team names if empty
+    if (game && !this.homeTeam && !this.awayTeam) {
+      this.homeTeam = game.homeTeam;
+      this.awayTeam = game.awayTeam;
+      await this.gameService.updateGame(this.gameId, {
+        homeTeam: game.homeTeam,
+        awayTeam: game.awayTeam
+      });
+    }
+  }
+
+  async unlinkEspnGame(): Promise<void> {
+    this.espnEventId = undefined;
+    this.linkedEspnGame.set(null);
+    await this.gameService.updateGame(this.gameId, { espnEventId: '' });
+  }
+
+  async syncFromEspn(): Promise<void> {
+    if (!this.espnEventId) return;
+
+    this.isSyncingEspn.set(true);
+    this.espnSyncError.set(null);
+
+    try {
+      const game = await this.espnService.getGame(this.espnEventId);
+      if (!game) {
+        this.espnSyncError.set('Could not fetch game data from ESPN');
+        return;
+      }
+
+      this.linkedEspnGame.set(game);
+
+      // Map ESPN quarters to our scores format
+      // Pro Bowl uses 3 periods, regular games use 4 quarters
+      const newScores = {
+        q1: { home: game.quarters[0]?.home || 0, away: game.quarters[0]?.away || 0 },
+        q2: { home: game.quarters[1]?.home || 0, away: game.quarters[1]?.away || 0 },
+        q3: { home: game.quarters[2]?.home || 0, away: game.quarters[2]?.away || 0 },
+        q4: { home: game.quarters[3]?.home || 0, away: game.quarters[3]?.away || 0 }
+      };
+
+      // For Pro Bowl (3 periods), use final score for Q4
+      if (game.quarters.length === 3 && game.status === 'post') {
+        newScores.q4 = { home: game.homeScore, away: game.awayScore };
+      }
+
+      this.scores = newScores;
+      await this.gameService.updateGame(this.gameId, { scores: newScores });
+      this.calculateWinners();
+    } catch (error) {
+      this.espnSyncError.set('Failed to sync scores from ESPN');
+    } finally {
+      this.isSyncingEspn.set(false);
+    }
+  }
+
+  getEspnGameDisplay(game: EspnGame): string {
+    let status = '';
+    if (game.status === 'pre') {
+      status = 'Upcoming';
+    } else if (game.status === 'in') {
+      status = `Q${game.period} ${game.clock}`;
+    } else {
+      status = 'Final';
+    }
+    return `${game.awayTeam} @ ${game.homeTeam} - ${status} (${game.awayScore}-${game.homeScore})`;
+  }
+
+  getQuarterScore(game: EspnGame, quarter: number, team: 'home' | 'away'): number {
+    return game.quarters[quarter]?.[team] ?? 0;
   }
 }
