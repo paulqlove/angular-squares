@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { GameService, GameListItem } from '../../core/services/game.service';
 import { EspnService, EspnGame, SportType, SPORT_CONFIG } from '../../core/services/espn.service';
+import { ThemeService, ThemeMode } from '../../core/services/theme.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
   heroPlus,
@@ -23,7 +24,10 @@ import {
   heroArrowRight,
   heroTicket,
   heroPlay,
-  heroCog6Tooth
+  heroCog6Tooth,
+  heroSun,
+  heroMoon,
+  heroComputerDesktop
 } from '@ng-icons/heroicons/outline';
 
 @Component({
@@ -48,26 +52,54 @@ import {
       heroArrowRight,
       heroTicket,
       heroPlay,
-      heroCog6Tooth
+      heroCog6Tooth,
+      heroSun,
+      heroMoon,
+      heroComputerDesktop
     })
   ],
   template: `
-    <div class="min-h-screen bg-primary-100">
+    <div class="min-h-screen bg-page">
       <!-- Dark Header -->
-      <header class="bg-primary-800 shadow-lg">
+      <header class="bg-header shadow-lg">
         <div class="container mx-auto px-4 py-4 flex justify-between items-center">
           <div class="flex items-center gap-3">
             <img src="assets/logo.png" alt="Logo" class="h-10 w-auto drop-shadow-lg">
             <div>
-              <h1 class="text-xl font-bold text-white tracking-tight">Football Squares</h1>
-              <p class="text-xs text-primary-300">Super Bowl Squares Pool</p>
+              <h1 class="text-xl font-bold text-header tracking-tight">Football Squares</h1>
+              <p class="text-xs text-header-muted">Super Bowl Squares Pool</p>
             </div>
           </div>
 
           <div class="flex items-center gap-3">
+            <!-- Theme Toggle -->
+            <div class="flex items-center bg-header-accent rounded-full p-1">
+              <button
+                (click)="setTheme('system')"
+                [class]="themeService.theme() === 'system' ? 'p-1.5 rounded-full bg-secondary-500 text-white' : 'p-1.5 rounded-full text-header-muted hover:text-header'"
+                title="System theme"
+              >
+                <ng-icon name="heroComputerDesktop" class="text-base"></ng-icon>
+              </button>
+              <button
+                (click)="setTheme('light')"
+                [class]="themeService.theme() === 'light' ? 'p-1.5 rounded-full bg-secondary-500 text-white' : 'p-1.5 rounded-full text-header-muted hover:text-header'"
+                title="Light theme"
+              >
+                <ng-icon name="heroSun" class="text-base"></ng-icon>
+              </button>
+              <button
+                (click)="setTheme('dark')"
+                [class]="themeService.theme() === 'dark' ? 'p-1.5 rounded-full bg-secondary-500 text-white' : 'p-1.5 rounded-full text-header-muted hover:text-header'"
+                title="Dark theme"
+              >
+                <ng-icon name="heroMoon" class="text-base"></ng-icon>
+              </button>
+            </div>
+
             <button
               (click)="openProfileModal()"
-              class="flex items-center gap-2 bg-primary-700/50 hover:bg-primary-700 rounded-full px-3 py-1.5 transition-colors cursor-pointer"
+              class="flex items-center gap-2 bg-header-accent hover:bg-primary-700 rounded-full px-3 py-1.5 transition-colors cursor-pointer"
               title="Edit profile"
             >
               @if (currentUser()?.photoURL) {
@@ -83,7 +115,7 @@ import {
                   </span>
                 </div>
               }
-              <span class="text-sm font-medium text-white hidden sm:inline">
+              <span class="text-sm font-medium text-header hidden sm:inline">
                 {{ currentUser()?.displayName || currentUser()?.email }}
               </span>
               @if (currentUser()?.isGuest) {
@@ -93,7 +125,7 @@ import {
 
             <button
               (click)="signOut()"
-              class="p-2 text-primary-300 hover:text-white hover:bg-primary-700 rounded-full transition-colors"
+              class="p-2 text-header-muted hover:text-header hover:bg-primary-700 rounded-full transition-colors"
               title="Sign out"
             >
               <ng-icon name="heroArrowRightOnRectangle" class="text-xl"></ng-icon>
@@ -104,10 +136,10 @@ import {
 
       <main class="container mx-auto px-4 py-8">
         <!-- Hero Section -->
-        <div class="bg-gradient-to-br from-primary-700 to-primary-800 rounded-2xl shadow-xl p-8 mb-8">
+        <div class="bg-card border border-card rounded-2xl shadow-xl p-8 mb-8 dark:bg-gradient-to-br dark:from-header-accent dark:to-header dark:border-0">
           <div class="flex items-center gap-3 mb-6">
             <span class="text-3xl">🏈</span>
-            <h2 class="text-2xl font-bold text-white tracking-tight">Start or Join a Game</h2>
+            <h2 class="text-2xl font-bold text-heading dark:text-white tracking-tight">Start or Join a Game</h2>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -115,31 +147,31 @@ import {
             @if (canCreateGame()) {
               <button
                 (click)="openCreateModal()"
-                class="group bg-white/10 hover:bg-white/20 backdrop-blur border border-white/20 rounded-xl p-6 text-left transition-all hover:scale-[1.02] hover:shadow-lg"
+                class="group bg-control hover:bg-control-hover dark:bg-white/10 dark:hover:bg-white/20 backdrop-blur border border-default dark:border-white/20 rounded-xl p-6 text-left transition-all hover:scale-[1.02] hover:shadow-lg"
               >
                 <div class="flex items-center gap-4 mb-3">
                   <div class="w-12 h-12 rounded-xl bg-secondary-500 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <ng-icon name="heroPlus" class="text-2xl text-white"></ng-icon>
                   </div>
                   <div>
-                    <h3 class="text-lg font-bold text-white">New Game</h3>
-                    <p class="text-sm text-primary-200">Create a squares pool</p>
+                    <h3 class="text-lg font-bold text-heading dark:text-white">New Game</h3>
+                    <p class="text-sm text-muted dark:text-primary-200">Create a squares pool</p>
                   </div>
                 </div>
-                <p class="text-sm text-primary-300">Set up your own game with custom settings and share it with friends.</p>
+                <p class="text-sm text-muted dark:text-primary-300">Set up your own game with custom settings and share it with friends.</p>
               </button>
             } @else {
-              <div class="bg-amber-500/20 backdrop-blur border border-amber-400/30 rounded-xl p-6">
+              <div class="bg-amber-100 dark:bg-amber-500/20 backdrop-blur border border-amber-300 dark:border-amber-400/30 rounded-xl p-6">
                 <div class="flex items-center gap-4 mb-3">
                   <div class="w-12 h-12 rounded-xl bg-amber-500 flex items-center justify-center">
                     <ng-icon name="heroUserGroup" class="text-2xl text-white"></ng-icon>
                   </div>
                   <div>
-                    <h3 class="text-lg font-bold text-white">Guest Mode</h3>
-                    <p class="text-sm text-amber-200">Sign in to create games</p>
+                    <h3 class="text-lg font-bold text-amber-900 dark:text-white">Guest Mode</h3>
+                    <p class="text-sm text-amber-700 dark:text-amber-200">Sign in to create games</p>
                   </div>
                 </div>
-                <p class="text-sm text-amber-100 mb-4">Create an account to host your own squares pools.</p>
+                <p class="text-sm text-amber-700 dark:text-amber-100 mb-4">Create an account to host your own squares pools.</p>
                 <button
                   (click)="signOut()"
                   class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-lg text-sm font-medium transition-colors"
@@ -150,14 +182,14 @@ import {
             }
 
             <!-- Join Game Card -->
-            <div class="bg-white/10 backdrop-blur border border-white/20 rounded-xl p-6">
+            <div class="bg-control dark:bg-white/10 backdrop-blur border border-default dark:border-white/20 rounded-xl p-6">
               <div class="flex items-center gap-4 mb-3">
                 <div class="w-12 h-12 rounded-xl bg-accent-500 flex items-center justify-center">
                   <ng-icon name="heroTicket" class="text-2xl text-white"></ng-icon>
                 </div>
                 <div>
-                  <h3 class="text-lg font-bold text-white">Join with Code</h3>
-                  <p class="text-sm text-primary-200">Have a 6-digit code?</p>
+                  <h3 class="text-lg font-bold text-heading dark:text-white">Join with Code</h3>
+                  <p class="text-sm text-muted dark:text-primary-200">Have a 6-digit code?</p>
                 </div>
               </div>
               <div class="flex gap-2">
@@ -165,14 +197,14 @@ import {
                   type="text"
                   [(ngModel)]="joinGameCode"
                   placeholder="XXXXXX"
-                  class="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-primary-400 uppercase tracking-widest font-mono text-center focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
+                  class="flex-1 px-4 py-3 bg-input dark:bg-white/10 border border-input dark:border-white/20 rounded-lg text-default dark:text-white placeholder-muted dark:placeholder-primary-400 uppercase tracking-widest font-mono text-center focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
                   maxlength="6"
                   (keyup.enter)="joinGame()"
                 />
                 <button
                   (click)="joinGame()"
                   [disabled]="joinGameCode.length !== 6"
-                  class="px-4 py-3 bg-accent-500 hover:bg-accent-400 disabled:bg-primary-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+                  class="px-4 py-3 bg-accent-500 hover:bg-accent-400 disabled:bg-control disabled:cursor-not-allowed text-white rounded-lg transition-colors"
                 >
                   <ng-icon name="heroArrowRight" class="text-xl"></ng-icon>
                 </button>
@@ -184,7 +216,7 @@ import {
         <!-- My Games Section -->
         @if (canCreateGame()) {
           <div class="mb-4">
-            <h2 class="text-xl font-bold text-primary-800 tracking-tight">My Games</h2>
+            <h2 class="text-xl font-bold text-heading tracking-tight">My Games</h2>
           </div>
 
           @if (isLoadingGames()) {
@@ -195,12 +227,12 @@ import {
               </svg>
             </div>
           } @else if (myGames().length === 0) {
-            <div class="bg-white rounded-2xl shadow-sm p-12 text-center">
-              <div class="w-20 h-20 rounded-full bg-primary-100 flex items-center justify-center mx-auto mb-4">
-                <ng-icon name="heroSquares2x2" class="text-4xl text-primary-400"></ng-icon>
+            <div class="bg-card rounded-2xl shadow-sm p-12 text-center">
+              <div class="w-20 h-20 rounded-full bg-control flex items-center justify-center mx-auto mb-4">
+                <ng-icon name="heroSquares2x2" class="text-4xl text-muted"></ng-icon>
               </div>
-              <h3 class="text-lg font-semibold text-primary-800 mb-2">No games yet</h3>
-              <p class="text-primary-500 mb-6">Create your first squares pool to get started!</p>
+              <h3 class="text-lg font-semibold text-heading mb-2">No games yet</h3>
+              <p class="text-muted mb-6">Create your first squares pool to get started!</p>
               <button
                 (click)="openCreateModal()"
                 class="inline-flex items-center gap-2 px-6 py-3 bg-secondary-500 hover:bg-secondary-600 text-white rounded-xl font-medium transition-colors"
@@ -212,11 +244,11 @@ import {
           } @else {
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               @for (game of myGames(); track game.id) {
-                <div class="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all overflow-hidden group">
+                <div class="bg-card rounded-2xl shadow-sm hover:shadow-md transition-all overflow-hidden group border border-card">
                   <!-- Game Header -->
-                  <div class="bg-gradient-to-r from-primary-700 to-primary-800 p-4">
+                  <div class="bg-control dark:bg-gradient-to-r dark:from-header-accent dark:to-header p-4">
                     <div class="flex items-center justify-between mb-2">
-                      <h3 class="font-bold text-white truncate">{{ game.name }}</h3>
+                      <h3 class="font-bold text-heading dark:text-white truncate">{{ game.name }}</h3>
                       @if (game.isLocked) {
                         <span class="flex items-center gap-1 text-xs bg-amber-500 text-white px-2 py-1 rounded-full">
                           <ng-icon name="heroLockClosed" class="text-xs"></ng-icon>
@@ -229,7 +261,7 @@ import {
                         </span>
                       }
                     </div>
-                    <p class="text-sm text-primary-200">
+                    <p class="text-sm text-muted dark:text-primary-300">
                       @if (game.homeTeam && game.awayTeam) {
                         {{ game.awayTeam }} vs {{ game.homeTeam }}
                       } @else {
@@ -243,10 +275,10 @@ import {
                     <!-- Progress Bar -->
                     <div class="mb-4">
                       <div class="flex justify-between text-sm mb-1">
-                        <span class="text-primary-600">Squares Filled</span>
-                        <span class="font-semibold text-primary-800">{{ game.squaresFilled }}/100</span>
+                        <span class="text-muted">Squares Filled</span>
+                        <span class="font-semibold text-default">{{ game.squaresFilled }}/100</span>
                       </div>
-                      <div class="h-2 bg-primary-100 rounded-full overflow-hidden">
+                      <div class="h-2 bg-control rounded-full overflow-hidden">
                         <div
                           class="h-full bg-gradient-to-r from-secondary-400 to-secondary-500 rounded-full transition-all duration-500"
                           [style.width.%]="game.squaresFilled"
@@ -255,13 +287,13 @@ import {
                     </div>
 
                     <!-- Stats Row -->
-                    <div class="flex items-center gap-4 text-sm text-primary-500 mb-4">
+                    <div class="flex items-center gap-4 text-sm text-muted mb-4">
                       <span class="flex items-center gap-1">
                         <ng-icon name="heroUserGroup" class="text-base"></ng-icon>
                         {{ game.playerCount }} players
                       </span>
-                      <span class="text-primary-300">|</span>
-                      <span class="font-mono text-xs bg-primary-100 px-2 py-0.5 rounded">{{ game.id }}</span>
+                      <span class="text-muted">|</span>
+                      <span class="font-mono text-xs bg-control px-2 py-0.5 rounded">{{ game.id }}</span>
                     </div>
 
                     <!-- Actions -->
@@ -274,21 +306,21 @@ import {
                       </button>
                       <button
                         (click)="shareGame(game.id)"
-                        class="p-2.5 text-primary-400 hover:text-secondary-600 hover:bg-secondary-50 rounded-xl transition-colors"
+                        class="p-2.5 text-muted hover:text-secondary-600 hover:bg-secondary-100 rounded-xl transition-colors"
                         title="Share game"
                       >
                         <ng-icon name="heroShare" class="text-lg"></ng-icon>
                       </button>
                       <button
                         (click)="openEditModal(game)"
-                        class="p-2.5 text-primary-400 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-colors"
+                        class="p-2.5 text-muted hover:text-default hover:bg-control rounded-xl transition-colors"
                         title="Edit game"
                       >
                         <ng-icon name="heroCog6Tooth" class="text-lg"></ng-icon>
                       </button>
                       <button
                         (click)="deleteGame(game.id)"
-                        class="p-2.5 text-primary-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+                        class="p-2.5 text-muted hover:text-red-600 hover:bg-red-100 rounded-xl transition-colors"
                         title="Delete game"
                       >
                         <ng-icon name="heroTrash" class="text-lg"></ng-icon>
@@ -297,8 +329,8 @@ import {
                   </div>
 
                   <!-- Footer -->
-                  <div class="px-4 py-3 bg-primary-50 border-t border-primary-100">
-                    <span class="text-xs text-primary-400">Created {{ formatDate(game.createdAt) }}</span>
+                  <div class="px-4 py-3 bg-input border-t border-default">
+                    <span class="text-xs text-muted">Created {{ formatDate(game.createdAt) }}</span>
                   </div>
                 </div>
               }
@@ -314,18 +346,18 @@ import {
           (click)="showCreateModal.set(false)"
         >
           <div
-            class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-modal-in"
+            class="bg-dialog rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-modal-in"
             (click)="$event.stopPropagation()"
           >
             <!-- Modal Header -->
-            <div class="flex items-center justify-between p-6 border-b border-primary-100">
+            <div class="flex items-center justify-between p-6 border-b border-default">
               <div>
-                <h3 class="text-xl font-bold text-primary-800">Create New Game</h3>
-                <p class="text-sm text-primary-500">Set up your squares pool</p>
+                <h3 class="text-xl font-bold text-heading">Create New Game</h3>
+                <p class="text-sm text-muted">Set up your squares pool</p>
               </div>
               <button
                 (click)="showCreateModal.set(false)"
-                class="p-2 text-primary-400 hover:text-primary-600 hover:bg-primary-100 rounded-lg transition-colors"
+                class="p-2 text-muted hover:text-default hover:bg-control rounded-lg transition-colors"
               >
                 <ng-icon name="heroXMark" class="text-2xl"></ng-icon>
               </button>
@@ -335,14 +367,14 @@ import {
             <div class="p-6 space-y-6">
               <!-- Sport Tabs -->
               <div>
-                <label class="block text-sm font-semibold text-primary-700 mb-3">Sport</label>
+                <label class="block text-sm font-semibold text-label mb-3">Sport</label>
                 <div class="flex gap-2">
                   @for (sport of sportOptions; track sport.value) {
                     <button
                       (click)="selectSport(sport.value)"
                       [class]="selectedSport === sport.value
-                        ? 'px-6 py-2.5 bg-primary-800 text-white rounded-lg font-medium transition-colors'
-                        : 'px-6 py-2.5 bg-primary-100 text-primary-600 hover:bg-primary-200 rounded-lg font-medium transition-colors'"
+                        ? 'px-6 py-2.5 bg-header text-header rounded-lg font-medium transition-colors'
+                        : 'px-6 py-2.5 bg-control text-default hover:bg-control-hover rounded-lg font-medium transition-colors'"
                     >
                       {{ sport.label }}
                     </button>
@@ -352,7 +384,7 @@ import {
 
               <!-- Game Selection -->
               <div>
-                <label class="block text-sm font-semibold text-primary-700 mb-3">Select Game</label>
+                <label class="block text-sm font-semibold text-label mb-3">Select Game</label>
                 @if (isLoadingEspnGames()) {
                   <div class="flex items-center justify-center py-8">
                     <svg class="animate-spin h-6 w-6 text-secondary-500" viewBox="0 0 24 24">
@@ -366,16 +398,20 @@ import {
                     <button
                       (click)="selectEspnGame('')"
                       [class]="selectedEspnGameId === ''
-                        ? 'p-4 border-2 border-secondary-500 bg-secondary-50 rounded-xl text-left transition-all'
-                        : 'p-4 border-2 border-primary-200 hover:border-primary-300 rounded-xl text-left transition-all'"
+                        ? 'p-4 border-2 border-secondary-500 bg-secondary-100 rounded-xl text-left transition-all'
+                        : 'p-4 border-2 border-default hover:border-hover rounded-xl text-left transition-all'"
                     >
                       <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-lg bg-primary-200 flex items-center justify-center">
-                          <ng-icon name="heroPencilSquare" class="text-lg text-primary-600"></ng-icon>
+                        <div class="w-10 h-10 rounded-lg bg-control flex items-center justify-center"
+                          [class.bg-secondary-200]="selectedEspnGameId === ''">
+                          <ng-icon name="heroPencilSquare" class="text-lg text-muted"
+                            [class.text-secondary-700]="selectedEspnGameId === ''"></ng-icon>
                         </div>
                         <div>
-                          <p class="font-semibold text-primary-800">Manual Scores</p>
-                          <p class="text-xs text-primary-500">Enter scores yourself</p>
+                          <p class="font-semibold"
+                            [class]="selectedEspnGameId === '' ? 'text-secondary-900' : 'text-heading'">Manual Scores</p>
+                          <p class="text-xs"
+                            [class]="selectedEspnGameId === '' ? 'text-secondary-700' : 'text-muted'">Enter scores yourself</p>
                         </div>
                       </div>
                     </button>
@@ -385,8 +421,8 @@ import {
                       <button
                         (click)="selectEspnGame(game.id)"
                         [class]="selectedEspnGameId === game.id
-                          ? 'p-4 border-2 border-secondary-500 bg-secondary-50 rounded-xl text-left transition-all'
-                          : 'p-4 border-2 border-primary-200 hover:border-primary-300 rounded-xl text-left transition-all'"
+                          ? 'p-4 border-2 border-secondary-500 bg-secondary-100 rounded-xl text-left transition-all'
+                          : 'p-4 border-2 border-default hover:border-hover rounded-xl text-left transition-all'"
                       >
                         <div class="flex items-center justify-between mb-2">
                           <span class="text-xs font-medium px-2 py-0.5 rounded-full"
@@ -394,9 +430,11 @@ import {
                             {{ getGameStatusText(game) }}
                           </span>
                         </div>
-                        <p class="font-semibold text-primary-800 text-sm">{{ game.awayTeam }} &#64; {{ game.homeTeam }}</p>
+                        <p class="font-semibold text-sm"
+                          [class]="selectedEspnGameId === game.id ? 'text-secondary-900' : 'text-heading'">{{ game.awayTeam }} &#64; {{ game.homeTeam }}</p>
                         @if (game.status !== 'pre') {
-                          <p class="text-xs text-primary-500 mt-1">{{ game.awayScore }} - {{ game.homeScore }}</p>
+                          <p class="text-xs mt-1"
+                            [class]="selectedEspnGameId === game.id ? 'text-secondary-700' : 'text-muted'">{{ game.awayScore }} - {{ game.homeScore }}</p>
                         }
                       </button>
                     }
@@ -406,27 +444,27 @@ import {
 
               <!-- Price Selection -->
               <div>
-                <label class="block text-sm font-semibold text-primary-700 mb-3">Price per Square</label>
+                <label class="block text-sm font-semibold text-label mb-3">Price per Square</label>
                 <div class="flex flex-wrap gap-2">
                   @for (price of pricePresets; track price) {
                     <button
                       (click)="selectPrice(price)"
                       [class]="newGamePrice === price
                         ? 'px-5 py-2.5 bg-secondary-500 text-white rounded-lg font-medium transition-colors'
-                        : 'px-5 py-2.5 bg-primary-100 text-primary-700 hover:bg-primary-200 rounded-lg font-medium transition-colors'"
+                        : 'px-5 py-2.5 bg-control text-default hover:bg-control-hover rounded-lg font-medium transition-colors'"
                     >
                       {{ price === 0 ? 'Free' : '$' + price }}
                     </button>
                   }
-                  <div class="flex items-center gap-1 px-3 py-2 bg-primary-100 rounded-lg">
-                    <span class="text-primary-500">$</span>
+                  <div class="flex items-center gap-1 px-3 py-2 bg-control rounded-lg">
+                    <span class="text-muted">$</span>
                     <input
                       type="number"
                       [(ngModel)]="customPrice"
                       (ngModelChange)="onCustomPriceChange()"
                       placeholder="Custom"
                       min="0"
-                      class="w-16 bg-transparent text-primary-800 font-medium focus:outline-none"
+                      class="w-16 bg-transparent text-default font-medium focus:outline-none"
                     />
                   </div>
                 </div>
@@ -434,21 +472,21 @@ import {
 
               <!-- Game Name -->
               <div>
-                <label class="block text-sm font-semibold text-primary-700 mb-3">Game Name <span class="text-primary-400 font-normal">(optional)</span></label>
+                <label class="block text-sm font-semibold text-label mb-3">Game Name <span class="text-muted font-normal">(optional)</span></label>
                 <input
                   type="text"
                   [(ngModel)]="newGameName"
                   placeholder="e.g., Super Bowl Party 2024"
-                  class="w-full px-4 py-3 border border-primary-200 rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none"
+                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
                 />
               </div>
             </div>
 
             <!-- Modal Footer -->
-            <div class="flex items-center justify-end gap-3 p-6 border-t border-primary-100 bg-primary-50">
+            <div class="flex items-center justify-end gap-3 p-6 border-t border-default bg-input">
               <button
                 (click)="showCreateModal.set(false)"
-                class="px-6 py-2.5 text-primary-600 hover:bg-primary-200 rounded-xl font-medium transition-colors"
+                class="px-6 py-2.5 text-muted hover:bg-control rounded-xl font-medium transition-colors"
               >
                 Cancel
               </button>
@@ -477,12 +515,12 @@ import {
       <!-- Share Modal -->
       @if (shareModalGameId()) {
         <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" (click)="shareModalGameId.set(null)">
-          <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-modal-in" (click)="$event.stopPropagation()">
-            <div class="flex items-center justify-between p-6 border-b border-primary-100">
-              <h3 class="text-xl font-bold text-primary-800">Share Game</h3>
+          <div class="bg-dialog rounded-2xl shadow-2xl max-w-md w-full animate-modal-in" (click)="$event.stopPropagation()">
+            <div class="flex items-center justify-between p-6 border-b border-default">
+              <h3 class="text-xl font-bold text-heading">Share Game</h3>
               <button
                 (click)="shareModalGameId.set(null)"
-                class="p-2 text-primary-400 hover:text-primary-600 hover:bg-primary-100 rounded-lg transition-colors"
+                class="p-2 text-muted hover:text-default hover:bg-control rounded-lg transition-colors"
               >
                 <ng-icon name="heroXMark" class="text-2xl"></ng-icon>
               </button>
@@ -490,9 +528,9 @@ import {
 
             <div class="p-6 space-y-5">
               <div>
-                <label class="block text-sm font-semibold text-primary-700 mb-2">Game Code</label>
+                <label class="block text-sm font-semibold text-label mb-2">Game Code</label>
                 <div class="flex items-center gap-2">
-                  <code class="flex-1 bg-primary-100 px-4 py-4 rounded-xl font-mono text-2xl tracking-widest text-center text-primary-800">
+                  <code class="flex-1 bg-control px-4 py-4 rounded-xl font-mono text-2xl tracking-widest text-center text-heading">
                     {{ shareModalGameId() }}
                   </code>
                   <button
@@ -505,13 +543,13 @@ import {
               </div>
 
               <div>
-                <label class="block text-sm font-semibold text-primary-700 mb-2">Share Link</label>
+                <label class="block text-sm font-semibold text-label mb-2">Share Link</label>
                 <div class="flex items-center gap-2">
                   <input
                     type="text"
                     [value]="getShareLink(shareModalGameId()!)"
                     readonly
-                    class="flex-1 px-4 py-3 bg-primary-100 rounded-xl text-sm truncate text-primary-600"
+                    class="flex-1 px-4 py-3 bg-control rounded-xl text-sm truncate text-muted"
                   />
                   <button
                     (click)="copyToClipboard(getShareLink(shareModalGameId()!))"
@@ -524,16 +562,16 @@ import {
 
               <!-- Copied notification -->
               @if (copiedToClipboard()) {
-                <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-2 rounded-lg text-sm text-center">
+                <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-2 rounded-lg text-sm text-center dark:bg-green-900/30 dark:border-green-800 dark:text-green-400">
                   Copied to clipboard!
                 </div>
               }
             </div>
 
-            <div class="p-6 border-t border-primary-100 bg-primary-50 rounded-b-2xl">
+            <div class="p-6 border-t border-default bg-input rounded-b-2xl">
               <button
                 (click)="shareModalGameId.set(null)"
-                class="w-full px-4 py-3 bg-primary-200 hover:bg-primary-300 text-primary-700 rounded-xl font-medium transition-colors"
+                class="w-full px-4 py-3 bg-control hover:bg-control-hover text-default rounded-xl font-medium transition-colors"
               >
                 Done
               </button>
@@ -545,15 +583,15 @@ import {
       <!-- Edit Game Modal -->
       @if (showEditModal()) {
         <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" (click)="closeEditModal()">
-          <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-modal-in" (click)="$event.stopPropagation()">
-            <div class="flex items-center justify-between p-6 border-b border-primary-100">
+          <div class="bg-dialog rounded-2xl shadow-2xl max-w-md w-full animate-modal-in" (click)="$event.stopPropagation()">
+            <div class="flex items-center justify-between p-6 border-b border-default">
               <div>
-                <h3 class="text-xl font-bold text-primary-800">Edit Game</h3>
-                <p class="text-sm text-primary-500">{{ editingGame()?.id }}</p>
+                <h3 class="text-xl font-bold text-heading">Edit Game</h3>
+                <p class="text-sm text-muted">{{ editingGame()?.id }}</p>
               </div>
               <button
                 (click)="closeEditModal()"
-                class="p-2 text-primary-400 hover:text-primary-600 hover:bg-primary-100 rounded-lg transition-colors"
+                class="p-2 text-muted hover:text-default hover:bg-control rounded-lg transition-colors"
               >
                 <ng-icon name="heroXMark" class="text-2xl"></ng-icon>
               </button>
@@ -562,42 +600,42 @@ import {
             <div class="p-6 space-y-5">
               <!-- Game Name -->
               <div>
-                <label class="block text-sm font-semibold text-primary-700 mb-2">Game Name</label>
+                <label class="block text-sm font-semibold text-label mb-2">Game Name</label>
                 <input
                   type="text"
                   [(ngModel)]="editGameName"
                   placeholder="e.g., Super Bowl Party 2024"
-                  class="w-full px-4 py-3 border border-primary-200 rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none"
+                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
                 />
               </div>
 
               <!-- Price Per Square -->
               <div>
-                <label class="block text-sm font-semibold text-primary-700 mb-2">Price Per Square</label>
+                <label class="block text-sm font-semibold text-label mb-2">Price Per Square</label>
                 <div class="flex items-center gap-2">
-                  <span class="text-primary-500">$</span>
+                  <span class="text-muted">$</span>
                   <input
                     type="number"
                     [(ngModel)]="editGamePrice"
                     min="0"
-                    class="flex-1 px-4 py-3 border border-primary-200 rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none"
+                    class="flex-1 px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
                   />
                 </div>
               </div>
 
               <!-- Manager Assignment -->
               <div>
-                <label class="block text-sm font-semibold text-primary-700 mb-2">
+                <label class="block text-sm font-semibold text-label mb-2">
                   Payment Manager
-                  <span class="text-primary-400 font-normal">(optional)</span>
+                  <span class="text-muted font-normal">(optional)</span>
                 </label>
-                <p class="text-xs text-primary-500 mb-2">Assign someone to help manage payments. They can mark who has paid.</p>
+                <p class="text-xs text-muted mb-2">Assign someone to help manage payments. They can mark who has paid.</p>
                 @if (editingGame()?.managerEmail) {
-                  <div class="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-xl">
-                    <span class="flex-1 text-green-700">{{ editingGame()?.managerEmail }}</span>
+                  <div class="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-xl dark:bg-green-900/30 dark:border-green-800">
+                    <span class="flex-1 text-green-700 dark:text-green-400">{{ editingGame()?.managerEmail }}</span>
                     <button
                       (click)="removeManager()"
-                      class="px-3 py-1 text-sm bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors"
+                      class="px-3 py-1 text-sm bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-400"
                     >
                       Remove
                     </button>
@@ -608,12 +646,12 @@ import {
                       type="email"
                       [(ngModel)]="managerEmail"
                       placeholder="Enter their email address"
-                      class="flex-1 px-4 py-3 border border-primary-200 rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none"
+                      class="flex-1 px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
                     />
                     <button
                       (click)="lookupAndAssignManager()"
                       [disabled]="!managerEmail || isLookingUpManager()"
-                      class="px-4 py-3 bg-secondary-500 hover:bg-secondary-600 disabled:bg-primary-300 disabled:cursor-not-allowed text-white rounded-xl transition-colors"
+                      class="px-4 py-3 bg-secondary-500 hover:bg-secondary-600 disabled:bg-control disabled:cursor-not-allowed text-white rounded-xl transition-colors"
                     >
                       @if (isLookingUpManager()) {
                         <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24">
@@ -626,16 +664,16 @@ import {
                     </button>
                   </div>
                   @if (managerLookupError()) {
-                    <p class="mt-2 text-sm text-red-600">{{ managerLookupError() }}</p>
+                    <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ managerLookupError() }}</p>
                   }
                 }
               </div>
             </div>
 
-            <div class="flex items-center justify-end gap-3 p-6 border-t border-primary-100 bg-primary-50 rounded-b-2xl">
+            <div class="flex items-center justify-end gap-3 p-6 border-t border-default bg-input rounded-b-2xl">
               <button
                 (click)="closeEditModal()"
-                class="px-6 py-2.5 text-primary-600 hover:bg-primary-200 rounded-xl font-medium transition-colors"
+                class="px-6 py-2.5 text-muted hover:bg-control rounded-xl font-medium transition-colors"
               >
                 Cancel
               </button>
@@ -658,12 +696,12 @@ import {
       <!-- Profile Edit Modal -->
       @if (showProfileModal()) {
         <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" (click)="showProfileModal.set(false)">
-          <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full animate-modal-in" (click)="$event.stopPropagation()">
-            <div class="flex items-center justify-between p-6 border-b border-primary-100">
-              <h3 class="text-xl font-bold text-primary-800">Edit Profile</h3>
+          <div class="bg-dialog rounded-2xl shadow-2xl max-w-sm w-full animate-modal-in" (click)="$event.stopPropagation()">
+            <div class="flex items-center justify-between p-6 border-b border-default">
+              <h3 class="text-xl font-bold text-heading">Edit Profile</h3>
               <button
                 (click)="showProfileModal.set(false)"
-                class="p-2 text-primary-400 hover:text-primary-600 hover:bg-primary-100 rounded-lg transition-colors"
+                class="p-2 text-muted hover:text-default hover:bg-control rounded-lg transition-colors"
               >
                 <ng-icon name="heroXMark" class="text-2xl"></ng-icon>
               </button>
@@ -671,24 +709,24 @@ import {
 
             <div class="p-6">
               <div>
-                <label class="block text-sm font-semibold text-primary-700 mb-2">Display Name</label>
+                <label class="block text-sm font-semibold text-label mb-2">Display Name</label>
                 <input
                   type="text"
                   [(ngModel)]="profileName"
                   placeholder="Enter your name"
-                  class="w-full px-4 py-3 border border-primary-200 rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none"
+                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
                   (keyup.enter)="saveProfile()"
                 />
                 @if (currentUser()?.email) {
-                  <p class="text-xs text-primary-500 mt-2">{{ currentUser()?.email }}</p>
+                  <p class="text-xs text-muted mt-2">{{ currentUser()?.email }}</p>
                 }
               </div>
             </div>
 
-            <div class="flex items-center justify-end gap-3 p-6 border-t border-primary-100 bg-primary-50 rounded-b-2xl">
+            <div class="flex items-center justify-end gap-3 p-6 border-t border-default bg-input rounded-b-2xl">
               <button
                 (click)="showProfileModal.set(false)"
-                class="px-6 py-2.5 text-primary-600 hover:bg-primary-200 rounded-xl font-medium transition-colors"
+                class="px-6 py-2.5 text-muted hover:bg-control rounded-xl font-medium transition-colors"
               >
                 Cancel
               </button>
@@ -730,6 +768,7 @@ export class DashboardComponent implements OnInit {
   private gameService = inject(GameService);
   private espnService = inject(EspnService);
   private router = inject(Router);
+  themeService = inject(ThemeService);
 
   currentUser = this.authService.currentUser;
   canCreateGame = this.authService.canCreateGame;
@@ -1048,5 +1087,9 @@ export class DashboardComponent implements OnInit {
     } finally {
       this.isSavingProfile.set(false);
     }
+  }
+
+  setTheme(mode: ThemeMode): void {
+    this.themeService.setTheme(mode);
   }
 }

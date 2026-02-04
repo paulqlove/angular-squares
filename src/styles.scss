@@ -4,12 +4,70 @@
 @tailwind components;
 @tailwind utilities;
 
+// Light mode (default)
+:root {
+  --color-bg-page: #f1f5f9;           // slate-100
+  --color-bg-card: #ffffff;           // white
+  --color-bg-card-hover: #f1f5f9;     // slate-100
+  --color-bg-input: #f8fafc;          // slate-50
+  --color-bg-input-hover: #f1f5f9;    // slate-100
+  --color-bg-control: #e2e8f0;        // slate-200
+  --color-bg-control-hover: #cbd5e1;  // slate-300
+  --color-bg-dialog: #ffffff;         // white
+  --color-bg-square: #334155;         // slate-700 (empty squares in light mode)
+  --color-bg-square-hover: #cbd5e1;   // slate-300
+  --color-bg-header: #1e293b;         // slate-800
+  --color-bg-header-accent: #334155;  // slate-700
+  --color-grid-line: #cbd5e1;         // slate-300 (grid lines)
+
+  --color-text-default: #0f172a;      // slate-900
+  --color-text-muted: #64748b;        // slate-500
+  --color-text-heading: #334155;      // slate-700
+  --color-text-label: #334155;        // slate-700
+  --color-text-header: #ffffff;
+  --color-text-header-muted: #cbd5e1; // slate-300
+
+  --color-border-default: #e2e8f0;    // slate-200
+  --color-border-hover: #cbd5e1;      // slate-300
+  --color-border-input: #cbd5e1;      // slate-300
+  --color-border-card: #e2e8f0;       // slate-200
+}
+
+// Dark mode
+.dark {
+  --color-bg-page: #0f172a;           // slate-900
+  --color-bg-card: #1e293b;           // slate-800
+  --color-bg-card-hover: #334155;     // slate-700
+  --color-bg-input: #1e293b;          // slate-800
+  --color-bg-input-hover: #334155;    // slate-700
+  --color-bg-control: #334155;        // slate-700
+  --color-bg-control-hover: #475569;  // slate-600
+  --color-bg-dialog: #1e293b;         // slate-800
+  --color-bg-square: #0f172a;         // slate-900 (empty squares - darker than card)
+  --color-bg-square-hover: #334155;   // slate-700
+  --color-bg-header: #020617;         // slate-950
+  --color-bg-header-accent: #0f172a;  // slate-900
+  --color-grid-line: #475569;         // slate-600 (lighter grid lines)
+
+  --color-text-default: #f1f5f9;      // slate-100
+  --color-text-muted: #94a3b8;        // slate-400
+  --color-text-heading: #f1f5f9;      // slate-100
+  --color-text-label: #e2e8f0;        // slate-200
+  --color-text-header: #ffffff;
+  --color-text-header-muted: #94a3b8; // slate-400
+
+  --color-border-default: #334155;    // slate-700
+  --color-border-hover: #475569;      // slate-600
+  --color-border-input: #334155;      // slate-700
+  --color-border-card: #334155;       // slate-700
+}
+
 // Add this to apply Roboto to all elements
 @layer base {
   html {
     font-family: Roboto, system-ui, sans-serif;
   }
-  
+
   h2 {
     @apply font-thin;
   }

@@ -1,28 +1,28 @@
-<div class="bg-card rounded-lg p-4 mt-8">
+<div class="rounded-lg p-4 mt-8">
   <h2 class="text-lg font-bold mb-4 text-heading">Winners & Payouts</h2>
-  
+
   <div class="winners-container">
     @for (quarter of ['q1', 'q2', 'q3', 'q4']; track quarter) {
-      <div class="quarter-card" 
+      <div class="quarter-card"
            [class]="winners[quarter] ? playerColors[winners[quarter]] : 'bg-card'"
            [class.quarter-card--no-winner]="!winners[quarter]"
-           [style.border-color]="winners[quarter] ? saturateColor(playerColors[winners[quarter]]) : 'rgb(203 213 225)'">
+           [style.border-color]="winners[quarter] ? saturateColor(playerColors[winners[quarter]]) : ''">
         <div class="card-content">
           <div class="winner-section">
-            <h3 class="font-medium text-heading">{{ getQuarterLabel(quarter) }}</h3>
+            <h3 class="font-medium" [class]="winners[quarter] ? 'text-slate-900' : 'text-heading'">{{ getQuarterLabel(quarter) }}</h3>
             <div class="winner-info">
               @if (winners[quarter]) {
                 <span>🏆</span>
-                <span class="text-default">{{ winners[quarter] }}</span>
+                <span class="text-slate-900">{{ winners[quarter] }}</span>
               } @else {
                 <span class="text-muted">No winner yet</span>
               }
             </div>
           </div>
-          
+
           <div class="payout-section">
-            <div class="text-sm text-muted">Payout</div>
-            <div class="text-lg font-medium text-default">
+            <div class="text-sm" [class]="winners[quarter] ? 'text-slate-700' : 'text-muted'">Payout</div>
+            <div class="text-lg font-medium" [class]="winners[quarter] ? 'text-slate-900' : 'text-default'">
               ${{ (totalPot * quarterPayouts[quarter]).toFixed(2) }}
             </div>
           </div>

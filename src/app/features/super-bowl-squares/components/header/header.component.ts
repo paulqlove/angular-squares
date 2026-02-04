@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ViewChild } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
@@ -9,13 +9,17 @@ import {
   heroArrowTopRightOnSquare,
   heroCreditCard,
   heroXMark,
-  heroArrowPath
+  heroArrowPath,
+  heroSun,
+  heroMoon,
+  heroComputerDesktop
 } from '@ng-icons/heroicons/outline';
 import { FormsModule } from '@angular/forms';
 import { ToggleComponent } from '../../../../components/ui/toggle/toggle.component';
 import { DialogComponent } from '../../../../components/ui/dialog/dialog.component';
 import { PasswordDialogComponent } from '../../components/password-dialog/password-dialog.component';
 import { EspnGame, SportType, SPORT_CONFIG } from '../../../../core/services/espn.service';
+import { ThemeService, ThemeMode } from '../../../../core/services/theme.service';
 
 @Component({
   selector: 'app-header',
@@ -30,7 +34,10 @@ import { EspnGame, SportType, SPORT_CONFIG } from '../../../../core/services/esp
       heroArrowTopRightOnSquare,
       heroCreditCard,
       heroXMark,
-      heroArrowPath
+      heroArrowPath,
+      heroSun,
+      heroMoon,
+      heroComputerDesktop
     })
   ],
   template: `
@@ -79,13 +86,13 @@ import { EspnGame, SportType, SPORT_CONFIG } from '../../../../core/services/esp
          [class.opacity-0]="!showSettings"
          [class.pointer-events-none]="!showSettings"
          (click)="closeSettings()">
-      <div class="fixed right-0 top-0 bottom-0 w-[90%] sm:w-full sm:max-w-md bg-white shadow-lg transform transition-transform duration-200 flex flex-col overflow-hidden"
+      <div class="fixed right-0 top-0 bottom-0 w-[90%] sm:w-full sm:max-w-md bg-dialog shadow-lg transform transition-transform duration-200 flex flex-col overflow-hidden"
            [class.translate-x-0]="showSettings"
            [class.translate-x-full]="!showSettings"
            (click)="$event.stopPropagation()">
-        
+
         <!-- Settings Header -->
-        <div class="flex-none flex items-center justify-between p-4 border-b">
+        <div class="flex-none flex items-center justify-between p-4 border-b border-default">
           <h2 class="text-lg font-bold text-heading">Settings</h2>
           <button (click)="closeSettings()" class="text-muted hover:text-heading">
             <ng-icon name="heroXMark" class="text-2xl"></ng-icon>
@@ -144,9 +151,37 @@ import { EspnGame, SportType, SPORT_CONFIG } from '../../../../core/services/esp
             </div>
           </div>
 
+          <!-- Theme Toggle -->
+          <div class="mb-6">
+            <label class="block text-label text-sm font-medium mb-2">Appearance</label>
+            <div class="flex gap-1 p-1 bg-input rounded-lg">
+              <button
+                (click)="setTheme('system')"
+                [class]="themeService.theme() === 'system' ? 'flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md bg-card text-default shadow-sm' : 'flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-muted hover:text-default'"
+              >
+                <ng-icon name="heroComputerDesktop" class="text-base"></ng-icon>
+                <span class="text-sm">System</span>
+              </button>
+              <button
+                (click)="setTheme('light')"
+                [class]="themeService.theme() === 'light' ? 'flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md bg-card text-default shadow-sm' : 'flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-muted hover:text-default'"
+              >
+                <ng-icon name="heroSun" class="text-base"></ng-icon>
+                <span class="text-sm">Light</span>
+              </button>
+              <button
+                (click)="setTheme('dark')"
+                [class]="themeService.theme() === 'dark' ? 'flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md bg-card text-default shadow-sm' : 'flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-muted hover:text-default'"
+              >
+                <ng-icon name="heroMoon" class="text-base"></ng-icon>
+                <span class="text-sm">Dark</span>
+              </button>
+            </div>
+          </div>
+
           <!-- ESPN Live Scores (visible to all, controls for owner only) -->
           @if (linkedEspnGame) {
-            <div class="mb-4 p-3 bg-gray-50 rounded-lg">
+            <div class="mb-4 p-3 bg-input rounded-lg">
               <div class="flex items-center justify-between mb-2">
                 <span class="text-sm font-semibold text-heading">ESPN Live Scores</span>
                 <span class="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full">Linked</span>
@@ -230,7 +265,7 @@ import { EspnGame, SportType, SPORT_CONFIG } from '../../../../core/services/esp
             </div>
           } @else if (isGameOwner) {
             <!-- ESPN Game Selection (Owner only when not linked) -->
-            <div class="mb-4 p-3 bg-gray-50 rounded-lg">
+            <div class="mb-4 p-3 bg-input rounded-lg">
               <div class="flex items-center justify-between mb-2">
                 <span class="text-sm font-semibold text-heading">ESPN Live Scores</span>
               </div>
@@ -256,7 +291,7 @@ import { EspnGame, SportType, SPORT_CONFIG } from '../../../../core/services/esp
                   </select>
                   <button
                     (click)="onRefreshEspnGames.emit()"
-                    class="p-1.5 text-muted hover:text-heading hover:bg-gray-100 rounded transition-colors"
+                    class="p-1.5 text-muted hover:text-heading hover:bg-control rounded transition-colors"
                     title="Refresh"
                   >
                     <ng-icon name="heroArrowPath" class="text-base"></ng-icon>
@@ -378,7 +413,7 @@ import { EspnGame, SportType, SPORT_CONFIG } from '../../../../core/services/esp
 
         <!-- Footer with Clear Game button (owner only) -->
         @if (isGameOwner) {
-          <div class="p-4 border-t border-gray-200 mt-auto bg-card">
+          <div class="p-4 border-t border-default mt-auto bg-card">
             <button
               (click)="onClearGame.emit(); closeSettings()"
               class="w-full bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded flex items-center justify-center gap-2"
@@ -399,6 +434,8 @@ import { EspnGame, SportType, SPORT_CONFIG } from '../../../../core/services/esp
   `
 })
 export class HeaderComponent {
+  themeService = inject(ThemeService);
+
   @Input() isRandomized = false;
   @Input() isLocked = false;
   @Input() venmoUsername = '';
@@ -516,5 +553,9 @@ export class HeaderComponent {
 
   getPeriodLabel(): string {
     return SPORT_CONFIG[this.espnSport]?.periodLabel || 'Q';
+  }
+
+  setTheme(mode: ThemeMode): void {
+    this.themeService.setTheme(mode);
   }
 } 

@@ -2,8 +2,8 @@
 
 .number-cell {
   @apply flex items-center justify-center text-default text-sm sm:text-base;
-  border-right: 1px solid var(--color-input);
-  border-bottom: 1px solid var(--color-input);
+  border-right: 1px solid var(--color-grid-line);
+  border-bottom: 1px solid var(--color-grid-line);
   width: -webkit-fill-available;
   width: -moz-available;
   height: 2rem; // Default height
@@ -24,7 +24,9 @@
 .square-cell {
   @extend .number-cell;
   @apply text-[8px] sm:text-xs cursor-pointer p-1 text-center truncate overflow-hidden whitespace-nowrap;
-  outline: 1px solid theme('backgroundColor.card');
+  // Player names should always be dark since player colors are pastel
+  color: #0f172a !important; // slate-900
+  outline: 1px solid var(--color-grid-line);
   outline-offset: -1px;
 } 
 
