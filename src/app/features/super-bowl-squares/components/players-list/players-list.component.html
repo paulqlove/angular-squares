@@ -2,12 +2,15 @@
   <div class="space-y-2 max-h-[387px] overflow-y-auto">
     @if (getPlayerEntries().length > 0) {
       @for (entry of getPlayerEntries(); track entry.player) {
-        <div class="flex items-center justify-between p-2 rounded bg-card cursor-pointer hover:bg-card-hover"
-             [class.bg-card-hover]="selectedPlayer === entry.player"
-             (click)="onPlayerClick(entry.player)"
-             [appTooltip]="'Click to highlight squares on the board'">
+        <button
+          type="button"
+          class="w-full flex items-center justify-between p-2 rounded bg-card hover:bg-card-hover focus:ring-2 focus:ring-secondary-500 focus:outline-none text-left"
+          [class.bg-card-hover]="selectedPlayer === entry.player"
+          (click)="onPlayerClick(entry.player)"
+          [appTooltip]="'Click to highlight squares on the board'"
+          [attr.aria-pressed]="selectedPlayer === entry.player">
           <div class="flex flex-wrap items-center gap-2">
-            <div class="w-4 h-4 rounded" [class]="playerColors[entry.player]"></div>
+            <div class="w-4 h-4 rounded" [class]="playerColors[entry.player]" aria-hidden="true"></div>
             <span class="text-default">{{ entry.player }}</span>
             @if (entry.probability !== null) {
               <span class="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full"
@@ -30,7 +33,7 @@
             <div class="text-default font-medium">{{ entry.stats.squares }}&nbsp;squares</div>
             <div class="text-muted text-sm">${{ entry.stats.total.toFixed(2) }}</div>
           </div>
-        </div>
+        </button>
       }
     } @else {
       <p class="text-muted text-center py-4">No players yet</p>

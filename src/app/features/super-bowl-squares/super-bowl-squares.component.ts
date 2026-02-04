@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { GameService, GameData } from '../../core/services/game.service';
 import { AuthService } from '../../core/services/auth.service';
 import { EspnService, EspnGame, SportType, SPORT_CONFIG } from '../../core/services/espn.service';
+import { ToastService } from '../../core/services/toast.service';
 import { Subscription } from 'rxjs';
 import { GameBoardComponent } from './components/game-board/game-board.component';
 import { PlayersListComponent } from './components/players-list/players-list.component';
@@ -23,7 +24,6 @@ import {
   heroXMark
 } from '@ng-icons/heroicons/outline';
 import { GameStatusComponent } from './components/game-status/game-status.component';
-import { PasswordDialogComponent } from './components/password-dialog/password-dialog.component';
 import { HeaderComponent } from './components/header/header.component';
 import { PaymentDialogComponent } from './components/payment-dialog/payment-dialog.component';
 import { ProbabilityHeatmapComponent } from './components/probability-heatmap/probability-heatmap.component';
@@ -39,7 +39,6 @@ import { ProbabilityHeatmapComponent } from './components/probability-heatmap/pr
     PlayersListComponent,
     WinnersAndPayoutsComponent,
     GameStatusComponent,
-    PasswordDialogComponent,
     HeaderComponent,
     PaymentDialogComponent,
     ProbabilityHeatmapComponent
@@ -62,7 +61,6 @@ import { ProbabilityHeatmapComponent } from './components/probability-heatmap/pr
   styleUrls: ['./super-bowl-squares.component.scss']
 })
 export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
-  @ViewChild('passwordDialog') passwordDialog!: PasswordDialogComponent;
   @ViewChild('paymentDialog') paymentDialog!: PaymentDialogComponent;
 
   // Game state
@@ -149,6 +147,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   private gameService = inject(GameService);
   private authService = inject(AuthService);
   private espnService = inject(EspnService);
+  private toastService = inject(ToastService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
@@ -476,40 +475,12 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   }
 
   async toggleLock(): Promise<void> {
-    // Check if user is game owner
-    if (this.isGameOwner()) {
-      this.isLocked = !this.isLocked;
-      await this.gameService.updateGame(this.gameId, { isLocked: this.isLocked });
+    // Only owners can toggle lock
+    if (!this.isGameOwner()) {
       return;
     }
-
-    // Fall back to password for legacy games
-    try {
-      const password = await new Promise<string>((resolve, reject) => {
-        const submitSub = this.passwordDialog.passwordSubmit.subscribe(pwd => {
-          submitSub.unsubscribe();
-          cancelSub.unsubscribe();
-          resolve(pwd);
-        });
-
-        const cancelSub = this.passwordDialog.cancel.subscribe(() => {
-          submitSub.unsubscribe();
-          cancelSub.unsubscribe();
-          reject();
-        });
-
-        this.passwordDialog.open();
-      });
-
-      if (password === 'chattanooga' || password === 'password') {
-        this.isLocked = !this.isLocked;
-        await this.gameService.updateGame(this.gameId, { isLocked: this.isLocked });
-      } else {
-        alert('Incorrect password');
-      }
-    } catch {
-      // User cancelled
-    }
+    this.isLocked = !this.isLocked;
+    await this.gameService.updateGame(this.gameId, { isLocked: this.isLocked });
   }
 
   onTeamNameChange(event: {team: 'home' | 'away', name: string}): void {
@@ -544,44 +515,12 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   }
 
   onManagePayments() {
-    // Check if user is game owner or manager
-    if (this.isGameOwner() || this.isManager()) {
-      this.paymentDialog.setData(this.playerStats, this.playerColors, this.paidPlayers);
-      this.paymentDialog.open();
+    // Only owners and managers can manage payments
+    if (!this.isGameOwner() && !this.isManager()) {
       return;
     }
-
-    // Fall back to password for legacy games
-    this.verifyPassword().then(isValid => {
-      if (isValid) {
-        this.paymentDialog.setData(this.playerStats, this.playerColors, this.paidPlayers);
-        this.paymentDialog.open();
-      }
-    });
-  }
-
-  private async verifyPassword(): Promise<boolean> {
-    try {
-      const password = await new Promise<string>((resolve, reject) => {
-        const submitSub = this.passwordDialog.passwordSubmit.subscribe(pwd => {
-          submitSub.unsubscribe();
-          cancelSub.unsubscribe();
-          resolve(pwd);
-        });
-
-        const cancelSub = this.passwordDialog.cancel.subscribe(() => {
-          submitSub.unsubscribe();
-          cancelSub.unsubscribe();
-          reject();
-        });
-
-        this.passwordDialog.open();
-      });
-
-      return password === 'chattanooga' || password === 'password';
-    } catch {
-      return false;
-    }
+    this.paymentDialog.setData(this.playerStats, this.playerColors, this.paidPlayers);
+    this.paymentDialog.open();
   }
 
   onPaidPlayersChange(paidPlayers: string[]) {
@@ -592,10 +531,9 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   }
 
   async onClearGame() {
-    // Check if user is game owner
+    // Only owners can clear game
     if (!this.isGameOwner()) {
-      const isValid = await this.verifyPassword();
-      if (!isValid) return;
+      return;
     }
 
     if (!confirm('Are you sure you want to clear all game data? This cannot be undone.')) {
@@ -650,7 +588,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       this.copiedToClipboard.set(true);
       setTimeout(() => this.copiedToClipboard.set(false), 2000);
     } catch (error) {
-      console.error('Failed to copy:', error);
+      this.toastService.error('Failed to copy');
     }
   }
 
@@ -660,7 +598,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       this.copiedToClipboard.set(true);
       setTimeout(() => this.copiedToClipboard.set(false), 2000);
     } catch (error) {
-      console.error('Failed to copy:', error);
+      this.toastService.error('Failed to copy');
     }
   }
 
@@ -798,7 +736,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       this._currentPlayer = this.editingName.trim();
       this.showNameEditModal.set(false);
     } catch (error) {
-      console.error('Failed to save name:', error);
+      this.toastService.error('Failed to save name');
     } finally {
       this.isSavingName.set(false);
     }

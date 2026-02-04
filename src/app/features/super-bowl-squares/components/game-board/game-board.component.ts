@@ -43,7 +43,27 @@ export class GameBoardComponent {
     return this.selectedSquares[key] || '';
   }
 
+  getSquareAriaLabel(row: number, col: number): string {
+    const player = this.getSquarePlayer(row, col);
+    const awayNum = this.awayNumbers[row];
+    const homeNum = this.homeNumbers[col];
+    const awayLabel = this.awayTeam || 'Away';
+    const homeLabel = this.homeTeam || 'Home';
+
+    if (player) {
+      return `Square ${awayLabel} ${awayNum ?? '?'}, ${homeLabel} ${homeNum ?? '?'}, taken by ${player}`;
+    }
+    return `Square ${awayLabel} ${awayNum ?? '?'}, ${homeLabel} ${homeNum ?? '?'}, available`;
+  }
+
   onSquareClick(row: number, col: number): void {
     this.squareClick.emit({ row, col });
+  }
+
+  onSquareKeydown(event: KeyboardEvent, row: number, col: number): void {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.squareClick.emit({ row, col });
+    }
   }
 } 

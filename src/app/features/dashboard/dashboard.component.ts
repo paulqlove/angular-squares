@@ -6,6 +6,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { GameService, GameListItem } from '../../core/services/game.service';
 import { EspnService, EspnGame, SportType, SPORT_CONFIG } from '../../core/services/espn.service';
 import { ThemeService, ThemeMode } from '../../core/services/theme.service';
+import { ToastService } from '../../core/services/toast.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
   heroPlus,
@@ -76,22 +77,28 @@ import {
             <div class="flex items-center bg-header-accent rounded-full p-1">
               <button
                 (click)="setTheme('system')"
-                [class]="themeService.theme() === 'system' ? 'p-1.5 rounded-full bg-secondary-500 text-white' : 'p-1.5 rounded-full text-header-muted hover:text-header'"
+                [class]="themeService.theme() === 'system' ? 'p-2 rounded-full bg-secondary-500 text-white' : 'p-2 rounded-full text-header-muted hover:text-header'"
                 title="System theme"
+                aria-label="System theme"
+                [attr.aria-pressed]="themeService.theme() === 'system'"
               >
                 <ng-icon name="heroComputerDesktop" class="text-base"></ng-icon>
               </button>
               <button
                 (click)="setTheme('light')"
-                [class]="themeService.theme() === 'light' ? 'p-1.5 rounded-full bg-secondary-500 text-white' : 'p-1.5 rounded-full text-header-muted hover:text-header'"
+                [class]="themeService.theme() === 'light' ? 'p-2 rounded-full bg-secondary-500 text-white' : 'p-2 rounded-full text-header-muted hover:text-header'"
                 title="Light theme"
+                aria-label="Light theme"
+                [attr.aria-pressed]="themeService.theme() === 'light'"
               >
                 <ng-icon name="heroSun" class="text-base"></ng-icon>
               </button>
               <button
                 (click)="setTheme('dark')"
-                [class]="themeService.theme() === 'dark' ? 'p-1.5 rounded-full bg-secondary-500 text-white' : 'p-1.5 rounded-full text-header-muted hover:text-header'"
+                [class]="themeService.theme() === 'dark' ? 'p-2 rounded-full bg-secondary-500 text-white' : 'p-2 rounded-full text-header-muted hover:text-header'"
                 title="Dark theme"
+                aria-label="Dark theme"
+                [attr.aria-pressed]="themeService.theme() === 'dark'"
               >
                 <ng-icon name="heroMoon" class="text-base"></ng-icon>
               </button>
@@ -125,8 +132,9 @@ import {
 
             <button
               (click)="signOut()"
-              class="p-2 text-header-muted hover:text-header hover:bg-primary-700 rounded-full transition-colors"
+              class="p-2.5 text-header-muted hover:text-header hover:bg-primary-700 rounded-full transition-colors"
               title="Sign out"
+              aria-label="Sign out"
             >
               <ng-icon name="heroArrowRightOnRectangle" class="text-xl"></ng-icon>
             </button>
@@ -308,6 +316,7 @@ import {
                         (click)="shareGame(game.id)"
                         class="p-2.5 text-muted hover:text-secondary-600 hover:bg-secondary-100 rounded-xl transition-colors"
                         title="Share game"
+                        aria-label="Share game"
                       >
                         <ng-icon name="heroShare" class="text-lg"></ng-icon>
                       </button>
@@ -315,6 +324,7 @@ import {
                         (click)="openEditModal(game)"
                         class="p-2.5 text-muted hover:text-default hover:bg-control rounded-xl transition-colors"
                         title="Edit game"
+                        aria-label="Edit game"
                       >
                         <ng-icon name="heroCog6Tooth" class="text-lg"></ng-icon>
                       </button>
@@ -322,6 +332,7 @@ import {
                         (click)="deleteGame(game.id)"
                         class="p-2.5 text-muted hover:text-red-600 hover:bg-red-100 rounded-xl transition-colors"
                         title="Delete game"
+                        aria-label="Delete game"
                       >
                         <ng-icon name="heroTrash" class="text-lg"></ng-icon>
                       </button>
@@ -768,6 +779,7 @@ export class DashboardComponent implements OnInit {
   private gameService = inject(GameService);
   private espnService = inject(EspnService);
   private router = inject(Router);
+  private toastService = inject(ToastService);
   themeService = inject(ThemeService);
 
   currentUser = this.authService.currentUser;
@@ -822,7 +834,7 @@ export class DashboardComponent implements OnInit {
         const games = await this.gameService.getUserGames(user.uid);
         this.myGames.set(games);
       } catch (error) {
-        console.error('Failed to load games:', error);
+        this.toastService.error('Failed to load games');
       } finally {
         this.isLoadingGames.set(false);
       }
@@ -910,7 +922,7 @@ export class DashboardComponent implements OnInit {
       );
       this.router.navigate(['/game', gameId]);
     } catch (error) {
-      console.error('Failed to create game:', error);
+      this.toastService.error('Failed to create game');
     } finally {
       this.isCreating.set(false);
       this.showCreateModal.set(false);
@@ -949,7 +961,7 @@ export class DashboardComponent implements OnInit {
         await this.gameService.deleteGame(gameId, user.uid);
         this.myGames.update(games => games.filter(g => g.id !== gameId));
       } catch (error) {
-        console.error('Failed to delete game:', error);
+        this.toastService.error('Failed to delete game');
       }
     }
   }
@@ -964,7 +976,7 @@ export class DashboardComponent implements OnInit {
       this.copiedToClipboard.set(true);
       setTimeout(() => this.copiedToClipboard.set(false), 2000);
     } catch (error) {
-      console.error('Failed to copy:', error);
+      this.toastService.error('Failed to copy');
     }
   }
 
@@ -1038,7 +1050,7 @@ export class DashboardComponent implements OnInit {
         games.map(g => g.id === game.id ? { ...g, managerId: undefined, managerEmail: undefined } : g)
       );
     } catch (error) {
-      console.error('Failed to remove manager:', error);
+      this.toastService.error('Failed to remove manager');
     }
   }
 
@@ -1057,7 +1069,7 @@ export class DashboardComponent implements OnInit {
       );
       this.closeEditModal();
     } catch (error) {
-      console.error('Failed to save game:', error);
+      this.toastService.error('Failed to save changes');
     } finally {
       this.isSavingGame.set(false);
     }

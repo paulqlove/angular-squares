@@ -1,37 +1,43 @@
 <div class="relative">
-  <div class="pt-8 pl-8">
+  <div class="pt-8 pl-8" role="grid" aria-label="Football squares game board">
     <!-- Top row with home numbers -->
-    <div class="grid grid-cols-[auto_repeat(10,minmax(0,1fr))] gap-0">
-      <div class="number-cell empty-cell"></div>
+    <div class="grid grid-cols-[auto_repeat(10,minmax(0,1fr))] gap-0" role="row">
+      <div class="number-cell empty-cell" role="columnheader"></div>
       <div *ngFor="let num of homeNumbers; let i = index"
-           class="number-cell ">
+           class="number-cell"
+           role="columnheader">
         <app-animated-number [number]="num" [animate]="isAnimating"></app-animated-number>
       </div>
     </div>
 
     <!-- Grid rows -->
-    <div *ngFor="let awayNum of awayNumbers; let row = index" 
-         class="grid grid-cols-[auto_repeat(10,minmax(0,1fr))] gap-0">
+    <div *ngFor="let awayNum of awayNumbers; let row = index"
+         class="grid grid-cols-[auto_repeat(10,minmax(0,1fr))] gap-0"
+         role="row">
       <!-- Left side away numbers -->
-      <div class="number-cell  pr-4 label-width">
+      <div class="number-cell pr-4 label-width" role="rowheader">
         <app-animated-number [number]="awayNum" [animate]="isAnimating"></app-animated-number>
       </div>
 
       <!-- Square cells -->
       <div *ngFor="let homeNum of homeNumbers; let col = index"
-           [ngClass]="[getSquareClass(row, col), 'square-cell hover:bg-square-hover']"
-           (click)="onSquareClick(row, col)">
+           [ngClass]="[getSquareClass(row, col), 'square-cell hover:bg-square-hover focus:ring-2 focus:ring-secondary-500 focus:outline-none']"
+           role="gridcell"
+           tabindex="0"
+           [attr.aria-label]="getSquareAriaLabel(row, col)"
+           (click)="onSquareClick(row, col)"
+           (keydown)="onSquareKeydown($event, row, col)">
         {{ getSquarePlayer(row, col) }}
       </div>
     </div>
 
     <!-- Team Labels -->
-    <div class="absolute top-8 left-0 h-full flex items-center">
+    <div class="absolute top-8 left-0 h-full flex items-center" aria-hidden="true">
       <div class="transform -rotate-90 origin-top-left whitespace-nowrap font-extralight text-lg text-heading capitalize">
         {{ awayTeam }}
       </div>
     </div>
-    <div class="absolute top-0 left-8 w-full text-center font-extralight text-lg text-heading capitalize">
+    <div class="absolute top-0 left-8 w-full text-center font-extralight text-lg text-heading capitalize" aria-hidden="true">
       {{ homeTeam }}
     </div>
   </div>

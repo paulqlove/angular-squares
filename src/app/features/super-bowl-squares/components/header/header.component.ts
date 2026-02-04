@@ -17,14 +17,13 @@ import {
 import { FormsModule } from '@angular/forms';
 import { ToggleComponent } from '../../../../components/ui/toggle/toggle.component';
 import { DialogComponent } from '../../../../components/ui/dialog/dialog.component';
-import { PasswordDialogComponent } from '../../components/password-dialog/password-dialog.component';
 import { EspnGame, SportType, SPORT_CONFIG } from '../../../../core/services/espn.service';
 import { ThemeService, ThemeMode } from '../../../../core/services/theme.service';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, NgIconComponent, FormsModule, ToggleComponent, DialogComponent, PasswordDialogComponent],
+  imports: [CommonModule, NgIconComponent, FormsModule, ToggleComponent, DialogComponent],
   providers: [
     provideIcons({
       heroCog6Tooth,
@@ -60,9 +59,10 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
           }
 
           <!-- Settings Button -->
-          <button 
+          <button
             (click)="toggleSettings()"
-            class="p-2 text-muted hover:text-heading rounded-lg hover:bg-card transition-colors flex"
+            class="p-2.5 text-muted hover:text-heading rounded-lg hover:bg-card transition-colors flex"
+            aria-label="Open settings"
           >
             <ng-icon name="heroCog6Tooth" class="text-2xl"></ng-icon>
           </button>
@@ -94,7 +94,7 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
         <!-- Settings Header -->
         <div class="flex-none flex items-center justify-between p-4 border-b border-default">
           <h2 class="text-lg font-bold text-heading">Settings</h2>
-          <button (click)="closeSettings()" class="text-muted hover:text-heading">
+          <button (click)="closeSettings()" class="p-2 text-muted hover:text-heading" aria-label="Close settings">
             <ng-icon name="heroXMark" class="text-2xl"></ng-icon>
           </button>
         </div>
@@ -126,7 +126,7 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
                 [disabled]="!isGameOwner"
                 class="w-full px-3 py-2 bg-input border border-input rounded-md
                        focus:outline-none focus:ring-2
-                       focus:ring-gradient-to-r focus:from-secondary-500 focus:via-secondary-600 focus:to-accent-600
+                       focus:ring-2 focus:ring-secondary-500
                        capitalize disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="Enter away team"
               />
@@ -144,7 +144,7 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
                 [disabled]="!isGameOwner"
                 class="w-full px-3 py-2 bg-input border border-input rounded-md
                        focus:outline-none focus:ring-2
-                       focus:ring-gradient-to-r focus:from-secondary-500 focus:via-secondary-600 focus:to-accent-600
+                       focus:ring-2 focus:ring-secondary-500
                        capitalize disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="Enter home team"
               />
@@ -323,7 +323,7 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
                 [disabled]="isLocked || !isGameOwner"
                 class="w-full px-3 py-2 bg-input border border-input rounded-md
                        focus:outline-none focus:ring-2
-                       focus:ring-gradient-to-r focus:from-secondary-500 focus:via-secondary-600 focus:to-accent-600
+                       focus:ring-2 focus:ring-secondary-500
                        disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
@@ -344,7 +344,7 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
                 [disabled]="!isGameOwner"
                 class="w-full px-3 py-2 bg-input border border-input rounded-md
                        focus:outline-none focus:ring-2
-                       focus:ring-gradient-to-r focus:from-secondary-500 focus:via-secondary-600 focus:to-accent-600
+                       focus:ring-2 focus:ring-secondary-500
                        disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
@@ -429,8 +429,6 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
       </div>
     </div>
 
-    <!-- Add this at the end of the template -->
-    <app-password-dialog #passwordDialog></app-password-dialog>
   `
 })
 export class HeaderComponent {
@@ -467,7 +465,6 @@ export class HeaderComponent {
 
   showSettings = false;
   showVenmoDialog = false;
-  @ViewChild('passwordDialog') passwordDialog!: PasswordDialogComponent;
   tempVenmoUsername = '';
   selectedEspnGameId = '';
 
