@@ -348,8 +348,7 @@ export class DashboardComponent implements OnInit {
   newGamePrice = 10;
   sportOptions: { value: SportType; label: string }[] = [
     { value: 'nfl', label: 'NFL' },
-    { value: 'nba', label: 'NBA' },
-    { value: 'ncaam', label: 'NCAA Basketball' }
+    { value: 'nba', label: 'NBA' }
   ];
 
   constructor() {

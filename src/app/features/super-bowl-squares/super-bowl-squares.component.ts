@@ -168,8 +168,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   lastSyncTime = signal<Date | null>(null);
   sportOptions: { value: SportType; label: string }[] = [
     { value: 'nfl', label: 'NFL' },
-    { value: 'nba', label: 'NBA' },
-    { value: 'ncaam', label: 'NCAA Basketball' }
+    { value: 'nba', label: 'NBA' }
   ];
 
   // Auto-polling for live scores
@@ -725,21 +724,13 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       this.linkedEspnGame.set(game);
       this.lastSyncTime.set(new Date());
 
-      // Map ESPN quarters/halves to our scores format
+      // Map ESPN quarters to our scores format
       const newScores = {
         q1: { home: game.quarters[0]?.home || 0, away: game.quarters[0]?.away || 0 },
         q2: { home: game.quarters[1]?.home || 0, away: game.quarters[1]?.away || 0 },
         q3: { home: game.quarters[2]?.home || 0, away: game.quarters[2]?.away || 0 },
         q4: { home: game.quarters[3]?.home || 0, away: game.quarters[3]?.away || 0 }
       };
-
-      // For 2-half sports (NCAA), H1 goes to Q1+Q2, H2 goes to Q3+Q4
-      if (this.espnSport === 'ncaam' && game.quarters.length === 2) {
-        newScores.q1 = { home: 0, away: 0 };
-        newScores.q2 = game.quarters[0] || { home: 0, away: 0 };
-        newScores.q3 = { home: 0, away: 0 };
-        newScores.q4 = game.quarters[1] || { home: 0, away: 0 };
-      }
 
       // For Pro Bowl or other 3-period games, use final score for Q4
       if (game.quarters.length === 3 && game.status === 'post') {

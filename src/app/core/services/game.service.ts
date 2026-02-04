@@ -15,7 +15,7 @@ import {
 import { Observable, BehaviorSubject } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
-export type SportType = 'nfl' | 'nba' | 'ncaam';
+export type SportType = 'nfl' | 'nba';
 
 export interface GameData {
   id?: string;

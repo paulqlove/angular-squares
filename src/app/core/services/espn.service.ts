@@ -1,7 +1,7 @@
 import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
-export type SportType = 'nfl' | 'nba' | 'ncaam';
+export type SportType = 'nfl' | 'nba';
 
 export interface EspnGame {
   id: string;
@@ -18,8 +18,7 @@ export interface EspnGame {
 
 export const SPORT_CONFIG: Record<SportType, { label: string; periods: number; periodLabel: string }> = {
   nfl: { label: 'NFL', periods: 4, periodLabel: 'Q' },
-  nba: { label: 'NBA', periods: 4, periodLabel: 'Q' },
-  ncaam: { label: 'NCAA Basketball', periods: 2, periodLabel: 'H' }
+  nba: { label: 'NBA', periods: 4, periodLabel: 'Q' }
 };
 
 @Injectable({
@@ -30,8 +29,7 @@ export class EspnService {
 
   private readonly API_URLS: Record<SportType, string> = {
     nfl: 'https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard',
-    nba: 'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard',
-    ncaam: 'https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard'
+    nba: 'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard'
   };
 
   private get isBrowser(): boolean {
