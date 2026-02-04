@@ -18,7 +18,9 @@ import {
   heroTrash,
   heroShare,
   heroArrowLeft,
-  heroClipboard
+  heroClipboard,
+  heroPencilSquare,
+  heroXMark
 } from '@ng-icons/heroicons/outline';
 import { GameStatusComponent } from './components/game-status/game-status.component';
 import { PasswordDialogComponent } from './components/password-dialog/password-dialog.component';
@@ -51,7 +53,9 @@ import { ProbabilityHeatmapComponent } from './components/probability-heatmap/pr
       heroTrash,
       heroShare,
       heroArrowLeft,
-      heroClipboard
+      heroClipboard,
+      heroPencilSquare,
+      heroXMark
     })
   ],
   templateUrl: './super-bowl-squares.component.html',
@@ -153,10 +157,14 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   gameNotFound = signal(false);
   showShareModal = signal(false);
   copiedToClipboard = signal(false);
+  showNameEditModal = signal(false);
+  editingName = '';
+  isSavingName = signal(false);
 
   // Auth state
   currentUser = this.authService.currentUser;
   isGameOwner = signal(false);
+  isManager = signal(false);
 
   // ESPN sync state
   espnGames = signal<EspnGame[]>([]);
@@ -175,10 +183,12 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   private pollingInterval: ReturnType<typeof setInterval> | null = null;
 
   ngOnInit(): void {
-    // Set current player from auth if available
+    // Set current player from auth if available (name or email)
     const user = this.authService.currentUser();
     if (user?.displayName) {
       this._currentPlayer = user.displayName;
+    } else if (user?.email) {
+      this._currentPlayer = user.email;
     }
 
     // Get game ID from route
@@ -234,9 +244,10 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           this.espnEventId = data.espnEventId;
           this.espnSport = data.espnSport || 'nfl';
 
-          // Check if current user is the game owner
+          // Check if current user is the game owner or manager
           const user = this.authService.currentUser();
-          this.isGameOwner.set(user?.uid === data.ownerId);
+          this.isGameOwner.set(!!user && user.uid === data.ownerId);
+          this.isManager.set(!!user && !!data.managerId && user.uid === data.managerId);
 
           Object.values(this.selectedSquares).forEach(playerName => {
             if (!this.playerColors[playerName]) {
@@ -521,8 +532,8 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   }
 
   onManagePayments() {
-    // Check if user is game owner
-    if (this.isGameOwner()) {
+    // Check if user is game owner or manager
+    if (this.isGameOwner() || this.isManager()) {
       this.paymentDialog.setData(this.playerStats, this.playerColors, this.paidPlayers);
       this.paymentDialog.open();
       return;
@@ -751,6 +762,33 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       this.espnSyncError.set('Failed to sync scores from ESPN');
     } finally {
       this.isSyncingEspn.set(false);
+    }
+  }
+
+  // Name edit modal methods
+  openNameEditModal(): void {
+    const user = this.authService.currentUser();
+    this.editingName = user?.displayName || '';
+    this.showNameEditModal.set(true);
+  }
+
+  async saveNameEdit(): Promise<void> {
+    if (!this.editingName.trim()) return;
+
+    this.isSavingName.set(true);
+    try {
+      const user = this.authService.currentUser();
+      if (user?.isGuest) {
+        this.authService.updateGuestName(this.editingName);
+      } else {
+        await this.authService.updateDisplayName(this.editingName);
+      }
+      this._currentPlayer = this.editingName.trim();
+      this.showNameEditModal.set(false);
+    } catch (error) {
+      console.error('Failed to save name:', error);
+    } finally {
+      this.isSavingName.set(false);
     }
   }
 }

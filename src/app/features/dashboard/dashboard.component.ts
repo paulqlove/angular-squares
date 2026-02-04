@@ -22,7 +22,8 @@ import {
   heroPencilSquare,
   heroArrowRight,
   heroTicket,
-  heroPlay
+  heroPlay,
+  heroCog6Tooth
 } from '@ng-icons/heroicons/outline';
 
 @Component({
@@ -46,7 +47,8 @@ import {
       heroPencilSquare,
       heroArrowRight,
       heroTicket,
-      heroPlay
+      heroPlay,
+      heroCog6Tooth
     })
   ],
   template: `
@@ -63,7 +65,11 @@ import {
           </div>
 
           <div class="flex items-center gap-3">
-            <div class="flex items-center gap-2 bg-primary-700/50 rounded-full px-3 py-1.5">
+            <button
+              (click)="openProfileModal()"
+              class="flex items-center gap-2 bg-primary-700/50 hover:bg-primary-700 rounded-full px-3 py-1.5 transition-colors cursor-pointer"
+              title="Edit profile"
+            >
               @if (currentUser()?.photoURL) {
                 <img
                   [src]="currentUser()?.photoURL"
@@ -73,17 +79,17 @@ import {
               } @else {
                 <div class="w-7 h-7 rounded-full bg-secondary-500 flex items-center justify-center">
                   <span class="text-white font-semibold text-sm">
-                    {{ currentUser()?.displayName?.charAt(0)?.toUpperCase() || '?' }}
+                    {{ (currentUser()?.displayName || currentUser()?.email)?.charAt(0)?.toUpperCase() || '?' }}
                   </span>
                 </div>
               }
               <span class="text-sm font-medium text-white hidden sm:inline">
-                {{ currentUser()?.displayName }}
+                {{ currentUser()?.displayName || currentUser()?.email }}
               </span>
               @if (currentUser()?.isGuest) {
                 <span class="text-xs bg-primary-600 text-primary-200 px-2 py-0.5 rounded-full">Guest</span>
               }
-            </div>
+            </button>
 
             <button
               (click)="signOut()"
@@ -272,6 +278,13 @@ import {
                         title="Share game"
                       >
                         <ng-icon name="heroShare" class="text-lg"></ng-icon>
+                      </button>
+                      <button
+                        (click)="openEditModal(game)"
+                        class="p-2.5 text-primary-400 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-colors"
+                        title="Edit game"
+                      >
+                        <ng-icon name="heroCog6Tooth" class="text-lg"></ng-icon>
                       </button>
                       <button
                         (click)="deleteGame(game.id)"
@@ -508,14 +521,187 @@ import {
                   </button>
                 </div>
               </div>
+
+              <!-- Copied notification -->
+              @if (copiedToClipboard()) {
+                <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-2 rounded-lg text-sm text-center">
+                  Copied to clipboard!
+                </div>
+              }
             </div>
 
-            <div class="p-6 border-t border-primary-100 bg-primary-50">
+            <div class="p-6 border-t border-primary-100 bg-primary-50 rounded-b-2xl">
               <button
                 (click)="shareModalGameId.set(null)"
                 class="w-full px-4 py-3 bg-primary-200 hover:bg-primary-300 text-primary-700 rounded-xl font-medium transition-colors"
               >
                 Done
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Edit Game Modal -->
+      @if (showEditModal()) {
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" (click)="closeEditModal()">
+          <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-modal-in" (click)="$event.stopPropagation()">
+            <div class="flex items-center justify-between p-6 border-b border-primary-100">
+              <div>
+                <h3 class="text-xl font-bold text-primary-800">Edit Game</h3>
+                <p class="text-sm text-primary-500">{{ editingGame()?.id }}</p>
+              </div>
+              <button
+                (click)="closeEditModal()"
+                class="p-2 text-primary-400 hover:text-primary-600 hover:bg-primary-100 rounded-lg transition-colors"
+              >
+                <ng-icon name="heroXMark" class="text-2xl"></ng-icon>
+              </button>
+            </div>
+
+            <div class="p-6 space-y-5">
+              <!-- Game Name -->
+              <div>
+                <label class="block text-sm font-semibold text-primary-700 mb-2">Game Name</label>
+                <input
+                  type="text"
+                  [(ngModel)]="editGameName"
+                  placeholder="e.g., Super Bowl Party 2024"
+                  class="w-full px-4 py-3 border border-primary-200 rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none"
+                />
+              </div>
+
+              <!-- Price Per Square -->
+              <div>
+                <label class="block text-sm font-semibold text-primary-700 mb-2">Price Per Square</label>
+                <div class="flex items-center gap-2">
+                  <span class="text-primary-500">$</span>
+                  <input
+                    type="number"
+                    [(ngModel)]="editGamePrice"
+                    min="0"
+                    class="flex-1 px-4 py-3 border border-primary-200 rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none"
+                  />
+                </div>
+              </div>
+
+              <!-- Manager Assignment -->
+              <div>
+                <label class="block text-sm font-semibold text-primary-700 mb-2">
+                  Payment Manager
+                  <span class="text-primary-400 font-normal">(optional)</span>
+                </label>
+                <p class="text-xs text-primary-500 mb-2">Assign someone to help manage payments. They can mark who has paid.</p>
+                @if (editingGame()?.managerEmail) {
+                  <div class="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-xl">
+                    <span class="flex-1 text-green-700">{{ editingGame()?.managerEmail }}</span>
+                    <button
+                      (click)="removeManager()"
+                      class="px-3 py-1 text-sm bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                } @else {
+                  <div class="flex gap-2">
+                    <input
+                      type="email"
+                      [(ngModel)]="managerEmail"
+                      placeholder="Enter their email address"
+                      class="flex-1 px-4 py-3 border border-primary-200 rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none"
+                    />
+                    <button
+                      (click)="lookupAndAssignManager()"
+                      [disabled]="!managerEmail || isLookingUpManager()"
+                      class="px-4 py-3 bg-secondary-500 hover:bg-secondary-600 disabled:bg-primary-300 disabled:cursor-not-allowed text-white rounded-xl transition-colors"
+                    >
+                      @if (isLookingUpManager()) {
+                        <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                        </svg>
+                      } @else {
+                        Assign
+                      }
+                    </button>
+                  </div>
+                  @if (managerLookupError()) {
+                    <p class="mt-2 text-sm text-red-600">{{ managerLookupError() }}</p>
+                  }
+                }
+              </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 p-6 border-t border-primary-100 bg-primary-50 rounded-b-2xl">
+              <button
+                (click)="closeEditModal()"
+                class="px-6 py-2.5 text-primary-600 hover:bg-primary-200 rounded-xl font-medium transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                (click)="saveGameEdits()"
+                [disabled]="isSavingGame()"
+                class="px-8 py-2.5 bg-secondary-500 hover:bg-secondary-600 disabled:opacity-50 text-white rounded-xl font-bold transition-colors"
+              >
+                @if (isSavingGame()) {
+                  Saving...
+                } @else {
+                  Save Changes
+                }
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Profile Edit Modal -->
+      @if (showProfileModal()) {
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" (click)="showProfileModal.set(false)">
+          <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full animate-modal-in" (click)="$event.stopPropagation()">
+            <div class="flex items-center justify-between p-6 border-b border-primary-100">
+              <h3 class="text-xl font-bold text-primary-800">Edit Profile</h3>
+              <button
+                (click)="showProfileModal.set(false)"
+                class="p-2 text-primary-400 hover:text-primary-600 hover:bg-primary-100 rounded-lg transition-colors"
+              >
+                <ng-icon name="heroXMark" class="text-2xl"></ng-icon>
+              </button>
+            </div>
+
+            <div class="p-6">
+              <div>
+                <label class="block text-sm font-semibold text-primary-700 mb-2">Display Name</label>
+                <input
+                  type="text"
+                  [(ngModel)]="profileName"
+                  placeholder="Enter your name"
+                  class="w-full px-4 py-3 border border-primary-200 rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none"
+                  (keyup.enter)="saveProfile()"
+                />
+                @if (currentUser()?.email) {
+                  <p class="text-xs text-primary-500 mt-2">{{ currentUser()?.email }}</p>
+                }
+              </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 p-6 border-t border-primary-100 bg-primary-50 rounded-b-2xl">
+              <button
+                (click)="showProfileModal.set(false)"
+                class="px-6 py-2.5 text-primary-600 hover:bg-primary-200 rounded-xl font-medium transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                (click)="saveProfile()"
+                [disabled]="isSavingProfile() || !profileName.trim()"
+                class="px-8 py-2.5 bg-secondary-500 hover:bg-secondary-600 disabled:opacity-50 text-white rounded-xl font-bold transition-colors"
+              >
+                @if (isSavingProfile()) {
+                  Saving...
+                } @else {
+                  Save
+                }
               </button>
             </div>
           </div>
@@ -555,6 +741,22 @@ export class DashboardComponent implements OnInit {
   shareModalGameId = signal<string | null>(null);
   espnGames = signal<EspnGame[]>([]);
   isLoadingEspnGames = signal(false);
+  copiedToClipboard = signal(false);
+
+  // Edit modal state
+  showEditModal = signal(false);
+  editingGame = signal<GameListItem | null>(null);
+  editGameName = '';
+  editGamePrice = 10;
+  managerEmail = '';
+  managerLookupError = signal<string | null>(null);
+  isLookingUpManager = signal(false);
+  isSavingGame = signal(false);
+
+  // Profile edit state
+  showProfileModal = signal(false);
+  profileName = '';
+  isSavingProfile = signal(false);
 
   newGameName = '';
   joinGameCode = '';
@@ -720,6 +922,8 @@ export class DashboardComponent implements OnInit {
   async copyToClipboard(text: string): Promise<void> {
     try {
       await navigator.clipboard.writeText(text);
+      this.copiedToClipboard.set(true);
+      setTimeout(() => this.copiedToClipboard.set(false), 2000);
     } catch (error) {
       console.error('Failed to copy:', error);
     }
@@ -732,5 +936,117 @@ export class DashboardComponent implements OnInit {
   async signOut(): Promise<void> {
     await this.authService.signOut();
     this.router.navigate(['/']);
+  }
+
+  // Edit modal methods
+  openEditModal(game: GameListItem): void {
+    this.editingGame.set(game);
+    this.editGameName = game.name;
+    this.editGamePrice = game.pricePerSquare;
+    this.managerEmail = '';
+    this.managerLookupError.set(null);
+    this.showEditModal.set(true);
+  }
+
+  closeEditModal(): void {
+    this.showEditModal.set(false);
+    this.editingGame.set(null);
+    this.managerEmail = '';
+    this.managerLookupError.set(null);
+  }
+
+  async lookupAndAssignManager(): Promise<void> {
+    if (!this.managerEmail || !this.editingGame()) return;
+
+    this.isLookingUpManager.set(true);
+    this.managerLookupError.set(null);
+
+    try {
+      const managerId = await this.authService.lookupUserByEmail(this.managerEmail);
+      if (!managerId) {
+        this.managerLookupError.set('No account found with this email. They need to sign in first.');
+        return;
+      }
+
+      const game = this.editingGame()!;
+      if (managerId === this.currentUser()?.uid) {
+        this.managerLookupError.set('You cannot assign yourself as manager.');
+        return;
+      }
+
+      await this.gameService.updateGameManager(game.id, managerId, this.managerEmail);
+      // Update local state
+      this.editingGame.set({ ...game, managerId, managerEmail: this.managerEmail });
+      this.myGames.update(games =>
+        games.map(g => g.id === game.id ? { ...g, managerId, managerEmail: this.managerEmail } : g)
+      );
+      this.managerEmail = '';
+    } catch (error) {
+      this.managerLookupError.set('Failed to assign manager. Please try again.');
+    } finally {
+      this.isLookingUpManager.set(false);
+    }
+  }
+
+  async removeManager(): Promise<void> {
+    const game = this.editingGame();
+    if (!game) return;
+
+    try {
+      await this.gameService.updateGameManager(game.id, null, null);
+      this.editingGame.set({ ...game, managerId: undefined, managerEmail: undefined });
+      this.myGames.update(games =>
+        games.map(g => g.id === game.id ? { ...g, managerId: undefined, managerEmail: undefined } : g)
+      );
+    } catch (error) {
+      console.error('Failed to remove manager:', error);
+    }
+  }
+
+  async saveGameEdits(): Promise<void> {
+    const game = this.editingGame();
+    if (!game) return;
+
+    this.isSavingGame.set(true);
+    try {
+      await this.gameService.updateGame(game.id, {
+        name: this.editGameName,
+        pricePerSquare: this.editGamePrice
+      });
+      this.myGames.update(games =>
+        games.map(g => g.id === game.id ? { ...g, name: this.editGameName, pricePerSquare: this.editGamePrice } : g)
+      );
+      this.closeEditModal();
+    } catch (error) {
+      console.error('Failed to save game:', error);
+    } finally {
+      this.isSavingGame.set(false);
+    }
+  }
+
+  // Profile modal methods
+  openProfileModal(): void {
+    const user = this.currentUser();
+    this.profileName = user?.displayName || '';
+    this.showProfileModal.set(true);
+  }
+
+  async saveProfile(): Promise<void> {
+    if (!this.profileName.trim()) return;
+
+    this.isSavingProfile.set(true);
+    try {
+      const user = this.currentUser();
+      if (user?.isGuest) {
+        this.authService.updateGuestName(this.profileName);
+      } else {
+        await this.authService.updateDisplayName(this.profileName);
+      }
+      this.showProfileModal.set(false);
+    } catch (error) {
+      console.error('Failed to save profile:', error);
+    } finally {
+      this.isSavingProfile.set(false);
+    }
   }
 }

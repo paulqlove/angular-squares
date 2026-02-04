@@ -94,6 +94,17 @@ import { EspnGame, SportType, SPORT_CONFIG } from '../../../../core/services/esp
 
         <!-- Settings Content -->
         <div class="flex-1 overflow-y-auto p-4 pt-8 bg-page">
+          <!-- Non-owner notice -->
+          @if (!isGameOwner && !isManager) {
+            <div class="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+              <p class="text-sm text-amber-700">Only the game owner can modify settings.</p>
+            </div>
+          } @else if (isManager && !isGameOwner) {
+            <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p class="text-sm text-blue-700">You are a payment manager. You can manage who has paid.</p>
+            </div>
+          }
+
           <!-- Team Names -->
           <div class="space-y-4 mb-4">
             <div>
@@ -105,10 +116,11 @@ import { EspnGame, SportType, SPORT_CONFIG } from '../../../../core/services/esp
                 id="awayTeam"
                 [ngModel]="awayTeam"
                 (ngModelChange)="onTeamChange('away', $event)"
+                [disabled]="!isGameOwner"
                 class="w-full px-3 py-2 bg-input border border-input rounded-md
                        focus:outline-none focus:ring-2
                        focus:ring-gradient-to-r focus:from-secondary-500 focus:via-secondary-600 focus:to-accent-600
-                       capitalize"
+                       capitalize disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="Enter away team"
               />
             </div>
@@ -122,75 +134,75 @@ import { EspnGame, SportType, SPORT_CONFIG } from '../../../../core/services/esp
                 id="homeTeam"
                 [ngModel]="homeTeam"
                 (ngModelChange)="onTeamChange('home', $event)"
+                [disabled]="!isGameOwner"
                 class="w-full px-3 py-2 bg-input border border-input rounded-md
                        focus:outline-none focus:ring-2
                        focus:ring-gradient-to-r focus:from-secondary-500 focus:via-secondary-600 focus:to-accent-600
-                       capitalize"
+                       capitalize disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="Enter home team"
               />
             </div>
           </div>
 
-          <!-- ESPN Live Scores (Owner Only) -->
-          @if (isGameOwner) {
+          <!-- ESPN Live Scores (visible to all, controls for owner only) -->
+          @if (linkedEspnGame) {
             <div class="mb-4 p-3 bg-gray-50 rounded-lg">
               <div class="flex items-center justify-between mb-2">
                 <span class="text-sm font-semibold text-heading">ESPN Live Scores</span>
-                @if (linkedEspnGame) {
-                  <span class="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full">Linked</span>
-                }
+                <span class="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full">Linked</span>
               </div>
 
-              @if (linkedEspnGame) {
-                <!-- Scoreboard Display -->
-                <div class="bg-gray-900 rounded-lg p-3 mb-2 text-white">
-                  <div class="flex items-center justify-between text-xs mb-2">
-                    <span class="text-gray-400">ESPN</span>
-                    <span class="px-1.5 py-0.5 rounded text-xs"
-                      [class.bg-yellow-500]="linkedEspnGame.status === 'in'"
-                      [class.animate-pulse]="linkedEspnGame.status === 'in'"
-                      [class.bg-green-600]="linkedEspnGame.status === 'post'"
-                      [class.bg-gray-600]="linkedEspnGame.status === 'pre'"
-                    >
-                      @if (linkedEspnGame.status === 'pre') { Upcoming }
-                      @else if (linkedEspnGame.status === 'in') { {{ getPeriodLabel() }}{{ linkedEspnGame.period }} {{ linkedEspnGame.clock }} }
-                      @else { Final }
-                    </span>
-                  </div>
-                  <table class="w-full text-xs">
-                    <thead>
-                      <tr class="text-gray-400 border-b border-gray-700">
-                        <th class="text-left py-1 w-16"></th>
-                        <th class="text-center py-1 w-8">1</th>
-                        <th class="text-center py-1 w-8">2</th>
-                        <th class="text-center py-1 w-8">3</th>
-                        <th class="text-center py-1 w-8">4</th>
-                        <th class="text-center py-1 w-10 font-bold">T</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr class="border-b border-gray-800">
-                        <td class="py-1 font-semibold">{{ linkedEspnGame.awayTeam }}</td>
-                        <td class="text-center py-1 text-gray-300">{{ getQuarterScore(linkedEspnGame, 0, 'away') }}</td>
-                        <td class="text-center py-1 text-gray-300">{{ getQuarterScore(linkedEspnGame, 1, 'away') }}</td>
-                        <td class="text-center py-1 text-gray-300">{{ getQuarterScore(linkedEspnGame, 2, 'away') }}</td>
-                        <td class="text-center py-1 text-gray-300">{{ getQuarterScore(linkedEspnGame, 3, 'away') }}</td>
-                        <td class="text-center py-1 font-bold text-white">{{ linkedEspnGame.awayScore }}</td>
-                      </tr>
-                      <tr>
-                        <td class="py-1 font-semibold">{{ linkedEspnGame.homeTeam }}</td>
-                        <td class="text-center py-1 text-gray-300">{{ getQuarterScore(linkedEspnGame, 0, 'home') }}</td>
-                        <td class="text-center py-1 text-gray-300">{{ getQuarterScore(linkedEspnGame, 1, 'home') }}</td>
-                        <td class="text-center py-1 text-gray-300">{{ getQuarterScore(linkedEspnGame, 2, 'home') }}</td>
-                        <td class="text-center py-1 text-gray-300">{{ getQuarterScore(linkedEspnGame, 3, 'home') }}</td>
-                        <td class="text-center py-1 font-bold text-white">{{ linkedEspnGame.homeScore }}</td>
-                      </tr>
-                    </tbody>
-                  </table>
+              <!-- Scoreboard Display (visible to all) -->
+              <div class="bg-gray-900 rounded-lg p-3 mb-2 text-white">
+                <div class="flex items-center justify-between text-xs mb-2">
+                  <span class="text-gray-400">ESPN</span>
+                  <span class="px-1.5 py-0.5 rounded text-xs"
+                    [class.bg-yellow-500]="linkedEspnGame.status === 'in'"
+                    [class.animate-pulse]="linkedEspnGame.status === 'in'"
+                    [class.bg-green-600]="linkedEspnGame.status === 'post'"
+                    [class.bg-gray-600]="linkedEspnGame.status === 'pre'"
+                  >
+                    @if (linkedEspnGame.status === 'pre') { Upcoming }
+                    @else if (linkedEspnGame.status === 'in') { {{ getPeriodLabel() }}{{ linkedEspnGame.period }} {{ linkedEspnGame.clock }} }
+                    @else { Final }
+                  </span>
                 </div>
-                @if (lastSyncTime) {
-                  <p class="text-xs text-muted mb-2">Last synced: {{ getTimeSinceSync() }}</p>
-                }
+                <table class="w-full text-xs">
+                  <thead>
+                    <tr class="text-gray-400 border-b border-gray-700">
+                      <th class="text-left py-1 w-16"></th>
+                      <th class="text-center py-1 w-8">1</th>
+                      <th class="text-center py-1 w-8">2</th>
+                      <th class="text-center py-1 w-8">3</th>
+                      <th class="text-center py-1 w-8">4</th>
+                      <th class="text-center py-1 w-10 font-bold">T</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="border-b border-gray-800">
+                      <td class="py-1 font-semibold">{{ linkedEspnGame.awayTeam }}</td>
+                      <td class="text-center py-1 text-gray-300">{{ getQuarterScore(linkedEspnGame, 0, 'away') }}</td>
+                      <td class="text-center py-1 text-gray-300">{{ getQuarterScore(linkedEspnGame, 1, 'away') }}</td>
+                      <td class="text-center py-1 text-gray-300">{{ getQuarterScore(linkedEspnGame, 2, 'away') }}</td>
+                      <td class="text-center py-1 text-gray-300">{{ getQuarterScore(linkedEspnGame, 3, 'away') }}</td>
+                      <td class="text-center py-1 font-bold text-white">{{ linkedEspnGame.awayScore }}</td>
+                    </tr>
+                    <tr>
+                      <td class="py-1 font-semibold">{{ linkedEspnGame.homeTeam }}</td>
+                      <td class="text-center py-1 text-gray-300">{{ getQuarterScore(linkedEspnGame, 0, 'home') }}</td>
+                      <td class="text-center py-1 text-gray-300">{{ getQuarterScore(linkedEspnGame, 1, 'home') }}</td>
+                      <td class="text-center py-1 text-gray-300">{{ getQuarterScore(linkedEspnGame, 2, 'home') }}</td>
+                      <td class="text-center py-1 text-gray-300">{{ getQuarterScore(linkedEspnGame, 3, 'home') }}</td>
+                      <td class="text-center py-1 font-bold text-white">{{ linkedEspnGame.homeScore }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              @if (lastSyncTime) {
+                <p class="text-xs text-muted mb-2">Last synced: {{ getTimeSinceSync() }}</p>
+              }
+              <!-- Controls only for owner -->
+              @if (isGameOwner) {
                 <div class="flex gap-2">
                   <button
                     (click)="onSyncEspn.emit()"
@@ -214,45 +226,50 @@ import { EspnGame, SportType, SPORT_CONFIG } from '../../../../core/services/esp
                     Unlink
                   </button>
                 </div>
-              } @else {
-                <!-- Sport & Game Selection -->
-                <div class="space-y-2">
+              }
+            </div>
+          } @else if (isGameOwner) {
+            <!-- ESPN Game Selection (Owner only when not linked) -->
+            <div class="mb-4 p-3 bg-gray-50 rounded-lg">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-semibold text-heading">ESPN Live Scores</span>
+              </div>
+              <div class="space-y-2">
+                <select
+                  [ngModel]="espnSport"
+                  (ngModelChange)="onSportChange.emit($event)"
+                  class="w-full bg-input text-default text-sm border rounded px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-secondary-500"
+                >
+                  @for (sport of sportOptions; track sport.value) {
+                    <option [value]="sport.value">{{ sport.label }}</option>
+                  }
+                </select>
+                <div class="flex items-center gap-1.5">
                   <select
-                    [ngModel]="espnSport"
-                    (ngModelChange)="onSportChange.emit($event)"
-                    class="w-full bg-input text-default text-sm border rounded px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-secondary-500"
+                    [(ngModel)]="selectedEspnGameId"
+                    class="flex-1 bg-input text-default text-sm border rounded px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-secondary-500"
                   >
-                    @for (sport of sportOptions; track sport.value) {
-                      <option [value]="sport.value">{{ sport.label }}</option>
+                    <option value="">Select game...</option>
+                    @for (game of espnGames; track game.id) {
+                      <option [value]="game.id">{{ getEspnGameDisplay(game) }}</option>
                     }
                   </select>
-                  <div class="flex items-center gap-1.5">
-                    <select
-                      [(ngModel)]="selectedEspnGameId"
-                      class="flex-1 bg-input text-default text-sm border rounded px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-secondary-500"
-                    >
-                      <option value="">Select game...</option>
-                      @for (game of espnGames; track game.id) {
-                        <option [value]="game.id">{{ getEspnGameDisplay(game) }}</option>
-                      }
-                    </select>
-                    <button
+                  <button
                     (click)="onRefreshEspnGames.emit()"
                     class="p-1.5 text-muted hover:text-heading hover:bg-gray-100 rounded transition-colors"
                     title="Refresh"
                   >
                     <ng-icon name="heroArrowPath" class="text-base"></ng-icon>
                   </button>
-                    <button
-                      (click)="linkEspnGame()"
-                      [disabled]="!selectedEspnGameId"
-                      class="px-3 py-1.5 text-sm bg-secondary-500 hover:bg-secondary-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded transition-colors"
-                    >
-                      Link
-                    </button>
-                  </div>
+                  <button
+                    (click)="linkEspnGame()"
+                    [disabled]="!selectedEspnGameId"
+                    class="px-3 py-1.5 text-sm bg-secondary-500 hover:bg-secondary-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded transition-colors"
+                  >
+                    Link
+                  </button>
                 </div>
-              }
+              </div>
             </div>
           }
 
@@ -268,10 +285,10 @@ import { EspnGame, SportType, SPORT_CONFIG } from '../../../../core/services/esp
                 id="pricePerSquare"
                 [ngModel]="pricePerSquare"
                 (ngModelChange)="handlePriceChange($event)"
-                [disabled]="isLocked"
-                class="w-full px-3 py-2 bg-input border border-input rounded-md 
-                       focus:outline-none focus:ring-2 
-                       focus:ring-gradient-to-r focus:from-secondary-500 focus:via-secondary-600 focus:to-accent-600 
+                [disabled]="isLocked || !isGameOwner"
+                class="w-full px-3 py-2 bg-input border border-input rounded-md
+                       focus:outline-none focus:ring-2
+                       focus:ring-gradient-to-r focus:from-secondary-500 focus:via-secondary-600 focus:to-accent-600
                        disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
@@ -289,12 +306,14 @@ import { EspnGame, SportType, SPORT_CONFIG } from '../../../../core/services/esp
                 [(ngModel)]="tempVenmoUsername"
                 (blur)="onVenmoBlur()"
                 [placeholder]="venmoUsername ? '@' + venmoUsername.replace('@', '') : '@username'"
-                class="w-full px-3 py-2 bg-input border border-input rounded-md 
-                       focus:outline-none focus:ring-2 
-                       focus:ring-gradient-to-r focus:from-secondary-500 focus:via-secondary-600 focus:to-accent-600"
+                [disabled]="!isGameOwner"
+                class="w-full px-3 py-2 bg-input border border-input rounded-md
+                       focus:outline-none focus:ring-2
+                       focus:ring-gradient-to-r focus:from-secondary-500 focus:via-secondary-600 focus:to-accent-600
+                       disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
-            
+
             <div class="flex items-center justify-center gap-2 mt-3">
               <a
                 [href]="getVenmoLink()"
@@ -304,8 +323,8 @@ import { EspnGame, SportType, SPORT_CONFIG } from '../../../../core/services/esp
                 *ngIf="venmoUsername"
               >
                 Open Venmo Profile
-                <ng-icon 
-                  name="heroArrowTopRightOnSquare" 
+                <ng-icon
+                  name="heroArrowTopRightOnSquare"
                   class="w-4 h-4"
                   aria-hidden="true">
                 </ng-icon>
@@ -313,57 +332,65 @@ import { EspnGame, SportType, SPORT_CONFIG } from '../../../../core/services/esp
             </div>
           </div>
 
-          <!-- Add this before the Game Controls section -->
+          <!-- Lock Game toggle (owner only) -->
           <div class="mb-8">
             <div class="flex items-center justify-between p-4 rounded">
               <span class="text-default">Lock Game</span>
-              <app-toggle 
-              class="flex"
-              [checked]="isLocked"
-              (onChange)="onToggleLock.emit()"
+              <app-toggle
+                class="flex"
+                [checked]="isLocked"
+                [disabled]="!isGameOwner"
+                (onChange)="onToggleLock.emit()"
               ></app-toggle>
             </div>
-            </div>
+          </div>
             
             <!-- Game Controls -->
             <div class="space-y-4 mb-8">
-            <button 
-              (click)="onManagePayments.emit()"
-              class="w-full bg-control hover:bg-control-hover text-default px-4 py-2 rounded flex items-center justify-center gap-2"
-            >
-              <ng-icon name="heroCreditCard" class="text-2xl"></ng-icon>
-              Manage Payments
-            </button>
-            <button (click)="onRandomize.emit()" 
-                    [disabled]="isLocked"
-                    class="w-full px-4 py-2 rounded flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed
-                           bg-gradient-to-r from-secondary-500 via-secondary-600 to-accent-600 
-                           hover:from-secondary-600 hover:via-secondary-700 hover:to-accent-700
-                           text-white shadow-md hover:shadow-lg transition-all duration-200">
-              <span *ngIf="!isRandomized">🎲</span>
-              <ng-icon *ngIf="isRandomized" name="heroTrash" class="text-2xl"></ng-icon>
-              {{ isRandomized ? 'Clear Numbers' : 'Randomize Numbers' }}
-            </button>
+            <!-- Manage Payments (owner or manager) -->
+            @if (isGameOwner || isManager) {
+              <button
+                (click)="onManagePayments.emit()"
+                class="w-full bg-control hover:bg-control-hover text-default px-4 py-2 rounded flex items-center justify-center gap-2"
+              >
+                <ng-icon name="heroCreditCard" class="text-2xl"></ng-icon>
+                Manage Payments
+              </button>
+            }
 
-         
+            <!-- Randomize Numbers (owner only) -->
+            @if (isGameOwner) {
+              <button (click)="onRandomize.emit()"
+                      [disabled]="isLocked"
+                      class="w-full px-4 py-2 rounded flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed
+                             bg-gradient-to-r from-secondary-500 via-secondary-600 to-accent-600
+                             hover:from-secondary-600 hover:via-secondary-700 hover:to-accent-700
+                             text-white shadow-md hover:shadow-lg transition-all duration-200">
+                <span *ngIf="!isRandomized">🎲</span>
+                <ng-icon *ngIf="isRandomized" name="heroTrash" class="text-2xl"></ng-icon>
+                {{ isRandomized ? 'Clear Numbers' : 'Randomize Numbers' }}
+              </button>
+            }
           </div>
 
          
         </div>
 
-        <!-- Footer with Clear Game button -->
-        <div class="p-4 border-t border-gray-200 mt-auto bg-card">
-          <button 
-            (click)="onClearGame.emit(); closeSettings()"
-            class="w-full bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded flex items-center justify-center gap-2"
-          >
-            <ng-icon name="heroTrash" class="text-2xl"></ng-icon>
-            Clear Game
-          </button>
-          <p class="text-xs text-gray-500 text-center mt-2">
-            This will reset all game data. Requires password.
-          </p>
-        </div>
+        <!-- Footer with Clear Game button (owner only) -->
+        @if (isGameOwner) {
+          <div class="p-4 border-t border-gray-200 mt-auto bg-card">
+            <button
+              (click)="onClearGame.emit(); closeSettings()"
+              class="w-full bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded flex items-center justify-center gap-2"
+            >
+              <ng-icon name="heroTrash" class="text-2xl"></ng-icon>
+              Clear Game
+            </button>
+            <p class="text-xs text-gray-500 text-center mt-2">
+              This will reset all game data.
+            </p>
+          </div>
+        }
       </div>
     </div>
 
@@ -379,6 +406,7 @@ export class HeaderComponent {
   @Input() awayTeam = '';
   @Input() pricePerSquare = 10;
   @Input() isGameOwner = false;
+  @Input() isManager = false;
   @Input() espnEventId: string | undefined;
   @Input() espnSport: SportType = 'nfl';
   @Input() espnGames: EspnGame[] = [];
@@ -422,39 +450,18 @@ export class HeaderComponent {
     return `https://venmo.com/${this.venmoUsername.replace('@', '')}`;
   }
 
-  async onVenmoBlur(): Promise<void> {
+  onVenmoBlur(): void {
+    if (!this.isGameOwner) {
+      this.tempVenmoUsername = this.venmoUsername;
+      return;
+    }
+
     if (this.tempVenmoUsername === this.venmoUsername) {
-      return; // No change, don't show password dialog
+      return;
     }
 
-    try {
-      const password = await new Promise<string>((resolve, reject) => {
-        const submitSub = this.passwordDialog.passwordSubmit.subscribe((pwd: string) => {
-          submitSub.unsubscribe();
-          cancelSub.unsubscribe();
-          resolve(pwd);
-        });
-        
-        const cancelSub = this.passwordDialog.cancel.subscribe(() => {
-          submitSub.unsubscribe();
-          cancelSub.unsubscribe();
-          reject();
-        });
-        
-        this.passwordDialog.open();
-      });
-
-      if (password === 'chattanooga' || password === 'password') {
-        this.venmoUsername = this.tempVenmoUsername;
-        this.onVenmoUsernameChange.emit(this.tempVenmoUsername);
-      } else {
-        alert('Incorrect password');
-        this.tempVenmoUsername = this.venmoUsername; // Reset on invalid password
-      }
-    } catch {
-      // User cancelled
-      this.tempVenmoUsername = this.venmoUsername; // Reset on cancel
-    }
+    this.venmoUsername = this.tempVenmoUsername;
+    this.onVenmoUsernameChange.emit(this.tempVenmoUsername);
   }
 
   onTeamChange(team: 'home' | 'away', name: string) {

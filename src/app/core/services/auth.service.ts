@@ -15,6 +15,7 @@ import {
   setPersistence
 } from 'firebase/auth';
 import { initializeApp, getApps } from 'firebase/app';
+import { Database, getDatabase, ref, set, get } from 'firebase/database';
 import { environment } from '../../../environments/environment';
 
 export interface AuthUser {
@@ -39,6 +40,7 @@ export class AuthService {
   private platformId = inject(PLATFORM_ID);
   // Lazy init required for SSR hydration - see CLAUDE.md "SSR Hydration Pattern"
   private _auth: Auth | null = null;
+  private _db: Database | null = null;
   private _authInitialized = false;
   private _authReadyPromise: Promise<void> | null = null;
   private _authReadyResolve: (() => void) | null = null;
@@ -76,6 +78,22 @@ export class AuthService {
       throw new Error('[AuthService] Auth not available - not in browser context');
     }
     return this._auth;
+  }
+
+  private get db(): Database {
+    if (!this._db && this.isBrowser) {
+      let app;
+      if (getApps().length === 0) {
+        app = initializeApp(environment.firebase);
+      } else {
+        app = getApps()[0];
+      }
+      this._db = getDatabase(app, environment.firebase.databaseURL);
+    }
+    if (!this._db) {
+      throw new Error('[AuthService] Database not available - not in browser context');
+    }
+    return this._db;
   }
 
   constructor() {
@@ -154,6 +172,10 @@ export class AuthService {
 
       this._currentUser.set(authUser);
       this.clearGuestCookie();
+      // Index email for manager lookup
+      if (user.email) {
+        this.indexUserEmail(user.email, user.uid);
+      }
       return authUser;
     } catch (error: any) {
       this._authError.set(this.getErrorMessage(error.code));
@@ -186,6 +208,10 @@ export class AuthService {
 
       this._currentUser.set(authUser);
       this.clearGuestCookie();
+      // Index email for manager lookup
+      if (email) {
+        this.indexUserEmail(email, result.user.uid);
+      }
       return authUser;
     } catch (error: any) {
       this._authError.set(this.getErrorMessage(error.code));
@@ -214,6 +240,10 @@ export class AuthService {
 
       this._currentUser.set(authUser);
       this.clearGuestCookie();
+      // Index email for manager lookup
+      if (email) {
+        this.indexUserEmail(email, user.uid);
+      }
       return authUser;
     } catch (error: any) {
       this._authError.set(this.getErrorMessage(error.code));
@@ -254,6 +284,21 @@ export class AuthService {
         createdAt: parseInt(currentUser.uid.replace('guest_', ''))
       };
       this.setGuestCookie(guestUser);
+      this._currentUser.set({
+        ...currentUser,
+        displayName: name.trim()
+      });
+    }
+  }
+
+  // Update display name for Firebase users
+  async updateDisplayName(name: string): Promise<void> {
+    const currentUser = this._currentUser();
+    if (!currentUser || currentUser.isGuest) return;
+
+    const firebaseUser = this.auth.currentUser;
+    if (firebaseUser) {
+      await updateProfile(firebaseUser, { displayName: name.trim() });
       this._currentUser.set({
         ...currentUser,
         displayName: name.trim()
@@ -307,6 +352,26 @@ export class AuthService {
   private clearGuestCookie(): void {
     if (!this.isBrowser) return;
     document.cookie = `${GUEST_COOKIE_KEY}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+  }
+
+  // Email index helpers for manager lookup
+  private sanitizeEmailForKey(email: string): string {
+    return email.toLowerCase().replace(/\./g, ',');
+  }
+
+  async indexUserEmail(email: string, uid: string): Promise<void> {
+    if (!this.isBrowser || !email) return;
+    const sanitized = this.sanitizeEmailForKey(email);
+    const emailRef = ref(this.db, `emailIndex/${sanitized}`);
+    await set(emailRef, uid);
+  }
+
+  async lookupUserByEmail(email: string): Promise<string | null> {
+    if (!this.isBrowser || !email) return null;
+    const sanitized = this.sanitizeEmailForKey(email);
+    const emailRef = ref(this.db, `emailIndex/${sanitized}`);
+    const snapshot = await get(emailRef);
+    return snapshot.exists() ? snapshot.val() : null;
   }
 
   // Error message helper

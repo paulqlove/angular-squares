@@ -43,6 +43,8 @@ export interface GameData {
   paidPlayers?: string[];
   espnEventId?: string;
   espnSport?: SportType;
+  managerId?: string;
+  managerEmail?: string;
 }
 
 export interface GameListItem {
@@ -55,6 +57,9 @@ export interface GameListItem {
   playerCount: number;
   squaresFilled: number;
   isLocked: boolean;
+  pricePerSquare: number;
+  managerId?: string;
+  managerEmail?: string;
 }
 
 @Injectable({
@@ -203,7 +208,9 @@ export class GameService {
           venmoUsername: rawData.venmoUsername || '',
           paidPlayers: rawData.paidPlayers || [],
           espnEventId: rawData.espnEventId || undefined,
-          espnSport: rawData.espnSport || undefined
+          espnSport: rawData.espnSport || undefined,
+          managerId: rawData.managerId || undefined,
+          managerEmail: rawData.managerEmail || undefined
         };
 
         // Convert squares from Firebase format
@@ -277,6 +284,12 @@ export class GameService {
     if (data.espnSport !== undefined) {
       updateData.espnSport = data.espnSport;
     }
+    if (data.managerId !== undefined) {
+      updateData.managerId = data.managerId;
+    }
+    if (data.managerEmail !== undefined) {
+      updateData.managerEmail = data.managerEmail;
+    }
 
     await update(gameRef, updateData);
   }
@@ -314,7 +327,9 @@ export class GameService {
         venmoUsername: rawData.venmoUsername || '',
         paidPlayers: rawData.paidPlayers || [],
         espnEventId: rawData.espnEventId || undefined,
-        espnSport: rawData.espnSport || undefined
+        espnSport: rawData.espnSport || undefined,
+        managerId: rawData.managerId || undefined,
+        managerEmail: rawData.managerEmail || undefined
       };
     }
 
@@ -355,7 +370,10 @@ export class GameService {
           createdAt: game.createdAt,
           playerCount: playerNames.size,
           squaresFilled: Object.keys(game.selectedSquares).length,
-          isLocked: game.isLocked
+          isLocked: game.isLocked,
+          pricePerSquare: game.pricePerSquare,
+          managerId: game.managerId,
+          managerEmail: game.managerEmail
         });
       }
     }
@@ -396,5 +414,15 @@ export class GameService {
   isGameOwner(userId: string): boolean {
     const game = this._currentGame.getValue();
     return game?.ownerId === userId;
+  }
+
+  // Update game manager
+  async updateGameManager(gameId: string, managerId: string | null, managerEmail: string | null): Promise<void> {
+    if (!this.isBrowser) return;
+    const gameRef = ref(this.db, `games/${gameId}`);
+    await update(gameRef, {
+      managerId: managerId || '',
+      managerEmail: managerEmail || ''
+    });
   }
 }
