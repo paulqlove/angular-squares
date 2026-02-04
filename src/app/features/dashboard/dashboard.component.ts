@@ -99,6 +99,18 @@ import {
                   placeholder="Game name (optional)"
                   class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none"
                 />
+                <div class="flex items-center gap-2">
+                  <label class="text-sm text-muted whitespace-nowrap">Price per square:</label>
+                  <div class="flex items-center gap-1">
+                    <span class="text-muted">$</span>
+                    <input
+                      type="number"
+                      [(ngModel)]="newGamePrice"
+                      min="0"
+                      class="w-20 px-3 py-2 border border-gray-200 rounded-lg focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none"
+                    />
+                  </div>
+                </div>
                 <select
                   [(ngModel)]="selectedEspnGameId"
                   class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none bg-white"
@@ -321,6 +333,7 @@ export class DashboardComponent implements OnInit {
   newGameName = '';
   joinGameCode = '';
   selectedEspnGameId = '';
+  newGamePrice = 10;
 
   constructor() {
     // Fetch ESPN games when form opens
@@ -394,7 +407,8 @@ export class DashboardComponent implements OnInit {
         this.newGameName.trim() || undefined,
         this.selectedEspnGameId || undefined,
         homeTeam,
-        awayTeam
+        awayTeam,
+        this.newGamePrice
       );
       this.router.navigate(['/game', gameId]);
     } catch (error) {
@@ -404,6 +418,7 @@ export class DashboardComponent implements OnInit {
       this.showCreateForm.set(false);
       this.newGameName = '';
       this.selectedEspnGameId = '';
+      this.newGamePrice = 10;
     }
   }
 

@@ -106,7 +106,8 @@ export class GameService {
     gameName?: string,
     espnEventId?: string,
     homeTeam?: string,
-    awayTeam?: string
+    awayTeam?: string,
+    pricePerSquare?: number
   ): Promise<string> {
     if (!this.isBrowser) throw new Error('Cannot create game on server');
     const gameId = this.generateGameId();
@@ -129,7 +130,7 @@ export class GameService {
       playerColors: {},
       winners: {},
       isLocked: false,
-      pricePerSquare: 10,
+      pricePerSquare: pricePerSquare ?? 10,
       isRandomized: false,
       homeTeam: homeTeam || '',
       awayTeam: awayTeam || '',
