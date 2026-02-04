@@ -41,10 +41,12 @@
     [pricePerSquare]="currentPrice"
     [isGameOwner]="isGameOwner()"
     [espnEventId]="espnEventId"
+    [espnSport]="espnSport"
     [espnGames]="espnGames()"
     [linkedEspnGame]="linkedEspnGame()"
     [isSyncingEspn]="isSyncingEspn()"
     [lastSyncTime]="lastSyncTime()"
+    [sportOptions]="sportOptions"
     (onRandomize)="randomizeNumbers()"
     (onToggleLock)="toggleLock()"
     (onVenmoUsernameChange)="onVenmoUsernameChange($event)"
@@ -55,7 +57,8 @@
     (onEspnGameChange)="linkEspnGame($event)"
     (onSyncEspn)="syncFromEspn()"
     (onUnlinkEspn)="unlinkEspnGame()"
-    (onRefreshEspnGames)="fetchEspnGames()">
+    (onRefreshEspnGames)="fetchEspnGames()"
+    (onSportChange)="onSportChange($event)">
   </app-header>
 
   <div class="container mx-auto">

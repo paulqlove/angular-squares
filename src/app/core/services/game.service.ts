@@ -15,6 +15,8 @@ import {
 import { Observable, BehaviorSubject } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
+export type SportType = 'nfl' | 'nba' | 'ncaam';
+
 export interface GameData {
   id?: string;
   name: string;
@@ -40,6 +42,7 @@ export interface GameData {
   venmoUsername?: string;
   paidPlayers?: string[];
   espnEventId?: string;
+  espnSport?: SportType;
 }
 
 export interface GameListItem {
@@ -107,7 +110,8 @@ export class GameService {
     espnEventId?: string,
     homeTeam?: string,
     awayTeam?: string,
-    pricePerSquare?: number
+    pricePerSquare?: number,
+    espnSport?: SportType
   ): Promise<string> {
     if (!this.isBrowser) throw new Error('Cannot create game on server');
     const gameId = this.generateGameId();
@@ -136,7 +140,8 @@ export class GameService {
       awayTeam: awayTeam || '',
       venmoUsername: '',
       paidPlayers: [],
-      espnEventId: espnEventId || undefined
+      espnEventId: espnEventId || undefined,
+      espnSport: espnSport || undefined
     };
 
     const gameRef = ref(this.db, `games/${gameId}`);
@@ -197,7 +202,8 @@ export class GameService {
           awayTeam: rawData.awayTeam || '',
           venmoUsername: rawData.venmoUsername || '',
           paidPlayers: rawData.paidPlayers || [],
-          espnEventId: rawData.espnEventId || undefined
+          espnEventId: rawData.espnEventId || undefined,
+          espnSport: rawData.espnSport || undefined
         };
 
         // Convert squares from Firebase format
@@ -268,6 +274,9 @@ export class GameService {
     if (data.espnEventId !== undefined) {
       updateData.espnEventId = data.espnEventId;
     }
+    if (data.espnSport !== undefined) {
+      updateData.espnSport = data.espnSport;
+    }
 
     await update(gameRef, updateData);
   }
@@ -304,7 +313,8 @@ export class GameService {
         awayTeam: rawData.awayTeam || '',
         venmoUsername: rawData.venmoUsername || '',
         paidPlayers: rawData.paidPlayers || [],
-        espnEventId: rawData.espnEventId || undefined
+        espnEventId: rawData.espnEventId || undefined,
+        espnSport: rawData.espnSport || undefined
       };
     }
 

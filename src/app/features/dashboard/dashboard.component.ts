@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { GameService, GameListItem } from '../../core/services/game.service';
-import { EspnService, EspnGame } from '../../core/services/espn.service';
+import { EspnService, EspnGame, SportType, SPORT_CONFIG } from '../../core/services/espn.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
   heroPlus,
@@ -111,15 +111,26 @@ import {
                     />
                   </div>
                 </div>
-                <select
-                  [(ngModel)]="selectedEspnGameId"
-                  class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none bg-white"
-                >
-                  <option value="">No live game (manual scores)</option>
-                  @for (game of espnGames(); track game.id) {
-                    <option [value]="game.id">{{ getEspnGameDisplay(game) }}</option>
-                  }
-                </select>
+                <div class="flex gap-2">
+                  <select
+                    [(ngModel)]="selectedSport"
+                    (ngModelChange)="onSportChange()"
+                    class="px-4 py-2 border border-gray-200 rounded-lg focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none bg-white"
+                  >
+                    @for (sport of sportOptions; track sport.value) {
+                      <option [value]="sport.value">{{ sport.label }}</option>
+                    }
+                  </select>
+                  <select
+                    [(ngModel)]="selectedEspnGameId"
+                    class="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none bg-white"
+                  >
+                    <option value="">No live game (manual scores)</option>
+                    @for (game of espnGames(); track game.id) {
+                      <option [value]="game.id">{{ getEspnGameDisplay(game) }}</option>
+                    }
+                  </select>
+                </div>
                 <div class="flex gap-2">
                   <button
                     (click)="createGame()"
@@ -332,8 +343,14 @@ export class DashboardComponent implements OnInit {
 
   newGameName = '';
   joinGameCode = '';
+  selectedSport: SportType = 'nfl';
   selectedEspnGameId = '';
   newGamePrice = 10;
+  sportOptions: { value: SportType; label: string }[] = [
+    { value: 'nfl', label: 'NFL' },
+    { value: 'nba', label: 'NBA' },
+    { value: 'ncaam', label: 'NCAA Basketball' }
+  ];
 
   constructor() {
     // Fetch ESPN games when form opens
@@ -366,8 +383,13 @@ export class DashboardComponent implements OnInit {
   }
 
   async fetchEspnGames(): Promise<void> {
-    const games = await this.espnService.getGames();
+    const games = await this.espnService.getGames(this.selectedSport);
     this.espnGames.set(games);
+  }
+
+  onSportChange(): void {
+    this.selectedEspnGameId = '';
+    this.fetchEspnGames();
   }
 
   getEspnGameDisplay(game: EspnGame): string {
@@ -408,7 +430,8 @@ export class DashboardComponent implements OnInit {
         this.selectedEspnGameId || undefined,
         homeTeam,
         awayTeam,
-        this.newGamePrice
+        this.newGamePrice,
+        this.selectedEspnGameId ? this.selectedSport : undefined
       );
       this.router.navigate(['/game', gameId]);
     } catch (error) {
@@ -417,6 +440,7 @@ export class DashboardComponent implements OnInit {
       this.isCreating.set(false);
       this.showCreateForm.set(false);
       this.newGameName = '';
+      this.selectedSport = 'nfl';
       this.selectedEspnGameId = '';
       this.newGamePrice = 10;
     }

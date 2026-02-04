@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GameService, GameData } from '../../core/services/game.service';
 import { AuthService } from '../../core/services/auth.service';
-import { EspnService, EspnGame } from '../../core/services/espn.service';
+import { EspnService, EspnGame, SportType, SPORT_CONFIG } from '../../core/services/espn.service';
 import { Subscription } from 'rxjs';
 import { GameBoardComponent } from './components/game-board/game-board.component';
 import { PlayersListComponent } from './components/players-list/players-list.component';
@@ -162,9 +162,15 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   espnGames = signal<EspnGame[]>([]);
   linkedEspnGame = signal<EspnGame | null>(null);
   espnEventId: string | undefined;
+  espnSport: SportType = 'nfl';
   isSyncingEspn = signal(false);
   espnSyncError = signal<string | null>(null);
   lastSyncTime = signal<Date | null>(null);
+  sportOptions: { value: SportType; label: string }[] = [
+    { value: 'nfl', label: 'NFL' },
+    { value: 'nba', label: 'NBA' },
+    { value: 'ncaam', label: 'NCAA Basketball' }
+  ];
 
   // Auto-polling for live scores
   private pollingInterval: ReturnType<typeof setInterval> | null = null;
@@ -227,6 +233,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           this.paidPlayers = new Set(data.paidPlayers || []);
           this.playerColors = data.playerColors || {};
           this.espnEventId = data.espnEventId;
+          this.espnSport = data.espnSport || 'nfl';
 
           // Check if current user is the game owner
           const user = this.authService.currentUser();
@@ -646,7 +653,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   // ESPN Sync Methods
   async fetchEspnGames(): Promise<void> {
     this.espnSyncError.set(null);
-    const games = await this.espnService.getGames();
+    const games = await this.espnService.getGames(this.espnSport);
     this.espnGames.set(games);
 
     // If we have a linked game, update its data
@@ -663,9 +670,17 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     }
   }
 
+  onSportChange(sport: SportType): void {
+    this.espnSport = sport;
+    this.espnGames.set([]);
+    this.fetchEspnGames();
+    // Save sport preference to game
+    this.gameService.updateGame(this.gameId, { espnSport: sport });
+  }
+
   async linkEspnGame(eventId: string): Promise<void> {
     this.espnEventId = eventId;
-    await this.gameService.updateGame(this.gameId, { espnEventId: eventId });
+    await this.gameService.updateGame(this.gameId, { espnEventId: eventId, espnSport: this.espnSport });
 
     const game = this.espnGames().find(g => g.id === eventId);
     this.linkedEspnGame.set(game || null);
@@ -701,7 +716,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     this.espnSyncError.set(null);
 
     try {
-      const game = await this.espnService.getGame(this.espnEventId);
+      const game = await this.espnService.getGame(this.espnEventId, this.espnSport);
       if (!game) {
         this.espnSyncError.set('Could not fetch game data from ESPN');
         return;
@@ -710,8 +725,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       this.linkedEspnGame.set(game);
       this.lastSyncTime.set(new Date());
 
-      // Map ESPN quarters to our scores format
-      // Pro Bowl uses 3 periods, regular games use 4 quarters
+      // Map ESPN quarters/halves to our scores format
       const newScores = {
         q1: { home: game.quarters[0]?.home || 0, away: game.quarters[0]?.away || 0 },
         q2: { home: game.quarters[1]?.home || 0, away: game.quarters[1]?.away || 0 },
@@ -719,7 +733,15 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
         q4: { home: game.quarters[3]?.home || 0, away: game.quarters[3]?.away || 0 }
       };
 
-      // For Pro Bowl (3 periods), use final score for Q4
+      // For 2-half sports (NCAA), H1 goes to Q1+Q2, H2 goes to Q3+Q4
+      if (this.espnSport === 'ncaam' && game.quarters.length === 2) {
+        newScores.q1 = { home: 0, away: 0 };
+        newScores.q2 = game.quarters[0] || { home: 0, away: 0 };
+        newScores.q3 = { home: 0, away: 0 };
+        newScores.q4 = game.quarters[1] || { home: 0, away: 0 };
+      }
+
+      // For Pro Bowl or other 3-period games, use final score for Q4
       if (game.quarters.length === 3 && game.status === 'post') {
         newScores.q4 = { home: game.homeScore, away: game.awayScore };
       }

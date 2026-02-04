@@ -1,6 +1,8 @@
 import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
+export type SportType = 'nfl' | 'nba' | 'ncaam';
+
 export interface EspnGame {
   id: string;
   name: string;
@@ -14,37 +16,48 @@ export interface EspnGame {
   quarters: { home: number; away: number }[];
 }
 
+export const SPORT_CONFIG: Record<SportType, { label: string; periods: number; periodLabel: string }> = {
+  nfl: { label: 'NFL', periods: 4, periodLabel: 'Q' },
+  nba: { label: 'NBA', periods: 4, periodLabel: 'Q' },
+  ncaam: { label: 'NCAA Basketball', periods: 2, periodLabel: 'H' }
+};
+
 @Injectable({
   providedIn: 'root'
 })
 export class EspnService {
   private platformId = inject(PLATFORM_ID);
-  private readonly API_URL = 'https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard';
+
+  private readonly API_URLS: Record<SportType, string> = {
+    nfl: 'https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard',
+    nba: 'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard',
+    ncaam: 'https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard'
+  };
 
   private get isBrowser(): boolean {
     return isPlatformBrowser(this.platformId);
   }
 
-  async getGames(): Promise<EspnGame[]> {
+  async getGames(sport: SportType = 'nfl'): Promise<EspnGame[]> {
     if (!this.isBrowser) return [];
 
     try {
-      const response = await fetch(this.API_URL);
+      const response = await fetch(this.API_URLS[sport]);
       const data = await response.json();
-      return this.parseGames(data);
+      return this.parseGames(data, sport);
     } catch (error) {
       console.error('Failed to fetch ESPN games:', error);
       return [];
     }
   }
 
-  async getGame(eventId: string): Promise<EspnGame | null> {
+  async getGame(eventId: string, sport: SportType = 'nfl'): Promise<EspnGame | null> {
     if (!this.isBrowser) return null;
 
     try {
-      const response = await fetch(`${this.API_URL}?event=${eventId}`);
+      const response = await fetch(`${this.API_URLS[sport]}?event=${eventId}`);
       const data = await response.json();
-      const games = this.parseGames(data);
+      const games = this.parseGames(data, sport);
       return games.find(g => g.id === eventId) || null;
     } catch (error) {
       console.error('Failed to fetch ESPN game:', error);
@@ -52,8 +65,10 @@ export class EspnService {
     }
   }
 
-  private parseGames(data: any): EspnGame[] {
+  private parseGames(data: any, sport: SportType): EspnGame[] {
     if (!data?.events) return [];
+
+    const periodCount = SPORT_CONFIG[sport].periods;
 
     return data.events.map((event: any) => {
       const competition = event.competitions?.[0];
@@ -65,7 +80,7 @@ export class EspnService {
       const quarters: { home: number; away: number }[] = [];
       const homeLinescores = homeCompetitor?.linescores || [];
       const awayLinescores = awayCompetitor?.linescores || [];
-      const maxPeriods = Math.max(homeLinescores.length, awayLinescores.length, 4);
+      const maxPeriods = Math.max(homeLinescores.length, awayLinescores.length, periodCount);
 
       for (let i = 0; i < maxPeriods; i++) {
         quarters.push({
@@ -76,7 +91,7 @@ export class EspnService {
 
       // Map status type to our status enum
       let gameStatus: 'pre' | 'in' | 'post' = 'pre';
-      if (status?.type?.name === 'STATUS_IN_PROGRESS') {
+      if (status?.type?.name === 'STATUS_IN_PROGRESS' || status?.type?.name === 'STATUS_HALFTIME') {
         gameStatus = 'in';
       } else if (status?.type?.name === 'STATUS_FINAL' || status?.type?.completed) {
         gameStatus = 'post';

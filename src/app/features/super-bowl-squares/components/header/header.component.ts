@@ -15,7 +15,7 @@ import { FormsModule } from '@angular/forms';
 import { ToggleComponent } from '../../../../components/ui/toggle/toggle.component';
 import { DialogComponent } from '../../../../components/ui/dialog/dialog.component';
 import { PasswordDialogComponent } from '../../components/password-dialog/password-dialog.component';
-import { EspnGame } from '../../../../core/services/espn.service';
+import { EspnGame, SportType, SPORT_CONFIG } from '../../../../core/services/espn.service';
 
 @Component({
   selector: 'app-header',
@@ -153,7 +153,7 @@ import { EspnGame } from '../../../../core/services/espn.service';
                       [class.bg-gray-600]="linkedEspnGame.status === 'pre'"
                     >
                       @if (linkedEspnGame.status === 'pre') { Upcoming }
-                      @else if (linkedEspnGame.status === 'in') { Q{{ linkedEspnGame.period }} {{ linkedEspnGame.clock }} }
+                      @else if (linkedEspnGame.status === 'in') { {{ getPeriodLabel() }}{{ linkedEspnGame.period }} {{ linkedEspnGame.clock }} }
                       @else { Final }
                     </span>
                   </div>
@@ -215,31 +215,42 @@ import { EspnGame } from '../../../../core/services/espn.service';
                   </button>
                 </div>
               } @else {
-                <!-- Game Selection -->
-                <div class="flex items-center gap-1.5">
+                <!-- Sport & Game Selection -->
+                <div class="space-y-2">
                   <select
-                    [(ngModel)]="selectedEspnGameId"
-                    class="flex-1 bg-input text-default text-sm border rounded px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-secondary-500"
+                    [ngModel]="espnSport"
+                    (ngModelChange)="onSportChange.emit($event)"
+                    class="w-full bg-input text-default text-sm border rounded px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-secondary-500"
                   >
-                    <option value="">Select ESPN game...</option>
-                    @for (game of espnGames; track game.id) {
-                      <option [value]="game.id">{{ getEspnGameDisplay(game) }}</option>
+                    @for (sport of sportOptions; track sport.value) {
+                      <option [value]="sport.value">{{ sport.label }}</option>
                     }
                   </select>
-                  <button
+                  <div class="flex items-center gap-1.5">
+                    <select
+                      [(ngModel)]="selectedEspnGameId"
+                      class="flex-1 bg-input text-default text-sm border rounded px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-secondary-500"
+                    >
+                      <option value="">Select game...</option>
+                      @for (game of espnGames; track game.id) {
+                        <option [value]="game.id">{{ getEspnGameDisplay(game) }}</option>
+                      }
+                    </select>
+                    <button
                     (click)="onRefreshEspnGames.emit()"
                     class="p-1.5 text-muted hover:text-heading hover:bg-gray-100 rounded transition-colors"
                     title="Refresh"
                   >
                     <ng-icon name="heroArrowPath" class="text-base"></ng-icon>
                   </button>
-                  <button
-                    (click)="linkEspnGame()"
-                    [disabled]="!selectedEspnGameId"
-                    class="px-3 py-1.5 text-sm bg-secondary-500 hover:bg-secondary-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded transition-colors"
-                  >
-                    Link
-                  </button>
+                    <button
+                      (click)="linkEspnGame()"
+                      [disabled]="!selectedEspnGameId"
+                      class="px-3 py-1.5 text-sm bg-secondary-500 hover:bg-secondary-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded transition-colors"
+                    >
+                      Link
+                    </button>
+                  </div>
                 </div>
               }
             </div>
@@ -369,10 +380,12 @@ export class HeaderComponent {
   @Input() pricePerSquare = 10;
   @Input() isGameOwner = false;
   @Input() espnEventId: string | undefined;
+  @Input() espnSport: SportType = 'nfl';
   @Input() espnGames: EspnGame[] = [];
   @Input() linkedEspnGame: EspnGame | null = null;
   @Input() isSyncingEspn = false;
   @Input() lastSyncTime: Date | null = null;
+  @Input() sportOptions: { value: SportType; label: string }[] = [];
 
   @Output() onRandomize = new EventEmitter<void>();
   @Output() onToggleLock = new EventEmitter<void>();
@@ -385,6 +398,7 @@ export class HeaderComponent {
   @Output() onSyncEspn = new EventEmitter<void>();
   @Output() onUnlinkEspn = new EventEmitter<void>();
   @Output() onRefreshEspnGames = new EventEmitter<void>();
+  @Output() onSportChange = new EventEmitter<SportType>();
 
   showSettings = false;
   showVenmoDialog = false;
@@ -491,5 +505,9 @@ export class HeaderComponent {
     if (minutes < 60) return `${minutes}m ago`;
     const hours = Math.floor(minutes / 60);
     return `${hours}h ago`;
+  }
+
+  getPeriodLabel(): string {
+    return SPORT_CONFIG[this.espnSport]?.periodLabel || 'Q';
   }
 } 
