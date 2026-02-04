@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject, effect } from '@angular/core';
+import { Component, OnInit, signal, inject, effect, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -14,7 +14,15 @@ import {
   heroTrash,
   heroLockClosed,
   heroUserGroup,
-  heroArrowTopRightOnSquare
+  heroArrowTopRightOnSquare,
+  heroXMark,
+  heroTrophy,
+  heroClock,
+  heroCheckCircle,
+  heroPencilSquare,
+  heroArrowRight,
+  heroTicket,
+  heroPlay
 } from '@ng-icons/heroicons/outline';
 
 @Component({
@@ -30,45 +38,56 @@ import {
       heroTrash,
       heroLockClosed,
       heroUserGroup,
-      heroArrowTopRightOnSquare
+      heroArrowTopRightOnSquare,
+      heroXMark,
+      heroTrophy,
+      heroClock,
+      heroCheckCircle,
+      heroPencilSquare,
+      heroArrowRight,
+      heroTicket,
+      heroPlay
     })
   ],
   template: `
-    <div class="min-h-screen bg-page">
-      <!-- Header -->
-      <header class="bg-white shadow-sm">
+    <div class="min-h-screen bg-primary-100">
+      <!-- Dark Header -->
+      <header class="bg-primary-800 shadow-lg">
         <div class="container mx-auto px-4 py-4 flex justify-between items-center">
           <div class="flex items-center gap-3">
-            <img src="assets/logo.png" alt="Logo" class="h-8 w-auto">
-            <h1 class="text-xl font-bold text-heading">Football Squares</h1>
+            <img src="assets/logo.png" alt="Logo" class="h-10 w-auto drop-shadow-lg">
+            <div>
+              <h1 class="text-xl font-bold text-white tracking-tight">Football Squares</h1>
+              <p class="text-xs text-primary-300">Super Bowl Squares Pool</p>
+            </div>
           </div>
 
-          <div class="flex items-center gap-4">
-            <div class="flex items-center gap-2">
+          <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 bg-primary-700/50 rounded-full px-3 py-1.5">
               @if (currentUser()?.photoURL) {
                 <img
                   [src]="currentUser()?.photoURL"
                   alt="Profile"
-                  class="w-8 h-8 rounded-full"
+                  class="w-7 h-7 rounded-full ring-2 ring-primary-500"
                 />
               } @else {
-                <div class="w-8 h-8 rounded-full bg-secondary-100 flex items-center justify-center">
-                  <span class="text-secondary-600 font-medium text-sm">
+                <div class="w-7 h-7 rounded-full bg-secondary-500 flex items-center justify-center">
+                  <span class="text-white font-semibold text-sm">
                     {{ currentUser()?.displayName?.charAt(0)?.toUpperCase() || '?' }}
                   </span>
                 </div>
               }
-              <span class="text-sm font-medium text-default hidden sm:inline">
+              <span class="text-sm font-medium text-white hidden sm:inline">
                 {{ currentUser()?.displayName }}
               </span>
               @if (currentUser()?.isGuest) {
-                <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">Guest</span>
+                <span class="text-xs bg-primary-600 text-primary-200 px-2 py-0.5 rounded-full">Guest</span>
               }
             </div>
 
             <button
               (click)="signOut()"
-              class="p-2 text-muted hover:text-heading rounded-lg hover:bg-gray-100 transition-colors"
+              class="p-2 text-primary-300 hover:text-white hover:bg-primary-700 rounded-full transition-colors"
               title="Sign out"
             >
               <ng-icon name="heroArrowRightOnRectangle" class="text-xl"></ng-icon>
@@ -78,216 +97,394 @@ import {
       </header>
 
       <main class="container mx-auto px-4 py-8">
-        <!-- Create Game Section -->
-        @if (canCreateGame()) {
-          <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
-            <h2 class="text-lg font-semibold text-heading mb-4">Create New Game</h2>
+        <!-- Hero Section -->
+        <div class="bg-gradient-to-br from-primary-700 to-primary-800 rounded-2xl shadow-xl p-8 mb-8">
+          <div class="flex items-center gap-3 mb-6">
+            <span class="text-3xl">🏈</span>
+            <h2 class="text-2xl font-bold text-white tracking-tight">Start or Join a Game</h2>
+          </div>
 
-            @if (!showCreateForm()) {
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Create Game Card -->
+            @if (canCreateGame()) {
               <button
-                (click)="showCreateForm.set(true)"
-                class="flex items-center gap-2 px-4 py-2 bg-secondary-500 hover:bg-secondary-600 text-white rounded-lg transition-colors"
+                (click)="openCreateModal()"
+                class="group bg-white/10 hover:bg-white/20 backdrop-blur border border-white/20 rounded-xl p-6 text-left transition-all hover:scale-[1.02] hover:shadow-lg"
               >
-                <ng-icon name="heroPlus" class="text-xl"></ng-icon>
-                New Game
-              </button>
-            } @else {
-              <div class="flex flex-col gap-3 max-w-md">
-                <input
-                  type="text"
-                  [(ngModel)]="newGameName"
-                  placeholder="Game name (optional)"
-                  class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none"
-                />
-                <div class="flex items-center gap-2">
-                  <label class="text-sm text-muted whitespace-nowrap">Price per square:</label>
-                  <div class="flex items-center gap-1">
-                    <span class="text-muted">$</span>
-                    <input
-                      type="number"
-                      [(ngModel)]="newGamePrice"
-                      min="0"
-                      class="w-20 px-3 py-2 border border-gray-200 rounded-lg focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none"
-                    />
+                <div class="flex items-center gap-4 mb-3">
+                  <div class="w-12 h-12 rounded-xl bg-secondary-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <ng-icon name="heroPlus" class="text-2xl text-white"></ng-icon>
+                  </div>
+                  <div>
+                    <h3 class="text-lg font-bold text-white">New Game</h3>
+                    <p class="text-sm text-primary-200">Create a squares pool</p>
                   </div>
                 </div>
-                <div class="flex gap-2">
-                  <select
-                    [(ngModel)]="selectedSport"
-                    (ngModelChange)="onSportChange()"
-                    class="px-4 py-2 border border-gray-200 rounded-lg focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none bg-white"
-                  >
-                    @for (sport of sportOptions; track sport.value) {
-                      <option [value]="sport.value">{{ sport.label }}</option>
-                    }
-                  </select>
-                  <select
-                    [(ngModel)]="selectedEspnGameId"
-                    class="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none bg-white"
-                  >
-                    <option value="">No live game (manual scores)</option>
-                    @for (game of espnGames(); track game.id) {
-                      <option [value]="game.id">{{ getEspnGameDisplay(game) }}</option>
-                    }
-                  </select>
+                <p class="text-sm text-primary-300">Set up your own game with custom settings and share it with friends.</p>
+              </button>
+            } @else {
+              <div class="bg-amber-500/20 backdrop-blur border border-amber-400/30 rounded-xl p-6">
+                <div class="flex items-center gap-4 mb-3">
+                  <div class="w-12 h-12 rounded-xl bg-amber-500 flex items-center justify-center">
+                    <ng-icon name="heroUserGroup" class="text-2xl text-white"></ng-icon>
+                  </div>
+                  <div>
+                    <h3 class="text-lg font-bold text-white">Guest Mode</h3>
+                    <p class="text-sm text-amber-200">Sign in to create games</p>
+                  </div>
                 </div>
-                <div class="flex gap-2">
-                  <button
-                    (click)="createGame()"
-                    [disabled]="isCreating()"
-                    class="px-4 py-2 bg-secondary-500 hover:bg-secondary-600 text-white rounded-lg transition-colors disabled:opacity-50"
-                  >
-                    @if (isCreating()) {
-                      Creating...
-                    } @else {
-                      Create
-                    }
-                  </button>
-                  <button
-                    (click)="showCreateForm.set(false)"
-                    class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
+                <p class="text-sm text-amber-100 mb-4">Create an account to host your own squares pools.</p>
+                <button
+                  (click)="signOut()"
+                  class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-lg text-sm font-medium transition-colors"
+                >
+                  Sign In
+                </button>
               </div>
             }
-          </div>
-        } @else {
-          <div class="bg-amber-50 border border-amber-200 rounded-xl p-6 mb-8">
-            <h2 class="text-lg font-semibold text-amber-800 mb-2">Guest Mode</h2>
-            <p class="text-amber-700 mb-4">
-              Sign in with Google or create an account to create your own games.
-            </p>
-            <button
-              (click)="signOut()"
-              class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors"
-            >
-              Sign In
-            </button>
-          </div>
-        }
 
-        <!-- Join Game Section -->
-        <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
-          <h2 class="text-lg font-semibold text-heading mb-4">Join a Game</h2>
-          <div class="flex flex-col sm:flex-row gap-3 max-w-md">
-            <input
-              type="text"
-              [(ngModel)]="joinGameCode"
-              placeholder="Enter game code"
-              class="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none uppercase tracking-widest font-mono"
-              maxlength="6"
-              (keyup.enter)="joinGame()"
-            />
-            <button
-              (click)="joinGame()"
-              [disabled]="joinGameCode.length !== 6"
-              class="px-4 py-2 bg-accent-500 hover:bg-accent-600 text-white rounded-lg transition-colors disabled:opacity-50"
-            >
-              Join Game
-            </button>
+            <!-- Join Game Card -->
+            <div class="bg-white/10 backdrop-blur border border-white/20 rounded-xl p-6">
+              <div class="flex items-center gap-4 mb-3">
+                <div class="w-12 h-12 rounded-xl bg-accent-500 flex items-center justify-center">
+                  <ng-icon name="heroTicket" class="text-2xl text-white"></ng-icon>
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold text-white">Join with Code</h3>
+                  <p class="text-sm text-primary-200">Have a 6-digit code?</p>
+                </div>
+              </div>
+              <div class="flex gap-2">
+                <input
+                  type="text"
+                  [(ngModel)]="joinGameCode"
+                  placeholder="XXXXXX"
+                  class="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-primary-400 uppercase tracking-widest font-mono text-center focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
+                  maxlength="6"
+                  (keyup.enter)="joinGame()"
+                />
+                <button
+                  (click)="joinGame()"
+                  [disabled]="joinGameCode.length !== 6"
+                  class="px-4 py-3 bg-accent-500 hover:bg-accent-400 disabled:bg-primary-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+                >
+                  <ng-icon name="heroArrowRight" class="text-xl"></ng-icon>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
         <!-- My Games Section -->
         @if (canCreateGame()) {
-          <div class="bg-white rounded-xl shadow-sm p-6">
-            <h2 class="text-lg font-semibold text-heading mb-4">My Games</h2>
+          <div class="mb-4">
+            <h2 class="text-xl font-bold text-primary-800 tracking-tight">My Games</h2>
+          </div>
 
-            @if (isLoadingGames()) {
-              <div class="flex items-center justify-center py-8">
-                <svg class="animate-spin h-8 w-8 text-secondary-500" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-                </svg>
+          @if (isLoadingGames()) {
+            <div class="flex items-center justify-center py-16">
+              <svg class="animate-spin h-10 w-10 text-secondary-500" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+              </svg>
+            </div>
+          } @else if (myGames().length === 0) {
+            <div class="bg-white rounded-2xl shadow-sm p-12 text-center">
+              <div class="w-20 h-20 rounded-full bg-primary-100 flex items-center justify-center mx-auto mb-4">
+                <ng-icon name="heroSquares2x2" class="text-4xl text-primary-400"></ng-icon>
               </div>
-            } @else if (myGames().length === 0) {
-              <div class="text-center py-8">
-                <ng-icon name="heroSquares2x2" class="text-4xl text-gray-300 mb-3"></ng-icon>
-                <p class="text-muted">No games yet. Create your first game above!</p>
-              </div>
-            } @else {
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                @for (game of myGames(); track game.id) {
-                  <div class="border border-gray-200 rounded-lg p-4 hover:border-secondary-300 transition-colors">
-                    <div class="flex items-start justify-between mb-3">
-                      <div>
-                        <h3 class="font-medium text-heading">{{ game.name }}</h3>
-                        <p class="text-sm text-muted">
-                          @if (game.homeTeam && game.awayTeam) {
-                            {{ game.awayTeam }} vs {{ game.homeTeam }}
-                          } @else {
-                            No teams set
-                          }
-                        </p>
-                      </div>
+              <h3 class="text-lg font-semibold text-primary-800 mb-2">No games yet</h3>
+              <p class="text-primary-500 mb-6">Create your first squares pool to get started!</p>
+              <button
+                (click)="openCreateModal()"
+                class="inline-flex items-center gap-2 px-6 py-3 bg-secondary-500 hover:bg-secondary-600 text-white rounded-xl font-medium transition-colors"
+              >
+                <ng-icon name="heroPlus" class="text-xl"></ng-icon>
+                Create Game
+              </button>
+            </div>
+          } @else {
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              @for (game of myGames(); track game.id) {
+                <div class="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all overflow-hidden group">
+                  <!-- Game Header -->
+                  <div class="bg-gradient-to-r from-primary-700 to-primary-800 p-4">
+                    <div class="flex items-center justify-between mb-2">
+                      <h3 class="font-bold text-white truncate">{{ game.name }}</h3>
                       @if (game.isLocked) {
-                        <ng-icon name="heroLockClosed" class="text-amber-500"></ng-icon>
+                        <span class="flex items-center gap-1 text-xs bg-amber-500 text-white px-2 py-1 rounded-full">
+                          <ng-icon name="heroLockClosed" class="text-xs"></ng-icon>
+                          Locked
+                        </span>
+                      } @else {
+                        <span class="flex items-center gap-1 text-xs bg-green-500 text-white px-2 py-1 rounded-full">
+                          <ng-icon name="heroPlay" class="text-xs"></ng-icon>
+                          Active
+                        </span>
                       }
                     </div>
+                    <p class="text-sm text-primary-200">
+                      @if (game.homeTeam && game.awayTeam) {
+                        {{ game.awayTeam }} vs {{ game.homeTeam }}
+                      } @else {
+                        <span class="italic">No teams set</span>
+                      }
+                    </p>
+                  </div>
 
-                    <div class="flex items-center gap-4 text-sm text-muted mb-4">
+                  <!-- Game Content -->
+                  <div class="p-4">
+                    <!-- Progress Bar -->
+                    <div class="mb-4">
+                      <div class="flex justify-between text-sm mb-1">
+                        <span class="text-primary-600">Squares Filled</span>
+                        <span class="font-semibold text-primary-800">{{ game.squaresFilled }}/100</span>
+                      </div>
+                      <div class="h-2 bg-primary-100 rounded-full overflow-hidden">
+                        <div
+                          class="h-full bg-gradient-to-r from-secondary-400 to-secondary-500 rounded-full transition-all duration-500"
+                          [style.width.%]="game.squaresFilled"
+                        ></div>
+                      </div>
+                    </div>
+
+                    <!-- Stats Row -->
+                    <div class="flex items-center gap-4 text-sm text-primary-500 mb-4">
                       <span class="flex items-center gap-1">
                         <ng-icon name="heroUserGroup" class="text-base"></ng-icon>
                         {{ game.playerCount }} players
                       </span>
-                      <span>{{ game.squaresFilled }}/100 squares</span>
+                      <span class="text-primary-300">|</span>
+                      <span class="font-mono text-xs bg-primary-100 px-2 py-0.5 rounded">{{ game.id }}</span>
                     </div>
 
+                    <!-- Actions -->
                     <div class="flex items-center gap-2">
                       <button
                         (click)="openGame(game.id)"
-                        class="flex-1 px-3 py-2 bg-secondary-500 hover:bg-secondary-600 text-white rounded-lg text-sm transition-colors"
+                        class="flex-1 px-4 py-2.5 bg-secondary-500 hover:bg-secondary-600 text-white rounded-xl font-medium transition-colors"
                       >
-                        Open
+                        Open Game
                       </button>
                       <button
                         (click)="shareGame(game.id)"
-                        class="p-2 text-muted hover:text-secondary-600 hover:bg-secondary-50 rounded-lg transition-colors"
+                        class="p-2.5 text-primary-400 hover:text-secondary-600 hover:bg-secondary-50 rounded-xl transition-colors"
                         title="Share game"
                       >
                         <ng-icon name="heroShare" class="text-lg"></ng-icon>
                       </button>
                       <button
                         (click)="deleteGame(game.id)"
-                        class="p-2 text-muted hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        class="p-2.5 text-primary-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
                         title="Delete game"
                       >
                         <ng-icon name="heroTrash" class="text-lg"></ng-icon>
                       </button>
                     </div>
-
-                    <div class="mt-3 pt-3 border-t border-gray-100">
-                      <div class="flex items-center justify-between text-xs text-muted">
-                        <span>Code: <code class="bg-gray-100 px-1.5 py-0.5 rounded font-mono">{{ game.id }}</code></span>
-                        <span>{{ formatDate(game.createdAt) }}</span>
-                      </div>
-                    </div>
                   </div>
-                }
-              </div>
-            }
-          </div>
+
+                  <!-- Footer -->
+                  <div class="px-4 py-3 bg-primary-50 border-t border-primary-100">
+                    <span class="text-xs text-primary-400">Created {{ formatDate(game.createdAt) }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
         }
       </main>
 
+      <!-- Create Game Modal -->
+      @if (showCreateModal()) {
+        <div
+          class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          (click)="showCreateModal.set(false)"
+        >
+          <div
+            class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-modal-in"
+            (click)="$event.stopPropagation()"
+          >
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-6 border-b border-primary-100">
+              <div>
+                <h3 class="text-xl font-bold text-primary-800">Create New Game</h3>
+                <p class="text-sm text-primary-500">Set up your squares pool</p>
+              </div>
+              <button
+                (click)="showCreateModal.set(false)"
+                class="p-2 text-primary-400 hover:text-primary-600 hover:bg-primary-100 rounded-lg transition-colors"
+              >
+                <ng-icon name="heroXMark" class="text-2xl"></ng-icon>
+              </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6 space-y-6">
+              <!-- Sport Tabs -->
+              <div>
+                <label class="block text-sm font-semibold text-primary-700 mb-3">Sport</label>
+                <div class="flex gap-2">
+                  @for (sport of sportOptions; track sport.value) {
+                    <button
+                      (click)="selectSport(sport.value)"
+                      [class]="selectedSport === sport.value
+                        ? 'px-6 py-2.5 bg-primary-800 text-white rounded-lg font-medium transition-colors'
+                        : 'px-6 py-2.5 bg-primary-100 text-primary-600 hover:bg-primary-200 rounded-lg font-medium transition-colors'"
+                    >
+                      {{ sport.label }}
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <!-- Game Selection -->
+              <div>
+                <label class="block text-sm font-semibold text-primary-700 mb-3">Select Game</label>
+                @if (isLoadingEspnGames()) {
+                  <div class="flex items-center justify-center py-8">
+                    <svg class="animate-spin h-6 w-6 text-secondary-500" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                    </svg>
+                  </div>
+                } @else {
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-64 overflow-y-auto">
+                    <!-- Manual Scores Option -->
+                    <button
+                      (click)="selectEspnGame('')"
+                      [class]="selectedEspnGameId === ''
+                        ? 'p-4 border-2 border-secondary-500 bg-secondary-50 rounded-xl text-left transition-all'
+                        : 'p-4 border-2 border-primary-200 hover:border-primary-300 rounded-xl text-left transition-all'"
+                    >
+                      <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-primary-200 flex items-center justify-center">
+                          <ng-icon name="heroPencilSquare" class="text-lg text-primary-600"></ng-icon>
+                        </div>
+                        <div>
+                          <p class="font-semibold text-primary-800">Manual Scores</p>
+                          <p class="text-xs text-primary-500">Enter scores yourself</p>
+                        </div>
+                      </div>
+                    </button>
+
+                    <!-- ESPN Games -->
+                    @for (game of espnGames(); track game.id) {
+                      <button
+                        (click)="selectEspnGame(game.id)"
+                        [class]="selectedEspnGameId === game.id
+                          ? 'p-4 border-2 border-secondary-500 bg-secondary-50 rounded-xl text-left transition-all'
+                          : 'p-4 border-2 border-primary-200 hover:border-primary-300 rounded-xl text-left transition-all'"
+                      >
+                        <div class="flex items-center justify-between mb-2">
+                          <span class="text-xs font-medium px-2 py-0.5 rounded-full"
+                            [class]="getGameStatusClass(game.status)">
+                            {{ getGameStatusText(game) }}
+                          </span>
+                        </div>
+                        <p class="font-semibold text-primary-800 text-sm">{{ game.awayTeam }} &#64; {{ game.homeTeam }}</p>
+                        @if (game.status !== 'pre') {
+                          <p class="text-xs text-primary-500 mt-1">{{ game.awayScore }} - {{ game.homeScore }}</p>
+                        }
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+
+              <!-- Price Selection -->
+              <div>
+                <label class="block text-sm font-semibold text-primary-700 mb-3">Price per Square</label>
+                <div class="flex flex-wrap gap-2">
+                  @for (price of pricePresets; track price) {
+                    <button
+                      (click)="selectPrice(price)"
+                      [class]="newGamePrice === price
+                        ? 'px-5 py-2.5 bg-secondary-500 text-white rounded-lg font-medium transition-colors'
+                        : 'px-5 py-2.5 bg-primary-100 text-primary-700 hover:bg-primary-200 rounded-lg font-medium transition-colors'"
+                    >
+                      {{ price === 0 ? 'Free' : '$' + price }}
+                    </button>
+                  }
+                  <div class="flex items-center gap-1 px-3 py-2 bg-primary-100 rounded-lg">
+                    <span class="text-primary-500">$</span>
+                    <input
+                      type="number"
+                      [(ngModel)]="customPrice"
+                      (ngModelChange)="onCustomPriceChange()"
+                      placeholder="Custom"
+                      min="0"
+                      class="w-16 bg-transparent text-primary-800 font-medium focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Game Name -->
+              <div>
+                <label class="block text-sm font-semibold text-primary-700 mb-3">Game Name <span class="text-primary-400 font-normal">(optional)</span></label>
+                <input
+                  type="text"
+                  [(ngModel)]="newGameName"
+                  placeholder="e.g., Super Bowl Party 2024"
+                  class="w-full px-4 py-3 border border-primary-200 rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none"
+                />
+              </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="flex items-center justify-end gap-3 p-6 border-t border-primary-100 bg-primary-50">
+              <button
+                (click)="showCreateModal.set(false)"
+                class="px-6 py-2.5 text-primary-600 hover:bg-primary-200 rounded-xl font-medium transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                (click)="createGame()"
+                [disabled]="isCreating()"
+                class="px-8 py-2.5 bg-secondary-500 hover:bg-secondary-600 disabled:opacity-50 text-white rounded-xl font-bold transition-colors"
+              >
+                @if (isCreating()) {
+                  <span class="flex items-center gap-2">
+                    <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                    </svg>
+                    Creating...
+                  </span>
+                } @else {
+                  Create Game
+                }
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+
       <!-- Share Modal -->
       @if (shareModalGameId()) {
-        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" (click)="shareModalGameId.set(null)">
-          <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6" (click)="$event.stopPropagation()">
-            <h3 class="text-lg font-semibold text-heading mb-4">Share Game</h3>
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" (click)="shareModalGameId.set(null)">
+          <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-modal-in" (click)="$event.stopPropagation()">
+            <div class="flex items-center justify-between p-6 border-b border-primary-100">
+              <h3 class="text-xl font-bold text-primary-800">Share Game</h3>
+              <button
+                (click)="shareModalGameId.set(null)"
+                class="p-2 text-primary-400 hover:text-primary-600 hover:bg-primary-100 rounded-lg transition-colors"
+              >
+                <ng-icon name="heroXMark" class="text-2xl"></ng-icon>
+              </button>
+            </div>
 
-            <div class="space-y-4">
+            <div class="p-6 space-y-5">
               <div>
-                <label class="block text-sm font-medium text-label mb-2">Game Code</label>
+                <label class="block text-sm font-semibold text-primary-700 mb-2">Game Code</label>
                 <div class="flex items-center gap-2">
-                  <code class="flex-1 bg-gray-100 px-4 py-3 rounded-lg font-mono text-xl tracking-widest text-center">
+                  <code class="flex-1 bg-primary-100 px-4 py-4 rounded-xl font-mono text-2xl tracking-widest text-center text-primary-800">
                     {{ shareModalGameId() }}
                   </code>
                   <button
                     (click)="copyToClipboard(shareModalGameId()!)"
-                    class="p-3 bg-secondary-500 hover:bg-secondary-600 text-white rounded-lg transition-colors"
+                    class="p-4 bg-secondary-500 hover:bg-secondary-600 text-white rounded-xl transition-colors"
                   >
                     Copy
                   </button>
@@ -295,17 +492,17 @@ import {
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-label mb-2">Share Link</label>
+                <label class="block text-sm font-semibold text-primary-700 mb-2">Share Link</label>
                 <div class="flex items-center gap-2">
                   <input
                     type="text"
                     [value]="getShareLink(shareModalGameId()!)"
                     readonly
-                    class="flex-1 px-3 py-2 bg-gray-100 rounded-lg text-sm truncate"
+                    class="flex-1 px-4 py-3 bg-primary-100 rounded-xl text-sm truncate text-primary-600"
                   />
                   <button
                     (click)="copyToClipboard(getShareLink(shareModalGameId()!))"
-                    class="p-2 bg-secondary-500 hover:bg-secondary-600 text-white rounded-lg transition-colors"
+                    class="px-4 py-3 bg-secondary-500 hover:bg-secondary-600 text-white rounded-xl transition-colors"
                   >
                     Copy
                   </button>
@@ -313,17 +510,34 @@ import {
               </div>
             </div>
 
-            <button
-              (click)="shareModalGameId.set(null)"
-              class="w-full mt-6 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
-            >
-              Close
-            </button>
+            <div class="p-6 border-t border-primary-100 bg-primary-50">
+              <button
+                (click)="shareModalGameId.set(null)"
+                class="w-full px-4 py-3 bg-primary-200 hover:bg-primary-300 text-primary-700 rounded-xl font-medium transition-colors"
+              >
+                Done
+              </button>
+            </div>
           </div>
         </div>
       }
     </div>
-  `
+  `,
+  styles: [`
+    @keyframes modal-in {
+      from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+    .animate-modal-in {
+      animation: modal-in 0.2s ease-out;
+    }
+  `]
 })
 export class DashboardComponent implements OnInit {
   private authService = inject(AuthService);
@@ -337,28 +551,23 @@ export class DashboardComponent implements OnInit {
   myGames = signal<GameListItem[]>([]);
   isLoadingGames = signal(true);
   isCreating = signal(false);
-  showCreateForm = signal(false);
+  showCreateModal = signal(false);
   shareModalGameId = signal<string | null>(null);
   espnGames = signal<EspnGame[]>([]);
+  isLoadingEspnGames = signal(false);
 
   newGameName = '';
   joinGameCode = '';
   selectedSport: SportType = 'nfl';
   selectedEspnGameId = '';
   newGamePrice = 10;
+  customPrice: number | null = null;
+
+  pricePresets = [0, 5, 10, 20, 50];
   sportOptions: { value: SportType; label: string }[] = [
     { value: 'nfl', label: 'NFL' },
     { value: 'nba', label: 'NBA' }
   ];
-
-  constructor() {
-    // Fetch ESPN games when form opens
-    effect(() => {
-      if (this.showCreateForm() && this.espnGames().length === 0) {
-        this.fetchEspnGames();
-      }
-    });
-  }
 
   ngOnInit(): void {
     this.loadMyGames();
@@ -381,37 +590,63 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  async fetchEspnGames(): Promise<void> {
-    const games = await this.espnService.getGames(this.selectedSport);
-    this.espnGames.set(games);
+  openCreateModal(): void {
+    this.showCreateModal.set(true);
+    this.fetchEspnGames();
   }
 
-  onSportChange(): void {
+  async fetchEspnGames(): Promise<void> {
+    this.isLoadingEspnGames.set(true);
+    try {
+      const games = await this.espnService.getGames(this.selectedSport);
+      this.espnGames.set(games);
+    } finally {
+      this.isLoadingEspnGames.set(false);
+    }
+  }
+
+  selectSport(sport: SportType): void {
+    this.selectedSport = sport;
     this.selectedEspnGameId = '';
     this.fetchEspnGames();
   }
 
-  getEspnGameDisplay(game: EspnGame): string {
-    let status = '';
-    if (game.status === 'pre') {
-      status = 'Upcoming';
-    } else if (game.status === 'in') {
-      status = `Q${game.period} ${game.clock}`;
-    } else {
-      status = 'Final';
+  selectEspnGame(gameId: string): void {
+    this.selectedEspnGameId = gameId;
+  }
+
+  selectPrice(price: number): void {
+    this.newGamePrice = price;
+    this.customPrice = null;
+  }
+
+  onCustomPriceChange(): void {
+    if (this.customPrice !== null && this.customPrice >= 0) {
+      this.newGamePrice = this.customPrice;
     }
-    return `${game.awayTeam} @ ${game.homeTeam} - ${status}`;
+  }
+
+  getGameStatusClass(status: string): string {
+    switch (status) {
+      case 'pre': return 'bg-primary-200 text-primary-700';
+      case 'in': return 'bg-red-100 text-red-700';
+      case 'post': return 'bg-green-100 text-green-700';
+      default: return 'bg-primary-200 text-primary-700';
+    }
+  }
+
+  getGameStatusText(game: EspnGame): string {
+    if (game.status === 'pre') return 'Upcoming';
+    if (game.status === 'in') return `LIVE - Q${game.period} ${game.clock}`;
+    return 'Final';
   }
 
   async createGame(): Promise<void> {
     const user = this.currentUser();
-    if (!user || user.isGuest) {
-      return;
-    }
+    if (!user || user.isGuest) return;
 
     this.isCreating.set(true);
     try {
-      // Get team names from ESPN game if selected
       let homeTeam: string | undefined;
       let awayTeam: string | undefined;
       if (this.selectedEspnGameId) {
@@ -437,12 +672,17 @@ export class DashboardComponent implements OnInit {
       console.error('Failed to create game:', error);
     } finally {
       this.isCreating.set(false);
-      this.showCreateForm.set(false);
-      this.newGameName = '';
-      this.selectedSport = 'nfl';
-      this.selectedEspnGameId = '';
-      this.newGamePrice = 10;
+      this.showCreateModal.set(false);
+      this.resetCreateForm();
     }
+  }
+
+  resetCreateForm(): void {
+    this.newGameName = '';
+    this.selectedSport = 'nfl';
+    this.selectedEspnGameId = '';
+    this.newGamePrice = 10;
+    this.customPrice = null;
   }
 
   joinGame(): void {
@@ -480,7 +720,6 @@ export class DashboardComponent implements OnInit {
   async copyToClipboard(text: string): Promise<void> {
     try {
       await navigator.clipboard.writeText(text);
-      // Could add a toast notification here
     } catch (error) {
       console.error('Failed to copy:', error);
     }

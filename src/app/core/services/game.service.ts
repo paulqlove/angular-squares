@@ -140,8 +140,8 @@ export class GameService {
       awayTeam: awayTeam || '',
       venmoUsername: '',
       paidPlayers: [],
-      espnEventId: espnEventId || undefined,
-      espnSport: espnSport || undefined
+      ...(espnEventId ? { espnEventId } : {}),
+      ...(espnSport ? { espnSport } : {})
     };
 
     const gameRef = ref(this.db, `games/${gameId}`);
