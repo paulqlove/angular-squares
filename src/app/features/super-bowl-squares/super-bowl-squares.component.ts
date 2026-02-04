@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -142,6 +142,12 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   paidPlayers: Set<string> = new Set();
   activeTab: 'board' | 'probabilities' = 'board';
 
+  // Injected services
+  private gameService = inject(GameService);
+  private authService = inject(AuthService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+
   // UI state
   isLoading = signal(true);
   gameNotFound = signal(false);
@@ -151,13 +157,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   // Auth state
   currentUser = this.authService.currentUser;
   isGameOwner = signal(false);
-
-  constructor(
-    private gameService: GameService,
-    private authService: AuthService,
-    private route: ActivatedRoute,
-    private router: Router
-  ) {}
 
   ngOnInit(): void {
     // Set current player from auth if available
@@ -189,9 +188,16 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Subscribe to game updates
+    // Subscribe to game updates (skip initial null from BehaviorSubject since we already verified game exists)
+    let isFirstEmission = true;
     this.subscription.add(
       this.gameService.subscribeToGame(gameId).subscribe((data: GameData | null) => {
+        // Skip the initial null emission from BehaviorSubject - we already verified game exists
+        if (isFirstEmission && !data) {
+          isFirstEmission = false;
+          return;
+        }
+        isFirstEmission = false;
         this.isLoading.set(false);
 
         if (data) {

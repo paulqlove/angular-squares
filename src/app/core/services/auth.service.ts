@@ -1,4 +1,5 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import {
   getAuth,
   signInWithPopup,
@@ -33,7 +34,10 @@ const GUEST_COOKIE_KEY = 'squares_guest_user';
   providedIn: 'root'
 })
 export class AuthService {
-  private auth: Auth;
+  private platformId = inject(PLATFORM_ID);
+  // Lazy init required for SSR hydration - see CLAUDE.md "SSR Hydration Pattern"
+  private _auth: Auth | null = null;
+  private _authInitialized = false;
   private _currentUser = signal<AuthUser | null>(null);
   private _isLoading = signal<boolean>(true);
   private _authError = signal<string | null>(null);
@@ -51,13 +55,29 @@ export class AuthService {
     return user !== null && !user.isGuest;
   });
 
-  constructor() {
-    // Initialize Firebase if not already initialized
-    if (getApps().length === 0) {
-      initializeApp(environment.firebase);
+  private get isBrowser(): boolean {
+    return isPlatformBrowser(this.platformId);
+  }
+
+  private get auth(): Auth {
+    if (!this._auth && this.isBrowser) {
+      if (getApps().length === 0) {
+        initializeApp(environment.firebase);
+      }
+      this._auth = getAuth();
     }
-    this.auth = getAuth();
-    this.initializeAuthState();
+    if (!this._auth) {
+      throw new Error('[AuthService] Auth not available - not in browser context');
+    }
+    return this._auth;
+  }
+
+  constructor() {
+    if (this.isBrowser) {
+      this.initializeAuthState();
+    } else {
+      this._isLoading.set(false);
+    }
   }
 
   private initializeAuthState(): void {
@@ -244,12 +264,14 @@ export class AuthService {
 
   // Cookie helpers
   private setGuestCookie(guestUser: GuestUser): void {
+    if (!this.isBrowser) return;
     const expires = new Date();
     expires.setDate(expires.getDate() + 30); // 30 days
     document.cookie = `${GUEST_COOKIE_KEY}=${encodeURIComponent(JSON.stringify(guestUser))}; expires=${expires.toUTCString()}; path=/; SameSite=Strict`;
   }
 
   private getGuestFromCookie(): GuestUser | null {
+    if (!this.isBrowser) return null;
     const cookies = document.cookie.split(';');
     for (const cookie of cookies) {
       const [name, value] = cookie.trim().split('=');
@@ -265,6 +287,7 @@ export class AuthService {
   }
 
   private clearGuestCookie(): void {
+    if (!this.isBrowser) return;
     document.cookie = `${GUEST_COOKIE_KEY}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
   }
 

@@ -1,4 +1,5 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { initializeApp, getApps } from 'firebase/app';
 import {
   Database,
@@ -56,19 +57,36 @@ export interface GameListItem {
   providedIn: 'root'
 })
 export class GameService {
-  private db: Database;
+  private platformId = inject(PLATFORM_ID);
+  // Lazy init required for SSR hydration - see CLAUDE.md "SSR Hydration Pattern"
+  private _db: Database | null = null;
   private currentGameId = signal<string | null>(null);
   private _currentGame = new BehaviorSubject<GameData | null>(null);
   private gameSubscription: (() => void) | null = null;
 
   currentGame$ = this._currentGame.asObservable();
 
-  constructor() {
-    if (getApps().length === 0) {
-      initializeApp(environment.firebase);
-    }
-    this.db = getDatabase();
+  private get isBrowser(): boolean {
+    return isPlatformBrowser(this.platformId);
   }
+
+  private get db(): Database {
+    if (!this._db && this.isBrowser) {
+      let app;
+      if (getApps().length === 0) {
+        app = initializeApp(environment.firebase);
+      } else {
+        app = getApps()[0];
+      }
+      this._db = getDatabase(app, environment.firebase.databaseURL);
+    }
+    if (!this._db) {
+      throw new Error('[GameService] Database not available - not in browser context');
+    }
+    return this._db;
+  }
+
+  constructor() {}
 
   // Generate a short, shareable game ID
   private generateGameId(): string {
@@ -82,6 +100,7 @@ export class GameService {
 
   // Create a new game
   async createGame(ownerId: string, ownerName: string, gameName?: string): Promise<string> {
+    if (!this.isBrowser) throw new Error('Cannot create game on server');
     const gameId = this.generateGameId();
 
     const defaultGameData: GameData = {
@@ -125,12 +144,18 @@ export class GameService {
 
   // Subscribe to a specific game
   subscribeToGame(gameId: string): Observable<GameData | null> {
+    if (!this.isBrowser) {
+      return this.currentGame$;
+    }
+
     // Unsubscribe from previous game
     if (this.gameSubscription) {
       this.gameSubscription();
       this.gameSubscription = null;
     }
 
+    // Reset to null before subscribing to new game
+    this._currentGame.next(null);
     this.currentGameId.set(gameId);
 
     const gameRef = ref(this.db, `games/${gameId}`);
@@ -182,6 +207,7 @@ export class GameService {
 
   // Update game data
   async updateGame(gameId: string, data: Partial<GameData>): Promise<void> {
+    if (!this.isBrowser) return;
     const gameRef = ref(this.db, `games/${gameId}`);
 
     const updateData: any = {};
@@ -234,6 +260,7 @@ export class GameService {
 
   // Get a game by ID (one-time fetch)
   async getGame(gameId: string): Promise<GameData | null> {
+    if (!this.isBrowser) return null;
     const gameRef = ref(this.db, `games/${gameId}`);
     const snapshot = await get(gameRef);
 
@@ -271,6 +298,7 @@ export class GameService {
 
   // Check if game exists
   async gameExists(gameId: string): Promise<boolean> {
+    if (!this.isBrowser) return false;
     const gameRef = ref(this.db, `games/${gameId}`);
     const snapshot = await get(gameRef);
     return snapshot.exists();
@@ -278,6 +306,7 @@ export class GameService {
 
   // Get games created by a user
   async getUserGames(userId: string): Promise<GameListItem[]> {
+    if (!this.isBrowser) return [];
     const userGamesRef = ref(this.db, `users/${userId}/games`);
     const snapshot = await get(userGamesRef);
 
@@ -311,6 +340,7 @@ export class GameService {
 
   // Delete a game
   async deleteGame(gameId: string, ownerId: string): Promise<void> {
+    if (!this.isBrowser) return;
     const gameRef = ref(this.db, `games/${gameId}`);
     const userGameRef = ref(this.db, `users/${ownerId}/games/${gameId}`);
 
