@@ -10,7 +10,9 @@ import {
   onAuthStateChanged,
   User,
   Auth,
-  updateProfile
+  updateProfile,
+  browserLocalPersistence,
+  setPersistence
 } from 'firebase/auth';
 import { initializeApp, getApps } from 'firebase/app';
 import { environment } from '../../../environments/environment';
@@ -65,6 +67,8 @@ export class AuthService {
         initializeApp(environment.firebase);
       }
       this._auth = getAuth();
+      // Set persistence to local storage so auth survives page refresh
+      setPersistence(this._auth, browserLocalPersistence);
     }
     if (!this._auth) {
       throw new Error('[AuthService] Auth not available - not in browser context');
