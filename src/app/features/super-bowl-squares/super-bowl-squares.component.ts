@@ -164,7 +164,10 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   espnEventId: string | undefined;
   isSyncingEspn = signal(false);
   espnSyncError = signal<string | null>(null);
-  showEspnSection = signal(false);
+  lastSyncTime = signal<Date | null>(null);
+
+  // Auto-polling for live scores
+  private pollingInterval: ReturnType<typeof setInterval> | null = null;
 
   ngOnInit(): void {
     // Set current player from auth if available
@@ -240,6 +243,11 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           if (Object.values(this.scores).some(score => score.home > 0 || score.away > 0)) {
             this.calculateWinners();
           }
+
+          // Fetch ESPN games if owner and load linked game data
+          if (this.isGameOwner() && this.espnGames().length === 0) {
+            this.fetchEspnGames();
+          }
         } else {
           this.gameNotFound.set(true);
         }
@@ -250,6 +258,23 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
     this.gameService.unsubscribe();
+    this.stopPolling();
+  }
+
+  private startPolling(): void {
+    if (this.pollingInterval) return;
+    this.pollingInterval = setInterval(() => {
+      if (this.espnEventId && this.linkedEspnGame()?.status === 'in') {
+        this.syncFromEspn();
+      }
+    }, 30000); // 30 seconds
+  }
+
+  private stopPolling(): void {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+      this.pollingInterval = null;
+    }
   }
 
   private calculatePlayerStats(): void {
@@ -619,13 +644,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   }
 
   // ESPN Sync Methods
-  toggleEspnSection(): void {
-    this.showEspnSection.set(!this.showEspnSection());
-    if (this.showEspnSection() && this.espnGames().length === 0) {
-      this.fetchEspnGames();
-    }
-  }
-
   async fetchEspnGames(): Promise<void> {
     this.espnSyncError.set(null);
     const games = await this.espnService.getGames();
@@ -635,6 +653,13 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     if (this.espnEventId) {
       const linked = games.find(g => g.id === this.espnEventId);
       this.linkedEspnGame.set(linked || null);
+
+      // Start/stop polling based on game status
+      if (linked?.status === 'in') {
+        this.startPolling();
+      } else {
+        this.stopPolling();
+      }
     }
   }
 
@@ -654,11 +679,18 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
         awayTeam: game.awayTeam
       });
     }
+
+    // Start polling if game is in progress
+    if (game?.status === 'in') {
+      this.startPolling();
+    }
   }
 
   async unlinkEspnGame(): Promise<void> {
     this.espnEventId = undefined;
     this.linkedEspnGame.set(null);
+    this.lastSyncTime.set(null);
+    this.stopPolling();
     await this.gameService.updateGame(this.gameId, { espnEventId: '' });
   }
 
@@ -676,6 +708,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       }
 
       this.linkedEspnGame.set(game);
+      this.lastSyncTime.set(new Date());
 
       // Map ESPN quarters to our scores format
       // Pro Bowl uses 3 periods, regular games use 4 quarters
@@ -694,26 +727,17 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       this.scores = newScores;
       await this.gameService.updateGame(this.gameId, { scores: newScores });
       this.calculateWinners();
+
+      // Stop polling if game has ended
+      if (game.status === 'post') {
+        this.stopPolling();
+      } else if (game.status === 'in' && !this.pollingInterval) {
+        this.startPolling();
+      }
     } catch (error) {
       this.espnSyncError.set('Failed to sync scores from ESPN');
     } finally {
       this.isSyncingEspn.set(false);
     }
-  }
-
-  getEspnGameDisplay(game: EspnGame): string {
-    let status = '';
-    if (game.status === 'pre') {
-      status = 'Upcoming';
-    } else if (game.status === 'in') {
-      status = `Q${game.period} ${game.clock}`;
-    } else {
-      status = 'Final';
-    }
-    return `${game.awayTeam} @ ${game.homeTeam} - ${status} (${game.awayScore}-${game.homeScore})`;
-  }
-
-  getQuarterScore(game: EspnGame, quarter: number, team: 'home' | 'away'): number {
-    return game.quarters[quarter]?.[team] ?? 0;
   }
 }

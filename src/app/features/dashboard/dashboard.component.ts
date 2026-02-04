@@ -1,9 +1,10 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { GameService, GameListItem } from '../../core/services/game.service';
+import { EspnService, EspnGame } from '../../core/services/espn.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
   heroPlus,
@@ -91,13 +92,22 @@ import {
                 New Game
               </button>
             } @else {
-              <div class="flex flex-col sm:flex-row gap-3 max-w-md">
+              <div class="flex flex-col gap-3 max-w-md">
                 <input
                   type="text"
                   [(ngModel)]="newGameName"
                   placeholder="Game name (optional)"
-                  class="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none"
+                  class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none"
                 />
+                <select
+                  [(ngModel)]="selectedEspnGameId"
+                  class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none bg-white"
+                >
+                  <option value="">No live game (manual scores)</option>
+                  @for (game of espnGames(); track game.id) {
+                    <option [value]="game.id">{{ getEspnGameDisplay(game) }}</option>
+                  }
+                </select>
                 <div class="flex gap-2">
                   <button
                     (click)="createGame()"
@@ -293,6 +303,11 @@ import {
   `
 })
 export class DashboardComponent implements OnInit {
+  private authService = inject(AuthService);
+  private gameService = inject(GameService);
+  private espnService = inject(EspnService);
+  private router = inject(Router);
+
   currentUser = this.authService.currentUser;
   canCreateGame = this.authService.canCreateGame;
 
@@ -301,15 +316,20 @@ export class DashboardComponent implements OnInit {
   isCreating = signal(false);
   showCreateForm = signal(false);
   shareModalGameId = signal<string | null>(null);
+  espnGames = signal<EspnGame[]>([]);
 
   newGameName = '';
   joinGameCode = '';
+  selectedEspnGameId = '';
 
-  constructor(
-    private authService: AuthService,
-    private gameService: GameService,
-    private router: Router
-  ) {}
+  constructor() {
+    // Fetch ESPN games when form opens
+    effect(() => {
+      if (this.showCreateForm() && this.espnGames().length === 0) {
+        this.fetchEspnGames();
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.loadMyGames();
@@ -332,16 +352,49 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  async fetchEspnGames(): Promise<void> {
+    const games = await this.espnService.getGames();
+    this.espnGames.set(games);
+  }
+
+  getEspnGameDisplay(game: EspnGame): string {
+    let status = '';
+    if (game.status === 'pre') {
+      status = 'Upcoming';
+    } else if (game.status === 'in') {
+      status = `Q${game.period} ${game.clock}`;
+    } else {
+      status = 'Final';
+    }
+    return `${game.awayTeam} @ ${game.homeTeam} - ${status}`;
+  }
+
   async createGame(): Promise<void> {
     const user = this.currentUser();
-    if (!user || user.isGuest) return;
+    if (!user || user.isGuest) {
+      return;
+    }
 
     this.isCreating.set(true);
     try {
+      // Get team names from ESPN game if selected
+      let homeTeam: string | undefined;
+      let awayTeam: string | undefined;
+      if (this.selectedEspnGameId) {
+        const espnGame = this.espnGames().find(g => g.id === this.selectedEspnGameId);
+        if (espnGame) {
+          homeTeam = espnGame.homeTeam;
+          awayTeam = espnGame.awayTeam;
+        }
+      }
+
       const gameId = await this.gameService.createGame(
         user.uid,
         user.displayName || 'Unknown',
-        this.newGameName.trim() || undefined
+        this.newGameName.trim() || undefined,
+        this.selectedEspnGameId || undefined,
+        homeTeam,
+        awayTeam
       );
       this.router.navigate(['/game', gameId]);
     } catch (error) {
@@ -350,6 +403,7 @@ export class DashboardComponent implements OnInit {
       this.isCreating.set(false);
       this.showCreateForm.set(false);
       this.newGameName = '';
+      this.selectedEspnGameId = '';
     }
   }
 

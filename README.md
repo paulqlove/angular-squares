@@ -1,59 +1,74 @@
-# AngularSquares
+# Football Squares (Angular Squares)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.1.1.
+Real-time multiplayer Super Bowl squares game with Firebase backend.
 
-## Development server
+## Tech Stack
 
-To start a local development server, run:
+| Layer | Technology |
+|-------|------------|
+| **Frontend** | Angular 17 (standalone components) |
+| **Styling** | Tailwind CSS 3.4 + SCSS |
+| **State** | Angular Signals + RxJS |
+| **Backend** | Firebase (Auth + Realtime Database) |
+| **Deployment** | GitHub Pages |
 
-```bash
-ng serve
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Angular App                          │
+├─────────────────────────────────────────────────────────┤
+│  Routes: / (welcome) | /dashboard | /game/:gameId       │
+├─────────────────────────────────────────────────────────┤
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐     │
+│  │ AuthService │  │ GameService │  │  Firebase   │     │
+│  │  (Signals)  │  │ (RxJS/RTDB) │  │    Auth     │     │
+│  └─────────────┘  └─────────────┘  └─────────────┘     │
+└─────────────────────────────────────────────────────────┘
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Key Directories
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
+```
+src/app/
+├── core/           # Services (Auth, Game), guards
+├── features/       # Pages (welcome, dashboard, super-bowl-squares)
+├── components/ui/  # Reusable components (toggle, dialog)
+└── shared/         # Directives, utilities
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Getting Started
 
+### Prerequisites
+- Node.js 18+
+- npm
+
+### Installation
 ```bash
-ng generate --help
+npm install
+npm start  # Dev server at localhost:4200
 ```
 
-## Building
+### Scripts
 
-To build the project run:
+| Command | Description |
+|---------|-------------|
+| `npm start` | Dev server |
+| `npm run build` | Production build |
+| `npm test` | Run Karma + Jasmine tests |
 
-```bash
-ng build
-```
+## Features
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+- 10x10 game board with player colors (31 color variants)
+- Real-time score tracking (4 quarters)
+- Number randomization with animation
+- Payment tracking (Venmo integration)
+- Probability heatmap (historical NFL data)
+- Multi-game support with shareable 6-character codes
+- Google/Email/Guest authentication
+- Game ownership and permissions
 
-## Running unit tests
+## Documentation
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- [Enhancement Plan](./ENHANCEMENT_PLAN.md) - Full roadmap
+- [TODO](./docs/TODO.md) - Current task tracking

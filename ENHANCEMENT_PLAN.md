@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-This document outlines a comprehensive enhancement plan for the Angular Squares (Football Squares) application. The plan covers four major areas: Google Authentication integration, Supabase backend migration, 3rd party NFL API integration for live scores, and design aesthetic improvements.
+This document outlines a comprehensive enhancement plan for the Angular Squares (Football Squares) application. The plan covers three major areas: Google Authentication integration, 3rd party NFL API integration for live scores, and design aesthetic improvements.
 
 ---
 
@@ -75,17 +75,7 @@ src/app/
 
 The following enhancements from the original plan are still pending:
 
-### Phase 2: Supabase Migration (Optional)
-- Migrate from Firebase to Supabase PostgreSQL
-- Row Level Security policies
-- Better data normalization
-
-### Phase 3: Live Score API Integration
-- ESPN API integration for automatic score updates
-- Real-time game linking
-- Quarter detection
-
-### Phase 4: Design Improvements
+### Phase 2: Design Improvements
 - Dark mode
 - Accessibility fixes
 - Loading skeletons
@@ -203,198 +193,7 @@ interface GameData {
 
 ---
 
-## Enhancement 2: Supabase Backend Migration
-
-### Current Firebase Architecture
-- Firebase Realtime Database at `games/default-game`
-- Direct SDK integration (no backend server)
-- Credentials embedded in `environment.ts`
-- Single shared game document
-
-### Proposed Supabase Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        Supabase                              │
-├─────────────────┬─────────────────┬─────────────────────────┤
-│   PostgreSQL    │   Auth (OAuth)  │   Realtime              │
-│   Database      │   Google SSO    │   Subscriptions         │
-├─────────────────┴─────────────────┴─────────────────────────┤
-│                    Row Level Security                        │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### Database Schema Design
-
-```sql
--- Users table (managed by Supabase Auth, extended with profile)
-CREATE TABLE profiles (
-  id UUID REFERENCES auth.users PRIMARY KEY,
-  display_name TEXT,
-  avatar_url TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Games table
-CREATE TABLE games (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  owner_id UUID REFERENCES profiles(id),
-  name TEXT NOT NULL DEFAULT 'Football Squares',
-  home_team TEXT NOT NULL DEFAULT 'Chiefs',
-  away_team TEXT NOT NULL DEFAULT 'Eagles',
-  price_per_square DECIMAL(10,2) DEFAULT 10.00,
-  is_locked BOOLEAN DEFAULT FALSE,
-  is_randomized BOOLEAN DEFAULT FALSE,
-  home_numbers INTEGER[] DEFAULT ARRAY[0,1,2,3,4,5,6,7,8,9],
-  away_numbers INTEGER[] DEFAULT ARRAY[0,1,2,3,4,5,6,7,8,9],
-  venmo_username TEXT,
-  visibility TEXT DEFAULT 'public' CHECK (visibility IN ('public', 'private')),
-  invite_code TEXT UNIQUE,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Squares table (normalized from selectedSquares object)
-CREATE TABLE squares (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  game_id UUID REFERENCES games(id) ON DELETE CASCADE,
-  row_index INTEGER NOT NULL CHECK (row_index >= 0 AND row_index <= 9),
-  col_index INTEGER NOT NULL CHECK (col_index >= 0 AND col_index <= 9),
-  player_name TEXT NOT NULL,
-  player_id UUID REFERENCES profiles(id),
-  color_class TEXT,
-  is_paid BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(game_id, row_index, col_index)
-);
-
--- Scores table
-CREATE TABLE scores (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  game_id UUID REFERENCES games(id) ON DELETE CASCADE,
-  quarter INTEGER NOT NULL CHECK (quarter >= 1 AND quarter <= 4),
-  home_score INTEGER DEFAULT 0,
-  away_score INTEGER DEFAULT 0,
-  is_final BOOLEAN DEFAULT FALSE,
-  updated_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(game_id, quarter)
-);
-
--- Winners table
-CREATE TABLE winners (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  game_id UUID REFERENCES games(id) ON DELETE CASCADE,
-  quarter INTEGER NOT NULL CHECK (quarter >= 1 AND quarter <= 4),
-  player_name TEXT NOT NULL,
-  player_id UUID REFERENCES profiles(id),
-  payout_amount DECIMAL(10,2),
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(game_id, quarter)
-);
-
--- Row Level Security Policies
-ALTER TABLE games ENABLE ROW LEVEL SECURITY;
-ALTER TABLE squares ENABLE ROW LEVEL SECURITY;
-ALTER TABLE scores ENABLE ROW LEVEL SECURITY;
-ALTER TABLE winners ENABLE ROW LEVEL SECURITY;
-
--- Games: Anyone can view public games, only owner can modify
-CREATE POLICY "Public games are viewable by everyone" ON games
-  FOR SELECT USING (visibility = 'public');
-
-CREATE POLICY "Game owners can do everything" ON games
-  FOR ALL USING (auth.uid() = owner_id);
-
--- Squares: Players can claim unclaimed squares in unlocked games
-CREATE POLICY "Squares viewable in accessible games" ON squares
-  FOR SELECT USING (
-    EXISTS (SELECT 1 FROM games WHERE id = game_id AND visibility = 'public')
-  );
-
-CREATE POLICY "Players can claim squares in unlocked games" ON squares
-  FOR INSERT WITH CHECK (
-    EXISTS (SELECT 1 FROM games WHERE id = game_id AND is_locked = FALSE)
-  );
-```
-
-### Migration Implementation Tasks
-
-#### Phase 1: Supabase Setup
-| Task | Description | Priority |
-|------|-------------|----------|
-| 1.1 | Create Supabase project | High |
-| 1.2 | Design and implement database schema | High |
-| 1.3 | Configure Row Level Security policies | High |
-| 1.4 | Set up Google OAuth in Supabase Auth | High |
-| 1.5 | Install `@supabase/supabase-js` package | High |
-
-#### Phase 2: Service Layer Migration
-| Task | Description | Priority |
-|------|-------------|----------|
-| 2.1 | Create `SupabaseService` for client initialization | High |
-| 2.2 | Migrate `FirebaseService` methods to Supabase | High |
-| 2.3 | Implement Supabase Realtime subscriptions | High |
-| 2.4 | Create data migration script for existing Firebase data | Medium |
-| 2.5 | Update environment configuration | High |
-
-#### Phase 3: Feature Updates
-| Task | Description | Priority |
-|------|-------------|----------|
-| 3.1 | Update components to use new service methods | High |
-| 3.2 | Implement optimistic updates for better UX | Medium |
-| 3.3 | Add offline support with local caching | Low |
-| 3.4 | Create multi-game support (game list, game creation) | Medium |
-
-### New Service Structure
-```typescript
-// src/app/core/services/supabase.service.ts
-@Injectable({ providedIn: 'root' })
-export class SupabaseService {
-  private supabase: SupabaseClient;
-
-  // Authentication
-  signInWithGoogle(): Promise<AuthResponse>;
-  signOut(): Promise<void>;
-  getSession(): Promise<Session | null>;
-  onAuthStateChange(callback: (event, session) => void): Subscription;
-
-  // Games
-  createGame(game: Partial<Game>): Promise<Game>;
-  getGame(id: string): Promise<Game>;
-  getGames(): Promise<Game[]>;
-  updateGame(id: string, updates: Partial<Game>): Promise<Game>;
-  deleteGame(id: string): Promise<void>;
-  subscribeToGame(id: string, callback: (game: Game) => void): RealtimeChannel;
-
-  // Squares
-  claimSquare(gameId: string, row: number, col: number, playerName: string): Promise<Square>;
-  releaseSquare(gameId: string, row: number, col: number): Promise<void>;
-  getSquares(gameId: string): Promise<Square[]>;
-  subscribeToSquares(gameId: string, callback: (squares: Square[]) => void): RealtimeChannel;
-
-  // Scores
-  updateScore(gameId: string, quarter: number, homeScore: number, awayScore: number): Promise<Score>;
-  getScores(gameId: string): Promise<Score[]>;
-  subscribeToScores(gameId: string, callback: (scores: Score[]) => void): RealtimeChannel;
-}
-```
-
-### Environment Configuration
-```typescript
-// src/environments/environment.ts
-export const environment = {
-  production: false,
-  supabase: {
-    url: 'https://your-project.supabase.co',
-    anonKey: 'your-anon-key'
-  }
-};
-```
-
----
-
-## Enhancement 3: 3rd Party API for Live Scores
+## Enhancement 2: 3rd Party API for Live Scores
 
 ### Current Score Management
 - Manual entry via `ScoreInputComponent`
@@ -559,7 +358,7 @@ export class LiveScoreService {
 
 ---
 
-## Enhancement 4: Design Aesthetic Analysis & Improvements
+## Enhancement 3: Design Aesthetic Analysis & Improvements
 
 ### Current Design Assessment
 
@@ -738,40 +537,29 @@ export class ThemeService {
 ## Implementation Roadmap
 
 ### Sprint 1: Authentication Foundation (Week 1-2)
-- [ ] Set up Supabase project
-- [ ] Configure Google OAuth
-- [ ] Create AuthService and AuthGuard
-- [ ] Build login page UI
-- [ ] Implement session management
+- [x] Configure Firebase Auth with Google OAuth
+- [x] Create AuthService and AuthGuard
+- [x] Build login page UI
+- [x] Implement session management
 
-### Sprint 2: Database Migration (Week 3-4)
-- [ ] Design and create Supabase schema
-- [ ] Implement Row Level Security
-- [ ] Create SupabaseService
-- [ ] Migrate FirebaseService methods
-- [ ] Set up Realtime subscriptions
-- [ ] Data migration from Firebase
+### Sprint 2: Live Scores (Week 3-4)
+- [x] Build EspnService for API integration
+- [x] Add NFL game selection UI
+- [x] Implement score polling (30s auto-sync)
+- [x] Add live indicator UI
 
-### Sprint 3: Live Scores (Week 5-6)
-- [ ] Create Edge Function for ESPN API
-- [ ] Build LiveScoreService
-- [ ] Add NFL game selection UI
-- [ ] Implement score polling
-- [ ] Add live indicator UI
-
-### Sprint 4: Design Enhancements (Week 7-8)
+### Sprint 3: Design Enhancements (Week 5-6)
 - [ ] Fix accessibility issues
 - [ ] Implement button variants
 - [ ] Add loading states
 - [ ] Build dark mode
 - [ ] Polish animations
 
-### Sprint 5: Testing & Launch (Week 9-10)
+### Sprint 4: Testing & Launch (Week 7-8)
 - [ ] End-to-end testing
 - [ ] Performance optimization
 - [ ] Documentation updates
 - [ ] Staged rollout
-- [ ] Firebase deprecation
 
 ---
 
@@ -780,8 +568,7 @@ export class ThemeService {
 | Risk | Probability | Impact | Mitigation |
 |------|-------------|--------|------------|
 | ESPN API changes/blocks | Medium | High | Implement fallback to manual entry |
-| Supabase downtime | Low | High | Add offline caching |
-| Data migration errors | Medium | Medium | Thorough testing, rollback plan |
+| Firebase downtime | Low | High | Add offline caching |
 | OAuth token issues | Low | Medium | Implement refresh token handling |
 | User adoption friction | Medium | Medium | Clear onboarding, preserve anonymous access |
 
@@ -806,45 +593,32 @@ src/app/
 ├── core/
 │   ├── guards/
 │   │   └── auth.guard.ts
-│   ├── interceptors/
-│   │   └── auth.interceptor.ts
 │   ├── services/
-│   │   ├── supabase.service.ts      # Replaces firebase.service.ts
-│   │   ├── auth.service.ts          # New
-│   │   ├── live-score.service.ts    # New
-│   │   └── theme.service.ts         # New
+│   │   ├── auth.service.ts          # Firebase Auth
+│   │   ├── game.service.ts          # Firebase Realtime DB
+│   │   ├── espn.service.ts          # ESPN API integration
+│   │   └── theme.service.ts         # Future: dark mode
 │   └── models/
 │       ├── user.model.ts
 │       ├── game.model.ts
 │       └── score.model.ts
 ├── features/
-│   ├── auth/
-│   │   ├── login/
-│   │   ├── callback/
-│   │   └── components/
-│   │       ├── google-sign-in-button/
-│   │       └── user-menu/
+│   ├── welcome/
+│   │   └── welcome.component.ts
+│   ├── dashboard/
+│   │   └── dashboard.component.ts
 │   └── super-bowl-squares/
 │       └── ... (existing + updates)
 ├── shared/
 │   ├── components/
-│   │   ├── skeleton-loader/         # New
-│   │   ├── empty-state/             # New
-│   │   └── theme-toggle/            # New
+│   │   ├── skeleton-loader/         # Future
+│   │   ├── empty-state/             # Future
+│   │   └── theme-toggle/            # Future
 │   └── directives/
 │       └── tooltip.directive.ts
 └── environments/
     ├── environment.ts
     └── environment.prod.ts
-
-supabase/
-├── functions/
-│   └── nfl-scores/
-│       └── index.ts
-├── migrations/
-│   ├── 001_initial_schema.sql
-│   └── 002_rls_policies.sql
-└── seed.sql
 ```
 
 ---

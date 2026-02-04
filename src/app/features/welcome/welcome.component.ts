@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -307,6 +307,9 @@ interface Feature {
   `
 })
 export class WelcomeComponent {
+  private authService = inject(AuthService);
+  private router = inject(Router);
+
   guestName = '';
   gameCode = '';
   email = '';
@@ -351,11 +354,6 @@ export class WelcomeComponent {
       description: 'See which squares have the best odds based on NFL history'
     }
   ];
-
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {}
 
   async signInWithGoogle(): Promise<void> {
     try {

@@ -100,7 +100,14 @@ export class GameService {
   }
 
   // Create a new game
-  async createGame(ownerId: string, ownerName: string, gameName?: string): Promise<string> {
+  async createGame(
+    ownerId: string,
+    ownerName: string,
+    gameName?: string,
+    espnEventId?: string,
+    homeTeam?: string,
+    awayTeam?: string
+  ): Promise<string> {
     if (!this.isBrowser) throw new Error('Cannot create game on server');
     const gameId = this.generateGameId();
 
@@ -124,10 +131,11 @@ export class GameService {
       isLocked: false,
       pricePerSquare: 10,
       isRandomized: false,
-      homeTeam: '',
-      awayTeam: '',
+      homeTeam: homeTeam || '',
+      awayTeam: awayTeam || '',
       venmoUsername: '',
-      paidPlayers: []
+      paidPlayers: [],
+      espnEventId: espnEventId || undefined
     };
 
     const gameRef = ref(this.db, `games/${gameId}`);
