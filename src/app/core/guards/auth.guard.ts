@@ -2,9 +2,12 @@ import { inject } from '@angular/core';
 import { Router, CanActivateFn } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
-export const authGuard: CanActivateFn = (route, state) => {
+export const authGuard: CanActivateFn = async (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
+
+  // Wait for auth state to be determined
+  await authService.waitForAuthReady();
 
   if (authService.isAuthenticated()) {
     return true;
@@ -15,9 +18,12 @@ export const authGuard: CanActivateFn = (route, state) => {
   return false;
 };
 
-export const guestGuard: CanActivateFn = (route, state) => {
+export const guestGuard: CanActivateFn = async (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
+
+  // Wait for auth state to be determined
+  await authService.waitForAuthReady();
 
   // If already authenticated, redirect to dashboard
   if (authService.isAuthenticated()) {
@@ -28,9 +34,12 @@ export const guestGuard: CanActivateFn = (route, state) => {
   return true;
 };
 
-export const gameCreatorGuard: CanActivateFn = (route, state) => {
+export const gameCreatorGuard: CanActivateFn = async (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
+
+  // Wait for auth state to be determined
+  await authService.waitForAuthReady();
 
   if (authService.canCreateGame()) {
     return true;

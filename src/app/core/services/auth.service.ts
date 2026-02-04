@@ -40,6 +40,8 @@ export class AuthService {
   // Lazy init required for SSR hydration - see CLAUDE.md "SSR Hydration Pattern"
   private _auth: Auth | null = null;
   private _authInitialized = false;
+  private _authReadyPromise: Promise<void> | null = null;
+  private _authReadyResolve: (() => void) | null = null;
   private _currentUser = signal<AuthUser | null>(null);
   private _isLoading = signal<boolean>(true);
   private _authError = signal<string | null>(null);
@@ -78,10 +80,19 @@ export class AuthService {
 
   constructor() {
     if (this.isBrowser) {
+      this._authReadyPromise = new Promise((resolve) => {
+        this._authReadyResolve = resolve;
+      });
       this.initializeAuthState();
     } else {
       this._isLoading.set(false);
+      this._authReadyPromise = Promise.resolve();
     }
+  }
+
+  // Wait for auth state to be determined (for route guards)
+  waitForAuthReady(): Promise<void> {
+    return this._authReadyPromise || Promise.resolve();
   }
 
   private initializeAuthState(): void {
@@ -114,8 +125,11 @@ export class AuthService {
       } else if (!this.getGuestFromCookie()) {
         // Only clear if no guest user either
         this._currentUser.set(null);
-      } else {
-        this._isLoading.set(false);
+      }
+      // Resolve the auth ready promise
+      if (this._authReadyResolve) {
+        this._authReadyResolve();
+        this._authReadyResolve = null;
       }
     });
   }
