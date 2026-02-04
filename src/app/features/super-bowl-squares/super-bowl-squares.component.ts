@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, signal, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, signal, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -151,6 +151,18 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   private espnService = inject(EspnService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+
+  constructor() {
+    // Reactively update currentPlayer when auth state changes (e.g., Google sign-in after page load)
+    effect(() => {
+      const user = this.authService.currentUser();
+      if (user?.displayName && !this._currentPlayer) {
+        this._currentPlayer = user.displayName;
+      } else if (user?.email && !this._currentPlayer) {
+        this._currentPlayer = user.email;
+      }
+    });
+  }
 
   // UI state
   isLoading = signal(true);
