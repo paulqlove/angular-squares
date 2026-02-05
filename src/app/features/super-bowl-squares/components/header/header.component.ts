@@ -491,10 +491,12 @@ export class HeaderComponent {
 
   toggleSettings(): void {
     this.showSettings = !this.showSettings;
+    document.body.classList.toggle('overflow-hidden', this.showSettings);
   }
 
   closeSettings(): void {
     this.showSettings = false;
+    document.body.classList.remove('overflow-hidden');
   }
 
   getVenmoLink(): string {

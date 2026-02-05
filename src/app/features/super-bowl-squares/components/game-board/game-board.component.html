@@ -1,7 +1,7 @@
 <div class="relative">
   <div class="pt-8 pl-8" role="grid" aria-label="Football squares game board">
     <!-- Top row with home numbers -->
-    <div class="grid grid-cols-[auto_repeat(10,minmax(0,1fr))] gap-0" role="row">
+    <div class="grid grid-cols-[1rem_repeat(10,minmax(0,1fr))] gap-0" role="row">
       <div class="number-cell empty-cell" role="columnheader"></div>
       <div *ngFor="let num of homeNumbers; let i = index"
            class="number-cell"
@@ -12,7 +12,7 @@
 
     <!-- Grid rows -->
     <div *ngFor="let awayNum of awayNumbers; let row = index"
-         class="grid grid-cols-[auto_repeat(10,minmax(0,1fr))] gap-0"
+         class="grid grid-cols-[1rem_repeat(10,minmax(0,1fr))] gap-0"
          role="row">
       <!-- Left side away numbers -->
       <div class="number-cell pr-4 label-width" role="rowheader">

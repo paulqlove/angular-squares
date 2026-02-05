@@ -30,6 +30,11 @@
                 "glob": "**/*",
                 "input": "src/assets",
                 "output": "/assets"
+              },
+              {
+                "glob": "CNAME",
+                "input": "src",
+                "output": "/"
               }
             ],
             "styles": [
@@ -45,7 +50,7 @@
                 "src/styles"
               ]
             },
-            "baseHref": "/angular-squares/",
+            "baseHref": "/",
             "allowedCommonJsDependencies": [
               "faye-websocket",
               "@firebase/database",
