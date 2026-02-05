@@ -1,7 +1,7 @@
 # Angular Squares - TODO
 
 **Based on:** [Enhancement Plan](../ENHANCEMENT_PLAN.md)
-**Last Updated:** February 4, 2026
+**Last Updated:** February 5, 2026
 
 ---
 
@@ -65,6 +65,7 @@ Implemented features:
 
 ### UI Polish
 - [x] Add ripple grid animation to welcome page hero
+- [x] Consolidate 3 headers into shared AppHeaderComponent with ng-content projection
 - [ ] Create loading skeleton components
 - [ ] Implement button variants (primary, secondary, ghost, danger)
 - [ ] Add micro-interactions (square select, score update)
@@ -111,3 +112,4 @@ _Session notes and decisions go here_
 | Duplicate player name prevention | Feb 2026 | Warns and blocks when entering a name already in use |
 | Unique player names per game | Feb 2026 | playerUserIds mapping, forced name change modal, dashboard name propagation |
 | Security implementation | Feb 2026 | XSS fix, SanitizationService, Firebase security rules deployed |
+| Shared header component | Feb 2026 | Consolidated 3 page headers into AppHeaderComponent, extracted SettingsPanelComponent |

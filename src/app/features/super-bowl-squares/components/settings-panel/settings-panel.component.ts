@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ViewChild, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
@@ -12,8 +12,7 @@ import {
   heroArrowPath,
   heroSun,
   heroMoon,
-  heroComputerDesktop,
-  heroQuestionMarkCircle
+  heroComputerDesktop
 } from '@ng-icons/heroicons/outline';
 import { FormsModule } from '@angular/forms';
 import { ToggleComponent } from '../../../../components/ui/toggle/toggle.component';
@@ -23,7 +22,7 @@ import { SanitizationService } from '../../../../core/services/sanitization.serv
 import { ThemeService, ThemeMode } from '../../../../core/services/theme.service';
 
 @Component({
-  selector: 'app-header',
+  selector: 'app-settings-panel',
   standalone: true,
   imports: [CommonModule, NgIconComponent, FormsModule, ToggleComponent, DialogComponent],
   providers: [
@@ -38,54 +37,10 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
       heroArrowPath,
       heroSun,
       heroMoon,
-      heroComputerDesktop,
-      heroQuestionMarkCircle
+      heroComputerDesktop
     })
   ],
   template: `
-    <div class="fixed top-0 left-0 right-0 z-[100] bg-page">
-      <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-        <div class="flex items-center gap-2">
-          <img src="assets/logo.png" alt="Logo" class="h-8 w-auto">
-          <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-heading">Football Squares</h1>
-        </div>
-        <div class="flex items-center gap-2">
-          <!-- Venmo Button -->
-          @if (venmoUsername) {
-            <button
-              (click)="showVenmoDialog = true"
-              class="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-[#008CFF] hover:bg-[#0074D4] rounded-lg transition-colors"
-            >
-              <ng-icon name="heroCreditCard" class="text-lg"></ng-icon>
-              <span class="sm:inline">Pay</span>
-            </button>
-          }
-
-          <!-- Help Button -->
-          <button
-            (click)="onShowHelp.emit()"
-            class="p-2.5 text-muted hover:text-heading rounded-lg hover:bg-card transition-colors flex items-center justify-center"
-            title="Show tutorial"
-            aria-label="Show tutorial"
-          >
-            <ng-icon name="heroQuestionMarkCircle" class="text-2xl"></ng-icon>
-          </button>
-
-          <!-- Settings Button -->
-          <button
-            (click)="toggleSettings()"
-            class="p-2.5 text-muted hover:text-heading rounded-lg hover:bg-card transition-colors flex items-center justify-center"
-            aria-label="Open settings"
-            data-walkthrough="settings-button"
-          >
-            <ng-icon name="heroCog6Tooth" class="text-2xl"></ng-icon>
-          </button>
-        </div>
-      </div>
-    </div>
-    <!-- Add spacing to prevent content from going under fixed header -->
-    <div class="h-[72px]"></div>
-
     <!-- Venmo Confirmation Dialog -->
     <app-dialog
       [isOpen]="showVenmoDialog"
@@ -98,18 +53,18 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
 
     <!-- Settings Panel -->
     <div class="fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity duration-200 overflow-hidden"
-         [class.opacity-0]="!showSettings"
-         [class.pointer-events-none]="!showSettings"
-         (click)="closeSettings()">
+         [class.opacity-0]="!isOpen"
+         [class.pointer-events-none]="!isOpen"
+         (click)="close()">
       <div class="fixed right-0 top-0 bottom-0 w-[90%] sm:w-full sm:max-w-md bg-dialog shadow-lg transform transition-transform duration-200 flex flex-col overflow-hidden"
-           [class.translate-x-0]="showSettings"
-           [class.translate-x-full]="!showSettings"
+           [class.translate-x-0]="isOpen"
+           [class.translate-x-full]="!isOpen"
            (click)="$event.stopPropagation()">
 
         <!-- Settings Header -->
         <div class="flex-none flex items-center justify-between p-4 border-b border-default">
           <h2 class="text-lg font-bold text-heading">Settings</h2>
-          <button (click)="closeSettings()" class="p-2 text-muted hover:text-heading" aria-label="Close settings">
+          <button (click)="close()" class="p-2 text-muted hover:text-heading" aria-label="Close settings">
             <ng-icon name="heroXMark" class="text-2xl"></ng-icon>
           </button>
         </div>
@@ -394,7 +349,7 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
               ></app-toggle>
             </div>
           </div>
-            
+
             <!-- Game Controls -->
             <div class="space-y-4 mb-8">
             <!-- Manage Payments (owner or manager) -->
@@ -423,14 +378,14 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
             }
           </div>
 
-         
+
         </div>
 
         <!-- Footer with Clear Game button (owner only) -->
         @if (isGameOwner) {
           <div class="p-4 border-t border-default mt-auto bg-card">
             <button
-              (click)="onClearGame.emit(); closeSettings()"
+              (click)="onClearGame.emit(); close()"
               class="w-full bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded flex items-center justify-center gap-2"
             >
               <ng-icon name="heroTrash" class="text-2xl"></ng-icon>
@@ -446,10 +401,11 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
 
   `
 })
-export class HeaderComponent {
+export class SettingsPanelComponent implements OnChanges {
   themeService = inject(ThemeService);
   private sanitizationService = inject(SanitizationService);
 
+  @Input() isOpen = false;
   @Input() isRandomized = false;
   @Input() isLocked = false;
   @Input() venmoUsername = '';
@@ -466,6 +422,7 @@ export class HeaderComponent {
   @Input() lastSyncTime: Date | null = null;
   @Input() sportOptions: { value: SportType; label: string }[] = [];
 
+  @Output() closed = new EventEmitter<void>();
   @Output() onRandomize = new EventEmitter<void>();
   @Output() onToggleLock = new EventEmitter<void>();
   @Output() onVenmoUsernameChange = new EventEmitter<string>();
@@ -478,25 +435,26 @@ export class HeaderComponent {
   @Output() onUnlinkEspn = new EventEmitter<void>();
   @Output() onRefreshEspnGames = new EventEmitter<void>();
   @Output() onSportChange = new EventEmitter<SportType>();
-  @Output() onShowHelp = new EventEmitter<void>();
 
-  showSettings = false;
   showVenmoDialog = false;
   tempVenmoUsername = '';
   selectedEspnGameId = '';
 
-  ngOnInit() {
-    this.tempVenmoUsername = this.venmoUsername || '';
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['isOpen']) {
+      document.body.classList.toggle('overflow-hidden', this.isOpen);
+    }
+    if (changes['venmoUsername']) {
+      this.tempVenmoUsername = this.venmoUsername || '';
+    }
   }
 
-  toggleSettings(): void {
-    this.showSettings = !this.showSettings;
-    document.body.classList.toggle('overflow-hidden', this.showSettings);
+  close(): void {
+    this.closed.emit();
   }
 
-  closeSettings(): void {
-    this.showSettings = false;
-    document.body.classList.remove('overflow-hidden');
+  showVenmoConfirmation(): void {
+    this.showVenmoDialog = true;
   }
 
   getVenmoLink(): string {
@@ -581,4 +539,4 @@ export class HeaderComponent {
   setTheme(mode: ThemeMode): void {
     this.themeService.setTheme(mode);
   }
-} 
+}

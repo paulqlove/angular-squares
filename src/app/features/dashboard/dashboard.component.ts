@@ -10,6 +10,7 @@ import { ToastService } from '../../core/services/toast.service';
 import { SanitizationService } from '../../core/services/sanitization.service';
 import { WalkthroughService, WalkthroughStep } from '../../core/services/walkthrough.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import { AppHeaderComponent } from '../../components/ui/app-header/app-header.component';
 import {
   heroPlus,
   heroArrowRightOnRectangle,
@@ -38,7 +39,7 @@ import {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgIconComponent],
+  imports: [CommonModule, FormsModule, NgIconComponent, AppHeaderComponent],
   providers: [
     provideIcons({
       heroPlus,
@@ -67,132 +68,120 @@ import {
   ],
   template: `
     <div class="min-h-screen bg-page">
-      <!-- Dark Header -->
-      <header class="bg-header shadow-lg">
-        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div class="flex items-center gap-3">
-            <img src="assets/logo.png" alt="Logo" class="h-10 w-auto drop-shadow-lg">
-            <div>
-              <h1 class="text-xl font-bold text-header tracking-tight">Football Squares</h1>
-              <p class="text-xs text-header-muted">Super Bowl Squares Pool</p>
-            </div>
-          </div>
+      <!-- Header -->
+      <app-shared-header variant="solid">
+        <!-- Help Button -->
+        <button
+          (click)="startWalkthrough()"
+          class="p-2 text-header-muted hover:text-header rounded-lg hover:bg-header-accent transition-colors flex items-center justify-center"
+          title="Show tutorial"
+          aria-label="Show tutorial"
+        >
+          <ng-icon name="heroQuestionMarkCircle" class="text-xl"></ng-icon>
+        </button>
 
-          <div class="flex items-center gap-2">
-            <!-- Help Button -->
-            <button
-              (click)="startWalkthrough()"
-              class="p-2 text-header-muted hover:text-header rounded-lg hover:bg-header-accent transition-colors flex items-center justify-center"
-              title="Show tutorial"
-              aria-label="Show tutorial"
-            >
-              <ng-icon name="heroQuestionMarkCircle" class="text-xl"></ng-icon>
-            </button>
-
-            <!-- Profile Dropdown -->
-            <div class="relative" data-walkthrough="profile-dropdown">
-            <button
-              (click)="toggleProfileDropdown($event)"
-              class="flex items-center gap-2 bg-header-accent hover:bg-primary-700 rounded-full px-3 py-1.5 transition-colors cursor-pointer"
-              title="Profile menu"
-            >
-              @if (currentUser()?.photoURL) {
-                <img
-                  [src]="currentUser()?.photoURL"
-                  alt="Profile"
-                  class="w-7 h-7 rounded-full ring-2 ring-primary-500"
-                />
-              } @else {
-                <div class="w-7 h-7 rounded-full bg-secondary-500 flex items-center justify-center">
-                  <span class="text-white font-semibold text-sm">
-                    {{ (currentUser()?.displayName || currentUser()?.email)?.charAt(0)?.toUpperCase() || '?' }}
-                  </span>
-                </div>
-              }
-              <span class="text-sm font-medium text-header hidden sm:inline">
-                {{ currentUser()?.displayName || currentUser()?.email }}
-              </span>
-              @if (currentUser()?.isGuest) {
-                <span class="text-xs bg-primary-600 text-primary-200 px-2 py-0.5 rounded-full">Guest</span>
-              }
-              <ng-icon name="heroChevronDown" class="text-sm text-header-muted"></ng-icon>
-            </button>
-
-            @if (showProfileDropdown()) {
-              <div class="absolute right-0 mt-2 w-64 bg-dialog rounded-xl shadow-lg border border-default p-4 z-50" (click)="$event.stopPropagation()">
-                <!-- Name input -->
-                <div class="mb-4">
-                  <label class="block text-xs font-semibold text-muted mb-1.5">Display Name</label>
-                  <div class="flex flex-wrap gap-2">
-                    <input
-                      type="text"
-                      [(ngModel)]="profileName"
-                      placeholder="Enter your name"
-                      class="flex-1 min-w-0 px-3 py-2 bg-input border border-input rounded-lg text-sm text-default focus:border-secondary-500 focus:ring-1 focus:ring-secondary-100 outline-none"
-                      (keyup.enter)="saveProfile()"
-                    />
-                    <button
-                      (click)="saveProfile()"
-                      [disabled]="isSavingProfile() || !profileName.trim()"
-                      class="flex-1 px-3 py-2 bg-secondary-500 hover:bg-secondary-600 disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-colors"
-                    >
-                      @if (isSavingProfile()) {
-                        ...
-                      } @else {
-                        Save
-                      }
-                    </button>
-                  </div>
-                  @if (currentUser()?.email) {
-                    <p class="text-xs text-muted mt-1">{{ currentUser()?.email }}</p>
-                  }
-                </div>
-
-                <!-- Theme toggle -->
-                <div class="mb-4">
-                  <label class="block text-xs font-semibold text-muted mb-1.5">Theme</label>
-                  <div class="flex items-center bg-control rounded-lg p-1">
-                    <button
-                      (click)="setTheme('system')"
-                      [class]="themeService.theme() === 'system' ? 'flex-1 p-2 rounded-md bg-secondary-500 text-white' : 'flex-1 p-2 rounded-md text-muted hover:text-default'"
-                      title="System theme"
-                      aria-label="System theme"
-                    >
-                      <ng-icon name="heroComputerDesktop" class="text-base"></ng-icon>
-                    </button>
-                    <button
-                      (click)="setTheme('light')"
-                      [class]="themeService.theme() === 'light' ? 'flex-1 p-2 rounded-md bg-secondary-500 text-white' : 'flex-1 p-2 rounded-md text-muted hover:text-default'"
-                      title="Light theme"
-                      aria-label="Light theme"
-                    >
-                      <ng-icon name="heroSun" class="text-base"></ng-icon>
-                    </button>
-                    <button
-                      (click)="setTheme('dark')"
-                      [class]="themeService.theme() === 'dark' ? 'flex-1 p-2 rounded-md bg-secondary-500 text-white' : 'flex-1 p-2 rounded-md text-muted hover:text-default'"
-                      title="Dark theme"
-                      aria-label="Dark theme"
-                    >
-                      <ng-icon name="heroMoon" class="text-base"></ng-icon>
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Sign out -->
-                <button
-                  (click)="signOut()"
-                  class="w-full flex items-center justify-center gap-2 px-3 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-sm font-medium transition-colors"
-                >
-                  <ng-icon name="heroArrowRightOnRectangle" class="text-base"></ng-icon>
-                  Sign Out
-                </button>
+        <!-- Profile Dropdown -->
+        <div class="relative" data-walkthrough="profile-dropdown">
+          <button
+            (click)="toggleProfileDropdown($event)"
+            class="flex items-center gap-2 bg-header-accent hover:bg-primary-700 rounded-full px-3 py-1.5 transition-colors cursor-pointer"
+            title="Profile menu"
+          >
+            @if (currentUser()?.photoURL) {
+              <img
+                [src]="currentUser()?.photoURL"
+                alt="Profile"
+                class="w-7 h-7 rounded-full ring-2 ring-primary-500"
+              />
+            } @else {
+              <div class="w-7 h-7 rounded-full bg-secondary-500 flex items-center justify-center">
+                <span class="text-white font-semibold text-sm">
+                  {{ (currentUser()?.displayName || currentUser()?.email)?.charAt(0)?.toUpperCase() || '?' }}
+                </span>
               </div>
             }
+            <span class="text-sm font-medium text-header hidden sm:inline">
+              {{ currentUser()?.displayName || currentUser()?.email }}
+            </span>
+            @if (currentUser()?.isGuest) {
+              <span class="text-xs bg-primary-600 text-primary-200 px-2 py-0.5 rounded-full">Guest</span>
+            }
+            <ng-icon name="heroChevronDown" class="text-sm text-header-muted"></ng-icon>
+          </button>
+
+          @if (showProfileDropdown()) {
+            <div class="absolute right-0 mt-2 w-64 bg-dialog rounded-xl shadow-lg border border-default p-4 z-50" (click)="$event.stopPropagation()">
+              <!-- Name input -->
+              <div class="mb-4">
+                <label class="block text-xs font-semibold text-muted mb-1.5">Display Name</label>
+                <div class="flex flex-wrap gap-2">
+                  <input
+                    type="text"
+                    [(ngModel)]="profileName"
+                    placeholder="Enter your name"
+                    class="flex-1 min-w-0 px-3 py-2 bg-input border border-input rounded-lg text-sm text-default focus:border-secondary-500 focus:ring-1 focus:ring-secondary-100 outline-none"
+                    (keyup.enter)="saveProfile()"
+                  />
+                  <button
+                    (click)="saveProfile()"
+                    [disabled]="isSavingProfile() || !profileName.trim()"
+                    class="flex-1 px-3 py-2 bg-secondary-500 hover:bg-secondary-600 disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-colors"
+                  >
+                    @if (isSavingProfile()) {
+                      ...
+                    } @else {
+                      Save
+                    }
+                  </button>
+                </div>
+                @if (currentUser()?.email) {
+                  <p class="text-xs text-muted mt-1">{{ currentUser()?.email }}</p>
+                }
+              </div>
+
+              <!-- Theme toggle -->
+              <div class="mb-4">
+                <label class="block text-xs font-semibold text-muted mb-1.5">Theme</label>
+                <div class="flex items-center bg-control rounded-lg p-1">
+                  <button
+                    (click)="setTheme('system')"
+                    [class]="themeService.theme() === 'system' ? 'flex-1 p-2 rounded-md bg-secondary-500 text-white' : 'flex-1 p-2 rounded-md text-muted hover:text-default'"
+                    title="System theme"
+                    aria-label="System theme"
+                  >
+                    <ng-icon name="heroComputerDesktop" class="text-base"></ng-icon>
+                  </button>
+                  <button
+                    (click)="setTheme('light')"
+                    [class]="themeService.theme() === 'light' ? 'flex-1 p-2 rounded-md bg-secondary-500 text-white' : 'flex-1 p-2 rounded-md text-muted hover:text-default'"
+                    title="Light theme"
+                    aria-label="Light theme"
+                  >
+                    <ng-icon name="heroSun" class="text-base"></ng-icon>
+                  </button>
+                  <button
+                    (click)="setTheme('dark')"
+                    [class]="themeService.theme() === 'dark' ? 'flex-1 p-2 rounded-md bg-secondary-500 text-white' : 'flex-1 p-2 rounded-md text-muted hover:text-default'"
+                    title="Dark theme"
+                    aria-label="Dark theme"
+                  >
+                    <ng-icon name="heroMoon" class="text-base"></ng-icon>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Sign out -->
+              <button
+                (click)="signOut()"
+                class="w-full flex items-center justify-center gap-2 px-3 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-sm font-medium transition-colors"
+              >
+                <ng-icon name="heroArrowRightOnRectangle" class="text-base"></ng-icon>
+                Sign Out
+              </button>
             </div>
-          </div>
+          }
         </div>
-      </header>
+      </app-shared-header>
 
       <main class="container mx-auto px-4 py-8">
         <!-- Hero Section -->

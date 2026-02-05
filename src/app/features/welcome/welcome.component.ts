@@ -15,6 +15,7 @@ import {
   heroEnvelope
 } from '@ng-icons/heroicons/outline';
 import { RippleGridComponent } from '../../components/ui/ripple-grid/ripple-grid.component';
+import { AppHeaderComponent } from '../../components/ui/app-header/app-header.component';
 
 interface Feature {
   icon: string;
@@ -25,7 +26,7 @@ interface Feature {
 @Component({
   selector: 'app-welcome',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgIconComponent, RippleGridComponent],
+  imports: [CommonModule, FormsModule, NgIconComponent, RippleGridComponent, AppHeaderComponent],
   providers: [
     provideIcons({
       heroSquares2x2,
@@ -52,12 +53,7 @@ interface Feature {
         <!-- Content layer -->
         <div class="relative z-10">
           <!-- Header -->
-          <header class="container mx-auto px-4 py-6">
-            <div class="flex items-center gap-3">
-              <img src="assets/logo.png" alt="Logo" class="h-10 w-auto">
-              <h1 class="text-2xl font-bold text-white">Football Squares</h1>
-            </div>
-          </header>
+          <app-shared-header variant="transparent"></app-shared-header>
 
           <!-- Hero Content -->
           <div class="container mx-auto px-4 py-12 md:py-16">

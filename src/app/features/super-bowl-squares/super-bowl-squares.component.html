@@ -32,7 +32,47 @@
   </div>
 } @else {
 <!-- Main Game View -->
-  <app-header
+  <app-shared-header variant="fixed">
+    @if (venmoUsername) {
+      <button
+        (click)="showVenmoDialog = true"
+        class="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-[#008CFF] hover:bg-[#0074D4] rounded-lg transition-colors"
+      >
+        <ng-icon name="heroCreditCard" class="text-lg"></ng-icon>
+        <span class="sm:inline">Pay</span>
+      </button>
+    }
+    <button
+      (click)="startWalkthrough()"
+      class="p-2.5 text-muted hover:text-heading rounded-lg hover:bg-card transition-colors flex items-center justify-center"
+      title="Show tutorial"
+      aria-label="Show tutorial"
+    >
+      <ng-icon name="heroQuestionMarkCircle" class="text-2xl"></ng-icon>
+    </button>
+    <button
+      (click)="showSettings.set(true)"
+      class="p-2.5 text-muted hover:text-heading rounded-lg hover:bg-card transition-colors flex items-center justify-center"
+      aria-label="Open settings"
+      data-walkthrough="settings-button"
+    >
+      <ng-icon name="heroCog6Tooth" class="text-2xl"></ng-icon>
+    </button>
+  </app-shared-header>
+
+  <!-- Venmo Confirmation Dialog -->
+  <app-dialog
+    [isOpen]="showVenmoDialog"
+    title="Leave Site?"
+    [messageParts]="venmoMessageParts"
+    confirmText="Continue to Venmo"
+    (onConfirm)="onVenmoConfirm()"
+    (onCancel)="showVenmoDialog = false"
+  ></app-dialog>
+
+  <app-settings-panel
+    [isOpen]="showSettings()"
+    (closed)="showSettings.set(false)"
     [isRandomized]="isRandomized"
     [isLocked]="isLocked"
     [venmoUsername]="venmoUsername"
@@ -60,8 +100,7 @@
     (onUnlinkEspn)="unlinkEspnGame()"
     (onRefreshEspnGames)="fetchEspnGames()"
     (onSportChange)="onSportChange($event)"
-    (onShowHelp)="startWalkthrough()">
-  </app-header>
+  ></app-settings-panel>
 
   <div class="container mx-auto">
     <div class="space-y-6">
