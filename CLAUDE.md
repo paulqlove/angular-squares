@@ -121,6 +121,11 @@ Game owners can link their game to an ESPN NFL game for live score syncing.
 
 ## Deployment
 
-- **Platform**: GitHub Pages
-- **Base href**: `/angular-squares/`
+- **Platform**: GitHub Pages (custom domain: quarterscore.com)
+- **Base href**: `/` (critical — custom domain serves from root, not a subdirectory)
 - **Build command**: `npm run build` outputs to `dist/angular-squares/`
+- **Deploy command**: `ng deploy` (uses angular-cli-ghpages, config in angular.json)
+
+## Prompt Gaps
+
+When you encounter a situation where you had to backtrack, made an incorrect assumption, or needed clarification mid-task, append an entry to `PROMPT_GAPS.md` with: what you got wrong, what assumption you made, and what instruction in CLAUDE.md would have prevented it. Write it as a suggested CLAUDE.md addition, not a bug report.
