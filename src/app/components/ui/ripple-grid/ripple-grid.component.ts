@@ -29,6 +29,7 @@ export class RippleGridComponent implements OnInit, OnDestroy {
   private resizeObserver: ResizeObserver | null = null;
   private rippleIntervalId: ReturnType<typeof setInterval> | null = null;
 
+  private rippleDuration = 0;
   private rippleTime = 0;
   private rippleActive = false;
   private rippleOriginX = 0;
@@ -77,6 +78,9 @@ export class RippleGridComponent implements OnInit, OnDestroy {
     if (this.ctx) {
       this.ctx.scale(dpr, dpr);
     }
+
+    const maxRadius = Math.sqrt((rect.width / 2) ** 2 + (rect.height / 2) ** 2) + 150;
+    this.rippleDuration = maxRadius / 230;
   }
 
   private scheduleRipple(): void {
@@ -107,7 +111,7 @@ export class RippleGridComponent implements OnInit, OnDestroy {
 
       if (this.rippleActive) {
         this.rippleTime += deltaTime;
-        if (this.rippleTime > 3) {
+        if (this.rippleTime > this.rippleDuration) {
           this.rippleActive = false;
         }
       }
@@ -207,7 +211,7 @@ export class RippleGridComponent implements OnInit, OnDestroy {
     const falloff = Math.cos((distFromRing / ringWidth) * Math.PI * 0.5);
 
     // Subtle amplitude that fades as ring expands
-    const amplitude = 26 * falloff * Math.max(0, 1 - this.rippleTime * 0.3);
+    const amplitude = 26 * falloff * Math.max(0, 1 - this.rippleTime / this.rippleDuration);
 
     const angle = Math.atan2(dy, dx);
     return {
