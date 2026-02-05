@@ -187,7 +187,10 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   lastSyncTime = signal<Date | null>(null);
   sportOptions: { value: SportType; label: string }[] = [
     { value: 'nfl', label: 'NFL' },
-    { value: 'nba', label: 'NBA' }
+    { value: 'ncaaf', label: 'NCAA Football' },
+    { value: 'nba', label: 'NBA' },
+    { value: 'wnba', label: 'WNBA' },
+    { value: 'afl', label: 'AFL' }
   ];
 
   // Auto-polling for live scores

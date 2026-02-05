@@ -15,7 +15,7 @@ import {
 import { Observable, BehaviorSubject } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
-export type SportType = 'nfl' | 'nba';
+export type SportType = 'nfl' | 'nba' | 'ncaaf' | 'wnba' | 'afl';
 
 export interface GameData {
   id?: string;
@@ -60,6 +60,8 @@ export interface GameListItem {
   pricePerSquare: number;
   managerId?: string;
   managerEmail?: string;
+  espnEventId?: string;
+  espnSport?: SportType;
 }
 
 @Injectable({
@@ -116,7 +118,8 @@ export class GameService {
     homeTeam?: string,
     awayTeam?: string,
     pricePerSquare?: number,
-    espnSport?: SportType
+    espnSport?: SportType,
+    managerEmail?: string
   ): Promise<string> {
     if (!this.isBrowser) throw new Error('Cannot create game on server');
     const gameId = this.generateGameId();
@@ -146,7 +149,8 @@ export class GameService {
       venmoUsername: '',
       paidPlayers: [],
       ...(espnEventId ? { espnEventId } : {}),
-      ...(espnSport ? { espnSport } : {})
+      ...(espnSport ? { espnSport } : {}),
+      ...(managerEmail ? { managerEmail } : {})
     };
 
     const gameRef = ref(this.db, `games/${gameId}`);
@@ -373,7 +377,9 @@ export class GameService {
           isLocked: game.isLocked,
           pricePerSquare: game.pricePerSquare,
           managerId: game.managerId,
-          managerEmail: game.managerEmail
+          managerEmail: game.managerEmail,
+          espnEventId: game.espnEventId,
+          espnSport: game.espnSport
         });
       }
     }

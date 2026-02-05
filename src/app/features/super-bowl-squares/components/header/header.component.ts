@@ -124,7 +124,7 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
                 [ngModel]="awayTeam"
                 (ngModelChange)="onTeamChange('away', $event)"
                 [disabled]="!isGameOwner"
-                class="w-full px-3 py-2 bg-input border border-input rounded-md
+                class="w-full px-3 py-2 bg-input border border-input rounded-md text-default
                        focus:outline-none focus:ring-2
                        focus:ring-2 focus:ring-secondary-500
                        capitalize disabled:opacity-50 disabled:cursor-not-allowed"
@@ -142,7 +142,7 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
                 [ngModel]="homeTeam"
                 (ngModelChange)="onTeamChange('home', $event)"
                 [disabled]="!isGameOwner"
-                class="w-full px-3 py-2 bg-input border border-input rounded-md
+                class="w-full px-3 py-2 bg-input border border-input rounded-md text-default
                        focus:outline-none focus:ring-2
                        focus:ring-2 focus:ring-secondary-500
                        capitalize disabled:opacity-50 disabled:cursor-not-allowed"
@@ -273,7 +273,7 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
                 <select
                   [ngModel]="espnSport"
                   (ngModelChange)="onSportChange.emit($event)"
-                  class="w-full bg-input text-default text-sm border rounded px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-secondary-500"
+                  class="w-full bg-input text-default text-sm border border-input rounded px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-secondary-500"
                 >
                   @for (sport of sportOptions; track sport.value) {
                     <option [value]="sport.value">{{ sport.label }}</option>
@@ -282,7 +282,7 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
                 <div class="flex items-center gap-1.5">
                   <select
                     [(ngModel)]="selectedEspnGameId"
-                    class="flex-1 bg-input text-default text-sm border rounded px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-secondary-500"
+                    class="flex-1 bg-input text-default text-sm border border-input rounded px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-secondary-500"
                   >
                     <option value="">Select game...</option>
                     @for (game of espnGames; track game.id) {
@@ -299,7 +299,7 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
                   <button
                     (click)="linkEspnGame()"
                     [disabled]="!selectedEspnGameId"
-                    class="px-3 py-1.5 text-sm bg-secondary-500 hover:bg-secondary-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded transition-colors"
+                    class="px-3 py-1.5 text-sm bg-secondary-500 hover:bg-secondary-600 disabled:bg-control disabled:text-muted disabled:cursor-not-allowed text-white rounded transition-colors"
                   >
                     Link
                   </button>
@@ -321,7 +321,7 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
                 [ngModel]="pricePerSquare"
                 (ngModelChange)="handlePriceChange($event)"
                 [disabled]="isLocked || !isGameOwner"
-                class="w-full px-3 py-2 bg-input border border-input rounded-md
+                class="w-full px-3 py-2 bg-input border border-input rounded-md text-default
                        focus:outline-none focus:ring-2
                        focus:ring-2 focus:ring-secondary-500
                        disabled:opacity-50 disabled:cursor-not-allowed"
@@ -342,7 +342,7 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
                 (blur)="onVenmoBlur()"
                 [placeholder]="venmoUsername ? '@' + venmoUsername.replace('@', '') : '@username'"
                 [disabled]="!isGameOwner"
-                class="w-full px-3 py-2 bg-input border border-input rounded-md
+                class="w-full px-3 py-2 bg-input border border-input rounded-md text-default
                        focus:outline-none focus:ring-2
                        focus:ring-2 focus:ring-secondary-500
                        disabled:opacity-50 disabled:cursor-not-allowed"

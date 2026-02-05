@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject, effect, computed } from '@angular/core';
+import { Component, OnInit, signal, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -28,7 +28,8 @@ import {
   heroCog6Tooth,
   heroSun,
   heroMoon,
-  heroComputerDesktop
+  heroComputerDesktop,
+  heroChevronDown
 } from '@ng-icons/heroicons/outline';
 
 @Component({
@@ -56,7 +57,8 @@ import {
       heroCog6Tooth,
       heroSun,
       heroMoon,
-      heroComputerDesktop
+      heroComputerDesktop,
+      heroChevronDown
     })
   ],
   template: `
@@ -72,42 +74,12 @@ import {
             </div>
           </div>
 
-          <div class="flex items-center gap-3">
-            <!-- Theme Toggle -->
-            <div class="flex items-center bg-header-accent rounded-full p-1">
-              <button
-                (click)="setTheme('system')"
-                [class]="themeService.theme() === 'system' ? 'p-2 rounded-full bg-secondary-500 text-white' : 'p-2 rounded-full text-header-muted hover:text-header'"
-                title="System theme"
-                aria-label="System theme"
-                [attr.aria-pressed]="themeService.theme() === 'system'"
-              >
-                <ng-icon name="heroComputerDesktop" class="text-base"></ng-icon>
-              </button>
-              <button
-                (click)="setTheme('light')"
-                [class]="themeService.theme() === 'light' ? 'p-2 rounded-full bg-secondary-500 text-white' : 'p-2 rounded-full text-header-muted hover:text-header'"
-                title="Light theme"
-                aria-label="Light theme"
-                [attr.aria-pressed]="themeService.theme() === 'light'"
-              >
-                <ng-icon name="heroSun" class="text-base"></ng-icon>
-              </button>
-              <button
-                (click)="setTheme('dark')"
-                [class]="themeService.theme() === 'dark' ? 'p-2 rounded-full bg-secondary-500 text-white' : 'p-2 rounded-full text-header-muted hover:text-header'"
-                title="Dark theme"
-                aria-label="Dark theme"
-                [attr.aria-pressed]="themeService.theme() === 'dark'"
-              >
-                <ng-icon name="heroMoon" class="text-base"></ng-icon>
-              </button>
-            </div>
-
+          <!-- Profile Dropdown -->
+          <div class="relative">
             <button
-              (click)="openProfileModal()"
+              (click)="toggleProfileDropdown($event)"
               class="flex items-center gap-2 bg-header-accent hover:bg-primary-700 rounded-full px-3 py-1.5 transition-colors cursor-pointer"
-              title="Edit profile"
+              title="Profile menu"
             >
               @if (currentUser()?.photoURL) {
                 <img
@@ -128,16 +100,80 @@ import {
               @if (currentUser()?.isGuest) {
                 <span class="text-xs bg-primary-600 text-primary-200 px-2 py-0.5 rounded-full">Guest</span>
               }
+              <ng-icon name="heroChevronDown" class="text-sm text-header-muted"></ng-icon>
             </button>
 
-            <button
-              (click)="signOut()"
-              class="p-2.5 text-header-muted hover:text-header hover:bg-primary-700 rounded-full transition-colors"
-              title="Sign out"
-              aria-label="Sign out"
-            >
-              <ng-icon name="heroArrowRightOnRectangle" class="text-xl"></ng-icon>
-            </button>
+            @if (showProfileDropdown()) {
+              <div class="absolute right-0 mt-2 w-64 bg-dialog rounded-xl shadow-lg border border-default p-4 z-50" (click)="$event.stopPropagation()">
+                <!-- Name input -->
+                <div class="mb-4">
+                  <label class="block text-xs font-semibold text-muted mb-1.5">Display Name</label>
+                  <div class="flex flex-wrap gap-2">
+                    <input
+                      type="text"
+                      [(ngModel)]="profileName"
+                      placeholder="Enter your name"
+                      class="flex-1 min-w-0 px-3 py-2 bg-input border border-input rounded-lg text-sm text-default focus:border-secondary-500 focus:ring-1 focus:ring-secondary-100 outline-none"
+                      (keyup.enter)="saveProfile()"
+                    />
+                    <button
+                      (click)="saveProfile()"
+                      [disabled]="isSavingProfile() || !profileName.trim()"
+                      class="flex-1 px-3 py-2 bg-secondary-500 hover:bg-secondary-600 disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-colors"
+                    >
+                      @if (isSavingProfile()) {
+                        ...
+                      } @else {
+                        Save
+                      }
+                    </button>
+                  </div>
+                  @if (currentUser()?.email) {
+                    <p class="text-xs text-muted mt-1">{{ currentUser()?.email }}</p>
+                  }
+                </div>
+
+                <!-- Theme toggle -->
+                <div class="mb-4">
+                  <label class="block text-xs font-semibold text-muted mb-1.5">Theme</label>
+                  <div class="flex items-center bg-control rounded-lg p-1">
+                    <button
+                      (click)="setTheme('system')"
+                      [class]="themeService.theme() === 'system' ? 'flex-1 p-2 rounded-md bg-secondary-500 text-white' : 'flex-1 p-2 rounded-md text-muted hover:text-default'"
+                      title="System theme"
+                      aria-label="System theme"
+                    >
+                      <ng-icon name="heroComputerDesktop" class="text-base"></ng-icon>
+                    </button>
+                    <button
+                      (click)="setTheme('light')"
+                      [class]="themeService.theme() === 'light' ? 'flex-1 p-2 rounded-md bg-secondary-500 text-white' : 'flex-1 p-2 rounded-md text-muted hover:text-default'"
+                      title="Light theme"
+                      aria-label="Light theme"
+                    >
+                      <ng-icon name="heroSun" class="text-base"></ng-icon>
+                    </button>
+                    <button
+                      (click)="setTheme('dark')"
+                      [class]="themeService.theme() === 'dark' ? 'flex-1 p-2 rounded-md bg-secondary-500 text-white' : 'flex-1 p-2 rounded-md text-muted hover:text-default'"
+                      title="Dark theme"
+                      aria-label="Dark theme"
+                    >
+                      <ng-icon name="heroMoon" class="text-base"></ng-icon>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Sign out -->
+                <button
+                  (click)="signOut()"
+                  class="w-full flex items-center justify-center gap-2 px-3 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-sm font-medium transition-colors"
+                >
+                  <ng-icon name="heroArrowRightOnRectangle" class="text-base"></ng-icon>
+                  Sign Out
+                </button>
+              </div>
+            }
           </div>
         </div>
       </header>
@@ -200,19 +236,19 @@ import {
                   <p class="text-sm text-muted dark:text-primary-200">Have a 6-digit code?</p>
                 </div>
               </div>
-              <div class="flex gap-2">
+              <div class="flex gap-2 min-w-0">
                 <input
                   type="text"
                   [(ngModel)]="joinGameCode"
                   placeholder="XXXXXX"
-                  class="flex-1 px-4 py-3 bg-input dark:bg-white/10 border border-input dark:border-white/20 rounded-lg text-default dark:text-white placeholder-muted dark:placeholder-primary-400 uppercase tracking-widest font-mono text-center focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
+                  class="flex-1 min-w-0 px-4 py-3 bg-input dark:bg-white/10 border border-input dark:border-white/20 rounded-lg text-default dark:text-white placeholder-muted dark:placeholder-primary-400 uppercase tracking-widest font-mono text-center focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
                   maxlength="6"
                   (keyup.enter)="joinGame()"
                 />
                 <button
                   (click)="joinGame()"
                   [disabled]="joinGameCode.length !== 6"
-                  class="px-4 py-3 bg-accent-500 hover:bg-accent-400 disabled:bg-control disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+                  class="shrink-0 px-4 py-3 bg-accent-500 hover:bg-accent-400 disabled:bg-control disabled:cursor-not-allowed text-white rounded-lg transition-colors"
                 >
                   <ng-icon name="heroArrowRight" class="text-xl"></ng-icon>
                 </button>
@@ -379,13 +415,13 @@ import {
               <!-- Sport Tabs -->
               <div>
                 <label class="block text-sm font-semibold text-label mb-3">Sport</label>
-                <div class="flex gap-2">
+                <div class="flex gap-2 overflow-x-auto">
                   @for (sport of sportOptions; track sport.value) {
                     <button
                       (click)="selectSport(sport.value)"
                       [class]="selectedSport === sport.value
-                        ? 'px-6 py-2.5 bg-header text-header rounded-lg font-medium transition-colors'
-                        : 'px-6 py-2.5 bg-control text-default hover:bg-control-hover rounded-lg font-medium transition-colors'"
+                        ? 'px-6 py-2.5 bg-header text-header rounded-lg font-medium transition-colors whitespace-nowrap'
+                        : 'px-6 py-2.5 bg-control text-default hover:bg-control-hover rounded-lg font-medium transition-colors whitespace-nowrap'"
                     >
                       {{ sport.label }}
                     </button>
@@ -405,7 +441,7 @@ import {
                   </div>
                 } @else {
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-64 overflow-y-auto">
-                    <!-- Manual Scores Option -->
+                    <!-- Manual Scores Option - Hidden for now
                     <button
                       (click)="selectEspnGame('')"
                       [class]="selectedEspnGameId === ''
@@ -426,6 +462,7 @@ import {
                         </div>
                       </div>
                     </button>
+                    -->
 
                     <!-- ESPN Games -->
                     @for (game of espnGames(); track game.id) {
@@ -443,6 +480,10 @@ import {
                         </div>
                         <p class="font-semibold text-sm"
                           [class]="selectedEspnGameId === game.id ? 'text-secondary-900' : 'text-heading'">{{ game.awayTeam }} &#64; {{ game.homeTeam }}</p>
+                        @if (game.status === 'pre' && game.date) {
+                          <p class="text-xs mt-1"
+                            [class]="selectedEspnGameId === game.id ? 'text-secondary-700' : 'text-muted'">{{ formatGameDate(game.date) }}</p>
+                        }
                         @if (game.status !== 'pre') {
                           <p class="text-xs mt-1"
                             [class]="selectedEspnGameId === game.id ? 'text-secondary-700' : 'text-muted'">{{ game.awayScore }} - {{ game.homeScore }}</p>
@@ -483,11 +524,30 @@ import {
 
               <!-- Game Name -->
               <div>
-                <label class="block text-sm font-semibold text-label mb-3">Game Name <span class="text-muted font-normal">(optional)</span></label>
+                <label class="block text-sm font-semibold text-label mb-3">Game Name <span class="text-red-500">*</span></label>
                 <input
                   type="text"
                   [(ngModel)]="newGameName"
                   placeholder="e.g., Super Bowl Party 2024"
+                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
+                  [class.border-red-500]="gameNameError()"
+                />
+                @if (gameNameError()) {
+                  <p class="mt-2 text-sm text-red-600 dark:text-red-400">Game name is required</p>
+                }
+              </div>
+
+              <!-- Payment Manager -->
+              <div>
+                <label class="block text-sm font-semibold text-label mb-3">
+                  Payment Manager
+                  <span class="text-muted font-normal">(optional)</span>
+                </label>
+                <p class="text-xs text-muted mb-2">Assign someone to help manage payments. Enter their email address.</p>
+                <input
+                  type="email"
+                  [(ngModel)]="newGamePaymentManager"
+                  placeholder="Enter their email address"
                   class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
                 />
               </div>
@@ -594,7 +654,7 @@ import {
       <!-- Edit Game Modal -->
       @if (showEditModal()) {
         <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" (click)="closeEditModal()">
-          <div class="bg-dialog rounded-2xl shadow-2xl max-w-md w-full animate-modal-in" (click)="$event.stopPropagation()">
+          <div class="bg-dialog rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-modal-in" (click)="$event.stopPropagation()">
             <div class="flex items-center justify-between p-6 border-b border-default">
               <div>
                 <h3 class="text-xl font-bold text-heading">Edit Game</h3>
@@ -609,6 +669,66 @@ import {
             </div>
 
             <div class="p-6 space-y-5">
+              <!-- Sport Tabs -->
+              <div>
+                <label class="block text-sm font-semibold text-label mb-2">Sport</label>
+                <div class="flex gap-2 overflow-x-auto">
+                  @for (sport of sportOptions; track sport.value) {
+                    <button
+                      (click)="selectEditSport(sport.value)"
+                      [class]="editSport === sport.value
+                        ? 'px-4 py-2 bg-header text-header rounded-lg font-medium transition-colors whitespace-nowrap text-sm'
+                        : 'px-4 py-2 bg-control text-default hover:bg-control-hover rounded-lg font-medium transition-colors whitespace-nowrap text-sm'"
+                    >
+                      {{ sport.label }}
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <!-- ESPN Game Selection -->
+              <div>
+                <label class="block text-sm font-semibold text-label mb-2">ESPN Game</label>
+                @if (isLoadingEditEspnGames()) {
+                  <div class="flex items-center justify-center py-6">
+                    <svg class="animate-spin h-6 w-6 text-secondary-500" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                    </svg>
+                  </div>
+                } @else {
+                  <div class="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto">
+                    @for (game of editEspnGames(); track game.id) {
+                      <button
+                        (click)="selectEditEspnGame(game.id)"
+                        [class]="editEspnGameId === game.id
+                          ? 'p-3 border-2 border-secondary-500 bg-secondary-100 rounded-xl text-left transition-all'
+                          : 'p-3 border-2 border-default hover:border-hover rounded-xl text-left transition-all'"
+                      >
+                        <div class="flex items-center justify-between">
+                          <div>
+                            <p class="font-semibold text-sm"
+                              [class]="editEspnGameId === game.id ? 'text-secondary-900' : 'text-heading'">{{ game.awayTeam }} &#64; {{ game.homeTeam }}</p>
+                            @if (game.status === 'pre' && game.date) {
+                              <p class="text-xs"
+                                [class]="editEspnGameId === game.id ? 'text-secondary-700' : 'text-muted'">{{ formatGameDate(game.date) }}</p>
+                            }
+                            @if (game.status !== 'pre') {
+                              <p class="text-xs"
+                                [class]="editEspnGameId === game.id ? 'text-secondary-700' : 'text-muted'">{{ game.awayScore }} - {{ game.homeScore }}</p>
+                            }
+                          </div>
+                          <span class="text-xs font-medium px-2 py-0.5 rounded-full"
+                            [class]="getGameStatusClass(game.status)">
+                            {{ getGameStatusText(game) }}
+                          </span>
+                        </div>
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+
               <!-- Game Name -->
               <div>
                 <label class="block text-sm font-semibold text-label mb-2">Game Name</label>
@@ -704,58 +824,6 @@ import {
         </div>
       }
 
-      <!-- Profile Edit Modal -->
-      @if (showProfileModal()) {
-        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" (click)="showProfileModal.set(false)">
-          <div class="bg-dialog rounded-2xl shadow-2xl max-w-sm w-full animate-modal-in" (click)="$event.stopPropagation()">
-            <div class="flex items-center justify-between p-6 border-b border-default">
-              <h3 class="text-xl font-bold text-heading">Edit Profile</h3>
-              <button
-                (click)="showProfileModal.set(false)"
-                class="p-2 text-muted hover:text-default hover:bg-control rounded-lg transition-colors"
-              >
-                <ng-icon name="heroXMark" class="text-2xl"></ng-icon>
-              </button>
-            </div>
-
-            <div class="p-6">
-              <div>
-                <label class="block text-sm font-semibold text-label mb-2">Display Name</label>
-                <input
-                  type="text"
-                  [(ngModel)]="profileName"
-                  placeholder="Enter your name"
-                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
-                  (keyup.enter)="saveProfile()"
-                />
-                @if (currentUser()?.email) {
-                  <p class="text-xs text-muted mt-2">{{ currentUser()?.email }}</p>
-                }
-              </div>
-            </div>
-
-            <div class="flex items-center justify-end gap-3 p-6 border-t border-default bg-input rounded-b-2xl">
-              <button
-                (click)="showProfileModal.set(false)"
-                class="px-6 py-2.5 text-muted hover:bg-control rounded-xl font-medium transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                (click)="saveProfile()"
-                [disabled]="isSavingProfile() || !profileName.trim()"
-                class="px-8 py-2.5 bg-secondary-500 hover:bg-secondary-600 disabled:opacity-50 text-white rounded-xl font-bold transition-colors"
-              >
-                @if (isSavingProfile()) {
-                  Saving...
-                } @else {
-                  Save
-                }
-              </button>
-            </div>
-          </div>
-        </div>
-      }
     </div>
   `,
   styles: [`
@@ -793,23 +861,29 @@ export class DashboardComponent implements OnInit {
   espnGames = signal<EspnGame[]>([]);
   isLoadingEspnGames = signal(false);
   copiedToClipboard = signal(false);
+  gameNameError = signal(false);
 
   // Edit modal state
   showEditModal = signal(false);
   editingGame = signal<GameListItem | null>(null);
   editGameName = '';
   editGamePrice = 10;
+  editSport: SportType = 'nfl';
+  editEspnGameId = '';
+  editEspnGames = signal<EspnGame[]>([]);
+  isLoadingEditEspnGames = signal(false);
   managerEmail = '';
   managerLookupError = signal<string | null>(null);
   isLookingUpManager = signal(false);
   isSavingGame = signal(false);
 
-  // Profile edit state
-  showProfileModal = signal(false);
+  // Profile dropdown state
+  showProfileDropdown = signal(false);
   profileName = '';
   isSavingProfile = signal(false);
 
   newGameName = '';
+  newGamePaymentManager = '';
   joinGameCode = '';
   selectedSport: SportType = 'nfl';
   selectedEspnGameId = '';
@@ -819,7 +893,10 @@ export class DashboardComponent implements OnInit {
   pricePresets = [0, 5, 10, 20, 50];
   sportOptions: { value: SportType; label: string }[] = [
     { value: 'nfl', label: 'NFL' },
-    { value: 'nba', label: 'NBA' }
+    { value: 'ncaaf', label: 'NCAA Football' },
+    { value: 'nba', label: 'NBA' },
+    { value: 'wnba', label: 'WNBA' },
+    { value: 'afl', label: 'AFL' }
   ];
 
   ngOnInit(): void {
@@ -898,6 +975,13 @@ export class DashboardComponent implements OnInit {
     const user = this.currentUser();
     if (!user || user.isGuest) return;
 
+    // Validate game name is required
+    if (!this.newGameName.trim()) {
+      this.gameNameError.set(true);
+      return;
+    }
+    this.gameNameError.set(false);
+
     this.isCreating.set(true);
     try {
       let homeTeam: string | undefined;
@@ -913,12 +997,13 @@ export class DashboardComponent implements OnInit {
       const gameId = await this.gameService.createGame(
         user.uid,
         user.displayName || 'Unknown',
-        this.newGameName.trim() || undefined,
+        this.newGameName.trim(),
         this.selectedEspnGameId || undefined,
         homeTeam,
         awayTeam,
         this.newGamePrice,
-        this.selectedEspnGameId ? this.selectedSport : undefined
+        this.selectedEspnGameId ? this.selectedSport : undefined,
+        this.newGamePaymentManager.trim() || undefined
       );
       this.router.navigate(['/game', gameId]);
     } catch (error) {
@@ -932,10 +1017,12 @@ export class DashboardComponent implements OnInit {
 
   resetCreateForm(): void {
     this.newGameName = '';
+    this.newGamePaymentManager = '';
     this.selectedSport = 'nfl';
     this.selectedEspnGameId = '';
     this.newGamePrice = 10;
     this.customPrice = null;
+    this.gameNameError.set(false);
   }
 
   joinGame(): void {
@@ -984,6 +1071,17 @@ export class DashboardComponent implements OnInit {
     return new Date(timestamp).toLocaleDateString();
   }
 
+  formatGameDate(isoDate: string): string {
+    const date = new Date(isoDate);
+    return date.toLocaleDateString(undefined, {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit'
+    });
+  }
+
   async signOut(): Promise<void> {
     await this.authService.signOut();
     this.router.navigate(['/']);
@@ -994,9 +1092,12 @@ export class DashboardComponent implements OnInit {
     this.editingGame.set(game);
     this.editGameName = game.name;
     this.editGamePrice = game.pricePerSquare;
+    this.editSport = game.espnSport || 'nfl';
+    this.editEspnGameId = game.espnEventId || '';
     this.managerEmail = '';
     this.managerLookupError.set(null);
     this.showEditModal.set(true);
+    this.fetchEditEspnGames();
   }
 
   closeEditModal(): void {
@@ -1004,6 +1105,27 @@ export class DashboardComponent implements OnInit {
     this.editingGame.set(null);
     this.managerEmail = '';
     this.managerLookupError.set(null);
+    this.editEspnGames.set([]);
+  }
+
+  async fetchEditEspnGames(): Promise<void> {
+    this.isLoadingEditEspnGames.set(true);
+    try {
+      const games = await this.espnService.getGames(this.editSport);
+      this.editEspnGames.set(games);
+    } finally {
+      this.isLoadingEditEspnGames.set(false);
+    }
+  }
+
+  selectEditSport(sport: SportType): void {
+    this.editSport = sport;
+    this.editEspnGameId = '';
+    this.fetchEditEspnGames();
+  }
+
+  selectEditEspnGame(gameId: string): void {
+    this.editEspnGameId = gameId;
   }
 
   async lookupAndAssignManager(): Promise<void> {
@@ -1060,12 +1182,25 @@ export class DashboardComponent implements OnInit {
 
     this.isSavingGame.set(true);
     try {
+      const selectedEspnGame = this.editEspnGames().find(g => g.id === this.editEspnGameId);
       await this.gameService.updateGame(game.id, {
         name: this.editGameName,
-        pricePerSquare: this.editGamePrice
+        pricePerSquare: this.editGamePrice,
+        espnEventId: this.editEspnGameId || undefined,
+        espnSport: this.editEspnGameId ? this.editSport : undefined,
+        homeTeam: selectedEspnGame?.homeTeam || game.homeTeam,
+        awayTeam: selectedEspnGame?.awayTeam || game.awayTeam
       });
       this.myGames.update(games =>
-        games.map(g => g.id === game.id ? { ...g, name: this.editGameName, pricePerSquare: this.editGamePrice } : g)
+        games.map(g => g.id === game.id ? {
+          ...g,
+          name: this.editGameName,
+          pricePerSquare: this.editGamePrice,
+          espnEventId: this.editEspnGameId || undefined,
+          espnSport: this.editEspnGameId ? this.editSport : undefined,
+          homeTeam: selectedEspnGame?.homeTeam || game.homeTeam,
+          awayTeam: selectedEspnGame?.awayTeam || game.awayTeam
+        } : g)
       );
       this.closeEditModal();
     } catch (error) {
@@ -1075,11 +1210,22 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  // Profile modal methods
-  openProfileModal(): void {
-    const user = this.currentUser();
-    this.profileName = user?.displayName || '';
-    this.showProfileModal.set(true);
+  // Profile dropdown methods
+  toggleProfileDropdown(event: Event): void {
+    event.stopPropagation();
+    const isOpening = !this.showProfileDropdown();
+    this.showProfileDropdown.set(isOpening);
+    if (isOpening) {
+      const user = this.currentUser();
+      this.profileName = user?.displayName || '';
+    }
+  }
+
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    if (this.showProfileDropdown()) {
+      this.showProfileDropdown.set(false);
+    }
   }
 
   async saveProfile(): Promise<void> {
@@ -1093,7 +1239,7 @@ export class DashboardComponent implements OnInit {
       } else {
         await this.authService.updateDisplayName(this.profileName);
       }
-      this.showProfileModal.set(false);
+      // Keep dropdown open so user sees it saved
     } catch (error) {
       console.error('Failed to save profile:', error);
     } finally {
