@@ -194,6 +194,15 @@
                 class="px-4 py-2 text-lg font-bold transition-colors hover:text-secondary-400 -mb-px">
                 Odds
               </button>
+              <button
+                (click)="activeTab = 'boxscore'"
+                [class.border-b-2]="activeTab === 'boxscore'"
+                [class.border-secondary-500]="activeTab === 'boxscore'"
+                [class.text-secondary-500]="activeTab === 'boxscore'"
+                [class.text-muted]="activeTab !== 'boxscore'"
+                class="px-4 py-2 text-lg font-bold transition-colors hover:text-secondary-400 -mb-px">
+                Box Score
+              </button>
             </div>
 
             <!-- Tab Content -->
@@ -209,7 +218,7 @@
                 [isRandomizing]="isRandomizing"
                 (squareClick)="onSquareClick($event)">
               </app-game-board>
-            } @else {
+            } @else if (activeTab === 'probabilities') {
               <app-probability-heatmap
                 [homeNumbers]="homeNumbers"
                 [awayNumbers]="awayNumbers"
@@ -218,6 +227,11 @@
                 [selectedSquares]="selectedSquares"
                 [selectedPlayer]="selectedPlayer">
               </app-probability-heatmap>
+            } @else {
+              <app-box-score
+                [game]="linkedEspnGame()"
+                [espnSport]="espnSport">
+              </app-box-score>
             }
           </div>
         </div>

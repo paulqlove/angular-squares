@@ -35,6 +35,7 @@ import { DialogComponent, DialogPart } from '../../components/ui/dialog/dialog.c
 import { PaymentDialogComponent } from './components/payment-dialog/payment-dialog.component';
 import { ProbabilityHeatmapComponent } from './components/probability-heatmap/probability-heatmap.component';
 import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.component';
+import { BoxScoreComponent } from './components/box-score/box-score.component';
 
 @Component({
   selector: 'app-super-bowl-squares',
@@ -52,7 +53,8 @@ import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.co
     DialogComponent,
     PaymentDialogComponent,
     ProbabilityHeatmapComponent,
-    AuthModalComponent
+    AuthModalComponent,
+    BoxScoreComponent
   ],
   providers: [
     provideIcons({
@@ -158,7 +160,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   selectedPlayer: string | null = null;
   venmoUsername = '';
   paidPlayers: Set<string> = new Set();
-  activeTab: 'board' | 'probabilities' = 'board';
+  activeTab: 'board' | 'probabilities' | 'boxscore' = 'board';
   showVenmoDialog = false;
 
   // Injected services
