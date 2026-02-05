@@ -7,6 +7,7 @@ import { GameService, GameListItem } from '../../core/services/game.service';
 import { EspnService, EspnGame, SportType, SPORT_CONFIG } from '../../core/services/espn.service';
 import { ThemeService, ThemeMode } from '../../core/services/theme.service';
 import { ToastService } from '../../core/services/toast.service';
+import { SanitizationService } from '../../core/services/sanitization.service';
 import { WalkthroughService, WalkthroughStep } from '../../core/services/walkthrough.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
@@ -399,6 +400,94 @@ import {
               }
             </div>
           }
+        }
+
+        <!-- Joined Games Section -->
+        @if (joinedGames().length > 0) {
+          <div class="mt-10 mb-4">
+            <div class="flex items-center gap-2 mb-1">
+              <ng-icon name="heroUserGroup" class="text-xl text-muted"></ng-icon>
+              <h2 class="text-xl font-bold text-heading tracking-tight">Joined Games</h2>
+            </div>
+            <p class="text-sm text-muted">Games you've joined by selecting squares</p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            @for (game of joinedGames(); track game.id) {
+              <div class="bg-card rounded-2xl shadow-sm hover:shadow-md transition-all overflow-hidden group border border-card border-l-4 border-l-secondary-500">
+                <!-- Game Header -->
+                <div class="bg-control dark:bg-gradient-to-r dark:from-header-accent dark:to-header p-4">
+                  <div class="flex items-center justify-between mb-2">
+                    <h3 class="font-bold text-heading dark:text-white truncate">{{ game.name }}</h3>
+                    <span class="flex items-center gap-1 text-xs bg-secondary-100 text-secondary-700 px-2 py-1 rounded-full dark:bg-secondary-500/20 dark:text-secondary-300">
+                      <ng-icon name="heroUserGroup" class="text-xs"></ng-icon>
+                      Joined
+                    </span>
+                  </div>
+                  <p class="text-sm text-muted dark:text-primary-300">
+                    @if (game.homeTeam && game.awayTeam) {
+                      {{ game.awayTeam }} vs {{ game.homeTeam }}
+                    } @else {
+                      <span class="italic">No teams set</span>
+                    }
+                  </p>
+                  <p class="text-xs text-muted dark:text-primary-400 mt-1">
+                    Hosted by {{ game.ownerName }}
+                  </p>
+                </div>
+
+                <!-- Game Content -->
+                <div class="p-4">
+                  <!-- Progress Bar -->
+                  <div class="mb-4">
+                    <div class="flex justify-between text-sm mb-1">
+                      <span class="text-muted">Squares Filled</span>
+                      <span class="font-semibold text-default">{{ game.squaresFilled }}/100</span>
+                    </div>
+                    <div class="h-2 bg-control rounded-full overflow-hidden">
+                      <div
+                        class="h-full bg-gradient-to-r from-secondary-400 to-secondary-500 rounded-full transition-all duration-500"
+                        [style.width.%]="game.squaresFilled"
+                      ></div>
+                    </div>
+                  </div>
+
+                  <!-- Stats Row -->
+                  <div class="flex items-center gap-4 text-sm text-muted mb-4">
+                    <span class="flex items-center gap-1">
+                      <ng-icon name="heroUserGroup" class="text-base"></ng-icon>
+                      {{ game.playerCount }} players
+                    </span>
+                    <span class="text-muted">|</span>
+                    <span class="font-mono text-xs bg-control px-2 py-0.5 rounded">{{ game.id }}</span>
+                  </div>
+
+                  <!-- Actions (Open and Share only) -->
+                  <div class="flex items-center gap-2">
+                    <button
+                      (click)="openGame(game.id)"
+                      class="flex-1 px-4 py-2.5 bg-secondary-500 hover:bg-secondary-600 text-white rounded-xl font-medium transition-colors"
+                    >
+                      Open Game
+                    </button>
+                    <button
+                      (click)="shareGame(game.id)"
+                      class="p-2.5 text-muted hover:text-secondary-600 hover:bg-secondary-100 rounded-xl transition-colors"
+                      title="Share game"
+                      aria-label="Share game"
+                    >
+                      <ng-icon name="heroShare" class="text-lg"></ng-icon>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="px-4 py-3 bg-input border-t border-default">
+                  <span class="text-xs text-muted">Created {{ formatDate(game.createdAt) }}</span>
+                </div>
+              </div>
+            }
+          </div>
         }
       </main>
 
@@ -865,6 +954,7 @@ export class DashboardComponent implements OnInit {
   private router = inject(Router);
   private toastService = inject(ToastService);
   private walkthroughService = inject(WalkthroughService);
+  private sanitizationService = inject(SanitizationService);
   themeService = inject(ThemeService);
 
   private dashboardWalkthroughSteps: WalkthroughStep[] = [
@@ -904,6 +994,7 @@ export class DashboardComponent implements OnInit {
   canCreateGame = this.authService.canCreateGame;
 
   myGames = signal<GameListItem[]>([]);
+  joinedGames = signal<GameListItem[]>([]);
   isLoadingGames = signal(true);
   isCreating = signal(false);
   showCreateModal = signal(false);
@@ -966,8 +1057,12 @@ export class DashboardComponent implements OnInit {
     if (user && !user.isGuest) {
       this.isLoadingGames.set(true);
       try {
-        const games = await this.gameService.getUserGames(user.uid);
-        this.myGames.set(games);
+        const [owned, joined] = await Promise.all([
+          this.gameService.getUserGames(user.uid),
+          this.gameService.getJoinedGames(user.uid)
+        ]);
+        this.myGames.set(owned);
+        this.joinedGames.set(joined);
       } catch (error) {
         this.toastService.error('Failed to load games');
       } finally {
@@ -1034,11 +1129,14 @@ export class DashboardComponent implements OnInit {
     if (!user || user.isGuest) return;
 
     // Validate game name is required
-    if (!this.newGameName.trim()) {
+    const sanitizedName = this.sanitizationService.sanitizeGameName(this.newGameName);
+    if (!sanitizedName) {
       this.gameNameError.set(true);
       return;
     }
     this.gameNameError.set(false);
+
+    const sanitizedPrice = this.sanitizationService.validatePrice(this.newGamePrice);
 
     this.isCreating.set(true);
     try {
@@ -1055,11 +1153,11 @@ export class DashboardComponent implements OnInit {
       const gameId = await this.gameService.createGame(
         user.uid,
         user.displayName || 'Unknown',
-        this.newGameName.trim(),
+        sanitizedName,
         this.selectedEspnGameId || undefined,
         homeTeam,
         awayTeam,
-        this.newGamePrice,
+        sanitizedPrice,
         this.selectedEspnGameId ? this.selectedSport : undefined,
         this.newGamePaymentManager.trim() || undefined
       );
@@ -1238,12 +1336,15 @@ export class DashboardComponent implements OnInit {
     const game = this.editingGame();
     if (!game) return;
 
+    const sanitizedName = this.sanitizationService.sanitizeGameName(this.editGameName);
+    const sanitizedPrice = this.sanitizationService.validatePrice(this.editGamePrice);
+
     this.isSavingGame.set(true);
     try {
       const selectedEspnGame = this.editEspnGames().find(g => g.id === this.editEspnGameId);
       await this.gameService.updateGame(game.id, {
-        name: this.editGameName,
-        pricePerSquare: this.editGamePrice,
+        name: sanitizedName,
+        pricePerSquare: sanitizedPrice,
         espnEventId: this.editEspnGameId || undefined,
         espnSport: this.editEspnGameId ? this.editSport : undefined,
         homeTeam: selectedEspnGame?.homeTeam || game.homeTeam,
@@ -1252,8 +1353,8 @@ export class DashboardComponent implements OnInit {
       this.myGames.update(games =>
         games.map(g => g.id === game.id ? {
           ...g,
-          name: this.editGameName,
-          pricePerSquare: this.editGamePrice,
+          name: sanitizedName,
+          pricePerSquare: sanitizedPrice,
           espnEventId: this.editEspnGameId || undefined,
           espnSport: this.editEspnGameId ? this.editSport : undefined,
           homeTeam: selectedEspnGame?.homeTeam || game.homeTeam,
@@ -1287,16 +1388,18 @@ export class DashboardComponent implements OnInit {
   }
 
   async saveProfile(): Promise<void> {
-    if (!this.profileName.trim()) return;
+    const sanitizedName = this.sanitizationService.sanitizeDisplayName(this.profileName);
+    if (!sanitizedName) return;
 
     this.isSavingProfile.set(true);
     try {
       const user = this.currentUser();
       if (user?.isGuest) {
-        this.authService.updateGuestName(this.profileName);
+        this.authService.updateGuestName(sanitizedName);
       } else {
-        await this.authService.updateDisplayName(this.profileName);
+        await this.authService.updateDisplayName(sanitizedName);
       }
+      this.profileName = sanitizedName;
       // Keep dropdown open so user sees it saved
     } catch (error) {
       console.error('Failed to save profile:', error);

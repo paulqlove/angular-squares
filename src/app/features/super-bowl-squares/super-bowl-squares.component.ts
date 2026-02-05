@@ -6,6 +6,7 @@ import { GameService, GameData } from '../../core/services/game.service';
 import { AuthService } from '../../core/services/auth.service';
 import { EspnService, EspnGame, SportType, SPORT_CONFIG } from '../../core/services/espn.service';
 import { ToastService } from '../../core/services/toast.service';
+import { SanitizationService } from '../../core/services/sanitization.service';
 import { WalkthroughService, WalkthroughStep } from '../../core/services/walkthrough.service';
 import { Subscription } from 'rxjs';
 import { GameBoardComponent } from './components/game-board/game-board.component';
@@ -133,7 +134,9 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   }
   set currentPlayer(value: string) {
     this._currentPlayer = this.sanitizePlayerName(value);
+    this.checkDuplicateName();
   }
+  duplicateNameWarning = signal<string | null>(null);
   isRandomized: boolean = false;
   isRandomizing: boolean = false;
   isLocked: boolean = false;
@@ -152,6 +155,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   private espnService = inject(EspnService);
   private toastService = inject(ToastService);
   private walkthroughService = inject(WalkthroughService);
+  private sanitizationService = inject(SanitizationService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
@@ -307,6 +311,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           });
 
           this.calculatePlayerStats();
+          this.checkDuplicateName();
 
           if (Object.values(this.scores).some(score => score.home > 0 || score.away > 0)) {
             this.calculateWinners();
@@ -383,15 +388,38 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   }
 
   private sanitizePlayerName(name: string): string {
-    return name
-      .trim()
-      .replace(/\s+/g, ' ');
+    return this.sanitizationService.sanitizePlayerName(name);
+  }
+
+  private checkDuplicateName(): void {
+    const sanitizedName = this.sanitizePlayerName(this._currentPlayer);
+    if (!sanitizedName) {
+      this.duplicateNameWarning.set(null);
+      return;
+    }
+
+    // Check if this name already exists in the game
+    const existingPlayers = new Set(Object.values(this.selectedSquares));
+    if (existingPlayers.has(sanitizedName)) {
+      this.duplicateNameWarning.set(`"${sanitizedName}" is already in use`);
+    } else {
+      this.duplicateNameWarning.set(null);
+    }
   }
 
   onSquareClick(event: { row: number; col: number }): void {
     if (!this.currentPlayer) {
       this.showAlert = true;
       this.alertMessage = 'Please enter your name first';
+      setTimeout(() => {
+        this.showAlert = false;
+      }, 3000);
+      return;
+    }
+
+    if (this.duplicateNameWarning()) {
+      this.showAlert = true;
+      this.alertMessage = this.duplicateNameWarning()!;
       setTimeout(() => {
         this.showAlert = false;
       }, 3000);
@@ -438,11 +466,20 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     this.gameService.updateGame(this.gameId, {
       selectedSquares: newSelectedSquares
     });
+
+    // Track joined game for authenticated non-owner users
+    const user = this.authService.currentUser();
+    if (user && !user.isGuest && user.uid !== this.gameOwnerId) {
+      this.gameService.addJoinedGame(user.uid, this.gameId, this.gameName);
+    }
   }
 
   onScoreChange(event: { quarter: string; scores: { home: number; away: number } }): void {
     const quarter = `q${event.quarter}` as keyof typeof this.scores;
-    this.scores[quarter] = event.scores;
+    this.scores[quarter] = {
+      home: this.sanitizationService.validateScore(event.scores.home),
+      away: this.sanitizationService.validateScore(event.scores.away)
+    };
     this.gameService.updateGame(this.gameId, {
       scores: this.scores
     });
@@ -527,10 +564,11 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   }
 
   onTeamNameChange(event: {team: 'home' | 'away', name: string}): void {
+    const sanitizedName = this.sanitizationService.sanitizeTeamName(event.name);
     if (event.team === 'home') {
-      this.homeTeam = event.name;
+      this.homeTeam = sanitizedName;
     } else {
-      this.awayTeam = event.name;
+      this.awayTeam = sanitizedName;
     }
     this.gameService.updateGame(this.gameId, {
       homeTeam: this.homeTeam,
@@ -539,7 +577,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   }
 
   onPriceChange(price: number): void {
-    this.currentPrice = price;
+    this.currentPrice = this.sanitizationService.validatePrice(price);
     this.gameService.updateGame(this.gameId, {
       pricePerSquare: this.currentPrice
     });
@@ -551,9 +589,9 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   }
 
   onVenmoUsernameChange(username: string) {
-    this.venmoUsername = username;
+    this.venmoUsername = this.sanitizationService.sanitizeVenmoUsername(username);
     this.gameService.updateGame(this.gameId, {
-      venmoUsername: username
+      venmoUsername: this.venmoUsername
     });
   }
 
@@ -777,8 +815,28 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     this.showNameEditModal.set(true);
   }
 
+  isEditingNameTaken(): boolean {
+    if (!this.editingName.trim()) return false;
+    const sanitizedName = this.sanitizePlayerName(this.editingName);
+    const existingPlayers = new Set(Object.values(this.selectedSquares));
+    const currentUserName = this.authService.currentUser()?.displayName;
+    return existingPlayers.has(sanitizedName) && currentUserName !== sanitizedName;
+  }
+
   async saveNameEdit(): Promise<void> {
     if (!this.editingName.trim()) return;
+
+    // Check for duplicate name
+    const sanitizedName = this.sanitizePlayerName(this.editingName);
+    const existingPlayers = new Set(Object.values(this.selectedSquares));
+    const currentUserName = this.authService.currentUser()?.displayName;
+
+    // Allow if it's the same name they already have, or if they already have squares under this name
+    const isOwnName = currentUserName === sanitizedName;
+    if (existingPlayers.has(sanitizedName) && !isOwnName) {
+      this.toastService.error(`"${sanitizedName}" is already in use. Please use a different name.`);
+      return;
+    }
 
     this.isSavingName.set(true);
     try {

@@ -95,3 +95,5 @@ _Session notes and decisions go here_
 | Last sync timestamp | Feb 2026 | Shows "Xm ago" format in settings panel |
 | Dark mode support | Feb 2026 | ThemeService with system/light/dark toggle, semantic color tokens |
 | Ripple grid animation | Feb 2026 | Canvas-based expanding ring effect on welcome hero, gradient title |
+| Fix dashboard refresh flash | Feb 2026 | App-level loading screen while auth initializes, prevents welcome page flash |
+| Duplicate player name prevention | Feb 2026 | Warns and blocks when entering a name already in use |

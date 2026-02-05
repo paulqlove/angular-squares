@@ -17,8 +17,9 @@ import {
 } from '@ng-icons/heroicons/outline';
 import { FormsModule } from '@angular/forms';
 import { ToggleComponent } from '../../../../components/ui/toggle/toggle.component';
-import { DialogComponent } from '../../../../components/ui/dialog/dialog.component';
+import { DialogComponent, DialogPart } from '../../../../components/ui/dialog/dialog.component';
 import { EspnGame, SportType, SPORT_CONFIG } from '../../../../core/services/espn.service';
+import { SanitizationService } from '../../../../core/services/sanitization.service';
 import { ThemeService, ThemeMode } from '../../../../core/services/theme.service';
 
 @Component({
@@ -89,7 +90,8 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
     <app-dialog
       [isOpen]="showVenmoDialog"
       title="Leave Site?"
-      [message]="venmoMessage"
+      [messageParts]="venmoMessageParts"
+      confirmText="Continue to Venmo"
       (onConfirm)="onVenmoConfirm()"
       (onCancel)="showVenmoDialog = false"
     ></app-dialog>
@@ -446,6 +448,7 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
 })
 export class HeaderComponent {
   themeService = inject(ThemeService);
+  private sanitizationService = inject(SanitizationService);
 
   @Input() isRandomized = false;
   @Input() isLocked = false;
@@ -504,12 +507,14 @@ export class HeaderComponent {
       return;
     }
 
-    if (this.tempVenmoUsername === this.venmoUsername) {
+    const sanitized = this.sanitizationService.sanitizeVenmoUsername(this.tempVenmoUsername);
+    if (sanitized === this.venmoUsername) {
       return;
     }
 
-    this.venmoUsername = this.tempVenmoUsername;
-    this.onVenmoUsernameChange.emit(this.tempVenmoUsername);
+    this.venmoUsername = sanitized;
+    this.tempVenmoUsername = sanitized;
+    this.onVenmoUsernameChange.emit(sanitized);
   }
 
   onTeamChange(team: 'home' | 'away', name: string) {
@@ -525,8 +530,13 @@ export class HeaderComponent {
     this.showVenmoDialog = false;
   }
 
-  get venmoMessage(): string {
-    return `You will be redirected to <strong class="text-[#008CFF]">Venmo</strong> to pay <strong>${this.venmoUsername}</strong>`;
+  get venmoMessageParts(): DialogPart[] {
+    return [
+      { text: 'You will be redirected to ' },
+      { text: 'Venmo', bold: true, color: '#008CFF' },
+      { text: ' to pay ' },
+      { text: this.venmoUsername, bold: true }
+    ];
   }
 
   getEspnGameDisplay(game: EspnGame): string {

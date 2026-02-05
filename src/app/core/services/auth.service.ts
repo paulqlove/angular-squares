@@ -17,6 +17,7 @@ import {
 import { initializeApp, getApps } from 'firebase/app';
 import { Database, getDatabase, ref, set, get } from 'firebase/database';
 import { environment } from '../../../environments/environment';
+import { SanitizationService } from './sanitization.service';
 
 export interface AuthUser {
   uid: string;
@@ -38,6 +39,7 @@ const GUEST_COOKIE_KEY = 'squares_guest_user';
 })
 export class AuthService {
   private platformId = inject(PLATFORM_ID);
+  private sanitizationService = inject(SanitizationService);
   // Lazy init required for SSR hydration - see CLAUDE.md "SSR Hydration Pattern"
   private _auth: Auth | null = null;
   private _db: Database | null = null;
@@ -103,7 +105,8 @@ export class AuthService {
       });
       this.initializeAuthState();
     } else {
-      this._isLoading.set(false);
+      // Keep isLoading true during SSR so server renders the loading spinner
+      // This prevents flash of welcome page before client hydration
       this._authReadyPromise = Promise.resolve();
     }
   }
@@ -255,8 +258,9 @@ export class AuthService {
 
   // Guest Sign In (cookie-based)
   signInAsGuest(name: string): AuthUser {
+    const sanitizedName = this.sanitizationService.sanitizeDisplayName(name);
     const guestUser: GuestUser = {
-      name: name.trim(),
+      name: sanitizedName,
       createdAt: Date.now()
     };
 
@@ -279,14 +283,15 @@ export class AuthService {
   updateGuestName(name: string): void {
     const currentUser = this._currentUser();
     if (currentUser?.isGuest) {
+      const sanitizedName = this.sanitizationService.sanitizeDisplayName(name);
       const guestUser: GuestUser = {
-        name: name.trim(),
+        name: sanitizedName,
         createdAt: parseInt(currentUser.uid.replace('guest_', ''))
       };
       this.setGuestCookie(guestUser);
       this._currentUser.set({
         ...currentUser,
-        displayName: name.trim()
+        displayName: sanitizedName
       });
     }
   }
@@ -296,12 +301,13 @@ export class AuthService {
     const currentUser = this._currentUser();
     if (!currentUser || currentUser.isGuest) return;
 
+    const sanitizedName = this.sanitizationService.sanitizeDisplayName(name);
     const firebaseUser = this.auth.currentUser;
     if (firebaseUser) {
-      await updateProfile(firebaseUser, { displayName: name.trim() });
+      await updateProfile(firebaseUser, { displayName: sanitizedName });
       this._currentUser.set({
         ...currentUser,
-        displayName: name.trim()
+        displayName: sanitizedName
       });
     }
   }

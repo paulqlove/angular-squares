@@ -422,6 +422,64 @@ export class GameService {
     return game?.ownerId === userId;
   }
 
+  // Add a game to user's joined games list
+  async addJoinedGame(userId: string, gameId: string, gameName: string): Promise<void> {
+    if (!this.isBrowser) return;
+    const joinedGameRef = ref(this.db, `users/${userId}/joinedGames/${gameId}`);
+    const snapshot = await get(joinedGameRef);
+    if (snapshot.exists()) return; // Already joined
+    await set(joinedGameRef, {
+      joinedAt: Date.now(),
+      gameName
+    });
+  }
+
+  // Get games user has joined (not owned)
+  async getJoinedGames(userId: string): Promise<GameListItem[]> {
+    if (!this.isBrowser) return [];
+    const joinedGamesRef = ref(this.db, `users/${userId}/joinedGames`);
+    const snapshot = await get(joinedGamesRef);
+
+    if (!snapshot.exists()) {
+      return [];
+    }
+
+    const gameIds = Object.keys(snapshot.val());
+    const games: GameListItem[] = [];
+
+    for (const gameId of gameIds) {
+      const game = await this.getGame(gameId);
+      if (game) {
+        const playerNames = new Set(Object.values(game.selectedSquares));
+        games.push({
+          id: gameId,
+          name: game.name,
+          ownerName: game.ownerName,
+          homeTeam: game.homeTeam,
+          awayTeam: game.awayTeam,
+          createdAt: game.createdAt,
+          playerCount: playerNames.size,
+          squaresFilled: Object.keys(game.selectedSquares).length,
+          isLocked: game.isLocked,
+          pricePerSquare: game.pricePerSquare,
+          managerId: game.managerId,
+          managerEmail: game.managerEmail,
+          espnEventId: game.espnEventId,
+          espnSport: game.espnSport
+        });
+      }
+    }
+
+    return games.sort((a, b) => b.createdAt - a.createdAt);
+  }
+
+  // Remove a game from user's joined games list
+  async removeJoinedGame(userId: string, gameId: string): Promise<void> {
+    if (!this.isBrowser) return;
+    const joinedGameRef = ref(this.db, `users/${userId}/joinedGames/${gameId}`);
+    await remove(joinedGameRef);
+  }
+
   // Update game manager
   async updateGameManager(gameId: string, managerId: string | null, managerEmail: string | null): Promise<void> {
     if (!this.isBrowser) return;
