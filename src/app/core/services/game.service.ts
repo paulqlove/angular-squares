@@ -63,6 +63,7 @@ export interface GameListItem {
   managerEmail?: string;
   espnEventId?: string;
   espnSport?: SportType;
+  venmoUsername?: string;
 }
 
 @Injectable({
@@ -120,7 +121,8 @@ export class GameService {
     awayTeam?: string,
     pricePerSquare?: number,
     espnSport?: SportType,
-    managerEmail?: string
+    managerEmail?: string,
+    venmoUsername?: string
   ): Promise<string> {
     if (!this.isBrowser) throw new Error('Cannot create game on server');
     const gameId = this.generateGameId();
@@ -147,7 +149,7 @@ export class GameService {
       isRandomized: false,
       homeTeam: homeTeam || '',
       awayTeam: awayTeam || '',
-      venmoUsername: '',
+      venmoUsername: venmoUsername || '',
       paidPlayers: [],
       ...(espnEventId ? { espnEventId } : {}),
       ...(espnSport ? { espnSport } : {}),
@@ -385,7 +387,8 @@ export class GameService {
           managerId: game.managerId,
           managerEmail: game.managerEmail,
           espnEventId: game.espnEventId,
-          espnSport: game.espnSport
+          espnSport: game.espnSport,
+          venmoUsername: game.venmoUsername
         });
       }
     }
@@ -471,7 +474,8 @@ export class GameService {
           managerId: game.managerId,
           managerEmail: game.managerEmail,
           espnEventId: game.espnEventId,
-          espnSport: game.espnSport
+          espnSport: game.espnSport,
+          venmoUsername: game.venmoUsername
         });
       }
     }

@@ -631,6 +631,20 @@ import {
                 }
               </div>
 
+              <!-- Venmo Username -->
+              <div>
+                <label class="block text-sm font-semibold text-label mb-3">
+                  Venmo Username
+                  <span class="text-muted font-normal">(optional)</span>
+                </label>
+                <input
+                  type="text"
+                  [(ngModel)]="newGameVenmoUsername"
+                  placeholder="@username"
+                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
+                />
+              </div>
+
               <!-- Payment Manager -->
               <div>
                 <label class="block text-sm font-semibold text-label mb-3">
@@ -848,6 +862,17 @@ import {
                 </div>
               </div>
 
+              <!-- Venmo Username -->
+              <div>
+                <label class="block text-sm font-semibold text-label mb-2">Venmo Username</label>
+                <input
+                  type="text"
+                  [(ngModel)]="editGameVenmoUsername"
+                  placeholder="@username"
+                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
+                />
+              </div>
+
               <!-- Manager Assignment -->
               <div>
                 <label class="block text-sm font-semibold text-label mb-2">
@@ -997,6 +1022,7 @@ export class DashboardComponent implements OnInit {
   showEditModal = signal(false);
   editingGame = signal<GameListItem | null>(null);
   editGameName = '';
+  editGameVenmoUsername = '';
   editGamePrice = 10;
   editSport: SportType = 'nfl';
   editEspnGameId = '';
@@ -1013,6 +1039,7 @@ export class DashboardComponent implements OnInit {
   isSavingProfile = signal(false);
 
   newGameName = '';
+  newGameVenmoUsername = '';
   newGamePaymentManager = '';
   joinGameCode = '';
   selectedSport: SportType = 'nfl';
@@ -1139,6 +1166,8 @@ export class DashboardComponent implements OnInit {
         }
       }
 
+      const sanitizedVenmo = this.sanitizationService.sanitizeVenmoUsername(this.newGameVenmoUsername);
+
       const gameId = await this.gameService.createGame(
         user.uid,
         user.displayName || 'Unknown',
@@ -1148,7 +1177,8 @@ export class DashboardComponent implements OnInit {
         awayTeam,
         sanitizedPrice,
         this.selectedEspnGameId ? this.selectedSport : undefined,
-        this.newGamePaymentManager.trim() || undefined
+        this.newGamePaymentManager.trim() || undefined,
+        sanitizedVenmo || undefined
       );
       this.router.navigate(['/game', gameId]);
     } catch (error) {
@@ -1162,6 +1192,7 @@ export class DashboardComponent implements OnInit {
 
   resetCreateForm(): void {
     this.newGameName = '';
+    this.newGameVenmoUsername = '';
     this.newGamePaymentManager = '';
     this.selectedSport = 'nfl';
     this.selectedEspnGameId = '';
@@ -1236,6 +1267,7 @@ export class DashboardComponent implements OnInit {
   openEditModal(game: GameListItem): void {
     this.editingGame.set(game);
     this.editGameName = game.name;
+    this.editGameVenmoUsername = game.venmoUsername || '';
     this.editGamePrice = game.pricePerSquare;
     this.editSport = game.espnSport || 'nfl';
     this.editEspnGameId = game.espnEventId || '';
@@ -1327,6 +1359,7 @@ export class DashboardComponent implements OnInit {
 
     const sanitizedName = this.sanitizationService.sanitizeGameName(this.editGameName);
     const sanitizedPrice = this.sanitizationService.validatePrice(this.editGamePrice);
+    const sanitizedVenmo = this.sanitizationService.sanitizeVenmoUsername(this.editGameVenmoUsername);
 
     this.isSavingGame.set(true);
     try {
@@ -1334,6 +1367,7 @@ export class DashboardComponent implements OnInit {
       await this.gameService.updateGame(game.id, {
         name: sanitizedName,
         pricePerSquare: sanitizedPrice,
+        venmoUsername: sanitizedVenmo,
         espnEventId: this.editEspnGameId || undefined,
         espnSport: this.editEspnGameId ? this.editSport : undefined,
         homeTeam: selectedEspnGame?.homeTeam || game.homeTeam,
@@ -1344,6 +1378,7 @@ export class DashboardComponent implements OnInit {
           ...g,
           name: sanitizedName,
           pricePerSquare: sanitizedPrice,
+          venmoUsername: sanitizedVenmo,
           espnEventId: this.editEspnGameId || undefined,
           espnSport: this.editEspnGameId ? this.editSport : undefined,
           homeTeam: selectedEspnGame?.homeTeam || game.homeTeam,
