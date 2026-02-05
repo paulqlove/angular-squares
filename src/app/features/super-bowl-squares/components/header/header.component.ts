@@ -12,7 +12,8 @@ import {
   heroArrowPath,
   heroSun,
   heroMoon,
-  heroComputerDesktop
+  heroComputerDesktop,
+  heroQuestionMarkCircle
 } from '@ng-icons/heroicons/outline';
 import { FormsModule } from '@angular/forms';
 import { ToggleComponent } from '../../../../components/ui/toggle/toggle.component';
@@ -36,7 +37,8 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
       heroArrowPath,
       heroSun,
       heroMoon,
-      heroComputerDesktop
+      heroComputerDesktop,
+      heroQuestionMarkCircle
     })
   ],
   template: `
@@ -49,7 +51,7 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
         <div class="flex items-center gap-2">
           <!-- Venmo Button -->
           @if (venmoUsername) {
-            <button 
+            <button
               (click)="showVenmoDialog = true"
               class="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-[#008CFF] hover:bg-[#0074D4] rounded-lg transition-colors"
             >
@@ -58,11 +60,22 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
             </button>
           }
 
+          <!-- Help Button -->
+          <button
+            (click)="onShowHelp.emit()"
+            class="p-2.5 text-muted hover:text-heading rounded-lg hover:bg-card transition-colors flex items-center justify-center"
+            title="Show tutorial"
+            aria-label="Show tutorial"
+          >
+            <ng-icon name="heroQuestionMarkCircle" class="text-2xl"></ng-icon>
+          </button>
+
           <!-- Settings Button -->
           <button
             (click)="toggleSettings()"
-            class="p-2.5 text-muted hover:text-heading rounded-lg hover:bg-card transition-colors flex"
+            class="p-2.5 text-muted hover:text-heading rounded-lg hover:bg-card transition-colors flex items-center justify-center"
             aria-label="Open settings"
+            data-walkthrough="settings-button"
           >
             <ng-icon name="heroCog6Tooth" class="text-2xl"></ng-icon>
           </button>
@@ -462,6 +475,7 @@ export class HeaderComponent {
   @Output() onUnlinkEspn = new EventEmitter<void>();
   @Output() onRefreshEspnGames = new EventEmitter<void>();
   @Output() onSportChange = new EventEmitter<SportType>();
+  @Output() onShowHelp = new EventEmitter<void>();
 
   showSettings = false;
   showVenmoDialog = false;

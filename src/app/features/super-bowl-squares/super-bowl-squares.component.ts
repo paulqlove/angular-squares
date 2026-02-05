@@ -6,6 +6,7 @@ import { GameService, GameData } from '../../core/services/game.service';
 import { AuthService } from '../../core/services/auth.service';
 import { EspnService, EspnGame, SportType, SPORT_CONFIG } from '../../core/services/espn.service';
 import { ToastService } from '../../core/services/toast.service';
+import { WalkthroughService, WalkthroughStep } from '../../core/services/walkthrough.service';
 import { Subscription } from 'rxjs';
 import { GameBoardComponent } from './components/game-board/game-board.component';
 import { PlayersListComponent } from './components/players-list/players-list.component';
@@ -21,7 +22,8 @@ import {
   heroArrowLeft,
   heroClipboard,
   heroPencilSquare,
-  heroXMark
+  heroXMark,
+  heroQuestionMarkCircle
 } from '@ng-icons/heroicons/outline';
 import { GameStatusComponent } from './components/game-status/game-status.component';
 import { HeaderComponent } from './components/header/header.component';
@@ -54,7 +56,8 @@ import { ProbabilityHeatmapComponent } from './components/probability-heatmap/pr
       heroArrowLeft,
       heroClipboard,
       heroPencilSquare,
-      heroXMark
+      heroXMark,
+      heroQuestionMarkCircle
     })
   ],
   templateUrl: './super-bowl-squares.component.html',
@@ -148,8 +151,42 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private espnService = inject(EspnService);
   private toastService = inject(ToastService);
+  private walkthroughService = inject(WalkthroughService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+
+  private gameboardWalkthroughSteps: WalkthroughStep[] = [
+    {
+      target: 'player-name',
+      title: 'Enter Your Name',
+      description: 'Type your name here so others know which squares are yours when you claim them.',
+      position: 'bottom'
+    },
+    {
+      target: 'game-board',
+      title: 'The Game Board',
+      description: 'Click any empty square to claim it. Check the Odds tab to see which squares have the best winning probability.',
+      position: 'right'
+    },
+    {
+      target: 'players-list',
+      title: 'Players List',
+      description: 'See all players and their squares. Click a name to highlight their squares on the board.',
+      position: 'left'
+    },
+    {
+      target: 'settings-button',
+      title: 'Game Settings',
+      description: 'Game owners can manage team names, prices, lock the board, and sync live ESPN scores here.',
+      position: 'bottom'
+    },
+    {
+      target: 'winners-payouts',
+      title: 'Winners & Payouts',
+      description: 'After numbers are randomized and scores come in, you\'ll see the winners for each quarter here.',
+      position: 'top'
+    }
+  ];
 
   constructor() {
     // Reactively update currentPlayer when auth state changes (e.g., Google sign-in after page load)
@@ -279,6 +316,9 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           if (this.isGameOwner() && this.espnGames().length === 0) {
             this.fetchEspnGames();
           }
+
+          // Trigger walkthrough on first load
+          this.triggerWalkthroughIfNew();
         } else {
           this.gameNotFound.set(true);
         }
@@ -716,6 +756,18 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     } finally {
       this.isSyncingEspn.set(false);
     }
+  }
+
+  // Walkthrough methods
+  startWalkthrough(): void {
+    this.walkthroughService.resetCompletion('gameboard');
+    this.walkthroughService.start('gameboard', this.gameboardWalkthroughSteps);
+  }
+
+  private triggerWalkthroughIfNew(): void {
+    setTimeout(() => {
+      this.walkthroughService.startIfNew('gameboard', this.gameboardWalkthroughSteps);
+    }, 1000);
   }
 
   // Name edit modal methods

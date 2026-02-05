@@ -7,6 +7,7 @@ import { GameService, GameListItem } from '../../core/services/game.service';
 import { EspnService, EspnGame, SportType, SPORT_CONFIG } from '../../core/services/espn.service';
 import { ThemeService, ThemeMode } from '../../core/services/theme.service';
 import { ToastService } from '../../core/services/toast.service';
+import { WalkthroughService, WalkthroughStep } from '../../core/services/walkthrough.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
   heroPlus,
@@ -29,7 +30,8 @@ import {
   heroSun,
   heroMoon,
   heroComputerDesktop,
-  heroChevronDown
+  heroChevronDown,
+  heroQuestionMarkCircle
 } from '@ng-icons/heroicons/outline';
 
 @Component({
@@ -58,7 +60,8 @@ import {
       heroSun,
       heroMoon,
       heroComputerDesktop,
-      heroChevronDown
+      heroChevronDown,
+      heroQuestionMarkCircle
     })
   ],
   template: `
@@ -74,8 +77,19 @@ import {
             </div>
           </div>
 
-          <!-- Profile Dropdown -->
-          <div class="relative">
+          <div class="flex items-center gap-2">
+            <!-- Help Button -->
+            <button
+              (click)="startWalkthrough()"
+              class="p-2 text-header-muted hover:text-header rounded-lg hover:bg-header-accent transition-colors flex items-center justify-center"
+              title="Show tutorial"
+              aria-label="Show tutorial"
+            >
+              <ng-icon name="heroQuestionMarkCircle" class="text-xl"></ng-icon>
+            </button>
+
+            <!-- Profile Dropdown -->
+            <div class="relative" data-walkthrough="profile-dropdown">
             <button
               (click)="toggleProfileDropdown($event)"
               class="flex items-center gap-2 bg-header-accent hover:bg-primary-700 rounded-full px-3 py-1.5 transition-colors cursor-pointer"
@@ -174,13 +188,14 @@ import {
                 </button>
               </div>
             }
+            </div>
           </div>
         </div>
       </header>
 
       <main class="container mx-auto px-4 py-8">
         <!-- Hero Section -->
-        <div class="bg-card border border-card rounded-2xl shadow-xl p-8 mb-8 dark:bg-gradient-to-br dark:from-header-accent dark:to-header dark:border-0">
+        <div class="bg-card border border-card rounded-2xl shadow-xl p-8 mb-8 dark:bg-gradient-to-br dark:from-header-accent dark:to-header dark:border-0" data-walkthrough="hero-section">
           <div class="flex items-center gap-3 mb-6">
             <span class="text-3xl">🏈</span>
             <h2 class="text-2xl font-bold text-heading dark:text-white tracking-tight">Start or Join a Game</h2>
@@ -192,6 +207,7 @@ import {
               <button
                 (click)="openCreateModal()"
                 class="group bg-control hover:bg-control-hover dark:bg-white/10 dark:hover:bg-white/20 backdrop-blur border border-default dark:border-white/20 rounded-xl p-6 text-left transition-all hover:scale-[1.02] hover:shadow-lg"
+                data-walkthrough="create-game"
               >
                 <div class="flex items-center gap-4 mb-3">
                   <div class="w-12 h-12 rounded-xl bg-secondary-500 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -226,7 +242,7 @@ import {
             }
 
             <!-- Join Game Card -->
-            <div class="bg-control dark:bg-white/10 backdrop-blur border border-default dark:border-white/20 rounded-xl p-6">
+            <div class="bg-control dark:bg-white/10 backdrop-blur border border-default dark:border-white/20 rounded-xl p-6" data-walkthrough="join-game">
               <div class="flex items-center gap-4 mb-3">
                 <div class="w-12 h-12 rounded-xl bg-accent-500 flex items-center justify-center">
                   <ng-icon name="heroTicket" class="text-2xl text-white"></ng-icon>
@@ -259,7 +275,7 @@ import {
 
         <!-- My Games Section -->
         @if (canCreateGame()) {
-          <div class="mb-4">
+          <div class="mb-4" data-walkthrough="my-games">
             <h2 class="text-xl font-bold text-heading tracking-tight">My Games</h2>
           </div>
 
@@ -848,7 +864,41 @@ export class DashboardComponent implements OnInit {
   private espnService = inject(EspnService);
   private router = inject(Router);
   private toastService = inject(ToastService);
+  private walkthroughService = inject(WalkthroughService);
   themeService = inject(ThemeService);
+
+  private dashboardWalkthroughSteps: WalkthroughStep[] = [
+    {
+      target: 'hero-section',
+      title: 'Welcome to Football Squares!',
+      description: 'This is where you can create new games or join existing ones. Let\'s take a quick tour!',
+      position: 'bottom'
+    },
+    {
+      target: 'create-game',
+      title: 'Create a New Game',
+      description: 'Click here to start your own squares pool. You can choose a sport, set the price per square, and invite friends.',
+      position: 'bottom'
+    },
+    {
+      target: 'join-game',
+      title: 'Join with a Code',
+      description: 'Have a 6-digit game code? Enter it here to join a friend\'s game instantly.',
+      position: 'bottom'
+    },
+    {
+      target: 'my-games',
+      title: 'Your Games',
+      description: 'All the games you\'ve created will appear here. You can manage, share, or delete them anytime.',
+      position: 'top'
+    },
+    {
+      target: 'profile-dropdown',
+      title: 'Your Profile',
+      description: 'Click here to update your display name, change the theme, or sign out.',
+      position: 'bottom'
+    }
+  ];
 
   currentUser = this.authService.currentUser;
   canCreateGame = this.authService.canCreateGame;
@@ -901,6 +951,14 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadMyGames();
+    setTimeout(() => {
+      this.walkthroughService.startIfNew('dashboard', this.dashboardWalkthroughSteps);
+    }, 500);
+  }
+
+  startWalkthrough(): void {
+    this.walkthroughService.resetCompletion('dashboard');
+    this.walkthroughService.start('dashboard', this.dashboardWalkthroughSteps);
   }
 
   async loadMyGames(): Promise<void> {

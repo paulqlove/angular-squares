@@ -59,7 +59,8 @@
     (onSyncEspn)="syncFromEspn()"
     (onUnlinkEspn)="unlinkEspnGame()"
     (onRefreshEspnGames)="fetchEspnGames()"
-    (onSportChange)="onSportChange($event)">
+    (onSportChange)="onSportChange($event)"
+    (onShowHelp)="startWalkthrough()">
   </app-header>
 
   <div class="container mx-auto">
@@ -93,31 +94,33 @@
         </div>
 
         <!-- Player Display / Input -->
-        @if (currentUser()?.displayName || currentUser()?.email) {
-          <div class="flex items-center gap-1.5">
-            <span class="text-sm text-muted">Playing as:</span>
-            <span class="font-medium text-default">{{ currentUser()?.displayName || currentUser()?.email }}</span>
-            <button
-              (click)="openNameEditModal()"
-              class="p-1.5 text-muted hover:text-heading hover:bg-control rounded transition-colors"
-              title="Edit name"
-              aria-label="Edit your name"
-            >
-              <ng-icon name="heroPencilSquare" class="text-sm"></ng-icon>
-            </button>
-          </div>
-        } @else {
-          <input type="text" [(ngModel)]="currentPlayer"
-                 placeholder="Enter your name"
-                 [disabled]="isLocked"
-                 class="w-48 px-3 py-1.5 text-sm border rounded-lg bg-input text-default focus:outline-none focus:ring-2 focus:ring-secondary-500 disabled:opacity-50 disabled:cursor-not-allowed">
-        }
+        <div data-walkthrough="player-name">
+          @if (currentUser()?.displayName || currentUser()?.email) {
+            <div class="flex items-center gap-1.5">
+              <span class="text-sm text-muted">Playing as:</span>
+              <span class="font-medium text-default">{{ currentUser()?.displayName || currentUser()?.email }}</span>
+              <button
+                (click)="openNameEditModal()"
+                class="p-1.5 text-muted hover:text-heading hover:bg-control rounded transition-colors"
+                title="Edit name"
+                aria-label="Edit your name"
+              >
+                <ng-icon name="heroPencilSquare" class="text-sm"></ng-icon>
+              </button>
+            </div>
+          } @else {
+            <input type="text" [(ngModel)]="currentPlayer"
+                   placeholder="Enter your name"
+                   [disabled]="isLocked"
+                   class="w-48 px-3 py-1.5 text-sm border rounded-lg bg-input text-default focus:outline-none focus:ring-2 focus:ring-secondary-500 disabled:opacity-50 disabled:cursor-not-allowed">
+          }
+        </div>
       </div>
 
       <!-- Grid container for board and players -->
       <div class="grid grid-cols-1 gap-6 lg:grid-cols-4">
         <!-- Game Board -->
-        <div class="col-span-1 lg:col-span-2">
+        <div class="col-span-1 lg:col-span-2" data-walkthrough="game-board">
           <div class="p-4 rounded-lg">
             <!-- Tabs -->
             <div class="flex mb-4 border-b border-default">
@@ -168,7 +171,7 @@
         </div>
 
         <!-- Players List -->
-        <div class="col-span-1 lg:col-span-2">
+        <div class="col-span-1 lg:col-span-2" data-walkthrough="players-list">
             <div class="flex flex-col justify-between h-full rounded-lg">
                 <!-- Header with toggle button -->
                 <div class="w-full">
@@ -209,13 +212,15 @@
       </div>
 
       <!-- Winners and Payouts -->
-      <app-winners-and-payouts
+      <div data-walkthrough="winners-payouts">
+        <app-winners-and-payouts
         [winners]="winners"
         [quarterPayouts]="quarterPayouts"
         [playerColors]="playerColors"
         [totalPot]="totalPot"
         [scores]="scores">
-      </app-winners-and-payouts>
+        </app-winners-and-payouts>
+      </div>
 
       <!-- Alert notifications -->
       <div *ngIf="showAlert"
