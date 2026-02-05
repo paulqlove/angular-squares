@@ -86,6 +86,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   };
   winners: { [key: string]: string } = {};
   playerColors: { [key: string]: string } = {};
+  playerUserIds: { [name: string]: string } = {};
   totalPot: number = 0;
   availableColors = [
     'bg-red-200',
@@ -212,6 +213,9 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   showNameEditModal = signal(false);
   editingName = '';
   isSavingName = signal(false);
+  showForceNameChangeModal = signal(false);
+  forceNameValue = '';
+  isSavingForceName = signal(false);
 
   // Auth state
   currentUser = this.authService.currentUser;
@@ -296,6 +300,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           this.venmoUsername = data.venmoUsername || '';
           this.paidPlayers = new Set(data.paidPlayers || []);
           this.playerColors = data.playerColors || {};
+          this.playerUserIds = data.playerUserIds || {};
           this.espnEventId = data.espnEventId;
           this.espnSport = data.espnSport || 'nfl';
 
@@ -312,6 +317,18 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
           this.calculatePlayerStats();
           this.checkDuplicateName();
+
+          // Backfill playerUserIds for current user if they have squares but no mapping
+          const currentUser = this.authService.currentUser();
+          if (currentUser && this._currentPlayer) {
+            const hasSquares = Object.values(this.selectedSquares).some(
+              p => p.toLowerCase() === this._currentPlayer.toLowerCase()
+            );
+            if (hasSquares && !this.playerUserIds[this._currentPlayer]) {
+              this.playerUserIds[this._currentPlayer] = currentUser.uid;
+              this.gameService.updateGame(this.gameId, { playerUserIds: this.playerUserIds });
+            }
+          }
 
           if (Object.values(this.scores).some(score => score.home > 0 || score.away > 0)) {
             this.calculateWinners();
@@ -395,24 +412,50 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     const sanitizedName = this.sanitizePlayerName(this._currentPlayer);
     if (!sanitizedName) {
       this.duplicateNameWarning.set(null);
+      this.showForceNameChangeModal.set(false);
       return;
     }
 
-    const currentUserName = this.authService.currentUser()?.displayName;
-    if (currentUserName?.toLowerCase() === sanitizedName.toLowerCase()) {
-      this.duplicateNameWarning.set(null);
-      return;
-    }
+    const currentUser = this.authService.currentUser();
+    const currentUid = currentUser?.uid;
 
     // Check if this name already exists in the game (case-insensitive)
-    const existingPlayers = new Set(
-      Object.values(this.selectedSquares).map(p => p.toLowerCase())
+    const existingName = Object.values(this.selectedSquares).find(
+      p => p.toLowerCase() === sanitizedName.toLowerCase()
     );
-    if (existingPlayers.has(sanitizedName.toLowerCase())) {
-      this.duplicateNameWarning.set(`"${sanitizedName}" is already in use`);
-    } else {
+    if (!existingName) {
       this.duplicateNameWarning.set(null);
+      this.showForceNameChangeModal.set(false);
+      return;
     }
+
+    // Name exists in game — check playerUserIds for ownership
+    const ownerUid = this.playerUserIds[existingName];
+
+    if (ownerUid && currentUid && ownerUid === currentUid) {
+      // Same user — allow
+      this.duplicateNameWarning.set(null);
+      this.showForceNameChangeModal.set(false);
+      return;
+    }
+
+    if (!ownerUid) {
+      // Legacy data — no userId mapping. Allow if it matches their auth name.
+      const currentUserName = currentUser?.displayName;
+      if (currentUserName?.toLowerCase() === sanitizedName.toLowerCase()) {
+        this.duplicateNameWarning.set(null);
+        this.showForceNameChangeModal.set(false);
+        return;
+      }
+    }
+
+    // Real conflict — another user owns this name
+    if (currentUser?.displayName?.toLowerCase() === sanitizedName.toLowerCase()) {
+      // Their auth profile name conflicts — force modal
+      this.showForceNameChangeModal.set(true);
+      this.forceNameValue = '';
+    }
+    this.duplicateNameWarning.set(`"${sanitizedName}" is already in use`);
   }
 
   onSquareClick(event: { row: number; col: number }): void {
@@ -471,12 +514,18 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     this.selectedSquares = newSelectedSquares;
     this.calculatePlayerStats();
 
+    // Record userId ownership for this player name
+    const user = this.authService.currentUser();
+    if (user && !this.playerUserIds[sanitizedPlayer]) {
+      this.playerUserIds[sanitizedPlayer] = user.uid;
+    }
+
     this.gameService.updateGame(this.gameId, {
-      selectedSquares: newSelectedSquares
+      selectedSquares: newSelectedSquares,
+      playerUserIds: this.playerUserIds
     });
 
     // Track joined game for authenticated non-owner users
-    const user = this.authService.currentUser();
     if (user && !user.isGuest && user.uid !== this.gameOwnerId) {
       this.gameService.addJoinedGame(user.uid, this.gameId, this.gameName);
     }
@@ -879,10 +928,17 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           p.toLowerCase() === oldName.toLowerCase() ? sanitizedName : p
         );
 
+        const updatedPlayerUserIds = { ...this.playerUserIds };
+        if (updatedPlayerUserIds[oldName]) {
+          updatedPlayerUserIds[sanitizedName] = updatedPlayerUserIds[oldName];
+          delete updatedPlayerUserIds[oldName];
+        }
+
         await this.gameService.updateGame(this.gameId, {
           selectedSquares: updatedSquares,
           playerColors: updatedColors,
-          paidPlayers: updatedPaidPlayers
+          paidPlayers: updatedPaidPlayers,
+          playerUserIds: updatedPlayerUserIds
         });
       }
 
@@ -892,6 +948,43 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       this.toastService.error('Failed to save name');
     } finally {
       this.isSavingName.set(false);
+    }
+  }
+
+  isForceNameTaken(): boolean {
+    if (!this.forceNameValue.trim()) return false;
+    const sanitized = this.sanitizePlayerName(this.forceNameValue);
+    return Object.values(this.selectedSquares).some(
+      p => p.toLowerCase() === sanitized.toLowerCase()
+    );
+  }
+
+  async saveForceNameChange(): Promise<void> {
+    const sanitized = this.sanitizePlayerName(this.forceNameValue);
+    if (!sanitized || this.isForceNameTaken()) return;
+
+    this.isSavingForceName.set(true);
+    try {
+      const user = this.authService.currentUser();
+      if (!user) return;
+
+      if (user.isGuest) {
+        this.authService.updateGuestName(sanitized);
+      } else {
+        await this.authService.updateDisplayName(sanitized);
+      }
+
+      // Record new name in playerUserIds
+      this.playerUserIds[sanitized] = user.uid;
+      await this.gameService.updateGame(this.gameId, { playerUserIds: this.playerUserIds });
+
+      this._currentPlayer = sanitized;
+      this.showForceNameChangeModal.set(false);
+      this.duplicateNameWarning.set(null);
+    } catch (error) {
+      this.toastService.error('Failed to save name');
+    } finally {
+      this.isSavingForceName.set(false);
     }
   }
 }

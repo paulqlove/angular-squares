@@ -45,6 +45,7 @@ export interface GameData {
   espnSport?: SportType;
   managerId?: string;
   managerEmail?: string;
+  playerUserIds?: { [name: string]: string };
 }
 
 export interface GameListItem {
@@ -214,7 +215,8 @@ export class GameService {
           espnEventId: rawData.espnEventId || undefined,
           espnSport: rawData.espnSport || undefined,
           managerId: rawData.managerId || undefined,
-          managerEmail: rawData.managerEmail || undefined
+          managerEmail: rawData.managerEmail || undefined,
+          playerUserIds: rawData.playerUserIds || undefined
         };
 
         // Convert squares from Firebase format
@@ -294,6 +296,9 @@ export class GameService {
     if (data.managerEmail !== undefined) {
       updateData.managerEmail = data.managerEmail;
     }
+    if (data.playerUserIds !== undefined) {
+      updateData.playerUserIds = data.playerUserIds;
+    }
 
     await update(gameRef, updateData);
   }
@@ -333,7 +338,8 @@ export class GameService {
         espnEventId: rawData.espnEventId || undefined,
         espnSport: rawData.espnSport || undefined,
         managerId: rawData.managerId || undefined,
-        managerEmail: rawData.managerEmail || undefined
+        managerEmail: rawData.managerEmail || undefined,
+        playerUserIds: rawData.playerUserIds || undefined
       };
     }
 
@@ -478,6 +484,57 @@ export class GameService {
     if (!this.isBrowser) return;
     const joinedGameRef = ref(this.db, `users/${userId}/joinedGames/${gameId}`);
     await remove(joinedGameRef);
+  }
+
+  // Propagate a player name change across all games the user participates in
+  async propagateNameChange(userId: string, oldName: string, newName: string): Promise<void> {
+    if (!this.isBrowser || !oldName || oldName === newName) return;
+
+    const [owned, joined] = await Promise.all([
+      this.getUserGames(userId),
+      this.getJoinedGames(userId)
+    ]);
+    const allGames = [...owned, ...joined];
+
+    for (const gameListing of allGames) {
+      const game = await this.getGame(gameListing.id);
+      if (!game) continue;
+
+      const hasSquares = Object.values(game.selectedSquares).some(
+        p => p.toLowerCase() === oldName.toLowerCase()
+      );
+      if (!hasSquares) continue;
+
+      const updatedSquares = { ...game.selectedSquares };
+      for (const key of Object.keys(updatedSquares)) {
+        if (updatedSquares[key].toLowerCase() === oldName.toLowerCase()) {
+          updatedSquares[key] = newName;
+        }
+      }
+
+      const updatedColors = { ...game.playerColors };
+      if (updatedColors[oldName]) {
+        updatedColors[newName] = updatedColors[oldName];
+        delete updatedColors[oldName];
+      }
+
+      const updatedPaidPlayers = (game.paidPlayers || []).map(p =>
+        p.toLowerCase() === oldName.toLowerCase() ? newName : p
+      );
+
+      const updatedPlayerUserIds = { ...(game.playerUserIds || {}) };
+      if (updatedPlayerUserIds[oldName]) {
+        updatedPlayerUserIds[newName] = updatedPlayerUserIds[oldName];
+        delete updatedPlayerUserIds[oldName];
+      }
+
+      await this.updateGame(gameListing.id, {
+        selectedSquares: updatedSquares,
+        playerColors: updatedColors,
+        paidPlayers: updatedPaidPlayers,
+        playerUserIds: updatedPlayerUserIds
+      });
+    }
   }
 
   // Update game manager

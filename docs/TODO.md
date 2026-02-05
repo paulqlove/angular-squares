@@ -109,4 +109,5 @@ _Session notes and decisions go here_
 | Ripple grid animation | Feb 2026 | Canvas-based expanding ring effect on welcome hero, gradient title |
 | Fix dashboard refresh flash | Feb 2026 | App-level loading screen while auth initializes, prevents welcome page flash |
 | Duplicate player name prevention | Feb 2026 | Warns and blocks when entering a name already in use |
+| Unique player names per game | Feb 2026 | playerUserIds mapping, forced name change modal, dashboard name propagation |
 | Security implementation | Feb 2026 | XSS fix, SanitizationService, Firebase security rules deployed |

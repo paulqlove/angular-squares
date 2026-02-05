@@ -1394,13 +1394,18 @@ export class DashboardComponent implements OnInit {
     this.isSavingProfile.set(true);
     try {
       const user = this.currentUser();
+      const oldName = user?.displayName || '';
       if (user?.isGuest) {
         this.authService.updateGuestName(sanitizedName);
       } else {
         await this.authService.updateDisplayName(sanitizedName);
       }
       this.profileName = sanitizedName;
-      // Keep dropdown open so user sees it saved
+
+      // Propagate name change to all games
+      if (user && oldName && oldName !== sanitizedName) {
+        await this.gameService.propagateNameChange(user.uid, oldName, sanitizedName);
+      }
     } catch (error) {
       console.error('Failed to save profile:', error);
     } finally {
