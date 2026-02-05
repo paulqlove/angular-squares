@@ -126,7 +126,8 @@
         "deploy": {
           "builder": "angular-cli-ghpages:deploy",
           "options": {
-            "dir": "dist/angular-squares/browser"
+            "dir": "dist/angular-squares/browser",
+            "baseHref": "/"
           }
         }
       }
