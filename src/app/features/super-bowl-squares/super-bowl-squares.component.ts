@@ -398,9 +398,11 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Check if this name already exists in the game
-    const existingPlayers = new Set(Object.values(this.selectedSquares));
-    if (existingPlayers.has(sanitizedName)) {
+    // Check if this name already exists in the game (case-insensitive)
+    const existingPlayers = new Set(
+      Object.values(this.selectedSquares).map(p => p.toLowerCase())
+    );
+    if (existingPlayers.has(sanitizedName.toLowerCase())) {
       this.duplicateNameWarning.set(`"${sanitizedName}" is already in use`);
     } else {
       this.duplicateNameWarning.set(null);
@@ -434,7 +436,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     const sanitizedPlayer = this.sanitizePlayerName(this.currentPlayer);
 
     if (this.selectedSquares[key]) {
-      if (this.selectedSquares[key] === sanitizedPlayer) {
+      if (this.selectedSquares[key].toLowerCase() === sanitizedPlayer.toLowerCase()) {
         const newSelectedSquares = { ...this.selectedSquares };
         delete newSelectedSquares[key];
 
@@ -818,22 +820,26 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   isEditingNameTaken(): boolean {
     if (!this.editingName.trim()) return false;
     const sanitizedName = this.sanitizePlayerName(this.editingName);
-    const existingPlayers = new Set(Object.values(this.selectedSquares));
+    const existingPlayers = new Set(
+      Object.values(this.selectedSquares).map(p => p.toLowerCase())
+    );
     const currentUserName = this.authService.currentUser()?.displayName;
-    return existingPlayers.has(sanitizedName) && currentUserName !== sanitizedName;
+    return existingPlayers.has(sanitizedName.toLowerCase())
+      && currentUserName?.toLowerCase() !== sanitizedName.toLowerCase();
   }
 
   async saveNameEdit(): Promise<void> {
     if (!this.editingName.trim()) return;
 
-    // Check for duplicate name
+    // Check for duplicate name (case-insensitive)
     const sanitizedName = this.sanitizePlayerName(this.editingName);
-    const existingPlayers = new Set(Object.values(this.selectedSquares));
+    const existingPlayers = new Set(
+      Object.values(this.selectedSquares).map(p => p.toLowerCase())
+    );
     const currentUserName = this.authService.currentUser()?.displayName;
 
-    // Allow if it's the same name they already have, or if they already have squares under this name
-    const isOwnName = currentUserName === sanitizedName;
-    if (existingPlayers.has(sanitizedName) && !isOwnName) {
+    const isOwnName = currentUserName?.toLowerCase() === sanitizedName.toLowerCase();
+    if (existingPlayers.has(sanitizedName.toLowerCase()) && !isOwnName) {
       this.toastService.error(`"${sanitizedName}" is already in use. Please use a different name.`);
       return;
     }
@@ -846,6 +852,34 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       } else {
         await this.authService.updateDisplayName(this.editingName);
       }
+
+      // Propagate name change across all game data
+      const oldName = currentUserName;
+      if (oldName && oldName !== sanitizedName) {
+        const updatedSquares = { ...this.selectedSquares };
+        for (const key of Object.keys(updatedSquares)) {
+          if (updatedSquares[key].toLowerCase() === oldName.toLowerCase()) {
+            updatedSquares[key] = sanitizedName;
+          }
+        }
+
+        const updatedColors = { ...this.playerColors };
+        if (updatedColors[oldName]) {
+          updatedColors[sanitizedName] = updatedColors[oldName];
+          delete updatedColors[oldName];
+        }
+
+        const updatedPaidPlayers = Array.from(this.paidPlayers).map(p =>
+          p.toLowerCase() === oldName.toLowerCase() ? sanitizedName : p
+        );
+
+        await this.gameService.updateGame(this.gameId, {
+          selectedSquares: updatedSquares,
+          playerColors: updatedColors,
+          paidPlayers: updatedPaidPlayers
+        });
+      }
+
       this._currentPlayer = this.editingName.trim();
       this.showNameEditModal.set(false);
     } catch (error) {
