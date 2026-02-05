@@ -14,6 +14,7 @@ import {
   heroArrowRight,
   heroEnvelope
 } from '@ng-icons/heroicons/outline';
+import { RippleGridComponent } from '../../components/ui/ripple-grid/ripple-grid.component';
 
 interface Feature {
   icon: string;
@@ -24,7 +25,7 @@ interface Feature {
 @Component({
   selector: 'app-welcome',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgIconComponent],
+  imports: [CommonModule, FormsModule, NgIconComponent, RippleGridComponent],
   providers: [
     provideIcons({
       heroSquares2x2,
@@ -38,39 +39,50 @@ interface Feature {
     })
   ],
   template: `
-    <div class="min-h-screen bg-gradient-to-br from-secondary-50 via-white to-accent-50">
-      <!-- Header -->
-      <header class="container mx-auto px-4 py-6">
-        <div class="flex items-center gap-3">
-          <img src="assets/logo.png" alt="Logo" class="h-10 w-auto">
-          <h1 class="text-2xl font-bold text-heading">Football Squares</h1>
-        </div>
-      </header>
+    <div class="min-h-screen">
+      <!-- Hero Section with ripple background -->
+      <section class="relative min-h-[85vh] overflow-hidden">
+        <!-- Ripple grid background -->
+        <app-ripple-grid
+          class="absolute inset-0"
+          backgroundColor="#10b981"
+          lineColor="rgba(0,0,0,0.15)">
+        </app-ripple-grid>
 
-      <!-- Hero Section -->
-      <section class="container mx-auto px-4 py-12 md:py-20">
-        <div class="max-w-4xl mx-auto text-center">
-          <h2 class="text-4xl md:text-5xl lg:text-6xl font-bold text-heading mb-6">
+        <!-- Content layer -->
+        <div class="relative z-10">
+          <!-- Header -->
+          <header class="container mx-auto px-4 py-6">
+            <div class="flex items-center gap-3">
+              <img src="assets/logo.png" alt="Logo" class="h-10 w-auto">
+              <h1 class="text-2xl font-bold text-white">Football Squares</h1>
+            </div>
+          </header>
+
+          <!-- Hero Content -->
+          <div class="container mx-auto px-4 py-12 md:py-16">
+            <div class="max-w-4xl mx-auto text-center">
+          <h2 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
             The Ultimate
-            <span class="bg-gradient-to-r from-secondary-500 to-accent-600 bg-clip-text text-transparent">
+            <span class="bg-gradient-to-r from-yellow-200 via-white to-yellow-200 bg-clip-text text-transparent">
               Football Squares
             </span>
             Game
           </h2>
-          <p class="text-lg md:text-xl text-muted mb-8 max-w-2xl mx-auto">
+          <p class="text-lg md:text-xl text-white/80 mb-8 max-w-2xl mx-auto">
             Create and share your football squares game in seconds.
             Perfect for Super Bowl parties, office pools, and game day fun.
           </p>
 
           <!-- Auth Options -->
-          <div class="bg-white rounded-2xl shadow-lg p-8 max-w-md mx-auto">
+          <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8 max-w-md mx-auto">
             @if (!showAuthForm()) {
               <div class="space-y-4">
                 <!-- Google Sign In -->
                 <button
                   (click)="signInWithGoogle()"
                   [disabled]="isLoading()"
-                  class="w-full flex items-center justify-center gap-3 px-6 py-3 bg-white border-2 border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all font-medium text-gray-700 disabled:opacity-50"
+                  class="w-full flex items-center justify-center gap-3 px-6 py-3 bg-white dark:bg-slate-700 border-2 border-gray-200 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-600 hover:border-gray-300 transition-all font-medium text-gray-700 dark:text-slate-200 disabled:opacity-50"
                 >
                   <svg class="w-5 h-5" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -84,10 +96,10 @@ interface Feature {
                 <!-- Divider -->
                 <div class="relative my-6">
                   <div class="absolute inset-0 flex items-center">
-                    <div class="w-full border-t border-gray-200"></div>
+                    <div class="w-full border-t border-gray-200 dark:border-slate-600"></div>
                   </div>
                   <div class="relative flex justify-center text-sm">
-                    <span class="px-4 bg-white text-muted">or</span>
+                    <span class="px-4 bg-white dark:bg-slate-800 text-muted">or</span>
                   </div>
                 </div>
 
@@ -111,10 +123,10 @@ interface Feature {
                 <!-- Divider -->
                 <div class="relative my-6">
                   <div class="absolute inset-0 flex items-center">
-                    <div class="w-full border-t border-gray-200"></div>
+                    <div class="w-full border-t border-gray-200 dark:border-slate-600"></div>
                   </div>
                   <div class="relative flex justify-center text-sm">
-                    <span class="px-4 bg-white text-muted">just joining a game?</span>
+                    <span class="px-4 bg-white dark:bg-slate-800 text-muted">just joining a game?</span>
                   </div>
                 </div>
 
@@ -124,13 +136,13 @@ interface Feature {
                     type="text"
                     [(ngModel)]="guestName"
                     placeholder="Enter your name"
-                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none transition-all"
+                    class="w-full px-4 py-3 border-2 border-gray-200 dark:border-slate-600 rounded-lg focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none transition-all bg-white dark:bg-slate-700 text-default"
                     (keyup.enter)="continueAsGuest()"
                   />
                   <button
                     (click)="continueAsGuest()"
                     [disabled]="!guestName.trim()"
-                    class="w-full px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    class="w-full px-6 py-3 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-200 rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Continue as Guest
                   </button>
@@ -161,7 +173,7 @@ interface Feature {
                     type="text"
                     [(ngModel)]="displayName"
                     placeholder="Your name"
-                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none transition-all"
+                    class="w-full px-4 py-3 border-2 border-gray-200 dark:border-slate-600 rounded-lg focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none transition-all bg-white dark:bg-slate-700 text-default"
                   />
                 }
 
@@ -169,14 +181,14 @@ interface Feature {
                   type="email"
                   [(ngModel)]="email"
                   placeholder="Email address"
-                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none transition-all"
+                  class="w-full px-4 py-3 border-2 border-gray-200 dark:border-slate-600 rounded-lg focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none transition-all bg-white dark:bg-slate-700 text-default"
                 />
 
                 <input
                   type="password"
                   [(ngModel)]="password"
                   placeholder="Password"
-                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none transition-all"
+                  class="w-full px-4 py-3 border-2 border-gray-200 dark:border-slate-600 rounded-lg focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none transition-all bg-white dark:bg-slate-700 text-default"
                   (keyup.enter)="submitEmailAuth()"
                 />
 
@@ -221,37 +233,40 @@ interface Feature {
 
           <!-- Join with Code -->
           <div class="mt-8">
-            <p class="text-muted mb-3">Have a game code?</p>
+            <p class="text-white/80 mb-3">Have a game code?</p>
             <div class="flex items-center justify-center gap-2 max-w-xs mx-auto">
               <input
                 type="text"
                 [(ngModel)]="gameCode"
                 placeholder="Enter game code"
-                class="flex-1 px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-secondary-500 outline-none uppercase tracking-widest text-center font-mono"
+                class="flex-1 px-4 py-2 border-2 border-white/30 rounded-lg focus:border-white outline-none uppercase tracking-widest text-center font-mono bg-white/20 text-white placeholder-white/60"
                 maxlength="6"
                 (keyup.enter)="joinGame()"
               />
               <button
                 (click)="joinGame()"
                 [disabled]="gameCode.length !== 6"
-                class="px-4 py-2 bg-accent-500 hover:bg-accent-600 text-white rounded-lg transition-colors disabled:opacity-50"
+                class="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors disabled:opacity-50 border-2 border-white/30"
               >
                 <ng-icon name="heroArrowRight" class="text-xl"></ng-icon>
               </button>
+            </div>
+          </div>
             </div>
           </div>
         </div>
       </section>
 
       <!-- Features Section -->
-      <section class="container mx-auto px-4 py-16 md:py-24">
+      <section class="bg-gradient-to-br from-secondary-50 via-white to-accent-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 py-16 md:py-24">
+        <div class="container mx-auto px-4">
         <h3 class="text-3xl font-bold text-center text-heading mb-12">
           Everything You Need for Game Day
         </h3>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
           @for (feature of features; track feature.title) {
-            <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div class="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
               <div class="w-12 h-12 bg-secondary-100 rounded-lg flex items-center justify-center mb-4">
                 <ng-icon [name]="feature.icon" class="text-2xl text-secondary-600"></ng-icon>
               </div>
@@ -259,11 +274,12 @@ interface Feature {
               <p class="text-muted">{{ feature.description }}</p>
             </div>
           }
+          </div>
         </div>
       </section>
 
       <!-- How It Works -->
-      <section class="bg-white py-16 md:py-24">
+      <section class="bg-white dark:bg-slate-800 py-16 md:py-24">
         <div class="container mx-auto px-4">
           <h3 class="text-3xl font-bold text-center text-heading mb-12">
             How It Works
@@ -298,9 +314,9 @@ interface Feature {
       </section>
 
       <!-- Footer -->
-      <footer class="bg-gray-50 py-8">
+      <footer class="bg-gray-50 dark:bg-slate-900 py-8">
         <div class="container mx-auto px-4 text-center text-muted text-sm">
-          <p>Made with love for football fans everywhere</p>
+          <p>Made with love for sports ball fans</p>
         </div>
       </footer>
     </div>

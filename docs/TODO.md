@@ -52,16 +52,17 @@ Implemented features:
 - [ ] Add ARIA labels for screen readers
 
 ### UI Polish
+- [x] Add ripple grid animation to welcome page hero
 - [ ] Create loading skeleton components
 - [ ] Implement button variants (primary, secondary, ghost, danger)
 - [ ] Add micro-interactions (square select, score update)
 - [ ] Create empty state illustrations
 
 ### Dark Mode
-- [ ] Create ThemeService with system/light/dark modes
-- [ ] Define dark color palette
-- [ ] Add dark mode toggle in settings
-- [ ] Test all components in dark mode
+- [x] Create ThemeService with system/light/dark modes
+- [x] Define dark color palette
+- [x] Add dark mode toggle in settings
+- [x] Test all components in dark mode
 
 ---
 
@@ -71,7 +72,7 @@ Implemented features:
 |--------|---------|--------|
 | Lighthouse Accessibility | ~78 | > 95 |
 | Test Coverage | Low | > 60% |
-| Dark Mode | No | Yes |
+| Dark Mode | Yes | Yes |
 | Page Load Time | ~2.5s | < 1.5s |
 
 ---
@@ -92,3 +93,5 @@ _Session notes and decisions go here_
 | ESPN settings in header | Feb 2026 | Moved from main content to settings panel |
 | Auto-polling for live scores | Feb 2026 | 30s interval when game in progress, stops when final |
 | Last sync timestamp | Feb 2026 | Shows "Xm ago" format in settings panel |
+| Dark mode support | Feb 2026 | ThemeService with system/light/dark toggle, semantic color tokens |
+| Ripple grid animation | Feb 2026 | Canvas-based expanding ring effect on welcome hero, gradient title |
