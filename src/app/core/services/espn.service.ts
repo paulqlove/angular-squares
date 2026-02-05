@@ -1,7 +1,7 @@
 import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
-export type SportType = 'nfl' | 'nba';
+export type SportType = 'nfl' | 'nba' | 'ncaaf' | 'wnba' | 'afl';
 
 export interface EspnGame {
   id: string;
@@ -14,11 +14,15 @@ export interface EspnGame {
   clock: string;
   status: 'pre' | 'in' | 'post';
   quarters: { home: number; away: number }[];
+  date: string; // ISO date string
 }
 
 export const SPORT_CONFIG: Record<SportType, { label: string; periods: number; periodLabel: string }> = {
   nfl: { label: 'NFL', periods: 4, periodLabel: 'Q' },
-  nba: { label: 'NBA', periods: 4, periodLabel: 'Q' }
+  nba: { label: 'NBA', periods: 4, periodLabel: 'Q' },
+  ncaaf: { label: 'NCAA Football', periods: 4, periodLabel: 'Q' },
+  wnba: { label: 'WNBA', periods: 4, periodLabel: 'Q' },
+  afl: { label: 'AFL', periods: 4, periodLabel: 'Q' }
 };
 
 @Injectable({
@@ -29,7 +33,10 @@ export class EspnService {
 
   private readonly API_URLS: Record<SportType, string> = {
     nfl: 'https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard',
-    nba: 'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard'
+    nba: 'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard',
+    ncaaf: 'https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard',
+    wnba: 'https://site.api.espn.com/apis/site/v2/sports/basketball/wnba/scoreboard',
+    afl: 'https://site.api.espn.com/apis/site/v2/sports/australian-football/afl/scoreboard'
   };
 
   private get isBrowser(): boolean {
@@ -105,7 +112,8 @@ export class EspnService {
         period: status?.period || 0,
         clock: status?.displayClock || '',
         status: gameStatus,
-        quarters
+        quarters,
+        date: event.date || ''
       };
     });
   }
