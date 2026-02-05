@@ -30,7 +30,7 @@
 
 .number-cell {
     @extend .grid-cell;
-    // @apply font-medium;
+    @apply text-default;
     min-width: 2rem;
     font-size: 1rem;
     &.empty-cell {
