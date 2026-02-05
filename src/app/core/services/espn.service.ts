@@ -47,9 +47,34 @@ export class EspnService {
     if (!this.isBrowser) return [];
 
     try {
-      const response = await fetch(this.API_URLS[sport]);
-      const data = await response.json();
-      return this.parseGames(data, sport);
+      const today = new Date();
+      const dateStr = today.getFullYear().toString() +
+        (today.getMonth() + 1).toString().padStart(2, '0') +
+        today.getDate().toString().padStart(2, '0');
+
+      // Fetch default scoreboard (live/recent) and today's games in parallel
+      const [defaultRes, todayRes] = await Promise.all([
+        fetch(this.API_URLS[sport]),
+        fetch(`${this.API_URLS[sport]}?dates=${dateStr}`)
+      ]);
+      const [defaultData, todayData] = await Promise.all([
+        defaultRes.json(),
+        todayRes.json()
+      ]);
+
+      const defaultGames = this.parseGames(defaultData, sport);
+      const todayGames = this.parseGames(todayData, sport);
+
+      // Merge and deduplicate by game id
+      const seen = new Set<string>();
+      const merged: EspnGame[] = [];
+      for (const game of [...todayGames, ...defaultGames]) {
+        if (!seen.has(game.id)) {
+          seen.add(game.id);
+          merged.push(game);
+        }
+      }
+      return merged;
     } catch (error) {
       console.error('Failed to fetch ESPN games:', error);
       return [];
