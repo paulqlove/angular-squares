@@ -25,13 +25,12 @@ import {
   heroPencilSquare,
   heroXMark,
   heroQuestionMarkCircle,
-  heroCog6Tooth,
-  heroCreditCard
+  heroCog6Tooth
 } from '@ng-icons/heroicons/outline';
 import { GameStatusComponent } from './components/game-status/game-status.component';
 import { AppHeaderComponent } from '../../components/ui/app-header/app-header.component';
 import { SettingsPanelComponent } from './components/settings-panel/settings-panel.component';
-import { DialogComponent, DialogPart } from '../../components/ui/dialog/dialog.component';
+import { VenmoPopoverComponent } from './components/venmo-popover/venmo-popover.component';
 import { PaymentDialogComponent } from './components/payment-dialog/payment-dialog.component';
 import { ProbabilityHeatmapComponent } from './components/probability-heatmap/probability-heatmap.component';
 import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.component';
@@ -50,7 +49,7 @@ import { BoxScoreComponent } from './components/box-score/box-score.component';
     GameStatusComponent,
     AppHeaderComponent,
     SettingsPanelComponent,
-    DialogComponent,
+    VenmoPopoverComponent,
     PaymentDialogComponent,
     ProbabilityHeatmapComponent,
     AuthModalComponent,
@@ -69,8 +68,7 @@ import { BoxScoreComponent } from './components/box-score/box-score.component';
       heroPencilSquare,
       heroXMark,
       heroQuestionMarkCircle,
-      heroCog6Tooth,
-      heroCreditCard
+      heroCog6Tooth
     })
   ],
   templateUrl: './super-bowl-squares.component.html',
@@ -161,7 +159,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   venmoUsername = '';
   paidPlayers: Set<string> = new Set();
   activeTab: 'board' | 'probabilities' | 'boxscore' = 'board';
-  showVenmoDialog = false;
 
   // Injected services
   private gameService = inject(GameService);
@@ -691,20 +688,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
   onPlayerSelected(player: string | null): void {
     this.selectedPlayer = player;
-  }
-
-  get venmoMessageParts(): DialogPart[] {
-    return [
-      { text: 'You will be redirected to ' },
-      { text: 'Venmo', bold: true, color: '#008CFF' },
-      { text: ' to pay ' },
-      { text: this.venmoUsername, bold: true }
-    ];
-  }
-
-  onVenmoConfirm(): void {
-    window.open(`https://venmo.com/${this.venmoUsername}`, '_blank');
-    this.showVenmoDialog = false;
   }
 
   onVenmoUsernameChange(username: string) {

@@ -113,3 +113,5 @@ _Session notes and decisions go here_
 | Unique player names per game | Feb 2026 | playerUserIds mapping, forced name change modal, dashboard name propagation |
 | Security implementation | Feb 2026 | XSS fix, SanitizationService, Firebase security rules deployed |
 | Shared header component | Feb 2026 | Consolidated 3 page headers into AppHeaderComponent, extracted SettingsPanelComponent |
+| Box Score tab | Feb 2026 | ESPN-linked box score with quarter-by-quarter breakdown |
+| Venmo Pay dropdown | Feb 2026 | Replaced dialog with dropdown popover — copy username, open Venmo link |
