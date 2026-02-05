@@ -76,20 +76,19 @@
             <ng-icon name="heroArrowLeft" class="text-xl"></ng-icon>
           </button>
           <div>
-            <div class="flex items-baseline gap-2">
-              <h2 class="text-xl font-bold text-heading">{{ gameName }}</h2>
+            <h2 class="text-xl font-bold text-heading">{{ gameName }}</h2>
+            <div class="flex items-center gap-1.5">
+              <span class="text-sm text-muted">Code:</span>
+              <code class="bg-control px-1.5 py-0.5 rounded font-mono text-xs text-default">{{ gameId }}</code>
               <button
                 (click)="openShareModal()"
-                class="text-muted hover:text-secondary-500 transition-colors"
+                class="p-1 text-muted hover:text-secondary-500 hover:bg-control rounded transition-colors"
                 title="Share game"
                 aria-label="Share game"
               >
-                <ng-icon name="heroShare" class="text-base"></ng-icon>
+                <ng-icon name="heroShare" class="text-sm"></ng-icon>
               </button>
             </div>
-            <p class="text-sm text-muted">
-              Code: <code class="bg-control px-1.5 py-0.5 rounded font-mono text-xs">{{ gameId }}</code>
-            </p>
           </div>
         </div>
 
