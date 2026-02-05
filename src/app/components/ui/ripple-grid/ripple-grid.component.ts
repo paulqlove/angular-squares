@@ -86,9 +86,10 @@ export class RippleGridComponent implements OnInit, OnDestroy {
   private scheduleRipple(): void {
     this.triggerRipple();
 
+    const interval = Math.max(this.rippleInterval, (this.rippleDuration + 1) * 1000);
     this.rippleIntervalId = setInterval(() => {
       this.triggerRipple();
-    }, this.rippleInterval);
+    }, interval);
   }
 
   private triggerRipple(): void {
