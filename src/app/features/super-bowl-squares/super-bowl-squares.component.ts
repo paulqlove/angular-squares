@@ -336,7 +336,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
             );
             if (hasSquares && !this.playerUserIds[this._currentPlayer]) {
               this.playerUserIds[this._currentPlayer] = currentUser.uid;
-              this.gameService.updateGame(this.gameId, { playerUserIds: this.playerUserIds });
+              this.gameService.updateGame(this.gameId, { playerUserIds: this.playerUserIds }).catch(() => {});
             }
           }
 
@@ -407,7 +407,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
     if (availableColor) {
       this.playerColors[playerName] = availableColor;
-      this.gameService.updateGame(this.gameId, { playerColors: this.playerColors });
+      this.gameService.updateGame(this.gameId, { playerColors: this.playerColors }).catch(() => {});
       return availableColor;
     }
 
@@ -468,7 +468,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     this.duplicateNameWarning.set(`"${sanitizedName}" is already in use`);
   }
 
-  onSquareClick(event: { row: number; col: number }): void {
+  async onSquareClick(event: { row: number; col: number }): Promise<void> {
     if (!this.currentPlayer) {
       this.showAlert = true;
       this.alertMessage = 'Please enter your name first';
@@ -491,20 +491,33 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Auto-sign-in: if no auth, sign in as guest (handles direct-URL visitors)
+    if (!this.authService.currentUser()) {
+      await this.authService.signInAsGuest(this.currentPlayer);
+    }
+
     const key = `${event.row}-${event.col}`;
     const sanitizedPlayer = this.sanitizePlayerName(this.currentPlayer);
 
     if (this.selectedSquares[key]) {
       if (this.selectedSquares[key].toLowerCase() === sanitizedPlayer.toLowerCase()) {
+        const previousSquares = { ...this.selectedSquares };
         const newSelectedSquares = { ...this.selectedSquares };
         delete newSelectedSquares[key];
 
         this.selectedSquares = newSelectedSquares;
         this.calculatePlayerStats();
 
-        this.gameService.updateGame(this.gameId, {
-          selectedSquares: newSelectedSquares
-        });
+        try {
+          await this.gameService.updateGame(this.gameId, {
+            selectedSquares: newSelectedSquares
+          });
+        } catch {
+          // Rollback on failure
+          this.selectedSquares = previousSquares;
+          this.calculatePlayerStats();
+          this.toastService.error('Failed to update square. Please try again.');
+        }
       } else {
         this.takenByPlayer = this.selectedSquares[key];
         this.showAlert = true;
@@ -516,6 +529,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const previousSquares = { ...this.selectedSquares };
     const newSelectedSquares = {
       ...this.selectedSquares,
       [key]: sanitizedPlayer
@@ -530,10 +544,18 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       this.playerUserIds[sanitizedPlayer] = user.uid;
     }
 
-    this.gameService.updateGame(this.gameId, {
-      selectedSquares: newSelectedSquares,
-      playerUserIds: this.playerUserIds
-    });
+    try {
+      await this.gameService.updateGame(this.gameId, {
+        selectedSquares: newSelectedSquares,
+        playerUserIds: this.playerUserIds
+      });
+    } catch {
+      // Rollback on failure
+      this.selectedSquares = previousSquares;
+      this.calculatePlayerStats();
+      this.toastService.error('Failed to claim square. Please try again.');
+      return;
+    }
 
     // Track joined game for authenticated non-owner users
     if (user && !user.isGuest && user.uid !== this.gameOwnerId) {

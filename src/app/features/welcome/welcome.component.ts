@@ -389,19 +389,19 @@ export class WelcomeComponent {
     }
   }
 
-  continueAsGuest(): void {
+  async continueAsGuest(): Promise<void> {
     if (this.guestName.trim()) {
-      this.authService.signInAsGuest(this.guestName.trim());
+      await this.authService.signInAsGuest(this.guestName.trim());
       this.navigateAfterAuth();
     }
   }
 
-  joinGame(): void {
+  async joinGame(): Promise<void> {
     if (this.gameCode.length === 6) {
       // If not logged in as guest, prompt for name
       if (!this.authService.currentUser()) {
         if (this.guestName.trim()) {
-          this.authService.signInAsGuest(this.guestName.trim());
+          await this.authService.signInAsGuest(this.guestName.trim());
         } else {
           // Show guest name input
           return;

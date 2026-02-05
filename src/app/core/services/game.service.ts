@@ -237,72 +237,73 @@ export class GameService {
     return this.currentGame$;
   }
 
-  // Update game data
+  // Update game data — uses multi-path updates from root so Firebase evaluates
+  // each path's .write rules independently (allows players to write to squares/playerColors/etc.)
   async updateGame(gameId: string, data: Partial<GameData>): Promise<void> {
     if (!this.isBrowser) return;
-    const gameRef = ref(this.db, `games/${gameId}`);
 
-    const updateData: any = {};
+    const prefix = `games/${gameId}`;
+    const updates: Record<string, any> = {};
 
     if (data.selectedSquares) {
-      updateData.squares = data.selectedSquares;
+      updates[`${prefix}/squares`] = data.selectedSquares;
     }
     if (data.name !== undefined) {
-      updateData.name = data.name;
+      updates[`${prefix}/name`] = data.name;
     }
     if (data.pricePerSquare !== undefined) {
-      updateData.pricePerSquare = data.pricePerSquare;
+      updates[`${prefix}/pricePerSquare`] = data.pricePerSquare;
     }
     if (data.playerColors) {
-      updateData.playerColors = data.playerColors;
+      updates[`${prefix}/playerColors`] = data.playerColors;
     }
     if (data.homeNumbers) {
-      updateData.homeNumbers = data.homeNumbers;
+      updates[`${prefix}/homeNumbers`] = data.homeNumbers;
     }
     if (data.awayNumbers) {
-      updateData.awayNumbers = data.awayNumbers;
+      updates[`${prefix}/awayNumbers`] = data.awayNumbers;
     }
     if (data.scores) {
-      updateData.scores = data.scores;
+      updates[`${prefix}/scores`] = data.scores;
     }
     if (data.winners) {
-      updateData.winners = data.winners;
+      updates[`${prefix}/winners`] = data.winners;
     }
     if (data.isRandomized !== undefined) {
-      updateData.isRandomized = data.isRandomized;
+      updates[`${prefix}/isRandomized`] = data.isRandomized;
     }
     if (data.isLocked !== undefined) {
-      updateData.isLocked = data.isLocked;
+      updates[`${prefix}/isLocked`] = data.isLocked;
     }
     if (data.homeTeam !== undefined) {
-      updateData.homeTeam = data.homeTeam;
+      updates[`${prefix}/homeTeam`] = data.homeTeam;
     }
     if (data.awayTeam !== undefined) {
-      updateData.awayTeam = data.awayTeam;
+      updates[`${prefix}/awayTeam`] = data.awayTeam;
     }
     if (data.venmoUsername !== undefined) {
-      updateData.venmoUsername = data.venmoUsername;
+      updates[`${prefix}/venmoUsername`] = data.venmoUsername;
     }
     if (data.paidPlayers !== undefined) {
-      updateData.paidPlayers = data.paidPlayers;
+      updates[`${prefix}/paidPlayers`] = data.paidPlayers;
     }
     if (data.espnEventId !== undefined) {
-      updateData.espnEventId = data.espnEventId;
+      updates[`${prefix}/espnEventId`] = data.espnEventId;
     }
     if (data.espnSport !== undefined) {
-      updateData.espnSport = data.espnSport;
+      updates[`${prefix}/espnSport`] = data.espnSport;
     }
     if (data.managerId !== undefined) {
-      updateData.managerId = data.managerId;
+      updates[`${prefix}/managerId`] = data.managerId;
     }
     if (data.managerEmail !== undefined) {
-      updateData.managerEmail = data.managerEmail;
+      updates[`${prefix}/managerEmail`] = data.managerEmail;
     }
     if (data.playerUserIds !== undefined) {
-      updateData.playerUserIds = data.playerUserIds;
+      updates[`${prefix}/playerUserIds`] = data.playerUserIds;
     }
 
-    await update(gameRef, updateData);
+    await update(ref(this.db), updates);
   }
 
   // Get a game by ID (one-time fetch)
@@ -544,10 +545,9 @@ export class GameService {
   // Update game manager
   async updateGameManager(gameId: string, managerId: string | null, managerEmail: string | null): Promise<void> {
     if (!this.isBrowser) return;
-    const gameRef = ref(this.db, `games/${gameId}`);
-    await update(gameRef, {
-      managerId: managerId || '',
-      managerEmail: managerEmail || ''
+    await update(ref(this.db), {
+      [`games/${gameId}/managerId`]: managerId || '',
+      [`games/${gameId}/managerEmail`]: managerEmail || ''
     });
   }
 }

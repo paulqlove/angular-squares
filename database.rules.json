@@ -19,6 +19,12 @@
         "pricePerSquare": {
           ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 10000"
         },
+        "squares": {
+          ".write": "auth != null",
+          "$key": {
+            ".validate": "$key.matches(/^[0-9]-[0-9]$/) && newData.isString() && newData.val().length <= 50"
+          }
+        },
         "selectedSquares": {
           "$key": {
             ".validate": "$key.matches(/^[0-9]-[0-9]$/) && newData.isString() && newData.val().length <= 50"
@@ -45,8 +51,15 @@
           }
         },
         "playerColors": {
+          ".write": "auth != null",
           "$player": {
             ".validate": "newData.isString() && newData.val().length <= 50"
+          }
+        },
+        "playerUserIds": {
+          ".write": "auth != null",
+          "$player": {
+            ".validate": "newData.isString() && newData.val().length <= 128"
           }
         },
         "winners": {
@@ -55,6 +68,7 @@
           }
         },
         "paidPlayers": {
+          ".write": "auth != null",
           "$index": {
             ".validate": "newData.isString() && newData.val().length <= 50"
           }

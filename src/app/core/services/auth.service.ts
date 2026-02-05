@@ -6,6 +6,7 @@ import {
   GoogleAuthProvider,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  signInAnonymously,
   signOut,
   onAuthStateChanged,
   User,
@@ -117,7 +118,7 @@ export class AuthService {
   }
 
   private initializeAuthState(): void {
-    // Check for guest user in cookie first
+    // Check for guest user in cookie first (show name immediately while Firebase loads)
     const guestUser = this.getGuestFromCookie();
     if (guestUser) {
       this._currentUser.set({
@@ -130,10 +131,21 @@ export class AuthService {
     }
 
     // Listen for Firebase auth state changes
-    onAuthStateChanged(this.auth, (user) => {
+    onAuthStateChanged(this.auth, async (user) => {
       this._isLoading.set(false);
-      if (user) {
-        // Firebase user takes precedence over guest
+      const guest = this.getGuestFromCookie();
+
+      if (user && user.isAnonymous && guest) {
+        // Anonymous Firebase user + guest cookie = guest with Firebase auth
+        this._currentUser.set({
+          uid: user.uid,
+          email: null,
+          displayName: guest.name,
+          photoURL: null,
+          isGuest: true
+        });
+      } else if (user && !user.isAnonymous) {
+        // Real Firebase user takes precedence
         this._currentUser.set({
           uid: user.uid,
           email: user.email,
@@ -141,12 +153,20 @@ export class AuthService {
           photoURL: user.photoURL,
           isGuest: false
         });
-        // Clear guest cookie if signed in with real account
         this.clearGuestCookie();
-      } else if (!this.getGuestFromCookie()) {
-        // Only clear if no guest user either
+      } else if (!user && guest) {
+        // Returning guest with cookie but no Firebase auth — sign in anonymously
+        try {
+          await signInAnonymously(this.auth);
+          // onAuthStateChanged will fire again with the anonymous user
+          return;
+        } catch {
+          // Fall back to cookie-only guest if anonymous auth fails
+        }
+      } else if (!user) {
         this._currentUser.set(null);
       }
+
       // Resolve the auth ready promise
       if (this._authReadyResolve) {
         this._authReadyResolve();
@@ -256,8 +276,8 @@ export class AuthService {
     }
   }
 
-  // Guest Sign In (cookie-based)
-  signInAsGuest(name: string): AuthUser {
+  // Guest Sign In (cookie + Firebase Anonymous Auth)
+  async signInAsGuest(name: string): Promise<AuthUser> {
     const sanitizedName = this.sanitizationService.sanitizeDisplayName(name);
     const guestUser: GuestUser = {
       name: sanitizedName,
@@ -267,8 +287,17 @@ export class AuthService {
     // Store in cookie (expires in 30 days)
     this.setGuestCookie(guestUser);
 
+    // Sign in anonymously with Firebase so we have auth != null for DB writes
+    let uid = `guest_${guestUser.createdAt}`;
+    try {
+      const result = await signInAnonymously(this.auth);
+      uid = result.user.uid;
+    } catch {
+      // Fall back to cookie-only if anonymous auth fails
+    }
+
     const authUser: AuthUser = {
-      uid: `guest_${guestUser.createdAt}`,
+      uid,
       email: null,
       displayName: guestUser.name,
       photoURL: null,
@@ -284,9 +313,10 @@ export class AuthService {
     const currentUser = this._currentUser();
     if (currentUser?.isGuest) {
       const sanitizedName = this.sanitizationService.sanitizeDisplayName(name);
+      const existingGuest = this.getGuestFromCookie();
       const guestUser: GuestUser = {
         name: sanitizedName,
-        createdAt: parseInt(currentUser.uid.replace('guest_', ''))
+        createdAt: existingGuest?.createdAt || Date.now()
       };
       this.setGuestCookie(guestUser);
       this._currentUser.set({
@@ -321,7 +351,10 @@ export class AuthService {
 
       if (currentUser?.isGuest) {
         this.clearGuestCookie();
-      } else {
+      }
+
+      // Always sign out of Firebase (guests now have anonymous sessions too)
+      if (this.auth.currentUser) {
         await signOut(this.auth);
       }
 
