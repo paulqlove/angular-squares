@@ -2,13 +2,7 @@
 
 .number-cell {
   @apply flex items-center justify-center text-default text-sm sm:text-base;
-  width: -webkit-fill-available;
-  width: -moz-available;
-  height: 2rem; // Default height
-
-  &.empty-cell {
-    @apply w-4;
-  }
+  height: calc((100vw - 5rem) / 10);
 
   @include tablet {
     height: 3rem;
@@ -26,8 +20,4 @@
   color: #0f172a !important; // slate-900
   outline: 1px solid var(--color-grid-line);
   outline-offset: -1px;
-} 
-
-.label-width {
-  @apply w-4;
 }
