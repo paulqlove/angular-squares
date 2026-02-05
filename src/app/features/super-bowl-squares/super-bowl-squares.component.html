@@ -68,14 +68,16 @@
       <!-- Game Info Bar -->
       <div class="flex flex-wrap items-center justify-between gap-4 p-3">
         <div class="flex items-center gap-3">
-          <button
-            (click)="goBack()"
-            class="p-2.5 transition-colors rounded-lg text-muted hover:text-heading hover:bg-control"
-            title="Back to dashboard"
-            aria-label="Back to dashboard"
-          >
-            <ng-icon name="heroArrowLeft" class="text-xl"></ng-icon>
-          </button>
+          @if (currentUser() && !currentUser()?.isGuest) {
+            <button
+              (click)="goBack()"
+              class="p-2.5 transition-colors rounded-lg text-muted hover:text-heading hover:bg-control"
+              title="Back to dashboard"
+              aria-label="Back to dashboard"
+            >
+              <ng-icon name="heroArrowLeft" class="text-xl"></ng-icon>
+            </button>
+          }
           <div>
             <h2 class="text-xl font-bold text-heading">{{ gameName }}</h2>
             <div class="flex items-center gap-1.5">
