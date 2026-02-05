@@ -34,6 +34,7 @@ import { SettingsPanelComponent } from './components/settings-panel/settings-pan
 import { DialogComponent, DialogPart } from '../../components/ui/dialog/dialog.component';
 import { PaymentDialogComponent } from './components/payment-dialog/payment-dialog.component';
 import { ProbabilityHeatmapComponent } from './components/probability-heatmap/probability-heatmap.component';
+import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.component';
 
 @Component({
   selector: 'app-super-bowl-squares',
@@ -50,7 +51,8 @@ import { ProbabilityHeatmapComponent } from './components/probability-heatmap/pr
     SettingsPanelComponent,
     DialogComponent,
     PaymentDialogComponent,
-    ProbabilityHeatmapComponent
+    ProbabilityHeatmapComponent,
+    AuthModalComponent
   ],
   providers: [
     provideIcons({
@@ -212,9 +214,19 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
         this._currentPlayer = user.email;
       }
     });
+
+    // Show auth modal when auth resolves as unauthenticated
+    effect(() => {
+      const user = this.authService.currentUser();
+      const loading = this.authService.isLoading();
+      if (!loading && !user) {
+        this.showAuthModal.set(true);
+      }
+    }, { allowSignalWrites: true });
   }
 
   // UI state
+  showAuthModal = signal(false);
   showSettings = signal(false);
   isLoading = signal(true);
   gameNotFound = signal(false);
@@ -349,8 +361,10 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
             this.fetchEspnGames();
           }
 
-          // Trigger walkthrough on first load
-          this.triggerWalkthroughIfNew();
+          // Trigger walkthrough on first load (only if already authenticated)
+          if (this.authService.currentUser()) {
+            this.triggerWalkthroughIfNew();
+          }
         } else {
           this.gameNotFound.set(true);
         }
@@ -897,6 +911,18 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     } finally {
       this.isSyncingEspn.set(false);
     }
+  }
+
+  // Auth modal
+  onAuthComplete(): void {
+    this.showAuthModal.set(false);
+    const user = this.authService.currentUser();
+    if (user?.displayName) {
+      this._currentPlayer = user.displayName;
+    } else if (user?.email) {
+      this._currentPlayer = user.email;
+    }
+    this.triggerWalkthroughIfNew();
   }
 
   // Walkthrough methods
