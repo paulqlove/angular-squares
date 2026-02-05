@@ -398,6 +398,12 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const currentUserName = this.authService.currentUser()?.displayName;
+    if (currentUserName?.toLowerCase() === sanitizedName.toLowerCase()) {
+      this.duplicateNameWarning.set(null);
+      return;
+    }
+
     // Check if this name already exists in the game (case-insensitive)
     const existingPlayers = new Set(
       Object.values(this.selectedSquares).map(p => p.toLowerCase())
