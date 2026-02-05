@@ -76,45 +76,43 @@
             <ng-icon name="heroArrowLeft" class="text-xl"></ng-icon>
           </button>
           <div>
-            <h2 class="font-semibold text-heading">{{ gameName }}</h2>
+            <div class="flex items-center gap-2">
+              <h2 class="text-xl font-bold text-heading">{{ gameName }}</h2>
+              <button
+                (click)="openShareModal()"
+                class="p-1.5 text-muted hover:text-secondary-500 hover:bg-control rounded-lg transition-colors"
+                title="Share game"
+                aria-label="Share game"
+              >
+                <ng-icon name="heroShare" class="text-lg"></ng-icon>
+              </button>
+            </div>
             <p class="text-sm text-muted">
               Code: <code class="bg-control px-1.5 py-0.5 rounded font-mono text-xs">{{ gameId }}</code>
             </p>
           </div>
         </div>
 
-        <button
-          (click)="openShareModal()"
-          class="flex items-center gap-2 px-4 py-2 text-white transition-colors rounded-lg bg-secondary-500 hover:bg-secondary-600"
-        >
-          <ng-icon name="heroShare" class="text-lg"></ng-icon>
-          <span class="hidden sm:inline">Share Game</span>
-        </button>
-      </div>
-
-      <!-- Player Display / Input -->
-      <div class="flex flex-wrap items-center w-full gap-4 px-4">
-        <div class="w-full">
-          @if (currentUser()?.displayName || currentUser()?.email) {
-            <div class="flex items-center gap-2 p-2 rounded">
-              <span class="text-sm text-muted">Playing as:</span>
-              <span class="font-medium text-default">{{ currentUser()?.displayName || currentUser()?.email }}</span>
-              <button
-                (click)="openNameEditModal()"
-                class="p-2 text-muted hover:text-heading hover:bg-control rounded transition-colors"
-                title="Edit name"
-                aria-label="Edit your name"
-              >
-                <ng-icon name="heroPencilSquare" class="text-base"></ng-icon>
-              </button>
-            </div>
-          } @else {
-            <input type="text" [(ngModel)]="currentPlayer"
-                   placeholder="Enter your name"
-                   [disabled]="isLocked"
-                   class="w-full p-2 border rounded bg-input text-default focus:outline-none focus:ring-2 focus:ring-secondary-500 disabled:opacity-50 disabled:cursor-not-allowed">
-          }
-        </div>
+        <!-- Player Display / Input -->
+        @if (currentUser()?.displayName || currentUser()?.email) {
+          <div class="flex items-center gap-1.5">
+            <span class="text-sm text-muted">Playing as:</span>
+            <span class="font-medium text-default">{{ currentUser()?.displayName || currentUser()?.email }}</span>
+            <button
+              (click)="openNameEditModal()"
+              class="p-1.5 text-muted hover:text-heading hover:bg-control rounded transition-colors"
+              title="Edit name"
+              aria-label="Edit your name"
+            >
+              <ng-icon name="heroPencilSquare" class="text-sm"></ng-icon>
+            </button>
+          </div>
+        } @else {
+          <input type="text" [(ngModel)]="currentPlayer"
+                 placeholder="Enter your name"
+                 [disabled]="isLocked"
+                 class="w-48 px-3 py-1.5 text-sm border rounded-lg bg-input text-default focus:outline-none focus:ring-2 focus:ring-secondary-500 disabled:opacity-50 disabled:cursor-not-allowed">
+        }
       </div>
 
       <!-- Grid container for board and players -->
