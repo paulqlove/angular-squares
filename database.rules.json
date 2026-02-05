@@ -1,0 +1,124 @@
+{
+  "rules": {
+    "games": {
+      "$gameId": {
+        ".read": true,
+        ".write": "auth != null && (data.child('ownerId').val() == auth.uid || data.child('managerId').val() == auth.uid || !data.exists())",
+        "name": {
+          ".validate": "newData.isString() && newData.val().length <= 100"
+        },
+        "venmoUsername": {
+          ".validate": "newData.isString() && newData.val().length <= 50"
+        },
+        "homeTeam": {
+          ".validate": "newData.isString() && newData.val().length <= 50"
+        },
+        "awayTeam": {
+          ".validate": "newData.isString() && newData.val().length <= 50"
+        },
+        "pricePerSquare": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 10000"
+        },
+        "selectedSquares": {
+          "$key": {
+            ".validate": "$key.matches(/^[0-9]-[0-9]$/) && newData.isString() && newData.val().length <= 50"
+          }
+        },
+        "scores": {
+          "$quarter": {
+            "home": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 999"
+            },
+            "away": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 999"
+            }
+          }
+        },
+        "homeNumbers": {
+          "$index": {
+            ".validate": "(newData.val() == null) || (newData.isNumber() && newData.val() >= 0 && newData.val() <= 9)"
+          }
+        },
+        "awayNumbers": {
+          "$index": {
+            ".validate": "(newData.val() == null) || (newData.isNumber() && newData.val() >= 0 && newData.val() <= 9)"
+          }
+        },
+        "playerColors": {
+          "$player": {
+            ".validate": "newData.isString() && newData.val().length <= 50"
+          }
+        },
+        "winners": {
+          "$quarter": {
+            ".validate": "newData.isString() && newData.val().length <= 50"
+          }
+        },
+        "paidPlayers": {
+          "$index": {
+            ".validate": "newData.isString() && newData.val().length <= 50"
+          }
+        },
+        "ownerId": {
+          ".validate": "newData.isString() && newData.val().length <= 128"
+        },
+        "ownerName": {
+          ".validate": "newData.isString() && newData.val().length <= 100"
+        },
+        "managerId": {
+          ".validate": "(newData.val() == null) || (newData.isString() && newData.val().length <= 128)"
+        },
+        "managerEmail": {
+          ".validate": "(newData.val() == null) || (newData.isString() && newData.val().length <= 254)"
+        },
+        "isLocked": {
+          ".validate": "newData.isBoolean()"
+        },
+        "isRandomized": {
+          ".validate": "newData.isBoolean()"
+        },
+        "espnEventId": {
+          ".validate": "(newData.val() == null) || (newData.isString() && newData.val().length <= 50)"
+        },
+        "espnSport": {
+          ".validate": "(newData.val() == null) || (newData.isString() && newData.val().length <= 20)"
+        },
+        "createdAt": {
+          ".validate": "newData.isNumber()"
+        }
+      }
+    },
+    "users": {
+      "$userId": {
+        ".read": "auth != null && auth.uid == $userId",
+        ".write": "auth != null && auth.uid == $userId",
+        "games": {
+          "$gameId": {
+            "createdAt": {
+              ".validate": "newData.isNumber()"
+            },
+            "name": {
+              ".validate": "newData.isString() && newData.val().length <= 100"
+            }
+          }
+        },
+        "joinedGames": {
+          "$gameId": {
+            "createdAt": {
+              ".validate": "newData.isNumber()"
+            },
+            "name": {
+              ".validate": "newData.isString() && newData.val().length <= 100"
+            }
+          }
+        }
+      }
+    },
+    "emailIndex": {
+      "$email": {
+        ".read": "auth != null",
+        ".write": "auth != null && newData.val() == auth.uid"
+      }
+    }
+  }
+}

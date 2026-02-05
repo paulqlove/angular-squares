@@ -1,7 +1,7 @@
 # Angular Squares - TODO
 
 **Based on:** [Enhancement Plan](../ENHANCEMENT_PLAN.md)
-**Last Updated:** February 2026
+**Last Updated:** February 4, 2026
 
 ---
 
@@ -23,6 +23,18 @@ Implemented features:
 - [x] User dashboard (create, view, share, delete games)
 - [x] Game ownership and permissions system
 - [x] Guest mode with cookie-based names (30 days)
+
+---
+
+## Security Implementation
+**Priority:** Critical | **Status:** Complete
+
+- [x] Fix XSS vulnerability in DialogComponent (removed bypassSecurityTrustHtml)
+- [x] Create SanitizationService for input validation
+- [x] Apply sanitization to all user inputs (player names, game names, team names, venmo, scores, prices)
+- [x] Create Firebase security rules (database.rules.json)
+- [x] Deploy Firebase security rules
+- [x] Add server-side validation for string lengths and number ranges
 
 ---
 
@@ -97,3 +109,4 @@ _Session notes and decisions go here_
 | Ripple grid animation | Feb 2026 | Canvas-based expanding ring effect on welcome hero, gradient title |
 | Fix dashboard refresh flash | Feb 2026 | App-level loading screen while auth initializes, prevents welcome page flash |
 | Duplicate player name prevention | Feb 2026 | Warns and blocks when entering a name already in use |
+| Security implementation | Feb 2026 | XSS fix, SanitizationService, Firebase security rules deployed |
