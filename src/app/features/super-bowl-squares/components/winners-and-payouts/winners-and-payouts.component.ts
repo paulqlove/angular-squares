@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -16,6 +16,8 @@ export class WinnersAndPayoutsComponent {
   @Input() scores: { [key: string]: { home: number; away: number } } = {};
   @Input() homeTeam: string = '';
   @Input() awayTeam: string = '';
+
+  @Output() quarterClick = new EventEmitter<string>();
 
   ngOnChanges() {
     if (this.winners && this.totalPot) {

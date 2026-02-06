@@ -185,6 +185,7 @@
                 [homeTeam]="homeTeam"
                 [awayTeam]="awayTeam"
                 [selectedPlayer]="selectedPlayer"
+                [highlightedSquare]="highlightedSquare"
                 [isRandomizing]="isRandomizing"
                 (squareClick)="onSquareClick($event)">
               </app-game-board>
@@ -248,7 +249,7 @@
       </div>
 
       <!-- Winners and Payouts -->
-      <div data-walkthrough="winners-payouts">
+      <div data-walkthrough="winners-payouts" (click)="$event.stopPropagation()">
         <app-winners-and-payouts
         [winners]="winners"
         [quarterPayouts]="quarterPayouts"
@@ -256,7 +257,8 @@
         [totalPot]="totalPot"
         [scores]="scores"
         [homeTeam]="homeTeam"
-        [awayTeam]="awayTeam">
+        [awayTeam]="awayTeam"
+        (quarterClick)="onQuarterClick($event)">
         </app-winners-and-payouts>
       </div>
 

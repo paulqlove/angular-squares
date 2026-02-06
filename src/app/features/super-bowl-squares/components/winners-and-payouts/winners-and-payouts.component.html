@@ -6,7 +6,9 @@
       <div class="quarter-card"
            [class]="winners[quarter] ? playerColors[winners[quarter]] : 'bg-card'"
            [class.quarter-card--no-winner]="!winners[quarter]"
-           [style.border-color]="winners[quarter] ? saturateColor(playerColors[winners[quarter]]) : ''">
+           [class.cursor-pointer]="winners[quarter]"
+           [style.border-color]="winners[quarter] ? saturateColor(playerColors[winners[quarter]]) : ''"
+           (click)="winners[quarter] && quarterClick.emit(quarter)">
         <div class="card-content">
           <div class="winner-section">
             <h3 class="font-medium" [class]="winners[quarter] ? 'text-slate-900' : 'text-heading'">{{ getQuarterLabel(quarter) }}</h3>

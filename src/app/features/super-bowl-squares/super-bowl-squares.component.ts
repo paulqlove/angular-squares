@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, signal, inject, effect } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, HostListener, signal, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -154,6 +154,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   alertMessage: string = '';
   takenByPlayer: string = '';
   selectedPlayer: string | null = null;
+  highlightedSquare: string | null = null;
   venmoUsername = '';
   paidPlayers: Set<string> = new Set();
   activeTab: 'board' | 'probabilities' | 'boxscore' = 'board';
@@ -675,8 +676,28 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     this.calculatePlayerStats();
   }
 
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    this.highlightedSquare = null;
+  }
+
   onPlayerSelected(player: string | null): void {
     this.selectedPlayer = player;
+  }
+
+  onQuarterClick(quarter: string): void {
+    const score = this.scores[quarter as keyof typeof this.scores];
+    if (!score) return;
+
+    const homeLastDigit = score.home % 10;
+    const awayLastDigit = score.away % 10;
+
+    const row = this.awayNumbers.findIndex(n => n === awayLastDigit);
+    const col = this.homeNumbers.findIndex(n => n === homeLastDigit);
+    if (row === -1 || col === -1) return;
+
+    const key = `${row}-${col}`;
+    this.highlightedSquare = this.highlightedSquare === key ? null : key;
   }
 
   onVenmoUsernameChange(username: string) {

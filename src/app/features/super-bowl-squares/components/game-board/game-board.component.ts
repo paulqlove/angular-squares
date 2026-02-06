@@ -17,7 +17,8 @@ export class GameBoardComponent {
   @Input() selectedSquares!: { [key: string]: string };
   @Input() playerColors!: { [key: string]: string };
   @Input() selectedPlayer: string | null = null;
-  
+  @Input() highlightedSquare: string | null = null;
+
   isAnimating = false;
 
   @Output() squareClick = new EventEmitter<{ row: number; col: number }>();
@@ -30,11 +31,18 @@ export class GameBoardComponent {
     const key = `${row}-${col}`;
     const player = this.selectedSquares[key];
     const baseColor = player ? this.playerColors[player] : 'bg-square';
-    
+
+    if (this.highlightedSquare) {
+      if (key === this.highlightedSquare) {
+        return `${baseColor} square-highlight`;
+      }
+      return `${baseColor} opacity-25`;
+    }
+
     if (this.selectedPlayer && player !== this.selectedPlayer) {
       return `${baseColor} opacity-25`;
     }
-    
+
     return baseColor;
   }
 
