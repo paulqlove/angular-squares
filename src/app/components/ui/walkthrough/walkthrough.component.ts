@@ -89,7 +89,7 @@ export class WalkthroughComponent {
       if (this.walkthroughService.isActive()) {
         this.walkthroughService.updateTargetRect();
       }
-    });
+    }, { allowSignalWrites: true });
   }
 
   isLastStep = computed(() => {
