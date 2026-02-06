@@ -25,9 +25,14 @@ export const guestGuard: CanActivateFn = async (route, state) => {
   // Wait for auth state to be determined
   await authService.waitForAuthReady();
 
-  // If already authenticated, redirect to dashboard
+  // If already authenticated, redirect appropriately
   if (authService.isAuthenticated()) {
-    router.navigate(['/dashboard']);
+    const joinCode = route.queryParamMap.get('join');
+    if (joinCode) {
+      router.navigate(['/game', joinCode]);
+    } else {
+      router.navigate(['/dashboard']);
+    }
     return false;
   }
 

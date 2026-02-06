@@ -1,6 +1,6 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
@@ -318,9 +318,18 @@ interface Feature {
     </div>
   `
 })
-export class WelcomeComponent {
+export class WelcomeComponent implements OnInit {
   private authService = inject(AuthService);
+  private route = inject(ActivatedRoute);
   private router = inject(Router);
+
+  ngOnInit(): void {
+    const joinCode = this.route.snapshot.queryParamMap.get('join');
+    if (joinCode) {
+      this.pendingJoinCode = joinCode.toUpperCase();
+      this.gameCode = this.pendingJoinCode;
+    }
+  }
 
   guestName = '';
   gameCode = '';
@@ -411,10 +420,13 @@ export class WelcomeComponent {
     }
   }
 
+  private pendingJoinCode = '';
+
   private navigateAfterAuth(): void {
-    // Check if there's a pending game to join
-    if (this.gameCode.length === 6) {
-      this.router.navigate(['/game', this.gameCode.toUpperCase()]);
+    const joinCode = this.gameCode || this.pendingJoinCode
+      || this.route.snapshot.queryParamMap.get('join');
+    if (joinCode) {
+      this.router.navigate(['/game', joinCode.toUpperCase()]);
     } else {
       this.router.navigate(['/dashboard']);
     }

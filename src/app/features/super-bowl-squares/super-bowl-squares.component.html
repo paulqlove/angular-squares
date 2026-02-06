@@ -32,8 +32,6 @@
   </div>
 } @else {
 <!-- Main Game View -->
-  <app-auth-modal [isOpen]="showAuthModal()" (authenticated)="onAuthComplete()"></app-auth-modal>
-
   <app-shared-header variant="fixed">
     @if (venmoUsername) {
       <app-venmo-popover [username]="venmoUsername"></app-venmo-popover>

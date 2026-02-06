@@ -33,7 +33,6 @@ import { SettingsPanelComponent } from './components/settings-panel/settings-pan
 import { VenmoPopoverComponent } from './components/venmo-popover/venmo-popover.component';
 import { PaymentDialogComponent } from './components/payment-dialog/payment-dialog.component';
 import { ProbabilityHeatmapComponent } from './components/probability-heatmap/probability-heatmap.component';
-import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.component';
 import { BoxScoreComponent } from './components/box-score/box-score.component';
 
 @Component({
@@ -52,7 +51,6 @@ import { BoxScoreComponent } from './components/box-score/box-score.component';
     VenmoPopoverComponent,
     PaymentDialogComponent,
     ProbabilityHeatmapComponent,
-    AuthModalComponent,
     BoxScoreComponent
   ],
   providers: [
@@ -214,18 +212,17 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Show auth modal when auth resolves as unauthenticated
+    // Redirect unauthenticated users to welcome page with game code
     effect(() => {
       const user = this.authService.currentUser();
       const loading = this.authService.isLoading();
       if (!loading && !user) {
-        this.showAuthModal.set(true);
+        this.router.navigate(['/'], { queryParams: { join: this.gameId } });
       }
-    }, { allowSignalWrites: true });
+    });
   }
 
   // UI state
-  showAuthModal = signal(false);
   showSettings = signal(false);
   isLoading = signal(true);
   gameNotFound = signal(false);
@@ -896,18 +893,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     } finally {
       this.isSyncingEspn.set(false);
     }
-  }
-
-  // Auth modal
-  onAuthComplete(): void {
-    this.showAuthModal.set(false);
-    const user = this.authService.currentUser();
-    if (user?.displayName) {
-      this._currentPlayer = user.displayName;
-    } else if (user?.email) {
-      this._currentPlayer = user.email;
-    }
-    this.triggerWalkthroughIfNew();
   }
 
   // Walkthrough methods
