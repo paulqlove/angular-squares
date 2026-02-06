@@ -116,8 +116,8 @@ Game owners can link their game to an ESPN NFL game for live score syncing.
 
 ## Documentation
 
-- [Enhancement Plan](./ENHANCEMENT_PLAN.md) - Full roadmap with technical specs
-- [TODO](./docs/TODO.md) - Current task tracking
+- [Enhancement Plan](@./ENHANCEMENT_PLAN.md) - Full roadmap with technical specs
+- [TODO](@./docs/TODO.md) - Current task tracking
 
 ## Deployment
 
