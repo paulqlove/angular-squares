@@ -14,6 +14,8 @@ export class WinnersAndPayoutsComponent {
   @Input() playerColors: { [key: string]: string } = {};
   @Input() totalPot: number = 0;
   @Input() scores: { [key: string]: { home: number; away: number } } = {};
+  @Input() homeTeam: string = '';
+  @Input() awayTeam: string = '';
 
   ngOnChanges() {
     if (this.winners && this.totalPot) {

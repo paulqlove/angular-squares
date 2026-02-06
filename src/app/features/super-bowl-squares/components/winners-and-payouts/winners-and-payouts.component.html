@@ -18,6 +18,11 @@
                 <span class="text-muted">No winner yet</span>
               }
             </div>
+            @if (scores[quarter] && (scores[quarter].home > 0 || scores[quarter].away > 0)) {
+              <div class="text-xs" [class]="winners[quarter] ? 'text-slate-600' : 'text-muted'">
+                {{ awayTeam || 'Away' }} {{ scores[quarter].away }} - {{ homeTeam || 'Home' }} {{ scores[quarter].home }}
+              </div>
+            }
           </div>
 
           <div class="payout-section">

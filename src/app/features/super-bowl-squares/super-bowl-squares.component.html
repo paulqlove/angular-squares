@@ -65,13 +65,6 @@
     [pricePerSquare]="currentPrice"
     [isGameOwner]="isGameOwner()"
     [isManager]="isManager()"
-    [espnEventId]="espnEventId"
-    [espnSport]="espnSport"
-    [espnGames]="espnGames()"
-    [linkedEspnGame]="linkedEspnGame()"
-    [isSyncingEspn]="isSyncingEspn()"
-    [lastSyncTime]="lastSyncTime()"
-    [sportOptions]="sportOptions"
     (onRandomize)="randomizeNumbers()"
     (onToggleLock)="toggleLock()"
     (onVenmoUsernameChange)="onVenmoUsernameChange($event)"
@@ -79,11 +72,6 @@
     (onPriceChange)="onPriceChange($event)"
     (onManagePayments)="onManagePayments()"
     (onClearGame)="onClearGame()"
-    (onEspnGameChange)="linkEspnGame($event)"
-    (onSyncEspn)="syncFromEspn()"
-    (onUnlinkEspn)="unlinkEspnGame()"
-    (onRefreshEspnGames)="fetchEspnGames()"
-    (onSportChange)="onSportChange($event)"
   ></app-settings-panel>
 
   <div class="container mx-auto">
@@ -266,7 +254,9 @@
         [quarterPayouts]="quarterPayouts"
         [playerColors]="playerColors"
         [totalPot]="totalPot"
-        [scores]="scores">
+        [scores]="scores"
+        [homeTeam]="homeTeam"
+        [awayTeam]="awayTeam">
         </app-winners-and-payouts>
       </div>
 

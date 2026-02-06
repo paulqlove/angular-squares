@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GameService, GameData } from '../../core/services/game.service';
 import { AuthService } from '../../core/services/auth.service';
-import { EspnService, EspnGame, SportType, SPORT_CONFIG } from '../../core/services/espn.service';
+import { EspnService, EspnGame, SportType } from '../../core/services/espn.service';
 import { ToastService } from '../../core/services/toast.service';
 import { SanitizationService } from '../../core/services/sanitization.service';
 import { WalkthroughService, WalkthroughStep } from '../../core/services/walkthrough.service';
@@ -241,20 +241,12 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   isManager = signal(false);
 
   // ESPN sync state
-  espnGames = signal<EspnGame[]>([]);
   linkedEspnGame = signal<EspnGame | null>(null);
   espnEventId: string | undefined;
   espnSport: SportType = 'nfl';
   isSyncingEspn = signal(false);
   espnSyncError = signal<string | null>(null);
   lastSyncTime = signal<Date | null>(null);
-  sportOptions: { value: SportType; label: string }[] = [
-    { value: 'nfl', label: 'NFL' },
-    { value: 'ncaaf', label: 'NCAA Football' },
-    { value: 'nba', label: 'NBA' },
-    { value: 'wnba', label: 'WNBA' },
-    { value: 'afl', label: 'AFL' }
-  ];
 
   // Auto-polling for live scores
   private pollingInterval: ReturnType<typeof setInterval> | null = null;
@@ -352,9 +344,9 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
             this.calculateWinners();
           }
 
-          // Fetch ESPN games if owner and load linked game data
-          if (this.isGameOwner() && this.espnGames().length === 0) {
-            this.fetchEspnGames();
+          // Fetch linked ESPN game data for all users (for box score display)
+          if (this.espnEventId && !this.linkedEspnGame()) {
+            this.fetchLinkedEspnGame();
           }
 
           // Trigger walkthrough on first load (only if already authenticated)
@@ -791,62 +783,17 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   }
 
   // ESPN Sync Methods
-  async fetchEspnGames(): Promise<void> {
-    this.espnSyncError.set(null);
-    const games = await this.espnService.getGames(this.espnSport);
-    this.espnGames.set(games);
+  private async fetchLinkedEspnGame(): Promise<void> {
+    if (!this.espnEventId) return;
 
-    // If we have a linked game, update its data
-    if (this.espnEventId) {
-      const linked = games.find(g => g.id === this.espnEventId);
-      this.linkedEspnGame.set(linked || null);
+    const game = await this.espnService.getGame(this.espnEventId, this.espnSport);
+    this.linkedEspnGame.set(game);
 
-      // Start/stop polling based on game status
-      if (linked?.status === 'in') {
-        this.startPolling();
-      } else {
-        this.stopPolling();
-      }
-    }
-  }
-
-  onSportChange(sport: SportType): void {
-    this.espnSport = sport;
-    this.espnGames.set([]);
-    this.fetchEspnGames();
-    // Save sport preference to game
-    this.gameService.updateGame(this.gameId, { espnSport: sport });
-  }
-
-  async linkEspnGame(eventId: string): Promise<void> {
-    this.espnEventId = eventId;
-    await this.gameService.updateGame(this.gameId, { espnEventId: eventId, espnSport: this.espnSport });
-
-    const game = this.espnGames().find(g => g.id === eventId);
-    this.linkedEspnGame.set(game || null);
-
-    // Auto-populate team names if empty
-    if (game && !this.homeTeam && !this.awayTeam) {
-      this.homeTeam = game.homeTeam;
-      this.awayTeam = game.awayTeam;
-      await this.gameService.updateGame(this.gameId, {
-        homeTeam: game.homeTeam,
-        awayTeam: game.awayTeam
-      });
-    }
-
-    // Start polling if game is in progress
     if (game?.status === 'in') {
       this.startPolling();
+    } else {
+      this.stopPolling();
     }
-  }
-
-  async unlinkEspnGame(): Promise<void> {
-    this.espnEventId = undefined;
-    this.linkedEspnGame.set(null);
-    this.lastSyncTime.set(null);
-    this.stopPolling();
-    await this.gameService.updateGame(this.gameId, { espnEventId: '' });
   }
 
   async syncFromEspn(): Promise<void> {

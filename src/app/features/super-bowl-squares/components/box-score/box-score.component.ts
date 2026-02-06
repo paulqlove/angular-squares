@@ -52,7 +52,7 @@ import { EspnGame, SportType, SPORT_CONFIG } from '../../../../core/services/esp
         </table>
       </div>
     } @else {
-      <p class="text-sm text-muted text-center py-8">No ESPN game linked. The game owner can link one in Settings.</p>
+      <p class="text-sm text-muted text-center py-8">No ESPN game linked.</p>
     }
   `
 })
