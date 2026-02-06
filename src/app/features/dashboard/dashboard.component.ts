@@ -879,10 +879,10 @@ import {
                   Payment Manager
                   <span class="text-muted font-normal">(optional)</span>
                 </label>
-                <p class="text-xs text-muted mb-2">Assign someone to help manage payments. They can mark who has paid.</p>
-                @if (editingGame()?.managerEmail) {
+                <p class="text-xs text-muted mb-2">Assign a player to help manage payments. They can mark who has paid.</p>
+                @if (editingGame()?.managerId) {
                   <div class="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-xl dark:bg-green-900/30 dark:border-green-800">
-                    <span class="flex-1 text-green-700 dark:text-green-400">{{ editingGame()?.managerEmail }}</span>
+                    <span class="flex-1 text-green-700 dark:text-green-400">{{ editingGame()?.managerName || editingGame()?.managerEmail || 'Assigned' }}</span>
                     <button
                       (click)="removeManager()"
                       class="px-3 py-1 text-sm bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-400"
@@ -890,32 +890,36 @@ import {
                       Remove
                     </button>
                   </div>
-                } @else {
-                  <div class="flex gap-2">
+                } @else if (editGamePlayers().length > 0) {
+                  <div class="relative">
                     <input
-                      type="email"
-                      [(ngModel)]="managerEmail"
-                      placeholder="Enter their email address"
-                      class="flex-1 px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
+                      type="text"
+                      [(ngModel)]="managerSearchQuery"
+                      (input)="onManagerSearchInput()"
+                      (focus)="onManagerSearchFocus()"
+                      (keydown)="onManagerSearchKeydown($event)"
+                      placeholder="Search players..."
+                      class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
+                      autocomplete="off"
                     />
-                    <button
-                      (click)="lookupAndAssignManager()"
-                      [disabled]="!managerEmail || isLookingUpManager()"
-                      class="px-4 py-3 bg-secondary-500 hover:bg-secondary-600 disabled:bg-control disabled:cursor-not-allowed text-white rounded-xl transition-colors"
-                    >
-                      @if (isLookingUpManager()) {
-                        <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
-                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-                        </svg>
-                      } @else {
-                        Assign
-                      }
-                    </button>
+                    @if (showManagerDropdown() && managerSearchResults().length > 0) {
+                      <div class="absolute z-10 mt-1 w-full bg-dialog border border-default rounded-xl shadow-lg max-h-48 overflow-y-auto">
+                        @for (player of managerSearchResults(); track player.uid; let i = $index) {
+                          <button
+                            (mousedown)="assignManagerFromPlayer(player)"
+                            (mouseenter)="selectedManagerIndex.set(i)"
+                            [class]="i === selectedManagerIndex()
+                              ? 'w-full px-4 py-3 text-left text-default bg-secondary-100 dark:bg-secondary-900/30 transition-colors'
+                              : 'w-full px-4 py-3 text-left text-default hover:bg-control transition-colors'"
+                          >
+                            {{ player.name }}
+                          </button>
+                        }
+                      </div>
+                    }
                   </div>
-                  @if (managerLookupError()) {
-                    <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ managerLookupError() }}</p>
-                  }
+                } @else {
+                  <p class="text-sm text-muted italic">No players have joined yet</p>
                 }
               </div>
             </div>
@@ -1028,9 +1032,11 @@ export class DashboardComponent implements OnInit {
   editEspnGameId = '';
   editEspnGames = signal<EspnGame[]>([]);
   isLoadingEditEspnGames = signal(false);
-  managerEmail = '';
-  managerLookupError = signal<string | null>(null);
-  isLookingUpManager = signal(false);
+  editGamePlayers = signal<{ name: string; uid: string }[]>([]);
+  managerSearchQuery = '';
+  managerSearchResults = signal<{ name: string; uid: string }[]>([]);
+  selectedManagerIndex = signal(-1);
+  showManagerDropdown = signal(false);
   isSavingGame = signal(false);
 
   // Profile dropdown state
@@ -1264,24 +1270,39 @@ export class DashboardComponent implements OnInit {
   }
 
   // Edit modal methods
-  openEditModal(game: GameListItem): void {
+  async openEditModal(game: GameListItem): Promise<void> {
     this.editingGame.set(game);
     this.editGameName = game.name;
     this.editGameVenmoUsername = game.venmoUsername || '';
     this.editGamePrice = game.pricePerSquare;
     this.editSport = game.espnSport || 'nfl';
     this.editEspnGameId = game.espnEventId || '';
-    this.managerEmail = '';
-    this.managerLookupError.set(null);
+    this.managerSearchQuery = '';
+    this.managerSearchResults.set([]);
+    this.selectedManagerIndex.set(-1);
+    this.showManagerDropdown.set(false);
     this.showEditModal.set(true);
     this.fetchEditEspnGames();
+
+    const fullGame = await this.gameService.getGame(game.id);
+    if (fullGame?.playerUserIds) {
+      const currentUid = this.currentUser()?.uid;
+      const players = Object.entries(fullGame.playerUserIds)
+        .filter(([, uid]) => uid !== currentUid)
+        .map(([name, uid]) => ({ name, uid }));
+      this.editGamePlayers.set(players);
+    } else {
+      this.editGamePlayers.set([]);
+    }
   }
 
   closeEditModal(): void {
     this.showEditModal.set(false);
     this.editingGame.set(null);
-    this.managerEmail = '';
-    this.managerLookupError.set(null);
+    this.managerSearchQuery = '';
+    this.managerSearchResults.set([]);
+    this.editGamePlayers.set([]);
+    this.showManagerDropdown.set(false);
     this.editEspnGames.set([]);
   }
 
@@ -1305,36 +1326,62 @@ export class DashboardComponent implements OnInit {
     this.editEspnGameId = gameId;
   }
 
-  async lookupAndAssignManager(): Promise<void> {
-    if (!this.managerEmail || !this.editingGame()) return;
+  onManagerSearchInput(): void {
+    const query = this.managerSearchQuery.toLowerCase().trim();
+    if (!query) {
+      this.managerSearchResults.set(this.editGamePlayers());
+    } else {
+      this.managerSearchResults.set(
+        this.editGamePlayers().filter(p => p.name.toLowerCase().includes(query))
+      );
+    }
+    this.selectedManagerIndex.set(-1);
+    this.showManagerDropdown.set(true);
+  }
 
-    this.isLookingUpManager.set(true);
-    this.managerLookupError.set(null);
+  onManagerSearchFocus(): void {
+    const query = this.managerSearchQuery.toLowerCase().trim();
+    if (!query) {
+      this.managerSearchResults.set(this.editGamePlayers());
+    }
+    this.showManagerDropdown.set(true);
+  }
+
+  onManagerSearchKeydown(event: KeyboardEvent): void {
+    const results = this.managerSearchResults();
+    if (!results.length) return;
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      this.selectedManagerIndex.update(i => Math.min(i + 1, results.length - 1));
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      this.selectedManagerIndex.update(i => Math.max(i - 1, 0));
+    } else if (event.key === 'Enter') {
+      event.preventDefault();
+      const idx = this.selectedManagerIndex();
+      if (idx >= 0 && idx < results.length) {
+        this.assignManagerFromPlayer(results[idx]);
+      }
+    } else if (event.key === 'Escape') {
+      this.showManagerDropdown.set(false);
+    }
+  }
+
+  async assignManagerFromPlayer(player: { name: string; uid: string }): Promise<void> {
+    const game = this.editingGame();
+    if (!game) return;
 
     try {
-      const managerId = await this.authService.lookupUserByEmail(this.managerEmail);
-      if (!managerId) {
-        this.managerLookupError.set('No account found with this email. They need to sign in first.');
-        return;
-      }
-
-      const game = this.editingGame()!;
-      if (managerId === this.currentUser()?.uid) {
-        this.managerLookupError.set('You cannot assign yourself as manager.');
-        return;
-      }
-
-      await this.gameService.updateGameManager(game.id, managerId, this.managerEmail);
-      // Update local state
-      this.editingGame.set({ ...game, managerId, managerEmail: this.managerEmail });
+      await this.gameService.updateGameManager(game.id, player.uid, null, player.name);
+      this.editingGame.set({ ...game, managerId: player.uid, managerName: player.name, managerEmail: undefined });
       this.myGames.update(games =>
-        games.map(g => g.id === game.id ? { ...g, managerId, managerEmail: this.managerEmail } : g)
+        games.map(g => g.id === game.id ? { ...g, managerId: player.uid, managerName: player.name, managerEmail: undefined } : g)
       );
-      this.managerEmail = '';
+      this.managerSearchQuery = '';
+      this.showManagerDropdown.set(false);
     } catch (error) {
-      this.managerLookupError.set('Failed to assign manager. Please try again.');
-    } finally {
-      this.isLookingUpManager.set(false);
+      this.toastService.error('Failed to assign manager');
     }
   }
 
@@ -1343,10 +1390,10 @@ export class DashboardComponent implements OnInit {
     if (!game) return;
 
     try {
-      await this.gameService.updateGameManager(game.id, null, null);
-      this.editingGame.set({ ...game, managerId: undefined, managerEmail: undefined });
+      await this.gameService.updateGameManager(game.id, null, null, null);
+      this.editingGame.set({ ...game, managerId: undefined, managerEmail: undefined, managerName: undefined });
       this.myGames.update(games =>
-        games.map(g => g.id === game.id ? { ...g, managerId: undefined, managerEmail: undefined } : g)
+        games.map(g => g.id === game.id ? { ...g, managerId: undefined, managerEmail: undefined, managerName: undefined } : g)
       );
     } catch (error) {
       this.toastService.error('Failed to remove manager');

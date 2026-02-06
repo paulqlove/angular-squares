@@ -45,6 +45,7 @@ export interface GameData {
   espnSport?: SportType;
   managerId?: string;
   managerEmail?: string;
+  managerName?: string;
   playerUserIds?: { [name: string]: string };
 }
 
@@ -61,6 +62,7 @@ export interface GameListItem {
   pricePerSquare: number;
   managerId?: string;
   managerEmail?: string;
+  managerName?: string;
   espnEventId?: string;
   espnSport?: SportType;
   venmoUsername?: string;
@@ -218,6 +220,7 @@ export class GameService {
           espnSport: rawData.espnSport || undefined,
           managerId: rawData.managerId || undefined,
           managerEmail: rawData.managerEmail || undefined,
+          managerName: rawData.managerName || undefined,
           playerUserIds: rawData.playerUserIds || undefined
         };
 
@@ -299,6 +302,9 @@ export class GameService {
     if (data.managerEmail !== undefined) {
       updates[`${prefix}/managerEmail`] = data.managerEmail;
     }
+    if (data.managerName !== undefined) {
+      updates[`${prefix}/managerName`] = data.managerName;
+    }
     if (data.playerUserIds !== undefined) {
       updates[`${prefix}/playerUserIds`] = data.playerUserIds;
     }
@@ -342,6 +348,7 @@ export class GameService {
         espnSport: rawData.espnSport || undefined,
         managerId: rawData.managerId || undefined,
         managerEmail: rawData.managerEmail || undefined,
+        managerName: rawData.managerName || undefined,
         playerUserIds: rawData.playerUserIds || undefined
       };
     }
@@ -387,6 +394,7 @@ export class GameService {
           pricePerSquare: game.pricePerSquare,
           managerId: game.managerId,
           managerEmail: game.managerEmail,
+          managerName: game.managerName,
           espnEventId: game.espnEventId,
           espnSport: game.espnSport,
           venmoUsername: game.venmoUsername
@@ -474,6 +482,7 @@ export class GameService {
           pricePerSquare: game.pricePerSquare,
           managerId: game.managerId,
           managerEmail: game.managerEmail,
+          managerName: game.managerName,
           espnEventId: game.espnEventId,
           espnSport: game.espnSport,
           venmoUsername: game.venmoUsername
@@ -543,11 +552,12 @@ export class GameService {
   }
 
   // Update game manager
-  async updateGameManager(gameId: string, managerId: string | null, managerEmail: string | null): Promise<void> {
+  async updateGameManager(gameId: string, managerId: string | null, managerEmail: string | null, managerName: string | null = null): Promise<void> {
     if (!this.isBrowser) return;
     await update(ref(this.db), {
       [`games/${gameId}/managerId`]: managerId || '',
-      [`games/${gameId}/managerEmail`]: managerEmail || ''
+      [`games/${gameId}/managerEmail`]: managerEmail || '',
+      [`games/${gameId}/managerName`]: managerName || ''
     });
   }
 }
