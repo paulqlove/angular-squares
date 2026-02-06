@@ -60,3 +60,8 @@ Opt-in browser push when a quarter is won.
 
 ### Built-in Blog
 Static pages at /blog. AI-generated SEO content covering rules, strategy, Super Bowl history.
+
+## Infrastructure
+
+### Migrate off GitHub Pages
+Repo needs to be private. GitHub Pages requires a public repo on the free plan (Enterprise required for private repo Pages). Migrate hosting to Vercel, Netlify, or Firebase Hosting — all support private repos on free tiers with custom domains and HTTPS.
