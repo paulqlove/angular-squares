@@ -865,16 +865,20 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       this.linkedEspnGame.set(game);
       this.lastSyncTime.set(new Date());
 
-      // Map ESPN quarters to our scores format
-      const newScores = {
-        q1: { home: game.quarters[0]?.home || 0, away: game.quarters[0]?.away || 0 },
-        q2: { home: game.quarters[1]?.home || 0, away: game.quarters[1]?.away || 0 },
-        q3: { home: game.quarters[2]?.home || 0, away: game.quarters[2]?.away || 0 },
-        q4: { home: game.quarters[3]?.home || 0, away: game.quarters[3]?.away || 0 }
-      };
+      // ESPN gives per-quarter scores; squares need cumulative scores
+      let homeAccum = 0;
+      let awayAccum = 0;
+      const quarterKeys = ['q1', 'q2', 'q3', 'q4'] as const;
+      const newScores = { ...this.scores };
 
-      // For Pro Bowl or other 3-period games, use final score for Q4
-      if (game.quarters.length === 3 && game.status === 'post') {
+      for (let i = 0; i < 4; i++) {
+        homeAccum += game.quarters[i]?.home || 0;
+        awayAccum += game.quarters[i]?.away || 0;
+        newScores[quarterKeys[i]] = { home: homeAccum, away: awayAccum };
+      }
+
+      // Use final score for Q4 when game is finished (handles OT, Pro Bowl, etc.)
+      if (game.status === 'post') {
         newScores.q4 = { home: game.homeScore, away: game.awayScore };
       }
 
