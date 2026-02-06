@@ -1411,7 +1411,8 @@ export class DashboardComponent implements OnInit {
     this.isSavingGame.set(true);
     try {
       const selectedEspnGame = this.editEspnGames().find(g => g.id === this.editEspnGameId);
-      await this.gameService.updateGame(game.id, {
+      const espnChanged = (this.editEspnGameId || undefined) !== game.espnEventId;
+      const updates: Record<string, any> = {
         name: sanitizedName,
         pricePerSquare: sanitizedPrice,
         venmoUsername: sanitizedVenmo,
@@ -1419,7 +1420,12 @@ export class DashboardComponent implements OnInit {
         espnSport: this.editEspnGameId ? this.editSport : undefined,
         homeTeam: selectedEspnGame?.homeTeam || game.homeTeam,
         awayTeam: selectedEspnGame?.awayTeam || game.awayTeam
-      });
+      };
+      if (espnChanged) {
+        updates['scores'] = { q1: { home: 0, away: 0 }, q2: { home: 0, away: 0 }, q3: { home: 0, away: 0 }, q4: { home: 0, away: 0 } };
+        updates['winners'] = {};
+      }
+      await this.gameService.updateGame(game.id, updates);
       this.myGames.update(games =>
         games.map(g => g.id === game.id ? {
           ...g,
@@ -1429,7 +1435,8 @@ export class DashboardComponent implements OnInit {
           espnEventId: this.editEspnGameId || undefined,
           espnSport: this.editEspnGameId ? this.editSport : undefined,
           homeTeam: selectedEspnGame?.homeTeam || game.homeTeam,
-          awayTeam: selectedEspnGame?.awayTeam || game.awayTeam
+          awayTeam: selectedEspnGame?.awayTeam || game.awayTeam,
+          ...(espnChanged ? { scores: { q1: { home: 0, away: 0 }, q2: { home: 0, away: 0 }, q3: { home: 0, away: 0 }, q4: { home: 0, away: 0 } }, winners: {} } : {})
         } : g)
       );
       this.closeEditModal();
