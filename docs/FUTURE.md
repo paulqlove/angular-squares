@@ -25,6 +25,9 @@ Product roadmap and monetization strategy for QuarterScore.
 - Multi-board TV display (large screen only)
 - Branded QR codes
 - Subdomain support (later: joes-bar.quarterscore.com)
+- Max squares per player (limit how many squares one person can claim)
+- Require account to play (disable guest mode per game)
+- Free game mode (no payment tracking — prizes are custom like gift cards, coupons, etc.)
 
 ## Feature Details
 
