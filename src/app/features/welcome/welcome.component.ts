@@ -116,7 +116,7 @@ interface Feature {
               </div>
 
               <!-- Right: Bento grid with ripple -->
-              <div class="relative h-[350px] md:h-[420px] lg:h-[460px] rounded-2xl overflow-hidden">
+              <div class="relative h-[350px] md:h-[420px] lg:h-[-webkit-fill-available] rounded-2xl overflow-hidden">
                 <app-ripple-grid
                   class="absolute inset-0"
                   backgroundColor="#10b981"
