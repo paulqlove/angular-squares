@@ -477,6 +477,11 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   }
 
   async onSquareClick(event: { row: number; col: number }): Promise<void> {
+    if (this.isLocked) {
+      this.toastService.warning('This game is locked. Contact the game owner or manager to unlock it.');
+      return;
+    }
+
     // If not authenticated, show auth modal and remember which square was clicked
     if (!this.authService.currentUser()) {
       this.pendingSquare = event;
@@ -499,10 +504,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       setTimeout(() => {
         this.showAlert = false;
       }, 3000);
-      return;
-    }
-
-    if (this.isLocked) {
       return;
     }
 
