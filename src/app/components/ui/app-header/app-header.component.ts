@@ -52,7 +52,7 @@ export class AppHeaderComponent {
       case 'solid':
         return 'text-xl font-bold text-header tracking-tight';
       case 'fixed':
-        return 'text-2xl sm:text-3xl md:text-4xl font-bold text-heading';
+        return 'hidden sm:block text-2xl sm:text-3xl md:text-4xl font-bold text-heading';
     }
   }
 }
