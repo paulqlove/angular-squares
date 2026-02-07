@@ -10,6 +10,13 @@ import {
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
+const FLASH_COLORS = [
+  '#fecaca', '#bfdbfe', '#bbf7d0', '#fef08a', '#e9d5ff',
+  '#fbcfe8', '#c7d2fe', '#fed7aa', '#99f6e4', '#a5f3fc',
+  '#d9f99d', '#a7f3d0', '#bae6fd', '#ddd6fe', '#f5d0fe',
+  '#fecdd3', '#fde68a',
+];
+
 @Component({
   selector: 'app-ripple-grid',
   standalone: true,
@@ -29,12 +36,17 @@ export class RippleGridComponent implements OnInit, OnDestroy {
   private resizeObserver: ResizeObserver | null = null;
   private rippleIntervalId: ReturnType<typeof setInterval> | null = null;
 
-  private rippleDuration = 0;
-  private rippleTime = 0;
+  private cellColors: string[] = [];
+  private gridCols = 0;
+  private gridRows = 0;
+  private gridOffsetX = 0;
+  private gridOffsetY = 0;
+  private lastTimestamp = 0;
   private rippleActive = false;
+  private rippleDuration = 0;
   private rippleOriginX = 0;
   private rippleOriginY = 0;
-  private lastTimestamp = 0;
+  private rippleTime = 0;
 
   ngOnInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
@@ -79,6 +91,11 @@ export class RippleGridComponent implements OnInit, OnDestroy {
       this.ctx.scale(dpr, dpr);
     }
 
+    this.gridCols = Math.ceil(rect.width / this.cellSize) + 2;
+    this.gridRows = Math.ceil(rect.height / this.cellSize) + 2;
+    this.gridOffsetX = (rect.width % this.cellSize) / 2 - this.cellSize;
+    this.gridOffsetY = (rect.height % this.cellSize) / 2 - this.cellSize;
+
     const maxRadius = Math.sqrt((rect.width / 2) ** 2 + (rect.height / 2) ** 2) + 150;
     this.rippleDuration = maxRadius / 230;
   }
@@ -99,6 +116,14 @@ export class RippleGridComponent implements OnInit, OnDestroy {
     this.rippleOriginY = canvas.height / dpr / 2;
     this.rippleTime = 0;
     this.rippleActive = true;
+
+    const totalCells = this.gridCols * this.gridRows;
+    if (this.cellColors.length < totalCells) {
+      this.cellColors = new Array(totalCells);
+    }
+    for (let i = 0; i < totalCells; i++) {
+      this.cellColors[i] = FLASH_COLORS[(Math.random() * FLASH_COLORS.length) | 0];
+    }
   }
 
   private startAnimation(): void {
@@ -135,24 +160,58 @@ export class RippleGridComponent implements OnInit, OnDestroy {
     this.ctx.fillStyle = this.backgroundColor;
     this.ctx.fillRect(0, 0, width, height);
 
+    if (this.rippleActive) {
+      this.drawCellColors();
+    }
+
     this.ctx.strokeStyle = this.lineColor;
     this.ctx.lineWidth = 1;
 
     this.drawGrid(width, height);
   }
 
+  private drawCellColors(): void {
+    if (!this.ctx) return;
+
+    const ringRadius = this.rippleTime * 230;
+    const ringWidth = 150;
+    const fade = Math.max(0, 1 - this.rippleTime / this.rippleDuration);
+
+    for (let row = 0; row < this.gridRows; row++) {
+      const cellY = this.gridOffsetY + row * this.cellSize;
+      const centerY = cellY + this.cellSize / 2;
+
+      for (let col = 0; col < this.gridCols; col++) {
+        const cellX = this.gridOffsetX + col * this.cellSize;
+        const centerX = cellX + this.cellSize / 2;
+
+        const dx = centerX - this.rippleOriginX;
+        const dy = centerY - this.rippleOriginY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const distFromRing = Math.abs(distance - ringRadius);
+
+        if (distFromRing > ringWidth) continue;
+
+        const falloff = Math.cos((distFromRing / ringWidth) * Math.PI * 0.5);
+        const alpha = Math.min(0.6, falloff * fade);
+
+        if (alpha < 0.01) continue;
+
+        this.ctx.globalAlpha = alpha;
+        this.ctx.fillStyle = this.cellColors[row * this.gridCols + col];
+        this.ctx.fillRect(cellX, cellY, this.cellSize, this.cellSize);
+      }
+    }
+
+    this.ctx.globalAlpha = 1;
+  }
+
   private drawGrid(width: number, height: number): void {
     if (!this.ctx) return;
 
-    const cols = Math.ceil(width / this.cellSize) + 2;
-    const rows = Math.ceil(height / this.cellSize) + 2;
-
-    const offsetX = (width % this.cellSize) / 2 - this.cellSize;
-    const offsetY = (height % this.cellSize) / 2 - this.cellSize;
-
     // Draw vertical lines
-    for (let col = 0; col <= cols; col++) {
-      const baseX = offsetX + col * this.cellSize;
+    for (let col = 0; col <= this.gridCols; col++) {
+      const baseX = this.gridOffsetX + col * this.cellSize;
       this.ctx.beginPath();
 
       for (let y = 0; y <= height; y += 5) {
@@ -167,8 +226,8 @@ export class RippleGridComponent implements OnInit, OnDestroy {
     }
 
     // Draw horizontal lines
-    for (let row = 0; row <= rows; row++) {
-      const baseY = offsetY + row * this.cellSize;
+    for (let row = 0; row <= this.gridRows; row++) {
+      const baseY = this.gridOffsetY + row * this.cellSize;
       this.ctx.beginPath();
 
       for (let x = 0; x <= width; x += 5) {
