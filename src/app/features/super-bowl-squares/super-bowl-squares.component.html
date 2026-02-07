@@ -78,7 +78,7 @@
     <div class="space-y-6">
       <!-- Game Info Bar -->
       <div class="flex flex-wrap items-center justify-between gap-4 p-3">
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 w-full sm:w-auto justify-center sm:justify-start">
           @if (currentUser() && !currentUser()?.isGuest) {
             <button
               (click)="goBack()"
@@ -89,9 +89,9 @@
               <ng-icon name="heroArrowLeft" class="text-xl"></ng-icon>
             </button>
           }
-          <div>
+          <div class="text-center sm:text-left">
             <h2 class="text-xl font-bold text-heading">{{ gameName }}</h2>
-            <div class="flex items-center gap-1.5">
+            <div class="flex items-center justify-center sm:justify-start gap-1.5">
               <span class="text-sm text-muted">Code:</span>
               <code class="bg-control px-1.5 py-0.5 rounded font-mono text-xs text-default">{{ gameId }}</code>
               <button
@@ -107,9 +107,9 @@
         </div>
 
         <!-- Player Display / Input -->
-        <div data-walkthrough="player-name">
+        <div class="w-full sm:w-auto pt-1 sm:pt-0" data-walkthrough="player-name">
           @if (currentUser()?.displayName || currentUser()?.email) {
-            <div class="flex items-center gap-1.5">
+            <div class="flex items-center justify-center sm:justify-end gap-1.5">
               <span class="text-sm text-muted">Playing as:</span>
               <span class="font-medium text-default">{{ currentUser()?.displayName || currentUser()?.email }}</span>
               @if (currentUser()?.isGuest) {
@@ -130,9 +130,9 @@
                      [disabled]="isLocked"
                      [class.border-red-500]="duplicateNameWarning()"
                      [class.ring-red-200]="duplicateNameWarning()"
-                     class="w-48 px-3 py-1.5 text-sm border rounded-lg bg-input text-default focus:outline-none focus:ring-2 focus:ring-secondary-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                     class="w-full sm:w-48 px-3 py-1.5 text-sm border rounded-lg bg-input text-default text-center sm:text-left focus:outline-none focus:ring-2 focus:ring-secondary-500 disabled:opacity-50 disabled:cursor-not-allowed">
               @if (duplicateNameWarning()) {
-                <span class="text-xs text-red-500">{{ duplicateNameWarning() }}</span>
+                <span class="text-xs text-red-500 text-center">{{ duplicateNameWarning() }}</span>
               }
             </div>
           }
@@ -200,7 +200,7 @@
                   [selectedPlayer]="selectedPlayer">
                 </app-probability-heatmap>
               } @else {
-                <div class="flex items-center justify-center h-64 text-muted">
+                <div class="flex items-center justify-center h-64 text-muted text-center px-4">
                   <p>Odds will appear once the board numbers are randomized.</p>
                 </div>
               }
