@@ -190,14 +190,20 @@
                 (squareClick)="onSquareClick($event)">
               </app-game-board>
             } @else if (activeTab === 'probabilities') {
-              <app-probability-heatmap
-                [homeNumbers]="homeNumbers"
-                [awayNumbers]="awayNumbers"
-                [homeTeam]="homeTeam"
-                [awayTeam]="awayTeam"
-                [selectedSquares]="selectedSquares"
-                [selectedPlayer]="selectedPlayer">
-              </app-probability-heatmap>
+              @if (isRandomized) {
+                <app-probability-heatmap
+                  [homeNumbers]="homeNumbers"
+                  [awayNumbers]="awayNumbers"
+                  [homeTeam]="homeTeam"
+                  [awayTeam]="awayTeam"
+                  [selectedSquares]="selectedSquares"
+                  [selectedPlayer]="selectedPlayer">
+                </app-probability-heatmap>
+              } @else {
+                <div class="flex items-center justify-center h-64 text-muted">
+                  <p>Odds will appear once the board numbers are randomized.</p>
+                </div>
+              }
             } @else {
               <app-box-score
                 [game]="linkedEspnGame()"
@@ -212,7 +218,7 @@
             <div class="flex flex-col justify-between h-full rounded-lg">
                 <!-- Header with toggle button -->
                 <div class="w-full">
-                    <div class="flex items-center justify-between p-4">
+                    <div class="flex items-center justify-between px-4 pt-4 pb-[0.5rem]">
                         <span class="text-lg font-bold text-heading">Players</span>
                         <button
                             (click)="isPlayersListVisible = !isPlayersListVisible"
