@@ -149,7 +149,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   }
   duplicateNameWarning = signal<string | null>(null);
   isRandomized: boolean = false;
-  isRandomizing: boolean = false;
   isLocked: boolean = false;
   isPlayersListVisible: boolean = true;
   showAlert: boolean = false;
@@ -651,7 +650,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
   async randomizeNumbers(): Promise<void> {
     if (this.isRandomized) {
-      this.isRandomizing = false;
       this.homeNumbers = Array(10).fill(null);
       this.awayNumbers = Array(10).fill(null);
       this.isRandomized = false;
@@ -664,19 +662,13 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.isRandomizing = true;
-
     const numbers = Array.from({length: 10}, (_, i) => i);
     const homeNumbers = [...numbers].sort(() => Math.random() - 0.5);
     const awayNumbers = [...numbers].sort(() => Math.random() - 0.5);
 
     this.homeNumbers = homeNumbers;
     this.awayNumbers = awayNumbers;
-
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
     this.isRandomized = true;
-    this.isRandomizing = false;
 
     await this.gameService.updateGame(this.gameId, {
       homeNumbers: this.homeNumbers,

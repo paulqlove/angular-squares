@@ -1,11 +1,9 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AnimatedNumberComponent } from '../animated-number/animated-number.component';
-
 @Component({
   selector: 'app-game-board',
   standalone: true,
-  imports: [CommonModule, AnimatedNumberComponent],
+  imports: [CommonModule],
   templateUrl: './game-board.component.html',
   styleUrls: ['./game-board.component.scss']
 })
@@ -18,14 +16,9 @@ export class GameBoardComponent {
   @Input() playerColors!: { [key: string]: string };
   @Input() selectedPlayer: string | null = null;
   @Input() highlightedSquare: string | null = null;
-
-  isAnimating = false;
+  @Input() isRandomized: boolean = false;
 
   @Output() squareClick = new EventEmitter<{ row: number; col: number }>();
-
-  @Input() set isRandomizing(value: boolean) {
-    this.isAnimating = value;
-  }
 
   getSquareClass(row: number, col: number): string {
     const key = `${row}-${col}`;

@@ -1,23 +1,27 @@
 <div class="relative overflow-hidden">
-  <div class="pt-8 pl-8" role="grid" aria-label="Football squares game board">
+  <div [ngClass]="isRandomized ? 'pt-8 pl-8' : ''" role="grid" aria-label="Football squares game board">
     <!-- Top row with home numbers -->
-    <div class="grid grid-cols-[1rem_repeat(10,minmax(0,1fr))] gap-0" role="row">
-      <div class="number-cell empty-cell" role="columnheader"></div>
-      <div *ngFor="let num of homeNumbers; let i = index"
-           class="number-cell"
-           role="columnheader">
-        <app-animated-number [number]="num" [animate]="isAnimating"></app-animated-number>
+    @if (isRandomized) {
+      <div class="grid grid-cols-[1rem_repeat(10,minmax(0,1fr))] gap-0" role="row">
+        <div class="number-cell empty-cell" role="columnheader"></div>
+        <div *ngFor="let num of homeNumbers; let i = index"
+             class="number-cell"
+             role="columnheader">
+          {{ num }}
+        </div>
       </div>
-    </div>
+    }
 
     <!-- Grid rows -->
     <div *ngFor="let awayNum of awayNumbers; let row = index"
-         class="grid grid-cols-[1rem_repeat(10,minmax(0,1fr))] gap-0"
+         [ngClass]="isRandomized ? 'grid grid-cols-[1rem_repeat(10,minmax(0,1fr))] gap-0' : 'grid grid-cols-[repeat(10,minmax(0,1fr))] gap-0'"
          role="row">
       <!-- Left side away numbers -->
-      <div class="number-cell pr-4 label-width" role="rowheader">
-        <app-animated-number [number]="awayNum" [animate]="isAnimating"></app-animated-number>
-      </div>
+      @if (isRandomized) {
+        <div class="number-cell pr-4 label-width" role="rowheader">
+          {{ awayNum }}
+        </div>
+      }
 
       <!-- Square cells -->
       <div *ngFor="let homeNum of homeNumbers; let col = index"
@@ -32,13 +36,15 @@
     </div>
 
     <!-- Team Labels -->
-    <div class="absolute top-8 left-0 h-full flex items-center" aria-hidden="true">
-      <div class="transform -rotate-90 origin-top-left whitespace-nowrap font-extralight text-lg text-heading capitalize">
-        {{ awayTeam }}
+    @if (isRandomized) {
+      <div class="absolute top-8 left-0 h-full flex items-center" aria-hidden="true">
+        <div class="transform -rotate-90 origin-top-left whitespace-nowrap font-extralight text-lg text-heading capitalize">
+          {{ awayTeam }}
+        </div>
       </div>
-    </div>
-    <div class="absolute top-0 left-8 w-full text-center font-extralight text-lg text-heading capitalize" aria-hidden="true">
-      {{ homeTeam }}
-    </div>
+      <div class="absolute top-0 left-8 w-full text-center font-extralight text-lg text-heading capitalize" aria-hidden="true">
+        {{ homeTeam }}
+      </div>
+    }
   </div>
 </div>
