@@ -66,6 +66,8 @@ export interface GameListItem {
   espnEventId?: string;
   espnSport?: SportType;
   venmoUsername?: string;
+  collected: number;
+  totalPot: number;
 }
 
 @Injectable({
@@ -381,6 +383,15 @@ export class GameService {
       const game = await this.getGame(gameId);
       if (game) {
         const playerNames = new Set(Object.values(game.selectedSquares));
+        const squaresFilled = Object.keys(game.selectedSquares).length;
+        const paidSet = new Set(game.paidPlayers || []);
+        const squaresPerPlayer: Record<string, number> = {};
+        for (const player of Object.values(game.selectedSquares)) {
+          squaresPerPlayer[player] = (squaresPerPlayer[player] || 0) + 1;
+        }
+        const collected = Object.entries(squaresPerPlayer)
+          .filter(([player]) => paidSet.has(player))
+          .reduce((sum, [, count]) => sum + count * game.pricePerSquare, 0);
         games.push({
           id: gameId,
           name: game.name,
@@ -389,7 +400,7 @@ export class GameService {
           awayTeam: game.awayTeam,
           createdAt: game.createdAt,
           playerCount: playerNames.size,
-          squaresFilled: Object.keys(game.selectedSquares).length,
+          squaresFilled,
           isLocked: game.isLocked,
           pricePerSquare: game.pricePerSquare,
           managerId: game.managerId,
@@ -397,7 +408,9 @@ export class GameService {
           managerName: game.managerName,
           espnEventId: game.espnEventId,
           espnSport: game.espnSport,
-          venmoUsername: game.venmoUsername
+          venmoUsername: game.venmoUsername,
+          collected,
+          totalPot: squaresFilled * game.pricePerSquare
         });
       }
     }
@@ -469,6 +482,15 @@ export class GameService {
       const game = await this.getGame(gameId);
       if (game) {
         const playerNames = new Set(Object.values(game.selectedSquares));
+        const squaresFilled = Object.keys(game.selectedSquares).length;
+        const paidSet = new Set(game.paidPlayers || []);
+        const squaresPerPlayer: Record<string, number> = {};
+        for (const player of Object.values(game.selectedSquares)) {
+          squaresPerPlayer[player] = (squaresPerPlayer[player] || 0) + 1;
+        }
+        const collected = Object.entries(squaresPerPlayer)
+          .filter(([player]) => paidSet.has(player))
+          .reduce((sum, [, count]) => sum + count * game.pricePerSquare, 0);
         games.push({
           id: gameId,
           name: game.name,
@@ -477,7 +499,7 @@ export class GameService {
           awayTeam: game.awayTeam,
           createdAt: game.createdAt,
           playerCount: playerNames.size,
-          squaresFilled: Object.keys(game.selectedSquares).length,
+          squaresFilled,
           isLocked: game.isLocked,
           pricePerSquare: game.pricePerSquare,
           managerId: game.managerId,
@@ -485,7 +507,9 @@ export class GameService {
           managerName: game.managerName,
           espnEventId: game.espnEventId,
           espnSport: game.espnSport,
-          venmoUsername: game.venmoUsername
+          venmoUsername: game.venmoUsername,
+          collected,
+          totalPot: squaresFilled * game.pricePerSquare
         });
       }
     }

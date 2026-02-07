@@ -323,7 +323,7 @@ import {
                   <!-- Game Content -->
                   <div class="p-4">
                     <!-- Progress Bar -->
-                    <div class="mb-4">
+                    <div class="mb-3">
                       <div class="flex justify-between text-sm mb-1">
                         <span class="text-muted">Squares Filled</span>
                         <span class="font-semibold text-default">{{ game.squaresFilled }}/100</span>
@@ -332,6 +332,19 @@ import {
                         <div
                           class="h-full bg-gradient-to-r from-secondary-400 to-secondary-500 rounded-full transition-all duration-500"
                           [style.width.%]="game.squaresFilled"
+                        ></div>
+                      </div>
+                    </div>
+
+                    <div class="mb-4">
+                      <div class="flex justify-between text-sm mb-1">
+                        <span class="text-muted">Collected</span>
+                        <span class="font-semibold text-default">\${{ game.collected }} / \${{ game.totalPot }}</span>
+                      </div>
+                      <div class="h-2 bg-control rounded-full overflow-hidden">
+                        <div
+                          class="h-full bg-green-500 rounded-full transition-all duration-500"
+                          [style.width.%]="game.totalPot > 0 ? (game.collected / game.totalPot) * 100 : 0"
                         ></div>
                       </div>
                     </div>
@@ -428,7 +441,7 @@ import {
                 <!-- Game Content -->
                 <div class="p-4">
                   <!-- Progress Bar -->
-                  <div class="mb-4">
+                  <div class="mb-3">
                     <div class="flex justify-between text-sm mb-1">
                       <span class="text-muted">Squares Filled</span>
                       <span class="font-semibold text-default">{{ game.squaresFilled }}/100</span>
@@ -437,6 +450,19 @@ import {
                       <div
                         class="h-full bg-gradient-to-r from-secondary-400 to-secondary-500 rounded-full transition-all duration-500"
                         [style.width.%]="game.squaresFilled"
+                      ></div>
+                    </div>
+                  </div>
+
+                  <div class="mb-4">
+                    <div class="flex justify-between text-sm mb-1">
+                      <span class="text-muted">Collected</span>
+                      <span class="font-semibold text-default">\${{ game.collected }} / \${{ game.totalPot }}</span>
+                    </div>
+                    <div class="h-2 bg-control rounded-full overflow-hidden">
+                      <div
+                        class="h-full bg-green-500 rounded-full transition-all duration-500"
+                        [style.width.%]="game.totalPot > 0 ? (game.collected / game.totalPot) * 100 : 0"
                       ></div>
                     </div>
                   </div>
