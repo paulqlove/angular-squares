@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
+import { Component, signal, inject, OnInit, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -203,6 +203,7 @@ export class WelcomeComponent implements OnInit {
   private authService = inject(AuthService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private ngZone = inject(NgZone);
 
   isAuthenticated = this.authService.isAuthenticated;
 
@@ -270,10 +271,7 @@ export class WelcomeComponent implements OnInit {
   private navigateAfterAuth(): void {
     const joinCode = this.gameCode || this.pendingJoinCode
       || this.route.snapshot.queryParamMap.get('join');
-    if (joinCode) {
-      this.router.navigate(['/game', joinCode.toUpperCase()], { replaceUrl: true });
-    } else {
-      this.router.navigate(['/dashboard'], { replaceUrl: true });
-    }
+    const url = joinCode ? `/game/${joinCode.toUpperCase()}` : '/dashboard';
+    this.ngZone.run(() => this.router.navigateByUrl(url));
   }
 }
