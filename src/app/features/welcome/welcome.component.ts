@@ -70,7 +70,7 @@ interface Feature {
         <!-- Hero card floating on green -->
         <section class="container mx-auto px-4 py-8 md:py-12">
           <div class="bg-page rounded-3xl p-8 md:p-12 lg:p-16 shadow-2xl">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center lg:items-stretch">
               <!-- Left: Copy -->
               <div>
                 <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-heading leading-[1.1] tracking-tight">
@@ -116,7 +116,7 @@ interface Feature {
               </div>
 
               <!-- Right: Bento grid with ripple -->
-              <div class="relative h-[350px] md:h-[420px] lg:h-[-webkit-fill-available] rounded-2xl overflow-hidden">
+              <div class="relative h-[350px] md:h-[420px] lg:h-full rounded-2xl overflow-hidden">
                 <app-ripple-grid
                   class="absolute inset-0"
                   backgroundColor="#10b981"
