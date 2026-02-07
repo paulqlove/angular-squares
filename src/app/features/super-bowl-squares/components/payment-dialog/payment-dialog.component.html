@@ -18,7 +18,7 @@
               </div>
               <span>{{ player.name }}</span>
               <span class="text-sm text-gray-500">
-                ({{ player.squares }} squares - ${{ player.total }})
+                ({{ player.squares }} {{ player.squares === 1 ? 'square' : 'squares' }} - ${{ player.total }})
               </span>
             </div>
             <button (click)="togglePaidStatus(player.name)"
