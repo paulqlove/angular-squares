@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit, NgZone } from '@angular/core';
+import { Component, signal, inject, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -203,9 +203,18 @@ export class WelcomeComponent implements OnInit {
   private authService = inject(AuthService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private ngZone = inject(NgZone);
 
   isAuthenticated = this.authService.isAuthenticated;
+
+  constructor() {
+    effect(() => {
+      if (this.authService.isAuthenticated()) {
+        const joinCode = this.gameCode || this.pendingJoinCode;
+        const url = joinCode ? `/game/${joinCode.toUpperCase()}` : '/dashboard';
+        this.router.navigateByUrl(url);
+      }
+    });
+  }
 
   ngOnInit(): void {
     const joinCode = this.route.snapshot.queryParamMap.get('join');
@@ -253,7 +262,6 @@ export class WelcomeComponent implements OnInit {
 
   onAuthenticated(): void {
     this.showAuthModal.set(false);
-    this.navigateAfterAuth();
   }
 
   goToDashboard(): void {
@@ -267,11 +275,4 @@ export class WelcomeComponent implements OnInit {
   }
 
   private pendingJoinCode = '';
-
-  private navigateAfterAuth(): void {
-    const joinCode = this.gameCode || this.pendingJoinCode
-      || this.route.snapshot.queryParamMap.get('join');
-    const url = joinCode ? `/game/${joinCode.toUpperCase()}` : '/dashboard';
-    this.ngZone.run(() => this.router.navigateByUrl(url));
-  }
 }
