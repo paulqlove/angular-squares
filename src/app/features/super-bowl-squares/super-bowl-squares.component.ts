@@ -308,6 +308,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           this.venmoUsername = data.venmoUsername || '';
           this.paidPlayers = new Set(data.paidPlayers || []);
           this.playerColors = data.playerColors || {};
+          this.winners = data.winners || {};
           this.playerUserIds = data.playerUserIds || {};
           this.espnEventId = data.espnEventId;
           this.espnSport = data.espnSport || 'nfl';
