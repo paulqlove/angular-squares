@@ -110,8 +110,8 @@ users/{userId}/games/{gameId}/
 Game owners can link their game to an ESPN NFL game for live score syncing.
 
 - **API**: `https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard` (public, no auth)
-- **Flow**: Owner expands "ESPN Live Scores" → selects game from dropdown → clicks "Link" → clicks "Sync Scores"
-- **Scoreboard UI**: Dark compact table showing quarter-by-quarter scores with live status indicator
+- **Linking**: Owner links an ESPN game from the **dashboard** (game create/edit form)
+- **Box Score tab**: Game page displays live scores on the **Box Score** tab with quarter-by-quarter scores and status indicator
 - **Pro Bowl handling**: Maps 3 periods to Q1-Q3, uses final score for Q4
 
 ## Documentation

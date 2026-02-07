@@ -338,13 +338,21 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
             }
           }
 
-          if (Object.values(this.scores).some(score => score.home > 0 || score.away > 0)) {
+          // Calculate winners — skip for ESPN-linked games (syncFromEspn handles period-aware winners)
+          if (!this.espnEventId && Object.values(this.scores).some(score => score.home > 0 || score.away > 0)) {
             this.calculateWinners();
           }
 
           // Fetch linked ESPN game data for all users (for box score display)
-          if (this.espnEventId && !this.linkedEspnGame()) {
+          if (this.espnEventId && this.espnEventId !== this.linkedEspnGame()?.id) {
             this.fetchLinkedEspnGame();
+            this.syncFromEspn();
+          } else if (this.espnEventId && this.linkedEspnGame()) {
+            // ESPN game already loaded — re-sync to get period-aware winners
+            this.syncFromEspn();
+          } else if (!this.espnEventId && this.linkedEspnGame()) {
+            this.linkedEspnGame.set(null);
+            this.stopPolling();
           }
 
           // Trigger walkthrough on first load (only if already authenticated)
@@ -597,6 +605,37 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       const winner = getWinner(score.home, score.away);
       if (winner) {
         newWinners[quarter] = winner;
+      }
+    });
+
+    this.winners = newWinners;
+    this.gameService.updateGame(this.gameId, { winners: newWinners });
+  }
+
+  private calculateWinnersFromEspn(currentPeriod: number, completed: boolean): void {
+    const newWinners: { [key: string]: string } = {};
+    const quarterKeys = ['q1', 'q2', 'q3', 'q4'];
+
+    const getWinner = (homeScore: number, awayScore: number): string | null => {
+      const homeLastDigit = homeScore % 10;
+      const awayLastDigit = awayScore % 10;
+      const winningSquare = Object.entries(this.selectedSquares).find(([key]) => {
+        const [row, col] = key.split('-').map(Number);
+        return this.awayNumbers[row] === awayLastDigit &&
+               this.homeNumbers[col] === homeLastDigit;
+      });
+      return winningSquare ? winningSquare[1] : null;
+    };
+
+    quarterKeys.forEach((quarter, index) => {
+      // Q4 (index 3) requires game completed; Q1-Q3 require period past that quarter
+      const isComplete = index === 3 ? completed : currentPeriod > index + 1;
+      if (isComplete) {
+        const score = this.scores[quarter as keyof typeof this.scores];
+        const winner = getWinner(score.home, score.away);
+        if (winner) {
+          newWinners[quarter] = winner;
+        }
       }
     });
 
@@ -873,7 +912,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
       this.scores = newScores;
       await this.gameService.updateGame(this.gameId, { scores: newScores });
-      this.calculateWinners();
+      this.calculateWinnersFromEspn(game.period, game.completed);
 
       // Stop polling if game has ended
       if (game.status === 'post') {

@@ -13,6 +13,7 @@ export interface EspnGame {
   period: number;
   clock: string;
   status: 'pre' | 'in' | 'post';
+  completed: boolean;
   quarters: { home: number; away: number }[];
   date: string; // ISO date string
 }
@@ -137,6 +138,7 @@ export class EspnService {
         period: status?.period || 0,
         clock: status?.displayClock || '',
         status: gameStatus,
+        completed: !!status?.type?.completed,
         quarters,
         date: event.date || ''
       };
