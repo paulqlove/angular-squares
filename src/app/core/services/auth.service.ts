@@ -4,8 +4,6 @@ import {
   getAuth,
   signInWithPopup,
   GoogleAuthProvider,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   signInAnonymously,
   signOut,
   onAuthStateChanged,
@@ -198,74 +196,6 @@ export class AuthService {
       // Index email for manager lookup
       if (user.email) {
         this.indexUserEmail(user.email, user.uid);
-      }
-      return authUser;
-    } catch (error: any) {
-      this._authError.set(this.getErrorMessage(error.code));
-      throw error;
-    } finally {
-      this._isLoading.set(false);
-    }
-  }
-
-  // Email/Password Sign Up
-  async signUpWithEmail(email: string, password: string, displayName: string): Promise<AuthUser> {
-    this._isLoading.set(true);
-    this._authError.set(null);
-
-    try {
-      const result = await createUserWithEmailAndPassword(this.auth, email, password);
-
-      // Update display name
-      if (displayName) {
-        await updateProfile(result.user, { displayName });
-      }
-
-      const authUser: AuthUser = {
-        uid: result.user.uid,
-        email: result.user.email,
-        displayName: displayName || result.user.email,
-        photoURL: null,
-        isGuest: false
-      };
-
-      this._currentUser.set(authUser);
-      this.clearGuestCookie();
-      // Index email for manager lookup
-      if (email) {
-        this.indexUserEmail(email, result.user.uid);
-      }
-      return authUser;
-    } catch (error: any) {
-      this._authError.set(this.getErrorMessage(error.code));
-      throw error;
-    } finally {
-      this._isLoading.set(false);
-    }
-  }
-
-  // Email/Password Sign In
-  async signInWithEmail(email: string, password: string): Promise<AuthUser> {
-    this._isLoading.set(true);
-    this._authError.set(null);
-
-    try {
-      const result = await signInWithEmailAndPassword(this.auth, email, password);
-      const user = result.user;
-
-      const authUser: AuthUser = {
-        uid: user.uid,
-        email: user.email,
-        displayName: user.displayName || user.email,
-        photoURL: user.photoURL,
-        isGuest: false
-      };
-
-      this._currentUser.set(authUser);
-      this.clearGuestCookie();
-      // Index email for manager lookup
-      if (email) {
-        this.indexUserEmail(email, user.uid);
       }
       return authUser;
     } catch (error: any) {

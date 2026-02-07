@@ -412,6 +412,12 @@
     </div>
   }
 
+  <!-- Auth Modal (for unauthenticated square clicks) -->
+  <app-auth-modal
+    [isOpen]="showAuthModal()"
+    (authenticated)="onAuthModalAuthenticated()">
+  </app-auth-modal>
+
   <!-- Forced Name Change Modal (non-dismissable) -->
   @if (showForceNameChangeModal()) {
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">

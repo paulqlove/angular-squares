@@ -34,6 +34,7 @@ import { VenmoPopoverComponent } from './components/venmo-popover/venmo-popover.
 import { PaymentDialogComponent } from './components/payment-dialog/payment-dialog.component';
 import { ProbabilityHeatmapComponent } from './components/probability-heatmap/probability-heatmap.component';
 import { BoxScoreComponent } from './components/box-score/box-score.component';
+import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.component';
 
 @Component({
   selector: 'app-super-bowl-squares',
@@ -51,7 +52,8 @@ import { BoxScoreComponent } from './components/box-score/box-score.component';
     VenmoPopoverComponent,
     PaymentDialogComponent,
     ProbabilityHeatmapComponent,
-    BoxScoreComponent
+    BoxScoreComponent,
+    AuthModalComponent
   ],
   providers: [
     provideIcons({
@@ -202,6 +204,10 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     }
   ];
 
+  // Auth modal state for unauthenticated square clicks
+  showAuthModal = signal(false);
+  pendingSquare: { row: number; col: number } | null = null;
+
   constructor() {
     // Reactively update currentPlayer when auth state changes (e.g., Google sign-in after page load)
     effect(() => {
@@ -210,15 +216,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
         this._currentPlayer = user.displayName;
       } else if (user?.email && !this._currentPlayer) {
         this._currentPlayer = user.email;
-      }
-    });
-
-    // Redirect unauthenticated users to welcome page with game code
-    effect(() => {
-      const user = this.authService.currentUser();
-      const loading = this.authService.isLoading();
-      if (!loading && !user) {
-        this.router.navigate(['/'], { queryParams: { join: this.gameId } });
       }
     });
   }
@@ -472,6 +469,13 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   }
 
   async onSquareClick(event: { row: number; col: number }): Promise<void> {
+    // If not authenticated, show auth modal and remember which square was clicked
+    if (!this.authService.currentUser()) {
+      this.pendingSquare = event;
+      this.showAuthModal.set(true);
+      return;
+    }
+
     if (!this.currentPlayer) {
       this.showAlert = true;
       this.alertMessage = 'Please enter your name first';
@@ -492,11 +496,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
     if (this.isLocked) {
       return;
-    }
-
-    // Auto-sign-in: if no auth, sign in as guest (handles direct-URL visitors)
-    if (!this.authService.currentUser()) {
-      await this.authService.signInAsGuest(this.currentPlayer);
     }
 
     const key = `${event.row}-${event.col}`;
@@ -801,6 +800,28 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     } else {
       this.router.navigate(['/']);
     }
+  }
+
+  async onAuthModalAuthenticated(): Promise<void> {
+    this.showAuthModal.set(false);
+
+    // Set current player from the newly authenticated user
+    const user = this.authService.currentUser();
+    if (user?.displayName) {
+      this._currentPlayer = user.displayName;
+    } else if (user?.email) {
+      this._currentPlayer = user.email;
+    }
+
+    // Claim the pending square if there was one
+    if (this.pendingSquare) {
+      const square = this.pendingSquare;
+      this.pendingSquare = null;
+      await this.onSquareClick(square);
+    }
+
+    // Trigger walkthrough for first-time users
+    this.triggerWalkthroughIfNew();
   }
 
   // ESPN Sync Methods
