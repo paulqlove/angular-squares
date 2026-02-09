@@ -644,6 +644,32 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     this.gameService.updateGame(this.gameId, { winners: newWinners });
   }
 
+  get currentLeaderSquare(): string | null {
+    if (!this.isRandomized) return null;
+
+    // Need scores or a linked ESPN game to show the leader
+    const hasScores = Object.values(this.scores).some(s => s.home > 0 || s.away > 0);
+    if (!hasScores && !this.espnEventId) return null;
+
+    // Use the latest quarter with scores, or 0-0 for linked ESPN games pre-kickoff
+    const quarters = ['q4', 'q3', 'q2', 'q1'] as const;
+    let currentScore = { home: 0, away: 0 };
+    for (const q of quarters) {
+      const s = this.scores[q];
+      if (s.home > 0 || s.away > 0) {
+        currentScore = s;
+        break;
+      }
+    }
+
+    const homeDigit = currentScore.home % 10;
+    const awayDigit = currentScore.away % 10;
+    const row = this.awayNumbers.findIndex(n => n === awayDigit);
+    const col = this.homeNumbers.findIndex(n => n === homeDigit);
+    if (row === -1 || col === -1) return null;
+    return `${row}-${col}`;
+  }
+
   getQuarterScores(quarter: number): { home: number; away: number } {
     const key = `q${quarter}` as keyof typeof this.scores;
     return this.scores[key];

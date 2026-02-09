@@ -16,6 +16,7 @@ export class GameBoardComponent {
   @Input() playerColors!: { [key: string]: string };
   @Input() selectedPlayer: string | null = null;
   @Input() highlightedSquare: string | null = null;
+  @Input() currentLeaderSquare: string | null = null;
   @Input() isRandomized: boolean = false;
 
   @Output() squareClick = new EventEmitter<{ row: number; col: number }>();
@@ -36,7 +37,8 @@ export class GameBoardComponent {
       return `${baseColor} opacity-25`;
     }
 
-    return baseColor;
+    const leader = !this.highlightedSquare && key === this.currentLeaderSquare ? ' square-leader' : '';
+    return baseColor + leader;
   }
 
   getSquarePlayer(row: number, col: number): string {
