@@ -1,7 +1,8 @@
-import { Component, signal, inject, OnInit, effect } from '@angular/core';
+import { Component, ElementRef, signal, inject, OnInit, effect, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/services/auth.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
@@ -16,6 +17,7 @@ import {
 import { RippleGridComponent } from '../../components/ui/ripple-grid/ripple-grid.component';
 import { AppHeaderComponent } from '../../components/ui/app-header/app-header.component';
 import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.component';
+import { SampleBoardComponent } from './sample-board.component';
 
 interface Feature {
   icon: string;
@@ -26,7 +28,7 @@ interface Feature {
 @Component({
   selector: 'app-welcome',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgIconComponent, RippleGridComponent, AppHeaderComponent, AuthModalComponent],
+  imports: [CommonModule, FormsModule, RouterLink, NgIconComponent, RippleGridComponent, AppHeaderComponent, AuthModalComponent, SampleBoardComponent],
   providers: [
     provideIcons({
       heroSquares2x2,
@@ -83,45 +85,65 @@ interface Feature {
                   Perfect for Super Bowl parties, office pools, and game day fun.
                 </p>
 
-                <div class="flex flex-wrap items-center gap-4 mt-10">
+                <div class="mt-8 flex flex-col gap-3">
                   <button
+                    type="button"
                     (click)="showAuthModal.set(true)"
-                    class="px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg rounded-lg transition-colors"
+                    class="w-full self-stretch px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg rounded-lg transition-colors sm:w-auto sm:self-start"
                   >
-                    Create Your Free Game
+                    Create game
                   </button>
-                </div>
 
-                <!-- Game Code -->
-                <div class="mt-10">
-                  <p class="text-sm text-muted mb-2">Have a game code?</p>
-                  <div class="flex items-center gap-2 sm:max-w-xs w-full">
-                    <input
-                      type="text"
-                      [(ngModel)]="gameCode"
-                      placeholder="Enter code"
-                      class="flex-1 px-4 py-2.5 border-2 border-default rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none uppercase tracking-widest text-center font-mono bg-input text-default"
-                      maxlength="6"
-                      (keyup.enter)="joinGame()"
-                    />
-                    <button
-                      (click)="joinGame()"
-                      [disabled]="gameCode.length !== 6"
-                      class="p-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors disabled:opacity-40"
+                  <div class="grid w-full grid-cols-2 gap-3 sm:flex sm:w-auto sm:self-start">
+                    <a
+                      [routerLink]="['/game', demoGameId]"
+                      class="inline-flex items-center justify-center rounded-lg border-2 border-default bg-card px-4 py-2.5 text-sm font-semibold text-heading hover:bg-card-hover transition-colors"
                     >
-                      <ng-icon name="heroArrowRight" class="text-xl"></ng-icon>
+                      See demo
+                    </a>
+                    <button
+                      type="button"
+                      (click)="openJoinCode()"
+                      [attr.aria-expanded]="showJoinCode()"
+                      aria-controls="join-code-panel"
+                      class="inline-flex items-center justify-center rounded-lg border-2 border-default bg-card px-4 py-2.5 text-sm font-semibold text-heading hover:bg-card-hover transition-colors"
+                    >
+                      Join with code
                     </button>
                   </div>
+
+                  @if (showJoinCode()) {
+                    <div id="join-code-panel" class="flex items-center gap-2 sm:max-w-xs w-full">
+                      <label for="join-code" class="sr-only">Game code</label>
+                      <input
+                        #joinInput
+                        id="join-code"
+                        type="text"
+                        [(ngModel)]="gameCode"
+                        placeholder="Enter code"
+                        class="flex-1 px-4 py-2.5 border-2 border-default rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none uppercase tracking-widest text-center font-mono bg-input text-default"
+                        maxlength="6"
+                        (keyup.enter)="joinGame()"
+                      />
+                      <button
+                        type="button"
+                        (click)="joinGame()"
+                        [disabled]="gameCode.length !== 6"
+                        aria-label="Join game"
+                        class="p-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors disabled:opacity-40"
+                      >
+                        <ng-icon name="heroArrowRight" class="text-xl"></ng-icon>
+                      </button>
+                    </div>
+                  }
+
+                  <p class="text-sm text-muted">Free, no account required to play</p>
                 </div>
               </div>
 
-              <!-- Right: Bento grid with ripple -->
-              <div class="relative h-[350px] md:h-[420px] lg:h-full rounded-2xl overflow-hidden">
-                <app-ripple-grid
-                  class="absolute inset-0"
-                  backgroundColor="#10b981"
-                  lineColor="rgba(0,0,0,0.15)">
-                </app-ripple-grid>
+              <!-- Right: sample board (replaces the empty green grid) -->
+              <div class="lg:flex lg:items-center">
+                <app-sample-board></app-sample-board>
               </div>
             </div>
           </div>
@@ -221,11 +243,16 @@ export class WelcomeComponent implements OnInit {
     if (joinCode) {
       this.pendingJoinCode = joinCode.toUpperCase();
       this.gameCode = this.pendingJoinCode;
+      this.showJoinCode.set(true);
     }
   }
 
+  @ViewChild('joinInput') private joinInput?: ElementRef<HTMLInputElement>;
+
   gameCode = '';
+  demoGameId = environment.demoGameId;
   showAuthModal = signal(false);
+  showJoinCode = signal(false);
 
   features: Feature[] = [
     {
@@ -272,6 +299,11 @@ export class WelcomeComponent implements OnInit {
     if (this.gameCode.length === 6) {
       this.router.navigate(['/game', this.gameCode.toUpperCase()]);
     }
+  }
+
+  openJoinCode(): void {
+    this.showJoinCode.set(true);
+    setTimeout(() => this.joinInput?.nativeElement.focus());
   }
 
   private pendingJoinCode = '';
