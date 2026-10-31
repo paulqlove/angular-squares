@@ -106,7 +106,7 @@ module.exports = {
         'focus': colors.warm.DEFAULT,
       },
       fontFamily: {
-        sans: ['Roboto', 'sans-serif'],
+        sans: ['Roboto', 'system-ui', 'sans-serif'],
       },
     },
   },
