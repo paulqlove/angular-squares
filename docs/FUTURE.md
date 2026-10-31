@@ -131,3 +131,7 @@ Open:
 2. Which Tuesday or Wednesday.
 3. Who can edit Cloudflare DNS for quarterscore.com.
 4. Decided: known routes only, plus a real `404.html`.
+
+## Later
+
+- AFL Grand Final squares test (Aug 2027): SEO landing page + notify-me + manual-score board; build out only if ~50 signups or ~500 AU visits. Rugby: revisit only for RWC 2027. Source: [Skeptic verdict](https://docs.google.com/document/d/1u1VswkSSvcydYiqWZ70jGgt5cVI1L90T6oUVUL04Hxs/edit)
