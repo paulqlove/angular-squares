@@ -49,7 +49,7 @@ interface Feature {
 
       <div class="relative z-10">
         <!-- Header (sits on green) -->
-        <app-shared-header variant="transparent">
+        <app-shared-header variant="transparent" heading="p">
           @if (isAuthenticated()) {
             <button
               (click)="goToDashboard()"
@@ -59,8 +59,9 @@ interface Feature {
             </button>
           } @else {
             <button
+              type="button"
               (click)="showAuthModal.set(true)"
-              class="px-5 py-2 bg-white text-emerald-700 text-sm font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+              class="inline-flex min-h-11 items-center justify-center px-5 py-2 bg-white text-emerald-700 text-sm font-semibold rounded-lg hover:bg-gray-100 transition-colors"
             >
               Sign in
             </button>
@@ -105,11 +106,13 @@ interface Feature {
                       (keyup.enter)="joinGame()"
                     />
                     <button
+                      type="button"
                       (click)="joinGame()"
                       [disabled]="gameCode.length !== 6"
-                      class="p-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors disabled:opacity-40"
+                      aria-label="Join game"
+                      class="inline-flex min-h-11 min-w-11 items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors disabled:opacity-40"
                     >
-                      <ng-icon name="heroArrowRight" class="text-xl"></ng-icon>
+                      <ng-icon name="heroArrowRight" class="text-xl" aria-hidden="true"></ng-icon>
                     </button>
                   </div>
                 </div>
@@ -130,9 +133,9 @@ interface Feature {
         <!-- Features Section -->
         <section class="bg-page py-16 md:py-24">
           <div class="container mx-auto px-4">
-            <h3 class="text-3xl font-bold text-center text-heading mb-12">
+            <h2 class="text-3xl font-bold text-center text-heading mb-12">
               Everything You Need for Game Day
-            </h3>
+            </h2>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
               @for (feature of features; track feature.title) {
@@ -140,7 +143,7 @@ interface Feature {
                   <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center mb-4">
                     <ng-icon [name]="feature.icon" class="text-2xl text-emerald-600"></ng-icon>
                   </div>
-                  <h4 class="text-lg font-semibold text-heading mb-2">{{ feature.title }}</h4>
+                  <h3 class="text-lg font-semibold text-heading mb-2">{{ feature.title }}</h3>
                   <p class="text-muted">{{ feature.description }}</p>
                 </div>
               }
@@ -151,16 +154,16 @@ interface Feature {
         <!-- How It Works -->
         <section class="bg-card py-16 md:py-24">
           <div class="container mx-auto px-4">
-            <h3 class="text-3xl font-bold text-center text-heading mb-12">
+            <h2 class="text-3xl font-bold text-center text-heading mb-12">
               How It Works
-            </h3>
+            </h2>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
               <div class="text-center">
                 <div class="w-16 h-16 bg-emerald-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
                   1
                 </div>
-                <h4 class="text-lg font-semibold text-heading mb-2">Create a Game</h4>
+                <h3 class="text-lg font-semibold text-heading mb-2">Create a Game</h3>
                 <p class="text-muted">Sign in and create a new game board with your custom settings</p>
               </div>
 
@@ -168,7 +171,7 @@ interface Feature {
                 <div class="w-16 h-16 bg-emerald-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
                   2
                 </div>
-                <h4 class="text-lg font-semibold text-heading mb-2">Share the Link</h4>
+                <h3 class="text-lg font-semibold text-heading mb-2">Share the Link</h3>
                 <p class="text-muted">Send the unique game code or link to your friends and family</p>
               </div>
 
@@ -176,7 +179,7 @@ interface Feature {
                 <div class="w-16 h-16 bg-emerald-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
                   3
                 </div>
-                <h4 class="text-lg font-semibold text-heading mb-2">Play & Win</h4>
+                <h3 class="text-lg font-semibold text-heading mb-2">Play & Win</h3>
                 <p class="text-muted">Claim your squares, watch the game, and see who wins each quarter</p>
               </div>
             </div>

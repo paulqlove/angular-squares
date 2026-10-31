@@ -11,7 +11,11 @@ import { Component, Input } from '@angular/core';
             <source srcset="assets/logo.webp" type="image/webp">
             <img src="assets/logo.png" alt="Quarter Score logo" width="114" height="120" [class]="logoClass">
           </picture>
-          <h1 [class]="titleClass">Quarter Score</h1>
+          @if (heading === 'h1') {
+            <h1 [class]="titleClass">Quarter Score</h1>
+          } @else {
+            <p [class]="titleClass">Quarter Score</p>
+          }
         </div>
         <div class="flex items-center gap-2">
           <ng-content></ng-content>
@@ -25,6 +29,8 @@ import { Component, Input } from '@angular/core';
 })
 export class AppHeaderComponent {
   @Input() variant: 'transparent' | 'solid' | 'fixed' = 'solid';
+  /** Welcome passes `p` so the page keeps a single h1. */
+  @Input() heading: 'h1' | 'p' = 'h1';
 
   get containerClass(): string {
     switch (this.variant) {
