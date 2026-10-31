@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, OnChanges, SimpleChanges, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
@@ -8,7 +8,7 @@ import { AuthService } from '../../../core/services/auth.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    @if (isOpen) {
+    @if (isOpen && !checkingAuth()) {
       <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
         <div class="w-full max-w-md bg-dialog shadow-2xl rounded-2xl p-8">
           <h2 class="text-2xl font-bold text-heading text-center mb-6">Join This Game</h2>
@@ -65,13 +65,32 @@ import { AuthService } from '../../../core/services/auth.service';
     }
   `
 })
-export class AuthModalComponent {
+export class AuthModalComponent implements OnChanges {
   @Input() isOpen = false;
   @Output() authenticated = new EventEmitter<void>();
 
   authService = inject(AuthService);
+  checkingAuth = signal(false);
 
   guestName = '';
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['isOpen']?.currentValue === true) {
+      void this.prepareAuth();
+    }
+  }
+
+  private async prepareAuth(): Promise<void> {
+    this.checkingAuth.set(true);
+    try {
+      await this.authService.ensureInitialized();
+      if (this.authService.isAuthenticated()) {
+        this.authenticated.emit();
+      }
+    } finally {
+      this.checkingAuth.set(false);
+    }
+  }
 
   async signInWithGoogle(): Promise<void> {
     try {

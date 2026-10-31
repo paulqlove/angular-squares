@@ -249,7 +249,16 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   private pollingInterval: ReturnType<typeof setInterval> | null = null;
 
   ngOnInit(): void {
-    // Set current player from auth if available (name or email)
+    void this.bindRoute();
+  }
+
+  private destroyed = false;
+
+  private async bindRoute(): Promise<void> {
+    // Firebase loads with the game route, not with the landing page.
+    await this.authService.ensureInitialized();
+    if (this.destroyed) return;
+
     const user = this.authService.currentUser();
     if (user?.displayName) {
       this._currentPlayer = user.displayName;
@@ -257,7 +266,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       this._currentPlayer = user.email;
     }
 
-    // Get game ID from route
     this.subscription.add(
       this.route.params.subscribe(params => {
         const gameId = params['gameId'];
@@ -367,6 +375,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.destroyed = true;
     this.subscription.unsubscribe();
     this.gameService.unsubscribe();
     this.stopPolling();
