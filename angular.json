@@ -40,6 +40,21 @@
                 "glob": "favicon*",
                 "input": "public",
                 "output": "/"
+              },
+              {
+                "glob": "404.html",
+                "input": "public",
+                "output": "/"
+              },
+              {
+                "glob": "robots.txt",
+                "input": "src",
+                "output": "/"
+              },
+              {
+                "glob": "sitemap.xml",
+                "input": "src",
+                "output": "/"
               }
             ],
             "styles": [

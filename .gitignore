@@ -48,3 +48,8 @@ Thumbs.db
 
 # Claude Code
 .claude/
+
+# Firebase emulator and CLI logs
+.firebase/
+firebase-debug.log
+*-debug.log
