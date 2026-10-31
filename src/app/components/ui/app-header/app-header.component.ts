@@ -7,7 +7,10 @@ import { Component, Input } from '@angular/core';
     <div [class]="containerClass">
       <div class="container mx-auto px-4 py-4 flex justify-between items-center">
         <div class="flex items-center gap-2">
-          <img src="assets/logo.png" alt="Logo" [class]="logoClass">
+          <picture>
+            <source srcset="assets/logo.webp" type="image/webp">
+            <img src="assets/logo.png" alt="Quarter Score logo" width="114" height="120" [class]="logoClass">
+          </picture>
           <h1 [class]="titleClass">Quarter Score</h1>
         </div>
         <div class="flex items-center gap-2">
