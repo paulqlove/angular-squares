@@ -35,6 +35,11 @@
                 "glob": "CNAME",
                 "input": "src",
                 "output": "/"
+              },
+              {
+                "glob": "favicon*",
+                "input": "public",
+                "output": "/"
               }
             ],
             "styles": [
