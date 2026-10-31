@@ -21,7 +21,7 @@
   --color-grid-line: #cbd5e1;         // slate-300 (grid lines)
 
   --color-text-default: #0f172a;      // slate-900
-  --color-text-muted: #64748b;        // slate-500
+  --color-text-muted: #475569;        // slate-600, 4.5:1 on page, card, and input
   --color-text-heading: #334155;      // slate-700
   --color-text-label: #334155;        // slate-700
   --color-text-header: #ffffff;
@@ -78,6 +78,14 @@
 @layer base {
   html {
     font-family: Roboto, system-ui, sans-serif;
+  }
+
+  // Placeholder text is content (WCAG 1.4.3). UA placeholders are often
+  // below 4.5:1, and Firefox also fades them with opacity.
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-text-muted);
+    opacity: 1;
   }
 }
 
