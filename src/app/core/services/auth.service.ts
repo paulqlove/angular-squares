@@ -1,21 +1,9 @@
 import { Injectable, signal, computed, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import {
-  getAuth,
-  signInWithPopup,
-  GoogleAuthProvider,
-  signInAnonymously,
-  signOut,
-  onAuthStateChanged,
-  User,
-  Auth,
-  updateProfile,
-  browserLocalPersistence,
-  setPersistence
-} from 'firebase/auth';
-import { initializeApp, getApps } from 'firebase/app';
-import { Database, getDatabase, ref, set, get } from 'firebase/database';
+import type { Auth } from 'firebase/auth';
+import type { Database } from 'firebase/database';
 import { environment } from '../../../environments/environment';
+import { loadFirebaseSdk } from './firebase-sdk';
 import { SanitizationService } from './sanitization.service';
 
 export interface AuthUser {
@@ -42,11 +30,11 @@ export class AuthService {
   // Lazy init required for SSR hydration - see CLAUDE.md "SSR Hydration Pattern"
   private _auth: Auth | null = null;
   private _db: Database | null = null;
-  private _authInitialized = false;
-  private _authReadyPromise: Promise<void> | null = null;
-  private _authReadyResolve: (() => void) | null = null;
+  private sdk: Awaited<ReturnType<typeof loadFirebaseSdk>> | null = null;
+  private initPromise: Promise<void> | null = null;
   private _currentUser = signal<AuthUser | null>(null);
-  private _isLoading = signal<boolean>(true);
+  // Start idle so `/` can render without waiting on Firebase.
+  private _isLoading = signal<boolean>(false);
   private _authError = signal<string | null>(null);
 
   // Public signals
@@ -67,55 +55,60 @@ export class AuthService {
   }
 
   private get auth(): Auth {
-    if (!this._auth && this.isBrowser) {
-      if (getApps().length === 0) {
-        initializeApp(environment.firebase);
-      }
-      this._auth = getAuth();
-      // Set persistence to local storage so auth survives page refresh
-      setPersistence(this._auth, browserLocalPersistence);
-    }
     if (!this._auth) {
-      throw new Error('[AuthService] Auth not available - not in browser context');
+      throw new Error('[AuthService] Auth not available - call ensureInitialized() first');
     }
     return this._auth;
   }
 
   private get db(): Database {
-    if (!this._db && this.isBrowser) {
-      let app;
-      if (getApps().length === 0) {
-        app = initializeApp(environment.firebase);
-      } else {
-        app = getApps()[0];
-      }
-      this._db = getDatabase(app, environment.firebase.databaseURL);
-    }
     if (!this._db) {
-      throw new Error('[AuthService] Database not available - not in browser context');
+      throw new Error('[AuthService] Database not available - call ensureInitialized() first');
     }
     return this._db;
   }
 
-  constructor() {
-    if (this.isBrowser) {
-      this._authReadyPromise = new Promise((resolve) => {
-        this._authReadyResolve = resolve;
-      });
-      this.initializeAuthState();
-    } else {
-      // Keep isLoading true during SSR so server renders the loading spinner
-      // This prevents flash of welcome page before client hydration
-      this._authReadyPromise = Promise.resolve();
+  /**
+   * Load Firebase and resolve the current user. Not called from the landing
+   * route, so visiting `/` does not download the Firebase vendor chunk.
+   */
+  ensureInitialized(): Promise<void> {
+    if (!this.isBrowser) {
+      return Promise.resolve();
     }
+    if (!this.initPromise) {
+      this.initPromise = this.initializeAuthState().catch((error) => {
+        this.initPromise = null;
+        this._isLoading.set(false);
+        throw error;
+      });
+    }
+    return this.initPromise;
   }
 
   // Wait for auth state to be determined (for route guards)
   waitForAuthReady(): Promise<void> {
-    return this._authReadyPromise || Promise.resolve();
+    return this.ensureInitialized();
   }
 
-  private initializeAuthState(): void {
+  /** Guest cookie only. Does not load Firebase. */
+  hasGuestCookie(): boolean {
+    return this.getGuestFromCookie() !== null;
+  }
+
+  private async initializeAuthState(): Promise<void> {
+    const sdk = await loadFirebaseSdk();
+    this.sdk = sdk;
+    const { app, auth, database } = sdk;
+    if (app.getApps().length === 0) {
+      app.initializeApp(environment.firebase);
+    }
+    const firebaseApp = app.getApps()[0];
+    this._auth = auth.getAuth();
+    // Local persistence so auth survives a refresh. Fire-and-forget, as before.
+    void auth.setPersistence(this._auth, auth.browserLocalPersistence);
+    this._db = database.getDatabase(firebaseApp, environment.firebase.databaseURL);
+
     // Check for guest user in cookie first (show name immediately while Firebase loads)
     const guestUser = this.getGuestFromCookie();
     if (guestUser) {
@@ -128,59 +121,65 @@ export class AuthService {
       });
     }
 
-    // Listen for Firebase auth state changes
-    onAuthStateChanged(this.auth, async (user) => {
-      this._isLoading.set(false);
-      const guest = this.getGuestFromCookie();
+    await new Promise<void>((resolve) => {
+      let settled = false;
+      const finish = () => {
+        if (settled) return;
+        settled = true;
+        resolve();
+      };
 
-      if (user && user.isAnonymous && guest) {
-        // Anonymous Firebase user + guest cookie = guest with Firebase auth
-        this._currentUser.set({
-          uid: user.uid,
-          email: null,
-          displayName: guest.name,
-          photoURL: null,
-          isGuest: true
-        });
-      } else if (user && !user.isAnonymous) {
-        // Real Firebase user takes precedence
-        this._currentUser.set({
-          uid: user.uid,
-          email: user.email,
-          displayName: user.displayName,
-          photoURL: user.photoURL,
-          isGuest: false
-        });
-        this.clearGuestCookie();
-      } else if (!user && guest) {
-        // Returning guest with cookie but no Firebase auth — sign in anonymously
-        try {
-          await signInAnonymously(this.auth);
-          // onAuthStateChanged will fire again with the anonymous user
-          return;
-        } catch {
-          // Fall back to cookie-only guest if anonymous auth fails
+      // Listen for Firebase auth state changes
+      auth.onAuthStateChanged(this._auth!, async (user) => {
+        this._isLoading.set(false);
+        const guest = this.getGuestFromCookie();
+
+        if (user && user.isAnonymous && guest) {
+          // Anonymous Firebase user + guest cookie = guest with Firebase auth
+          this._currentUser.set({
+            uid: user.uid,
+            email: null,
+            displayName: guest.name,
+            photoURL: null,
+            isGuest: true
+          });
+        } else if (user && !user.isAnonymous) {
+          // Real Firebase user takes precedence
+          this._currentUser.set({
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName,
+            photoURL: user.photoURL,
+            isGuest: false
+          });
+          this.clearGuestCookie();
+        } else if (!user && guest) {
+          // Returning guest with cookie but no Firebase auth — sign in anonymously
+          try {
+            await auth.signInAnonymously(this._auth!);
+            // onAuthStateChanged will fire again with the anonymous user
+            return;
+          } catch {
+            // Fall back to cookie-only guest if anonymous auth fails
+          }
+        } else if (!user) {
+          this._currentUser.set(null);
         }
-      } else if (!user) {
-        this._currentUser.set(null);
-      }
 
-      // Resolve the auth ready promise
-      if (this._authReadyResolve) {
-        this._authReadyResolve();
-        this._authReadyResolve = null;
-      }
+        finish();
+      });
     });
   }
 
   // Google Sign In
   async signInWithGoogle(): Promise<AuthUser> {
-    this._isLoading.set(true);
     this._authError.set(null);
 
     try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(this.auth, provider);
+      await this.ensureInitialized();
+      this._isLoading.set(true);
+      const provider = new this.sdk!.auth.GoogleAuthProvider();
+      const result = await this.sdk!.auth.signInWithPopup(this.auth, provider);
       const user = result.user;
 
       const authUser: AuthUser = {
@@ -208,6 +207,7 @@ export class AuthService {
 
   // Guest Sign In (cookie + Firebase Anonymous Auth)
   async signInAsGuest(name: string): Promise<AuthUser> {
+    await this.ensureInitialized();
     const sanitizedName = this.sanitizationService.sanitizeDisplayName(name);
     const guestUser: GuestUser = {
       name: sanitizedName,
@@ -220,7 +220,7 @@ export class AuthService {
     // Sign in anonymously with Firebase so we have auth != null for DB writes
     let uid = `guest_${guestUser.createdAt}`;
     try {
-      const result = await signInAnonymously(this.auth);
+      const result = await this.sdk!.auth.signInAnonymously(this.auth);
       uid = result.user.uid;
     } catch {
       // Fall back to cookie-only if anonymous auth fails
@@ -258,13 +258,14 @@ export class AuthService {
 
   // Update display name for Firebase users
   async updateDisplayName(name: string): Promise<void> {
+    await this.ensureInitialized();
     const currentUser = this._currentUser();
     if (!currentUser || currentUser.isGuest) return;
 
     const sanitizedName = this.sanitizationService.sanitizeDisplayName(name);
     const firebaseUser = this.auth.currentUser;
     if (firebaseUser) {
-      await updateProfile(firebaseUser, { displayName: sanitizedName });
+      await this.sdk!.auth.updateProfile(firebaseUser, { displayName: sanitizedName });
       this._currentUser.set({
         ...currentUser,
         displayName: sanitizedName
@@ -274,9 +275,9 @@ export class AuthService {
 
   // Sign Out
   async signOut(): Promise<void> {
-    this._isLoading.set(true);
-
     try {
+      await this.ensureInitialized();
+      this._isLoading.set(true);
       const currentUser = this._currentUser();
 
       if (currentUser?.isGuest) {
@@ -285,7 +286,7 @@ export class AuthService {
 
       // Always sign out of Firebase (guests now have anonymous sessions too)
       if (this.auth.currentUser) {
-        await signOut(this.auth);
+        await this.sdk!.auth.signOut(this.auth);
       }
 
       this._currentUser.set(null);
@@ -330,16 +331,18 @@ export class AuthService {
 
   async indexUserEmail(email: string, uid: string): Promise<void> {
     if (!this.isBrowser || !email) return;
+    await this.ensureInitialized();
     const sanitized = this.sanitizeEmailForKey(email);
-    const emailRef = ref(this.db, `emailIndex/${sanitized}`);
-    await set(emailRef, uid);
+    const emailRef = this.sdk!.database.ref(this.db, `emailIndex/${sanitized}`);
+    await this.sdk!.database.set(emailRef, uid);
   }
 
   async lookupUserByEmail(email: string): Promise<string | null> {
     if (!this.isBrowser || !email) return null;
+    await this.ensureInitialized();
     const sanitized = this.sanitizeEmailForKey(email);
-    const emailRef = ref(this.db, `emailIndex/${sanitized}`);
-    const snapshot = await get(emailRef);
+    const emailRef = this.sdk!.database.ref(this.db, `emailIndex/${sanitized}`);
+    const snapshot = await this.sdk!.database.get(emailRef);
     return snapshot.exists() ? snapshot.val() : null;
   }
 
