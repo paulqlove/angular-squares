@@ -42,6 +42,11 @@
                 "output": "/"
               },
               {
+                "glob": "404.html",
+                "input": "public",
+                "output": "/"
+              },
+              {
                 "glob": "robots.txt",
                 "input": "src",
                 "output": "/"
