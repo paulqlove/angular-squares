@@ -1,5 +1,7 @@
 export const environment = {
   production: false,
+  // Placeholder only. "See demo" links here and does not create a Firebase game.
+  demoGameId: 'DEMO00',
   firebase: {
     apiKey: 'AIzaSyBij6Rm7noCjgQVLvclvqRc34UtY2wQLsE',
     authDomain: 'squares-4e4f7.firebaseapp.com',

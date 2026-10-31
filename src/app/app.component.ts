@@ -1,6 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet } from '@angular/router';
+import { Meta } from '@angular/platform-browser';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { filter, Subscription } from 'rxjs';
 import { ToastComponent } from './components/ui/toast/toast.component';
 import { WalkthroughComponent } from './components/ui/walkthrough/walkthrough.component';
 import { AuthService } from './core/services/auth.service';
@@ -26,6 +28,31 @@ import { AuthService } from './core/services/auth.service';
     <app-walkthrough></app-walkthrough>
   `
 })
-export class AppComponent {
+export class AppComponent implements OnDestroy {
   protected authService = inject(AuthService);
+
+  private meta = inject(Meta);
+  private router = inject(Router);
+  private navigationSub: Subscription;
+
+  constructor() {
+    this.navigationSub = this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd)
+    ).subscribe(event => this.syncRobotsMeta(event.urlAfterRedirects));
+  }
+
+  ngOnDestroy(): void {
+    this.navigationSub.unsubscribe();
+  }
+
+  private syncRobotsMeta(url: string): void {
+    const path = url.split(/[?#]/)[0];
+    if (path === '/game' || path.startsWith('/game/')) {
+      this.meta.updateTag({ name: 'robots', content: 'noindex' });
+      return;
+    }
+    if (this.meta.getTag('name="robots"')) {
+      this.meta.removeTag('name="robots"');
+    }
+  }
 }
