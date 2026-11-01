@@ -16,22 +16,23 @@ interface SampleClaim {
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div
-      class="rounded-2xl border border-default bg-card p-3 shadow-sm sm:p-4"
+      class="qs-card p-4 sm:p-5"
       role="img"
       aria-label="Sample football squares board with a few squares claimed">
-      <div class="mb-2 flex items-baseline justify-between gap-3">
-        <p class="text-sm font-semibold text-heading">Chiefs vs Eagles</p>
-        <p class="text-xs font-medium text-muted">Sample board</p>
+      <div class="mb-4 flex items-center justify-between gap-3">
+        <p class="qs-eyebrow qs-eyebrow-bar">Board 01 / Harbor vs Riverside</p>
+        <span class="qs-badge">Sample</span>
       </div>
-      <div class="grid grid-cols-[0.9rem_repeat(10,minmax(0,1fr))] gap-px overflow-hidden rounded-lg bg-[var(--color-grid-line)] p-px">
-        <div class="bg-card"></div>
+      <div class="qs-canvas p-3 sm:p-6">
+      <div class="grid grid-cols-[1rem_repeat(10,minmax(0,1fr))] gap-px overflow-hidden rounded-inner bg-qs-line p-px shadow-card">
+        <div class="bg-qs-panel-2"></div>
         @for (digit of homeDigits; track $index) {
-          <div class="flex h-4 items-center justify-center bg-header text-[9px] font-semibold text-white sm:h-5 sm:text-[10px]">
+          <div class="flex h-5 items-center justify-center bg-qs-tile font-mono text-[10px] font-medium text-qs-tile-ink sm:h-6 sm:text-[11px]">
             {{ digit }}
           </div>
         }
         @for (row of rows; track row) {
-          <div class="flex items-center justify-center bg-header text-[9px] font-semibold text-white sm:text-[10px]">
+          <div class="flex items-center justify-center bg-qs-tile font-mono text-[10px] font-medium text-qs-tile-ink sm:text-[11px]">
             {{ awayDigits[row] }}
           </div>
           @for (col of rows; track col) {
@@ -42,10 +43,11 @@ interface SampleClaim {
                 {{ claim.name }}
               </div>
             } @else {
-              <div class="aspect-square bg-square"></div>
+              <div class="aspect-square bg-qs-panel"></div>
             }
           }
         }
+        </div>
       </div>
     </div>
   `
@@ -69,7 +71,7 @@ export class SampleBoardComponent {
     '6-5': { name: 'Cam', color: 'bg-orange-200' },
     '7-3': { name: 'Rio', color: 'bg-lime-200' },
     '8-0': { name: 'Lee', color: 'bg-pink-200' },
-    '8-8': { name: 'Max', color: 'bg-qs-accent-soft' },
+    '8-8': { name: 'Max', color: 'bg-green-200' },
     '9-6': { name: 'Nia', color: 'bg-fuchsia-200' }
   };
 

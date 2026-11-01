@@ -14,10 +14,10 @@ import { ContentShellComponent } from './content-shell.component';
       <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
       <article>
         <header class="max-w-3xl">
-          <p class="text-sm font-semibold uppercase tracking-wide text-qs-accent text-qs-accent">
+          <p class="qs-eyebrow">
             Historical frequencies
           </p>
-          <h1 class="mt-2 text-3xl font-extrabold tracking-tight text-heading sm:text-4xl">
+          <h1 class="qs-title mt-3 text-3xl sm:text-5xl">
             Best squares numbers
           </h1>
           <p class="mt-4 text-lg leading-relaxed text-muted">
@@ -53,24 +53,24 @@ import { ContentShellComponent } from './content-shell.component';
           </p>
           <p class="mt-2 text-sm text-muted md:hidden">Scroll sideways to read every digit.</p>
           <div class="mt-4 overflow-x-auto" tabindex="0" aria-label="Historical digit table. Scroll sideways if needed.">
-            <table class="w-full min-w-[44rem] border-collapse text-center text-sm text-slate-900">
+            <table class="w-full min-w-[44rem] border-collapse text-center font-mono text-sm">
               <caption class="sr-only">
                 Historical frequency of each away last digit and home last digit pair, in percent.
               </caption>
               <thead>
                 <tr>
-                  <th scope="col" class="bg-card p-2 text-left text-xs font-semibold text-heading">Away \\ Home</th>
+                  <th scope="col" class="bg-qs-panel-2 p-2 text-left qs-label text-qs-muted">Away \\ Home</th>
                   @for (digit of digits; track digit) {
-                    <th scope="col" class="bg-header p-2 text-xs font-semibold text-white">{{ digit }}</th>
+                    <th scope="col" class="bg-qs-tile p-2 text-xs font-medium text-qs-tile-ink">{{ digit }}</th>
                   }
                 </tr>
               </thead>
               <tbody>
                 @for (away of digits; track away) {
                   <tr>
-                    <th scope="row" class="bg-header p-2 text-xs font-semibold text-white">{{ away }}</th>
+                    <th scope="row" class="bg-qs-tile p-2 text-xs font-medium text-qs-tile-ink">{{ away }}</th>
                     @for (home of digits; track home) {
-                      <td [class]="cellClass(share(away, home))" class="p-2 font-semibold">
+                      <td [class]="cellClass(share(away, home))" class="border border-qs-line p-2 font-medium">
                         {{ share(away, home).toFixed(1) }}
                       </td>
                     }
@@ -80,12 +80,12 @@ import { ContentShellComponent } from './content-shell.component';
             </table>
           </div>
           <ul class="mt-4 flex flex-wrap gap-3 text-sm text-default" aria-label="Color key">
-            <li class="rounded bg-blue-300 px-2 py-1 text-slate-900">3.0 or more</li>
-            <li class="rounded bg-blue-200 px-2 py-1 text-slate-900">2.0 to 2.9</li>
-            <li class="rounded bg-qs-ok-soft px-2 py-1 text-slate-900">1.5 to 1.9</li>
-            <li class="rounded bg-qs-ok-soft px-2 py-1 text-slate-900">1.0 to 1.4</li>
-            <li class="rounded bg-yellow-200 px-2 py-1 text-slate-900">0.5 to 0.9</li>
-            <li class="rounded bg-red-100 px-2 py-1 text-slate-900">Under 0.5</li>
+            <li class="qs-heat-5 rounded-chip px-2 py-1 font-mono">3.0 or more</li>
+            <li class="qs-heat-4 rounded-chip px-2 py-1 font-mono">2.0 to 2.9</li>
+            <li class="qs-heat-3 rounded-chip px-2 py-1 font-mono">1.5 to 1.9</li>
+            <li class="qs-heat-2 rounded-chip px-2 py-1 font-mono">1.0 to 1.4</li>
+            <li class="qs-heat-1 rounded-chip px-2 py-1 font-mono">0.5 to 0.9</li>
+            <li class="qs-heat-0 rounded-chip border border-qs-line px-2 py-1 font-mono">Under 0.5</li>
           </ul>
           <p class="mt-4 text-xs text-muted">
             Source:
@@ -202,12 +202,12 @@ export class BestNumbersComponent {
   }
 
   public cellClass(share: number): string {
-    if (share >= 3) return 'bg-blue-300';
-    if (share >= 2) return 'bg-blue-200';
-    if (share >= 1.5) return 'bg-qs-ok-soft';
-    if (share >= 1) return 'bg-qs-ok-soft';
-    if (share >= 0.5) return 'bg-yellow-200';
-    return 'bg-red-100';
+    if (share >= 3) return 'qs-heat-5';
+    if (share >= 2) return 'qs-heat-4';
+    if (share >= 1.5) return 'qs-heat-3';
+    if (share >= 1) return 'qs-heat-2';
+    if (share >= 0.5) return 'qs-heat-1';
+    return 'qs-heat-0';
   }
 
   }

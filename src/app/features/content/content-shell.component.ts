@@ -2,6 +2,7 @@ import { Component, Input, inject, signal, ChangeDetectionStrategy } from '@angu
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
 import { SiteFooterComponent } from '../../shared/site-footer.component';
+import { ThemeToggleComponent } from '../../components/ui/theme-toggle/theme-toggle.component';
 
 interface NavLink {
   path: string;
@@ -10,7 +11,7 @@ interface NavLink {
 
 @Component({
     selector: 'app-content-shell',
-    imports: [RouterLink, SiteFooterComponent],
+    imports: [RouterLink, SiteFooterComponent, ThemeToggleComponent],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
     <a
@@ -20,22 +21,22 @@ interface NavLink {
       Skip to content
     </a>
     <div class="flex min-h-screen flex-col bg-page">
-      <header class="no-print border-b border-default bg-card">
-        <div class="mx-auto flex max-w-5xl flex-wrap items-center gap-3 px-4 py-3">
+      <header class="no-print qs-on-navy bg-qs-tile text-qs-tile-ink">
+        <div class="mx-auto flex max-w-5xl flex-wrap items-center gap-3 px-4 py-2">
           <a routerLink="/" class="flex min-h-11 items-center gap-2 rounded-md">
             <img
               src="assets/logo.webp"
               alt=""
               width="114"
               height="120"
-              class="h-10 w-auto"
+              class="h-8 w-auto"
             >
-            <span class="text-lg font-bold tracking-tight text-heading">Quarter Score</span>
+            <span class="qs-title text-lg">Quarter Score</span>
           </a>
 
           <button
             type="button"
-            class="ml-auto inline-flex min-h-11 items-center rounded-md border border-default px-3 text-sm font-semibold text-heading md:hidden"
+            class="ml-auto qs-btn qs-btn-ghost border-white/20 md:hidden"
             [attr.aria-expanded]="menuOpen()"
             aria-controls="site-nav"
             (click)="toggleMenu()"
@@ -55,8 +56,7 @@ interface NavLink {
                   <a
                     [routerLink]="link.path"
                     [attr.aria-current]="isCurrent(link.path) ? 'page' : null"
-                    class="inline-flex min-h-11 items-center rounded-md px-3 text-sm font-semibold text-heading hover:bg-control"
-                    [class.bg-control]="isCurrent(link.path)"
+                    class="qs-btn qs-btn-ghost w-full justify-start px-3 text-qs-tile-muted hover:text-qs-tile-ink aria-[current=page]:bg-white/10 aria-[current=page]:text-qs-tile-ink md:w-auto"
                   >
                     {{ link.label }}
                   </a>
@@ -65,10 +65,13 @@ interface NavLink {
               <li class="md:ml-2">
                 <a
                   routerLink="/dashboard"
-                  class="inline-flex min-h-11 w-full items-center justify-center rounded-md bg-qs-accent px-4 text-sm font-semibold text-white hover:bg-qs-accent-hover md:w-auto"
+                  class="qs-btn qs-btn-primary w-full md:w-auto"
                 >
                   Start a free game
                 </a>
+              </li>
+              <li>
+                <app-theme-toggle></app-theme-toggle>
               </li>
             </ul>
           </nav>

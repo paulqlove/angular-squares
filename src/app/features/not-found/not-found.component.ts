@@ -16,7 +16,7 @@ import { RouterLink } from '@angular/router';
           height="120"
           class="h-16 w-auto mx-auto mb-6"
         >
-        <h1 class="mb-2 text-2xl font-bold text-heading">Page not found</h1>
+        <h1 class="qs-title mb-2 text-3xl">Page not found</h1>
         <p class="mb-6 text-muted">That address isn't part of Quarter Score.</p>
         <a
           routerLink="/"

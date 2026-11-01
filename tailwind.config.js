@@ -129,11 +129,19 @@ module.exports = {
       ringColor: {
         'focus': 'var(--qs-accent)',
       },
+      fontWeight: {
+        bold: '600',
+        extrabold: '600',
+      },
       fontFamily: {
         sans: ['var(--qs-font-sans)'],
         mono: ['var(--qs-font-mono)'],
       },
       borderRadius: {
+        lg: '6px',
+        xl: '8px',
+        '2xl': '10px',
+        '3xl': '10px',
         chip: '4px',
         btn: '6px',
         inner: '8px',
@@ -141,6 +149,10 @@ module.exports = {
         bar: '12px',
       },
       boxShadow: {
+        md: 'var(--qs-shadow)',
+        lg: 'var(--qs-shadow)',
+        xl: 'var(--qs-shadow-pop)',
+        '2xl': 'var(--qs-shadow-pop)',
         card: 'var(--qs-shadow)',
         pop: 'var(--qs-shadow-pop)',
       },

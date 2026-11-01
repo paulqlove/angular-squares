@@ -190,6 +190,100 @@
   }
 }
 
+@layer components {
+  /* Mono label: eyebrows, counters, buttons, tabs, badges */
+  .qs-label {
+    font-family: var(--qs-font-mono);
+    font-size: 11.5px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .qs-eyebrow {
+    @apply qs-label;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--qs-muted);
+    letter-spacing: 0.14em;
+    line-height: 1.4;
+  }
+  .qs-eyebrow-bar::before {
+    content: "";
+    width: 3px;
+    height: 12px;
+    background: var(--qs-accent);
+  }
+  .qs-display {
+    font-size: clamp(36px, 4.4vw, 68px);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+  .qs-title {
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+  }
+
+  .qs-btn {
+    @apply qs-label;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 18px;
+    border: 1px solid transparent;
+    border-radius: var(--qs-r-btn);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color var(--qs-t-fast) var(--qs-ease), color var(--qs-t-fast) var(--qs-ease), border-color var(--qs-t-fast) var(--qs-ease);
+  }
+  .qs-btn:disabled { opacity: .45; cursor: not-allowed; }
+  .qs-btn-primary { background: var(--qs-accent); color: var(--qs-on-accent); }
+  .qs-btn-primary:hover:not(:disabled) { background: var(--qs-accent-hover); }
+  .qs-btn-ink { background: var(--qs-ink); color: var(--qs-bg); }
+  .qs-btn-ink:hover:not(:disabled) { background: color-mix(in srgb, var(--qs-ink) 85%, var(--qs-bg)); }
+  .qs-btn-secondary { background: var(--qs-panel-2); color: var(--qs-ink); border-color: var(--qs-line); }
+  .qs-btn-secondary:hover:not(:disabled) { border-color: var(--qs-line-strong); }
+  .qs-btn-ghost { background: transparent; color: inherit; }
+  .qs-btn-ghost:hover:not(:disabled) { background: color-mix(in srgb, currentColor 10%, transparent); }
+  .qs-btn-danger { background: var(--qs-bad-soft); color: var(--qs-bad); }
+
+  .qs-card {
+    background: var(--qs-panel);
+    border: 1px solid var(--qs-line);
+    border-radius: var(--qs-r-card);
+    box-shadow: var(--qs-shadow);
+  }
+
+  .qs-badge {
+    @apply qs-label;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    font-size: 10.5px;
+    border-radius: var(--qs-r-pill);
+    background: var(--qs-panel-2);
+    color: var(--qs-muted);
+    border: 1px solid var(--qs-line);
+  }
+  .qs-badge-ok { background: var(--qs-ok-soft); color: var(--qs-ok); border-color: transparent; }
+  .qs-badge-warn { background: var(--qs-warn-soft); color: var(--qs-warn); border-color: transparent; }
+  .qs-badge-bad { background: var(--qs-bad-soft); color: var(--qs-bad); border-color: transparent; }
+  /* Heatmap: one emerald ramp, never team colors or amber */
+  .qs-heat-0 { background: var(--qs-panel); color: var(--qs-ink); }
+  .qs-heat-1 { background: color-mix(in srgb, var(--qs-accent) 12%, var(--qs-panel)); color: var(--qs-ink); }
+  .qs-heat-2 { background: color-mix(in srgb, var(--qs-accent) 25%, var(--qs-panel)); color: var(--qs-ink); }
+  .qs-heat-3 { background: color-mix(in srgb, var(--qs-accent) 40%, var(--qs-panel)); color: var(--qs-ink); }
+  .qs-heat-4 { background: color-mix(in srgb, var(--qs-accent) 65%, var(--qs-panel)); color: var(--qs-tile); }
+  .qs-heat-5 { background: var(--qs-accent); color: var(--qs-on-accent); }
+  .qs-badge-code { background: var(--qs-accent-soft); color: var(--qs-accent); border-color: transparent; }
+}
+
 /* Focus ring: ink, never removed. On navy surfaces use paper. */
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
   outline: 3px solid var(--qs-ink);

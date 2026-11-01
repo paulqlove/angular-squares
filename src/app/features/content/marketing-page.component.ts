@@ -19,10 +19,10 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
           </p>
         }
         <header>
-          <p class="text-sm font-semibold uppercase tracking-wide text-qs-accent text-qs-accent">
+          <p class="qs-eyebrow">
             {{ page.eyebrow }}
           </p>
-          <h1 class="mt-2 text-3xl font-extrabold tracking-tight text-heading sm:text-4xl">
+          <h1 class="qs-title mt-3 text-3xl sm:text-5xl">
             {{ page.h1 }}
           </h1>
           <p class="mt-4 text-lg leading-relaxed text-muted">{{ page.lede }}</p>

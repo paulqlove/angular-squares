@@ -13,7 +13,7 @@ import { BLOG_POSTS } from './blog-posts.generated';
     <app-content-shell>
       <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
       <header>
-        <h1 class="text-3xl font-extrabold tracking-tight text-heading sm:text-4xl">Blog</h1>
+        <h1 class="qs-title text-3xl sm:text-5xl">Blog</h1>
         <p class="mt-4 text-lg leading-relaxed text-muted">
           Notes on football squares for friends, fans, and game-day parties.
           Posts stay free of logos, and the game never handles money.

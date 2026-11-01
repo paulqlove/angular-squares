@@ -16,7 +16,6 @@ import {
   heroChartBar,
   heroArrowRight
 } from '@ng-icons/heroicons/outline';
-import { RippleGridComponent } from '../../components/ui/ripple-grid/ripple-grid.component';
 import { AppHeaderComponent } from '../../components/ui/app-header/app-header.component';
 import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.component';
 import { SampleBoardComponent } from './sample-board.component';
@@ -31,7 +30,7 @@ interface Feature {
 
 @Component({
     selector: 'app-welcome',
-    imports: [FormsModule, RouterLink, NgIconComponent, RippleGridComponent, AppHeaderComponent, AuthModalComponent, SampleBoardComponent, SiteFooterComponent],
+    imports: [FormsModule, RouterLink, NgIconComponent, AppHeaderComponent, AuthModalComponent, SampleBoardComponent, SiteFooterComponent],
     providers: [
         provideIcons({
             heroSquares2x2,
@@ -45,184 +44,136 @@ interface Feature {
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
-    <div class="min-h-screen relative">
-      <!-- Ripple grid full background -->
-      <app-ripple-grid
-        class="fixed inset-0 z-0"
-        backgroundColor="#10b981"
-        lineColor="rgba(0,0,0,0.15)">
-      </app-ripple-grid>
+    <div class="min-h-screen bg-qs-bg text-qs-ink">
+      <app-shared-header heading="p">
+        @if (isAuthenticated()) {
+          <button type="button" (click)="goToDashboard()" class="qs-btn qs-btn-ghost">
+            Dashboard
+          </button>
+        } @else {
+          <button type="button" (click)="showAuthModal.set(true)" class="qs-btn qs-btn-ghost">
+            Sign in
+          </button>
+        }
+      </app-shared-header>
 
-      <div class="relative z-10">
-        <!-- Header (sits on green) -->
-        <app-shared-header variant="transparent" heading="p">
-          @if (isAuthenticated()) {
-            <button
-              (click)="goToDashboard()"
-              class="px-5 py-2 bg-white text-qs-accent text-sm font-semibold rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              Go to Dashboard
-            </button>
-          } @else {
-            <button
-              type="button"
-              (click)="showAuthModal.set(true)"
-              class="inline-flex min-h-11 items-center justify-center px-5 py-2 bg-white text-qs-accent text-sm font-semibold rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              Sign in
-            </button>
-          }
-        </app-shared-header>
-
-        <!-- Hero card floating on green -->
-        <section class="container mx-auto px-4 py-8 md:py-12">
-          <div class="bg-page rounded-3xl p-8 md:p-12 lg:p-16 shadow-2xl">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center lg:items-stretch">
-              <!-- Left: Copy -->
-              <div>
-                <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-heading leading-[1.1] tracking-tight">
-                  The Ultimate<br>
-                  <span class="text-qs-accent">Football Squares</span><br>
-                  Game
-                </h1>
-                <p class="text-lg md:text-xl text-muted mt-6 max-w-md">
-                  Create and share your football squares game in seconds.
-                  Perfect for Super Bowl parties, office pools, and game day fun.
-                </p>
-
-                <div class="mt-8 flex flex-col gap-3">
-                  <button
-                    type="button"
-                    (click)="showAuthModal.set(true)"
-                    class="w-full self-stretch px-8 py-3.5 bg-qs-accent hover:bg-qs-accent-hover text-qs-on-accent font-bold text-lg rounded-btn transition-colors sm:w-auto sm:self-start"
-                  >
-                    Create game
-                  </button>
-
-                  <div class="grid w-full grid-cols-2 gap-3 sm:flex sm:w-auto sm:self-start">
-                    <a
-                      [routerLink]="['/game', demoGameId]"
-                      class="inline-flex min-h-11 items-center justify-center rounded-lg border-2 border-default bg-card px-4 py-2.5 text-sm font-semibold text-heading hover:bg-card-hover transition-colors"
-                    >
-                      See demo
-                    </a>
-                    <button
-                      type="button"
-                      (click)="openJoinCode()"
-                      [attr.aria-expanded]="showJoinCode()"
-                      aria-controls="join-code-panel"
-                      class="inline-flex min-h-11 items-center justify-center rounded-lg border-2 border-default bg-card px-4 py-2.5 text-sm font-semibold text-heading hover:bg-card-hover transition-colors"
-                    >
-                      Join with code
-                    </button>
-                  </div>
-
-                  @if (showJoinCode()) {
-                    <div id="join-code-panel" class="flex items-center gap-2 sm:max-w-xs w-full">
-                      <label for="join-code" class="sr-only">Game code</label>
-                      <input
-                        #joinInput
-                        id="join-code"
-                        type="text"
-                        [(ngModel)]="gameCode"
-                        placeholder="Enter code"
-                        class="flex-1 px-4 py-2.5 border-2 border-qs-line-strong rounded-btn outline-none uppercase tracking-widest text-center font-mono bg-qs-panel-2 text-qs-ink"
-                        maxlength="6"
-                        (keyup.enter)="joinGame()"
-                      />
-                      <button
-                        type="button"
-                        (click)="joinGame()"
-                        [disabled]="gameCode.length !== 6"
-                        aria-label="Join game"
-                        class="inline-flex min-h-11 min-w-11 items-center justify-center bg-qs-accent hover:bg-qs-accent-hover text-qs-on-accent rounded-btn transition-colors disabled:opacity-40"
-                      >
-                        <ng-icon name="heroArrowRight" class="text-xl" aria-hidden="true"></ng-icon>
-                      </button>
-                    </div>
-                  }
-
-                  <p class="text-sm text-muted">Free, no account required to play</p>
-                </div>
-              </div>
-
-              <!-- Right: sample board (replaces the empty green grid) -->
-              <div class="lg:flex lg:items-center">
-                <app-sample-board></app-sample-board>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Features Section -->
-        <section class="bg-page py-16 md:py-24">
-          <div class="container mx-auto px-4">
-            <h2 class="text-3xl font-bold text-center text-heading mb-12">
-              Everything You Need for Game Day
-            </h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
-              @for (feature of features; track feature.title) {
-                <div [attr.id]="feature.id || null" class="bg-card rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
-                  <div class="w-12 h-12 bg-qs-accent-soft rounded-inner flex items-center justify-center mb-4">
-                    <ng-icon [name]="feature.icon" class="text-2xl text-qs-accent"></ng-icon>
-                  </div>
-                  <h3 class="text-lg font-semibold text-heading mb-2">{{ feature.title }}</h3>
-                  <p class="text-muted">{{ feature.description }}</p>
-                  @if (feature.link) {
-                    <a [routerLink]="feature.link.path" class="mt-3 inline-flex min-h-11 items-center font-semibold text-qs-accent underline underline-offset-2">
-                      {{ feature.link.label }}
-                    </a>
-                  }
-                </div>
-              }
-            </div>
-          </div>
-        </section>
-
-        <!-- How It Works -->
-        <section id="how-it-works" class="bg-card py-16 md:py-24">
-          <div class="container mx-auto px-4">
-            <h2 class="text-3xl font-bold text-center text-heading mb-4">
-              How It Works
-            </h2>
-
-            <p class="text-center mb-10">
-              <a routerLink="/how-to-play" class="font-semibold text-qs-accent underline underline-offset-2">
-                Read the full rules
-              </a>
+      <!-- Hero -->
+      <section class="mx-auto max-w-[1600px] px-4 sm:px-8 pt-10 pb-16 md:pt-16 md:pb-24">
+        <div class="grid grid-cols-1 xl:grid-cols-[1fr_minmax(0,1.05fr)] gap-10 xl:gap-16 items-center">
+          <div>
+            <p class="qs-eyebrow">Football squares / Free for game day</p>
+            <h1 class="qs-display mt-5 max-w-[14ch]">
+              The Ultimate Football <span class="text-qs-accent">Squares</span> Game
+            </h1>
+            <p class="mt-6 max-w-xl text-lg text-qs-muted leading-relaxed">
+              Create and share your football squares game in seconds.
+              Perfect for Super Bowl parties, office pools, and game day fun.
             </p>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-              <div class="text-center">
-                <div class="w-16 h-16 bg-qs-accent text-qs-on-accent rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
-                  1
-                </div>
-                <h3 class="text-lg font-semibold text-heading mb-2">Create a Game</h3>
-                <p class="text-muted">Sign in and create a new game board with your custom settings</p>
-              </div>
-
-              <div class="text-center">
-                <div class="w-16 h-16 bg-qs-accent text-qs-on-accent rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
-                  2
-                </div>
-                <h3 class="text-lg font-semibold text-heading mb-2">Share the Link</h3>
-                <p class="text-muted">Send the unique game code or link to your friends and family</p>
-              </div>
-
-              <div class="text-center">
-                <div class="w-16 h-16 bg-qs-accent text-qs-on-accent rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
-                  3
-                </div>
-                <h3 class="text-lg font-semibold text-heading mb-2">Play & Win</h3>
-                <p class="text-muted">Claim your squares, watch the game, and see who wins each quarter</p>
-              </div>
+            <div class="mt-8 flex flex-wrap gap-3">
+              <button type="button" (click)="showAuthModal.set(true)" class="qs-btn qs-btn-primary w-full sm:w-auto px-6">
+                Create game
+              </button>
+              <a [routerLink]="['/game', demoGameId]" class="qs-btn qs-btn-secondary flex-1 sm:flex-none">
+                See demo
+              </a>
+              <button
+                type="button"
+                (click)="openJoinCode()"
+                [attr.aria-expanded]="showJoinCode()"
+                aria-controls="join-code-panel"
+                class="qs-btn qs-btn-secondary flex-1 sm:flex-none"
+              >
+                Join with code
+              </button>
             </div>
-          </div>
-        </section>
 
-        <app-site-footer></app-site-footer>
-      </div>
+            @if (showJoinCode()) {
+              <div id="join-code-panel" class="mt-5 w-full sm:max-w-sm">
+                <label for="join-code" class="qs-label text-qs-muted">Game code</label>
+                <div class="mt-2 flex items-center gap-2">
+                  <input
+                    #joinInput
+                    id="join-code"
+                    type="text"
+                    [(ngModel)]="gameCode"
+                    placeholder="ABC123"
+                    autocapitalize="characters"
+                    autocomplete="off"
+                    class="min-h-11 flex-1 px-4 border border-qs-line-strong rounded-btn uppercase tracking-[0.2em] text-center font-mono text-base bg-qs-panel-2 text-qs-ink"
+                    maxlength="6"
+                    (keyup.enter)="joinGame()"
+                  />
+                  <button
+                    type="button"
+                    (click)="joinGame()"
+                    [disabled]="gameCode.length !== 6"
+                    class="qs-btn qs-btn-ink"
+                  >
+                    Join
+                    <ng-icon name="heroArrowRight" class="text-base" aria-hidden="true"></ng-icon>
+                  </button>
+                </div>
+              </div>
+            }
+
+            <p class="qs-label mt-6 text-qs-muted">Free · Players don't need an account</p>
+          </div>
+
+          <app-sample-board></app-sample-board>
+        </div>
+      </section>
+
+      <!-- Features -->
+      <section class="border-t border-qs-line py-16 md:py-24">
+        <div class="mx-auto max-w-[1600px] px-4 sm:px-8">
+          <p class="qs-eyebrow">Section 01 / Features</p>
+          <h2 class="qs-title mt-3 text-3xl md:text-4xl">Everything you need for game <span class="text-qs-accent">day.</span></h2>
+
+          <div class="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+            @for (feature of features; track feature.title; let i = $index) {
+              <div [attr.id]="feature.id || null" class="qs-card p-6 transition-colors hover:border-qs-ink">
+                <div class="flex items-center justify-between">
+                  <div class="w-10 h-10 bg-qs-accent-soft rounded-inner flex items-center justify-center">
+                    <ng-icon [name]="feature.icon" class="text-xl text-qs-accent"></ng-icon>
+                  </div>
+                  <span class="qs-label text-qs-muted">{{ (i + 1).toString().padStart(2, '0') }}</span>
+                </div>
+                <h3 class="qs-title mt-5 text-xl">{{ feature.title }}</h3>
+                <p class="mt-2 text-qs-muted">{{ feature.description }}</p>
+                @if (feature.link) {
+                  <a [routerLink]="feature.link.path" class="mt-3 inline-flex min-h-11 items-center font-medium text-qs-accent underline underline-offset-2">
+                    {{ feature.link.label }}
+                  </a>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- How It Works -->
+      <section id="how-it-works" class="border-t border-qs-line bg-qs-panel-2 py-16 md:py-24">
+        <div class="mx-auto max-w-[1600px] px-4 sm:px-8">
+          <p class="qs-eyebrow">Section 02 / How it works</p>
+          <div class="mt-3 flex flex-wrap items-end justify-between gap-4">
+            <h2 class="qs-title text-3xl md:text-4xl">Three steps to kickoff.</h2>
+            <a routerLink="/how-to-play" class="qs-btn qs-btn-secondary">Read the full rules</a>
+          </div>
+
+          <div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
+            @for (step of steps; track step.title; let i = $index) {
+              <div class="qs-card p-6">
+                <p class="qs-eyebrow qs-eyebrow-bar">Step {{ '0' + (i + 1) }} / 03</p>
+                <h3 class="qs-title mt-4 text-xl">{{ step.title }}</h3>
+                <p class="mt-2 text-qs-muted">{{ step.description }}</p>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+
+      <app-site-footer></app-site-footer>
     </div>
 
     <!-- Auth Modal -->
@@ -239,6 +190,12 @@ export class WelcomeComponent implements OnInit {
   private seo = inject(SeoService);
 
   isAuthenticated = this.authService.isAuthenticated;
+
+  readonly steps = [
+    { title: 'Create a game', description: 'Sign in and create a new game board with your custom settings' },
+    { title: 'Share the link', description: 'Send the unique game code or link to your friends and family' },
+    { title: 'Play and win', description: 'Claim your squares, watch the game, and see who wins each quarter' }
+  ];
 
   constructor() {
     effect(() => {

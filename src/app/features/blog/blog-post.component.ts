@@ -19,7 +19,7 @@ import { BLOG_POSTS } from './blog-posts.generated';
             <p class="text-sm text-muted">
               <time [attr.datetime]="post.date">{{ formatDate(post.date) }}</time>
             </p>
-            <h1 class="mt-2 text-3xl font-extrabold tracking-tight text-heading sm:text-4xl">
+            <h1 class="qs-title mt-3 text-3xl sm:text-5xl">
               {{ post.title }}
             </h1>
             <p class="mt-4 text-lg leading-relaxed text-muted">{{ post.description }}</p>
@@ -36,7 +36,7 @@ import { BLOG_POSTS } from './blog-posts.generated';
         </article>
       } @else {
         <article>
-          <h1 class="text-3xl font-extrabold text-heading">Post not found</h1>
+          <h1 class="qs-title text-3xl">Post not found</h1>
           <p class="mt-4 text-default">That post is not on the blog.</p>
           <p class="mt-6">
             <a routerLink="/blog" class="font-semibold text-qs-accent underline underline-offset-2 text-qs-accent">

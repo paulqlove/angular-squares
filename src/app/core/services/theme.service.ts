@@ -48,11 +48,8 @@ export class ThemeService {
   private applyTheme(effective: 'light' | 'dark'): void {
     if (!this.isBrowser) return;
 
-    if (effective === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    document.documentElement.classList.toggle('dark', effective === 'dark');
+    document.documentElement.dataset['theme'] = effective;
   }
 
   private getStoredTheme(): ThemeMode {
