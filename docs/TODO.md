@@ -49,6 +49,7 @@ Implemented features:
 - [x] Move ESPN selection to game creation flow (dashboard)
 - [x] Move ESPN settings to header settings panel
 - [x] Implement auto-polling mechanism (30s when game in progress)
+- [x] Move ESPN score writes to a scheduled Cloud Function (`functions/`, see [FUNCTIONS.md](./FUNCTIONS.md)). Browser polling remains only when `serverScoring` is false.
 - [x] Show last update timestamp ("Last synced: Xm ago")
 - [ ] Add manual score override for discrepancies
 

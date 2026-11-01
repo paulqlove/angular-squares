@@ -1,5 +1,8 @@
 export const environment = {
   production: false,
+  // Cloud Functions write ESPN scores. Both environments point at the same
+  // Firebase project, so this stays true unless you need the browser fallback.
+  serverScoring: true,
   // Placeholder only. "See demo" links here and does not create a Firebase game.
   demoGameId: 'DEMO00',
   firebase: {

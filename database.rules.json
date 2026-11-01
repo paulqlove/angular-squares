@@ -97,6 +97,20 @@
         "espnSport": {
           ".validate": "(newData.val() == null) || (newData.isString() && newData.val().length <= 20)"
         },
+        "espnLive": {
+          ".validate": "newData.hasChildren(['status', 'period', 'clock', 'completed', 'homeScore', 'awayScore', 'homeTeam', 'awayTeam', 'quarters']) && newData.child('status').isString() && newData.child('status').val().length <= 10 && newData.child('period').isNumber() && newData.child('clock').isString() && newData.child('clock').val().length <= 20 && newData.child('completed').isBoolean() && newData.child('homeScore').isNumber() && newData.child('awayScore').isNumber() && newData.child('homeTeam').isString() && newData.child('homeTeam').val().length <= 50 && newData.child('awayTeam').isString() && newData.child('awayTeam').val().length <= 50",
+          "quarters": {
+            "$index": {
+              ".validate": "$index.matches(/^[0-9]$/)",
+              "home": {
+                ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 999"
+              },
+              "away": {
+                ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 999"
+              }
+            }
+          }
+        },
         "createdAt": {
           ".validate": "newData.isNumber()"
         }
@@ -124,6 +138,21 @@
             "name": {
               ".validate": "newData.isString() && newData.val().length <= 100"
             }
+          }
+        }
+      }
+    },
+    "liveGames": {
+      ".read": false,
+      "$espnId": {
+        "$boardId": {
+          ".write": "auth != null && $espnId.matches(/^[A-Za-z0-9_-]{1,50}$/) && $boardId.matches(/^[A-Za-z0-9]{6}$/) && (root.child('games').child($boardId).child('ownerId').val() == auth.uid || root.child('games').child($boardId).child('managerId').val() == auth.uid)",
+          ".validate": "newData.hasChildren(['sport'])",
+          "sport": {
+            ".validate": "newData.isString() && (newData.val() == 'nfl' || newData.val() == 'nba' || newData.val() == 'ncaaf' || newData.val() == 'wnba' || newData.val() == 'afl')"
+          },
+          "$other": {
+            ".validate": false
           }
         }
       }

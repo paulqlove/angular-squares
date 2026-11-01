@@ -1,0 +1,21 @@
+{
+  "name": "squares-functions",
+  "description": "Scheduled ESPN score sync for quarterscore.com. Deploy manually with firebase deploy --only functions.",
+  "private": true,
+  "main": "lib/index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "tsc && node --test lib/*.test.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.5.0",
+    "firebase-functions": "^6.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.0",
+    "typescript": "^5.4.5"
+  }
+}

@@ -93,9 +93,13 @@ games/{gameId}/
   homeTeam, awayTeam, venmoUsername
   isLocked, isRandomized, pricePerSquare
   espnEventId: string (optional - links to ESPN game for live scores)
+  espnLive: clock, period, status, per-quarter linescores (written by Cloud Functions)
 
 users/{userId}/games/{gameId}/
   createdAt, name
+
+liveGames/{espnId}/{boardId}/
+  sport
 ```
 
 ## Game Logic
@@ -107,12 +111,13 @@ users/{userId}/games/{gameId}/
 
 ## ESPN Live Scores
 
-Game owners can link their game to an ESPN NFL game for live score syncing.
+Game owners can link a board to an ESPN game. Quarter scores are written by the scheduled function in `functions/` (`syncEspnScores`), not by the browser, when `environment.serverScoring` is true (the default). The browser poller in `syncFromEspn()` remains only as the fallback when that flag is false. Deploy steps: [docs/FUNCTIONS.md](docs/FUNCTIONS.md). Do not add functions to the GitHub hosting workflows.
 
-- **API**: `https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard` (public, no auth)
+- **API**: `https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard` (public, no auth). The function fetches this once per league per minute.
+- **Index**: `liveGames/{espnId}/{boardId}` so the function does not scan every game. Maintained on link, unlink, and delete.
 - **Linking**: Owner links an ESPN game from the **dashboard** (game create/edit form)
-- **Box Score tab**: Game page displays live scores on the **Box Score** tab with quarter-by-quarter scores and status indicator
-- **Pro Bowl handling**: Maps 3 periods to Q1-Q3, uses final score for Q4
+- **Box Score tab**: Game page displays live scores on the **Box Score** tab with quarter-by-quarter scores and status indicator (`espnLive`)
+- **Pro Bowl handling**: The client and the function share `syncFromEspn()`'s rule: per-quarter linescores accumulate into q1–q4, and a final game stores the ESPN final total in q4.
 
 ## Documentation
 

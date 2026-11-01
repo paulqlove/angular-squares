@@ -2,7 +2,8 @@ import { Component, OnInit, OnDestroy, ViewChild, HostListener, signal, inject, 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { GameService, GameData } from '../../core/services/game.service';
+import { GameService, GameData, EspnLiveSnapshot } from '../../core/services/game.service';
+import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/services/auth.service';
 import { EspnService, EspnGame, SportType } from '../../core/services/espn.service';
 import { ToastService } from '../../core/services/toast.service';
@@ -245,8 +246,10 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   espnSyncError = signal<string | null>(null);
   lastSyncTime = signal<Date | null>(null);
 
-  // Auto-polling for live scores
+  // Auto-polling for live scores. Off when Cloud Functions own the score writes.
   private pollingInterval: ReturnType<typeof setInterval> | null = null;
+  private liveIndexEnsuredFor: string | null = null;
+  private latestEspnLive: EspnLiveSnapshot | null = null;
 
   ngOnInit(): void {
     void this.bindRoute();
@@ -279,6 +282,8 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
   private async loadGame(gameId: string): Promise<void> {
     this.isLoading.set(true);
+    this.liveIndexEnsuredFor = null;
+    this.latestEspnLive = null;
 
     // Check if game exists
     const exists = await this.gameService.gameExists(gameId);
@@ -317,8 +322,9 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           this.playerColors = data.playerColors || {};
           this.winners = data.winners || {};
           this.playerUserIds = data.playerUserIds || {};
-          this.espnEventId = data.espnEventId;
+          this.espnEventId = data.espnEventId || undefined;
           this.espnSport = data.espnSport || 'nfl';
+          this.latestEspnLive = data.espnLive || null;
 
           // Check if current user is the game owner or manager
           const user = this.authService.currentUser();
@@ -346,13 +352,16 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
             }
           }
 
-          // Calculate winners — skip for ESPN-linked games (syncFromEspn handles period-aware winners)
+          // Calculate winners — skip for ESPN-linked games (the server, or syncFromEspn when
+          // serverScoring is false, handles period-aware winners)
           if (!this.espnEventId && Object.values(this.scores).some(score => score.home > 0 || score.away > 0)) {
             this.calculateWinners();
           }
 
-          // Fetch linked ESPN game data for all users (for box score display)
-          if (this.espnEventId && this.espnEventId !== this.linkedEspnGame()?.id) {
+          if (environment.serverScoring) {
+            this.applyServerScoreDisplay();
+            this.ensureLiveIndex();
+          } else if (this.espnEventId && this.espnEventId !== this.linkedEspnGame()?.id) {
             this.fetchLinkedEspnGame();
             this.syncFromEspn();
           } else if (this.espnEventId && this.linkedEspnGame()) {
@@ -382,7 +391,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   }
 
   private startPolling(): void {
-    if (this.pollingInterval) return;
+    if (environment.serverScoring || this.pollingInterval) return;
     this.pollingInterval = setInterval(() => {
       if (this.espnEventId && this.linkedEspnGame()?.status === 'in') {
         this.syncFromEspn();
@@ -893,11 +902,58 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   }
 
   // ESPN Sync Methods
-  private async fetchLinkedEspnGame(): Promise<void> {
+  private applyServerScoreDisplay(): void {
+    this.stopPolling();
+    if (!this.espnEventId) {
+      if (this.linkedEspnGame()) this.linkedEspnGame.set(null);
+      return;
+    }
+    const live = this.latestEspnLive;
+    if (live) {
+      this.linkedEspnGame.set(this.toLinkedGame(this.espnEventId, live));
+      return;
+    }
+    if (this.espnEventId !== this.linkedEspnGame()?.id) {
+      void this.fetchLinkedEspnGame(false);
+    }
+  }
+
+  private ensureLiveIndex(): void {
+    if (!this.espnEventId || !this.gameId) return;
+    if (!this.isGameOwner() && !this.isManager()) return;
+    const key = `${this.gameId}:${this.espnEventId}`;
+    if (this.liveIndexEnsuredFor === key) return;
+    this.liveIndexEnsuredFor = key;
+    this.gameService.ensureLiveGameIndex(this.gameId, this.espnEventId, this.espnSport).catch(() => {});
+  }
+
+  private toLinkedGame(id: string, live: EspnLiveSnapshot): EspnGame {
+    return {
+      id,
+      name: `${live.awayTeam || this.awayTeam || 'Away'} at ${live.homeTeam || this.homeTeam || 'Home'}`,
+      homeTeam: live.homeTeam || this.homeTeam || 'Home',
+      awayTeam: live.awayTeam || this.awayTeam || 'Away',
+      homeScore: live.homeScore,
+      awayScore: live.awayScore,
+      period: live.period,
+      clock: live.clock,
+      status: live.status,
+      completed: live.completed,
+      quarters: live.quarters,
+      date: ''
+    };
+  }
+
+  private async fetchLinkedEspnGame(poll = true): Promise<void> {
     if (!this.espnEventId) return;
 
-    const game = await this.espnService.getGame(this.espnEventId, this.espnSport);
+    const requestedId = this.espnEventId;
+    const game = await this.espnService.getGame(requestedId, this.espnSport);
+    if (this.destroyed || this.espnEventId !== requestedId) return;
+    if (environment.serverScoring && this.latestEspnLive) return;
     this.linkedEspnGame.set(game);
+
+    if (!poll || environment.serverScoring) return;
 
     if (game?.status === 'in') {
       this.startPolling();
@@ -907,7 +963,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   }
 
   async syncFromEspn(): Promise<void> {
-    if (!this.espnEventId) return;
+    if (environment.serverScoring || !this.espnEventId) return;
 
     this.isSyncingEspn.set(true);
     this.espnSyncError.set(null);
