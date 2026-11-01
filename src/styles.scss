@@ -31,6 +31,18 @@
   --color-border-hover: #cbd5e1;      // slate-300
   --color-border-input: #cbd5e1;      // slate-300
   --color-border-card: #e2e8f0;       // slate-200
+
+  // Primary actions and focus rings. White on #047857 is 5.48:1 (WCAG AA).
+  --color-action: #047857;
+  --color-action-hover: #065f46;
+  --color-action-foreground: #ffffff;
+  --color-focus: #047857;
+  // Live moments only. Slate text on amber-400 is 10.69:1.
+  --color-live: #fbbf24;
+  --color-live-foreground: #0f172a;
+  --color-progress: #334155;
+  --color-link: #334155;
+  --color-link-hover: #0f172a;
 }
 
 // Dark mode
@@ -60,24 +72,40 @@
   --color-border-hover: #475569;      // slate-600
   --color-border-input: #334155;      // slate-700
   --color-border-card: #334155;       // slate-700
+
+  --color-progress: #cbd5e1;
+  --color-link: #e2e8f0;
+  --color-link-hover: #ffffff;
 }
 
-// Self-hosted Roboto variable (latin). Apache 2.0; see src/assets/fonts/LICENSE.
-// One file covers weights 100–900, which is the file Chrome already fetched from
-// Google after the render-blocking stylesheet. font-display: swap paints text
-// immediately in the fallback stack, then swaps to Roboto.
+// Self-hosted latin variable fonts. SIL OFL 1.1; see src/assets/fonts/LICENSE.
+// font-display: swap paints the fallback stack immediately, then swaps.
 @font-face {
-  font-family: Roboto;
+  font-family: Inter;
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
-  src: url("/assets/fonts/roboto-latin.woff2") format("woff2");
+  src: url("/assets/fonts/inter-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: Archivo;
+  font-style: normal;
+  font-weight: 100 900;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("/assets/fonts/archivo-latin.woff2") format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 @layer base {
   html {
-    font-family: Roboto, system-ui, sans-serif;
+    font-family: Inter, system-ui, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: Archivo, Inter, system-ui, sans-serif;
   }
 
   // Placeholder text is content (WCAG 1.4.3). UA placeholders are often

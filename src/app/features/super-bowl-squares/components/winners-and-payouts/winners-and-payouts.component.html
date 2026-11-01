@@ -21,7 +21,7 @@
               }
             </div>
             @if (scores[quarter] && (scores[quarter].home > 0 || scores[quarter].away > 0)) {
-              <div class="text-xs" [class]="winners[quarter] ? 'text-slate-600' : 'text-muted'">
+              <div class="text-xs tabular-nums" [class]="winners[quarter] ? 'text-slate-600' : 'text-muted'">
                 {{ awayTeam || 'Away' }} {{ scores[quarter].away }} - {{ homeTeam || 'Home' }} {{ scores[quarter].home }}
               </div>
             }
@@ -29,7 +29,7 @@
 
           <div class="payout-section">
             <div class="text-sm" [class]="winners[quarter] ? 'text-slate-700' : 'text-muted'">Payout</div>
-            <div class="text-lg font-medium" [class]="winners[quarter] ? 'text-slate-900' : 'text-default'">
+            <div class="text-lg font-medium tabular-nums" [class]="winners[quarter] ? 'text-slate-900' : 'text-default'">
               ${{ (totalPot * quarterPayouts[quarter]).toFixed(2) }}
             </div>
           </div>
@@ -45,7 +45,7 @@
         
         <div class="payout-section">
           <div class="text-white/70 text-sm">Payouts</div>
-          <div class="text-white text-2xl font-bold">
+          <div class="text-white text-2xl font-bold tabular-nums">
             ${{ totalPot.toFixed(2) }}
           </div>
         </div>

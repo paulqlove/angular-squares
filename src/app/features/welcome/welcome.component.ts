@@ -45,17 +45,17 @@ interface Feature {
       <!-- Ripple grid full background -->
       <app-ripple-grid
         class="fixed inset-0 z-0"
-        backgroundColor="#10b981"
-        lineColor="rgba(0,0,0,0.15)">
+        backgroundColor="#0f172a"
+        lineColor="rgba(255,255,255,0.14)">
       </app-ripple-grid>
 
       <div class="relative z-10">
         <!-- Header (sits on green) -->
-        <app-shared-header variant="transparent" heading="p">
+        <app-shared-header variant="transparent">
           @if (isAuthenticated()) {
             <button
               (click)="goToDashboard()"
-              class="px-5 py-2 bg-white text-emerald-700 text-sm font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+              class="px-5 py-2 bg-white text-action text-sm font-semibold rounded-lg hover:bg-primary-100 transition-colors"
             >
               Go to Dashboard
             </button>
@@ -63,7 +63,7 @@ interface Feature {
             <button
               type="button"
               (click)="showAuthModal.set(true)"
-              class="inline-flex min-h-11 items-center justify-center px-5 py-2 bg-white text-emerald-700 text-sm font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+              class="inline-flex min-h-11 items-center justify-center px-5 py-2 bg-white text-action text-sm font-semibold rounded-lg hover:bg-primary-100 transition-colors"
             >
               Sign in
             </button>
@@ -77,20 +77,19 @@ interface Feature {
               <!-- Left: Copy -->
               <div>
                 <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-heading leading-[1.1] tracking-tight">
-                  The Ultimate<br>
-                  <span class="text-yellow-500">Football Squares</span><br>
-                  Game
+                  The ultimate<br>
+                  football squares<br>
+                  game
                 </h1>
                 <p class="text-lg md:text-xl text-muted mt-6 max-w-md">
-                  Create and share your football squares game in seconds.
-                  Perfect for Super Bowl parties, office pools, and game day fun.
+                  Every square, every score, live on one board.™
                 </p>
 
                 <div class="mt-8 flex flex-col gap-3">
                   <button
                     type="button"
                     (click)="showAuthModal.set(true)"
-                    class="w-full self-stretch px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg rounded-lg transition-colors sm:w-auto sm:self-start"
+                    class="w-full self-stretch px-8 py-3.5 bg-button hover:bg-button-hover text-button font-bold text-lg rounded-lg transition-colors sm:w-auto sm:self-start"
                   >
                     Create game
                   </button>
@@ -122,7 +121,7 @@ interface Feature {
                         type="text"
                         [(ngModel)]="gameCode"
                         placeholder="Enter code"
-                        class="flex-1 px-4 py-2.5 border-2 border-default rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none uppercase tracking-widest text-center font-mono bg-input text-default"
+                        class="flex-1 px-4 py-2.5 border-2 border-default rounded-lg focus:border-focus focus:ring-2 focus:ring-focus outline-none uppercase tracking-widest text-center font-mono bg-input text-default"
                         maxlength="6"
                         (keyup.enter)="joinGame()"
                       />
@@ -131,7 +130,7 @@ interface Feature {
                         (click)="joinGame()"
                         [disabled]="gameCode.length !== 6"
                         aria-label="Join game"
-                        class="inline-flex min-h-11 min-w-11 items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors disabled:opacity-40"
+                        class="inline-flex min-h-11 min-w-11 items-center justify-center bg-button hover:bg-button-hover text-button rounded-lg transition-colors disabled:opacity-40"
                       >
                         <ng-icon name="heroArrowRight" class="text-xl" aria-hidden="true"></ng-icon>
                       </button>
@@ -142,7 +141,7 @@ interface Feature {
                 </div>
               </div>
 
-              <!-- Right: sample board (replaces the empty green grid) -->
+              <!-- Right: sample board -->
               <div class="lg:flex lg:items-center">
                 <app-sample-board></app-sample-board>
               </div>
@@ -160,8 +159,8 @@ interface Feature {
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
               @for (feature of features; track feature.title) {
                 <div class="bg-card rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
-                  <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center mb-4">
-                    <ng-icon [name]="feature.icon" class="text-2xl text-emerald-600"></ng-icon>
+                  <div class="w-12 h-12 bg-control rounded-lg flex items-center justify-center mb-4">
+                    <ng-icon [name]="feature.icon" class="text-2xl text-heading"></ng-icon>
                   </div>
                   <h3 class="text-lg font-semibold text-heading mb-2">{{ feature.title }}</h3>
                   <p class="text-muted">{{ feature.description }}</p>
@@ -180,7 +179,7 @@ interface Feature {
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
               <div class="text-center">
-                <div class="w-16 h-16 bg-emerald-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+                <div class="w-16 h-16 bg-header text-header rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4 tabular-nums">
                   1
                 </div>
                 <h3 class="text-lg font-semibold text-heading mb-2">Create a Game</h3>
@@ -188,7 +187,7 @@ interface Feature {
               </div>
 
               <div class="text-center">
-                <div class="w-16 h-16 bg-emerald-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+                <div class="w-16 h-16 bg-header text-header rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4 tabular-nums">
                   2
                 </div>
                 <h3 class="text-lg font-semibold text-heading mb-2">Share the Link</h3>
@@ -196,7 +195,7 @@ interface Feature {
               </div>
 
               <div class="text-center">
-                <div class="w-16 h-16 bg-emerald-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+                <div class="w-16 h-16 bg-header text-header rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4 tabular-nums">
                   3
                 </div>
                 <h3 class="text-lg font-semibold text-heading mb-2">Play & Win</h3>

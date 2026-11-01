@@ -2,24 +2,35 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Page not found — Quarter Score</title>
+  <title>Page not found — QuarterScore</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
   <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="/assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
   <style>
     @font-face {
-      font-family: Roboto;
+      font-family: Inter;
       font-style: normal;
       font-weight: 100 900;
       font-display: swap;
-      src: url("/assets/fonts/roboto-latin.woff2") format("woff2");
+      src: url("/assets/fonts/inter-latin.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: Archivo;
+      font-style: normal;
+      font-weight: 100 900;
+      font-stretch: 100%;
+      font-display: swap;
+      src: url("/assets/fonts/archivo-latin.woff2") format("woff2");
     }
     :root {
       --bg: #f1f5f9;
       --heading: #334155;
-      --muted: #64748b;
-      --button: #0ea5e9;
-      --button-hover: #0284c7;
+      --muted: #475569;
+      --button: #047857;
+      --button-hover: #065f46;
     }
     .dark {
       --bg: #0f172a;
@@ -35,11 +46,15 @@
       justify-content: center;
       background: var(--bg);
       color: var(--heading);
-      font-family: Roboto, system-ui, sans-serif;
+      font-family: Inter, system-ui, sans-serif;
     }
     main { max-width: 28rem; padding: 1.5rem; text-align: center; }
-    img { height: 4rem; width: auto; }
-    h1 { font-size: 1.5rem; line-height: 2rem; margin: 1.5rem 0 0.5rem; }
+    h1 {
+      font-family: Archivo, Inter, system-ui, sans-serif;
+      font-size: 1.5rem;
+      line-height: 2rem;
+      margin: 1.5rem 0 0.5rem;
+    }
     p { margin: 0 0 1.5rem; color: var(--muted); }
     a {
       display: inline-block;
@@ -51,6 +66,10 @@
       text-decoration: none;
     }
     a:hover { background: var(--button-hover); }
+    .logo { height: 2.5rem; width: auto; }
+    .logo-dark { display: none; }
+    .dark .logo-light { display: none; }
+    .dark .logo-dark { display: inline; }
   </style>
   <script>
     (function () {
@@ -64,9 +83,10 @@
 </head>
 <body>
   <main>
-    <img src="/assets/logo.webp" alt="Quarter Score" width="114" height="120">
+    <img class="logo logo-light" src="/assets/brand/lockup-horizontal.svg" alt="QuarterScore" width="384" height="48">
+    <img class="logo logo-dark" src="/assets/brand/lockup-horizontal-reversed.svg" alt="QuarterScore" width="384" height="48">
     <h1>Page not found</h1>
-    <p>That address isn't part of Quarter Score.</p>
+    <p>That address isn't part of QuarterScore.</p>
     <a href="/">Back to home</a>
   </main>
 </body>

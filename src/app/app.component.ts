@@ -20,7 +20,7 @@ import { AuthService } from './core/services/auth.service';
   template: `
     @if (authService.isLoading()) {
       <div class="fixed inset-0 bg-page flex items-center justify-center">
-        <div class="animate-spin rounded-full h-8 w-8 border-2 border-emerald-500 border-t-transparent"></div>
+        <div class="animate-spin rounded-full h-8 w-8 border-2 border-heading border-t-transparent"></div>
       </div>
     } @else {
       <router-outlet></router-outlet>

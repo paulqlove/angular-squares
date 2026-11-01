@@ -70,12 +70,12 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
         <div class="flex-1 overflow-y-auto p-4 pt-8 bg-page">
           <!-- Non-owner notice -->
           @if (!isGameOwner && !isManager) {
-            <div class="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-              <p class="text-sm text-amber-700">Only the game owner can modify settings.</p>
+            <div class="mb-4 p-3 bg-control border border-default rounded-lg">
+              <p class="text-sm text-default">Only the game owner can modify settings.</p>
             </div>
           } @else if (isManager && !isGameOwner) {
-            <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <p class="text-sm text-blue-700">You are a payment manager. You can manage who has paid.</p>
+            <div class="mb-4 p-3 bg-control border border-default rounded-lg">
+              <p class="text-sm text-default">You are a payment manager. You can manage who has paid.</p>
             </div>
           }
 
@@ -92,8 +92,7 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
                 (ngModelChange)="onTeamChange('away', $event)"
                 [disabled]="!isGameOwner"
                 class="w-full px-3 py-2 bg-input border border-input rounded-md text-default
-                       focus:outline-none focus:ring-2
-                       focus:ring-2 focus:ring-secondary-500
+                       focus:outline-none focus:ring-2 focus:ring-focus
                        capitalize disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="Enter away team"
               />
@@ -110,8 +109,7 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
                 (ngModelChange)="onTeamChange('home', $event)"
                 [disabled]="!isGameOwner"
                 class="w-full px-3 py-2 bg-input border border-input rounded-md text-default
-                       focus:outline-none focus:ring-2
-                       focus:ring-2 focus:ring-secondary-500
+                       focus:outline-none focus:ring-2 focus:ring-focus
                        capitalize disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="Enter home team"
               />
@@ -160,8 +158,7 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
                 (ngModelChange)="handlePriceChange($event)"
                 [disabled]="isLocked || !isGameOwner"
                 class="w-full px-3 py-2 bg-input border border-input rounded-md text-default
-                       focus:outline-none focus:ring-2
-                       focus:ring-2 focus:ring-secondary-500
+                       focus:outline-none focus:ring-2 focus:ring-focus
                        disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
@@ -181,8 +178,7 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
                 [placeholder]="venmoUsername ? '@' + venmoUsername.replace('@', '') : '@username'"
                 [disabled]="!isGameOwner"
                 class="w-full px-3 py-2 bg-input border border-input rounded-md text-default
-                       focus:outline-none focus:ring-2
-                       focus:ring-2 focus:ring-secondary-500
+                       focus:outline-none focus:ring-2 focus:ring-focus
                        disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
@@ -236,9 +232,7 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
               <button (click)="onRandomize.emit()"
                       [disabled]="isLocked"
                       class="w-full px-4 py-2 rounded flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed
-                             bg-gradient-to-r from-secondary-500 via-secondary-600 to-accent-600
-                             hover:from-secondary-600 hover:via-secondary-700 hover:to-accent-700
-                             text-white shadow-md hover:shadow-lg transition-all duration-200">
+                             bg-button hover:bg-button-hover text-button shadow-md hover:shadow-lg transition-all duration-200">
                 <span *ngIf="!isRandomized">🎲</span>
                 <ng-icon *ngIf="isRandomized" name="heroTrash" class="text-2xl"></ng-icon>
                 {{ isRandomized ? 'Clear Numbers' : 'Randomize Numbers' }}

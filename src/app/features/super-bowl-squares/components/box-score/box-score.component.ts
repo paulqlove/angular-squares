@@ -9,18 +9,19 @@ import { EspnGame, SportType, SPORT_CONFIG } from '../../../../core/services/esp
       <div class="bg-gray-900 rounded-lg p-3 text-white">
         <div class="flex items-center justify-between text-xs mb-2">
           <span class="text-gray-400">ESPN</span>
-          <span class="px-1.5 py-0.5 rounded text-xs"
-            [class.bg-yellow-500]="game.status === 'in'"
+          <span class="px-1.5 py-0.5 rounded text-xs tabular-nums"
+            [class.bg-live]="game.status === 'in'"
+            [class.text-live]="game.status === 'in'"
             [class.animate-pulse]="game.status === 'in'"
-            [class.bg-green-600]="game.status === 'post'"
-            [class.bg-gray-600]="game.status === 'pre'"
+            [class.bg-primary-600]="game.status === 'post'"
+            [class.bg-primary-700]="game.status === 'pre'"
           >
             @if (game.status === 'pre') { Upcoming }
             @else if (game.status === 'in') { {{ getPeriodLabel() }}{{ game.period }} {{ game.clock }} }
             @else { Final }
           </span>
         </div>
-        <table class="w-full text-xs">
+        <table class="w-full text-xs tabular-nums">
           <thead>
             <tr class="text-gray-400 border-b border-gray-700">
               <th class="text-left py-1 w-16"></th>

@@ -25,12 +25,12 @@ interface SampleClaim {
       <div class="grid grid-cols-[0.9rem_repeat(10,minmax(0,1fr))] gap-px overflow-hidden rounded-lg bg-[var(--color-grid-line)] p-px">
         <div class="bg-card"></div>
         @for (digit of homeDigits; track $index) {
-          <div class="flex h-4 items-center justify-center bg-header text-[9px] font-semibold text-white sm:h-5 sm:text-[10px]">
+          <div class="flex h-4 items-center justify-center bg-header text-[9px] font-semibold tabular-nums text-white sm:h-5 sm:text-[10px]">
             {{ digit }}
           </div>
         }
         @for (row of rows; track row) {
-          <div class="flex items-center justify-center bg-header text-[9px] font-semibold text-white sm:text-[10px]">
+          <div class="flex items-center justify-center bg-header text-[9px] font-semibold tabular-nums text-white sm:text-[10px]">
             {{ awayDigits[row] }}
           </div>
           @for (col of rows; track col) {

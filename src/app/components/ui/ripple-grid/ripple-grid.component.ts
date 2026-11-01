@@ -25,8 +25,8 @@ const FLASH_COLORS = [
 export class RippleGridComponent implements OnInit, OnDestroy {
   @ViewChild('canvas', { static: true }) canvasRef!: ElementRef<HTMLCanvasElement>;
 
-  @Input() backgroundColor = '#10b981';
-  @Input() lineColor = 'rgba(0,0,0,0.15)';
+  @Input() backgroundColor = '#0f172a';
+  @Input() lineColor = 'rgba(255,255,255,0.14)';
   @Input() cellSize = 60;
   @Input() rippleInterval = 4000;
 

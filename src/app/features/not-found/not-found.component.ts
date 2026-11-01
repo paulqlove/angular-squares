@@ -10,17 +10,24 @@ import { RouterLink } from '@angular/router';
     <div class="flex items-center justify-center min-h-screen p-4 bg-page">
       <div class="max-w-md text-center">
         <img
-          src="assets/logo.webp"
-          alt=""
-          width="114"
-          height="120"
-          class="h-16 w-auto mx-auto mb-6"
+          src="assets/brand/lockup-horizontal.svg"
+          alt="QuarterScore"
+          width="384"
+          height="48"
+          class="mx-auto mb-6 h-10 w-auto dark:hidden"
+        >
+        <img
+          src="assets/brand/lockup-horizontal-reversed.svg"
+          alt="QuarterScore"
+          width="384"
+          height="48"
+          class="mx-auto mb-6 hidden h-10 w-auto dark:block"
         >
         <h1 class="mb-2 text-2xl font-bold text-heading">Page not found</h1>
-        <p class="mb-6 text-muted">That address isn't part of Quarter Score.</p>
+        <p class="mb-6 text-muted">That address isn't part of QuarterScore.</p>
         <a
           routerLink="/"
-          class="inline-block px-6 py-3 text-white transition-colors rounded-lg bg-secondary-500 hover:bg-secondary-600"
+          class="inline-block px-6 py-3 text-button transition-colors rounded-lg bg-button hover:bg-button-hover"
         >
           Back to home
         </a>
@@ -32,6 +39,6 @@ export class NotFoundComponent implements OnInit {
   private title = inject(Title);
 
   public ngOnInit(): void {
-    this.title.setTitle('Page not found — Quarter Score');
+    this.title.setTitle('Page not found — QuarterScore');
   }
 }

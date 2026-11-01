@@ -2,7 +2,7 @@
 @if (isLoading()) {
   <div class="flex items-center justify-center min-h-screen bg-page">
     <div class="text-center">
-      <svg class="w-12 h-12 mx-auto mb-4 animate-spin text-secondary-500" viewBox="0 0 24 24">
+      <svg class="w-12 h-12 mx-auto mb-4 animate-spin text-heading" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
       </svg>
@@ -24,7 +24,7 @@
       </p>
       <button
         (click)="goBack()"
-        class="px-6 py-3 text-white transition-colors rounded-lg bg-secondary-500 hover:bg-secondary-600"
+        class="px-6 py-3 text-button transition-colors rounded-lg bg-button hover:bg-button-hover"
       >
         Go Back
       </button>
@@ -124,7 +124,7 @@
                      [disabled]="isLocked"
                      [class.border-red-500]="duplicateNameWarning()"
                      [class.ring-red-200]="duplicateNameWarning()"
-                     class="w-full px-3 py-1.5 text-sm border rounded-lg bg-input text-default text-center sm:text-left focus:outline-none focus:ring-2 focus:ring-secondary-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                     class="w-full px-3 py-1.5 text-sm border rounded-lg bg-input text-default text-center sm:text-left focus:outline-none focus:ring-2 focus:ring-focus disabled:opacity-50 disabled:cursor-not-allowed">
               @if (duplicateNameWarning()) {
                 <span class="text-xs text-red-500 text-center">{{ duplicateNameWarning() }}</span>
               }
@@ -143,28 +143,28 @@
               <button
                 (click)="activeTab = 'board'"
                 [class.border-b-2]="activeTab === 'board'"
-                [class.border-secondary-500]="activeTab === 'board'"
-                [class.text-secondary-500]="activeTab === 'board'"
+                [class.border-heading]="activeTab === 'board'"
+                [class.text-heading]="activeTab === 'board'"
                 [class.text-muted]="activeTab !== 'board'"
-                class="px-4 py-2 text-lg font-bold transition-colors hover:text-secondary-400 -mb-px">
+                class="px-4 py-2 text-lg font-bold transition-colors hover:text-heading -mb-px">
                 Game Board
               </button>
               <button
                 (click)="activeTab = 'probabilities'"
                 [class.border-b-2]="activeTab === 'probabilities'"
-                [class.border-secondary-500]="activeTab === 'probabilities'"
-                [class.text-secondary-500]="activeTab === 'probabilities'"
+                [class.border-heading]="activeTab === 'probabilities'"
+                [class.text-heading]="activeTab === 'probabilities'"
                 [class.text-muted]="activeTab !== 'probabilities'"
-                class="px-4 py-2 text-lg font-bold transition-colors hover:text-secondary-400 -mb-px">
+                class="px-4 py-2 text-lg font-bold transition-colors hover:text-heading -mb-px">
                 Odds
               </button>
               <button
                 (click)="activeTab = 'boxscore'"
                 [class.border-b-2]="activeTab === 'boxscore'"
-                [class.border-secondary-500]="activeTab === 'boxscore'"
-                [class.text-secondary-500]="activeTab === 'boxscore'"
+                [class.border-heading]="activeTab === 'boxscore'"
+                [class.text-heading]="activeTab === 'boxscore'"
                 [class.text-muted]="activeTab !== 'boxscore'"
-                class="px-4 py-2 text-lg font-bold transition-colors hover:text-secondary-400 -mb-px">
+                class="px-4 py-2 text-lg font-bold transition-colors hover:text-heading -mb-px">
                 Box Score
               </button>
             </div>
@@ -314,7 +314,7 @@
               </div>
               <button
                 (click)="copyGameCode()"
-                class="p-3 text-white transition-colors rounded-lg bg-secondary-500 hover:bg-secondary-600"
+                class="p-3 text-button transition-colors rounded-lg bg-button hover:bg-button-hover"
                 title="Copy code"
                 aria-label="Copy game code"
               >
@@ -336,7 +336,7 @@
               />
               <button
                 (click)="copyShareLink()"
-                class="p-2.5 text-white transition-colors rounded-lg bg-secondary-500 hover:bg-secondary-600"
+                class="p-2.5 text-button transition-colors rounded-lg bg-button hover:bg-button-hover"
                 title="Copy link"
                 aria-label="Copy share link"
               >
@@ -382,7 +382,7 @@
             type="text"
             [(ngModel)]="editingName"
             placeholder="Enter your name"
-            class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
+            class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-focus focus:ring-2 focus:ring-focus outline-none text-default"
             (keyup.enter)="saveNameEdit()"
           />
           @if (isEditingNameTaken()) {
@@ -400,7 +400,7 @@
           <button
             (click)="saveNameEdit()"
             [disabled]="isSavingName() || !editingName.trim()"
-            class="px-6 py-2 font-bold text-white transition-colors rounded-lg bg-secondary-500 hover:bg-secondary-600 disabled:opacity-50"
+            class="px-6 py-2 font-bold text-button transition-colors rounded-lg bg-button hover:bg-button-hover disabled:opacity-50"
           >
             @if (isSavingName()) {
               Saving...
@@ -435,7 +435,7 @@
             type="text"
             [(ngModel)]="forceNameValue"
             placeholder="Enter a new name"
-            class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
+            class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-focus focus:ring-2 focus:ring-focus outline-none text-default"
             (keyup.enter)="saveForceNameChange()"
           />
           @if (isForceNameTaken()) {
@@ -447,7 +447,7 @@
           <button
             (click)="saveForceNameChange()"
             [disabled]="isSavingForceName() || !forceNameValue.trim() || isForceNameTaken()"
-            class="px-6 py-2 font-bold text-white transition-colors rounded-lg bg-secondary-500 hover:bg-secondary-600 disabled:opacity-50"
+            class="px-6 py-2 font-bold text-button transition-colors rounded-lg bg-button hover:bg-button-hover disabled:opacity-50"
           >
             @if (isSavingForceName()) {
               Saving...

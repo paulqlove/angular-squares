@@ -4,7 +4,7 @@
       @for (entry of getPlayerEntries(); track entry.player) {
         <button
           type="button"
-          class="w-full flex items-center justify-between p-2 rounded bg-card hover:bg-card-hover focus:ring-2 focus:ring-secondary-500 focus:outline-none text-left"
+          class="w-full flex items-center justify-between p-2 rounded bg-card hover:bg-card-hover focus:ring-2 focus:ring-focus focus:outline-none text-left"
           [class.bg-card-hover]="selectedPlayer === entry.player"
           (click)="onPlayerClick(entry.player)"
           [appTooltip]="'Click to highlight squares on the board'"
