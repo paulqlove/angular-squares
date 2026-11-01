@@ -27,18 +27,41 @@ Already in flight as separate PRs. Do not redo them here.
 - Push notifications for winners
 - Custom quarter payouts (default 20/20/20/40)
 
-### Bar/Venue (~$5-10/month or season)
+### Bar/Venue ($49-99/season)
 - Everything in Premium
+- **Customer email capture** (players sign up with email to join)
+- Unlimited boards per season
+- Free game mode (prizes are coupons, gift cards, etc. — no cash, no gambling concerns)
 - Custom branding/theming (colors, logo)
 - Multi-board TV display (large screen only)
 - Branded QR codes
 - Subdomain support (later: joes-bar.quarterscore.com)
 - Max squares per player (limit how many squares one person can claim)
 - Require account to play (disable guest mode per game)
-- Free game mode (no payment tracking — prizes are custom like gift cards, coupons, etc.)
+
+**Value prop for bars**: "Capture 50-100 customer emails per season" is worth $200+ in Facebook ad equivalent. The game is free entertainment that brings people back weekly.
 
 ### Pricing
-Keep play free. The free sites dominate search. Charge the host. Public prices elsewhere run about $0.99 per game to $25 per grid, so these tiers are the low end. Branding, weekly reuse, and export can cost more. No popups. No gambling affiliates.
+Keep play free. The free sites dominate search. Charge the host. Public prices elsewhere run about $0.99 per game to $25 per grid. No popups. No gambling affiliates.
+
+**Bar/Venue pricing rationale**: $10 is too cheap for B2B — signals "toy" not "tool." Bars spend $500/month on Untappd, $200 on trivia nights. Price at $49-99/season so serious buyers take it seriously. The bars who won't pay $49 also won't actually use it at $10.
+
+### Bar Outreach Strategy
+
+**Market size**: ~60,000 bars in the US, 10-15k are true sports bars showing NFL. Most do paper squares or nothing. Cold outreach converts 1-3%, so realistically hundreds of sign-ups in year one, not thousands.
+
+**Outreach approach**: Use AI (Grok, etc.) to identify and reach sports bars. Pitch the email capture angle, not the features: "Run free squares games during Sunday football. Capture customer emails. Give away coupons instead of cash — no gambling, just engagement."
+
+**Lead with**:
+1. Customer email capture (the real value)
+2. Free game mode (coupons/gift cards, not cash)
+3. Weekly engagement (reason for customers to return)
+4. Zero setup (scan QR, join, play)
+
+**Pricing options to test**:
+- $49/season (impulse buy, still signals value)
+- $99/year (covers NFL + college)
+- $29/month during season (recurring, Sept-Feb only)
 
 ## Feature Details
 
