@@ -1,10 +1,8 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
-import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
 
 @Component({
   selector: 'app-shared-header',
   standalone: true,
-  imports: [ThemeToggleComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div [class]="containerClass">
@@ -18,7 +16,6 @@ import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
         </div>
         <div class="flex items-center gap-1 sm:gap-2">
           <ng-content></ng-content>
-          <app-theme-toggle></app-theme-toggle>
         </div>
       </div>
     </div>

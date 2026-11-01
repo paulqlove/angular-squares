@@ -2,7 +2,6 @@ import { Component, Input, inject, signal, ChangeDetectionStrategy } from '@angu
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
 import { SiteFooterComponent } from '../../shared/site-footer.component';
-import { ThemeToggleComponent } from '../../components/ui/theme-toggle/theme-toggle.component';
 
 interface NavLink {
   path: string;
@@ -11,7 +10,7 @@ interface NavLink {
 
 @Component({
     selector: 'app-content-shell',
-    imports: [RouterLink, SiteFooterComponent, ThemeToggleComponent],
+    imports: [RouterLink, SiteFooterComponent],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
     <a
@@ -62,9 +61,6 @@ interface NavLink {
                 >
                   Start a free game
                 </a>
-              </li>
-              <li>
-                <app-theme-toggle></app-theme-toggle>
               </li>
             </ul>
           </nav>
