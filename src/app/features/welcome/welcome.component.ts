@@ -118,7 +118,7 @@ interface Feature {
             <p class="qs-label mt-6 text-qs-muted">Free · Players don't need an account</p>
           </div>
 
-          <app-phone-demo class="xl:-mb-[17rem] xl:translate-x-24"></app-phone-demo>
+          <app-phone-demo class="xl:-mb-[12rem]"></app-phone-demo>
         </div>
         </div>
       </section>
