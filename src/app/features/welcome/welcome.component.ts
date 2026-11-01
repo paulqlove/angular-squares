@@ -2,7 +2,6 @@ import { Component, ElementRef, signal, inject, OnInit, effect, ViewChild, Chang
 
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/services/auth.service';
 import { SeoService } from '../../core/services/seo.service';
 import { SiteFooterComponent } from '../../shared/site-footer.component';
@@ -75,9 +74,6 @@ interface Feature {
               <button type="button" (click)="showAuthModal.set(true)" class="qs-btn qs-btn-primary w-full sm:w-auto px-6">
                 Create game
               </button>
-              <a [routerLink]="['/game', demoGameId]" class="qs-btn qs-btn-secondary flex-1 sm:flex-none">
-                See demo
-              </a>
               <button
                 type="button"
                 (click)="openJoinCode()"
@@ -228,7 +224,6 @@ export class WelcomeComponent implements OnInit {
   @ViewChild('joinInput') private joinInput?: ElementRef<HTMLInputElement>;
 
   gameCode = '';
-  demoGameId = environment.demoGameId;
   showAuthModal = signal(false);
   showJoinCode = signal(false);
 
