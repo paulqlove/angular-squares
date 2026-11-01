@@ -62,14 +62,14 @@ import { WalkthroughService } from '../../../core/services/walkthrough.service';
             @if (walkthroughService.currentStepIndex() > 0) {
               <button
                 (click)="previous()"
-                class="px-4 py-2 text-sm font-medium bg-control hover:bg-control-hover text-default rounded-lg transition-colors"
+                class="qs-btn qs-btn-secondary"
               >
                 Back
               </button>
             }
             <button
               (click)="next()"
-              class="px-4 py-2 text-sm font-medium bg-qs-accent hover:bg-qs-accent-hover text-white rounded-lg transition-colors"
+              class="qs-btn qs-btn-primary"
             >
               {{ isLastStep() ? 'Done' : 'Next' }}
             </button>

@@ -36,7 +36,7 @@ import {
           aria-modal="true"
           aria-labelledby="upgrade-title"
           aria-describedby="upgrade-summary"
-          class="upgrade-dialog-in w-full max-w-lg rounded-2xl border border-default bg-dialog text-default shadow-2xl"
+          class="upgrade-dialog-in w-full max-w-lg rounded-card border border-qs-line bg-qs-panel text-qs-ink shadow-pop"
           (click)="$event.stopPropagation()"
         >
           <div class="flex items-start justify-between gap-3 border-b border-default p-4 sm:p-6">
@@ -104,7 +104,7 @@ import {
                     placeholder="you@example.com"
                   />
                   @if (emailError()) {
-                    <p id="upgrade-email-error" role="alert" class="mt-1.5 text-sm font-medium leading-5 text-red-800 dark:text-red-200">
+                    <p id="upgrade-email-error" role="alert" class="mt-1.5 text-sm font-medium leading-5 text-qs-bad">
                       {{ emailError() }}
                     </p>
                   }

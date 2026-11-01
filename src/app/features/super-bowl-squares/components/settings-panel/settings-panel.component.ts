@@ -237,8 +237,8 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
               <button (click)="onRandomize.emit()"
                 [disabled]="isLocked"
                       class="w-full px-4 py-2 rounded flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed
-                             bg-gradient-to-r from-qs-accent via-qs-accent-hover to-accent-600
-                             hover:from-qs-accent-hover hover:via-qs-accent-hover hover:to-accent-700
+                             bg-qs-accent
+                             hover:bg-qs-accent-hover
                              text-white shadow-md hover:shadow-lg transition-all duration-200">
                 @if (!isRandomized) {
                   <span>🎲</span>
@@ -259,12 +259,12 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
           <div class="p-4 border-t border-default mt-auto bg-card">
             <button
               (click)="onClearGame.emit(); close()"
-              class="w-full bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded flex items-center justify-center gap-2"
+              class="qs-btn qs-btn-danger w-full"
               >
               <ng-icon name="heroTrash" class="text-2xl"></ng-icon>
               Clear Game
             </button>
-            <p class="text-xs text-gray-500 text-center mt-2">
+            <p class="text-xs text-qs-muted text-center mt-2">
               This will reset all game data.
             </p>
           </div>

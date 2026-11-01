@@ -2,6 +2,8 @@
 
 .number-cell {
   @apply flex items-center justify-center text-default text-sm sm:text-base;
+  font-family: var(--qs-font-mono);
+  font-weight: 500;
   height: calc((100vw - 5rem) / 10);
 
   @include tablet {
@@ -16,29 +18,24 @@
 .square-cell {
   @extend .number-cell;
   @apply text-[8px] sm:text-xs cursor-pointer p-1 text-center truncate overflow-hidden whitespace-nowrap;
+  font-family: var(--qs-font-sans);
+  font-weight: 600;
   // Player names should always be dark since player colors are pastel
   color: #0f172a !important; // slate-900
-  outline: 1px solid var(--color-grid-line);
+  outline: 1px solid var(--qs-line);
   outline-offset: -1px;
 }
 
 .square-highlight {
-  box-shadow: 0 0 0 3px #facc15, 0 0 12px 2px rgba(250, 204, 21, 0.5);
+  box-shadow: inset 0 0 0 2px var(--qs-accent);
   z-index: 1;
   position: relative;
 }
 
+/* Current leader: 3px emerald ring, no scaling or glow */
 .square-leader {
   z-index: 2;
   position: relative;
-  animation: leader-pulse 2s ease-in-out infinite;
-}
-
-@keyframes leader-pulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.12);
-  }
+  outline: 3px solid var(--qs-accent) !important;
+  outline-offset: -3px !important;
 }

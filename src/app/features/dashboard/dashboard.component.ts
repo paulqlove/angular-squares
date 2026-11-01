@@ -85,14 +85,14 @@ import {
         <div class="relative" data-walkthrough="profile-dropdown">
           <button
             (click)="toggleProfileDropdown($event)"
-            class="flex items-center gap-2 bg-header-accent hover:bg-primary-700 rounded-full px-3 py-1.5 transition-colors cursor-pointer"
+            class="flex items-center gap-2 bg-header-accent hover:bg-white/10 rounded-full px-3 py-1.5 transition-colors cursor-pointer"
             title="Profile menu"
           >
             @if (currentUser()?.photoURL) {
               <img
                 [src]="$safeNavigationMigration(currentUser()?.photoURL)"
                 alt="Profile"
-                class="w-7 h-7 rounded-full ring-2 ring-primary-500"
+                class="w-7 h-7 rounded-full ring-2 ring-qs-accent"
               />
             } @else {
               <div class="w-7 h-7 rounded-full bg-qs-accent flex items-center justify-center">
@@ -105,7 +105,7 @@ import {
               {{ currentUser()?.displayName || currentUser()?.email }}
             </span>
             @if (currentUser()?.isGuest) {
-              <span class="text-xs bg-primary-600 text-primary-200 px-2 py-0.5 rounded-full">Guest</span>
+              <span class="text-xs qs-badge border-0 bg-white/10 text-qs-tile-ink">Guest</span>
             }
             <ng-icon name="heroChevronDown" class="text-sm text-header-muted"></ng-icon>
           </button>
@@ -174,7 +174,7 @@ import {
               <!-- Sign out -->
               <button
                 (click)="signOut()"
-                class="w-full flex items-center justify-center gap-2 px-3 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-sm font-medium transition-colors"
+                class="qs-btn qs-btn-ghost w-full text-qs-bad hover:!bg-qs-bad-soft"
               >
                 <ng-icon name="heroArrowRightOnRectangle" class="text-base"></ng-icon>
                 Sign Out
@@ -186,7 +186,7 @@ import {
 
       <main class="container mx-auto px-4 py-8">
         <!-- Hero Section -->
-        <div class="bg-card border border-card rounded-2xl shadow-xl p-8 mb-8 dark:bg-gradient-to-br dark:from-header-accent dark:to-header dark:border-0" data-walkthrough="hero-section">
+        <div class="qs-card p-8 mb-8" data-walkthrough="hero-section">
           <div class="flex items-center gap-3 mb-6">
             <span class="text-3xl">🏈</span>
             <h2 class="text-2xl font-bold text-heading dark:text-white tracking-tight">Start or Join a Game</h2>
@@ -208,10 +208,10 @@ import {
                   </div>
                   <div>
                     <h3 class="text-lg font-bold text-heading dark:text-white">New Game</h3>
-                    <p class="text-sm text-muted dark:text-primary-200">Create a squares pool</p>
+                    <p class="text-sm text-muted">Create a squares pool</p>
                   </div>
                 </div>
-                <p class="text-sm text-muted dark:text-primary-300">Set up your own game with custom settings and share it with friends.</p>
+                <p class="text-sm text-muted">Set up your own game with custom settings and share it with friends.</p>
               </button>
             } @else {
               <div class="bg-amber-100 dark:bg-amber-500/20 backdrop-blur border border-amber-300 dark:border-amber-400/30 rounded-xl p-6">
@@ -237,12 +237,12 @@ import {
             <!-- Join Game Card -->
             <div class="bg-control dark:bg-white/10 backdrop-blur border border-default dark:border-white/20 rounded-xl p-6" data-walkthrough="join-game">
               <div class="flex items-center gap-4 mb-3">
-                <div class="w-12 h-12 rounded-xl bg-accent-500 flex items-center justify-center">
+                <div class="w-12 h-12 rounded-xl bg-qs-ink flex items-center justify-center">
                   <ng-icon name="heroTicket" class="text-2xl text-white"></ng-icon>
                 </div>
                 <div>
                   <h3 class="text-lg font-bold text-heading dark:text-white">Join with Code</h3>
-                  <p class="text-sm text-muted dark:text-primary-200">Have a 6-digit code?</p>
+                  <p class="text-sm text-muted">Have a 6-digit code?</p>
                 </div>
               </div>
               <div class="flex gap-2 min-w-0">
@@ -250,14 +250,14 @@ import {
                   type="text"
                   [(ngModel)]="joinGameCode"
                   placeholder="XXXXXX"
-                  class="flex-1 min-w-0 px-4 py-3 bg-input dark:bg-white/10 border border-input dark:border-white/20 rounded-lg text-default dark:text-white placeholder-muted dark:placeholder-primary-400 uppercase tracking-widest font-mono text-center focus:outline-none focus:ring-2 focus:ring-qs-accent focus:border-transparent"
+                  class="flex-1 min-w-0 px-4 py-3 bg-qs-panel-2 border border-qs-line-strong rounded-btn text-qs-ink placeholder-muted uppercase tracking-widest font-mono text-center focus:outline-none focus:ring-2 focus:ring-qs-accent focus:border-transparent"
                   maxlength="6"
                   (keyup.enter)="joinGame()"
                 />
                 <button
                   (click)="joinGame()"
                   [disabled]="joinGameCode.length !== 6"
-                  class="shrink-0 px-4 py-3 bg-accent-500 hover:bg-accent-400 disabled:bg-control disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+                  class="qs-btn qs-btn-primary shrink-0"
                 >
                   <ng-icon name="heroArrowRight" class="text-xl"></ng-icon>
                 </button>
@@ -301,7 +301,7 @@ import {
               @for (game of myGames(); track game.id) {
                 <div class="bg-card rounded-2xl shadow-sm hover:shadow-md transition-all overflow-hidden group border border-card">
                   <!-- Game Header -->
-                  <div class="bg-control dark:bg-gradient-to-r dark:from-header-accent dark:to-header p-4">
+                  <div class="bg-qs-panel-2 p-4">
                     <div class="flex items-center justify-between mb-2">
                       <h3 class="font-bold text-heading dark:text-white truncate">{{ game.name }}</h3>
                       @if (game.isLocked) {
@@ -316,7 +316,7 @@ import {
                         </span>
                       }
                     </div>
-                    <p class="text-sm text-muted dark:text-primary-300">
+                    <p class="text-sm text-muted">
                       @if (game.homeTeam && game.awayTeam) {
                         {{ game.awayTeam }} vs {{ game.homeTeam }}
                       } @else {
@@ -335,7 +335,7 @@ import {
                       </div>
                       <div class="h-2 bg-control rounded-full overflow-hidden">
                         <div
-                          class="h-full bg-gradient-to-r from-qs-accent to-qs-accent-hover rounded-full transition-all duration-500"
+                          class="h-full bg-qs-accent rounded-full transition-all duration-500"
                           [style.width.%]="game.squaresFilled"
                         ></div>
                       </div>
@@ -368,7 +368,7 @@ import {
                     <div class="flex items-center gap-2">
                       <button
                         (click)="openGame(game.id)"
-                        class="flex-1 px-4 py-2.5 bg-qs-accent hover:bg-qs-accent-hover text-white rounded-xl font-medium transition-colors"
+                        class="qs-btn qs-btn-primary flex-1"
                       >
                         Open Game
                       </button>
@@ -390,7 +390,7 @@ import {
                       </button>
                       <button
                         (click)="deleteGame(game.id)"
-                        class="p-2.5 text-muted hover:text-red-600 hover:bg-red-100 rounded-xl transition-colors"
+                        class="p-2.5 text-muted hover:text-qs-bad hover:bg-qs-bad-soft rounded-xl transition-colors"
                         title="Delete game"
                         aria-label="Delete game"
                       >
@@ -423,7 +423,7 @@ import {
             @for (game of joinedGames(); track game.id) {
               <div class="bg-card rounded-2xl shadow-sm hover:shadow-md transition-all overflow-hidden group border border-card border-l-4 border-l-qs-accent">
                 <!-- Game Header -->
-                <div class="bg-control dark:bg-gradient-to-r dark:from-header-accent dark:to-header p-4">
+                <div class="bg-qs-panel-2 p-4">
                   <div class="flex items-center justify-between mb-2">
                     <h3 class="font-bold text-heading dark:text-white truncate">{{ game.name }}</h3>
                     <span class="flex items-center gap-1 text-xs bg-qs-accent-soft text-qs-accent px-2 py-1 rounded-full dark:bg-qs-accent/20 text-qs-accent">
@@ -431,14 +431,14 @@ import {
                       Joined
                     </span>
                   </div>
-                  <p class="text-sm text-muted dark:text-primary-300">
+                  <p class="text-sm text-muted">
                     @if (game.homeTeam && game.awayTeam) {
                       {{ game.awayTeam }} vs {{ game.homeTeam }}
                     } @else {
                       <span class="italic">No teams set</span>
                     }
                   </p>
-                  <p class="text-xs text-muted dark:text-primary-400 mt-1">
+                  <p class="text-xs text-muted mt-1">
                     Hosted by {{ game.ownerName }}
                   </p>
                 </div>
@@ -453,7 +453,7 @@ import {
                     </div>
                     <div class="h-2 bg-control rounded-full overflow-hidden">
                       <div
-                        class="h-full bg-gradient-to-r from-qs-accent to-qs-accent-hover rounded-full transition-all duration-500"
+                        class="h-full bg-qs-accent rounded-full transition-all duration-500"
                         [style.width.%]="game.squaresFilled"
                       ></div>
                     </div>
@@ -486,7 +486,7 @@ import {
                   <div class="flex items-center gap-2">
                     <button
                       (click)="openGame(game.id)"
-                      class="flex-1 px-4 py-2.5 bg-qs-accent hover:bg-qs-accent-hover text-white rounded-xl font-medium transition-colors"
+                      class="qs-btn qs-btn-primary flex-1"
                     >
                       Open Game
                     </button>
@@ -649,16 +649,16 @@ import {
 
               <!-- Game Name -->
               <div>
-                <label class="block text-sm font-semibold text-label mb-3">Game Name <span class="text-red-500">*</span></label>
+                <label class="block text-sm font-semibold text-label mb-3">Game Name <span class="text-qs-bad">*</span></label>
                 <input
                   type="text"
                   [(ngModel)]="newGameName"
                   placeholder="e.g., Super Bowl Party 2024"
                   class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-qs-accent focus:ring-2 focus:ring-qs-accent-soft outline-none text-default"
-                  [class.border-red-500]="gameNameError()"
+                  [class.border-qs-bad]="gameNameError()"
                 />
                 @if (gameNameError()) {
-                  <p class="mt-2 text-sm text-red-600 dark:text-red-400">Game name is required</p>
+                  <p class="mt-2 text-sm text-qs-bad">Game name is required</p>
                 }
               </div>
 
@@ -696,14 +696,14 @@ import {
             <div class="flex items-center justify-end gap-3 p-6 border-t border-default bg-input">
               <button
                 (click)="showCreateModal.set(false)"
-                class="px-6 py-2.5 text-muted hover:bg-control rounded-xl font-medium transition-colors"
+                class="qs-btn qs-btn-ghost text-qs-muted"
               >
                 Cancel
               </button>
               <button
                 (click)="createGame()"
                 [disabled]="isCreating()"
-                class="px-8 py-2.5 bg-qs-accent hover:bg-qs-accent-hover disabled:opacity-50 text-white rounded-xl font-bold transition-colors"
+                class="qs-btn qs-btn-primary px-8"
               >
                 @if (isCreating()) {
                   <span class="flex items-center gap-2">
@@ -781,7 +781,7 @@ import {
             <div class="p-6 border-t border-default bg-input rounded-b-2xl">
               <button
                 (click)="shareModalGameId.set(null)"
-                class="w-full px-4 py-3 bg-control hover:bg-control-hover text-default rounded-xl font-medium transition-colors"
+                class="qs-btn qs-btn-secondary w-full"
               >
                 Done
               </button>
@@ -916,7 +916,7 @@ import {
                     <span class="flex-1 text-qs-ok dark:text-qs-ok">{{ editingGame()?.managerName || editingGame()?.managerEmail || 'Assigned' }}</span>
                     <button
                       (click)="removeManager()"
-                      class="px-3 py-1 text-sm bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-400"
+                      class="qs-btn qs-btn-danger"
                     >
                       Remove
                     </button>
@@ -958,14 +958,14 @@ import {
             <div class="flex items-center justify-end gap-3 p-6 border-t border-default bg-input rounded-b-2xl">
               <button
                 (click)="closeEditModal()"
-                class="px-6 py-2.5 text-muted hover:bg-control rounded-xl font-medium transition-colors"
+                class="qs-btn qs-btn-ghost text-qs-muted"
               >
                 Cancel
               </button>
               <button
                 (click)="saveGameEdits()"
                 [disabled]="isSavingGame()"
-                class="px-8 py-2.5 bg-qs-accent hover:bg-qs-accent-hover disabled:opacity-50 text-white rounded-xl font-bold transition-colors"
+                class="qs-btn qs-btn-primary px-8"
               >
                 @if (isSavingGame()) {
                   Saving...
@@ -1205,10 +1205,10 @@ export class DashboardComponent implements OnInit {
 
   getGameStatusClass(status: string): string {
     switch (status) {
-      case 'pre': return 'bg-primary-200 text-primary-700';
-      case 'in': return 'bg-red-100 text-red-700';
+      case 'pre': return 'bg-qs-panel-2 text-qs-muted';
+      case 'in': return 'bg-qs-live-fill text-qs-tile';
       case 'post': return 'bg-qs-ok-soft text-qs-ok';
-      default: return 'bg-primary-200 text-primary-700';
+      default: return 'bg-qs-panel-2 text-qs-muted';
     }
   }
 

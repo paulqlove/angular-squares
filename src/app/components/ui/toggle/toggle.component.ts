@@ -10,7 +10,7 @@ import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from 
       type="button"
       (click)="!disabled && onChange.emit(!checked)"
       [class]="'relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 ' +
-        (checked ? 'bg-primary-600' : 'bg-gray-200') +
+        (checked ? 'bg-qs-accent' : 'bg-qs-line-strong') +
         (disabled ? ' opacity-50 cursor-not-allowed' : ' cursor-pointer')"
       role="switch"
       [attr.aria-checked]="checked"

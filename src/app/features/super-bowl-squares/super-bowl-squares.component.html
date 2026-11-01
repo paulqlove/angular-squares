@@ -13,18 +13,18 @@
   <!-- Game Not Found State -->
   <div class="flex items-center justify-center min-h-screen p-4 bg-page">
     <div class="max-w-md text-center">
-      <div class="flex items-center justify-center w-20 h-20 mx-auto mb-6 bg-red-100 rounded-full">
-        <svg class="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="flex items-center justify-center w-20 h-20 mx-auto mb-6 bg-qs-bad-soft rounded-full">
+        <svg class="w-10 h-10 text-qs-bad" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
         </svg>
       </div>
-      <h1 class="mb-2 text-2xl font-bold text-heading">Game Not Found</h1>
+      <h1 class="qs-title mb-2 text-3xl">Game Not Found</h1>
       <p class="mb-6 text-muted">
         The game code <code class="px-2 py-1 font-mono bg-control rounded">{{ gameId }}</code> doesn't exist or has been deleted.
       </p>
       <button
         (click)="goBack()"
-        class="px-6 py-3 text-white transition-colors rounded-lg bg-qs-accent hover:bg-qs-accent-hover"
+        class="qs-btn qs-btn-primary"
         >
         Go Back
       </button>
@@ -97,7 +97,7 @@
               <ng-icon name="heroArrowLeft" class="text-xl"></ng-icon>
             </button>
           }
-          <h2 class="text-xl font-bold text-heading">{{ gameName }}</h2>
+          <h2 class="qs-title text-2xl sm:text-3xl">{{ gameName }}</h2>
         </div>
 
         <!-- Player Display / Input -->
@@ -122,11 +122,10 @@
               <input type="text" [(ngModel)]="currentPlayer"
                 placeholder="Enter your name"
                 [disabled]="isLocked"
-                [class.border-red-500]="duplicateNameWarning()"
-                [class.ring-red-200]="duplicateNameWarning()"
+                [class.border-qs-bad]="duplicateNameWarning()"
                 class="w-full px-3 py-1.5 text-sm border rounded-lg bg-input text-default text-center sm:text-left focus:outline-none focus:ring-2 focus:ring-qs-accent disabled:opacity-50 disabled:cursor-not-allowed">
               @if (duplicateNameWarning()) {
-                <span class="text-xs text-red-500 text-center">{{ duplicateNameWarning() }}</span>
+                <span class="text-xs text-qs-bad text-center">{{ duplicateNameWarning() }}</span>
               }
             </div>
           }
@@ -137,34 +136,28 @@
       <div class="grid grid-cols-1 gap-6 lg:grid-cols-4">
         <!-- Game Board -->
         <div class="col-span-1 lg:col-span-2" data-walkthrough="game-board">
-          <div class="p-4 pt-0 rounded-lg">
+          <div class="qs-card p-3 sm:p-5">
             <!-- Tabs -->
-            <div class="flex mb-4 py-[0.5rem]">
+            <div class="flex flex-wrap gap-2 mb-4" role="tablist">
               <button
                 (click)="activeTab = 'board'"
-                [class.border-b-2]="activeTab === 'board'"
-                [class.border-qs-accent]="activeTab === 'board'"
-                [class.text-qs-accent]="activeTab === 'board'"
-                [class.text-muted]="activeTab !== 'board'"
-                class="px-4 py-2 text-lg font-bold transition-colors hover:text-qs-muted -mb-px">
+                role="tab"
+                [attr.aria-selected]="activeTab === 'board'"
+                class="qs-tab px-3 sm:px-4">
                 Game Board
               </button>
               <button
                 (click)="activeTab = 'probabilities'"
-                [class.border-b-2]="activeTab === 'probabilities'"
-                [class.border-qs-accent]="activeTab === 'probabilities'"
-                [class.text-qs-accent]="activeTab === 'probabilities'"
-                [class.text-muted]="activeTab !== 'probabilities'"
-                class="px-4 py-2 text-lg font-bold transition-colors hover:text-qs-muted -mb-px">
+                role="tab"
+                [attr.aria-selected]="activeTab === 'probabilities'"
+                class="qs-tab px-3 sm:px-4">
                 Heatmap
               </button>
               <button
                 (click)="activeTab = 'boxscore'"
-                [class.border-b-2]="activeTab === 'boxscore'"
-                [class.border-qs-accent]="activeTab === 'boxscore'"
-                [class.text-qs-accent]="activeTab === 'boxscore'"
-                [class.text-muted]="activeTab !== 'boxscore'"
-                class="px-4 py-2 text-lg font-bold transition-colors hover:text-qs-muted -mb-px">
+                role="tab"
+                [attr.aria-selected]="activeTab === 'boxscore'"
+                class="qs-tab px-3 sm:px-4">
                 Box Score
               </button>
             </div>
@@ -214,7 +207,7 @@
             <!-- Header with toggle button -->
             <div class="w-full">
               <div class="flex items-center justify-between px-4 pt-4 pb-[0.5rem]">
-                <span class="text-lg font-bold text-heading">Players</span>
+                <span class="qs-eyebrow qs-eyebrow-bar">Players</span>
                 <button
                   (click)="isPlayersListVisible = !isPlayersListVisible"
                   class="flex items-center gap-1 text-sm lg:hidden text-muted">
@@ -266,16 +259,16 @@
       <!-- Alert notifications -->
       @if (showAlert) {
         <div
-          class="fixed p-4 -translate-x-1/2 border-l-4 border-red-400 rounded-lg shadow-lg bottom-40 left-1/2 w-72 bg-red-50"
+          class="fixed p-4 -translate-x-1/2 border border-qs-line rounded-card shadow-pop bottom-40 left-1/2 w-72 bg-qs-bad-soft text-qs-bad"
           role="alert">
           <div class="flex">
             <div class="flex-shrink-0">
-              <svg class="w-5 h-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <svg class="w-5 h-5 text-qs-bad" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
               </svg>
             </div>
             <div class="ml-3">
-              <p class="text-sm text-red-700">
+              <p class="text-sm text-qs-bad">
                 {{ alertMessage }}
               </p>
             </div>
@@ -384,11 +377,11 @@
             type="text"
             [(ngModel)]="editingName"
             placeholder="Enter your name"
-            class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-qs-accent focus:ring-2 focus:ring-qs-accent-soft outline-none text-default"
+            class="w-full min-h-11 px-4 bg-qs-panel-2 border border-qs-line-strong rounded-btn text-base text-qs-ink"
             (keyup.enter)="saveNameEdit()"
             />
           @if (isEditingNameTaken()) {
-            <p class="mt-2 text-sm text-red-500">This name is already in use. Please choose a different name.</p>
+            <p class="mt-2 text-sm text-qs-bad">This name is already in use. Please choose a different name.</p>
           }
         </div>
 
@@ -402,7 +395,7 @@
           <button
             (click)="saveNameEdit()"
             [disabled]="isSavingName() || !editingName.trim()"
-            class="px-6 py-2 font-bold text-white transition-colors rounded-lg bg-qs-accent hover:bg-qs-accent-hover disabled:opacity-50"
+            class="qs-btn qs-btn-primary"
             >
             @if (isSavingName()) {
               Saving...
@@ -437,11 +430,11 @@
             type="text"
             [(ngModel)]="forceNameValue"
             placeholder="Enter a new name"
-            class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-qs-accent focus:ring-2 focus:ring-qs-accent-soft outline-none text-default"
+            class="w-full min-h-11 px-4 bg-qs-panel-2 border border-qs-line-strong rounded-btn text-base text-qs-ink"
             (keyup.enter)="saveForceNameChange()"
             />
           @if (isForceNameTaken()) {
-            <p class="mt-2 text-sm text-red-500">This name is already in use. Please choose a different name.</p>
+            <p class="mt-2 text-sm text-qs-bad">This name is already in use. Please choose a different name.</p>
           }
         </div>
 
@@ -449,7 +442,7 @@
           <button
             (click)="saveForceNameChange()"
             [disabled]="isSavingForceName() || !forceNameValue.trim() || isForceNameTaken()"
-            class="px-6 py-2 font-bold text-white transition-colors rounded-lg bg-qs-accent hover:bg-qs-accent-hover disabled:opacity-50"
+            class="qs-btn qs-btn-primary"
             >
             @if (isSavingForceName()) {
               Saving...

@@ -252,6 +252,15 @@
   .qs-btn-ghost:hover:not(:disabled) { background: color-mix(in srgb, currentColor 10%, transparent); }
   .qs-btn-danger { background: var(--qs-bad-soft); color: var(--qs-bad); }
 
+  .qs-tab {
+    @apply qs-btn;
+    background: var(--qs-panel);
+    color: var(--qs-ink);
+    border-color: var(--qs-line);
+  }
+  .qs-tab:hover { border-color: var(--qs-line-strong); }
+  .qs-tab[aria-selected="true"] { background: var(--qs-ink); color: var(--qs-bg); border-color: var(--qs-ink); }
+
   .qs-card {
     background: var(--qs-panel);
     border: 1px solid var(--qs-line);
