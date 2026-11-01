@@ -16,7 +16,7 @@ import { BLOG_POSTS } from './blog-posts.generated';
         <h1 class="text-3xl font-extrabold tracking-tight text-heading sm:text-4xl">Blog</h1>
         <p class="mt-4 text-lg leading-relaxed text-muted">
           Notes on football squares for friends, fans, and game-day parties.
-          Posts stay free of logos, and the game stays free of cash handling.
+          Posts stay free of logos, and the game never handles money.
         </p>
         <p class="mt-3 text-sm">
           <a class="font-semibold text-emerald-800 underline underline-offset-2 dark:text-emerald-300" href="/rss.xml">

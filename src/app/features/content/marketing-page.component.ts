@@ -13,6 +13,11 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
     <app-content-shell>
       <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
       <article>
+        @if (page.notice) {
+          <p class="mb-6 rounded-xl border border-default bg-card p-4 text-sm leading-relaxed text-default" role="note">
+            {{ page.notice }}
+          </p>
+        }
         <header>
           <p class="text-sm font-semibold uppercase tracking-wide text-emerald-800 dark:text-emerald-300">
             {{ page.eyebrow }}

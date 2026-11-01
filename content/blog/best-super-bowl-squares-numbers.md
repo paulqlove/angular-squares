@@ -1,6 +1,6 @@
 ---
 title: "Best Super Bowl Squares Numbers (What NFL Scoring History Says)"
-description: "TODO: Marketing description pending Paul's approval. Placeholder for the November 5, 2026 post on which squares digits show up most often."
+description: "Which Super Bowl squares numbers come up most? What NFL scoring history says about 0, 7, 3 and 4, and why it's still the luck of the draw."
 date: "2026-11-05"
 slug: best-super-bowl-squares-numbers
 ogImage: /assets/og-image.png

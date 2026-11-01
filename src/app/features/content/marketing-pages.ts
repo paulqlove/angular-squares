@@ -37,6 +37,8 @@ export interface MarketingPage {
   h1: string;
   eyebrow: string;
   lede: string;
+  /** Short note shown above the title. */
+  notice?: string;
   published: string;
   sections: PageSection[];
   steps?: HowToStep[];
@@ -46,7 +48,7 @@ export interface MarketingPage {
   cta: PageCta;
 }
 
-const MONEY_LINE = 'Quarter Score never collects, holds, or pays out money. If your group uses prizes, keep them as bragging rights or something donated, and follow your local rules.';
+const MONEY_LINE = 'Quarter Score never collects, holds, or pays out money. Keep it to bragging rights or a donation to a cause.';
 
 export const MARKETING_PAGES: Record<string, MarketingPage> = {
   'how-to-play': {
@@ -87,7 +89,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
         heading: 'How a quarter is decided',
         paragraphs: [
           'Scores use the last digit only. A score of 17 counts as 7. A score of 20 counts as 0. If the away team’s last digit is on row 7 and the home team’s last digit is on column 0, the square where that row and column meet is the quarter’s square.',
-          'Many groups give a small prize each quarter and a larger one for the final score. Quarter Score can show a suggested split of 20 percent, 20 percent, 20 percent, and 40 percent for the final. That split is a label for your own prize. It is not a payment.'
+          'Many groups play for bragging rights each quarter and a bigger brag for the final. Quarter Score can show a suggested split of 20 percent, 20 percent, 20 percent, and 40 percent for the final. That split is only a label. It is not a payment.'
         ]
       },
       {
@@ -122,7 +124,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     description: 'Football squares FAQ: cost, accounts, how numbers are drawn, private games, overtime, unfilled boards, and whether Quarter Score handles money.',
     h1: 'Football squares FAQ',
     eyebrow: 'Questions',
-    lede: 'Short answers for hosts and players. Squares here is a free game for friends and fans, with bragging rights or a prize you arrange yourselves.',
+    lede: 'Short answers for hosts and players. Squares here is a free game for friends and fans, with bragging rights.',
     published: '2026-11-01',
     faqs: [
       {
@@ -147,7 +149,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       },
       {
         question: 'What if the board is not full?',
-        answer: 'Empty squares can still be the winning square if the score lands there. Decide in advance whether an unclaimed square means no prize that quarter. You can also leave the board unlocked until more people claim a square.'
+        answer: 'Empty squares can still be the winning square if the score lands there. Decide in advance what an unclaimed square means for that quarter. You can also leave the board unlocked until more people claim a square.'
       },
       {
         question: 'What if the score does not change in a quarter?',
@@ -174,7 +176,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       { path: '/how-to-play', label: 'How to play', text: 'The full rules, including overtime and empty squares.' },
       { path: '/best-squares-numbers', label: 'Best numbers', text: 'The historical digit table, explained.' },
       { path: '/printable-football-squares', label: 'Printable board', text: 'A blank grid you can print or download.' },
-      { path: '/football-squares-fundraiser', label: 'Donation squares', text: 'Fundraiser formats where the cause is the point, not a cash prize.' }
+      { path: '/football-squares-fundraiser', label: 'Donation squares', text: 'Fundraiser formats where the cause is the point.' }
     ],
     cta: {
       path: '/dashboard',
@@ -188,6 +190,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     title: 'Super Bowl Squares for February 14, 2027 — Quarter Score',
     description: 'Super Bowl squares for Super Bowl LXI on February 14, 2027. Make a free board before the teams are set and share one link with friends.',
     h1: 'Super Bowl squares',
+    notice: 'QuarterScore is not affiliated with, endorsed by, or sponsored by the NFL, NBA, or NCAA. Team and event names are used only to describe the games.',
     eyebrow: 'February 14, 2027',
     lede: 'Super Bowl LXI is Sunday, February 14, 2027, at SoFi Stadium in Inglewood, with a 6:30 p.m. ET kickoff. You can make the board before either team is known.',
     published: '2026-11-01',
@@ -249,9 +252,9 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
         ]
       },
       {
-        heading: 'Prizes that fit the day',
+        heading: 'Stakes that fit the day',
         paragraphs: [
-          'Skip cash. First choice of leftovers, a pass on dishes, or picking the next movie is plenty. Say the prize out loud before you draw numbers.'
+          'First pick of leftovers, a pass on dishes, or picking the next movie is plenty. Say it out loud before you draw numbers.'
         ],
         bullets: [
           'Create the board the weekend before, not during dinner.',
@@ -479,7 +482,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     id: 'terms',
     path: '/terms',
     title: 'Terms of Use — Quarter Score',
-    description: 'Terms for using Quarter Score, a free football squares board. The site never collects, holds, or pays out pool money.',
+    description: 'Terms for using Quarter Score, a free football squares board. The site never collects, holds, or pays out money.',
     h1: 'Terms of use',
     eyebrow: 'Legal',
     lede: 'Quarter Score is a free board for organizing a squares game with friends and fans. These terms are the rules for using the site.',
@@ -489,7 +492,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
         heading: 'The service',
         paragraphs: [
           'You can create a board, share its link, claim squares by name, draw digits, and record scores. The site is provided as-is, without a promise that it will always be available or error-free.',
-          'Quarter Score never collects, holds, or pays out pool money. Any prize, contribution, or donation is between the people in your group. Hosts are responsible for following the law where they live, including rules on games of chance.'
+          'Quarter Score never collects, holds, or pays out money. Anything your group arranges stays between the people in that group. Hosts are responsible for following the law where they live, including rules on games of chance.'
         ]
       },
       {

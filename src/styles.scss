@@ -195,9 +195,14 @@ button:focus-visible {
 
   .print-grid th,
   .print-grid td {
-    border: 1px solid #000 !important;
+    border: 1.5pt solid #000 !important;
     background: #fff !important;
     color: #000 !important;
-    height: 42px;
+  }
+}
+
+@media print and (orientation: portrait) {
+  .print-grid td {
+    height: 0.6in;
   }
 }

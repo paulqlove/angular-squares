@@ -14,7 +14,7 @@ import { BreadcrumbItem } from '../core/services/seo.service';
             @if (!last) {
               <a
                 [routerLink]="item.path"
-                class="text-emerald-800 underline decoration-emerald-800/40 underline-offset-2 hover:decoration-emerald-800 dark:text-emerald-300 dark:decoration-emerald-300/40"
+                class="inline-block py-3 -my-3 text-emerald-800 underline decoration-emerald-800/40 underline-offset-2 hover:decoration-emerald-800 dark:text-emerald-300 dark:decoration-emerald-300/40"
               >
                 {{ item.name }}
               </a>

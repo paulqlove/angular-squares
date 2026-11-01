@@ -23,7 +23,7 @@ import { ContentShellComponent } from './content-shell.component';
           <p class="mt-4 text-lg leading-relaxed text-muted">
             Some last digits show up more often than others in professional football scores.
             This is the same table Quarter Score uses on a board’s heatmap. It describes the past.
-            It does not predict your game, and it is not a reason to chase a prize.
+            It does not predict your game, and it is not a reason to sweat your draw.
           </p>
         </header>
 

@@ -26,7 +26,7 @@ interface FooterGroup {
                 <li>
                   <a
                     [routerLink]="link.path"
-                    class="inline-flex min-h-11 items-center text-muted underline-offset-2 hover:text-heading hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
+                    class="inline-flex min-h-11 min-w-[44px] items-center px-2 text-muted underline-offset-2 hover:text-heading hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
                   >
                     {{ link.label }}
                   </a>
@@ -38,7 +38,7 @@ interface FooterGroup {
       </div>
       <div class="border-t border-default">
         <div class="mx-auto max-w-5xl px-4 py-6 text-muted">
-          <p>Quarter Score never collects, holds, or pays out money.</p>
+          <p>QuarterScore is not affiliated with, endorsed by, or sponsored by the NFL, NBA, NCAA, or any team. Super Bowl is a trademark of the NFL. Entertainment and score-tracking only. QuarterScore does not accept, hold, transfer, or pay out money, and does not facilitate wagering.</p>
           <p class="mt-2">Made with love for sports ball fans</p>
         </div>
       </div>
