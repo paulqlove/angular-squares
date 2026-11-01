@@ -75,7 +75,7 @@ import {
                 <li>Run multiple boards at once, each with live scoring and the heatmap</li>
                 <li>Team-color themes</li>
               </ul>
-              <p class="mt-3 text-sm leading-5 text-default">No payment today. Leave your email and we'll tell you when the pass is ready.</p>
+              <p id="upgrade-pass-note" class="mt-3 text-sm leading-5 text-default">No payment today. Your email is only used to tell you when it's ready.</p>
             </section>
 
             @if (submitted()) {
@@ -99,11 +99,10 @@ import {
                     [(ngModel)]="email"
                     [disabled]="isSubmitting()"
                     [attr.aria-invalid]="emailError() ? 'true' : 'false'"
-                    [attr.aria-describedby]="emailError() ? 'upgrade-email-error upgrade-email-hint' : 'upgrade-email-hint'"
+                    [attr.aria-describedby]="emailError() ? 'upgrade-email-error upgrade-pass-note' : 'upgrade-pass-note'"
                     class="min-h-11 w-full rounded-xl border border-slate-500 bg-input px-4 py-3 text-base text-default placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:border-secondary-800 focus:outline-none focus:ring-2 focus:ring-secondary-800 dark:border-slate-400 dark:focus:border-secondary-300 dark:focus:ring-secondary-300"
                     placeholder="you@example.com"
                   />
-                  <p id="upgrade-email-hint" class="mt-1.5 text-sm leading-5 text-default">We'll only use this to tell you the pass is ready.</p>
                   @if (emailError()) {
                     <p id="upgrade-email-error" role="alert" class="mt-1.5 text-sm font-medium leading-5 text-red-800 dark:text-red-200">
                       {{ emailError() }}
