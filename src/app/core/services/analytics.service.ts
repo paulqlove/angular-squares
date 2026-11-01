@@ -36,6 +36,17 @@ export class AnalyticsService {
     this.zone.runOutsideAngular(() => this.schedule());
   }
 
+  /**
+   * Send a GA4 event when Analytics has loaded.
+   * No-ops in dev, before the SDK is ready, or when no measurementId is set.
+   */
+  track(name: string, params?: Record<string, string | number | boolean>): void {
+    if (!this.analytics || !this.logEvent) {
+      return;
+    }
+    this.logEvent(this.analytics, name, params);
+  }
+
   private canRun(): boolean {
     return environment.production
       && isPlatformBrowser(this.platformId)

@@ -14,6 +14,17 @@ import {
 } from 'firebase/database';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { ActiveBoardLimitError } from '../errors/active-board-limit.error';
+import { EspnService } from './espn.service';
+import {
+  BoardActivity,
+  FREE_ACTIVE_BOARD_LIMIT,
+  NOTIFY_EMAIL_MAX_LENGTH,
+  NOTIFY_EMAIL_PATTERN,
+  NOTIFY_SOURCE_MAX_LENGTH,
+  hasLinkedGame,
+  isBoardActive
+} from '../utils/board-activity';
 
 export type SportType = 'nfl' | 'nba' | 'ncaaf' | 'wnba' | 'afl';
 
@@ -75,6 +86,7 @@ export interface GameListItem {
 })
 export class GameService {
   private platformId = inject(PLATFORM_ID);
+  private espnService = inject(EspnService);
   // Lazy init required for SSR hydration - see CLAUDE.md "SSR Hydration Pattern"
   private _db: Database | null = null;
   private currentGameId = signal<string | null>(null);
@@ -105,6 +117,42 @@ export class GameService {
 
   constructor() {}
 
+  private async loadOwnedBoardActivity(ownerId: string): Promise<BoardActivity[]> {
+    const userGamesRef = ref(this.db, `users/${ownerId}/games`);
+    const snapshot = await get(userGamesRef);
+    if (!snapshot.exists()) {
+      return [];
+    }
+
+    const gameIds = Object.keys(snapshot.val());
+    const boards = await Promise.all(gameIds.map(async (gameId) => {
+      const gameSnap = await get(ref(this.db, `games/${gameId}`));
+      if (!gameSnap.exists()) {
+        return null;
+      }
+      const raw = gameSnap.val() || {};
+      const espnEventId = typeof raw.espnEventId === 'string' ? raw.espnEventId : null;
+      const linkedGameFinal = hasLinkedGame(espnEventId)
+        ? await this.espnService.isEventFinal(espnEventId as string, this.normalizeSport(raw.espnSport))
+        : null;
+      const board: BoardActivity = {
+        createdAt: typeof raw.createdAt === 'number' ? raw.createdAt : null,
+        espnEventId,
+        linkedGameFinal
+      };
+      return board;
+    }));
+
+    return boards.filter((board): board is BoardActivity => board !== null);
+  }
+
+  private normalizeSport(value: unknown): SportType {
+    if (value === 'nfl' || value === 'nba' || value === 'ncaaf' || value === 'wnba' || value === 'afl') {
+      return value;
+    }
+    return 'nfl';
+  }
+
   // Generate a short, shareable game ID
   private generateGameId(): string {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Removed ambiguous chars
@@ -113,6 +161,51 @@ export class GameService {
       result += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     return result;
+  }
+
+  /**
+   * Read-only check used by the dashboard and by createGame.
+   * Does not write, delete, or rewrite any existing board.
+   */
+  async assertUnderFreeBoardLimit(ownerId: string): Promise<void> {
+    if (!this.isBrowser) {
+      throw new Error('Cannot check boards on server');
+    }
+    const boards = await this.loadOwnedBoardActivity(ownerId);
+    const now = Date.now();
+    const activeCount = boards.filter(board => isBoardActive(board, now)).length;
+    if (activeCount >= FREE_ACTIVE_BOARD_LIMIT) {
+      throw new ActiveBoardLimitError();
+    }
+  }
+
+  /** Write-only notifyMe/{pushId} entry. Callers must already be signed in. */
+  async createNotifyMe(email: string, uid: string, source: string): Promise<void> {
+    if (!this.isBrowser) {
+      throw new Error('Cannot save notification on server');
+    }
+    const trimmed = email.trim();
+    if (
+      trimmed.length === 0 ||
+      trimmed.length > NOTIFY_EMAIL_MAX_LENGTH ||
+      !NOTIFY_EMAIL_PATTERN.test(trimmed)
+    ) {
+      throw new Error('Invalid email');
+    }
+    if (!uid || uid.length > 128) {
+      throw new Error('Invalid uid');
+    }
+    if (!source || source.length > NOTIFY_SOURCE_MAX_LENGTH) {
+      throw new Error('Invalid source');
+    }
+
+    const entryRef = push(ref(this.db, 'notifyMe'));
+    await set(entryRef, {
+      email: trimmed,
+      timestamp: Date.now(),
+      uid,
+      source
+    });
   }
 
   // Create a new game
@@ -129,6 +222,10 @@ export class GameService {
     venmoUsername?: string
   ): Promise<string> {
     if (!this.isBrowser) throw new Error('Cannot create game on server');
+    await this.assertUnderFreeBoardLimit(ownerId);
+    // Drop a stale slot only after the read-only check says nothing is active.
+    // Existing game nodes are not modified.
+    await remove(ref(this.db, `users/${ownerId}/activeBoardId`));
     const gameId = this.generateGameId();
 
     const defaultGameData: GameData = {
@@ -169,6 +266,13 @@ export class GameService {
       createdAt: defaultGameData.createdAt,
       name: defaultGameData.name
     });
+
+    try {
+      await set(ref(this.db, `users/${ownerId}/activeBoardId`), gameId);
+    } catch (error) {
+      // The board exists. The client-side count still enforces the limit.
+      console.warn('[GameService] Active board slot was not saved', error);
+    }
 
     return gameId;
   }
