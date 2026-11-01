@@ -111,7 +111,7 @@ liveGames/{espnId}/{boardId}/
 
 ## ESPN Live Scores
 
-Game owners can link a board to an ESPN game. Quarter scores are written by the scheduled function in `functions/` (`syncEspnScores`), not by the browser, when `environment.serverScoring` is true (the default). The browser poller in `syncFromEspn()` remains only as the fallback when that flag is false. Deploy steps: [docs/FUNCTIONS.md](docs/FUNCTIONS.md). Do not add functions to the GitHub hosting workflows.
+Game owners can link a board to an ESPN game. `environment.serverScoring` defaults to false, so the browser poller in `syncFromEspn()` keeps writing scores. After `syncEspnScores` in `functions/` is deployed, set the flag to true and redeploy hosting. Deploy steps: [docs/FUNCTIONS.md](docs/FUNCTIONS.md). Do not add functions to the GitHub hosting workflows.
 
 - **API**: `https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard` (public, no auth). The function fetches this once per league per minute.
 - **Index**: `liveGames/{espnId}/{boardId}` so the function does not scan every game. Maintained on link, unlink, and delete.

@@ -1,8 +1,8 @@
 export const environment = {
   production: false,
-  // Cloud Functions write ESPN scores. Both environments point at the same
-  // Firebase project, so this stays true unless you need the browser fallback.
-  serverScoring: true,
+  // Leave false until the Cloud Function is deployed. Then set true and
+  // redeploy hosting so browsers stop writing ESPN scores. See docs/FUNCTIONS.md.
+  serverScoring: false,
   // Placeholder only. "See demo" links here and does not create a Firebase game.
   demoGameId: 'DEMO00',
   firebase: {

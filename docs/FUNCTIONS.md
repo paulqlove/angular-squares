@@ -6,20 +6,26 @@ Project: `squares-4e4f7` (Blaze, Realtime Database). The Admin SDK writes scores
 
 ## Deploy
 
+`serverScoring` is `false` in both environment files. Merging this change leaves the browser ESPN poller in place. Turn the poller off only after the function is live.
+
 From the repo root, with the Firebase CLI logged in as a project owner:
+
+1. Deploy the function. This does not deploy Hosting.
 
 ```bash
 cd functions && npm ci && npm test && cd ..
 firebase deploy --only functions --project squares-4e4f7
 ```
 
-That deploys `syncEspnScores` only. It does not deploy Hosting or change the GitHub workflows. Those workflows (`firebase-hosting-pr.yml`, `firebase-hosting-merge.yml`) stay hosting-only. Do not add a functions deploy step to them.
+2. Set `serverScoring` to `true` in `src/environments/environment.ts` and `src/environments/environment.prod.ts`.
+
+3. Merge that flag change, or redeploy hosting so the built client picks it up. Until that hosting release is live, browsers keep writing scores.
+
+That functions command deploys `syncEspnScores` only. It does not change the GitHub workflows. Those workflows (`firebase-hosting-pr.yml`, `firebase-hosting-merge.yml`) stay hosting-only. Do not add a functions deploy step to them.
 
 `firebase.json` runs `npm run build` in `functions/` before a functions deploy. The runtime is Node 20 (`functions/package.json` `engines.node`).
 
-Deploy the function before relying on production. The production client sets `serverScoring: true`, which turns browser score writes off. Until this command has succeeded, linked boards will not receive new scores.
-
-To roll the browser poller back on without deleting the function, set `serverScoring` to `false` in `src/environments/environment.prod.ts` and ship a hosting deploy.
+To turn the browser poller back on later, set `serverScoring` to `false` again and redeploy hosting. The function can stay deployed.
 
 ## What the function does
 
@@ -51,11 +57,11 @@ Clearing the ESPN game on edit (switching sport, which clears the selection, the
 
 ## Client flag
 
-`environment.serverScoring` defaults to `true` in both `environment.ts` and `environment.prod.ts`. Both files talk to `squares-4e4f7`, so a local `ng serve` must not keep writing scores once the function is deployed.
+`environment.serverScoring` defaults to `false` in both `environment.ts` and `environment.prod.ts`. Both files talk to `squares-4e4f7`. Leave the flag false until `firebase deploy --only functions` has succeeded, then set it to `true` and merge or redeploy hosting.
 
-When the flag is true, the game page does not poll ESPN to write scores. It still listens to Realtime Database. The Box Score tab uses `espnLive` from the function. If that snapshot is not there yet, the page fetches ESPN once for display and does not write.
+When the flag is false, the 30-second browser poller (`syncFromEspn`) writes scores, which is the current behavior.
 
-When the flag is false, the previous 30-second browser poller (`syncFromEspn`) writes scores again.
+When the flag is true, the game page does not poll ESPN to write scores. It still listens to Realtime Database. The Box Score tab uses `espnLive` from the function. If that snapshot is not there yet, the page fetches ESPN once for display and does not write. With the flag true and the function not deployed, linked boards stop receiving scores.
 
 ## Tests
 
