@@ -15,11 +15,19 @@
     "rewrites": [
       {
         "source": "/dashboard",
-        "destination": "/index.html"
+        "destination": "/spa.html"
       },
       {
-        "source": "/game/*",
-        "destination": "/index.html"
+        "source": "/dashboard/**",
+        "destination": "/spa.html"
+      },
+      {
+        "source": "/game/**",
+        "destination": "/spa.html"
+      },
+      {
+        "source": "**",
+        "destination": "/spa.html"
       }
     ],
     "headers": [
@@ -105,6 +113,15 @@
       },
       {
         "source": "/index.html",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/spa.html",
         "headers": [
           {
             "key": "Cache-Control",

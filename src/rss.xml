@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Quarter Score Blog</title>
+    <link>https://quarterscore.com/blog</link>
+    <description>Football squares notes from Quarter Score. Free games for friends and fans.</description>
+    <language>en-us</language>
+    <atom:link href="https://quarterscore.com/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Best Super Bowl Squares Numbers (What NFL Scoring History Says)</title>
+      <link>https://quarterscore.com/blog/best-super-bowl-squares-numbers</link>
+      <guid>https://quarterscore.com/blog/best-super-bowl-squares-numbers</guid>
+      <pubDate>Thu, 05 Nov 2026 12:00:00 GMT</pubDate>
+      <description>TODO: Marketing description pending Paul's approval. Placeholder for the November 5, 2026 post on which squares digits show up most often.</description>
+      <content:encoded><![CDATA[<blockquote>
+<p><strong>TODO:</strong> Final copy is not in the content plan. This placeholder holds the URL, title, outline, and internal links so the page can be prerendered. Do not treat it as finished writing. Paul approves the copy before it is published.</p>
+</blockquote>
+<h2>TODO: Why some digits come up more often</h2>
+<p>TODO: Explain why digits such as 0, 3, and 7 show up more often than others. Use the public table. Do not invent statistics.</p>
+<h2>TODO: Quarter by quarter</h2>
+<p>TODO: Describe how the picture changes from the first quarter to the final score. The public heatmap is one table of historical digit pairs, not a separate table for each quarter.</p>
+<h2>TODO: The Quarter Score heatmap</h2>
+<p>TODO: Explain the chart on the <a href="/best-squares-numbers">best squares numbers</a> page. It uses the same historical table as a board's heatmap. The <a href="/#probability-heatmap">homepage heatmap section</a> introduces it.</p>
+<h2>TODO: Squares that show up less often</h2>
+<p>TODO: Discuss digits such as 2, 5, and 9, and why a less common square can still come up.</p>
+<h2>TODO: Takeaway</h2>
+<p>TODO: It is luck. Have fun with it.</p>
+<p>Keep reading: <a href="/how-to-play">how to play</a> and <a href="/super-bowl-squares">Super Bowl squares</a>.</p>
+<p><a href="/dashboard">See the frequency of every square on your own board. Start a free game.</a></p>
+]]></content:encoded>
+    </item>
+  </channel>
+</rss>
