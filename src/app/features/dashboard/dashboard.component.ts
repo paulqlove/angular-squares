@@ -1123,6 +1123,14 @@ export class DashboardComponent implements OnInit {
         ]);
         this.myGames.set(owned);
         this.joinedGames.set(joined);
+        const linked = owned.filter(game => !!game.espnEventId);
+        if (linked.length > 0) {
+          this.gameService.ensureLiveGameIndexes(linked.map(game => ({
+            gameId: game.id,
+            espnEventId: game.espnEventId as string,
+            espnSport: game.espnSport
+          }))).catch(() => {});
+        }
       } catch (error) {
         this.toastService.error('Failed to load games');
       } finally {
@@ -1488,8 +1496,8 @@ export class DashboardComponent implements OnInit {
         name: sanitizedName,
         pricePerSquare: sanitizedPrice,
         venmoUsername: sanitizedVenmo,
-        espnEventId: this.editEspnGameId || undefined,
-        espnSport: this.editEspnGameId ? this.editSport : undefined,
+        espnEventId: this.editEspnGameId || null,
+        espnSport: this.editEspnGameId ? this.editSport : null,
         homeTeam: selectedEspnGame?.homeTeam || game.homeTeam,
         awayTeam: selectedEspnGame?.awayTeam || game.awayTeam
       };

@@ -53,3 +53,5 @@ Thumbs.db
 .firebase/
 firebase-debug.log
 *-debug.log
+functions/node_modules/
+functions/lib/

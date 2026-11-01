@@ -72,3 +72,4 @@ npm start  # Dev server at localhost:4200
 
 - [Enhancement Plan](./ENHANCEMENT_PLAN.md) - Full roadmap
 - [TODO](./docs/TODO.md) - Current task tracking
+- [Cloud Functions](./docs/FUNCTIONS.md) - ESPN score sync deploy (`firebase deploy --only functions`)

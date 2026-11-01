@@ -28,6 +28,18 @@ import {
 
 export type SportType = 'nfl' | 'nba' | 'ncaaf' | 'wnba' | 'afl';
 
+export interface EspnLiveSnapshot {
+  status: 'pre' | 'in' | 'post';
+  period: number;
+  clock: string;
+  completed: boolean;
+  homeScore: number;
+  awayScore: number;
+  homeTeam: string;
+  awayTeam: string;
+  quarters: { home: number; away: number }[];
+}
+
 export interface GameData {
   id?: string;
   name: string;
@@ -52,8 +64,9 @@ export interface GameData {
   playerColors?: { [key: string]: string };
   venmoUsername?: string;
   paidPlayers?: string[];
-  espnEventId?: string;
-  espnSport?: SportType;
+  espnEventId?: string | null;
+  espnSport?: SportType | null;
+  espnLive?: EspnLiveSnapshot;
   managerId?: string;
   managerEmail?: string;
   managerName?: string;
@@ -267,6 +280,12 @@ export class GameService {
       name: defaultGameData.name
     });
 
+    if (espnEventId) {
+      // The board already exists. A failed index write is repaired when the
+      // owner next opens the dashboard or the game.
+      await this.ensureLiveGameIndex(gameId, espnEventId, espnSport || 'nfl').catch(() => {});
+    }
+
     try {
       await set(ref(this.db, `users/${ownerId}/activeBoardId`), gameId);
     } catch (error) {
@@ -324,6 +343,7 @@ export class GameService {
           paidPlayers: rawData.paidPlayers || [],
           espnEventId: rawData.espnEventId || undefined,
           espnSport: rawData.espnSport || undefined,
+          espnLive: this.readEspnLive(rawData.espnLive),
           managerId: rawData.managerId || undefined,
           managerEmail: rawData.managerEmail || undefined,
           managerName: rawData.managerName || undefined,
@@ -397,10 +417,16 @@ export class GameService {
       updates[`${prefix}/paidPlayers`] = data.paidPlayers;
     }
     if (data.espnEventId !== undefined) {
-      updates[`${prefix}/espnEventId`] = data.espnEventId;
+      const nextId = data.espnEventId || null;
+      const nextSport = data.espnSport || 'nfl';
+      if (nextId && !this.isLinkableEspnId(nextId)) {
+        throw new Error('Invalid ESPN event id');
+      }
+      Object.assign(updates, await this.liveIndexUpdates(gameId, nextId, nextSport));
+      updates[`${prefix}/espnEventId`] = nextId;
     }
     if (data.espnSport !== undefined) {
-      updates[`${prefix}/espnSport`] = data.espnSport;
+      updates[`${prefix}/espnSport`] = data.espnSport || null;
     }
     if (data.managerId !== undefined) {
       updates[`${prefix}/managerId`] = data.managerId;
@@ -452,6 +478,7 @@ export class GameService {
         paidPlayers: rawData.paidPlayers || [],
         espnEventId: rawData.espnEventId || undefined,
         espnSport: rawData.espnSport || undefined,
+        espnLive: this.readEspnLive(rawData.espnLive),
         managerId: rawData.managerId || undefined,
         managerEmail: rawData.managerEmail || undefined,
         managerName: rawData.managerName || undefined,
@@ -510,8 +537,8 @@ export class GameService {
           managerId: game.managerId,
           managerEmail: game.managerEmail,
           managerName: game.managerName,
-          espnEventId: game.espnEventId,
-          espnSport: game.espnSport,
+          espnEventId: game.espnEventId || undefined,
+          espnSport: game.espnSport || undefined,
           venmoUsername: game.venmoUsername,
           collected,
           totalPot: squaresFilled * game.pricePerSquare
@@ -522,14 +549,36 @@ export class GameService {
     return games.sort((a, b) => b.createdAt - a.createdAt);
   }
 
-  // Delete a game
+  // Delete a game and its live-score index entry.
   async deleteGame(gameId: string, ownerId: string): Promise<void> {
     if (!this.isBrowser) return;
-    const gameRef = ref(this.db, `games/${gameId}`);
-    const userGameRef = ref(this.db, `users/${ownerId}/games/${gameId}`);
+    const espnSnap = await get(ref(this.db, `games/${gameId}/espnEventId`));
+    const updates: Record<string, unknown> = {
+      [`games/${gameId}`]: null,
+      [`users/${ownerId}/games/${gameId}`]: null,
+    };
+    const espnId = espnSnap.exists() ? espnSnap.val() : null;
+    if (typeof espnId === 'string' && this.isLinkableEspnId(espnId)) {
+      updates[`liveGames/${espnId}/${gameId}`] = null;
+    }
+    await update(ref(this.db), updates);
+  }
 
-    await remove(gameRef);
-    await remove(userGameRef);
+  // Keep liveGames/{espnId}/{boardId} in sync so the scheduled function
+  // can find linked boards without scanning every game.
+  async ensureLiveGameIndex(gameId: string, espnEventId: string, espnSport: SportType = 'nfl'): Promise<void> {
+    await this.ensureLiveGameIndexes([{ gameId, espnEventId, espnSport }]);
+  }
+
+  async ensureLiveGameIndexes(entries: { gameId: string; espnEventId: string; espnSport?: SportType | null }[]): Promise<void> {
+    if (!this.isBrowser || entries.length === 0) return;
+    const updates: Record<string, { sport: SportType }> = {};
+    for (const entry of entries) {
+      if (!this.isLinkableEspnId(entry.espnEventId) || !this.isBoardId(entry.gameId)) continue;
+      updates[`liveGames/${entry.espnEventId}/${entry.gameId}`] = { sport: entry.espnSport || 'nfl' };
+    }
+    if (Object.keys(updates).length === 0) return;
+    await update(ref(this.db), updates);
   }
 
   // Get shareable link for a game
@@ -609,8 +658,8 @@ export class GameService {
           managerId: game.managerId,
           managerEmail: game.managerEmail,
           managerName: game.managerName,
-          espnEventId: game.espnEventId,
-          espnSport: game.espnSport,
+          espnEventId: game.espnEventId || undefined,
+          espnSport: game.espnSport || undefined,
           venmoUsername: game.venmoUsername,
           collected,
           totalPot: squaresFilled * game.pricePerSquare
@@ -687,5 +736,61 @@ export class GameService {
       [`games/${gameId}/managerEmail`]: managerEmail || '',
       [`games/${gameId}/managerName`]: managerName || ''
     });
+  }
+
+  private async liveIndexUpdates(gameId: string, nextId: string | null, sport: SportType): Promise<Record<string, unknown>> {
+    const currentSnap = await get(ref(this.db, `games/${gameId}/espnEventId`));
+    const currentId = currentSnap.exists() && typeof currentSnap.val() === 'string' ? currentSnap.val() as string : null;
+    const updates: Record<string, unknown> = {};
+    if (currentId && currentId !== nextId && this.isLinkableEspnId(currentId)) {
+      updates[`liveGames/${currentId}/${gameId}`] = null;
+    }
+    if (nextId) {
+      updates[`liveGames/${nextId}/${gameId}`] = { sport };
+    }
+    return updates;
+  }
+
+  private isLinkableEspnId(id: string): boolean {
+    return /^[A-Za-z0-9_-]{1,50}$/.test(id);
+  }
+
+  private isBoardId(id: string): boolean {
+    return /^[A-Za-z0-9]{6}$/.test(id);
+  }
+
+  private readEspnLive(value: unknown): EspnLiveSnapshot | undefined {
+    if (!value || typeof value !== 'object') return undefined;
+    const raw = value as Record<string, unknown>;
+    const status = raw['status'];
+    if (status !== 'pre' && status !== 'in' && status !== 'post') return undefined;
+
+    const quartersRaw = raw['quarters'];
+    let quarterList: unknown[] = [];
+    if (Array.isArray(quartersRaw)) {
+      quarterList = quartersRaw;
+    } else if (quartersRaw && typeof quartersRaw === 'object') {
+      quarterList = Object.keys(quartersRaw)
+        .sort((a, b) => Number(a) - Number(b))
+        .map(key => (quartersRaw as Record<string, unknown>)[key]);
+    }
+
+    return {
+      status,
+      period: typeof raw['period'] === 'number' ? raw['period'] : 0,
+      clock: typeof raw['clock'] === 'string' ? raw['clock'] : '',
+      completed: raw['completed'] === true,
+      homeScore: typeof raw['homeScore'] === 'number' ? raw['homeScore'] : 0,
+      awayScore: typeof raw['awayScore'] === 'number' ? raw['awayScore'] : 0,
+      homeTeam: typeof raw['homeTeam'] === 'string' ? raw['homeTeam'] : '',
+      awayTeam: typeof raw['awayTeam'] === 'string' ? raw['awayTeam'] : '',
+      quarters: quarterList.map(quarter => {
+        const row = quarter && typeof quarter === 'object' ? quarter as Record<string, unknown> : {};
+        return {
+          home: typeof row['home'] === 'number' ? row['home'] : 0,
+          away: typeof row['away'] === 'number' ? row['away'] : 0
+        };
+      })
+    };
   }
 }
