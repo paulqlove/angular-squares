@@ -57,7 +57,8 @@ interface Feature {
       </app-shared-header>
 
       <!-- Hero -->
-      <section class="mx-auto max-w-[1600px] px-4 sm:px-8 pt-10 pb-16 md:pt-16 md:pb-24">
+      <section class="overflow-hidden">
+        <div class="mx-auto max-w-[1600px] px-4 sm:px-8 pt-10 pb-16 md:pt-16 md:pb-24 xl:pb-0">
         <div class="grid grid-cols-1 xl:grid-cols-[1fr_minmax(0,1.05fr)] gap-10 xl:gap-16 items-center">
           <div>
             <p class="qs-eyebrow">Football squares / Free for game day</p>
@@ -117,7 +118,8 @@ interface Feature {
             <p class="qs-label mt-6 text-qs-muted">Free · Players don't need an account</p>
           </div>
 
-          <app-phone-demo></app-phone-demo>
+          <app-phone-demo class="xl:-mb-[17rem] xl:translate-x-24"></app-phone-demo>
+        </div>
         </div>
       </section>
 

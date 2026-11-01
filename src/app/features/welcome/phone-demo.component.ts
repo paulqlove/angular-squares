@@ -120,6 +120,17 @@ const LOCK_STEP_MS = 180;
       }
     }
     .phone-screen { background: var(--qs-bg); }
+    /* Oversized and angled on wide screens; the hero crops it */
+    @media (min-width: 1280px) {
+      .phone {
+        zoom: 1.7;
+        transform: perspective(1800px) rotateY(-10deg) matrix(0.99, -0.14, -0.17, 0.985, 0, 0);
+        transform-origin: 30% 30%;
+      }
+    }
+    @media (min-width: 1600px) {
+      .phone { zoom: 1.9; }
+    }
     @media (max-width: 639px) {
       .phone { max-width: none; }
       .phone-screen {
