@@ -3,7 +3,7 @@
     "games": {
       "$gameId": {
         ".read": true,
-        ".write": "auth != null && (data.child('ownerId').val() == auth.uid || data.child('managerId').val() == auth.uid || !data.exists())",
+        ".write": "auth != null && (data.child('ownerId').val() == auth.uid || data.child('managerId').val() == auth.uid || (!data.exists() && (!root.child('users').child(auth.uid).child('activeBoardId').exists() || !root.child('games').child(root.child('users').child(auth.uid).child('activeBoardId').val()).exists() || (root.child('games').child(root.child('users').child(auth.uid).child('activeBoardId').val()).child('espnEventId').val() == null && root.child('games').child(root.child('users').child(auth.uid).child('activeBoardId').val()).child('createdAt').isNumber() && now >= root.child('games').child(root.child('users').child(auth.uid).child('activeBoardId').val()).child('createdAt').val() + 172800000))))",
         "name": {
           ".validate": "newData.isString() && newData.val().length <= 100"
         },
@@ -139,6 +139,32 @@
               ".validate": "newData.isString() && newData.val().length <= 100"
             }
           }
+        },
+        "activeBoardId": {
+          ".validate": "newData.isString() && newData.val().length >= 4 && newData.val().length <= 16 && newData.val().matches(/^[A-Za-z0-9]+$/)"
+        }
+      }
+    },
+    "notifyMe": {
+      ".read": false,
+      "$pushId": {
+        ".read": false,
+        ".write": "auth != null && !data.exists() && $pushId.length <= 128 && $pushId.matches(/^[A-Za-z0-9_-]+$/)",
+        ".validate": "newData.hasChildren(['email', 'timestamp', 'uid', 'source'])",
+        "email": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 254 && newData.val().matches(/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$/)"
+        },
+        "timestamp": {
+          ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 86400000 && newData.val() >= now - 86400000"
+        },
+        "uid": {
+          ".validate": "newData.isString() && newData.val() == auth.uid && newData.val().length <= 128"
+        },
+        "source": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 64"
+        },
+        "$other": {
+          ".validate": false
         }
       }
     },

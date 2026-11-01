@@ -1,5 +1,6 @@
 import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { isEspnStatusFinal } from '../utils/board-activity';
 
 export type SportType = 'nfl' | 'nba' | 'ncaaf' | 'wnba' | 'afl';
 
@@ -79,6 +80,31 @@ export class EspnService {
     } catch (error) {
       console.error('Failed to fetch ESPN games:', error);
       return [];
+    }
+  }
+
+  /**
+   * Whether the linked event is final.
+   * true / false when the summary says so. null when the lookup fails,
+   * which the board limit treats as still active.
+   */
+  async isEventFinal(eventId: string, sport: SportType = 'nfl'): Promise<boolean | null> {
+    if (!this.isBrowser || !eventId) {
+      return null;
+    }
+
+    try {
+      const summaryUrl = `${this.API_URLS[sport].replace(/\/scoreboard$/, '/summary')}?event=${encodeURIComponent(eventId)}`;
+      const response = await fetch(summaryUrl);
+      if (!response.ok) {
+        return null;
+      }
+      const data = await response.json();
+      const status = data?.header?.competitions?.[0]?.status?.type;
+      return isEspnStatusFinal(status);
+    } catch (error) {
+      console.error('Failed to read linked game status:', error);
+      return null;
     }
   }
 
