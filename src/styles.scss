@@ -175,6 +175,24 @@ button:focus-visible {
     padding-left: 1rem;
     color: var(--color-text-muted);
   }
+
+  table {
+    width: 100%;
+    max-width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+
+  th,
+  td {
+    border: 1px solid var(--color-border-default);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+  }
+
+  th {
+    background: var(--color-bg-card);
+  }
 }
 
 .dark .prose-content a {

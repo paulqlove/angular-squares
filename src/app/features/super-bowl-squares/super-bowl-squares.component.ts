@@ -180,7 +180,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     {
       target: 'game-board',
       title: 'The Game Board',
-      description: 'Click any empty square to claim it. Check the Odds tab to see which squares have the best winning probability.',
+      description: 'Click any empty square to claim it. Check the Heatmap tab to see how often each square\'s digit pair has come up.',
       position: 'right'
     },
     {
