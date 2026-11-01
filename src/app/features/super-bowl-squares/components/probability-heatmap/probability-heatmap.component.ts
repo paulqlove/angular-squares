@@ -3,10 +3,9 @@ import { CommonModule } from '@angular/common';
 import { SQUARES_PROBABILITIES } from '../../utils/probability.utils';
 
 @Component({
-  selector: 'app-probability-heatmap',
-  standalone: true,
-  imports: [CommonModule],
-  template: `
+    selector: 'app-probability-heatmap',
+    imports: [CommonModule],
+    template: `
     <div class="relative">
       <!-- Grid Container -->
       <div class="grid-container">
@@ -53,7 +52,7 @@ import { SQUARES_PROBABILITIES } from '../../utils/probability.utils';
       </div>
     </div>
   `,
-  styleUrls: ['./probability-heatmap.component.scss']
+    styleUrls: ['./probability-heatmap.component.scss']
 })
 export class ProbabilityHeatmapComponent {
   @Input() homeNumbers: (number | null)[] = [];

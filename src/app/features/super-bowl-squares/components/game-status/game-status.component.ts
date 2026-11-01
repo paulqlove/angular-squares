@@ -3,10 +3,9 @@ import { CommonModule } from '@angular/common';
 import { PlayerStats } from '../../types';
 
 @Component({
-  selector: 'app-game-status',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './game-status.component.html'
+    selector: 'app-game-status',
+    imports: [CommonModule],
+    templateUrl: './game-status.component.html'
 })
 export class GameStatusComponent {
   @Input() selectedSquares!: Record<string, string>;

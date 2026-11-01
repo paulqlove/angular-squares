@@ -3,10 +3,9 @@ import { CommonModule } from '@angular/common';
 import { ToastService, Toast } from '../../../core/services/toast.service';
 
 @Component({
-  selector: 'app-toast',
-  standalone: true,
-  imports: [CommonModule],
-  template: `
+    selector: 'app-toast',
+    imports: [CommonModule],
+    template: `
     <div class="fixed bottom-4 right-4 z-[200] flex flex-col gap-2">
       @for (toast of toastService.toasts(); track toast.id) {
         <div

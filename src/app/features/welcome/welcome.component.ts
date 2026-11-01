@@ -30,21 +30,20 @@ interface Feature {
 }
 
 @Component({
-  selector: 'app-welcome',
-  standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, NgIconComponent, RippleGridComponent, AppHeaderComponent, AuthModalComponent, SampleBoardComponent, SiteFooterComponent],
-  providers: [
-    provideIcons({
-      heroSquares2x2,
-      heroUserGroup,
-      heroTrophy,
-      heroCurrencyDollar,
-      heroShare,
-      heroChartBar,
-      heroArrowRight
-    })
-  ],
-  template: `
+    selector: 'app-welcome',
+    imports: [CommonModule, FormsModule, RouterLink, NgIconComponent, RippleGridComponent, AppHeaderComponent, AuthModalComponent, SampleBoardComponent, SiteFooterComponent],
+    providers: [
+        provideIcons({
+            heroSquares2x2,
+            heroUserGroup,
+            heroTrophy,
+            heroCurrencyDollar,
+            heroShare,
+            heroChartBar,
+            heroArrowRight
+        })
+    ],
+    template: `
     <div class="min-h-screen relative">
       <!-- Ripple grid full background -->
       <app-ripple-grid

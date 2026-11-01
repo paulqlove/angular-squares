@@ -24,10 +24,9 @@ import {
 } from '../../../../core/utils/board-activity';
 
 @Component({
-  selector: 'app-upgrade-pass-dialog',
-  standalone: true,
-  imports: [FormsModule],
-  template: `
+    selector: 'app-upgrade-pass-dialog',
+    imports: [FormsModule],
+    template: `
     <div class="fixed inset-0 z-[400] overflow-y-auto bg-slate-950/75" (click)="dismiss()">
       <div class="flex min-h-full items-center justify-center p-3 sm:p-6">
         <div
@@ -134,7 +133,7 @@ import {
       </div>
     </div>
   `,
-  styles: [`
+    styles: [`
     .upgrade-dialog-in {
       animation: upgrade-dialog-in 0.2s ease-out;
     }

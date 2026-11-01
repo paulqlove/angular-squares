@@ -38,42 +38,41 @@ import { BoxScoreComponent } from './components/box-score/box-score.component';
 import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.component';
 
 @Component({
-  selector: 'app-super-bowl-squares',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    NgIconComponent,
-    GameBoardComponent,
-    PlayersListComponent,
-    WinnersAndPayoutsComponent,
-    GameStatusComponent,
-    AppHeaderComponent,
-    SettingsPanelComponent,
-    VenmoPopoverComponent,
-    PaymentDialogComponent,
-    ProbabilityHeatmapComponent,
-    BoxScoreComponent,
-    AuthModalComponent
-  ],
-  providers: [
-    provideIcons({
-      heroLockOpen,
-      heroLockClosed,
-      heroChevronDown,
-      heroChevronRight,
-      heroTrash,
-      heroShare,
-      heroArrowLeft,
-      heroClipboard,
-      heroPencilSquare,
-      heroXMark,
-      heroQuestionMarkCircle,
-      heroCog6Tooth
-    })
-  ],
-  templateUrl: './super-bowl-squares.component.html',
-  styleUrls: ['./super-bowl-squares.component.scss']
+    selector: 'app-super-bowl-squares',
+    imports: [
+        CommonModule,
+        FormsModule,
+        NgIconComponent,
+        GameBoardComponent,
+        PlayersListComponent,
+        WinnersAndPayoutsComponent,
+        GameStatusComponent,
+        AppHeaderComponent,
+        SettingsPanelComponent,
+        VenmoPopoverComponent,
+        PaymentDialogComponent,
+        ProbabilityHeatmapComponent,
+        BoxScoreComponent,
+        AuthModalComponent
+    ],
+    providers: [
+        provideIcons({
+            heroLockOpen,
+            heroLockClosed,
+            heroChevronDown,
+            heroChevronRight,
+            heroTrash,
+            heroShare,
+            heroArrowLeft,
+            heroClipboard,
+            heroPencilSquare,
+            heroXMark,
+            heroQuestionMarkCircle,
+            heroCog6Tooth
+        })
+    ],
+    templateUrl: './super-bowl-squares.component.html',
+    styleUrls: ['./super-bowl-squares.component.scss']
 })
 export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   @ViewChild('paymentDialog') paymentDialog!: PaymentDialogComponent;

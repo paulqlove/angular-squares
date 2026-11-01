@@ -6,10 +6,9 @@ import { ContentShellComponent } from './content-shell.component';
 import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pages';
 
 @Component({
-  selector: 'app-marketing-page',
-  standalone: true,
-  imports: [RouterLink, ContentShellComponent, BreadcrumbsComponent],
-  template: `
+    selector: 'app-marketing-page',
+    imports: [RouterLink, ContentShellComponent, BreadcrumbsComponent],
+    template: `
     <app-content-shell>
       <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
       <article>

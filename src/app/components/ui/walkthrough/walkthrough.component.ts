@@ -3,10 +3,9 @@ import { CommonModule } from '@angular/common';
 import { WalkthroughService } from '../../../core/services/walkthrough.service';
 
 @Component({
-  selector: 'app-walkthrough',
-  standalone: true,
-  imports: [CommonModule],
-  template: `
+    selector: 'app-walkthrough',
+    imports: [CommonModule],
+    template: `
     @if (walkthroughService.isActive() && walkthroughService.currentStep()) {
       <div class="fixed inset-0 z-[300]" (click)="onOverlayClick($event)">
         <!-- Overlay with cutout -->

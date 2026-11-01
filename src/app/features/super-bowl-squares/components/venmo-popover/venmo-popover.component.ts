@@ -4,11 +4,10 @@ import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroCreditCard } from '@ng-icons/heroicons/outline';
 
 @Component({
-  selector: 'app-venmo-popover',
-  standalone: true,
-  imports: [CommonModule, NgIconComponent],
-  providers: [provideIcons({ heroCreditCard })],
-  template: `
+    selector: 'app-venmo-popover',
+    imports: [CommonModule, NgIconComponent],
+    providers: [provideIcons({ heroCreditCard })],
+    template: `
     <div class="relative">
       <button
         (click)="isOpen = !isOpen"

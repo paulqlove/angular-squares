@@ -20,24 +20,23 @@ import { SanitizationService } from '../../../../core/services/sanitization.serv
 import { ThemeService, ThemeMode } from '../../../../core/services/theme.service';
 
 @Component({
-  selector: 'app-settings-panel',
-  standalone: true,
-  imports: [CommonModule, NgIconComponent, FormsModule, ToggleComponent, DialogComponent],
-  providers: [
-    provideIcons({
-      heroCog6Tooth,
-      heroTrash,
-      heroLockOpen,
-      heroLockClosed,
-      heroArrowTopRightOnSquare,
-      heroCreditCard,
-      heroXMark,
-      heroSun,
-      heroMoon,
-      heroComputerDesktop
-    })
-  ],
-  template: `
+    selector: 'app-settings-panel',
+    imports: [CommonModule, NgIconComponent, FormsModule, ToggleComponent, DialogComponent],
+    providers: [
+        provideIcons({
+            heroCog6Tooth,
+            heroTrash,
+            heroLockOpen,
+            heroLockClosed,
+            heroArrowTopRightOnSquare,
+            heroCreditCard,
+            heroXMark,
+            heroSun,
+            heroMoon,
+            heroComputerDesktop
+        })
+    ],
+    template: `
     <!-- Venmo Confirmation Dialog -->
     <app-dialog
       [isOpen]="showVenmoDialog"

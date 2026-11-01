@@ -2,11 +2,10 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-winners-and-payouts',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './winners-and-payouts.component.html',
-  styleUrls: ['./winners-and-payouts.component.scss']
+    selector: 'app-winners-and-payouts',
+    imports: [CommonModule],
+    templateUrl: './winners-and-payouts.component.html',
+    styleUrls: ['./winners-and-payouts.component.scss']
 })
 export class WinnersAndPayoutsComponent {
   @Input() winners: { [key: string]: string } = {};

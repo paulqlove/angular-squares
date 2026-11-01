@@ -12,10 +12,9 @@ interface FooterGroup {
 }
 
 @Component({
-  selector: 'app-site-footer',
-  standalone: true,
-  imports: [RouterLink],
-  template: `
+    selector: 'app-site-footer',
+    imports: [RouterLink],
+    template: `
     <footer class="no-print border-t border-default bg-card text-sm">
       <div class="mx-auto grid max-w-5xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-3">
         @for (group of groups; track group.heading) {

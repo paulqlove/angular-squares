@@ -9,10 +9,9 @@ interface NavLink {
 }
 
 @Component({
-  selector: 'app-content-shell',
-  standalone: true,
-  imports: [RouterLink, SiteFooterComponent],
-  template: `
+    selector: 'app-content-shell',
+    imports: [RouterLink, SiteFooterComponent],
+    template: `
     <a
       href="#main"
       class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[200] focus:rounded-md focus:bg-card focus:px-4 focus:py-2 focus:text-heading"

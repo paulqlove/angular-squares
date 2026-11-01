@@ -7,10 +7,9 @@ import { BlogPost } from './blog-post.model';
 import { BLOG_POSTS } from './blog-posts.generated';
 
 @Component({
-  selector: 'app-blog-post',
-  standalone: true,
-  imports: [RouterLink, ContentShellComponent, BreadcrumbsComponent],
-  template: `
+    selector: 'app-blog-post',
+    imports: [RouterLink, ContentShellComponent, BreadcrumbsComponent],
+    template: `
     <app-content-shell>
       <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
       @if (post) {

@@ -5,13 +5,12 @@ import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroCheck, heroXMark } from '@ng-icons/heroicons/outline';
 
 @Component({
-  selector: 'app-payment-dialog',
-  standalone: true,
-  imports: [CommonModule, FormsModule, NgIconComponent],
-  providers: [
-    provideIcons({ heroCheck, heroXMark })
-  ],
-  templateUrl: './payment-dialog.component.html'
+    selector: 'app-payment-dialog',
+    imports: [CommonModule, FormsModule, NgIconComponent],
+    providers: [
+        provideIcons({ heroCheck, heroXMark })
+    ],
+    templateUrl: './payment-dialog.component.html'
 })
 export class PaymentDialogComponent {
   @Output() onPaidStatusChange = new EventEmitter<string[]>();

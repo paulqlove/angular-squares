@@ -6,10 +6,9 @@ import { SQUARES_PROBABILITIES } from '../super-bowl-squares/utils/probability.u
 import { ContentShellComponent } from './content-shell.component';
 
 @Component({
-  selector: 'app-best-numbers',
-  standalone: true,
-  imports: [RouterLink, ContentShellComponent, BreadcrumbsComponent],
-  template: `
+    selector: 'app-best-numbers',
+    imports: [RouterLink, ContentShellComponent, BreadcrumbsComponent],
+    template: `
     <app-content-shell [wide]="true">
       <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
       <article>

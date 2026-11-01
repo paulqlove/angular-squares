@@ -3,10 +3,9 @@ import { RouterLink } from '@angular/router';
 import { BreadcrumbItem } from '../core/services/seo.service';
 
 @Component({
-  selector: 'app-breadcrumbs',
-  standalone: true,
-  imports: [RouterLink],
-  template: `
+    selector: 'app-breadcrumbs',
+    imports: [RouterLink],
+    template: `
     <nav aria-label="Breadcrumb" class="mb-6 text-sm">
       <ol class="flex flex-wrap items-center gap-x-2 gap-y-1">
         @for (item of items; track item.path; let last = $last) {

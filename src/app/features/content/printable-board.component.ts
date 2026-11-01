@@ -5,10 +5,9 @@ import { BreadcrumbsComponent } from '../../shared/breadcrumbs.component';
 import { ContentShellComponent } from './content-shell.component';
 
 @Component({
-  selector: 'app-printable-board',
-  standalone: true,
-  imports: [RouterLink, ContentShellComponent, BreadcrumbsComponent],
-  template: `
+    selector: 'app-printable-board',
+    imports: [RouterLink, ContentShellComponent, BreadcrumbsComponent],
+    template: `
     <app-content-shell [wide]="true">
       <div class="no-print">
         <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>

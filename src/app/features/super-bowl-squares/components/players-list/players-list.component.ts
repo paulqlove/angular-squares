@@ -15,11 +15,10 @@ type PlayerEntry = {
 }
 
 @Component({
-  selector: 'app-players-list',
-  standalone: true,
-  imports: [CommonModule, TooltipDirective],
-  templateUrl: './players-list.component.html',
-  styleUrls: ['./players-list.component.scss']
+    selector: 'app-players-list',
+    imports: [CommonModule, TooltipDirective],
+    templateUrl: './players-list.component.html',
+    styleUrls: ['./players-list.component.scss']
 })
 export class PlayersListComponent {
   @Input() playerStats!: { [key: string]: PlayerStat };

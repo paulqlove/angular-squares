@@ -4,10 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
-  selector: 'app-auth-modal',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  template: `
+    selector: 'app-auth-modal',
+    imports: [CommonModule, FormsModule],
+    template: `
     @if (isOpen && !checkingAuth()) {
       <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
         <div class="w-full max-w-md bg-dialog shadow-2xl rounded-2xl p-8">

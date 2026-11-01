@@ -39,36 +39,35 @@ import {
 } from '@ng-icons/heroicons/outline';
 
 @Component({
-  selector: 'app-dashboard',
-  standalone: true,
-  imports: [CommonModule, FormsModule, NgIconComponent, AppHeaderComponent, UpgradePassDialogComponent],
-  providers: [
-    provideIcons({
-      heroPlus,
-      heroArrowRightOnRectangle,
-      heroSquares2x2,
-      heroShare,
-      heroTrash,
-      heroLockClosed,
-      heroUserGroup,
-      heroArrowTopRightOnSquare,
-      heroXMark,
-      heroTrophy,
-      heroClock,
-      heroCheckCircle,
-      heroPencilSquare,
-      heroArrowRight,
-      heroTicket,
-      heroPlay,
-      heroCog6Tooth,
-      heroSun,
-      heroMoon,
-      heroComputerDesktop,
-      heroChevronDown,
-      heroQuestionMarkCircle
-    })
-  ],
-  template: `
+    selector: 'app-dashboard',
+    imports: [CommonModule, FormsModule, NgIconComponent, AppHeaderComponent, UpgradePassDialogComponent],
+    providers: [
+        provideIcons({
+            heroPlus,
+            heroArrowRightOnRectangle,
+            heroSquares2x2,
+            heroShare,
+            heroTrash,
+            heroLockClosed,
+            heroUserGroup,
+            heroArrowTopRightOnSquare,
+            heroXMark,
+            heroTrophy,
+            heroClock,
+            heroCheckCircle,
+            heroPencilSquare,
+            heroArrowRight,
+            heroTicket,
+            heroPlay,
+            heroCog6Tooth,
+            heroSun,
+            heroMoon,
+            heroComputerDesktop,
+            heroChevronDown,
+            heroQuestionMarkCircle
+        })
+    ],
+    template: `
     <div class="min-h-screen bg-page" [attr.inert]="showUpgradeDialog() ? '' : null">
       <!-- Header -->
       <app-shared-header variant="solid">
@@ -984,7 +983,7 @@ import {
       <app-upgrade-pass-dialog (dismissed)="closeUpgrade()" />
     }
   `,
-  styles: [`
+    styles: [`
     @keyframes modal-in {
       from {
         opacity: 0;

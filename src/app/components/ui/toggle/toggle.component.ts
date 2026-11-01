@@ -2,10 +2,9 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-toggle',
-  standalone: true,
-  imports: [CommonModule],
-  template: `
+    selector: 'app-toggle',
+    imports: [CommonModule],
+    template: `
     <button
       type="button"
       (click)="!disabled && onChange.emit(!checked)"

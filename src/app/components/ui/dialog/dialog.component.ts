@@ -8,10 +8,9 @@ export interface DialogPart {
 }
 
 @Component({
-  selector: 'app-dialog',
-  standalone: true,
-  imports: [CommonModule],
-  template: `
+    selector: 'app-dialog',
+    imports: [CommonModule],
+    template: `
     <div
       *ngIf="isOpen"
       class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
