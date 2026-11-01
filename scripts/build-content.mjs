@@ -40,6 +40,9 @@ function loadPosts() {
     const raw = fs.readFileSync(path.join(blogDir, file), 'utf8');
     const parsed = matter(raw);
     const data = parsed.data;
+    if (data.draft === true) {
+      continue;
+    }
     if (data.date instanceof Date) {
       const year = data.date.getUTCFullYear();
       const month = String(data.date.getUTCMonth() + 1).padStart(2, '0');
