@@ -411,7 +411,8 @@
   <!-- Auth Modal (for unauthenticated square clicks) -->
   <app-auth-modal
     [isOpen]="showAuthModal()"
-    (authenticated)="onAuthModalAuthenticated()">
+    (authenticated)="onAuthModalAuthenticated()"
+    (closed)="onAuthModalClosed()">
   </app-auth-modal>
 
   <!-- Forced Name Change Modal (non-dismissable) -->

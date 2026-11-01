@@ -900,6 +900,12 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     this.triggerWalkthroughIfNew();
   }
 
+  onAuthModalClosed(): void {
+    this.showAuthModal.set(false);
+    // The user backed out, so don't claim this square on a later sign-in
+    this.pendingSquare = null;
+  }
+
   // ESPN Sync Methods
   private applyServerScoreDisplay(): void {
     this.stopPolling();

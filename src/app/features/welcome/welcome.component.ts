@@ -178,7 +178,8 @@ interface Feature {
     <!-- Auth Modal -->
     <app-auth-modal
       [isOpen]="showAuthModal()"
-      (authenticated)="onAuthenticated()">
+      (authenticated)="onAuthenticated()"
+      (closed)="showAuthModal.set(false)">
     </app-auth-modal>
   `
 })
