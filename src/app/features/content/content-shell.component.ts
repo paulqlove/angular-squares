@@ -24,14 +24,7 @@ interface NavLink {
       <header class="no-print qs-on-navy bg-qs-tile text-qs-tile-ink">
         <div class="mx-auto flex max-w-5xl flex-wrap items-center gap-3 px-4 py-2">
           <a routerLink="/" class="flex min-h-11 items-center gap-2 rounded-md">
-            <img
-              src="assets/logo.webp"
-              alt=""
-              width="114"
-              height="120"
-              class="h-8 w-auto"
-            >
-            <span class="qs-title text-lg">Quarter Score</span>
+            <img src="assets/brand/lockup-horizontal-reversed.svg" alt="QuarterScore" width="192" height="24" class="h-6 w-auto">
           </a>
 
           <button

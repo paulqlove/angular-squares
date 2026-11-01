@@ -9,15 +9,11 @@ import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
   template: `
     <div [class]="containerClass">
       <div class="mx-auto max-w-[1600px] px-4 sm:px-8 h-14 flex justify-between items-center">
-        <div class="flex items-center gap-2.5">
-          <picture>
-            <source srcset="assets/logo.webp" type="image/webp">
-            <img src="assets/logo.png" alt="Quarter Score logo" width="114" height="120" class="h-8 w-auto">
-          </picture>
+        <div class="flex items-center">
           @if (heading === 'h1') {
-            <h1 class="qs-title text-lg">Quarter Score</h1>
+            <h1><img src="assets/brand/lockup-horizontal-reversed.svg" alt="QuarterScore" width="192" height="24" class="h-6 w-auto"></h1>
           } @else {
-            <p class="qs-title text-lg">Quarter Score</p>
+            <p><img src="assets/brand/lockup-horizontal-reversed.svg" alt="QuarterScore" width="192" height="24" class="h-6 w-auto"></p>
           }
         </div>
         <div class="flex items-center gap-1 sm:gap-2">

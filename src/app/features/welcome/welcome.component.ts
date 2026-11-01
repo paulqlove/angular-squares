@@ -65,7 +65,8 @@ interface Feature {
             <h1 class="qs-display mt-5 max-w-[14ch]">
               The Ultimate Football <span class="text-qs-accent">Squares</span> Game
             </h1>
-            <p class="mt-6 max-w-xl text-lg text-qs-muted leading-relaxed">
+            <p class="mt-6 text-xl font-medium">Every square, every score, live on one board.™</p>
+            <p class="mt-3 max-w-xl text-lg text-qs-muted leading-relaxed">
               Create and share your football squares game in seconds.
               Perfect for Super Bowl parties, office pools, and game day fun.
             </p>
@@ -209,8 +210,8 @@ export class WelcomeComponent implements OnInit {
 
   ngOnInit(): void {
     this.seo.apply({
-      title: 'Quarter Score — Football Squares for Game Day',
-      description: 'Create and share a football squares game in seconds. Claim squares, follow each quarter, and see who wins — for Super Bowl parties, office pools, and game day.',
+      title: 'QuarterScore — Football Squares for Game Day',
+      description: 'Every square, every score, live on one board.™',
       path: '/',
       headline: 'The Ultimate Football Squares Game',
       published: '2026-11-01',

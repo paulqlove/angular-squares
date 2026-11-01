@@ -65,7 +65,7 @@ import {
             <section class="rounded-xl border border-default p-3 sm:p-4" aria-labelledby="upgrade-pass-name">
               <p class="text-sm font-semibold uppercase tracking-wide text-label">Coming soon</p>
               <div class="mt-1 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                <h3 id="upgrade-pass-name" class="text-lg font-bold text-heading">Super Bowl Pass</h3>
+                <h3 id="upgrade-pass-name" class="text-lg font-bold text-heading">QuarterScore Big Game Pass</h3>
                 <p class="text-2xl font-bold text-heading">
                   $4.99
                   <span class="text-base font-semibold text-default">one-time</span>
@@ -80,7 +80,7 @@ import {
 
             @if (submitted()) {
               <p #status tabindex="-1" role="status" class="rounded-xl border border-default bg-input p-4 text-base text-default focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 dark:focus-visible:outline-white">
-                You're on the list. We'll email you when the pass is available.
+                You're on the list. We'll email you when Big Game Pass is available.
               </p>
             } @else {
               <form (ngSubmit)="submit()" novalidate class="space-y-3">
