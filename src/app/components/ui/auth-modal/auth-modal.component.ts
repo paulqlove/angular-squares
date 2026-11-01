@@ -20,13 +20,13 @@ import { AuthService } from '../../../core/services/auth.service';
                 type="text"
                 [(ngModel)]="guestName"
                 placeholder="Enter your name"
-                class="w-full px-4 py-3 border-2 border-default rounded-lg focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none transition-all bg-input text-default"
+                class="w-full px-4 py-3 border-2 border-qs-line-strong rounded-btn outline-none transition-all bg-qs-panel-2 text-qs-ink"
                 (keyup.enter)="continueAsGuest()"
               />
               <button
                 (click)="continueAsGuest()"
                 [disabled]="!guestName.trim()"
-                class="w-full px-6 py-3 bg-secondary-500 hover:bg-secondary-600 text-white rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                class="w-full px-6 py-3 bg-qs-accent hover:bg-qs-accent-hover text-qs-on-accent rounded-btn transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Join as Guest
               </button>

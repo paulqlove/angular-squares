@@ -59,7 +59,7 @@ interface Feature {
           @if (isAuthenticated()) {
             <button
               (click)="goToDashboard()"
-              class="px-5 py-2 bg-white text-emerald-700 text-sm font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+              class="px-5 py-2 bg-white text-qs-accent text-sm font-semibold rounded-lg hover:bg-gray-100 transition-colors"
             >
               Go to Dashboard
             </button>
@@ -67,7 +67,7 @@ interface Feature {
             <button
               type="button"
               (click)="showAuthModal.set(true)"
-              class="inline-flex min-h-11 items-center justify-center px-5 py-2 bg-white text-emerald-700 text-sm font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+              class="inline-flex min-h-11 items-center justify-center px-5 py-2 bg-white text-qs-accent text-sm font-semibold rounded-lg hover:bg-gray-100 transition-colors"
             >
               Sign in
             </button>
@@ -82,7 +82,7 @@ interface Feature {
               <div>
                 <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-heading leading-[1.1] tracking-tight">
                   The Ultimate<br>
-                  <span class="text-yellow-500">Football Squares</span><br>
+                  <span class="text-qs-accent">Football Squares</span><br>
                   Game
                 </h1>
                 <p class="text-lg md:text-xl text-muted mt-6 max-w-md">
@@ -94,7 +94,7 @@ interface Feature {
                   <button
                     type="button"
                     (click)="showAuthModal.set(true)"
-                    class="w-full self-stretch px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg rounded-lg transition-colors sm:w-auto sm:self-start"
+                    class="w-full self-stretch px-8 py-3.5 bg-qs-accent hover:bg-qs-accent-hover text-qs-on-accent font-bold text-lg rounded-btn transition-colors sm:w-auto sm:self-start"
                   >
                     Create game
                   </button>
@@ -126,7 +126,7 @@ interface Feature {
                         type="text"
                         [(ngModel)]="gameCode"
                         placeholder="Enter code"
-                        class="flex-1 px-4 py-2.5 border-2 border-default rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none uppercase tracking-widest text-center font-mono bg-input text-default"
+                        class="flex-1 px-4 py-2.5 border-2 border-qs-line-strong rounded-btn outline-none uppercase tracking-widest text-center font-mono bg-qs-panel-2 text-qs-ink"
                         maxlength="6"
                         (keyup.enter)="joinGame()"
                       />
@@ -135,7 +135,7 @@ interface Feature {
                         (click)="joinGame()"
                         [disabled]="gameCode.length !== 6"
                         aria-label="Join game"
-                        class="inline-flex min-h-11 min-w-11 items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors disabled:opacity-40"
+                        class="inline-flex min-h-11 min-w-11 items-center justify-center bg-qs-accent hover:bg-qs-accent-hover text-qs-on-accent rounded-btn transition-colors disabled:opacity-40"
                       >
                         <ng-icon name="heroArrowRight" class="text-xl" aria-hidden="true"></ng-icon>
                       </button>
@@ -164,13 +164,13 @@ interface Feature {
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
               @for (feature of features; track feature.title) {
                 <div [attr.id]="feature.id || null" class="bg-card rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
-                  <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center mb-4">
-                    <ng-icon [name]="feature.icon" class="text-2xl text-emerald-600"></ng-icon>
+                  <div class="w-12 h-12 bg-qs-accent-soft rounded-inner flex items-center justify-center mb-4">
+                    <ng-icon [name]="feature.icon" class="text-2xl text-qs-accent"></ng-icon>
                   </div>
                   <h3 class="text-lg font-semibold text-heading mb-2">{{ feature.title }}</h3>
                   <p class="text-muted">{{ feature.description }}</p>
                   @if (feature.link) {
-                    <a [routerLink]="feature.link.path" class="mt-3 inline-flex min-h-11 items-center font-semibold text-emerald-800 underline underline-offset-2 dark:text-emerald-300">
+                    <a [routerLink]="feature.link.path" class="mt-3 inline-flex min-h-11 items-center font-semibold text-qs-accent underline underline-offset-2">
                       {{ feature.link.label }}
                     </a>
                   }
@@ -188,14 +188,14 @@ interface Feature {
             </h2>
 
             <p class="text-center mb-10">
-              <a routerLink="/how-to-play" class="font-semibold text-emerald-800 underline underline-offset-2 dark:text-emerald-300">
+              <a routerLink="/how-to-play" class="font-semibold text-qs-accent underline underline-offset-2">
                 Read the full rules
               </a>
             </p>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
               <div class="text-center">
-                <div class="w-16 h-16 bg-emerald-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+                <div class="w-16 h-16 bg-qs-accent text-qs-on-accent rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
                   1
                 </div>
                 <h3 class="text-lg font-semibold text-heading mb-2">Create a Game</h3>
@@ -203,7 +203,7 @@ interface Feature {
               </div>
 
               <div class="text-center">
-                <div class="w-16 h-16 bg-emerald-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+                <div class="w-16 h-16 bg-qs-accent text-qs-on-accent rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
                   2
                 </div>
                 <h3 class="text-lg font-semibold text-heading mb-2">Share the Link</h3>
@@ -211,7 +211,7 @@ interface Feature {
               </div>
 
               <div class="text-center">
-                <div class="w-16 h-16 bg-emerald-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+                <div class="w-16 h-16 bg-qs-accent text-qs-on-accent rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
                   3
                 </div>
                 <h3 class="text-lg font-semibold text-heading mb-2">Play & Win</h3>

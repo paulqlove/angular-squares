@@ -96,7 +96,7 @@ import {
                 class="w-7 h-7 rounded-full ring-2 ring-primary-500"
               />
             } @else {
-              <div class="w-7 h-7 rounded-full bg-secondary-500 flex items-center justify-center">
+              <div class="w-7 h-7 rounded-full bg-qs-accent flex items-center justify-center">
                 <span class="text-white font-semibold text-sm">
                   {{ (currentUser()?.displayName || currentUser()?.email)?.charAt(0)?.toUpperCase() || '?' }}
                 </span>
@@ -121,13 +121,13 @@ import {
                     type="text"
                     [(ngModel)]="profileName"
                     placeholder="Enter your name"
-                    class="flex-1 min-w-0 px-3 py-2 bg-input border border-input rounded-lg text-sm text-default focus:border-secondary-500 focus:ring-1 focus:ring-secondary-100 outline-none"
+                    class="flex-1 min-w-0 px-3 py-2 bg-input border border-input rounded-lg text-sm text-default focus:border-qs-accent focus:ring-1 focus:ring-secondary-100 outline-none"
                     (keyup.enter)="saveProfile()"
                   />
                   <button
                     (click)="saveProfile()"
                     [disabled]="isSavingProfile() || !profileName.trim()"
-                    class="flex-1 px-3 py-2 bg-secondary-500 hover:bg-secondary-600 disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-colors"
+                    class="flex-1 px-3 py-2 bg-qs-accent hover:bg-qs-accent-hover disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-colors"
                   >
                     @if (isSavingProfile()) {
                       ...
@@ -147,7 +147,7 @@ import {
                 <div class="flex items-center bg-control rounded-lg p-1">
                   <button
                     (click)="setTheme('system')"
-                    [class]="themeService.theme() === 'system' ? 'flex-1 p-2 rounded-md bg-secondary-500 text-white' : 'flex-1 p-2 rounded-md text-muted hover:text-default'"
+                    [class]="themeService.theme() === 'system' ? 'flex-1 p-2 rounded-md bg-qs-accent text-white' : 'flex-1 p-2 rounded-md text-muted hover:text-default'"
                     title="System theme"
                     aria-label="System theme"
                   >
@@ -155,7 +155,7 @@ import {
                   </button>
                   <button
                     (click)="setTheme('light')"
-                    [class]="themeService.theme() === 'light' ? 'flex-1 p-2 rounded-md bg-secondary-500 text-white' : 'flex-1 p-2 rounded-md text-muted hover:text-default'"
+                    [class]="themeService.theme() === 'light' ? 'flex-1 p-2 rounded-md bg-qs-accent text-white' : 'flex-1 p-2 rounded-md text-muted hover:text-default'"
                     title="Light theme"
                     aria-label="Light theme"
                   >
@@ -163,7 +163,7 @@ import {
                   </button>
                   <button
                     (click)="setTheme('dark')"
-                    [class]="themeService.theme() === 'dark' ? 'flex-1 p-2 rounded-md bg-secondary-500 text-white' : 'flex-1 p-2 rounded-md text-muted hover:text-default'"
+                    [class]="themeService.theme() === 'dark' ? 'flex-1 p-2 rounded-md bg-qs-accent text-white' : 'flex-1 p-2 rounded-md text-muted hover:text-default'"
                     title="Dark theme"
                     aria-label="Dark theme"
                   >
@@ -204,7 +204,7 @@ import {
                 data-walkthrough="create-game"
               >
                 <div class="flex items-center gap-4 mb-3">
-                  <div class="w-12 h-12 rounded-xl bg-secondary-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <div class="w-12 h-12 rounded-xl bg-qs-accent flex items-center justify-center group-hover:scale-110 transition-transform">
                     <ng-icon name="heroPlus" class="text-2xl text-white"></ng-icon>
                   </div>
                   <div>
@@ -251,7 +251,7 @@ import {
                   type="text"
                   [(ngModel)]="joinGameCode"
                   placeholder="XXXXXX"
-                  class="flex-1 min-w-0 px-4 py-3 bg-input dark:bg-white/10 border border-input dark:border-white/20 rounded-lg text-default dark:text-white placeholder-muted dark:placeholder-primary-400 uppercase tracking-widest font-mono text-center focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
+                  class="flex-1 min-w-0 px-4 py-3 bg-input dark:bg-white/10 border border-input dark:border-white/20 rounded-lg text-default dark:text-white placeholder-muted dark:placeholder-primary-400 uppercase tracking-widest font-mono text-center focus:outline-none focus:ring-2 focus:ring-qs-accent focus:border-transparent"
                   maxlength="6"
                   (keyup.enter)="joinGame()"
                 />
@@ -275,7 +275,7 @@ import {
 
           @if (isLoadingGames()) {
             <div class="flex items-center justify-center py-16">
-              <svg class="animate-spin h-10 w-10 text-secondary-500" viewBox="0 0 24 24">
+              <svg class="animate-spin h-10 w-10 text-qs-accent" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
               </svg>
@@ -291,7 +291,7 @@ import {
                 (click)="openCreateModal($event)"
                 [disabled]="isCheckingBoardLimit()"
                 [attr.aria-busy]="isCheckingBoardLimit()"
-                class="inline-flex min-h-11 items-center gap-2 px-6 py-3 bg-secondary-500 hover:bg-secondary-600 disabled:cursor-wait disabled:opacity-70 text-white rounded-xl font-medium transition-colors"
+                class="inline-flex min-h-11 items-center gap-2 px-6 py-3 bg-qs-accent hover:bg-qs-accent-hover disabled:cursor-wait disabled:opacity-70 text-white rounded-xl font-medium transition-colors"
               >
                 <ng-icon name="heroPlus" class="text-xl"></ng-icon>
                 Create Game
@@ -336,7 +336,7 @@ import {
                       </div>
                       <div class="h-2 bg-control rounded-full overflow-hidden">
                         <div
-                          class="h-full bg-gradient-to-r from-secondary-400 to-secondary-500 rounded-full transition-all duration-500"
+                          class="h-full bg-gradient-to-r from-qs-accent to-qs-accent-hover rounded-full transition-all duration-500"
                           [style.width.%]="game.squaresFilled"
                         ></div>
                       </div>
@@ -369,7 +369,7 @@ import {
                     <div class="flex items-center gap-2">
                       <button
                         (click)="openGame(game.id)"
-                        class="flex-1 px-4 py-2.5 bg-secondary-500 hover:bg-secondary-600 text-white rounded-xl font-medium transition-colors"
+                        class="flex-1 px-4 py-2.5 bg-qs-accent hover:bg-qs-accent-hover text-white rounded-xl font-medium transition-colors"
                       >
                         Open Game
                       </button>
@@ -427,7 +427,7 @@ import {
                 <div class="bg-control dark:bg-gradient-to-r dark:from-header-accent dark:to-header p-4">
                   <div class="flex items-center justify-between mb-2">
                     <h3 class="font-bold text-heading dark:text-white truncate">{{ game.name }}</h3>
-                    <span class="flex items-center gap-1 text-xs bg-secondary-100 text-secondary-700 px-2 py-1 rounded-full dark:bg-secondary-500/20 dark:text-secondary-300">
+                    <span class="flex items-center gap-1 text-xs bg-secondary-100 text-secondary-700 px-2 py-1 rounded-full dark:bg-qs-accent/20 dark:text-secondary-300">
                       <ng-icon name="heroUserGroup" class="text-xs"></ng-icon>
                       Joined
                     </span>
@@ -454,7 +454,7 @@ import {
                     </div>
                     <div class="h-2 bg-control rounded-full overflow-hidden">
                       <div
-                        class="h-full bg-gradient-to-r from-secondary-400 to-secondary-500 rounded-full transition-all duration-500"
+                        class="h-full bg-gradient-to-r from-qs-accent to-qs-accent-hover rounded-full transition-all duration-500"
                         [style.width.%]="game.squaresFilled"
                       ></div>
                     </div>
@@ -487,7 +487,7 @@ import {
                   <div class="flex items-center gap-2">
                     <button
                       (click)="openGame(game.id)"
-                      class="flex-1 px-4 py-2.5 bg-secondary-500 hover:bg-secondary-600 text-white rounded-xl font-medium transition-colors"
+                      class="flex-1 px-4 py-2.5 bg-qs-accent hover:bg-qs-accent-hover text-white rounded-xl font-medium transition-colors"
                     >
                       Open Game
                     </button>
@@ -560,7 +560,7 @@ import {
                 <label class="block text-sm font-semibold text-label mb-3">Select Game</label>
                 @if (isLoadingEspnGames()) {
                   <div class="flex items-center justify-center py-8">
-                    <svg class="animate-spin h-6 w-6 text-secondary-500" viewBox="0 0 24 24">
+                    <svg class="animate-spin h-6 w-6 text-qs-accent" viewBox="0 0 24 24">
                       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
                       <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
                     </svg>
@@ -628,7 +628,7 @@ import {
                     <button
                       (click)="selectPrice(price)"
                       [class]="newGamePrice === price
-                        ? 'px-5 py-2.5 bg-secondary-500 text-white rounded-lg font-medium transition-colors'
+                        ? 'px-5 py-2.5 bg-qs-accent text-white rounded-lg font-medium transition-colors'
                         : 'px-5 py-2.5 bg-control text-default hover:bg-control-hover rounded-lg font-medium transition-colors'"
                     >
                       {{ price === 0 ? 'Free' : '$' + price }}
@@ -655,7 +655,7 @@ import {
                   type="text"
                   [(ngModel)]="newGameName"
                   placeholder="e.g., Super Bowl Party 2024"
-                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
+                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-qs-accent focus:ring-2 focus:ring-secondary-100 outline-none text-default"
                   [class.border-red-500]="gameNameError()"
                 />
                 @if (gameNameError()) {
@@ -673,7 +673,7 @@ import {
                   type="text"
                   [(ngModel)]="newGameVenmoUsername"
                   placeholder="@username"
-                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
+                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-qs-accent focus:ring-2 focus:ring-secondary-100 outline-none text-default"
                 />
               </div>
 
@@ -688,7 +688,7 @@ import {
                   type="email"
                   [(ngModel)]="newGamePaymentManager"
                   placeholder="Enter their email address"
-                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
+                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-qs-accent focus:ring-2 focus:ring-secondary-100 outline-none text-default"
                 />
               </div>
             </div>
@@ -704,7 +704,7 @@ import {
               <button
                 (click)="createGame()"
                 [disabled]="isCreating()"
-                class="px-8 py-2.5 bg-secondary-500 hover:bg-secondary-600 disabled:opacity-50 text-white rounded-xl font-bold transition-colors"
+                class="px-8 py-2.5 bg-qs-accent hover:bg-qs-accent-hover disabled:opacity-50 text-white rounded-xl font-bold transition-colors"
               >
                 @if (isCreating()) {
                   <span class="flex items-center gap-2">
@@ -746,7 +746,7 @@ import {
                   </code>
                   <button
                     (click)="copyToClipboard(shareModalGameId()!)"
-                    class="p-4 bg-secondary-500 hover:bg-secondary-600 text-white rounded-xl transition-colors"
+                    class="p-4 bg-qs-accent hover:bg-qs-accent-hover text-white rounded-xl transition-colors"
                   >
                     Copy
                   </button>
@@ -764,7 +764,7 @@ import {
                   />
                   <button
                     (click)="copyToClipboard(getShareLink(shareModalGameId()!))"
-                    class="px-4 py-3 bg-secondary-500 hover:bg-secondary-600 text-white rounded-xl transition-colors"
+                    class="px-4 py-3 bg-qs-accent hover:bg-qs-accent-hover text-white rounded-xl transition-colors"
                   >
                     Copy
                   </button>
@@ -831,7 +831,7 @@ import {
                 <label class="block text-sm font-semibold text-label mb-2">ESPN Game</label>
                 @if (isLoadingEditEspnGames()) {
                   <div class="flex items-center justify-center py-6">
-                    <svg class="animate-spin h-6 w-6 text-secondary-500" viewBox="0 0 24 24">
+                    <svg class="animate-spin h-6 w-6 text-qs-accent" viewBox="0 0 24 24">
                       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
                       <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
                     </svg>
@@ -876,7 +876,7 @@ import {
                   type="text"
                   [(ngModel)]="editGameName"
                   placeholder="e.g., Super Bowl Party 2024"
-                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
+                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-qs-accent focus:ring-2 focus:ring-secondary-100 outline-none text-default"
                 />
               </div>
 
@@ -889,7 +889,7 @@ import {
                     type="number"
                     [(ngModel)]="editGamePrice"
                     min="0"
-                    class="flex-1 px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
+                    class="flex-1 px-4 py-3 bg-input border border-input rounded-xl focus:border-qs-accent focus:ring-2 focus:ring-secondary-100 outline-none text-default"
                   />
                 </div>
               </div>
@@ -901,7 +901,7 @@ import {
                   type="text"
                   [(ngModel)]="editGameVenmoUsername"
                   placeholder="@username"
-                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
+                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-qs-accent focus:ring-2 focus:ring-secondary-100 outline-none text-default"
                 />
               </div>
 
@@ -931,7 +931,7 @@ import {
                       (focus)="onManagerSearchFocus()"
                       (keydown)="onManagerSearchKeydown($event)"
                       placeholder="Search players..."
-                      class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
+                      class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-qs-accent focus:ring-2 focus:ring-secondary-100 outline-none text-default"
                       autocomplete="off"
                     />
                     @if (showManagerDropdown() && managerSearchResults().length > 0) {
@@ -966,7 +966,7 @@ import {
               <button
                 (click)="saveGameEdits()"
                 [disabled]="isSavingGame()"
-                class="px-8 py-2.5 bg-secondary-500 hover:bg-secondary-600 disabled:opacity-50 text-white rounded-xl font-bold transition-colors"
+                class="px-8 py-2.5 bg-qs-accent hover:bg-qs-accent-hover disabled:opacity-50 text-white rounded-xl font-bold transition-colors"
               >
                 @if (isSavingGame()) {
                   Saving...
