@@ -11,6 +11,8 @@ import { SanitizationService } from '../../core/services/sanitization.service';
 import { WalkthroughService, WalkthroughStep } from '../../core/services/walkthrough.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { AppHeaderComponent } from '../../components/ui/app-header/app-header.component';
+import { UpgradePassDialogComponent } from './components/upgrade-pass-dialog/upgrade-pass-dialog.component';
+import { ActiveBoardLimitError } from '../../core/errors/active-board-limit.error';
 import {
   heroPlus,
   heroArrowRightOnRectangle,
@@ -39,7 +41,7 @@ import {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgIconComponent, AppHeaderComponent],
+  imports: [CommonModule, FormsModule, NgIconComponent, AppHeaderComponent, UpgradePassDialogComponent],
   providers: [
     provideIcons({
       heroPlus,
@@ -67,7 +69,7 @@ import {
     })
   ],
   template: `
-    <div class="min-h-screen bg-page">
+    <div class="min-h-screen bg-page" [attr.inert]="showUpgradeDialog() ? '' : null">
       <!-- Header -->
       <app-shared-header variant="solid">
         <!-- Help Button -->
@@ -196,7 +198,9 @@ import {
             @if (canCreateGame()) {
               <button
                 (click)="openCreateModal()"
-                class="group bg-control hover:bg-control-hover dark:bg-white/10 dark:hover:bg-white/20 backdrop-blur border border-default dark:border-white/20 rounded-xl p-6 text-left transition-all hover:scale-[1.02] hover:shadow-lg"
+                [disabled]="isCheckingBoardLimit()"
+                [attr.aria-busy]="isCheckingBoardLimit()"
+                class="group bg-control hover:bg-control-hover dark:bg-white/10 dark:hover:bg-white/20 backdrop-blur border border-default dark:border-white/20 rounded-xl p-6 text-left transition-all hover:scale-[1.02] hover:shadow-lg disabled:cursor-wait disabled:opacity-70 disabled:hover:scale-100"
                 data-walkthrough="create-game"
               >
                 <div class="flex items-center gap-4 mb-3">
@@ -285,7 +289,9 @@ import {
               <p class="text-muted mb-6">Create your first squares pool to get started!</p>
               <button
                 (click)="openCreateModal()"
-                class="inline-flex items-center gap-2 px-6 py-3 bg-secondary-500 hover:bg-secondary-600 text-white rounded-xl font-medium transition-colors"
+                [disabled]="isCheckingBoardLimit()"
+                [attr.aria-busy]="isCheckingBoardLimit()"
+                class="inline-flex min-h-11 items-center gap-2 px-6 py-3 bg-secondary-500 hover:bg-secondary-600 disabled:cursor-wait disabled:opacity-70 text-white rounded-xl font-medium transition-colors"
               >
                 <ng-icon name="heroPlus" class="text-xl"></ng-icon>
                 Create Game
@@ -974,6 +980,9 @@ import {
       }
 
     </div>
+    @if (showUpgradeDialog()) {
+      <app-upgrade-pass-dialog (dismissed)="showUpgradeDialog.set(false)" />
+    }
   `,
   styles: [`
     @keyframes modal-in {
@@ -1041,7 +1050,9 @@ export class DashboardComponent implements OnInit {
   joinedGames = signal<GameListItem[]>([]);
   isLoadingGames = signal(true);
   isCreating = signal(false);
+  isCheckingBoardLimit = signal(false);
   showCreateModal = signal(false);
+  showUpgradeDialog = signal(false);
   shareModalGameId = signal<string | null>(null);
   espnGames = signal<EspnGame[]>([]);
   isLoadingEspnGames = signal(false);
@@ -1121,9 +1132,25 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  openCreateModal(): void {
-    this.showCreateModal.set(true);
-    this.fetchEspnGames();
+  async openCreateModal(): Promise<void> {
+    const user = this.currentUser();
+    if (!user || user.isGuest || this.isCheckingBoardLimit()) {
+      return;
+    }
+    this.isCheckingBoardLimit.set(true);
+    try {
+      await this.gameService.assertUnderFreeBoardLimit(user.uid);
+      this.showCreateModal.set(true);
+      this.fetchEspnGames();
+    } catch (error) {
+      if (error instanceof ActiveBoardLimitError) {
+        this.showUpgradeDialog.set(true);
+      } else {
+        this.toastService.error('Failed to check your boards. Try again.');
+      }
+    } finally {
+      this.isCheckingBoardLimit.set(false);
+    }
   }
 
   async fetchEspnGames(): Promise<void> {
@@ -1212,13 +1239,21 @@ export class DashboardComponent implements OnInit {
         this.newGamePaymentManager.trim() || undefined,
         sanitizedVenmo || undefined
       );
-      this.router.navigate(['/game', gameId]);
-    } catch (error) {
-      this.toastService.error('Failed to create game');
-    } finally {
-      this.isCreating.set(false);
       this.showCreateModal.set(false);
       this.resetCreateForm();
+      this.router.navigate(['/game', gameId]);
+    } catch (error) {
+      if (error instanceof ActiveBoardLimitError) {
+        this.showCreateModal.set(false);
+        this.resetCreateForm();
+        this.showUpgradeDialog.set(true);
+      } else {
+        this.toastService.error('Failed to create game');
+        this.showCreateModal.set(false);
+        this.resetCreateForm();
+      }
+    } finally {
+      this.isCreating.set(false);
     }
   }
 
