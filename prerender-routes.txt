@@ -2,7 +2,6 @@
 /best-squares-numbers
 /printable-football-squares
 /blog
-/blog/best-super-bowl-squares-numbers
 /how-to-play
 /faq
 /super-bowl-squares
