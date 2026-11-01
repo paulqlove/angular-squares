@@ -124,6 +124,7 @@ Game owners can link a board to an ESPN game. `environment.serverScoring` defaul
 - [Enhancement Plan](@./ENHANCEMENT_PLAN.md) - Full roadmap with technical specs
 - [TODO](@./docs/TODO.md) - Current task tracking
 - [Future Features](@./docs/FUTURE.md) - Product roadmap and monetization tiers
+- [Design Guidelines](@./docs/DESIGN.md) - Design source of truth: tokens, type, components, a11y, and the migration plan. Read before any UI or styling change.
 
 ## Deployment
 
