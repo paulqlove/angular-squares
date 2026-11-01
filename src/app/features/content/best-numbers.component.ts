@@ -124,12 +124,6 @@ import { ContentShellComponent } from './content-shell.component';
           <h2 id="related-heading" class="text-2xl font-bold text-heading">Keep going</h2>
           <ul class="mt-4 grid gap-3 sm:grid-cols-2">
             <li>
-              <a routerLink="/blog/best-super-bowl-squares-numbers" class="block rounded-xl border border-default bg-card p-4 hover:bg-card-hover">
-                <span class="font-semibold text-emerald-800 underline decoration-emerald-800/40 underline-offset-2 dark:text-emerald-300">November 5 post</span>
-                <span class="mt-1 block text-sm text-muted">The blog note that points at this table. Copy is still marked TODO.</span>
-              </a>
-            </li>
-            <li>
               <a routerLink="/how-to-play" class="block rounded-xl border border-default bg-card p-4 hover:bg-card-hover">
                 <span class="font-semibold text-emerald-800 underline decoration-emerald-800/40 underline-offset-2 dark:text-emerald-300">How to play</span>
                 <span class="mt-1 block text-sm text-muted">How the draw and the quarter winner work.</span>

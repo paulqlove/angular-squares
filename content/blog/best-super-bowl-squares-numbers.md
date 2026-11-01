@@ -4,6 +4,7 @@ description: "Which Super Bowl squares numbers come up most? What NFL scoring hi
 date: "2026-11-05"
 slug: best-super-bowl-squares-numbers
 ogImage: /assets/og-image.png
+draft: true
 ---
 
 You just got handed your square, you look at your two numbers, and someone across the room laughs. Maybe you're holding a 7 and a 0 and feeling great. Maybe you've got a 2 and a 5 and everyone's already feeling sorry for you. So is anyone actually right? Here's what NFL scoring history says about the best Super Bowl squares numbers, and why it still comes down to the luck of the draw.
