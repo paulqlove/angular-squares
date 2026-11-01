@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject, OnChanges, SimpleChanges, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, OnChanges, SimpleChanges, signal, ChangeDetectionStrategy, HostListener, ElementRef, ViewChild } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
@@ -9,15 +9,33 @@ import { AuthService } from '../../../core/services/auth.service';
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
     @if (isOpen && !checkingAuth()) {
-      <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-        <div class="w-full max-w-md bg-dialog shadow-2xl rounded-2xl p-8">
-          <h2 class="text-2xl font-bold text-heading text-center mb-6">Join This Game</h2>
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" (click)="close()">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="auth-modal-title"
+          class="relative w-full max-w-md bg-dialog shadow-2xl rounded-2xl p-8"
+          (click)="$event.stopPropagation()"
+        >
+          <button
+            #closeButton
+            type="button"
+            aria-label="Close"
+            (click)="close()"
+            class="absolute right-3 top-3 inline-flex min-h-11 min-w-11 items-center justify-center rounded-btn text-qs-muted hover:text-qs-ink hover:bg-qs-panel-2"
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"></path>
+            </svg>
+          </button>
+          <h2 id="auth-modal-title" class="text-2xl font-bold text-heading text-center mb-6">Join This Game</h2>
 
           <div class="space-y-4">
             <!-- Guest Mode (top) -->
             <div class="space-y-3">
               <input
                 type="text"
+                aria-label="Your name"
                 [(ngModel)]="guestName"
                 placeholder="Enter your name"
                 class="w-full px-4 py-3 border-2 border-qs-line-strong rounded-btn outline-none transition-all bg-qs-panel-2 text-qs-ink"
@@ -68,16 +86,39 @@ import { AuthService } from '../../../core/services/auth.service';
 export class AuthModalComponent implements OnChanges {
   @Input() isOpen = false;
   @Output() authenticated = new EventEmitter<void>();
+  @Output() closed = new EventEmitter<void>();
+
+  /** Focuses the close button once the dialog renders (after the auth check). */
+  @ViewChild('closeButton') set closeButtonRef(ref: ElementRef<HTMLButtonElement> | undefined) {
+    ref?.nativeElement.focus();
+  }
 
   authService = inject(AuthService);
   checkingAuth = signal(false);
 
   guestName = '';
 
+  private returnFocus: HTMLElement | null = null;
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['isOpen']?.currentValue === true) {
+      this.returnFocus = typeof document !== 'undefined' ? (document.activeElement as HTMLElement | null) : null;
       void this.prepareAuth();
     }
+  }
+
+  close(): void {
+    this.closed.emit();
+    const target = this.returnFocus;
+    this.returnFocus = null;
+    setTimeout(() => target?.focus());
+  }
+
+  @HostListener('document:keydown.escape', ['$event'])
+  onEscape(event: Event): void {
+    if (!this.isOpen || this.checkingAuth()) return;
+    event.preventDefault();
+    this.close();
   }
 
   private async prepareAuth(): Promise<void> {

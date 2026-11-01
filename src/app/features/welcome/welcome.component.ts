@@ -17,7 +17,7 @@ import {
 } from '@ng-icons/heroicons/outline';
 import { AppHeaderComponent } from '../../components/ui/app-header/app-header.component';
 import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.component';
-import { SampleBoardComponent } from './sample-board.component';
+import { PhoneDemoComponent } from './phone-demo.component';
 
 interface Feature {
   icon: string;
@@ -29,7 +29,7 @@ interface Feature {
 
 @Component({
     selector: 'app-welcome',
-    imports: [FormsModule, RouterLink, NgIconComponent, AppHeaderComponent, AuthModalComponent, SampleBoardComponent, SiteFooterComponent],
+    imports: [FormsModule, RouterLink, NgIconComponent, AppHeaderComponent, AuthModalComponent, PhoneDemoComponent, SiteFooterComponent],
     providers: [
         provideIcons({
             heroSquares2x2,
@@ -57,7 +57,8 @@ interface Feature {
       </app-shared-header>
 
       <!-- Hero -->
-      <section class="mx-auto max-w-[1600px] px-4 sm:px-8 pt-10 pb-16 md:pt-16 md:pb-24">
+      <section class="overflow-hidden">
+        <div class="mx-auto max-w-[1600px] px-4 sm:px-8 pt-10 pb-16 md:pt-16 md:pb-24 xl:pb-0">
         <div class="grid grid-cols-1 xl:grid-cols-[1fr_minmax(0,1.05fr)] gap-10 xl:gap-16 items-center">
           <div>
             <p class="qs-eyebrow">Football squares / Free for game day</p>
@@ -117,7 +118,8 @@ interface Feature {
             <p class="qs-label mt-6 text-qs-muted">Free · Players don't need an account</p>
           </div>
 
-          <app-sample-board></app-sample-board>
+          <app-phone-demo class="xl:-mb-[12rem]"></app-phone-demo>
+        </div>
         </div>
       </section>
 
@@ -176,7 +178,8 @@ interface Feature {
     <!-- Auth Modal -->
     <app-auth-modal
       [isOpen]="showAuthModal()"
-      (authenticated)="onAuthenticated()">
+      (authenticated)="onAuthenticated()"
+      (closed)="showAuthModal.set(false)">
     </app-auth-modal>
   `
 })
