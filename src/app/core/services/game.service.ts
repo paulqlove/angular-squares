@@ -41,6 +41,9 @@ export interface GameData {
   playerColors?: { [key: string]: string };
   venmoUsername?: string;
   paidPlayers?: string[];
+  houseRules?: string;
+  confirmationLabel?: string;
+  confirmationDescription?: string;
   espnEventId?: string;
   espnSport?: SportType;
   managerId?: string;
@@ -68,6 +71,62 @@ export interface GameListItem {
   venmoUsername?: string;
   collected: number;
   totalPot: number;
+  houseRules?: string;
+  confirmationLabel?: string;
+  confirmationDescription?: string;
+}
+
+function storedPrice(value: unknown): number {
+  return typeof value === 'number' && Number.isFinite(value) ? value : 0;
+}
+
+function storedText(value: unknown): string {
+  return typeof value === 'string' ? value : '';
+}
+
+export function mapStoredGame(gameId: string, rawData: any): GameData {
+  const data: GameData = {
+    id: gameId,
+    name: rawData?.name || 'Football Squares',
+    ownerId: rawData?.ownerId || '',
+    ownerName: rawData?.ownerName || 'Unknown',
+    createdAt: rawData?.createdAt || Date.now(),
+    selectedSquares: {},
+    homeNumbers: rawData?.homeNumbers || Array(10).fill(null),
+    awayNumbers: rawData?.awayNumbers || Array(10).fill(null),
+    scores: rawData?.scores || {
+      q1: { home: 0, away: 0 },
+      q2: { home: 0, away: 0 },
+      q3: { home: 0, away: 0 },
+      q4: { home: 0, away: 0 }
+    },
+    playerColors: rawData?.playerColors || {},
+    winners: rawData?.winners || {},
+    pricePerSquare: storedPrice(rawData?.pricePerSquare),
+    isRandomized: rawData?.isRandomized || false,
+    isLocked: rawData?.isLocked || false,
+    homeTeam: rawData?.homeTeam || '',
+    awayTeam: rawData?.awayTeam || '',
+    venmoUsername: storedText(rawData?.venmoUsername),
+    paidPlayers: Array.isArray(rawData?.paidPlayers) ? rawData.paidPlayers : [],
+    houseRules: storedText(rawData?.houseRules),
+    confirmationLabel: storedText(rawData?.confirmationLabel),
+    confirmationDescription: storedText(rawData?.confirmationDescription),
+    espnEventId: rawData?.espnEventId || undefined,
+    espnSport: rawData?.espnSport || undefined,
+    managerId: rawData?.managerId || undefined,
+    managerEmail: rawData?.managerEmail || undefined,
+    managerName: rawData?.managerName || undefined,
+    playerUserIds: rawData?.playerUserIds || undefined
+  };
+
+  if (rawData?.squares && typeof rawData.squares === 'object') {
+    Object.entries(rawData.squares).forEach(([key, value]) => {
+      data.selectedSquares[key] = value as string;
+    });
+  }
+
+  return data;
 }
 
 @Injectable({
@@ -126,7 +185,10 @@ export class GameService {
     pricePerSquare?: number,
     espnSport?: SportType,
     managerEmail?: string,
-    venmoUsername?: string
+    venmoUsername?: string,
+    houseRules?: string,
+    confirmationLabel?: string,
+    confirmationDescription?: string
   ): Promise<string> {
     if (!this.isBrowser) throw new Error('Cannot create game on server');
     const gameId = this.generateGameId();
@@ -149,19 +211,29 @@ export class GameService {
       playerColors: {},
       winners: {},
       isLocked: false,
-      pricePerSquare: pricePerSquare ?? 10,
+      pricePerSquare: pricePerSquare ?? 0,
       isRandomized: false,
       homeTeam: homeTeam || '',
       awayTeam: awayTeam || '',
       venmoUsername: venmoUsername || '',
       paidPlayers: [],
+      houseRules: houseRules || '',
+      confirmationLabel: confirmationLabel || '',
+      confirmationDescription: confirmationDescription || '',
       ...(espnEventId ? { espnEventId } : {}),
       ...(espnSport ? { espnSport } : {}),
       ...(managerEmail ? { managerEmail } : {})
     };
 
     const gameRef = ref(this.db, `games/${gameId}`);
-    await set(gameRef, defaultGameData);
+    const payload: Partial<GameData> = { ...defaultGameData };
+    if (pricePerSquare === undefined) {
+      delete payload.pricePerSquare;
+    }
+    if (!venmoUsername) {
+      delete payload.venmoUsername;
+    }
+    await set(gameRef, payload);
 
     // Also add to user's games list
     const userGameRef = ref(this.db, `users/${ownerId}/games/${gameId}`);
@@ -194,46 +266,7 @@ export class GameService {
     this.gameSubscription = onValue(gameRef, (snapshot) => {
       if (snapshot.exists()) {
         const rawData = snapshot.val();
-        const data: GameData = {
-          id: gameId,
-          name: rawData.name || 'Football Squares',
-          ownerId: rawData.ownerId || '',
-          ownerName: rawData.ownerName || 'Unknown',
-          createdAt: rawData.createdAt || Date.now(),
-          selectedSquares: {},
-          homeNumbers: rawData.homeNumbers || Array(10).fill(null),
-          awayNumbers: rawData.awayNumbers || Array(10).fill(null),
-          scores: rawData.scores || {
-            q1: { home: 0, away: 0 },
-            q2: { home: 0, away: 0 },
-            q3: { home: 0, away: 0 },
-            q4: { home: 0, away: 0 }
-          },
-          playerColors: rawData.playerColors || {},
-          winners: rawData.winners || {},
-          pricePerSquare: rawData.pricePerSquare || 10,
-          isRandomized: rawData.isRandomized || false,
-          isLocked: rawData.isLocked || false,
-          homeTeam: rawData.homeTeam || '',
-          awayTeam: rawData.awayTeam || '',
-          venmoUsername: rawData.venmoUsername || '',
-          paidPlayers: rawData.paidPlayers || [],
-          espnEventId: rawData.espnEventId || undefined,
-          espnSport: rawData.espnSport || undefined,
-          managerId: rawData.managerId || undefined,
-          managerEmail: rawData.managerEmail || undefined,
-          managerName: rawData.managerName || undefined,
-          playerUserIds: rawData.playerUserIds || undefined
-        };
-
-        // Convert squares from Firebase format
-        if (rawData.squares) {
-          Object.entries(rawData.squares).forEach(([key, value]) => {
-            data.selectedSquares[key] = value as string;
-          });
-        }
-
-        this._currentGame.next(data);
+        this._currentGame.next(mapStoredGame(gameId, rawData));
       } else {
         this._currentGame.next(null);
       }
@@ -289,6 +322,15 @@ export class GameService {
     if (data.venmoUsername !== undefined) {
       updates[`${prefix}/venmoUsername`] = data.venmoUsername;
     }
+    if (data.houseRules !== undefined) {
+      updates[`${prefix}/houseRules`] = data.houseRules;
+    }
+    if (data.confirmationLabel !== undefined) {
+      updates[`${prefix}/confirmationLabel`] = data.confirmationLabel;
+    }
+    if (data.confirmationDescription !== undefined) {
+      updates[`${prefix}/confirmationDescription`] = data.confirmationDescription;
+    }
     if (data.paidPlayers !== undefined) {
       updates[`${prefix}/paidPlayers`] = data.paidPlayers;
     }
@@ -321,38 +363,7 @@ export class GameService {
     const snapshot = await get(gameRef);
 
     if (snapshot.exists()) {
-      const rawData = snapshot.val();
-      return {
-        id: gameId,
-        name: rawData.name || 'Football Squares',
-        ownerId: rawData.ownerId || '',
-        ownerName: rawData.ownerName || 'Unknown',
-        createdAt: rawData.createdAt || Date.now(),
-        selectedSquares: rawData.squares || {},
-        homeNumbers: rawData.homeNumbers || Array(10).fill(null),
-        awayNumbers: rawData.awayNumbers || Array(10).fill(null),
-        scores: rawData.scores || {
-          q1: { home: 0, away: 0 },
-          q2: { home: 0, away: 0 },
-          q3: { home: 0, away: 0 },
-          q4: { home: 0, away: 0 }
-        },
-        playerColors: rawData.playerColors || {},
-        winners: rawData.winners || {},
-        pricePerSquare: rawData.pricePerSquare || 10,
-        isRandomized: rawData.isRandomized || false,
-        isLocked: rawData.isLocked || false,
-        homeTeam: rawData.homeTeam || '',
-        awayTeam: rawData.awayTeam || '',
-        venmoUsername: rawData.venmoUsername || '',
-        paidPlayers: rawData.paidPlayers || [],
-        espnEventId: rawData.espnEventId || undefined,
-        espnSport: rawData.espnSport || undefined,
-        managerId: rawData.managerId || undefined,
-        managerEmail: rawData.managerEmail || undefined,
-        managerName: rawData.managerName || undefined,
-        playerUserIds: rawData.playerUserIds || undefined
-      };
+      return mapStoredGame(gameId, snapshot.val());
     }
 
     return null;
@@ -410,7 +421,10 @@ export class GameService {
           espnSport: game.espnSport,
           venmoUsername: game.venmoUsername,
           collected,
-          totalPot: squaresFilled * game.pricePerSquare
+          totalPot: squaresFilled * game.pricePerSquare,
+          houseRules: game.houseRules,
+          confirmationLabel: game.confirmationLabel,
+          confirmationDescription: game.confirmationDescription
         });
       }
     }
@@ -509,7 +523,10 @@ export class GameService {
           espnSport: game.espnSport,
           venmoUsername: game.venmoUsername,
           collected,
-          totalPot: squaresFilled * game.pricePerSquare
+          totalPot: squaresFilled * game.pricePerSquare,
+          houseRules: game.houseRules,
+          confirmationLabel: game.confirmationLabel,
+          confirmationDescription: game.confirmationDescription
         });
       }
     }

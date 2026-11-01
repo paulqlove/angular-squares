@@ -1,47 +1,56 @@
-<div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"
-     [class.hidden]="!isOpen">
-  <div class="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4 overflow-hidden">
-    <div class="p-4  flex justify-between items-center">
-      <h2 class="text-xl font-bold text-heading">Manage Payments</h2>
-      <button (click)="close()" class="text-gray-500 hover:text-gray-700">
+<div class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
+     [class.hidden]="!isOpen"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="confirm-players-title">
+  <div class="bg-dialog rounded-lg shadow-xl w-full max-w-lg overflow-hidden">
+    <div class="p-4 flex justify-between items-center gap-3">
+      <h2 id="confirm-players-title" class="text-xl font-bold text-heading">Confirm players</h2>
+      <button type="button" (click)="close()" class="min-h-11 min-w-11 text-muted hover:text-heading" aria-label="Close">
         <ng-icon name="heroXMark" class="w-6 h-6"></ng-icon>
       </button>
+    </div>
+
+    <div class="px-4 pb-2">
+      <p class="text-sm text-default">{{ statusLabel }} is a label you choose. It is not a record of anything else.</p>
+      @if (statusDescription) {
+        <p class="mt-2 text-sm text-default whitespace-pre-wrap break-words">{{ statusDescription }}</p>
+      }
     </div>
 
     <div class="p-4 max-h-[60vh] overflow-y-auto">
       <div class="space-y-2">
         @for (player of getPlayersList(); track player.name) {
-          <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
-            <div class="flex items-center gap-2">
-              <div class="w-4 h-4 rounded-full"
-                   [style.backgroundColor]="player.color">
-              </div>
-              <span>{{ player.name }}</span>
-              <span class="text-sm text-gray-500">
-                ({{ player.squares }} {{ player.squares === 1 ? 'square' : 'squares' }} - ${{ player.total }})
+          <div class="flex flex-col gap-2 p-3 bg-control rounded sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex items-center gap-2 min-w-0">
+              <div class="w-4 h-4 rounded-full shrink-0" [style.backgroundColor]="player.color" aria-hidden="true"></div>
+              <span class="text-default">{{ player.name }}</span>
+              <span class="text-sm text-muted">
+                ({{ player.squares }} {{ player.squares === 1 ? 'square' : 'squares' }})
               </span>
             </div>
-            <button (click)="togglePaidStatus(player.name)"
-                    [class.bg-green-100]="player.paid"
-                    [class.text-green-700]="player.paid"
-                    [class.bg-gray-100]="!player.paid"
-                    [class.text-gray-700]="!player.paid"
-                    class="px-3 py-1 rounded-full text-sm font-medium">
-              {{ player.paid ? 'Paid' : 'Mark as Paid' }}
+            <button type="button"
+                    (click)="toggleConfirmed(player.name)"
+                    [attr.aria-pressed]="player.confirmed"
+                    [class.bg-green-100]="player.confirmed"
+                    [class.text-green-800]="player.confirmed"
+                    [class.bg-card]="!player.confirmed"
+                    [class.text-default]="!player.confirmed"
+                    class="min-h-11 px-4 py-2 rounded-full text-sm font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600">
+              {{ player.confirmed ? statusLabel : 'Mark ' + statusLabel }}
             </button>
           </div>
         }
       </div>
     </div>
-    <div class="p-4 ">
-      <button (click)="close()"
-              class="w-full px-4 py-2 rounded shadow-md hover:shadow-lg transition-all duration-200
-                     bg-gradient-to-r from-secondary-500 via-secondary-600 to-accent-600 
+    <div class="p-4">
+      <button type="button" (click)="close()"
+              class="w-full min-h-11 px-4 py-2 rounded shadow-md hover:shadow-lg transition-all duration-200
+                     bg-gradient-to-r from-secondary-500 via-secondary-600 to-accent-600
                      hover:from-secondary-600 hover:via-secondary-700 hover:to-accent-700
-                     text-white">
-        Submit
+                     text-white font-semibold">
+        Done
       </button>
     </div>
-
   </div>
-</div> 
+</div>

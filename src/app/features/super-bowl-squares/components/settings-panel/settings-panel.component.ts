@@ -6,8 +6,7 @@ import {
   heroTrash,
   heroLockOpen,
   heroLockClosed,
-  heroArrowTopRightOnSquare,
-  heroCreditCard,
+  heroCheck,
   heroXMark,
   heroSun,
   heroMoon,
@@ -15,22 +14,20 @@ import {
 } from '@ng-icons/heroicons/outline';
 import { FormsModule } from '@angular/forms';
 import { ToggleComponent } from '../../../../components/ui/toggle/toggle.component';
-import { DialogComponent, DialogPart } from '../../../../components/ui/dialog/dialog.component';
 import { SanitizationService } from '../../../../core/services/sanitization.service';
 import { ThemeService, ThemeMode } from '../../../../core/services/theme.service';
 
 @Component({
   selector: 'app-settings-panel',
   standalone: true,
-  imports: [CommonModule, NgIconComponent, FormsModule, ToggleComponent, DialogComponent],
+  imports: [CommonModule, NgIconComponent, FormsModule, ToggleComponent],
   providers: [
     provideIcons({
       heroCog6Tooth,
       heroTrash,
       heroLockOpen,
       heroLockClosed,
-      heroArrowTopRightOnSquare,
-      heroCreditCard,
+      heroCheck,
       heroXMark,
       heroSun,
       heroMoon,
@@ -38,16 +35,6 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
     })
   ],
   template: `
-    <!-- Venmo Confirmation Dialog -->
-    <app-dialog
-      [isOpen]="showVenmoDialog"
-      title="Leave Site?"
-      [messageParts]="venmoMessageParts"
-      confirmText="Continue to Venmo"
-      (onConfirm)="onVenmoConfirm()"
-      (onCancel)="showVenmoDialog = false"
-    ></app-dialog>
-
     <!-- Settings Panel -->
     <div class="fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity duration-200 overflow-hidden"
          [class.opacity-0]="!isOpen"
@@ -75,7 +62,7 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
             </div>
           } @else if (isManager && !isGameOwner) {
             <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <p class="text-sm text-blue-700">You are a payment manager. You can manage who has paid.</p>
+              <p class="text-sm text-blue-800">You can mark who is confirmed.</p>
             </div>
           }
 
@@ -146,63 +133,63 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
             </div>
           </div>
 
-          <!-- Price Per Square -->
           <div class="mb-4">
-            <label for="pricePerSquare" class="block text-label text-sm font-medium mb-2">
-              Price Per Square
+            <label for="houseRules" class="block text-label text-sm font-medium mb-2">
+              House rules
             </label>
-            <div class="flex items-center gap-2">
-              <span class="text-muted">$</span>
-              <input
-                type="number"
-                id="pricePerSquare"
-                [ngModel]="pricePerSquare"
-                (ngModelChange)="handlePriceChange($event)"
-                [disabled]="isLocked || !isGameOwner"
-                class="w-full px-3 py-2 bg-input border border-input rounded-md text-default
-                       focus:outline-none focus:ring-2
-                       focus:ring-2 focus:ring-secondary-500
-                       disabled:opacity-50 disabled:cursor-not-allowed"
-              />
-            </div>
+            <textarea
+              id="houseRules"
+              rows="4"
+              maxlength="500"
+              [(ngModel)]="tempHouseRules"
+              (blur)="commitHouseRules()"
+              [disabled]="!isGameOwner"
+              class="w-full px-3 py-2 bg-input border border-input rounded-md text-default
+                     focus:outline-none focus:ring-2 focus:ring-secondary-500
+                     disabled:opacity-50 disabled:cursor-not-allowed"
+              placeholder="Optional notes for everyone on this board"
+            ></textarea>
+            <p class="mt-1 text-xs text-muted">{{ tempHouseRules.length }} / 500</p>
           </div>
 
-           <!-- Venmo input -->
-          <div class="">
-            <label for="venmoUsername" class="block text-label text-sm font-medium mb-2">
-              Venmo Username
+          <div class="mb-4">
+            <label for="confirmationLabel" class="block text-label text-sm font-medium mb-2">
+              Confirmation label
+              <span class="text-muted font-normal">(optional)</span>
             </label>
-            <div class="relative">
-              <input
-                type="text"
-                id="venmoUsername"
-                [(ngModel)]="tempVenmoUsername"
-                (blur)="onVenmoBlur()"
-                [placeholder]="venmoUsername ? '@' + venmoUsername.replace('@', '') : '@username'"
-                [disabled]="!isGameOwner"
-                class="w-full px-3 py-2 bg-input border border-input rounded-md text-default
-                       focus:outline-none focus:ring-2
-                       focus:ring-2 focus:ring-secondary-500
-                       disabled:opacity-50 disabled:cursor-not-allowed"
-              />
-            </div>
+            <input
+              id="confirmationLabel"
+              type="text"
+              maxlength="40"
+              [(ngModel)]="tempConfirmationLabel"
+              (blur)="commitConfirmation()"
+              [disabled]="!isGameOwner"
+              class="w-full min-h-11 px-3 py-2 bg-input border border-input rounded-md text-default
+                     focus:outline-none focus:ring-2 focus:ring-secondary-500
+                     disabled:opacity-50 disabled:cursor-not-allowed"
+              placeholder="Confirmed"
+            />
+            <p class="mt-1 text-xs text-muted">Shown on each player you mark. Leave blank to use Confirmed.</p>
+          </div>
 
-            <div class="flex items-center justify-center gap-2 mt-3">
-              <a
-                [href]="getVenmoLink()"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="text-link hover:text-link-hover text-sm inline-flex items-center gap-1"
-                *ngIf="venmoUsername"
-              >
-                Open Venmo Profile
-                <ng-icon
-                  name="heroArrowTopRightOnSquare"
-                  class="w-4 h-4"
-                  aria-hidden="true">
-                </ng-icon>
-              </a>
-            </div>
+          <div class="mb-4">
+            <label for="confirmationDescription" class="block text-label text-sm font-medium mb-2">
+              What the label means
+              <span class="text-muted font-normal">(optional)</span>
+            </label>
+            <textarea
+              id="confirmationDescription"
+              rows="3"
+              maxlength="200"
+              [(ngModel)]="tempConfirmationDescription"
+              (blur)="commitConfirmation()"
+              [disabled]="!isGameOwner"
+              class="w-full px-3 py-2 bg-input border border-input rounded-md text-default
+                     focus:outline-none focus:ring-2 focus:ring-secondary-500
+                     disabled:opacity-50 disabled:cursor-not-allowed"
+              placeholder="Tell the group what confirmed means for this board"
+            ></textarea>
+            <p class="mt-1 text-xs text-muted">{{ tempConfirmationDescription.length }} / 200</p>
           </div>
 
           <!-- Lock Game toggle (owner only) -->
@@ -220,14 +207,14 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
 
             <!-- Game Controls -->
             <div class="space-y-4 mb-8">
-            <!-- Manage Payments (owner or manager) -->
             @if (isGameOwner || isManager) {
               <button
-                (click)="onManagePayments.emit()"
-                class="w-full bg-control hover:bg-control-hover text-default px-4 py-2 rounded flex items-center justify-center gap-2"
+                type="button"
+                (click)="onConfirmPlayers.emit()"
+                class="w-full min-h-11 bg-control hover:bg-control-hover text-default px-4 py-2 rounded flex items-center justify-center gap-2"
               >
-                <ng-icon name="heroCreditCard" class="text-2xl"></ng-icon>
-                Manage Payments
+                <ng-icon name="heroCheck" class="text-2xl"></ng-icon>
+                Confirm players
               </button>
             }
 
@@ -276,31 +263,39 @@ export class SettingsPanelComponent implements OnChanges {
   @Input() isOpen = false;
   @Input() isRandomized = false;
   @Input() isLocked = false;
-  @Input() venmoUsername = '';
   @Input() homeTeam = '';
   @Input() awayTeam = '';
-  @Input() pricePerSquare = 10;
+  @Input() houseRules = '';
+  @Input() confirmationLabel = '';
+  @Input() confirmationDescription = '';
   @Input() isGameOwner = false;
   @Input() isManager = false;
 
   @Output() closed = new EventEmitter<void>();
   @Output() onRandomize = new EventEmitter<void>();
   @Output() onToggleLock = new EventEmitter<void>();
-  @Output() onVenmoUsernameChange = new EventEmitter<string>();
   @Output() onTeamNameChange = new EventEmitter<{team: 'home' | 'away', name: string}>();
-  @Output() onPriceChange = new EventEmitter<number>();
-  @Output() onManagePayments = new EventEmitter<void>();
+  @Output() onHouseRulesChange = new EventEmitter<string>();
+  @Output() onConfirmationChange = new EventEmitter<{ label: string; description: string }>();
+  @Output() onConfirmPlayers = new EventEmitter<void>();
   @Output() onClearGame = new EventEmitter<void>();
 
-  showVenmoDialog = false;
-  tempVenmoUsername = '';
+  tempHouseRules = '';
+  tempConfirmationLabel = '';
+  tempConfirmationDescription = '';
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['isOpen']) {
       document.body.classList.toggle('overflow-hidden', this.isOpen);
     }
-    if (changes['venmoUsername']) {
-      this.tempVenmoUsername = this.venmoUsername || '';
+    if (changes['houseRules']) {
+      this.tempHouseRules = this.houseRules || '';
+    }
+    if (changes['confirmationLabel']) {
+      this.tempConfirmationLabel = this.confirmationLabel || '';
+    }
+    if (changes['confirmationDescription']) {
+      this.tempConfirmationDescription = this.confirmationDescription || '';
     }
   }
 
@@ -308,50 +303,33 @@ export class SettingsPanelComponent implements OnChanges {
     this.closed.emit();
   }
 
-  showVenmoConfirmation(): void {
-    this.showVenmoDialog = true;
-  }
-
-  getVenmoLink(): string {
-    return `https://venmo.com/${this.venmoUsername.replace('@', '')}`;
-  }
-
-  onVenmoBlur(): void {
+  commitHouseRules(): void {
     if (!this.isGameOwner) {
-      this.tempVenmoUsername = this.venmoUsername;
+      this.tempHouseRules = this.houseRules;
       return;
     }
+    const sanitized = this.sanitizationService.sanitizeMultilineText(this.tempHouseRules, 500);
+    this.tempHouseRules = sanitized;
+    if (sanitized === this.houseRules) return;
+    this.onHouseRulesChange.emit(sanitized);
+  }
 
-    const sanitized = this.sanitizationService.sanitizeVenmoUsername(this.tempVenmoUsername);
-    if (sanitized === this.venmoUsername) {
+  commitConfirmation(): void {
+    if (!this.isGameOwner) {
+      this.tempConfirmationLabel = this.confirmationLabel;
+      this.tempConfirmationDescription = this.confirmationDescription;
       return;
     }
-
-    this.venmoUsername = sanitized;
-    this.tempVenmoUsername = sanitized;
-    this.onVenmoUsernameChange.emit(sanitized);
+    const label = this.sanitizationService.sanitizePlainText(this.tempConfirmationLabel, 40);
+    const description = this.sanitizationService.sanitizeMultilineText(this.tempConfirmationDescription, 200);
+    this.tempConfirmationLabel = label;
+    this.tempConfirmationDescription = description;
+    if (label === this.confirmationLabel && description === this.confirmationDescription) return;
+    this.onConfirmationChange.emit({ label, description });
   }
 
   onTeamChange(team: 'home' | 'away', name: string) {
     this.onTeamNameChange.emit({ team, name });
-  }
-
-  handlePriceChange(price: number) {
-    this.onPriceChange.emit(price);
-  }
-
-  onVenmoConfirm() {
-    window.open(`https://venmo.com/${this.venmoUsername}`, '_blank');
-    this.showVenmoDialog = false;
-  }
-
-  get venmoMessageParts(): DialogPart[] {
-    return [
-      { text: 'You will be redirected to ' },
-      { text: 'Venmo', bold: true, color: '#008CFF' },
-      { text: ' to pay ' },
-      { text: this.venmoUsername, bold: true }
-    ];
   }
 
   setTheme(mode: ThemeMode): void {

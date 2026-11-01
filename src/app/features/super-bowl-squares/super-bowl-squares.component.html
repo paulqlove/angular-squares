@@ -33,9 +33,6 @@
 } @else {
 <!-- Main Game View -->
   <app-shared-header variant="fixed">
-    @if (venmoUsername) {
-      <app-venmo-popover [username]="venmoUsername"></app-venmo-popover>
-    }
     <button
       (click)="openShareModal()"
       class="p-2.5 text-muted hover:text-heading rounded-lg hover:bg-card transition-colors flex items-center justify-center"
@@ -67,23 +64,41 @@
     (closed)="showSettings.set(false)"
     [isRandomized]="isRandomized"
     [isLocked]="isLocked"
-    [venmoUsername]="venmoUsername"
     [homeTeam]="homeTeam"
     [awayTeam]="awayTeam"
-    [pricePerSquare]="currentPrice"
+    [houseRules]="houseRules"
+    [confirmationLabel]="confirmationLabel"
+    [confirmationDescription]="confirmationDescription"
     [isGameOwner]="isGameOwner()"
     [isManager]="isManager()"
     (onRandomize)="randomizeNumbers()"
     (onToggleLock)="toggleLock()"
-    (onVenmoUsernameChange)="onVenmoUsernameChange($event)"
     (onTeamNameChange)="onTeamNameChange($event)"
-    (onPriceChange)="onPriceChange($event)"
-    (onManagePayments)="onManagePayments()"
+    (onHouseRulesChange)="onHouseRulesChange($event)"
+    (onConfirmationChange)="onConfirmationChange($event)"
+    (onConfirmPlayers)="onConfirmPlayers()"
     (onClearGame)="onClearGame()"
   ></app-settings-panel>
 
-  <div class="container mx-auto">
-    <div class="space-y-6">
+  <div class="container mx-auto px-4">
+    <p class="text-sm leading-relaxed text-default" role="note">{{ disclaimer }}</p>
+    @if (needsAgeConfirm()) {
+      <div class="mt-4 rounded-xl border border-default bg-card p-4">
+        <app-age-gate
+          inputId="board-age-confirm"
+          [checked]="ageConfirmed()"
+          (checkedChange)="ageConfirmed.set($event)">
+        </app-age-gate>
+        <p class="mt-2 text-sm text-muted">Confirm before you claim a square.</p>
+      </div>
+    }
+    @if (houseRules) {
+      <section class="mt-4 rounded-xl border border-default bg-card p-4" aria-labelledby="house-rules-heading">
+        <h2 id="house-rules-heading" class="text-base font-bold text-heading">House rules</h2>
+        <p class="mt-2 whitespace-pre-wrap break-words text-default">{{ houseRules }}</p>
+      </section>
+    }
+    <div class="space-y-6 mt-4">
       <!-- Game Info Bar -->
       <div class="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
         <div class="flex items-center gap-2">
@@ -229,10 +244,14 @@
 
                 <!-- Players list content -->
                 <div [class.hidden]="!isPlayersListVisible" class="flex-1 p-4 pt-0 lg:block">
+                    @if (confirmationDescription) {
+                      <p class="mb-3 text-sm text-default whitespace-pre-wrap break-words">{{ confirmationDescription }}</p>
+                    }
                     <app-players-list
                         [playerStats]="playerStats"
                         [playerColors]="playerColors"
-                        [paidPlayers]="paidPlayers"
+                        [confirmedNames]="paidPlayers"
+                        [statusLabel]="statusLabel"
                         [homeNumbers]="homeNumbers"
                         [awayNumbers]="awayNumbers"
                         [selectedSquares]="selectedSquares"
@@ -242,26 +261,27 @@
 
                 <app-game-status
                     [selectedSquares]="selectedSquares"
-                    [playerStats]="playerStats"
-                    [paidPlayers]="paidPlayers">
+                    [confirmedNames]="paidPlayers"
+                    [statusLabel]="statusLabel">
                 </app-game-status>
             </div>
         </div>
       </div>
 
-      <!-- Winners and Payouts -->
-      <div data-walkthrough="winners-payouts" (click)="$event.stopPropagation()">
-        <app-winners-and-payouts
+      <div data-walkthrough="quarter-winners" (click)="keepQuarterHighlight($event)">
+        <app-quarter-winners
         [winners]="winners"
-        [quarterPayouts]="quarterPayouts"
         [playerColors]="playerColors"
-        [totalPot]="totalPot"
         [scores]="scores"
         [homeTeam]="homeTeam"
         [awayTeam]="awayTeam"
         (quarterClick)="onQuarterClick($event)">
-        </app-winners-and-payouts>
+        </app-quarter-winners>
       </div>
+
+      @if (legacyMoneyType) {
+        <ng-container *ngComponentOutlet="legacyMoneyType"></ng-container>
+      }
 
       <!-- Alert notifications -->
       <div *ngIf="showAlert"
@@ -459,4 +479,5 @@
       </div>
     </div>
   }
+  <app-site-footer></app-site-footer>
 }

@@ -1,5 +1,5 @@
 <div class="rounded-lg p-4 mt-8">
-  <h2 class="text-lg font-bold mb-4 text-heading">Winners & Payouts</h2>
+  <h2 class="text-lg font-bold mb-4 text-heading">Quarter winners</h2>
 
   <div class="winners-container">
     @for (quarter of ['q1', 'q2', 'q3', 'q4']; track quarter) {
@@ -14,42 +14,20 @@
             <h3 class="font-medium" [class]="winners[quarter] ? 'text-slate-900' : 'text-heading'">{{ getQuarterLabel(quarter) }}</h3>
             <div class="winner-info">
               @if (winners[quarter]) {
-                <span>🏆</span>
+                <span aria-hidden="true">🏆</span>
                 <span class="text-slate-900">{{ winners[quarter] }}</span>
               } @else {
                 <span class="text-muted">No winner yet</span>
               }
             </div>
             @if (scores[quarter] && (scores[quarter].home > 0 || scores[quarter].away > 0)) {
-              <div class="text-xs" [class]="winners[quarter] ? 'text-slate-600' : 'text-muted'">
+              <div class="text-xs" [class]="winners[quarter] ? 'text-slate-700' : 'text-muted'">
                 {{ awayTeam || 'Away' }} {{ scores[quarter].away }} - {{ homeTeam || 'Home' }} {{ scores[quarter].home }}
               </div>
             }
           </div>
-
-          <div class="payout-section">
-            <div class="text-sm" [class]="winners[quarter] ? 'text-slate-700' : 'text-muted'">Payout</div>
-            <div class="text-lg font-medium" [class]="winners[quarter] ? 'text-slate-900' : 'text-default'">
-              ${{ (totalPot * quarterPayouts[quarter]).toFixed(2) }}
-            </div>
-          </div>
         </div>
       </div>
     }
-
-    <div class="quarter-card bg-square border-warm">
-      <div class="card-content">
-        <div>
-          <h3 class="text-white font-medium">Total Pot</h3>
-        </div>
-        
-        <div class="payout-section">
-          <div class="text-white/70 text-sm">Payouts</div>
-          <div class="text-white text-2xl font-bold">
-            ${{ totalPot.toFixed(2) }}
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
-</div> 
+</div>

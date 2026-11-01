@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject, HostListener } from '@angular/core';
+import { Component, OnInit, signal, inject, HostListener, Type } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -11,6 +11,11 @@ import { SanitizationService } from '../../core/services/sanitization.service';
 import { WalkthroughService, WalkthroughStep } from '../../core/services/walkthrough.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { AppHeaderComponent } from '../../components/ui/app-header/app-header.component';
+import { SiteFooterComponent } from '../../components/ui/site-footer/site-footer.component';
+import { AgeGateComponent } from '../../components/ui/age-gate/age-gate.component';
+import { OwnerGateService } from '../../core/services/owner-gate.service';
+import { TosService } from '../../core/services/tos.service';
+import { ENTERTAINMENT_DISCLAIMER } from '../../core/legal';
 import {
   heroPlus,
   heroArrowRightOnRectangle,
@@ -39,7 +44,7 @@ import {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgIconComponent, AppHeaderComponent],
+  imports: [CommonModule, FormsModule, NgIconComponent, AppHeaderComponent, SiteFooterComponent, AgeGateComponent],
   providers: [
     provideIcons({
       heroPlus,
@@ -205,7 +210,7 @@ import {
                   </div>
                   <div>
                     <h3 class="text-lg font-bold text-heading dark:text-white">New Game</h3>
-                    <p class="text-sm text-muted dark:text-primary-200">Create a squares pool</p>
+                    <p class="text-sm text-muted dark:text-primary-200">Create a squares game</p>
                   </div>
                 </div>
                 <p class="text-sm text-muted dark:text-primary-300">Set up your own game with custom settings and share it with friends.</p>
@@ -221,7 +226,7 @@ import {
                     <p class="text-sm text-amber-700 dark:text-amber-200">Sign in to create games</p>
                   </div>
                 </div>
-                <p class="text-sm text-amber-700 dark:text-amber-100 mb-4">Create an account to host your own squares pools.</p>
+                <p class="text-sm text-amber-700 dark:text-amber-100 mb-4">Create an account to host your own games.</p>
                 <button
                   (click)="signOut()"
                   class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-lg text-sm font-medium transition-colors"
@@ -242,22 +247,33 @@ import {
                   <p class="text-sm text-muted dark:text-primary-200">Have a 6-digit code?</p>
                 </div>
               </div>
-              <div class="flex gap-2 min-w-0">
-                <input
-                  type="text"
-                  [(ngModel)]="joinGameCode"
-                  placeholder="XXXXXX"
-                  class="flex-1 min-w-0 px-4 py-3 bg-input dark:bg-white/10 border border-input dark:border-white/20 rounded-lg text-default dark:text-white placeholder-muted dark:placeholder-primary-400 uppercase tracking-widest font-mono text-center focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
-                  maxlength="6"
-                  (keyup.enter)="joinGame()"
-                />
-                <button
-                  (click)="joinGame()"
-                  [disabled]="joinGameCode.length !== 6"
-                  class="shrink-0 px-4 py-3 bg-accent-500 hover:bg-accent-400 disabled:bg-control disabled:cursor-not-allowed text-white rounded-lg transition-colors"
-                >
-                  <ng-icon name="heroArrowRight" class="text-xl"></ng-icon>
-                </button>
+              <div class="space-y-3">
+                <app-age-gate
+                  inputId="dashboard-join-age"
+                  [checked]="joinAgeConfirmed"
+                  (checkedChange)="joinAgeConfirmed = $event">
+                </app-age-gate>
+                <div class="flex gap-2 min-w-0">
+                  <label for="dashboard-join-code" class="sr-only">Game code</label>
+                  <input
+                    id="dashboard-join-code"
+                    type="text"
+                    [(ngModel)]="joinGameCode"
+                    placeholder="XXXXXX"
+                    class="flex-1 min-w-0 min-h-11 px-4 py-3 bg-input dark:bg-white/10 border border-input dark:border-white/20 rounded-lg text-default dark:text-white placeholder-muted dark:placeholder-primary-400 uppercase tracking-widest font-mono text-center focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
+                    maxlength="6"
+                    (keyup.enter)="joinGame()"
+                  />
+                  <button
+                    type="button"
+                    (click)="joinGame()"
+                    [disabled]="joinGameCode.length !== 6 || !joinAgeConfirmed"
+                    aria-label="Join game"
+                    class="shrink-0 min-h-11 min-w-11 px-4 py-3 bg-accent-500 hover:bg-accent-400 disabled:bg-control disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+                  >
+                    <ng-icon name="heroArrowRight" class="text-xl"></ng-icon>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -282,7 +298,7 @@ import {
                 <ng-icon name="heroSquares2x2" class="text-4xl text-muted"></ng-icon>
               </div>
               <h3 class="text-lg font-semibold text-heading mb-2">No games yet</h3>
-              <p class="text-muted mb-6">Create your first squares pool to get started!</p>
+              <p class="text-muted mb-6">Create your first squares game to get started!</p>
               <button
                 (click)="openCreateModal()"
                 class="inline-flex items-center gap-2 px-6 py-3 bg-secondary-500 hover:bg-secondary-600 text-white rounded-xl font-medium transition-colors"
@@ -336,18 +352,9 @@ import {
                       </div>
                     </div>
 
-                    <div class="mb-4">
-                      <div class="flex justify-between text-sm mb-1">
-                        <span class="text-muted">Collected</span>
-                        <span class="font-semibold text-default">\${{ game.collected }} / \${{ game.totalPot }}</span>
-                      </div>
-                      <div class="h-2 bg-control rounded-full overflow-hidden">
-                        <div
-                          class="h-full bg-green-500 rounded-full transition-all duration-500"
-                          [style.width.%]="game.totalPot > 0 ? (game.collected / game.totalPot) * 100 : 0"
-                        ></div>
-                      </div>
-                    </div>
+                    @if (legacySummaryType) {
+                      <ng-container *ngComponentOutlet="legacySummaryType; inputs: { game: game }"></ng-container>
+                    }
 
                     <!-- Stats Row -->
                     <div class="flex items-center gap-4 text-sm text-muted mb-4">
@@ -454,19 +461,6 @@ import {
                     </div>
                   </div>
 
-                  <div class="mb-4">
-                    <div class="flex justify-between text-sm mb-1">
-                      <span class="text-muted">Collected</span>
-                      <span class="font-semibold text-default">\${{ game.collected }} / \${{ game.totalPot }}</span>
-                    </div>
-                    <div class="h-2 bg-control rounded-full overflow-hidden">
-                      <div
-                        class="h-full bg-green-500 rounded-full transition-all duration-500"
-                        [style.width.%]="game.totalPot > 0 ? (game.collected / game.totalPot) * 100 : 0"
-                      ></div>
-                    </div>
-                  </div>
-
                   <!-- Stats Row -->
                   <div class="flex items-center gap-4 text-sm text-muted mb-4">
                     <span class="flex items-center gap-1">
@@ -520,7 +514,7 @@ import {
             <div class="flex items-center justify-between p-6 border-b border-default">
               <div>
                 <h3 class="text-xl font-bold text-heading">Create New Game</h3>
-                <p class="text-sm text-muted">Set up your squares pool</p>
+                <p class="text-sm text-muted">Set up your squares game</p>
               </div>
               <button
                 (click)="showCreateModal.set(false)"
@@ -614,34 +608,6 @@ import {
                 }
               </div>
 
-              <!-- Price Selection -->
-              <div>
-                <label class="block text-sm font-semibold text-label mb-3">Price per Square</label>
-                <div class="flex flex-wrap gap-2">
-                  @for (price of pricePresets; track price) {
-                    <button
-                      (click)="selectPrice(price)"
-                      [class]="newGamePrice === price
-                        ? 'px-5 py-2.5 bg-secondary-500 text-white rounded-lg font-medium transition-colors'
-                        : 'px-5 py-2.5 bg-control text-default hover:bg-control-hover rounded-lg font-medium transition-colors'"
-                    >
-                      {{ price === 0 ? 'Free' : '$' + price }}
-                    </button>
-                  }
-                  <div class="flex items-center gap-1 px-3 py-2 bg-control rounded-lg">
-                    <span class="text-muted">$</span>
-                    <input
-                      type="number"
-                      [(ngModel)]="customPrice"
-                      (ngModelChange)="onCustomPriceChange()"
-                      placeholder="Custom"
-                      min="0"
-                      class="w-16 bg-transparent text-default font-medium focus:outline-none"
-                    />
-                  </div>
-                </div>
-              </div>
-
               <!-- Game Name -->
               <div>
                 <label class="block text-sm font-semibold text-label mb-3">Game Name <span class="text-red-500">*</span></label>
@@ -657,34 +623,71 @@ import {
                 }
               </div>
 
-              <!-- Venmo Username -->
               <div>
-                <label class="block text-sm font-semibold text-label mb-3">
-                  Venmo Username
-                  <span class="text-muted font-normal">(optional)</span>
-                </label>
-                <input
-                  type="text"
-                  [(ngModel)]="newGameVenmoUsername"
-                  placeholder="@username"
+                <label for="new-house-rules" class="block text-sm font-semibold text-label mb-3">House rules</label>
+                <textarea
+                  id="new-house-rules"
+                  rows="4"
+                  maxlength="500"
+                  [(ngModel)]="newGameHouseRules"
+                  placeholder="Optional notes for everyone on this board"
                   class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
-                />
+                ></textarea>
+                <p class="mt-1 text-xs text-muted">{{ newGameHouseRules.length }} / 500</p>
               </div>
 
-              <!-- Payment Manager -->
               <div>
-                <label class="block text-sm font-semibold text-label mb-3">
-                  Payment Manager
+                <label for="new-confirm-label" class="block text-sm font-semibold text-label mb-3">
+                  Confirmation label
                   <span class="text-muted font-normal">(optional)</span>
                 </label>
-                <p class="text-xs text-muted mb-2">Assign someone to help manage payments. Enter their email address.</p>
                 <input
+                  id="new-confirm-label"
+                  type="text"
+                  maxlength="40"
+                  [(ngModel)]="newGameConfirmationLabel"
+                  placeholder="Confirmed"
+                  class="w-full min-h-11 px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
+                />
+                <p class="mt-1 text-xs text-muted">Leave blank to use Confirmed. You decide what it means.</p>
+              </div>
+
+              <div>
+                <label for="new-confirm-description" class="block text-sm font-semibold text-label mb-3">
+                  What the label means
+                  <span class="text-muted font-normal">(optional)</span>
+                </label>
+                <textarea
+                  id="new-confirm-description"
+                  rows="3"
+                  maxlength="200"
+                  [(ngModel)]="newGameConfirmationDescription"
+                  placeholder="Tell the group what confirmed means for this board"
+                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
+                ></textarea>
+              </div>
+
+              <div>
+                <label for="new-helper-email" class="block text-sm font-semibold text-label mb-3">
+                  Confirmation helper
+                  <span class="text-muted font-normal">(optional)</span>
+                </label>
+                <p class="text-xs text-muted mb-2">They can mark who is confirmed. Enter their email address.</p>
+                <input
+                  id="new-helper-email"
                   type="email"
                   [(ngModel)]="newGamePaymentManager"
                   placeholder="Enter their email address"
-                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
+                  class="w-full min-h-11 px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
                 />
               </div>
+
+              <p class="text-sm leading-relaxed text-default" role="note">{{ disclaimer }}</p>
+              <app-age-gate
+                inputId="create-age-confirm"
+                [checked]="createAgeConfirmed"
+                (checkedChange)="createAgeConfirmed = $event">
+              </app-age-gate>
             </div>
 
             <!-- Modal Footer -->
@@ -697,7 +700,7 @@ import {
               </button>
               <button
                 (click)="createGame()"
-                [disabled]="isCreating()"
+                [disabled]="isCreating() || !createAgeConfirmed"
                 class="px-8 py-2.5 bg-secondary-500 hover:bg-secondary-600 disabled:opacity-50 text-white rounded-xl font-bold transition-colors"
               >
                 @if (isCreating()) {
@@ -874,38 +877,54 @@ import {
                 />
               </div>
 
-              <!-- Price Per Square -->
               <div>
-                <label class="block text-sm font-semibold text-label mb-2">Price Per Square</label>
-                <div class="flex items-center gap-2">
-                  <span class="text-muted">$</span>
-                  <input
-                    type="number"
-                    [(ngModel)]="editGamePrice"
-                    min="0"
-                    class="flex-1 px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
-                  />
-                </div>
+                <label for="edit-house-rules" class="block text-sm font-semibold text-label mb-2">House rules</label>
+                <textarea
+                  id="edit-house-rules"
+                  rows="4"
+                  maxlength="500"
+                  [(ngModel)]="editHouseRules"
+                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
+                ></textarea>
+                <p class="mt-1 text-xs text-muted">{{ editHouseRules.length }} / 500</p>
               </div>
 
-              <!-- Venmo Username -->
               <div>
-                <label class="block text-sm font-semibold text-label mb-2">Venmo Username</label>
+                <label for="edit-confirm-label" class="block text-sm font-semibold text-label mb-2">
+                  Confirmation label
+                  <span class="text-muted font-normal">(optional)</span>
+                </label>
                 <input
+                  id="edit-confirm-label"
                   type="text"
-                  [(ngModel)]="editGameVenmoUsername"
-                  placeholder="@username"
-                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
+                  maxlength="40"
+                  [(ngModel)]="editConfirmationLabel"
+                  placeholder="Confirmed"
+                  class="w-full min-h-11 px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
                 />
+              </div>
+
+              <div>
+                <label for="edit-confirm-description" class="block text-sm font-semibold text-label mb-2">
+                  What the label means
+                  <span class="text-muted font-normal">(optional)</span>
+                </label>
+                <textarea
+                  id="edit-confirm-description"
+                  rows="3"
+                  maxlength="200"
+                  [(ngModel)]="editConfirmationDescription"
+                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
+                ></textarea>
               </div>
 
               <!-- Manager Assignment -->
               <div>
                 <label class="block text-sm font-semibold text-label mb-2">
-                  Payment Manager
+                  Confirmation helper
                   <span class="text-muted font-normal">(optional)</span>
                 </label>
-                <p class="text-xs text-muted mb-2">Assign a player to help manage payments. They can mark who has paid.</p>
+                <p class="text-xs text-muted mb-2">They can mark who is confirmed.</p>
                 @if (editingGame()?.managerId) {
                   <div class="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-xl dark:bg-green-900/30 dark:border-green-800">
                     <span class="flex-1 text-green-700 dark:text-green-400">{{ editingGame()?.managerName || editingGame()?.managerEmail || 'Assigned' }}</span>
@@ -973,6 +992,7 @@ import {
         </div>
       }
 
+      <app-site-footer></app-site-footer>
     </div>
   `,
   styles: [`
@@ -999,7 +1019,11 @@ export class DashboardComponent implements OnInit {
   private toastService = inject(ToastService);
   private walkthroughService = inject(WalkthroughService);
   private sanitizationService = inject(SanitizationService);
+  private ownerGate = inject(OwnerGateService);
+  private tosService = inject(TosService);
   themeService = inject(ThemeService);
+  readonly disclaimer = ENTERTAINMENT_DISCLAIMER;
+  legacySummaryType: Type<unknown> | null = null;
 
   private dashboardWalkthroughSteps: WalkthroughStep[] = [
     {
@@ -1011,7 +1035,7 @@ export class DashboardComponent implements OnInit {
     {
       target: 'create-game',
       title: 'Create a New Game',
-      description: 'Click here to start your own squares pool. You can choose a sport, set the price per square, and invite friends.',
+      description: 'Click here to start your own squares game. You can choose a sport, add house rules, and invite friends.',
       position: 'bottom'
     },
     {
@@ -1052,8 +1076,9 @@ export class DashboardComponent implements OnInit {
   showEditModal = signal(false);
   editingGame = signal<GameListItem | null>(null);
   editGameName = '';
-  editGameVenmoUsername = '';
-  editGamePrice = 10;
+  editHouseRules = '';
+  editConfirmationLabel = '';
+  editConfirmationDescription = '';
   editSport: SportType = 'nfl';
   editEspnGameId = '';
   editEspnGames = signal<EspnGame[]>([]);
@@ -1071,15 +1096,15 @@ export class DashboardComponent implements OnInit {
   isSavingProfile = signal(false);
 
   newGameName = '';
-  newGameVenmoUsername = '';
+  newGameHouseRules = '';
+  newGameConfirmationLabel = '';
+  newGameConfirmationDescription = '';
   newGamePaymentManager = '';
   joinGameCode = '';
+  joinAgeConfirmed = false;
+  createAgeConfirmed = false;
   selectedSport: SportType = 'nfl';
   selectedEspnGameId = '';
-  newGamePrice = 10;
-  customPrice: number | null = null;
-
-  pricePresets = [0, 5, 10, 20, 50];
   sportOptions: { value: SportType; label: string }[] = [
     { value: 'nfl', label: 'NFL' },
     { value: 'ncaaf', label: 'NCAA Football' },
@@ -1089,10 +1114,18 @@ export class DashboardComponent implements OnInit {
   ];
 
   ngOnInit(): void {
+    void this.loadLegacySummary();
     this.loadMyGames();
     setTimeout(() => {
       this.walkthroughService.startIfNew('dashboard', this.dashboardWalkthroughSteps);
     }, 500);
+  }
+
+  private async loadLegacySummary(): Promise<void> {
+    const allowed = await this.ownerGate.refresh();
+    if (!allowed) return;
+    const loaded = await import('../legacy-money/legacy-money-summary.component');
+    this.legacySummaryType = loaded.LegacyMoneySummaryComponent;
   }
 
   startWalkthrough(): void {
@@ -1146,17 +1179,6 @@ export class DashboardComponent implements OnInit {
     this.selectedEspnGameId = gameId;
   }
 
-  selectPrice(price: number): void {
-    this.newGamePrice = price;
-    this.customPrice = null;
-  }
-
-  onCustomPriceChange(): void {
-    if (this.customPrice !== null && this.customPrice >= 0) {
-      this.newGamePrice = this.customPrice;
-    }
-  }
-
   getGameStatusClass(status: string): string {
     switch (status) {
       case 'pre': return 'bg-primary-200 text-primary-700';
@@ -1184,7 +1206,7 @@ export class DashboardComponent implements OnInit {
     }
     this.gameNameError.set(false);
 
-    const sanitizedPrice = this.sanitizationService.validatePrice(this.newGamePrice);
+    if (!this.createAgeConfirmed) return;
 
     this.isCreating.set(true);
     try {
@@ -1198,8 +1220,7 @@ export class DashboardComponent implements OnInit {
         }
       }
 
-      const sanitizedVenmo = this.sanitizationService.sanitizeVenmoUsername(this.newGameVenmoUsername);
-
+      await this.tosService.recordAcceptance();
       const gameId = await this.gameService.createGame(
         user.uid,
         user.displayName || 'Unknown',
@@ -1207,10 +1228,13 @@ export class DashboardComponent implements OnInit {
         this.selectedEspnGameId || undefined,
         homeTeam,
         awayTeam,
-        sanitizedPrice,
+        undefined,
         this.selectedEspnGameId ? this.selectedSport : undefined,
         this.newGamePaymentManager.trim() || undefined,
-        sanitizedVenmo || undefined
+        undefined,
+        this.sanitizationService.sanitizeMultilineText(this.newGameHouseRules, 500),
+        this.sanitizationService.sanitizePlainText(this.newGameConfirmationLabel, 40),
+        this.sanitizationService.sanitizeMultilineText(this.newGameConfirmationDescription, 200)
       );
       this.router.navigate(['/game', gameId]);
     } catch (error) {
@@ -1224,19 +1248,20 @@ export class DashboardComponent implements OnInit {
 
   resetCreateForm(): void {
     this.newGameName = '';
-    this.newGameVenmoUsername = '';
+    this.newGameHouseRules = '';
+    this.newGameConfirmationLabel = '';
+    this.newGameConfirmationDescription = '';
     this.newGamePaymentManager = '';
     this.selectedSport = 'nfl';
     this.selectedEspnGameId = '';
-    this.newGamePrice = 10;
-    this.customPrice = null;
+    this.createAgeConfirmed = false;
     this.gameNameError.set(false);
   }
 
-  joinGame(): void {
-    if (this.joinGameCode.length === 6) {
-      this.router.navigate(['/game', this.joinGameCode.toUpperCase()]);
-    }
+  async joinGame(): Promise<void> {
+    if (this.joinGameCode.length !== 6 || !this.joinAgeConfirmed) return;
+    await this.tosService.recordAcceptance();
+    this.router.navigate(['/game', this.joinGameCode.toUpperCase()]);
   }
 
   openGame(gameId: string): void {
@@ -1299,8 +1324,9 @@ export class DashboardComponent implements OnInit {
   async openEditModal(game: GameListItem): Promise<void> {
     this.editingGame.set(game);
     this.editGameName = game.name;
-    this.editGameVenmoUsername = game.venmoUsername || '';
-    this.editGamePrice = game.pricePerSquare;
+    this.editHouseRules = game.houseRules || '';
+    this.editConfirmationLabel = game.confirmationLabel || '';
+    this.editConfirmationDescription = game.confirmationDescription || '';
     this.editSport = game.espnSport || 'nfl';
     this.editEspnGameId = game.espnEventId || '';
     this.managerSearchQuery = '';
@@ -1311,6 +1337,11 @@ export class DashboardComponent implements OnInit {
     this.fetchEditEspnGames();
 
     const fullGame = await this.gameService.getGame(game.id);
+    if (fullGame) {
+      this.editHouseRules = fullGame.houseRules || '';
+      this.editConfirmationLabel = fullGame.confirmationLabel || '';
+      this.editConfirmationDescription = fullGame.confirmationDescription || '';
+    }
     if (fullGame?.playerUserIds) {
       const currentUid = this.currentUser()?.uid;
       const players = Object.entries(fullGame.playerUserIds)
@@ -1431,8 +1462,9 @@ export class DashboardComponent implements OnInit {
     if (!game) return;
 
     const sanitizedName = this.sanitizationService.sanitizeGameName(this.editGameName);
-    const sanitizedPrice = this.sanitizationService.validatePrice(this.editGamePrice);
-    const sanitizedVenmo = this.sanitizationService.sanitizeVenmoUsername(this.editGameVenmoUsername);
+    const houseRules = this.sanitizationService.sanitizeMultilineText(this.editHouseRules, 500);
+    const confirmationLabel = this.sanitizationService.sanitizePlainText(this.editConfirmationLabel, 40);
+    const confirmationDescription = this.sanitizationService.sanitizeMultilineText(this.editConfirmationDescription, 200);
 
     this.isSavingGame.set(true);
     try {
@@ -1440,8 +1472,9 @@ export class DashboardComponent implements OnInit {
       const espnChanged = (this.editEspnGameId || undefined) !== game.espnEventId;
       const updates: Record<string, any> = {
         name: sanitizedName,
-        pricePerSquare: sanitizedPrice,
-        venmoUsername: sanitizedVenmo,
+        houseRules,
+        confirmationLabel,
+        confirmationDescription,
         espnEventId: this.editEspnGameId || undefined,
         espnSport: this.editEspnGameId ? this.editSport : undefined,
         homeTeam: selectedEspnGame?.homeTeam || game.homeTeam,
@@ -1456,8 +1489,9 @@ export class DashboardComponent implements OnInit {
         games.map(g => g.id === game.id ? {
           ...g,
           name: sanitizedName,
-          pricePerSquare: sanitizedPrice,
-          venmoUsername: sanitizedVenmo,
+          houseRules,
+          confirmationLabel,
+          confirmationDescription,
           espnEventId: this.editEspnGameId || undefined,
           espnSport: this.editEspnGameId ? this.editSport : undefined,
           homeTeam: selectedEspnGame?.homeTeam || game.homeTeam,

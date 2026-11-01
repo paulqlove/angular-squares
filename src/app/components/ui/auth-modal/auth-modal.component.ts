@@ -2,11 +2,13 @@ import { Component, Input, Output, EventEmitter, inject, OnChanges, SimpleChange
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
+import { TosService } from '../../../core/services/tos.service';
+import { AgeGateComponent } from '../age-gate/age-gate.component';
 
 @Component({
   selector: 'app-auth-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AgeGateComponent],
   template: `
     @if (isOpen && !checkingAuth()) {
       <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
@@ -14,6 +16,11 @@ import { AuthService } from '../../../core/services/auth.service';
           <h2 class="text-2xl font-bold text-heading text-center mb-6">Join This Game</h2>
 
           <div class="space-y-4">
+            <app-age-gate
+              inputId="auth-age-confirm"
+              [checked]="ageConfirmed"
+              (checkedChange)="ageConfirmed = $event">
+            </app-age-gate>
             <!-- Guest Mode (top) -->
             <div class="space-y-3">
               <input
@@ -25,7 +32,7 @@ import { AuthService } from '../../../core/services/auth.service';
               />
               <button
                 (click)="continueAsGuest()"
-                [disabled]="!guestName.trim()"
+                [disabled]="!guestName.trim() || !ageConfirmed"
                 class="w-full px-6 py-3 bg-secondary-500 hover:bg-secondary-600 text-white rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Join as Guest
@@ -48,7 +55,7 @@ import { AuthService } from '../../../core/services/auth.service';
             <!-- Google Sign In (bottom) -->
             <button
               (click)="signInWithGoogle()"
-              [disabled]="authService.isLoading()"
+              [disabled]="authService.isLoading() || !ageConfirmed"
               class="w-full flex items-center justify-center gap-3 px-6 py-3 bg-control border-2 border-default rounded-lg hover:bg-control-hover transition-all font-medium text-default disabled:opacity-50"
             >
               <svg class="w-5 h-5" viewBox="0 0 24 24">
@@ -70,9 +77,11 @@ export class AuthModalComponent implements OnChanges {
   @Output() authenticated = new EventEmitter<void>();
 
   authService = inject(AuthService);
+  private tosService = inject(TosService);
   checkingAuth = signal(false);
 
   guestName = '';
+  ageConfirmed = false;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['isOpen']?.currentValue === true) {
@@ -93,15 +102,18 @@ export class AuthModalComponent implements OnChanges {
   }
 
   async signInWithGoogle(): Promise<void> {
+    if (!this.ageConfirmed) return;
     try {
       await this.authService.signInWithGoogle();
+      await this.tosService.recordAcceptance();
       this.authenticated.emit();
     } catch {}
   }
 
   async continueAsGuest(): Promise<void> {
-    if (this.guestName.trim()) {
+    if (this.guestName.trim() && this.ageConfirmed) {
       await this.authService.signInAsGuest(this.guestName.trim());
+      await this.tosService.recordAcceptance();
       this.authenticated.emit();
     }
   }

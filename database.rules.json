@@ -10,6 +10,15 @@
         "venmoUsername": {
           ".validate": "newData.isString() && newData.val().length <= 50"
         },
+        "houseRules": {
+          ".validate": "newData.isString() && newData.val().length <= 500"
+        },
+        "confirmationLabel": {
+          ".validate": "newData.isString() && newData.val().length <= 40"
+        },
+        "confirmationDescription": {
+          ".validate": "newData.isString() && newData.val().length <= 200"
+        },
         "homeTeam": {
           ".validate": "newData.isString() && newData.val().length <= 50"
         },
@@ -125,7 +134,26 @@
               ".validate": "newData.isString() && newData.val().length <= 100"
             }
           }
+        },
+        "tosAcceptance": {
+          ".validate": "newData.hasChildren(['acceptedAt', 'version'])",
+          "acceptedAt": {
+            ".validate": "newData.isNumber()"
+          },
+          "version": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 32"
+          },
+          "$other": {
+            ".validate": false
+          }
         }
+      }
+    },
+    "owners": {
+      "$uid": {
+        ".read": "auth != null && auth.uid == $uid",
+        ".write": false,
+        ".validate": "newData.isBoolean()"
       }
     },
     "emailIndex": {

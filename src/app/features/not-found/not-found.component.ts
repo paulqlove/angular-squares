@@ -1,13 +1,15 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
+import { SiteFooterComponent } from '../../components/ui/site-footer/site-footer.component';
 
 @Component({
   selector: 'app-not-found',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, SiteFooterComponent],
   template: `
-    <div class="flex items-center justify-center min-h-screen p-4 bg-page">
+    <div class="flex min-h-screen flex-col bg-page">
+    <div class="flex flex-1 items-center justify-center p-4">
       <div class="max-w-md text-center">
         <img
           src="assets/logo.webp"
@@ -25,6 +27,8 @@ import { RouterLink } from '@angular/router';
           Back to home
         </a>
       </div>
+    </div>
+    <app-site-footer></app-site-footer>
     </div>
   `
 })

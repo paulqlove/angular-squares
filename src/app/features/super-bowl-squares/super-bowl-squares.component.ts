@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, HostListener, signal, inject, effect } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, HostListener, signal, inject, effect, Type } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -11,7 +11,7 @@ import { WalkthroughService, WalkthroughStep } from '../../core/services/walkthr
 import { Subscription } from 'rxjs';
 import { GameBoardComponent } from './components/game-board/game-board.component';
 import { PlayersListComponent } from './components/players-list/players-list.component';
-import { WinnersAndPayoutsComponent } from './components/winners-and-payouts/winners-and-payouts.component';
+import { QuarterWinnersComponent } from './components/quarter-winners/quarter-winners.component';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
   heroLockOpen,
@@ -30,11 +30,15 @@ import {
 import { GameStatusComponent } from './components/game-status/game-status.component';
 import { AppHeaderComponent } from '../../components/ui/app-header/app-header.component';
 import { SettingsPanelComponent } from './components/settings-panel/settings-panel.component';
-import { VenmoPopoverComponent } from './components/venmo-popover/venmo-popover.component';
 import { PaymentDialogComponent } from './components/payment-dialog/payment-dialog.component';
 import { ProbabilityHeatmapComponent } from './components/probability-heatmap/probability-heatmap.component';
 import { BoxScoreComponent } from './components/box-score/box-score.component';
 import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.component';
+import { SiteFooterComponent } from '../../components/ui/site-footer/site-footer.component';
+import { AgeGateComponent } from '../../components/ui/age-gate/age-gate.component';
+import { ENTERTAINMENT_DISCLAIMER } from '../../core/legal';
+import { OwnerGateService } from '../../core/services/owner-gate.service';
+import { TosService } from '../../core/services/tos.service';
 
 @Component({
   selector: 'app-super-bowl-squares',
@@ -45,15 +49,16 @@ import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.co
     NgIconComponent,
     GameBoardComponent,
     PlayersListComponent,
-    WinnersAndPayoutsComponent,
+    QuarterWinnersComponent,
     GameStatusComponent,
     AppHeaderComponent,
     SettingsPanelComponent,
-    VenmoPopoverComponent,
     PaymentDialogComponent,
     ProbabilityHeatmapComponent,
     BoxScoreComponent,
-    AuthModalComponent
+    AuthModalComponent,
+    SiteFooterComponent,
+    AgeGateComponent
   ],
   providers: [
     provideIcons({
@@ -85,7 +90,13 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   awayTeam: string = '';
   selectedSquares: { [key: string]: string } = {};
   playerStats: { [key: string]: { squares: number, total: number } } = {};
-  currentPrice: number = 10;
+  houseRules = '';
+  confirmationLabel = '';
+  confirmationDescription = '';
+  readonly disclaimer = ENTERTAINMENT_DISCLAIMER;
+  needsAgeConfirm = signal(true);
+  ageConfirmed = signal(false);
+  legacyMoneyType: Type<unknown> | null = null;
   homeNumbers: (number | null)[] = Array(10).fill(null);
   awayNumbers: (number | null)[] = Array(10).fill(null);
   scores = {
@@ -97,7 +108,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   winners: { [key: string]: string } = {};
   playerColors: { [key: string]: string } = {};
   playerUserIds: { [name: string]: string } = {};
-  totalPot: number = 0;
   availableColors = [
     'bg-red-200',
     'bg-blue-200',
@@ -131,13 +141,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     'bg-sky-100'
   ];
 
-  quarterPayouts = {
-    q1: 0.2,
-    q2: 0.2,
-    q3: 0.2,
-    q4: 0.4
-  };
-
   private subscription: Subscription = new Subscription();
   private _currentPlayer = '';
   get currentPlayer(): string {
@@ -156,7 +159,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   takenByPlayer: string = '';
   selectedPlayer: string | null = null;
   highlightedSquare: string | null = null;
-  venmoUsername = '';
   paidPlayers: Set<string> = new Set();
   activeTab: 'board' | 'probabilities' | 'boxscore' = 'board';
 
@@ -167,6 +169,8 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   private toastService = inject(ToastService);
   private walkthroughService = inject(WalkthroughService);
   private sanitizationService = inject(SanitizationService);
+  private ownerGate = inject(OwnerGateService);
+  private tosService = inject(TosService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
@@ -192,13 +196,13 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     {
       target: 'settings-button',
       title: 'Game Settings',
-      description: 'Game owners can manage team names, prices, lock the board, and sync live ESPN scores here.',
+      description: 'Game owners can set team names, house rules, and the confirmation label here.',
       position: 'bottom'
     },
     {
-      target: 'winners-payouts',
-      title: 'Winners & Payouts',
-      description: 'After numbers are randomized and scores come in, you\'ll see the winners for each quarter here.',
+      target: 'quarter-winners',
+      title: 'Quarter winners',
+      description: 'After numbers are randomized and scores come in, you\'ll see who won each quarter here.',
       position: 'top'
     }
   ];
@@ -258,6 +262,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     // Firebase loads with the game route, not with the landing page.
     await this.authService.ensureInitialized();
     if (this.destroyed) return;
+    await this.refreshAgeGate();
 
     const user = this.authService.currentUser();
     if (user?.displayName) {
@@ -307,12 +312,13 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           this.homeNumbers = data.homeNumbers || Array(10).fill(null);
           this.awayNumbers = data.awayNumbers || Array(10).fill(null);
           this.scores = data.scores || this.scores;
-          this.currentPrice = data.pricePerSquare || 10;
+          this.houseRules = data.houseRules || '';
+          this.confirmationLabel = data.confirmationLabel || '';
+          this.confirmationDescription = data.confirmationDescription || '';
           this.isRandomized = data.isRandomized || false;
           this.isLocked = data.isLocked || false;
           this.homeTeam = data.homeTeam || '';
           this.awayTeam = data.awayTeam || '';
-          this.venmoUsername = data.venmoUsername || '';
           this.paidPlayers = new Set(data.paidPlayers || []);
           this.playerColors = data.playerColors || {};
           this.winners = data.winners || {};
@@ -324,6 +330,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           const user = this.authService.currentUser();
           this.isGameOwner.set(!!user && user.uid === data.ownerId);
           this.isManager.set(!!user && !!data.managerId && user.uid === data.managerId);
+          void this.syncLegacyMoney(data.ownerId || '');
 
           Object.values(this.selectedSquares).forEach(playerName => {
             if (!this.playerColors[playerName]) {
@@ -381,6 +388,31 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     this.stopPolling();
   }
 
+  private async refreshAgeGate(): Promise<void> {
+    if (!this.authService.currentUser()) {
+      this.needsAgeConfirm.set(true);
+      return;
+    }
+    await this.tosService.flushPending();
+    const accepted = await this.tosService.hasCurrentAcceptance();
+    this.needsAgeConfirm.set(!accepted);
+    if (accepted) {
+      this.ageConfirmed.set(true);
+    }
+  }
+
+  private async syncLegacyMoney(ownerId: string): Promise<void> {
+    await this.ownerGate.refresh();
+    if (!this.ownerGate.canSeeGame(ownerId)) {
+      this.legacyMoneyType = null;
+      return;
+    }
+    if (!this.legacyMoneyType) {
+      const loaded = await import('../legacy-money/legacy-money-panel.component');
+      this.legacyMoneyType = loaded.LegacyMoneyPanelComponent;
+    }
+  }
+
   private startPolling(): void {
     if (this.pollingInterval) return;
     this.pollingInterval = setInterval(() => {
@@ -399,19 +431,15 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
   private calculatePlayerStats(): void {
     const stats: { [key: string]: { squares: number, total: number } } = {};
-    let totalPot = 0;
 
-    Object.entries(this.selectedSquares).forEach(([key, player]) => {
+    Object.values(this.selectedSquares).forEach(player => {
       if (!stats[player]) {
         stats[player] = { squares: 0, total: 0 };
       }
       stats[player].squares += 1;
-      stats[player].total += this.currentPrice;
-      totalPot += this.currentPrice;
     });
 
     this.playerStats = stats;
-    this.totalPot = totalPot;
   }
 
   private getPlayerColor(playerName: string): string {
@@ -496,6 +524,15 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       this.pendingSquare = event;
       this.showAuthModal.set(true);
       return;
+    }
+
+    if (this.needsAgeConfirm() && !this.ageConfirmed()) {
+      this.toastService.warning('Confirm you are 18 or older and agree to the terms before claiming a square.');
+      return;
+    }
+    if (this.needsAgeConfirm()) {
+      await this.tosService.recordAcceptance();
+      this.needsAgeConfirm.set(false);
     }
 
     if (!this.currentPlayer) {
@@ -735,12 +772,26 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     });
   }
 
-  onPriceChange(price: number): void {
-    this.currentPrice = this.sanitizationService.validatePrice(price);
+  get statusLabel(): string {
+    return this.confirmationLabel.trim() || 'Confirmed';
+  }
+
+  keepQuarterHighlight(event: Event): void {
+    event.stopPropagation();
+  }
+
+  onHouseRulesChange(value: string): void {
+    this.houseRules = value;
+    this.gameService.updateGame(this.gameId, { houseRules: value });
+  }
+
+  onConfirmationChange(value: { label: string; description: string }): void {
+    this.confirmationLabel = value.label;
+    this.confirmationDescription = value.description;
     this.gameService.updateGame(this.gameId, {
-      pricePerSquare: this.currentPrice
+      confirmationLabel: value.label,
+      confirmationDescription: value.description
     });
-    this.calculatePlayerStats();
   }
 
   @HostListener('document:click')
@@ -767,19 +818,17 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     this.highlightedSquare = this.highlightedSquare === key ? null : key;
   }
 
-  onVenmoUsernameChange(username: string) {
-    this.venmoUsername = this.sanitizationService.sanitizeVenmoUsername(username);
-    this.gameService.updateGame(this.gameId, {
-      venmoUsername: this.venmoUsername
-    });
-  }
-
-  onManagePayments() {
-    // Only owners and managers can manage payments
+  onConfirmPlayers() {
     if (!this.isGameOwner() && !this.isManager()) {
       return;
     }
-    this.paymentDialog.setData(this.playerStats, this.playerColors, this.paidPlayers);
+    this.paymentDialog.setData(
+      this.playerStats,
+      this.playerColors,
+      this.paidPlayers,
+      this.statusLabel,
+      this.confirmationDescription
+    );
     this.paymentDialog.open();
   }
 
@@ -812,12 +861,10 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       },
       winners: {},
       playerColors: {},
-      pricePerSquare: 10,
       isRandomized: false,
       isLocked: false,
       homeTeam: '',
       awayTeam: '',
-      venmoUsername: '',
       paidPlayers: []
     };
 
@@ -872,6 +919,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
   async onAuthModalAuthenticated(): Promise<void> {
     this.showAuthModal.set(false);
+    await this.refreshAgeGate();
 
     // Set current player from the newly authenticated user
     const user = this.authService.currentUser();

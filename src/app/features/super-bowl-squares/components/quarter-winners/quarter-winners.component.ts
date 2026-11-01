@@ -2,34 +2,20 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-winners-and-payouts',
+  selector: 'app-quarter-winners',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './winners-and-payouts.component.html',
-  styleUrls: ['./winners-and-payouts.component.scss']
+  templateUrl: './quarter-winners.component.html',
+  styleUrls: ['./quarter-winners.component.scss']
 })
-export class WinnersAndPayoutsComponent {
+export class QuarterWinnersComponent {
   @Input() winners: { [key: string]: string } = {};
-  @Input() quarterPayouts: { [key: string]: number } = {};
   @Input() playerColors: { [key: string]: string } = {};
-  @Input() totalPot: number = 0;
   @Input() scores: { [key: string]: { home: number; away: number } } = {};
   @Input() homeTeam: string = '';
   @Input() awayTeam: string = '';
 
   @Output() quarterClick = new EventEmitter<string>();
-
-  ngOnChanges() {
-    if (this.winners && this.totalPot) {
-      Object.entries(this.winners).forEach(([quarter, winner]) => {
-        const payout = this.totalPot * this.quarterPayouts[quarter];
-      });
-    }
-  }
-
-  getQuarters(): string[] {
-    return Object.keys(this.quarterPayouts);
-  }
 
   getQuarterLabel(quarter: string): string {
     const quarterMap: { [key: string]: string } = {
@@ -39,11 +25,6 @@ export class WinnersAndPayoutsComponent {
       q4: 'Final Score'
     };
     return quarterMap[quarter] || quarter;
-  }
-
-  getPayoutAmount(quarter: string): string {
-    const percentage = this.quarterPayouts[quarter] * 100;
-    return `${percentage}%`;
   }
 
   hasAnyScores(): boolean {

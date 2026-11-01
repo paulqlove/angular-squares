@@ -9,7 +9,7 @@ import {
   heroSquares2x2,
   heroUserGroup,
   heroTrophy,
-  heroCurrencyDollar,
+  heroDocumentText,
   heroShare,
   heroChartBar,
   heroArrowRight
@@ -18,6 +18,9 @@ import { RippleGridComponent } from '../../components/ui/ripple-grid/ripple-grid
 import { AppHeaderComponent } from '../../components/ui/app-header/app-header.component';
 import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.component';
 import { SampleBoardComponent } from './sample-board.component';
+import { SiteFooterComponent } from '../../components/ui/site-footer/site-footer.component';
+import { AgeGateComponent } from '../../components/ui/age-gate/age-gate.component';
+import { TosService } from '../../core/services/tos.service';
 
 interface Feature {
   icon: string;
@@ -28,13 +31,13 @@ interface Feature {
 @Component({
   selector: 'app-welcome',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, NgIconComponent, RippleGridComponent, AppHeaderComponent, AuthModalComponent, SampleBoardComponent],
+  imports: [CommonModule, FormsModule, RouterLink, NgIconComponent, RippleGridComponent, AppHeaderComponent, AuthModalComponent, SampleBoardComponent, SiteFooterComponent, AgeGateComponent],
   providers: [
     provideIcons({
       heroSquares2x2,
       heroUserGroup,
       heroTrophy,
-      heroCurrencyDollar,
+      heroDocumentText,
       heroShare,
       heroChartBar,
       heroArrowRight
@@ -83,7 +86,7 @@ interface Feature {
                 </h1>
                 <p class="text-lg md:text-xl text-muted mt-6 max-w-md">
                   Create and share your football squares game in seconds.
-                  Perfect for Super Bowl parties, office pools, and game day fun.
+                  Perfect for Super Bowl parties, friends and fans, and game day.
                 </p>
 
                 <div class="mt-8 flex flex-col gap-3">
@@ -114,7 +117,13 @@ interface Feature {
                   </div>
 
                   @if (showJoinCode()) {
-                    <div id="join-code-panel" class="flex items-center gap-2 sm:max-w-xs w-full">
+                    <div id="join-code-panel" class="space-y-3 sm:max-w-md w-full">
+                      <app-age-gate
+                        inputId="welcome-join-age"
+                        [checked]="joinAgeConfirmed"
+                        (checkedChange)="joinAgeConfirmed = $event">
+                      </app-age-gate>
+                      <div class="flex items-center gap-2">
                       <label for="join-code" class="sr-only">Game code</label>
                       <input
                         #joinInput
@@ -129,12 +138,13 @@ interface Feature {
                       <button
                         type="button"
                         (click)="joinGame()"
-                        [disabled]="gameCode.length !== 6"
+                        [disabled]="gameCode.length !== 6 || !joinAgeConfirmed"
                         aria-label="Join game"
                         class="inline-flex min-h-11 min-w-11 items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors disabled:opacity-40"
                       >
                         <ng-icon name="heroArrowRight" class="text-xl" aria-hidden="true"></ng-icon>
                       </button>
+                      </div>
                     </div>
                   }
 
@@ -206,12 +216,7 @@ interface Feature {
           </div>
         </section>
 
-        <!-- Footer -->
-        <footer class="bg-page py-8">
-          <div class="container mx-auto px-4 text-center text-muted text-sm">
-            <p>Made with love for sports ball fans</p>
-          </div>
-        </footer>
+        <app-site-footer></app-site-footer>
       </div>
     </div>
 
@@ -224,6 +229,7 @@ interface Feature {
 })
 export class WelcomeComponent implements OnInit {
   private authService = inject(AuthService);
+  private tosService = inject(TosService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
@@ -251,6 +257,7 @@ export class WelcomeComponent implements OnInit {
   @ViewChild('joinInput') private joinInput?: ElementRef<HTMLInputElement>;
 
   gameCode = '';
+  joinAgeConfirmed = false;
   demoGameId = environment.demoGameId;
   showAuthModal = signal(false);
   showJoinCode = signal(false);
@@ -272,9 +279,9 @@ export class WelcomeComponent implements OnInit {
       description: 'Winners calculated automatically based on quarter scores'
     },
     {
-      icon: 'heroCurrencyDollar',
-      title: 'Payment Tracking',
-      description: 'Track who has paid with Venmo integration'
+      icon: 'heroDocumentText',
+      title: 'House rules',
+      description: 'The host can post plain-text notes for the group'
     },
     {
       icon: 'heroShare',
@@ -296,10 +303,14 @@ export class WelcomeComponent implements OnInit {
     this.router.navigate(['/dashboard']);
   }
 
-  joinGame(): void {
-    if (this.gameCode.length === 6) {
-      this.router.navigate(['/game', this.gameCode.toUpperCase()]);
+  async joinGame(): Promise<void> {
+    if (this.gameCode.length !== 6 || !this.joinAgeConfirmed) return;
+    if (this.authService.isAuthenticated()) {
+      await this.tosService.recordAcceptance();
+    } else {
+      this.tosService.rememberPending();
     }
+    this.router.navigate(['/game', this.gameCode.toUpperCase()]);
   }
 
   openJoinCode(): void {

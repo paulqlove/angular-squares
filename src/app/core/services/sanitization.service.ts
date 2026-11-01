@@ -24,17 +24,23 @@ export class SanitizationService {
     return this.sanitizeString(name, 50);
   }
 
-  sanitizeVenmoUsername(username: string): string {
-    if (!username) return '';
-    // Only allow alphanumeric, @, _, -
-    const sanitized = username
-      .replace(/[^a-zA-Z0-9@_-]/g, '')
-      .substring(0, 50);
-    return sanitized;
-  }
-
   sanitizeDisplayName(name: string): string {
     return this.sanitizeString(name, 50);
+  }
+
+  sanitizePlainText(value: string, maxLength: number): string {
+    return this.sanitizeString(value, maxLength);
+  }
+
+  /** Plain text that keeps line breaks. Tags are stripped. Angular still escapes on render. */
+  sanitizeMultilineText(value: string, maxLength: number): string {
+    if (!value) return '';
+    let sanitized = value.replace(this.HTML_TAG_PATTERN, '');
+    for (const pattern of this.SCRIPT_PATTERNS) {
+      sanitized = sanitized.replace(pattern, '');
+    }
+    sanitized = sanitized.replace(/\r\n/g, '\n').trim();
+    return sanitized.substring(0, maxLength);
   }
 
   validateScore(score: number | string): number {
