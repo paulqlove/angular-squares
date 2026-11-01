@@ -17,7 +17,7 @@ import {
 } from '@ng-icons/heroicons/outline';
 import { AppHeaderComponent } from '../../components/ui/app-header/app-header.component';
 import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.component';
-import { SampleBoardComponent } from './sample-board.component';
+import { PhoneDemoComponent } from './phone-demo.component';
 
 interface Feature {
   icon: string;
@@ -29,7 +29,7 @@ interface Feature {
 
 @Component({
     selector: 'app-welcome',
-    imports: [FormsModule, RouterLink, NgIconComponent, AppHeaderComponent, AuthModalComponent, SampleBoardComponent, SiteFooterComponent],
+    imports: [FormsModule, RouterLink, NgIconComponent, AppHeaderComponent, AuthModalComponent, PhoneDemoComponent, SiteFooterComponent],
     providers: [
         provideIcons({
             heroSquares2x2,
@@ -117,7 +117,7 @@ interface Feature {
             <p class="qs-label mt-6 text-qs-muted">Free · Players don't need an account</p>
           </div>
 
-          <app-sample-board></app-sample-board>
+          <app-phone-demo></app-phone-demo>
         </div>
       </section>
 
