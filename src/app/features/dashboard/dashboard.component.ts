@@ -197,7 +197,7 @@ import {
             <!-- Create Game Card -->
             @if (canCreateGame()) {
               <button
-                (click)="openCreateModal()"
+                (click)="openCreateModal($event)"
                 [disabled]="isCheckingBoardLimit()"
                 [attr.aria-busy]="isCheckingBoardLimit()"
                 class="group bg-control hover:bg-control-hover dark:bg-white/10 dark:hover:bg-white/20 backdrop-blur border border-default dark:border-white/20 rounded-xl p-6 text-left transition-all hover:scale-[1.02] hover:shadow-lg disabled:cursor-wait disabled:opacity-70 disabled:hover:scale-100"
@@ -288,7 +288,7 @@ import {
               <h3 class="text-lg font-semibold text-heading mb-2">No games yet</h3>
               <p class="text-muted mb-6">Create your first squares pool to get started!</p>
               <button
-                (click)="openCreateModal()"
+                (click)="openCreateModal($event)"
                 [disabled]="isCheckingBoardLimit()"
                 [attr.aria-busy]="isCheckingBoardLimit()"
                 class="inline-flex min-h-11 items-center gap-2 px-6 py-3 bg-secondary-500 hover:bg-secondary-600 disabled:cursor-wait disabled:opacity-70 text-white rounded-xl font-medium transition-colors"
@@ -981,7 +981,7 @@ import {
 
     </div>
     @if (showUpgradeDialog()) {
-      <app-upgrade-pass-dialog (dismissed)="showUpgradeDialog.set(false)" />
+      <app-upgrade-pass-dialog (dismissed)="closeUpgrade()" />
     }
   `,
   styles: [`
@@ -1053,6 +1053,7 @@ export class DashboardComponent implements OnInit {
   isCheckingBoardLimit = signal(false);
   showCreateModal = signal(false);
   showUpgradeDialog = signal(false);
+  private upgradeReturnFocus: HTMLElement | null = null;
   shareModalGameId = signal<string | null>(null);
   espnGames = signal<EspnGame[]>([]);
   isLoadingEspnGames = signal(false);
@@ -1132,7 +1133,11 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  async openCreateModal(): Promise<void> {
+  async openCreateModal(event: Event): Promise<void> {
+    const trigger = event.currentTarget;
+    if (trigger instanceof HTMLElement) {
+      this.upgradeReturnFocus = trigger;
+    }
     const user = this.currentUser();
     if (!user || user.isGuest || this.isCheckingBoardLimit()) {
       return;
@@ -1151,6 +1156,12 @@ export class DashboardComponent implements OnInit {
     } finally {
       this.isCheckingBoardLimit.set(false);
     }
+  }
+
+  closeUpgrade(): void {
+    this.showUpgradeDialog.set(false);
+    const trigger = this.upgradeReturnFocus;
+    setTimeout(() => trigger?.focus());
   }
 
   async fetchEspnGames(): Promise<void> {

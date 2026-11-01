@@ -40,8 +40,8 @@ import {
           (click)="$event.stopPropagation()"
         >
           <div class="flex items-start justify-between gap-3 border-b border-default p-4 sm:p-6">
-            <h2 id="upgrade-title" class="text-xl font-bold text-heading sm:text-2xl">
-              Your free board is still active
+            <h2 id="upgrade-title" class="text-xl font-bold text-amber-800 dark:text-amber-100 sm:text-2xl">
+              Your free board is still going
             </h2>
             <button
               #closeButton
@@ -56,14 +56,13 @@ import {
             </button>
           </div>
 
-          <div class="space-y-5 p-4 sm:p-6">
-            <div id="upgrade-summary" class="space-y-3 text-base leading-6 text-default">
+          <div class="space-y-3 p-4 sm:space-y-5 sm:p-6">
+            <div id="upgrade-summary" class="space-y-2 text-base leading-6 text-default">
               <p>You can host one active board at a time. Live scoring and the heatmap stay included.</p>
-              <p>A linked board counts until that game is final. A board with no linked game counts for 48 hours after you create it. You can start another one after that.</p>
-              <p>If the linked game just ended, try again in a moment.</p>
+              <p>It stays up until a linked game is final, or for 48 hours if you didn't link one.</p>
             </div>
 
-            <section class="rounded-xl border border-default p-4" aria-labelledby="upgrade-pass-name">
+            <section class="rounded-xl border border-default p-3 sm:p-4" aria-labelledby="upgrade-pass-name">
               <p class="text-sm font-semibold uppercase tracking-wide text-label">Coming soon</p>
               <div class="mt-1 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
                 <h3 id="upgrade-pass-name" class="text-lg font-bold text-heading">Super Bowl Pass</h3>
@@ -72,8 +71,8 @@ import {
                   <span class="text-base font-semibold text-default">one-time</span>
                 </p>
               </div>
-              <ul class="mt-3 list-disc space-y-1 pl-5 text-base text-default">
-                <li>Live scoring across multiple boards</li>
+              <ul class="mt-2 list-disc space-y-1 pl-5 text-base text-default">
+                <li>Run multiple boards at once, each with live scoring and the heatmap</li>
                 <li>Team-color themes</li>
               </ul>
               <p class="mt-3 text-sm leading-5 text-default">No payment today. Leave your email and we'll tell you when the pass is ready.</p>
@@ -101,7 +100,7 @@ import {
                     [disabled]="isSubmitting()"
                     [attr.aria-invalid]="emailError() ? 'true' : 'false'"
                     [attr.aria-describedby]="emailError() ? 'upgrade-email-error upgrade-email-hint' : 'upgrade-email-hint'"
-                    class="min-h-11 w-full rounded-xl border border-input bg-input px-4 py-3 text-base text-default focus:border-secondary-800 focus:outline-none focus:ring-2 focus:ring-secondary-800"
+                    class="min-h-11 w-full rounded-xl border border-slate-500 bg-input px-4 py-3 text-base text-default placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:border-secondary-800 focus:outline-none focus:ring-2 focus:ring-secondary-800 dark:border-slate-400 dark:focus:border-secondary-300 dark:focus:ring-secondary-300"
                     placeholder="you@example.com"
                   />
                   <p id="upgrade-email-hint" class="mt-1.5 text-sm leading-5 text-default">We'll only use this to tell you the pass is ready.</p>
@@ -173,15 +172,12 @@ export class UpgradePassDialogComponent implements AfterViewInit, OnDestroy {
   private authService = inject(AuthService);
   private gameService = inject(GameService);
   private platformId = inject(PLATFORM_ID);
-  private previouslyFocused: HTMLElement | null = null;
   private previousOverflow = '';
 
   ngAfterViewInit(): void {
     if (!isPlatformBrowser(this.platformId)) {
       return;
     }
-    const active = document.activeElement;
-    this.previouslyFocused = active instanceof HTMLElement ? active : null;
     this.previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     this.closeButton?.nativeElement.focus();
@@ -192,8 +188,6 @@ export class UpgradePassDialogComponent implements AfterViewInit, OnDestroy {
       return;
     }
     document.body.style.overflow = this.previousOverflow;
-    const target = this.previouslyFocused;
-    setTimeout(() => target?.focus());
   }
 
   dismiss(): void {
@@ -217,15 +211,16 @@ export class UpgradePassDialogComponent implements AfterViewInit, OnDestroy {
       return;
     }
     const message = this.validateEmail(this.email);
-    this.emailError.set(message);
     if (message) {
+      this.announceEmailError(message);
       this.emailInput?.nativeElement.focus();
       return;
     }
+    this.emailError.set(null);
 
     const user = this.authService.currentUser();
     if (!user || user.isGuest) {
-      this.emailError.set('Sign in to join the list.');
+      this.announceEmailError('Sign in to join the list.');
       return;
     }
 
@@ -236,7 +231,7 @@ export class UpgradePassDialogComponent implements AfterViewInit, OnDestroy {
       this.submitted.set(true);
       setTimeout(() => this.status?.nativeElement.focus());
     } catch {
-      this.emailError.set('We couldn\'t save that email. Try again in a moment.');
+      this.announceEmailError('We couldn\'t save that email. Try again in a moment.');
     } finally {
       this.isSubmitting.set(false);
     }
@@ -266,6 +261,11 @@ export class UpgradePassDialogComponent implements AfterViewInit, OnDestroy {
       event.preventDefault();
       first.focus();
     }
+  }
+
+  private announceEmailError(message: string): void {
+    this.emailError.set(null);
+    setTimeout(() => this.emailError.set(message));
   }
 
   private validateEmail(value: string): string | null {
