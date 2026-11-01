@@ -1,10 +1,9 @@
-import { DOCUMENT } from '@angular/common';
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, DOCUMENT } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 
 export const SITE_ORIGIN = 'https://quarterscore.com';
 export const DEFAULT_OG_IMAGE = '/assets/og-image.png';
-export const DEFAULT_OG_ALT = 'Quarter Score logo beside the words Football Squares for game day';
+export const DEFAULT_OG_ALT = 'QuarterScore. Every square, every score, live on one board.™';
 
 export interface BreadcrumbItem {
   name: string;
@@ -44,7 +43,7 @@ export class SeoService {
     this.upsert('name', 'description', config.description);
     this.upsert('name', 'robots', config.noindex ? 'noindex, follow' : 'index, follow');
     this.upsert('property', 'og:type', config.ogType ?? 'website');
-    this.upsert('property', 'og:site_name', 'Quarter Score');
+    this.upsert('property', 'og:site_name', 'QuarterScore');
     this.upsert('property', 'og:url', canonical);
     this.upsert('property', 'og:title', config.title);
     this.upsert('property', 'og:description', config.description);
@@ -98,15 +97,15 @@ export class SeoService {
       image: [image],
       author: {
         '@type': 'Organization',
-        name: 'Quarter Score',
+        name: 'QuarterScore',
         url: `${SITE_ORIGIN}/`
       },
       publisher: {
         '@type': 'Organization',
-        name: 'Quarter Score',
+        name: 'QuarterScore',
         logo: {
           '@type': 'ImageObject',
-          url: `${SITE_ORIGIN}/assets/logo.png`
+          url: `${SITE_ORIGIN}/icon-512.png`
         }
       },
       mainEntityOfPage: {

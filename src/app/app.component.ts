@@ -1,5 +1,5 @@
-import { Component, inject, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+
 import { Meta } from '@angular/platform-browser';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
@@ -9,18 +9,17 @@ import { AnalyticsService } from './core/services/analytics.service';
 import { AuthService } from './core/services/auth.service';
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [
-    CommonModule,
+    selector: 'app-root',
+    imports: [
     RouterOutlet,
     ToastComponent,
     WalkthroughComponent
-  ],
-  template: `
+],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    template: `
     @if (authService.isLoading()) {
       <div class="fixed inset-0 bg-page flex items-center justify-center">
-        <div class="animate-spin rounded-full h-8 w-8 border-2 border-emerald-500 border-t-transparent"></div>
+        <div class="animate-spin rounded-full h-8 w-8 border-2 border-qs-accent border-t-transparent"></div>
       </div>
     } @else {
       <router-outlet></router-outlet>

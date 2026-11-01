@@ -1,4 +1,5 @@
 const colors = {
+  // Legacy color ramps (keep during migration)
   primary: {
     50: '#f8fafc',
     100: '#f1f5f9',
@@ -38,6 +39,7 @@ const colors = {
     900: '#1e3a8a',
     950: '#172554',
   },
+  // Player pastels (unchanged)
   player: {
     red: '#fecaca',
     blue: '#bfdbfe',
@@ -50,12 +52,34 @@ const colors = {
     teal: '#99f6e4',
     cyan: '#a5f3fc'
   },
-  warm: {
-    // DEFAULT: 'hsl(18.75deg 26.02% 51.76%)',
-    DEFAULT: 'hsl(150, 15%, 50%)',
-    hover: 'hsl(150, 15%, 45%)',
-    // hover: 'hsl(18.75deg 26.02% 46.76%)'
-  }
+  // New QS design system tokens
+  qs: {
+    bg: 'var(--qs-bg)',
+    panel: 'var(--qs-panel)',
+    'panel-2': 'var(--qs-panel-2)',
+    canvas: 'var(--qs-canvas)',
+    ink: 'var(--qs-ink)',
+    muted: 'var(--qs-muted)',
+    line: 'var(--qs-line)',
+    'line-strong': 'var(--qs-line-strong)',
+    accent: 'var(--qs-accent)',
+    'accent-hover': 'var(--qs-accent-hover)',
+    'accent-soft': 'var(--qs-accent-soft)',
+    'on-accent': 'var(--qs-on-accent)',
+    live: 'var(--qs-live)',
+    'live-fill': 'var(--qs-live-fill)',
+    ok: 'var(--qs-ok)',
+    'ok-soft': 'var(--qs-ok-soft)',
+    warn: 'var(--qs-warn)',
+    'warn-soft': 'var(--qs-warn-soft)',
+    bad: 'var(--qs-bad)',
+    'bad-soft': 'var(--qs-bad-soft)',
+    tile: 'var(--qs-tile)',
+    'tile-ink': 'var(--qs-tile-ink)',
+    'tile-muted': 'var(--qs-tile-muted)',
+    'tile-ok': 'var(--qs-tile-ok)',
+    'tile-bad': 'var(--qs-tile-bad)',
+  },
 };
 
 /** @type {import('tailwindcss').Config} */
@@ -103,10 +127,34 @@ module.exports = {
         'card': 'var(--color-border-card)',
       },
       ringColor: {
-        'focus': colors.warm.DEFAULT,
+        'focus': 'var(--qs-accent)',
+      },
+      fontWeight: {
+        bold: '600',
+        extrabold: '600',
       },
       fontFamily: {
-        sans: ['Roboto', 'system-ui', 'sans-serif'],
+        sans: ['var(--qs-font-sans)'],
+        mono: ['var(--qs-font-mono)'],
+      },
+      borderRadius: {
+        lg: '6px',
+        xl: '8px',
+        '2xl': '10px',
+        '3xl': '10px',
+        chip: '4px',
+        btn: '6px',
+        inner: '8px',
+        card: '10px',
+        bar: '12px',
+      },
+      boxShadow: {
+        md: 'var(--qs-shadow)',
+        lg: 'var(--qs-shadow)',
+        xl: 'var(--qs-shadow-pop)',
+        '2xl': 'var(--qs-shadow-pop)',
+        card: 'var(--qs-shadow)',
+        pop: 'var(--qs-shadow-pop)',
       },
     },
   },
@@ -126,6 +174,14 @@ module.exports = {
     'bg-blue-300', 'bg-green-300', 'bg-gray-200',
     'bg-white', 'hover:bg-gray-100',
     'dark',
+    // QS design system classes
+    'bg-qs-bg', 'bg-qs-panel', 'bg-qs-panel-2', 'bg-qs-canvas',
+    'bg-qs-accent', 'bg-qs-accent-soft', 'bg-qs-tile',
+    'text-qs-ink', 'text-qs-muted', 'text-qs-accent', 'text-qs-on-accent',
+    'text-qs-tile-ink', 'text-qs-live',
+    'border-qs-line', 'border-qs-line-strong', 'border-qs-accent',
+    'rounded-card', 'rounded-btn', 'rounded-inner', 'rounded-chip',
+    'shadow-card', 'shadow-pop',
   ],
   plugins: [],
 };

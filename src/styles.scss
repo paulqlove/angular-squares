@@ -4,68 +4,169 @@
 @tailwind components;
 @tailwind utilities;
 
-// Light mode (default)
+/* QuarterScore design tokens, v2 (Nov 2026).
+ * Source: Drive > Ventures > QuarterScore > Design > "QuarterScore Design Guidelines v2".
+ * Prefix is --qs- so nothing collides with host-picked team colors (--home, --away).
+ */
+
 :root {
-  --color-bg-page: #f1f5f9;           // slate-100
-  --color-bg-card: #ffffff;           // white
-  --color-bg-card-hover: #f1f5f9;     // slate-100
-  --color-bg-input: #f8fafc;          // slate-50
-  --color-bg-input-hover: #f1f5f9;    // slate-100
-  --color-bg-control: #e2e8f0;        // slate-200
-  --color-bg-control-hover: #cbd5e1;  // slate-300
-  --color-bg-dialog: #ffffff;         // white
-  --color-bg-square: #334155;         // slate-700 (empty squares in light mode)
-  --color-bg-square-hover: #cbd5e1;   // slate-300
-  --color-bg-header: #1e293b;         // slate-800
-  --color-bg-header-accent: #334155;  // slate-700
-  --color-grid-line: #cbd5e1;         // slate-300 (grid lines)
+  /* type */
+  --qs-font-sans: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --qs-font-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
 
-  --color-text-default: #0f172a;      // slate-900
-  --color-text-muted: #475569;        // slate-600, 4.5:1 on page, card, and input
-  --color-text-heading: #334155;      // slate-700
-  --color-text-label: #334155;        // slate-700
-  --color-text-header: #ffffff;
-  --color-text-header-muted: #cbd5e1; // slate-300
+  /* surfaces (warm paper) */
+  --qs-bg: #f6f3ee; /* page; optional gradient #f9f7f3 -> #f3f0ea */
+  --qs-panel: #fffefc; /* cards, dialogs */
+  --qs-panel-2: #f8f5f0; /* inner boxes, inputs, hover fills */
+  --qs-canvas: #ebe6da; /* board stage */
+  --qs-canvas-dot: rgba(15,23,42,.16);
 
-  --color-border-default: #e2e8f0;    // slate-200
-  --color-border-hover: #cbd5e1;      // slate-300
-  --color-border-input: #cbd5e1;      // slate-300
-  --color-border-card: #e2e8f0;       // slate-200
+  /* ink */
+  --qs-ink: #0f172a; /* navy, same as the logo */
+  --qs-muted: #5b6070; /* 5.0:1+ on every light surface */
+  --qs-line: #e4dfd6; /* decorative borders */
+  --qs-line-strong: #8b909d; /* input borders, 3:1+ on panel */
+
+  /* the one accent */
+  --qs-accent: #047857; /* emerald-700. white on it = 5.48:1 */
+  --qs-accent-hover: #065f46;
+  --qs-accent-soft: #d6efe3;
+  --qs-on-accent: #ffffff;
+
+  /* live (amber), for score moments only */
+  --qs-live: #b45309; /* text-safe amber, 4.54:1 on bg */
+  --qs-live-fill: #fbbf24; /* fills with navy text, 10.7:1 */
+
+  /* status, always semantic */
+  --qs-ok: #1f7a4d; --qs-ok-soft: #dcf1e5;
+  --qs-warn: #8a5410; --qs-warn-soft: #f6e8c8;
+  --qs-bad: #b3261e; --qs-bad-soft: #fadcd8;
+
+  /* dark tiles on a light page (live score, winner tiles, TV frame) */
+  --qs-tile: #0f172a; --qs-tile-ink: #f3efe8; --qs-tile-muted: #94a3b8;
+  --qs-tile-ok: #1f3d2e; --qs-tile-bad: #5c1f1a;
+
+  /* shape and elevation */
+  --qs-r-chip: 4px; --qs-r-btn: 6px; --qs-r-inner: 8px; --qs-r-card: 10px; --qs-r-bar: 12px; --qs-r-pill: 999px;
+  --qs-shadow: 0 10px 28px -22px rgba(15,23,42,.4);
+  --qs-shadow-pop: 0 16px 40px -16px rgba(15,23,42,.45);
+
+  /* motion */
+  --qs-ease: cubic-bezier(.2,.7,.2,1);
+  --qs-t-fast: 120ms; --qs-t-state: 200ms; --qs-t-reveal: 450ms;
+
+  /* Legacy aliases (remove after migration) */
+  --color-bg-page: var(--qs-bg);
+  --color-bg-card: var(--qs-panel);
+  --color-bg-card-hover: var(--qs-panel-2);
+  --color-bg-input: var(--qs-panel-2);
+  --color-bg-input-hover: var(--qs-panel-2);
+  --color-bg-control: var(--qs-panel-2);
+  --color-bg-control-hover: var(--qs-line);
+  --color-bg-dialog: var(--qs-panel);
+  --color-bg-square: var(--qs-panel);
+  --color-bg-square-hover: var(--qs-accent-soft);
+  --color-bg-header: var(--qs-tile);
+  --color-bg-header-accent: var(--qs-tile);
+  --color-grid-line: var(--qs-line);
+  --color-text-default: var(--qs-ink);
+  --color-text-muted: var(--qs-muted);
+  --color-text-heading: var(--qs-ink);
+  --color-text-label: var(--qs-ink);
+  --color-text-header: var(--qs-tile-ink);
+  --color-text-header-muted: var(--qs-tile-muted);
+  --color-border-default: var(--qs-line);
+  --color-border-hover: var(--qs-line-strong);
+  --color-border-input: var(--qs-line-strong);
+  --color-border-card: var(--qs-line);
 }
 
-// Dark mode
-.dark {
-  --color-bg-page: #0f172a;           // slate-900
-  --color-bg-card: #1e293b;           // slate-800
-  --color-bg-card-hover: #334155;     // slate-700
-  --color-bg-input: #1e293b;          // slate-800
-  --color-bg-input-hover: #334155;    // slate-700
-  --color-bg-control: #334155;        // slate-700
-  --color-bg-control-hover: #475569;  // slate-600
-  --color-bg-dialog: #1e293b;         // slate-800
-  --color-bg-square: #0f172a;         // slate-900 (empty squares - darker than card)
-  --color-bg-square-hover: #334155;   // slate-700
-  --color-bg-header: #020617;         // slate-950
-  --color-bg-header-accent: #0f172a;  // slate-900
-  --color-grid-line: #475569;         // slate-600 (lighter grid lines)
-
-  --color-text-default: #f1f5f9;      // slate-100
-  --color-text-muted: #94a3b8;        // slate-400
-  --color-text-heading: #f1f5f9;      // slate-100
-  --color-text-label: #e2e8f0;        // slate-200
-  --color-text-header: #ffffff;
-  --color-text-header-muted: #94a3b8; // slate-400
-
-  --color-border-default: #334155;    // slate-700
-  --color-border-hover: #475569;      // slate-600
-  --color-border-input: #334155;      // slate-700
-  --color-border-card: #334155;       // slate-700
+/* Dark mode = navy. Same as the TV view and the reversed logo. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --qs-bg: #0f172a; --qs-panel: #1e293b; --qs-panel-2: #263244;
+    --qs-canvas: #0b1220; --qs-canvas-dot: rgba(243,239,232,.12);
+    --qs-ink: #f3efe8; --qs-muted: #94a3b8; --qs-line: #334155; --qs-line-strong: #64748b;
+    --qs-accent: #34d399; --qs-accent-hover: #6ee7b7; --qs-accent-soft: #123b2c; --qs-on-accent: #0f172a;
+    --qs-live: #fbbf24; --qs-live-fill: #fbbf24;
+    --qs-ok: #6fd3a0; --qs-ok-soft: #173a2a; --qs-warn: #f0bd6a; --qs-warn-soft: #3a2d12; --qs-bad: #ff9a90; --qs-bad-soft: #40201c;
+    --qs-tile: #020617; --qs-tile-ink: #f3efe8;
+    --qs-shadow: 0 10px 28px -22px rgba(0,0,0,.8);
+    --qs-shadow-pop: 0 16px 40px -16px rgba(0,0,0,.85);
+  }
+}
+:root[data-theme="dark"] {
+  --qs-bg: #0f172a; --qs-panel: #1e293b; --qs-panel-2: #263244;
+  --qs-canvas: #0b1220; --qs-canvas-dot: rgba(243,239,232,.12);
+  --qs-ink: #f3efe8; --qs-muted: #94a3b8; --qs-line: #334155; --qs-line-strong: #64748b;
+  --qs-accent: #34d399; --qs-accent-hover: #6ee7b7; --qs-accent-soft: #123b2c; --qs-on-accent: #0f172a;
+  --qs-live: #fbbf24; --qs-live-fill: #fbbf24;
+  --qs-ok: #6fd3a0; --qs-ok-soft: #173a2a; --qs-warn: #f0bd6a; --qs-warn-soft: #3a2d12; --qs-bad: #ff9a90; --qs-bad-soft: #40201c;
+  --qs-tile: #020617; --qs-tile-ink: #f3efe8;
+  --qs-shadow: 0 10px 28px -22px rgba(0,0,0,.8);
+  --qs-shadow-pop: 0 16px 40px -16px rgba(0,0,0,.85);
 }
 
-// Self-hosted Roboto variable (latin). Apache 2.0; see src/assets/fonts/LICENSE.
-// One file covers weights 100–900, which is the file Chrome already fetched from
-// Google after the render-blocking stylesheet. font-display: swap paints text
-// immediately in the fallback stack, then swaps to Roboto.
+/* Board canvas: the stage the grid sits on */
+.qs-canvas {
+  background: var(--qs-canvas);
+  background-image: radial-gradient(var(--qs-canvas-dot) 1px, transparent 1.2px);
+  background-size: 22px 22px;
+  border-radius: var(--qs-r-inner);
+}
+
+/* Self-hosted fonts. Apache 2.0 / OFL; see src/assets/fonts/LICENSE. */
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/assets/fonts/space-grotesk-latin-400-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/assets/fonts/space-grotesk-latin-500-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/assets/fonts/space-grotesk-latin-600-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/assets/fonts/jetbrains-mono-latin-400-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/assets/fonts/jetbrains-mono-latin-500-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/assets/fonts/jetbrains-mono-latin-600-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Keep Roboto as fallback during migration */
 @font-face {
   font-family: Roboto;
   font-style: normal;
@@ -77,19 +178,129 @@
 
 @layer base {
   html {
-    font-family: Roboto, system-ui, sans-serif;
+    font-family: var(--qs-font-sans);
+    background: var(--qs-bg);
+    color: var(--qs-ink);
   }
 
-  // Placeholder text is content (WCAG 1.4.3). UA placeholders are often
-  // below 4.5:1, and Firefox also fades them with opacity.
   input::placeholder,
   textarea::placeholder {
-    color: var(--color-text-muted);
+    color: var(--qs-muted);
     opacity: 1;
   }
 }
 
-// Toast animation
+@layer components {
+  /* Mono label: eyebrows, counters, buttons, tabs, badges */
+  .qs-label {
+    font-family: var(--qs-font-mono);
+    font-size: 11.5px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .qs-eyebrow {
+    @apply qs-label;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--qs-muted);
+    letter-spacing: 0.14em;
+    line-height: 1.4;
+  }
+  .qs-eyebrow-bar::before {
+    content: "";
+    width: 3px;
+    height: 12px;
+    background: var(--qs-accent);
+  }
+  .qs-display {
+    font-size: clamp(36px, 4.4vw, 68px);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+  .qs-title {
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+  }
+
+  .qs-btn {
+    @apply qs-label;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 18px;
+    border: 1px solid transparent;
+    border-radius: var(--qs-r-btn);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color var(--qs-t-fast) var(--qs-ease), color var(--qs-t-fast) var(--qs-ease), border-color var(--qs-t-fast) var(--qs-ease);
+  }
+  .qs-btn:disabled { opacity: .45; cursor: not-allowed; }
+  .qs-btn-primary { background: var(--qs-accent); color: var(--qs-on-accent); }
+  .qs-btn-primary:hover:not(:disabled) { background: var(--qs-accent-hover); }
+  .qs-btn-ink { background: var(--qs-ink); color: var(--qs-bg); }
+  .qs-btn-ink:hover:not(:disabled) { background: color-mix(in srgb, var(--qs-ink) 85%, var(--qs-bg)); }
+  .qs-btn-secondary { background: var(--qs-panel-2); color: var(--qs-ink); border-color: var(--qs-line); }
+  .qs-btn-secondary:hover:not(:disabled) { border-color: var(--qs-line-strong); }
+  .qs-btn-ghost { background: transparent; color: inherit; }
+  .qs-btn-ghost:hover:not(:disabled) { background: color-mix(in srgb, currentColor 10%, transparent); }
+  .qs-btn-danger { background: var(--qs-bad-soft); color: var(--qs-bad); }
+
+  .qs-tab {
+    @apply qs-btn;
+    background: var(--qs-panel);
+    color: var(--qs-ink);
+    border-color: var(--qs-line);
+  }
+  .qs-tab:hover { border-color: var(--qs-line-strong); }
+  .qs-tab[aria-selected="true"] { background: var(--qs-ink); color: var(--qs-bg); border-color: var(--qs-ink); }
+
+  .qs-card {
+    background: var(--qs-panel);
+    border: 1px solid var(--qs-line);
+    border-radius: var(--qs-r-card);
+    box-shadow: var(--qs-shadow);
+  }
+
+  .qs-badge {
+    @apply qs-label;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    font-size: 10.5px;
+    border-radius: var(--qs-r-pill);
+    background: var(--qs-panel-2);
+    color: var(--qs-muted);
+    border: 1px solid var(--qs-line);
+  }
+  .qs-badge-ok { background: var(--qs-ok-soft); color: var(--qs-ok); border-color: transparent; }
+  .qs-badge-warn { background: var(--qs-warn-soft); color: var(--qs-warn); border-color: transparent; }
+  .qs-badge-bad { background: var(--qs-bad-soft); color: var(--qs-bad); border-color: transparent; }
+  /* Heatmap: one emerald ramp, never team colors or amber */
+  .qs-heat-0 { background: var(--qs-panel); color: var(--qs-ink); }
+  .qs-heat-1 { background: color-mix(in srgb, var(--qs-accent) 12%, var(--qs-panel)); color: var(--qs-ink); }
+  .qs-heat-2 { background: color-mix(in srgb, var(--qs-accent) 25%, var(--qs-panel)); color: var(--qs-ink); }
+  .qs-heat-3 { background: color-mix(in srgb, var(--qs-accent) 40%, var(--qs-panel)); color: var(--qs-ink); }
+  .qs-heat-4 { background: color-mix(in srgb, var(--qs-accent) 65%, var(--qs-panel)); color: var(--qs-tile); }
+  .qs-heat-5 { background: var(--qs-accent); color: var(--qs-on-accent); }
+  .qs-badge-code { background: var(--qs-accent-soft); color: var(--qs-accent); border-color: transparent; }
+}
+
+/* Focus ring: ink, never removed. On navy surfaces use paper. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid var(--qs-ink);
+  outline-offset: 2px;
+}
+.qs-on-navy :where(a, button, input, [tabindex]):focus-visible { outline-color: #f3efe8; }
+
+/* Toast animation */
 @keyframes toast-in {
   from {
     opacity: 0;
@@ -102,10 +313,10 @@
 }
 
 .animate-toast-in {
-  animation: toast-in 0.3s ease-out;
+  animation: toast-in 0.3s var(--qs-ease);
 }
 
-// Walkthrough animations
+/* Walkthrough animations */
 @keyframes pulse-subtle {
   0%, 100% { opacity: 0.75; }
   50% { opacity: 1; }
@@ -127,25 +338,19 @@
 }
 
 .animate-tooltip-in {
-  animation: tooltip-in 0.2s ease-out;
-}
-
-a:focus-visible,
-button:focus-visible {
-  outline: 2px solid #047857;
-  outline-offset: 2px;
+  animation: tooltip-in 0.2s var(--qs-ease);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-toast-in,
-  .animate-pulse-subtle,
-  .animate-tooltip-in {
-    animation: none;
+  *, *::before, *::after {
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }
 
 .prose-content {
-  color: var(--color-text-default);
+  color: var(--qs-ink);
   line-height: 1.7;
 
   > * + * {
@@ -155,12 +360,12 @@ button:focus-visible {
   h2 {
     margin-top: 2.5rem;
     font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--color-text-heading);
+    font-weight: 600;
+    color: var(--qs-ink);
   }
 
   a {
-    color: #065f46;
+    color: var(--qs-accent);
     text-decoration: underline;
     text-underline-offset: 2px;
   }
@@ -171,9 +376,9 @@ button:focus-visible {
   }
 
   blockquote {
-    border-left: 4px solid #047857;
+    border-left: 4px solid var(--qs-accent);
     padding-left: 1rem;
-    color: var(--color-text-muted);
+    color: var(--qs-muted);
   }
 
   table {
@@ -185,18 +390,14 @@ button:focus-visible {
 
   th,
   td {
-    border: 1px solid var(--color-border-default);
+    border: 1px solid var(--qs-line);
     padding: 0.5rem 0.75rem;
     text-align: left;
   }
 
   th {
-    background: var(--color-bg-card);
+    background: var(--qs-panel);
   }
-}
-
-.dark .prose-content a {
-  color: #6ee7b7;
 }
 
 @media print {

@@ -1,5 +1,5 @@
-import { Component, OnInit, signal, inject, HostListener } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, signal, inject, HostListener, ChangeDetectionStrategy } from '@angular/core';
+
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
@@ -39,36 +39,35 @@ import {
 } from '@ng-icons/heroicons/outline';
 
 @Component({
-  selector: 'app-dashboard',
-  standalone: true,
-  imports: [CommonModule, FormsModule, NgIconComponent, AppHeaderComponent, UpgradePassDialogComponent],
-  providers: [
-    provideIcons({
-      heroPlus,
-      heroArrowRightOnRectangle,
-      heroSquares2x2,
-      heroShare,
-      heroTrash,
-      heroLockClosed,
-      heroUserGroup,
-      heroArrowTopRightOnSquare,
-      heroXMark,
-      heroTrophy,
-      heroClock,
-      heroCheckCircle,
-      heroPencilSquare,
-      heroArrowRight,
-      heroTicket,
-      heroPlay,
-      heroCog6Tooth,
-      heroSun,
-      heroMoon,
-      heroComputerDesktop,
-      heroChevronDown,
-      heroQuestionMarkCircle
-    })
-  ],
-  template: `
+    selector: 'app-dashboard',
+    imports: [FormsModule, NgIconComponent, AppHeaderComponent, UpgradePassDialogComponent],
+    providers: [
+        provideIcons({
+            heroPlus,
+            heroArrowRightOnRectangle,
+            heroSquares2x2,
+            heroShare,
+            heroTrash,
+            heroLockClosed,
+            heroUserGroup,
+            heroArrowTopRightOnSquare,
+            heroXMark,
+            heroTrophy,
+            heroClock,
+            heroCheckCircle,
+            heroPencilSquare,
+            heroArrowRight,
+            heroTicket,
+            heroPlay,
+            heroCog6Tooth,
+            heroSun,
+            heroMoon,
+            heroComputerDesktop,
+            heroChevronDown,
+            heroQuestionMarkCircle
+        })
+    ],
+    template: `
     <div class="min-h-screen bg-page" [attr.inert]="showUpgradeDialog() ? '' : null">
       <!-- Header -->
       <app-shared-header variant="solid">
@@ -86,17 +85,17 @@ import {
         <div class="relative" data-walkthrough="profile-dropdown">
           <button
             (click)="toggleProfileDropdown($event)"
-            class="flex items-center gap-2 bg-header-accent hover:bg-primary-700 rounded-full px-3 py-1.5 transition-colors cursor-pointer"
+            class="flex items-center gap-2 bg-header-accent hover:bg-white/10 rounded-full px-3 py-1.5 transition-colors cursor-pointer"
             title="Profile menu"
           >
             @if (currentUser()?.photoURL) {
               <img
-                [src]="currentUser()?.photoURL"
+                [src]="$safeNavigationMigration(currentUser()?.photoURL)"
                 alt="Profile"
-                class="w-7 h-7 rounded-full ring-2 ring-primary-500"
+                class="w-7 h-7 rounded-full ring-2 ring-qs-accent"
               />
             } @else {
-              <div class="w-7 h-7 rounded-full bg-secondary-500 flex items-center justify-center">
+              <div class="w-7 h-7 rounded-full bg-qs-accent flex items-center justify-center">
                 <span class="text-white font-semibold text-sm">
                   {{ (currentUser()?.displayName || currentUser()?.email)?.charAt(0)?.toUpperCase() || '?' }}
                 </span>
@@ -106,7 +105,7 @@ import {
               {{ currentUser()?.displayName || currentUser()?.email }}
             </span>
             @if (currentUser()?.isGuest) {
-              <span class="text-xs bg-primary-600 text-primary-200 px-2 py-0.5 rounded-full">Guest</span>
+              <span class="text-xs qs-badge border-0 bg-white/10 text-qs-tile-ink">Guest</span>
             }
             <ng-icon name="heroChevronDown" class="text-sm text-header-muted"></ng-icon>
           </button>
@@ -121,13 +120,13 @@ import {
                     type="text"
                     [(ngModel)]="profileName"
                     placeholder="Enter your name"
-                    class="flex-1 min-w-0 px-3 py-2 bg-input border border-input rounded-lg text-sm text-default focus:border-secondary-500 focus:ring-1 focus:ring-secondary-100 outline-none"
+                    class="flex-1 min-w-0 px-3 py-2 bg-input border border-input rounded-lg text-sm text-default focus:border-qs-accent focus:ring-1 focus:ring-qs-accent-soft outline-none"
                     (keyup.enter)="saveProfile()"
                   />
                   <button
                     (click)="saveProfile()"
                     [disabled]="isSavingProfile() || !profileName.trim()"
-                    class="flex-1 px-3 py-2 bg-secondary-500 hover:bg-secondary-600 disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-colors"
+                    class="flex-1 px-3 py-2 bg-qs-accent hover:bg-qs-accent-hover disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-colors"
                   >
                     @if (isSavingProfile()) {
                       ...
@@ -147,7 +146,7 @@ import {
                 <div class="flex items-center bg-control rounded-lg p-1">
                   <button
                     (click)="setTheme('system')"
-                    [class]="themeService.theme() === 'system' ? 'flex-1 p-2 rounded-md bg-secondary-500 text-white' : 'flex-1 p-2 rounded-md text-muted hover:text-default'"
+                    [class]="themeService.theme() === 'system' ? 'flex-1 p-2 rounded-md bg-qs-accent text-white' : 'flex-1 p-2 rounded-md text-muted hover:text-default'"
                     title="System theme"
                     aria-label="System theme"
                   >
@@ -155,7 +154,7 @@ import {
                   </button>
                   <button
                     (click)="setTheme('light')"
-                    [class]="themeService.theme() === 'light' ? 'flex-1 p-2 rounded-md bg-secondary-500 text-white' : 'flex-1 p-2 rounded-md text-muted hover:text-default'"
+                    [class]="themeService.theme() === 'light' ? 'flex-1 p-2 rounded-md bg-qs-accent text-white' : 'flex-1 p-2 rounded-md text-muted hover:text-default'"
                     title="Light theme"
                     aria-label="Light theme"
                   >
@@ -163,7 +162,7 @@ import {
                   </button>
                   <button
                     (click)="setTheme('dark')"
-                    [class]="themeService.theme() === 'dark' ? 'flex-1 p-2 rounded-md bg-secondary-500 text-white' : 'flex-1 p-2 rounded-md text-muted hover:text-default'"
+                    [class]="themeService.theme() === 'dark' ? 'flex-1 p-2 rounded-md bg-qs-accent text-white' : 'flex-1 p-2 rounded-md text-muted hover:text-default'"
                     title="Dark theme"
                     aria-label="Dark theme"
                   >
@@ -175,7 +174,7 @@ import {
               <!-- Sign out -->
               <button
                 (click)="signOut()"
-                class="w-full flex items-center justify-center gap-2 px-3 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-sm font-medium transition-colors"
+                class="qs-btn qs-btn-ghost w-full text-qs-bad hover:!bg-qs-bad-soft"
               >
                 <ng-icon name="heroArrowRightOnRectangle" class="text-base"></ng-icon>
                 Sign Out
@@ -187,7 +186,7 @@ import {
 
       <main class="container mx-auto px-4 py-8">
         <!-- Hero Section -->
-        <div class="bg-card border border-card rounded-2xl shadow-xl p-8 mb-8 dark:bg-gradient-to-br dark:from-header-accent dark:to-header dark:border-0" data-walkthrough="hero-section">
+        <div class="qs-card p-8 mb-8" data-walkthrough="hero-section">
           <div class="flex items-center gap-3 mb-6">
             <span class="text-3xl">🏈</span>
             <h2 class="text-2xl font-bold text-heading dark:text-white tracking-tight">Start or Join a Game</h2>
@@ -204,15 +203,15 @@ import {
                 data-walkthrough="create-game"
               >
                 <div class="flex items-center gap-4 mb-3">
-                  <div class="w-12 h-12 rounded-xl bg-secondary-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <div class="w-12 h-12 rounded-xl bg-qs-accent flex items-center justify-center group-hover:scale-110 transition-transform">
                     <ng-icon name="heroPlus" class="text-2xl text-white"></ng-icon>
                   </div>
                   <div>
                     <h3 class="text-lg font-bold text-heading dark:text-white">New Game</h3>
-                    <p class="text-sm text-muted dark:text-primary-200">Create a squares pool</p>
+                    <p class="text-sm text-muted">Create a squares pool</p>
                   </div>
                 </div>
-                <p class="text-sm text-muted dark:text-primary-300">Set up your own game with custom settings and share it with friends.</p>
+                <p class="text-sm text-muted">Set up your own game with custom settings and share it with friends.</p>
               </button>
             } @else {
               <div class="bg-amber-100 dark:bg-amber-500/20 backdrop-blur border border-amber-300 dark:border-amber-400/30 rounded-xl p-6">
@@ -238,12 +237,12 @@ import {
             <!-- Join Game Card -->
             <div class="bg-control dark:bg-white/10 backdrop-blur border border-default dark:border-white/20 rounded-xl p-6" data-walkthrough="join-game">
               <div class="flex items-center gap-4 mb-3">
-                <div class="w-12 h-12 rounded-xl bg-accent-500 flex items-center justify-center">
+                <div class="w-12 h-12 rounded-xl bg-qs-ink flex items-center justify-center">
                   <ng-icon name="heroTicket" class="text-2xl text-white"></ng-icon>
                 </div>
                 <div>
                   <h3 class="text-lg font-bold text-heading dark:text-white">Join with Code</h3>
-                  <p class="text-sm text-muted dark:text-primary-200">Have a 6-digit code?</p>
+                  <p class="text-sm text-muted">Have a 6-digit code?</p>
                 </div>
               </div>
               <div class="flex gap-2 min-w-0">
@@ -251,14 +250,14 @@ import {
                   type="text"
                   [(ngModel)]="joinGameCode"
                   placeholder="XXXXXX"
-                  class="flex-1 min-w-0 px-4 py-3 bg-input dark:bg-white/10 border border-input dark:border-white/20 rounded-lg text-default dark:text-white placeholder-muted dark:placeholder-primary-400 uppercase tracking-widest font-mono text-center focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
+                  class="flex-1 min-w-0 px-4 py-3 bg-qs-panel-2 border border-qs-line-strong rounded-btn text-qs-ink placeholder-muted uppercase tracking-widest font-mono text-center focus:outline-none focus:ring-2 focus:ring-qs-accent focus:border-transparent"
                   maxlength="6"
                   (keyup.enter)="joinGame()"
                 />
                 <button
                   (click)="joinGame()"
                   [disabled]="joinGameCode.length !== 6"
-                  class="shrink-0 px-4 py-3 bg-accent-500 hover:bg-accent-400 disabled:bg-control disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+                  class="qs-btn qs-btn-primary shrink-0"
                 >
                   <ng-icon name="heroArrowRight" class="text-xl"></ng-icon>
                 </button>
@@ -275,7 +274,7 @@ import {
 
           @if (isLoadingGames()) {
             <div class="flex items-center justify-center py-16">
-              <svg class="animate-spin h-10 w-10 text-secondary-500" viewBox="0 0 24 24">
+              <svg class="animate-spin h-10 w-10 text-qs-accent" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
               </svg>
@@ -291,7 +290,7 @@ import {
                 (click)="openCreateModal($event)"
                 [disabled]="isCheckingBoardLimit()"
                 [attr.aria-busy]="isCheckingBoardLimit()"
-                class="inline-flex min-h-11 items-center gap-2 px-6 py-3 bg-secondary-500 hover:bg-secondary-600 disabled:cursor-wait disabled:opacity-70 text-white rounded-xl font-medium transition-colors"
+                class="inline-flex min-h-11 items-center gap-2 px-6 py-3 bg-qs-accent hover:bg-qs-accent-hover disabled:cursor-wait disabled:opacity-70 text-white rounded-xl font-medium transition-colors"
               >
                 <ng-icon name="heroPlus" class="text-xl"></ng-icon>
                 Create Game
@@ -302,7 +301,7 @@ import {
               @for (game of myGames(); track game.id) {
                 <div class="bg-card rounded-2xl shadow-sm hover:shadow-md transition-all overflow-hidden group border border-card">
                   <!-- Game Header -->
-                  <div class="bg-control dark:bg-gradient-to-r dark:from-header-accent dark:to-header p-4">
+                  <div class="bg-qs-panel-2 p-4">
                     <div class="flex items-center justify-between mb-2">
                       <h3 class="font-bold text-heading dark:text-white truncate">{{ game.name }}</h3>
                       @if (game.isLocked) {
@@ -311,13 +310,13 @@ import {
                           Locked
                         </span>
                       } @else {
-                        <span class="flex items-center gap-1 text-xs bg-green-500 text-white px-2 py-1 rounded-full">
+                        <span class="flex items-center gap-1 text-xs bg-qs-ok text-white px-2 py-1 rounded-full">
                           <ng-icon name="heroPlay" class="text-xs"></ng-icon>
                           Active
                         </span>
                       }
                     </div>
-                    <p class="text-sm text-muted dark:text-primary-300">
+                    <p class="text-sm text-muted">
                       @if (game.homeTeam && game.awayTeam) {
                         {{ game.awayTeam }} vs {{ game.homeTeam }}
                       } @else {
@@ -336,7 +335,7 @@ import {
                       </div>
                       <div class="h-2 bg-control rounded-full overflow-hidden">
                         <div
-                          class="h-full bg-gradient-to-r from-secondary-400 to-secondary-500 rounded-full transition-all duration-500"
+                          class="h-full bg-qs-accent rounded-full transition-all duration-500"
                           [style.width.%]="game.squaresFilled"
                         ></div>
                       </div>
@@ -349,7 +348,7 @@ import {
                       </div>
                       <div class="h-2 bg-control rounded-full overflow-hidden">
                         <div
-                          class="h-full bg-green-500 rounded-full transition-all duration-500"
+                          class="h-full bg-qs-ok rounded-full transition-all duration-500"
                           [style.width.%]="game.totalPot > 0 ? (game.collected / game.totalPot) * 100 : 0"
                         ></div>
                       </div>
@@ -369,13 +368,13 @@ import {
                     <div class="flex items-center gap-2">
                       <button
                         (click)="openGame(game.id)"
-                        class="flex-1 px-4 py-2.5 bg-secondary-500 hover:bg-secondary-600 text-white rounded-xl font-medium transition-colors"
+                        class="qs-btn qs-btn-primary flex-1"
                       >
                         Open Game
                       </button>
                       <button
                         (click)="shareGame(game.id)"
-                        class="p-2.5 text-muted hover:text-secondary-600 hover:bg-secondary-100 rounded-xl transition-colors"
+                        class="p-2.5 text-muted hover:text-qs-accent hover:bg-qs-accent-soft rounded-xl transition-colors"
                         title="Share game"
                         aria-label="Share game"
                       >
@@ -391,7 +390,7 @@ import {
                       </button>
                       <button
                         (click)="deleteGame(game.id)"
-                        class="p-2.5 text-muted hover:text-red-600 hover:bg-red-100 rounded-xl transition-colors"
+                        class="p-2.5 text-muted hover:text-qs-bad hover:bg-qs-bad-soft rounded-xl transition-colors"
                         title="Delete game"
                         aria-label="Delete game"
                       >
@@ -422,24 +421,24 @@ import {
 
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             @for (game of joinedGames(); track game.id) {
-              <div class="bg-card rounded-2xl shadow-sm hover:shadow-md transition-all overflow-hidden group border border-card border-l-4 border-l-secondary-500">
+              <div class="bg-card rounded-2xl shadow-sm hover:shadow-md transition-all overflow-hidden group border border-card border-l-4 border-l-qs-accent">
                 <!-- Game Header -->
-                <div class="bg-control dark:bg-gradient-to-r dark:from-header-accent dark:to-header p-4">
+                <div class="bg-qs-panel-2 p-4">
                   <div class="flex items-center justify-between mb-2">
                     <h3 class="font-bold text-heading dark:text-white truncate">{{ game.name }}</h3>
-                    <span class="flex items-center gap-1 text-xs bg-secondary-100 text-secondary-700 px-2 py-1 rounded-full dark:bg-secondary-500/20 dark:text-secondary-300">
+                    <span class="flex items-center gap-1 text-xs bg-qs-accent-soft text-qs-accent px-2 py-1 rounded-full dark:bg-qs-accent/20 text-qs-accent">
                       <ng-icon name="heroUserGroup" class="text-xs"></ng-icon>
                       Joined
                     </span>
                   </div>
-                  <p class="text-sm text-muted dark:text-primary-300">
+                  <p class="text-sm text-muted">
                     @if (game.homeTeam && game.awayTeam) {
                       {{ game.awayTeam }} vs {{ game.homeTeam }}
                     } @else {
                       <span class="italic">No teams set</span>
                     }
                   </p>
-                  <p class="text-xs text-muted dark:text-primary-400 mt-1">
+                  <p class="text-xs text-muted mt-1">
                     Hosted by {{ game.ownerName }}
                   </p>
                 </div>
@@ -454,7 +453,7 @@ import {
                     </div>
                     <div class="h-2 bg-control rounded-full overflow-hidden">
                       <div
-                        class="h-full bg-gradient-to-r from-secondary-400 to-secondary-500 rounded-full transition-all duration-500"
+                        class="h-full bg-qs-accent rounded-full transition-all duration-500"
                         [style.width.%]="game.squaresFilled"
                       ></div>
                     </div>
@@ -467,7 +466,7 @@ import {
                     </div>
                     <div class="h-2 bg-control rounded-full overflow-hidden">
                       <div
-                        class="h-full bg-green-500 rounded-full transition-all duration-500"
+                        class="h-full bg-qs-ok rounded-full transition-all duration-500"
                         [style.width.%]="game.totalPot > 0 ? (game.collected / game.totalPot) * 100 : 0"
                       ></div>
                     </div>
@@ -487,13 +486,13 @@ import {
                   <div class="flex items-center gap-2">
                     <button
                       (click)="openGame(game.id)"
-                      class="flex-1 px-4 py-2.5 bg-secondary-500 hover:bg-secondary-600 text-white rounded-xl font-medium transition-colors"
+                      class="qs-btn qs-btn-primary flex-1"
                     >
                       Open Game
                     </button>
                     <button
                       (click)="shareGame(game.id)"
-                      class="p-2.5 text-muted hover:text-secondary-600 hover:bg-secondary-100 rounded-xl transition-colors"
+                      class="p-2.5 text-muted hover:text-qs-accent hover:bg-qs-accent-soft rounded-xl transition-colors"
                       title="Share game"
                       aria-label="Share game"
                     >
@@ -560,7 +559,7 @@ import {
                 <label class="block text-sm font-semibold text-label mb-3">Select Game</label>
                 @if (isLoadingEspnGames()) {
                   <div class="flex items-center justify-center py-8">
-                    <svg class="animate-spin h-6 w-6 text-secondary-500" viewBox="0 0 24 24">
+                    <svg class="animate-spin h-6 w-6 text-qs-accent" viewBox="0 0 24 24">
                       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
                       <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
                     </svg>
@@ -571,20 +570,20 @@ import {
                     <button
                       (click)="selectEspnGame('')"
                       [class]="selectedEspnGameId === ''
-                        ? 'p-4 border-2 border-secondary-500 bg-secondary-100 rounded-xl text-left transition-all'
+                        ? 'p-4 border-2 border-qs-accent bg-qs-accent-soft rounded-xl text-left transition-all'
                         : 'p-4 border-2 border-default hover:border-hover rounded-xl text-left transition-all'"
                     >
                       <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-lg bg-control flex items-center justify-center"
-                          [class.bg-secondary-200]="selectedEspnGameId === ''">
+                          [class.bg-qs-accent-soft]="selectedEspnGameId === ''">
                           <ng-icon name="heroPencilSquare" class="text-lg text-muted"
-                            [class.text-secondary-700]="selectedEspnGameId === ''"></ng-icon>
+                            [class.text-qs-accent]="selectedEspnGameId === ''"></ng-icon>
                         </div>
                         <div>
                           <p class="font-semibold"
-                            [class]="selectedEspnGameId === '' ? 'text-secondary-900' : 'text-heading'">Manual Scores</p>
+                            [class]="selectedEspnGameId === '' ? 'text-qs-ink' : 'text-heading'">Manual Scores</p>
                           <p class="text-xs"
-                            [class]="selectedEspnGameId === '' ? 'text-secondary-700' : 'text-muted'">Enter scores yourself</p>
+                            [class]="selectedEspnGameId === '' ? 'text-qs-accent' : 'text-muted'">Enter scores yourself</p>
                         </div>
                       </div>
                     </button>
@@ -595,7 +594,7 @@ import {
                       <button
                         (click)="selectEspnGame(game.id)"
                         [class]="selectedEspnGameId === game.id
-                          ? 'p-4 border-2 border-secondary-500 bg-secondary-100 rounded-xl text-left transition-all'
+                          ? 'p-4 border-2 border-qs-accent bg-qs-accent-soft rounded-xl text-left transition-all'
                           : 'p-4 border-2 border-default hover:border-hover rounded-xl text-left transition-all'"
                       >
                         <div class="flex items-center justify-between mb-2">
@@ -605,14 +604,14 @@ import {
                           </span>
                         </div>
                         <p class="font-semibold text-sm"
-                          [class]="selectedEspnGameId === game.id ? 'text-secondary-900' : 'text-heading'">{{ game.awayTeam }} &#64; {{ game.homeTeam }}</p>
+                          [class]="selectedEspnGameId === game.id ? 'text-qs-ink' : 'text-heading'">{{ game.awayTeam }} &#64; {{ game.homeTeam }}</p>
                         @if (game.status === 'pre' && game.date) {
                           <p class="text-xs mt-1"
-                            [class]="selectedEspnGameId === game.id ? 'text-secondary-700' : 'text-muted'">{{ formatGameDate(game.date) }}</p>
+                            [class]="selectedEspnGameId === game.id ? 'text-qs-accent' : 'text-muted'">{{ formatGameDate(game.date) }}</p>
                         }
                         @if (game.status !== 'pre') {
                           <p class="text-xs mt-1"
-                            [class]="selectedEspnGameId === game.id ? 'text-secondary-700' : 'text-muted'">{{ game.awayScore }} - {{ game.homeScore }}</p>
+                            [class]="selectedEspnGameId === game.id ? 'text-qs-accent' : 'text-muted'">{{ game.awayScore }} - {{ game.homeScore }}</p>
                         }
                       </button>
                     }
@@ -628,7 +627,7 @@ import {
                     <button
                       (click)="selectPrice(price)"
                       [class]="newGamePrice === price
-                        ? 'px-5 py-2.5 bg-secondary-500 text-white rounded-lg font-medium transition-colors'
+                        ? 'px-5 py-2.5 bg-qs-accent text-white rounded-lg font-medium transition-colors'
                         : 'px-5 py-2.5 bg-control text-default hover:bg-control-hover rounded-lg font-medium transition-colors'"
                     >
                       {{ price === 0 ? 'Free' : '$' + price }}
@@ -650,16 +649,16 @@ import {
 
               <!-- Game Name -->
               <div>
-                <label class="block text-sm font-semibold text-label mb-3">Game Name <span class="text-red-500">*</span></label>
+                <label class="block text-sm font-semibold text-label mb-3">Game Name <span class="text-qs-bad">*</span></label>
                 <input
                   type="text"
                   [(ngModel)]="newGameName"
                   placeholder="e.g., Super Bowl Party 2024"
-                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
-                  [class.border-red-500]="gameNameError()"
+                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-qs-accent focus:ring-2 focus:ring-qs-accent-soft outline-none text-default"
+                  [class.border-qs-bad]="gameNameError()"
                 />
                 @if (gameNameError()) {
-                  <p class="mt-2 text-sm text-red-600 dark:text-red-400">Game name is required</p>
+                  <p class="mt-2 text-sm text-qs-bad">Game name is required</p>
                 }
               </div>
 
@@ -673,7 +672,7 @@ import {
                   type="text"
                   [(ngModel)]="newGameVenmoUsername"
                   placeholder="@username"
-                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
+                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-qs-accent focus:ring-2 focus:ring-qs-accent-soft outline-none text-default"
                 />
               </div>
 
@@ -688,7 +687,7 @@ import {
                   type="email"
                   [(ngModel)]="newGamePaymentManager"
                   placeholder="Enter their email address"
-                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
+                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-qs-accent focus:ring-2 focus:ring-qs-accent-soft outline-none text-default"
                 />
               </div>
             </div>
@@ -697,14 +696,14 @@ import {
             <div class="flex items-center justify-end gap-3 p-6 border-t border-default bg-input">
               <button
                 (click)="showCreateModal.set(false)"
-                class="px-6 py-2.5 text-muted hover:bg-control rounded-xl font-medium transition-colors"
+                class="qs-btn qs-btn-ghost text-qs-muted"
               >
                 Cancel
               </button>
               <button
                 (click)="createGame()"
                 [disabled]="isCreating()"
-                class="px-8 py-2.5 bg-secondary-500 hover:bg-secondary-600 disabled:opacity-50 text-white rounded-xl font-bold transition-colors"
+                class="qs-btn qs-btn-primary px-8"
               >
                 @if (isCreating()) {
                   <span class="flex items-center gap-2">
@@ -746,7 +745,7 @@ import {
                   </code>
                   <button
                     (click)="copyToClipboard(shareModalGameId()!)"
-                    class="p-4 bg-secondary-500 hover:bg-secondary-600 text-white rounded-xl transition-colors"
+                    class="p-4 bg-qs-accent hover:bg-qs-accent-hover text-white rounded-xl transition-colors"
                   >
                     Copy
                   </button>
@@ -764,7 +763,7 @@ import {
                   />
                   <button
                     (click)="copyToClipboard(getShareLink(shareModalGameId()!))"
-                    class="px-4 py-3 bg-secondary-500 hover:bg-secondary-600 text-white rounded-xl transition-colors"
+                    class="px-4 py-3 bg-qs-accent hover:bg-qs-accent-hover text-white rounded-xl transition-colors"
                   >
                     Copy
                   </button>
@@ -773,7 +772,7 @@ import {
 
               <!-- Copied notification -->
               @if (copiedToClipboard()) {
-                <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-2 rounded-lg text-sm text-center dark:bg-green-900/30 dark:border-green-800 dark:text-green-400">
+                <div class="bg-qs-ok-soft border border-qs-ok-soft text-qs-ok px-4 py-2 rounded-lg text-sm text-center dark:bg-qs-tile-ok/30 dark:border-qs-ok dark:text-qs-ok">
                   Copied to clipboard!
                 </div>
               }
@@ -782,7 +781,7 @@ import {
             <div class="p-6 border-t border-default bg-input rounded-b-2xl">
               <button
                 (click)="shareModalGameId.set(null)"
-                class="w-full px-4 py-3 bg-control hover:bg-control-hover text-default rounded-xl font-medium transition-colors"
+                class="qs-btn qs-btn-secondary w-full"
               >
                 Done
               </button>
@@ -831,7 +830,7 @@ import {
                 <label class="block text-sm font-semibold text-label mb-2">ESPN Game</label>
                 @if (isLoadingEditEspnGames()) {
                   <div class="flex items-center justify-center py-6">
-                    <svg class="animate-spin h-6 w-6 text-secondary-500" viewBox="0 0 24 24">
+                    <svg class="animate-spin h-6 w-6 text-qs-accent" viewBox="0 0 24 24">
                       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
                       <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
                     </svg>
@@ -842,20 +841,20 @@ import {
                       <button
                         (click)="selectEditEspnGame(game.id)"
                         [class]="editEspnGameId === game.id
-                          ? 'p-3 border-2 border-secondary-500 bg-secondary-100 rounded-xl text-left transition-all'
+                          ? 'p-3 border-2 border-qs-accent bg-qs-accent-soft rounded-xl text-left transition-all'
                           : 'p-3 border-2 border-default hover:border-hover rounded-xl text-left transition-all'"
                       >
                         <div class="flex items-center justify-between">
                           <div>
                             <p class="font-semibold text-sm"
-                              [class]="editEspnGameId === game.id ? 'text-secondary-900' : 'text-heading'">{{ game.awayTeam }} &#64; {{ game.homeTeam }}</p>
+                              [class]="editEspnGameId === game.id ? 'text-qs-ink' : 'text-heading'">{{ game.awayTeam }} &#64; {{ game.homeTeam }}</p>
                             @if (game.status === 'pre' && game.date) {
                               <p class="text-xs"
-                                [class]="editEspnGameId === game.id ? 'text-secondary-700' : 'text-muted'">{{ formatGameDate(game.date) }}</p>
+                                [class]="editEspnGameId === game.id ? 'text-qs-accent' : 'text-muted'">{{ formatGameDate(game.date) }}</p>
                             }
                             @if (game.status !== 'pre') {
                               <p class="text-xs"
-                                [class]="editEspnGameId === game.id ? 'text-secondary-700' : 'text-muted'">{{ game.awayScore }} - {{ game.homeScore }}</p>
+                                [class]="editEspnGameId === game.id ? 'text-qs-accent' : 'text-muted'">{{ game.awayScore }} - {{ game.homeScore }}</p>
                             }
                           </div>
                           <span class="text-xs font-medium px-2 py-0.5 rounded-full"
@@ -876,7 +875,7 @@ import {
                   type="text"
                   [(ngModel)]="editGameName"
                   placeholder="e.g., Super Bowl Party 2024"
-                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
+                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-qs-accent focus:ring-2 focus:ring-qs-accent-soft outline-none text-default"
                 />
               </div>
 
@@ -889,7 +888,7 @@ import {
                     type="number"
                     [(ngModel)]="editGamePrice"
                     min="0"
-                    class="flex-1 px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
+                    class="flex-1 px-4 py-3 bg-input border border-input rounded-xl focus:border-qs-accent focus:ring-2 focus:ring-qs-accent-soft outline-none text-default"
                   />
                 </div>
               </div>
@@ -901,7 +900,7 @@ import {
                   type="text"
                   [(ngModel)]="editGameVenmoUsername"
                   placeholder="@username"
-                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
+                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-qs-accent focus:ring-2 focus:ring-qs-accent-soft outline-none text-default"
                 />
               </div>
 
@@ -913,11 +912,11 @@ import {
                 </label>
                 <p class="text-xs text-muted mb-2">Assign a player to help manage payments. They can mark who has paid.</p>
                 @if (editingGame()?.managerId) {
-                  <div class="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-xl dark:bg-green-900/30 dark:border-green-800">
-                    <span class="flex-1 text-green-700 dark:text-green-400">{{ editingGame()?.managerName || editingGame()?.managerEmail || 'Assigned' }}</span>
+                  <div class="flex items-center gap-2 p-3 bg-qs-ok-soft border border-qs-ok-soft rounded-xl dark:bg-qs-tile-ok/30 dark:border-qs-ok">
+                    <span class="flex-1 text-qs-ok dark:text-qs-ok">{{ editingGame()?.managerName || editingGame()?.managerEmail || 'Assigned' }}</span>
                     <button
                       (click)="removeManager()"
-                      class="px-3 py-1 text-sm bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-400"
+                      class="qs-btn qs-btn-danger"
                     >
                       Remove
                     </button>
@@ -931,7 +930,7 @@ import {
                       (focus)="onManagerSearchFocus()"
                       (keydown)="onManagerSearchKeydown($event)"
                       placeholder="Search players..."
-                      class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none text-default"
+                      class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-qs-accent focus:ring-2 focus:ring-qs-accent-soft outline-none text-default"
                       autocomplete="off"
                     />
                     @if (showManagerDropdown() && managerSearchResults().length > 0) {
@@ -941,7 +940,7 @@ import {
                             (mousedown)="assignManagerFromPlayer(player)"
                             (mouseenter)="selectedManagerIndex.set(i)"
                             [class]="i === selectedManagerIndex()
-                              ? 'w-full px-4 py-3 text-left text-default bg-secondary-100 dark:bg-secondary-900/30 transition-colors'
+                              ? 'w-full px-4 py-3 text-left text-default bg-qs-accent-soft dark:bg-qs-accent/30 transition-colors'
                               : 'w-full px-4 py-3 text-left text-default hover:bg-control transition-colors'"
                           >
                             {{ player.name }}
@@ -959,14 +958,14 @@ import {
             <div class="flex items-center justify-end gap-3 p-6 border-t border-default bg-input rounded-b-2xl">
               <button
                 (click)="closeEditModal()"
-                class="px-6 py-2.5 text-muted hover:bg-control rounded-xl font-medium transition-colors"
+                class="qs-btn qs-btn-ghost text-qs-muted"
               >
                 Cancel
               </button>
               <button
                 (click)="saveGameEdits()"
                 [disabled]="isSavingGame()"
-                class="px-8 py-2.5 bg-secondary-500 hover:bg-secondary-600 disabled:opacity-50 text-white rounded-xl font-bold transition-colors"
+                class="qs-btn qs-btn-primary px-8"
               >
                 @if (isSavingGame()) {
                   Saving...
@@ -984,7 +983,8 @@ import {
       <app-upgrade-pass-dialog (dismissed)="closeUpgrade()" />
     }
   `,
-  styles: [`
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styles: [`
     @keyframes modal-in {
       from {
         opacity: 0;
@@ -1205,10 +1205,10 @@ export class DashboardComponent implements OnInit {
 
   getGameStatusClass(status: string): string {
     switch (status) {
-      case 'pre': return 'bg-primary-200 text-primary-700';
-      case 'in': return 'bg-red-100 text-red-700';
-      case 'post': return 'bg-green-100 text-green-700';
-      default: return 'bg-primary-200 text-primary-700';
+      case 'pre': return 'bg-qs-panel-2 text-qs-muted';
+      case 'in': return 'bg-qs-live-fill text-qs-tile';
+      case 'post': return 'bg-qs-ok-soft text-qs-ok';
+      default: return 'bg-qs-panel-2 text-qs-muted';
     }
   }
 

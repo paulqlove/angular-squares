@@ -1,17 +1,17 @@
-import { Component, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
+
 import { FormsModule } from '@angular/forms';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroCheck, heroXMark } from '@ng-icons/heroicons/outline';
 
 @Component({
-  selector: 'app-payment-dialog',
-  standalone: true,
-  imports: [CommonModule, FormsModule, NgIconComponent],
-  providers: [
-    provideIcons({ heroCheck, heroXMark })
-  ],
-  templateUrl: './payment-dialog.component.html'
+    selector: 'app-payment-dialog',
+    imports: [FormsModule, NgIconComponent],
+    providers: [
+        provideIcons({ heroCheck, heroXMark })
+    ],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    templateUrl: './payment-dialog.component.html'
 })
 export class PaymentDialogComponent {
   @Output() onPaidStatusChange = new EventEmitter<string[]>();

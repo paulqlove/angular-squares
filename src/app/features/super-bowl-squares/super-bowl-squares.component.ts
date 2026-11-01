@@ -1,5 +1,5 @@
-import { Component, OnInit, OnDestroy, ViewChild, HostListener, signal, inject, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy, ViewChild, HostListener, signal, inject, effect, ChangeDetectionStrategy } from '@angular/core';
+
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GameService, GameData, EspnLiveSnapshot } from '../../core/services/game.service';
@@ -38,10 +38,8 @@ import { BoxScoreComponent } from './components/box-score/box-score.component';
 import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.component';
 
 @Component({
-  selector: 'app-super-bowl-squares',
-  standalone: true,
-  imports: [
-    CommonModule,
+    selector: 'app-super-bowl-squares',
+    imports: [
     FormsModule,
     NgIconComponent,
     GameBoardComponent,
@@ -55,25 +53,26 @@ import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.co
     ProbabilityHeatmapComponent,
     BoxScoreComponent,
     AuthModalComponent
-  ],
-  providers: [
-    provideIcons({
-      heroLockOpen,
-      heroLockClosed,
-      heroChevronDown,
-      heroChevronRight,
-      heroTrash,
-      heroShare,
-      heroArrowLeft,
-      heroClipboard,
-      heroPencilSquare,
-      heroXMark,
-      heroQuestionMarkCircle,
-      heroCog6Tooth
-    })
-  ],
-  templateUrl: './super-bowl-squares.component.html',
-  styleUrls: ['./super-bowl-squares.component.scss']
+],
+    providers: [
+        provideIcons({
+            heroLockOpen,
+            heroLockClosed,
+            heroChevronDown,
+            heroChevronRight,
+            heroTrash,
+            heroShare,
+            heroArrowLeft,
+            heroClipboard,
+            heroPencilSquare,
+            heroXMark,
+            heroQuestionMarkCircle,
+            heroCog6Tooth
+        })
+    ],
+    templateUrl: './super-bowl-squares.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrls: ['./super-bowl-squares.component.scss']
 })
 export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   @ViewChild('paymentDialog') paymentDialog!: PaymentDialogComponent;
@@ -102,7 +101,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   availableColors = [
     'bg-red-200',
     'bg-blue-200',
-    'bg-green-200',
+    'bg-qs-ok-soft',
     'bg-yellow-200',
     'bg-purple-200',
     'bg-pink-200',
@@ -111,15 +110,15 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     'bg-teal-200',
     'bg-cyan-200',
     'bg-lime-200',
-    'bg-emerald-200',
-    'bg-sky-200',
+    'bg-qs-accent-soft',
+    'bg-qs-accent-soft',
     'bg-violet-200',
     'bg-fuchsia-200',
     'bg-rose-200',
     'bg-amber-200',
     'bg-red-100',
     'bg-blue-100',
-    'bg-green-100',
+    'bg-qs-ok-soft',
     'bg-yellow-100',
     'bg-purple-100',
     'bg-pink-100',
@@ -128,8 +127,8 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     'bg-teal-100',
     'bg-cyan-100',
     'bg-lime-100',
-    'bg-emerald-100',
-    'bg-sky-100'
+    'bg-qs-accent-soft',
+    'bg-qs-accent-soft'
   ];
 
   quarterPayouts = {

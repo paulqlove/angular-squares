@@ -1,12 +1,11 @@
-import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
+
 import { SQUARES_PROBABILITIES } from '../../utils/probability.utils';
 
 @Component({
-  selector: 'app-probability-heatmap',
-  standalone: true,
-  imports: [CommonModule],
-  template: `
+    selector: 'app-probability-heatmap',
+    imports: [],
+    template: `
     <div class="relative">
       <!-- Grid Container -->
       <div class="grid-container">
@@ -53,7 +52,8 @@ import { SQUARES_PROBABILITIES } from '../../utils/probability.utils';
       </div>
     </div>
   `,
-  styleUrls: ['./probability-heatmap.component.scss']
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrls: ['./probability-heatmap.component.scss']
 })
 export class ProbabilityHeatmapComponent {
   @Input() homeNumbers: (number | null)[] = [];
@@ -81,8 +81,8 @@ export class ProbabilityHeatmapComponent {
     // Enhanced color scale with better contrast
     if (prob >= 3.0) return 'bg-blue-300';      // Darker blue
     if (prob >= 2.0) return 'bg-blue-200';
-    if (prob >= 1.5) return 'bg-green-300';     // Darker green
-    if (prob >= 1.0) return 'bg-green-200';
+    if (prob >= 1.5) return 'bg-qs-ok-soft';     // Darker green
+    if (prob >= 1.0) return 'bg-qs-ok-soft';
     if (prob >= 0.5) return 'bg-yellow-200';    // More visible yellow
     return 'bg-red-100';                        // Light red for lowest
   }

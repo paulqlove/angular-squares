@@ -1,24 +1,24 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { SeoService } from '../../core/services/seo.service';
 import { BreadcrumbsComponent } from '../../shared/breadcrumbs.component';
 import { ContentShellComponent } from './content-shell.component';
 
 @Component({
-  selector: 'app-printable-board',
-  standalone: true,
-  imports: [RouterLink, ContentShellComponent, BreadcrumbsComponent],
-  template: `
+    selector: 'app-printable-board',
+    imports: [RouterLink, ContentShellComponent, BreadcrumbsComponent],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    template: `
     <app-content-shell [wide]="true">
       <div class="no-print">
         <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
       </div>
       <article>
         <header class="no-print max-w-3xl">
-          <p class="text-sm font-semibold uppercase tracking-wide text-emerald-800 dark:text-emerald-300">
+          <p class="qs-eyebrow">
             Free grid
           </p>
-          <h1 class="mt-2 text-3xl font-extrabold tracking-tight text-heading sm:text-4xl">
+          <h1 class="qs-title mt-3 text-3xl sm:text-5xl">
             Printable football squares
           </h1>
           <p class="mt-4 text-lg leading-relaxed text-muted">
@@ -28,7 +28,7 @@ import { ContentShellComponent } from './content-shell.component';
           <div class="mt-6 flex flex-col gap-3 sm:flex-row">
             <button
               type="button"
-              class="inline-flex min-h-11 items-center justify-center rounded-md bg-emerald-700 px-4 font-semibold text-white hover:bg-emerald-800"
+              class="inline-flex min-h-11 items-center justify-center rounded-md bg-qs-accent px-4 font-semibold text-white hover:bg-qs-accent-hover"
               (click)="printBoard()"
             >
               Print this board
@@ -105,36 +105,36 @@ import { ContentShellComponent } from './content-shell.component';
           <ul class="mt-4 grid gap-3 sm:grid-cols-2">
             <li>
               <a routerLink="/how-to-play" class="block rounded-xl border border-default bg-card p-4 hover:bg-card-hover">
-                <span class="font-semibold text-emerald-800 underline decoration-emerald-800/40 underline-offset-2 dark:text-emerald-300">How to play</span>
+                <span class="font-semibold text-qs-accent underline decoration-qs-accent/40 underline-offset-2 text-qs-accent">How to play</span>
                 <span class="mt-1 block text-sm text-muted">The same rules, on a live board.</span>
               </a>
             </li>
             <li>
               <a routerLink="/" class="block rounded-xl border border-default bg-card p-4 hover:bg-card-hover">
-                <span class="font-semibold text-emerald-800 underline decoration-emerald-800/40 underline-offset-2 dark:text-emerald-300">Homepage</span>
+                <span class="font-semibold text-qs-accent underline decoration-qs-accent/40 underline-offset-2 text-qs-accent">Homepage</span>
                 <span class="mt-1 block text-sm text-muted">See a sample board and start a game.</span>
               </a>
             </li>
             <li>
               <a routerLink="/super-bowl-squares" class="block rounded-xl border border-default bg-card p-4 hover:bg-card-hover">
-                <span class="font-semibold text-emerald-800 underline decoration-emerald-800/40 underline-offset-2 dark:text-emerald-300">Super Bowl squares</span>
+                <span class="font-semibold text-qs-accent underline decoration-qs-accent/40 underline-offset-2 text-qs-accent">Super Bowl squares</span>
                 <span class="mt-1 block text-sm text-muted">The February 14, 2027 party board.</span>
               </a>
             </li>
             <li>
               <a routerLink="/blog" class="block rounded-xl border border-default bg-card p-4 hover:bg-card-hover">
-                <span class="font-semibold text-emerald-800 underline decoration-emerald-800/40 underline-offset-2 dark:text-emerald-300">Blog</span>
+                <span class="font-semibold text-qs-accent underline decoration-qs-accent/40 underline-offset-2 text-qs-accent">Blog</span>
                 <span class="mt-1 block text-sm text-muted">Paper versus a live board, when that post is ready.</span>
               </a>
             </li>
           </ul>
         </section>
 
-        <section class="no-print mt-10 rounded-2xl bg-emerald-700 px-5 py-6 text-white">
-          <a routerLink="/dashboard" class="inline-flex min-h-11 items-center rounded-md bg-white px-4 font-semibold text-emerald-900 hover:bg-emerald-50">
+        <section class="no-print mt-10 rounded-2xl bg-qs-accent px-5 py-6 text-white">
+          <a routerLink="/dashboard" class="inline-flex min-h-11 items-center rounded-md bg-white px-4 font-semibold text-qs-accent hover:bg-qs-accent-soft">
             Skip the paper and run it live
           </a>
-          <p class="mt-3 text-sm leading-relaxed text-emerald-50">
+          <p class="mt-3 text-sm leading-relaxed text-qs-on-accent">
             Or keep both. The printable is free, and so is the online board.
           </p>
         </section>

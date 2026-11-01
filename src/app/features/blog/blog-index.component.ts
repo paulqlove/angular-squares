@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { SeoService } from '../../core/services/seo.service';
 import { BreadcrumbsComponent } from '../../shared/breadcrumbs.component';
@@ -6,20 +6,20 @@ import { ContentShellComponent } from '../content/content-shell.component';
 import { BLOG_POSTS } from './blog-posts.generated';
 
 @Component({
-  selector: 'app-blog-index',
-  standalone: true,
-  imports: [RouterLink, ContentShellComponent, BreadcrumbsComponent],
-  template: `
+    selector: 'app-blog-index',
+    imports: [RouterLink, ContentShellComponent, BreadcrumbsComponent],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    template: `
     <app-content-shell>
       <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
       <header>
-        <h1 class="text-3xl font-extrabold tracking-tight text-heading sm:text-4xl">Blog</h1>
+        <h1 class="qs-title text-3xl sm:text-5xl">Blog</h1>
         <p class="mt-4 text-lg leading-relaxed text-muted">
           Notes on football squares for friends, fans, and game-day parties.
           Posts stay free of logos, and the game never handles money.
         </p>
         <p class="mt-3 text-sm">
-          <a class="font-semibold text-emerald-800 underline underline-offset-2 dark:text-emerald-300" href="/rss.xml">
+          <a class="font-semibold text-qs-accent underline underline-offset-2 text-qs-accent" href="/rss.xml">
             Subscribe with RSS
           </a>
         </p>
@@ -37,7 +37,7 @@ import { BLOG_POSTS } from './blog-posts.generated';
               <h2 class="mt-2 text-2xl font-bold text-heading">
                 <a
                   [routerLink]="['/blog', post.slug]"
-                  class="text-emerald-800 underline decoration-emerald-800/30 underline-offset-2 hover:decoration-emerald-800 dark:text-emerald-300"
+                  class="text-qs-accent underline decoration-qs-accent/30 underline-offset-2 hover:decoration-qs-accent text-qs-accent"
                 >
                   {{ post.title }}
                 </a>

@@ -1,12 +1,12 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { BreadcrumbItem } from '../core/services/seo.service';
 
 @Component({
-  selector: 'app-breadcrumbs',
-  standalone: true,
-  imports: [RouterLink],
-  template: `
+    selector: 'app-breadcrumbs',
+    imports: [RouterLink],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    template: `
     <nav aria-label="Breadcrumb" class="mb-6 text-sm">
       <ol class="flex flex-wrap items-center gap-x-2 gap-y-1">
         @for (item of items; track item.path; let last = $last) {
@@ -14,7 +14,7 @@ import { BreadcrumbItem } from '../core/services/seo.service';
             @if (!last) {
               <a
                 [routerLink]="item.path"
-                class="inline-block py-3 -my-3 text-emerald-800 underline decoration-emerald-800/40 underline-offset-2 hover:decoration-emerald-800 dark:text-emerald-300 dark:decoration-emerald-300/40"
+                class="inline-block py-3 -my-3 text-qs-accent underline decoration-qs-accent/40 underline-offset-2 hover:decoration-qs-accent text-qs-accent dark:decoration-qs-accent/40"
               >
                 {{ item.name }}
               </a>

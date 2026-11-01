@@ -1,12 +1,12 @@
-import { Component, inject, HostListener, computed, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, HostListener, computed, effect, ChangeDetectionStrategy } from '@angular/core';
+
 import { WalkthroughService } from '../../../core/services/walkthrough.service';
 
 @Component({
-  selector: 'app-walkthrough',
-  standalone: true,
-  imports: [CommonModule],
-  template: `
+    selector: 'app-walkthrough',
+    imports: [],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    template: `
     @if (walkthroughService.isActive() && walkthroughService.currentStep()) {
       <div class="fixed inset-0 z-[300]" (click)="onOverlayClick($event)">
         <!-- Overlay with cutout -->
@@ -18,7 +18,7 @@ import { WalkthroughService } from '../../../core/services/walkthrough.service';
         <!-- Pulse ring around target -->
         @if (targetRect()) {
           <div
-            class="absolute border-2 border-secondary-500 rounded-lg pointer-events-none animate-pulse-subtle"
+            class="absolute border-2 border-qs-accent rounded-lg pointer-events-none animate-pulse-subtle"
             [style.left.px]="targetRect()!.left - 4"
             [style.top.px]="targetRect()!.top - 4"
             [style.width.px]="targetRect()!.width + 8"
@@ -44,7 +44,7 @@ import { WalkthroughService } from '../../../core/services/walkthrough.service';
             @for (step of walkthroughService.steps(); track $index) {
               <div
                 class="w-2 h-2 rounded-full transition-colors"
-                [class.bg-secondary-500]="$index === walkthroughService.currentStepIndex()"
+                [class.bg-qs-accent]="$index === walkthroughService.currentStepIndex()"
                 [class.bg-control]="$index !== walkthroughService.currentStepIndex()"
               ></div>
             }
@@ -62,14 +62,14 @@ import { WalkthroughService } from '../../../core/services/walkthrough.service';
             @if (walkthroughService.currentStepIndex() > 0) {
               <button
                 (click)="previous()"
-                class="px-4 py-2 text-sm font-medium bg-control hover:bg-control-hover text-default rounded-lg transition-colors"
+                class="qs-btn qs-btn-secondary"
               >
                 Back
               </button>
             }
             <button
               (click)="next()"
-              class="px-4 py-2 text-sm font-medium bg-secondary-500 hover:bg-secondary-600 text-white rounded-lg transition-colors"
+              class="qs-btn qs-btn-primary"
             >
               {{ isLastStep() ? 'Done' : 'Next' }}
             </button>

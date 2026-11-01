@@ -1,13 +1,13 @@
-import { Component, Input, Output, EventEmitter, inject, OnChanges, SimpleChanges, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, Output, EventEmitter, inject, OnChanges, SimpleChanges, signal, ChangeDetectionStrategy } from '@angular/core';
+
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
-  selector: 'app-auth-modal',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  template: `
+    selector: 'app-auth-modal',
+    imports: [FormsModule],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    template: `
     @if (isOpen && !checkingAuth()) {
       <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
         <div class="w-full max-w-md bg-dialog shadow-2xl rounded-2xl p-8">
@@ -20,13 +20,13 @@ import { AuthService } from '../../../core/services/auth.service';
                 type="text"
                 [(ngModel)]="guestName"
                 placeholder="Enter your name"
-                class="w-full px-4 py-3 border-2 border-default rounded-lg focus:border-secondary-500 focus:ring-2 focus:ring-secondary-100 outline-none transition-all bg-input text-default"
+                class="w-full px-4 py-3 border-2 border-qs-line-strong rounded-btn outline-none transition-all bg-qs-panel-2 text-qs-ink"
                 (keyup.enter)="continueAsGuest()"
               />
               <button
                 (click)="continueAsGuest()"
                 [disabled]="!guestName.trim()"
-                class="w-full px-6 py-3 bg-secondary-500 hover:bg-secondary-600 text-white rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                class="qs-btn qs-btn-primary w-full"
               >
                 Join as Guest
               </button>
@@ -49,7 +49,7 @@ import { AuthService } from '../../../core/services/auth.service';
             <button
               (click)="signInWithGoogle()"
               [disabled]="authService.isLoading()"
-              class="w-full flex items-center justify-center gap-3 px-6 py-3 bg-control border-2 border-default rounded-lg hover:bg-control-hover transition-all font-medium text-default disabled:opacity-50"
+              class="qs-btn qs-btn-secondary w-full gap-3"
             >
               <svg class="w-5 h-5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>

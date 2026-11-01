@@ -1,5 +1,5 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
+
 import { calculateWinProbability } from '../../utils/probability.utils';
 import { TooltipDirective } from '../../../../shared/directives/tooltip.directive';
 
@@ -15,11 +15,11 @@ type PlayerEntry = {
 }
 
 @Component({
-  selector: 'app-players-list',
-  standalone: true,
-  imports: [CommonModule, TooltipDirective],
-  templateUrl: './players-list.component.html',
-  styleUrls: ['./players-list.component.scss']
+    selector: 'app-players-list',
+    imports: [TooltipDirective],
+    templateUrl: './players-list.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrls: ['./players-list.component.scss']
 })
 export class PlayersListComponent {
   @Input() playerStats!: { [key: string]: PlayerStat };

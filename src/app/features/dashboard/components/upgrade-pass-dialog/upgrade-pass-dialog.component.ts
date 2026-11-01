@@ -10,6 +10,7 @@ import {
   inject,
   signal,
   PLATFORM_ID,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -24,10 +25,9 @@ import {
 } from '../../../../core/utils/board-activity';
 
 @Component({
-  selector: 'app-upgrade-pass-dialog',
-  standalone: true,
-  imports: [FormsModule],
-  template: `
+    selector: 'app-upgrade-pass-dialog',
+    imports: [FormsModule],
+    template: `
     <div class="fixed inset-0 z-[400] overflow-y-auto bg-slate-950/75" (click)="dismiss()">
       <div class="flex min-h-full items-center justify-center p-3 sm:p-6">
         <div
@@ -36,7 +36,7 @@ import {
           aria-modal="true"
           aria-labelledby="upgrade-title"
           aria-describedby="upgrade-summary"
-          class="upgrade-dialog-in w-full max-w-lg rounded-2xl border border-default bg-dialog text-default shadow-2xl"
+          class="upgrade-dialog-in w-full max-w-lg rounded-card border border-qs-line bg-qs-panel text-qs-ink shadow-pop"
           (click)="$event.stopPropagation()"
         >
           <div class="flex items-start justify-between gap-3 border-b border-default p-4 sm:p-6">
@@ -65,7 +65,7 @@ import {
             <section class="rounded-xl border border-default p-3 sm:p-4" aria-labelledby="upgrade-pass-name">
               <p class="text-sm font-semibold uppercase tracking-wide text-label">Coming soon</p>
               <div class="mt-1 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                <h3 id="upgrade-pass-name" class="text-lg font-bold text-heading">Super Bowl Pass</h3>
+                <h3 id="upgrade-pass-name" class="text-lg font-bold text-heading">QuarterScore Big Game Pass</h3>
                 <p class="text-2xl font-bold text-heading">
                   $4.99
                   <span class="text-base font-semibold text-default">one-time</span>
@@ -80,7 +80,7 @@ import {
 
             @if (submitted()) {
               <p #status tabindex="-1" role="status" class="rounded-xl border border-default bg-input p-4 text-base text-default focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 dark:focus-visible:outline-white">
-                You're on the list. We'll email you when the pass is available.
+                You're on the list. We'll email you when Big Game Pass is available.
               </p>
             } @else {
               <form (ngSubmit)="submit()" novalidate class="space-y-3">
@@ -100,18 +100,18 @@ import {
                     [disabled]="isSubmitting()"
                     [attr.aria-invalid]="emailError() ? 'true' : 'false'"
                     [attr.aria-describedby]="emailError() ? 'upgrade-email-error upgrade-pass-note' : 'upgrade-pass-note'"
-                    class="min-h-11 w-full rounded-xl border border-slate-500 bg-input px-4 py-3 text-base text-default placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:border-secondary-800 focus:outline-none focus:ring-2 focus:ring-secondary-800 dark:border-slate-400 dark:focus:border-secondary-300 dark:focus:ring-secondary-300"
+                    class="min-h-11 w-full rounded-xl border border-slate-500 bg-input px-4 py-3 text-base text-default placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:border-qs-accent focus:outline-none focus:ring-2 focus:ring-qs-accent"
                     placeholder="you@example.com"
                   />
                   @if (emailError()) {
-                    <p id="upgrade-email-error" role="alert" class="mt-1.5 text-sm font-medium leading-5 text-red-800 dark:text-red-200">
+                    <p id="upgrade-email-error" role="alert" class="mt-1.5 text-sm font-medium leading-5 text-qs-bad">
                       {{ emailError() }}
                     </p>
                   }
                 </div>
                 <button
                   type="submit"
-                  class="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-secondary-800 px-4 py-3 text-base font-bold text-white hover:bg-secondary-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:opacity-60 dark:focus-visible:outline-white sm:w-auto"
+                  class="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-qs-accent px-4 py-3 text-base font-bold text-white hover:bg-qs-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:opacity-60 dark:focus-visible:outline-white sm:w-auto"
                   [disabled]="isSubmitting()"
                   [attr.aria-busy]="isSubmitting()"
                 >
@@ -134,7 +134,8 @@ import {
       </div>
     </div>
   `,
-  styles: [`
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styles: [`
     .upgrade-dialog-in {
       animation: upgrade-dialog-in 0.2s ease-out;
     }

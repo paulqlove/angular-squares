@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { SeoService } from '../../core/services/seo.service';
 import { BreadcrumbsComponent } from '../../shared/breadcrumbs.component';
@@ -7,10 +7,10 @@ import { BlogPost } from './blog-post.model';
 import { BLOG_POSTS } from './blog-posts.generated';
 
 @Component({
-  selector: 'app-blog-post',
-  standalone: true,
-  imports: [RouterLink, ContentShellComponent, BreadcrumbsComponent],
-  template: `
+    selector: 'app-blog-post',
+    imports: [RouterLink, ContentShellComponent, BreadcrumbsComponent],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    template: `
     <app-content-shell>
       <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
       @if (post) {
@@ -19,7 +19,7 @@ import { BLOG_POSTS } from './blog-posts.generated';
             <p class="text-sm text-muted">
               <time [attr.datetime]="post.date">{{ formatDate(post.date) }}</time>
             </p>
-            <h1 class="mt-2 text-3xl font-extrabold tracking-tight text-heading sm:text-4xl">
+            <h1 class="qs-title mt-3 text-3xl sm:text-5xl">
               {{ post.title }}
             </h1>
             <p class="mt-4 text-lg leading-relaxed text-muted">{{ post.description }}</p>
@@ -29,17 +29,17 @@ import { BLOG_POSTS } from './blog-posts.generated';
             Quarter Score never collects, holds, or pays out money.
           </p>
           <p class="mt-6">
-            <a routerLink="/blog" class="font-semibold text-emerald-800 underline underline-offset-2 dark:text-emerald-300">
+            <a routerLink="/blog" class="font-semibold text-qs-accent underline underline-offset-2 text-qs-accent">
               All posts
             </a>
           </p>
         </article>
       } @else {
         <article>
-          <h1 class="text-3xl font-extrabold text-heading">Post not found</h1>
+          <h1 class="qs-title text-3xl">Post not found</h1>
           <p class="mt-4 text-default">That post is not on the blog.</p>
           <p class="mt-6">
-            <a routerLink="/blog" class="font-semibold text-emerald-800 underline underline-offset-2 dark:text-emerald-300">
+            <a routerLink="/blog" class="font-semibold text-qs-accent underline underline-offset-2 text-qs-accent">
               Back to the blog
             </a>
           </p>
