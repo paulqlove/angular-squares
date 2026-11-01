@@ -42,7 +42,7 @@
     "@types/express": "^4.17.17",
     "@types/jasmine": "~5.1.0",
     "@types/node": "^18.18.0",
-    "angular-cli-ghpages": "^2.0.3",
+    "angular-cli-ghpages": "^3.1.2",
     "autoprefixer": "^10.4.17",
     "gray-matter": "^4.0.3",
     "istanbul-lib-instrument": "^6.0.3",
