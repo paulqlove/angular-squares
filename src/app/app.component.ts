@@ -5,6 +5,7 @@ import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
 import { ToastComponent } from './components/ui/toast/toast.component';
 import { WalkthroughComponent } from './components/ui/walkthrough/walkthrough.component';
+import { AnalyticsService } from './core/services/analytics.service';
 import { AuthService } from './core/services/auth.service';
 
 @Component({
@@ -31,6 +32,7 @@ import { AuthService } from './core/services/auth.service';
 export class AppComponent implements OnDestroy {
   protected authService = inject(AuthService);
 
+  private analytics = inject(AnalyticsService);
   private meta = inject(Meta);
   private router = inject(Router);
   private navigationSub: Subscription;
@@ -39,6 +41,7 @@ export class AppComponent implements OnDestroy {
     this.navigationSub = this.router.events.pipe(
       filter((event): event is NavigationEnd => event instanceof NavigationEnd)
     ).subscribe(event => this.syncRobotsMeta(event.urlAfterRedirects));
+    this.analytics.start();
   }
 
   ngOnDestroy(): void {
