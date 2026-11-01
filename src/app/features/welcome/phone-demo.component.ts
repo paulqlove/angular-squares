@@ -123,13 +123,13 @@ const LOCK_STEP_MS = 180;
     /* Oversized and angled on wide screens; the hero crops it */
     @media (min-width: 1280px) {
       .phone {
-        zoom: 1.36;
-        transform: perspective(1400px) rotateX(16deg) rotateY(-24deg);
+        zoom: 1.5;
+        transform: perspective(1400px) rotateX(16deg) rotateY(-18deg);
         transform-origin: 50% 50%;
       }
     }
     @media (min-width: 1600px) {
-      .phone { zoom: 1.6; }
+      .phone { zoom: 1.76; }
     }
     @media (max-width: 639px) {
       .phone { max-width: none; }
