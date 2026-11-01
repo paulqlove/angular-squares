@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 interface FooterLink {
@@ -14,6 +14,7 @@ interface FooterGroup {
 @Component({
     selector: 'app-site-footer',
     imports: [RouterLink],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
     <footer class="no-print border-t border-default bg-card text-sm">
       <div class="mx-auto grid max-w-5xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-3">

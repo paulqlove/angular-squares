@@ -7,6 +7,7 @@ import {
   PLATFORM_ID,
   ViewChild,
   inject,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
@@ -20,6 +21,7 @@ const FLASH_COLORS = [
 @Component({
   selector: 'app-ripple-grid',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<canvas #canvas class="w-full h-full"></canvas>`,
 })
 export class RippleGridComponent implements OnInit, OnDestroy {

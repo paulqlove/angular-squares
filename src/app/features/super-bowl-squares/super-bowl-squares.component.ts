@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, HostListener, signal, inject, effect } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, HostListener, signal, inject, effect, ChangeDetectionStrategy } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -71,6 +71,7 @@ import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.co
         })
     ],
     templateUrl: './super-bowl-squares.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./super-bowl-squares.component.scss']
 })
 export class SuperBowlSquaresComponent implements OnInit, OnDestroy {

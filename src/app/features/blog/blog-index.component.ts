@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { SeoService } from '../../core/services/seo.service';
 import { BreadcrumbsComponent } from '../../shared/breadcrumbs.component';
@@ -8,6 +8,7 @@ import { BLOG_POSTS } from './blog-posts.generated';
 @Component({
     selector: 'app-blog-index',
     imports: [RouterLink, ContentShellComponent, BreadcrumbsComponent],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
     <app-content-shell>
       <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>

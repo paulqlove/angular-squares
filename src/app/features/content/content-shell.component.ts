@@ -1,4 +1,4 @@
-import { Component, Input, inject, signal } from '@angular/core';
+import { Component, Input, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
 import { SiteFooterComponent } from '../../shared/site-footer.component';
@@ -11,6 +11,7 @@ interface NavLink {
 @Component({
     selector: 'app-content-shell',
     imports: [RouterLink, SiteFooterComponent],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
     <a
       href="#main"

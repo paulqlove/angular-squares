@@ -1,10 +1,11 @@
-import { Component, inject, HostListener, computed, effect } from '@angular/core';
+import { Component, inject, HostListener, computed, effect, ChangeDetectionStrategy } from '@angular/core';
 
 import { WalkthroughService } from '../../../core/services/walkthrough.service';
 
 @Component({
     selector: 'app-walkthrough',
     imports: [],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
     @if (walkthroughService.isActive() && walkthroughService.currentStep()) {
       <div class="fixed inset-0 z-[300]" (click)="onOverlayClick($event)">

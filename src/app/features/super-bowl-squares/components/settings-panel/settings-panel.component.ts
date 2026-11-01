@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
@@ -36,6 +36,7 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
             heroComputerDesktop
         })
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
     <!-- Venmo Confirmation Dialog -->
     <app-dialog

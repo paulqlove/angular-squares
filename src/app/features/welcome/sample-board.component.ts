@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 interface SampleClaim {
   name: string;
@@ -13,6 +13,7 @@ interface SampleClaim {
   selector: 'app-sample-board',
   standalone: true,
   host: { class: 'block w-full' },
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div
       class="rounded-2xl border border-default bg-card p-3 shadow-sm sm:p-4"

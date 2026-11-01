@@ -1,8 +1,9 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   selector: 'app-shared-header',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div [class]="containerClass">
       <div class="container mx-auto px-4 py-4 flex justify-between items-center">

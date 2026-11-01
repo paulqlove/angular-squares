@@ -1,10 +1,11 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 
 
 @Component({
     selector: 'app-winners-and-payouts',
     imports: [],
     templateUrl: './winners-and-payouts.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./winners-and-payouts.component.scss']
 })
 export class WinnersAndPayoutsComponent {

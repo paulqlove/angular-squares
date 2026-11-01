@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject, HostListener } from '@angular/core';
+import { Component, OnInit, signal, inject, HostListener, ChangeDetectionStrategy } from '@angular/core';
 
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -90,7 +90,7 @@ import {
           >
             @if (currentUser()?.photoURL) {
               <img
-                [src]="currentUser()?.photoURL"
+                [src]="$safeNavigationMigration(currentUser()?.photoURL)"
                 alt="Profile"
                 class="w-7 h-7 rounded-full ring-2 ring-primary-500"
               />
@@ -983,6 +983,7 @@ import {
       <app-upgrade-pass-dialog (dismissed)="closeUpgrade()" />
     }
   `,
+    changeDetection: ChangeDetectionStrategy.Eager,
     styles: [`
     @keyframes modal-in {
       from {

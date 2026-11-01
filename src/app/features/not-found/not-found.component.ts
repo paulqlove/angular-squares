@@ -1,10 +1,11 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 
 @Component({
     selector: 'app-not-found',
     imports: [RouterLink],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
     <div class="flex items-center justify-center min-h-screen p-4 bg-page">
       <div class="max-w-md text-center">

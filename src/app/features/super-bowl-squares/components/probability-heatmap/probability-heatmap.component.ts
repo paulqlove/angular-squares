@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 import { SQUARES_PROBABILITIES } from '../../utils/probability.utils';
 
@@ -52,6 +52,7 @@ import { SQUARES_PROBABILITIES } from '../../utils/probability.utils';
       </div>
     </div>
   `,
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./probability-heatmap.component.scss']
 })
 export class ProbabilityHeatmapComponent {

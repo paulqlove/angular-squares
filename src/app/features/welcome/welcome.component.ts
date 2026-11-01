@@ -1,4 +1,4 @@
-import { Component, ElementRef, signal, inject, OnInit, effect, ViewChild } from '@angular/core';
+import { Component, ElementRef, signal, inject, OnInit, effect, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -43,6 +43,7 @@ interface Feature {
             heroArrowRight
         })
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
     <div class="min-h-screen relative">
       <!-- Ripple grid full background -->

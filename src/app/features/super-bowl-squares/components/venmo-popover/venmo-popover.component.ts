@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, Input } from '@angular/core';
+import { Component, ElementRef, HostListener, Input, ChangeDetectionStrategy } from '@angular/core';
 
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroCreditCard } from '@ng-icons/heroicons/outline';
@@ -7,6 +7,7 @@ import { heroCreditCard } from '@ng-icons/heroicons/outline';
     selector: 'app-venmo-popover',
     imports: [NgIconComponent],
     providers: [provideIcons({ heroCreditCard })],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
     <div class="relative">
       <button

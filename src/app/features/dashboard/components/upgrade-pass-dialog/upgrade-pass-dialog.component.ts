@@ -10,6 +10,7 @@ import {
   inject,
   signal,
   PLATFORM_ID,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -133,6 +134,7 @@ import {
       </div>
     </div>
   `,
+    changeDetection: ChangeDetectionStrategy.Eager,
     styles: [`
     .upgrade-dialog-in {
       animation: upgrade-dialog-in 0.2s ease-out;

@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
@@ -10,6 +10,7 @@ import { heroCheck, heroXMark } from '@ng-icons/heroicons/outline';
     providers: [
         provideIcons({ heroCheck, heroXMark })
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     templateUrl: './payment-dialog.component.html'
 })
 export class PaymentDialogComponent {

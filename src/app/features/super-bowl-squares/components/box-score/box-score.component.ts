@@ -1,9 +1,10 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { EspnGame, SportType, SPORT_CONFIG } from '../../../../core/services/espn.service';
 
 @Component({
   selector: 'app-box-score',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @if (game) {
       <div class="bg-gray-900 rounded-lg p-3 text-white">

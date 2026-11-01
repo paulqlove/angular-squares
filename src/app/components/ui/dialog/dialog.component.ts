@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 
 
 export interface DialogPart {
@@ -10,6 +10,7 @@ export interface DialogPart {
 @Component({
     selector: 'app-dialog',
     imports: [],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
     @if (isOpen) {
       <div

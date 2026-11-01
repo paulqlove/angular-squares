@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy } from '@angular/core';
+import { Component, inject, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 
 import { Meta } from '@angular/platform-browser';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
@@ -15,6 +15,7 @@ import { AuthService } from './core/services/auth.service';
     ToastComponent,
     WalkthroughComponent
 ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
     @if (authService.isLoading()) {
       <div class="fixed inset-0 bg-page flex items-center justify-center">

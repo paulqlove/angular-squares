@@ -1,10 +1,11 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PlayerStats } from '../../types';
 
 @Component({
     selector: 'app-game-status',
     imports: [CommonModule],
+    changeDetection: ChangeDetectionStrategy.Eager,
     templateUrl: './game-status.component.html'
 })
 export class GameStatusComponent {

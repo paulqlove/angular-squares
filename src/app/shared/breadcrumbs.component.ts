@@ -1,10 +1,11 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { BreadcrumbItem } from '../core/services/seo.service';
 
 @Component({
     selector: 'app-breadcrumbs',
     imports: [RouterLink],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
     <nav aria-label="Breadcrumb" class="mb-6 text-sm">
       <ol class="flex flex-wrap items-center gap-x-2 gap-y-1">

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { SeoService } from '../../core/services/seo.service';
 import { BreadcrumbsComponent } from '../../shared/breadcrumbs.component';
@@ -8,6 +8,7 @@ import { ContentShellComponent } from './content-shell.component';
 @Component({
     selector: 'app-best-numbers',
     imports: [RouterLink, ContentShellComponent, BreadcrumbsComponent],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
     <app-content-shell [wide]="true">
       <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
