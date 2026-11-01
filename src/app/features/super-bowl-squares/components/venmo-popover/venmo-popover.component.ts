@@ -12,7 +12,7 @@ import { heroCreditCard } from '@ng-icons/heroicons/outline';
     <div class="relative">
       <button
         (click)="isOpen = !isOpen"
-        class="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-[#008CFF] hover:bg-[#0074D4] rounded-lg transition-colors"
+        class="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-qs-accent hover:bg-qs-accent-hover rounded-lg transition-colors"
       >
         <ng-icon name="heroCreditCard" class="text-lg"></ng-icon>
         <span>Pay</span>
@@ -20,7 +20,7 @@ import { heroCreditCard } from '@ng-icons/heroicons/outline';
 
       <div *ngIf="isOpen" class="absolute right-0 top-full mt-2 bg-card rounded-lg shadow-lg border border-default p-4 w-56 z-50 space-y-3">
         <div class="flex items-center justify-center gap-2">
-          <button (click)="copyUsername($event)" class="text-lg font-light text-default hover:text-[#008CFF] transition-colors">
+          <button (click)="copyUsername($event)" class="text-lg font-light text-default hover:text-qs-accent transition-colors">
             {{ username }}
           </button>
           <button (click)="copyUsername($event)" class="text-muted hover:text-default transition-colors">
@@ -30,12 +30,12 @@ import { heroCreditCard } from '@ng-icons/heroicons/outline';
             </svg>
           </button>
         </div>
-        <div class="text-center text-xs text-green-500 font-medium h-4">
+        <div class="text-center text-xs text-qs-ok font-medium h-4">
           {{ copied ? 'Copied!' : '' }}
         </div>
         <button
           (click)="openVenmo($event)"
-          class="block w-full px-3 py-2 text-center text-sm font-semibold text-white bg-[#008CFF] hover:bg-[#0074D4] rounded-lg transition-colors"
+          class="block w-full px-3 py-2 text-center text-sm font-semibold text-white bg-qs-accent hover:bg-qs-accent-hover rounded-lg transition-colors"
         >
           Open Venmo
         </button>

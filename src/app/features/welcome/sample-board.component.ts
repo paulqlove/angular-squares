@@ -68,7 +68,7 @@ export class SampleBoardComponent {
     '6-5': { name: 'Cam', color: 'bg-orange-200' },
     '7-3': { name: 'Rio', color: 'bg-lime-200' },
     '8-0': { name: 'Lee', color: 'bg-pink-200' },
-    '8-8': { name: 'Max', color: 'bg-sky-200' },
+    '8-8': { name: 'Max', color: 'bg-qs-accent-soft' },
     '9-6': { name: 'Nia', color: 'bg-fuchsia-200' }
   };
 

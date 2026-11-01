@@ -19,7 +19,7 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
           </p>
         }
         <header>
-          <p class="text-sm font-semibold uppercase tracking-wide text-emerald-800 dark:text-emerald-300">
+          <p class="text-sm font-semibold uppercase tracking-wide text-qs-accent text-qs-accent">
             {{ page.eyebrow }}
           </p>
           <h1 class="mt-2 text-3xl font-extrabold tracking-tight text-heading sm:text-4xl">
@@ -39,7 +39,7 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
           <ol class="mt-10 space-y-6">
             @for (step of page.steps; track step.name; let index = $index) {
               <li class="flex gap-4">
-                <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-emerald-700 text-base font-bold text-white" aria-hidden="true">
+                <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-qs-accent text-base font-bold text-white" aria-hidden="true">
                   {{ index + 1 }}
                 </span>
                 <div>
@@ -91,7 +91,7 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
                   [fragment]="link.fragment"
                   class="block min-h-11 rounded-xl border border-default bg-card p-4 hover:bg-card-hover"
                 >
-                  <span class="font-semibold text-emerald-800 underline decoration-emerald-800/40 underline-offset-2 dark:text-emerald-300 dark:decoration-emerald-300/40">
+                  <span class="font-semibold text-qs-accent underline decoration-qs-accent/40 underline-offset-2 text-qs-accent dark:decoration-qs-accent/40">
                     {{ link.label }}
                   </span>
                   <span class="mt-1 block text-sm text-muted">{{ link.text }}</span>
@@ -101,14 +101,14 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
           </ul>
         </section>
 
-        <section class="mt-10 rounded-2xl bg-emerald-700 px-5 py-6 text-white">
+        <section class="mt-10 rounded-2xl bg-qs-accent px-5 py-6 text-white">
           <a
             [routerLink]="page.cta.path"
-            class="inline-flex min-h-11 items-center rounded-md bg-white px-4 font-semibold text-emerald-900 hover:bg-emerald-50"
+            class="inline-flex min-h-11 items-center rounded-md bg-white px-4 font-semibold text-qs-accent hover:bg-qs-accent-soft"
           >
             {{ page.cta.label }}
           </a>
-          <p class="mt-3 text-sm leading-relaxed text-emerald-50">{{ page.cta.note }}</p>
+          <p class="mt-3 text-sm leading-relaxed text-qs-on-accent">{{ page.cta.note }}</p>
         </section>
 
         @if (page.disclaimer) {

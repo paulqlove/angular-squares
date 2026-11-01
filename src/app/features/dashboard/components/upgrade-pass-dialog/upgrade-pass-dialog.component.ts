@@ -100,7 +100,7 @@ import {
                     [disabled]="isSubmitting()"
                     [attr.aria-invalid]="emailError() ? 'true' : 'false'"
                     [attr.aria-describedby]="emailError() ? 'upgrade-email-error upgrade-pass-note' : 'upgrade-pass-note'"
-                    class="min-h-11 w-full rounded-xl border border-slate-500 bg-input px-4 py-3 text-base text-default placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:border-secondary-800 focus:outline-none focus:ring-2 focus:ring-secondary-800 dark:border-slate-400 dark:focus:border-secondary-300 dark:focus:ring-secondary-300"
+                    class="min-h-11 w-full rounded-xl border border-slate-500 bg-input px-4 py-3 text-base text-default placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:border-qs-accent focus:outline-none focus:ring-2 focus:ring-qs-accent"
                     placeholder="you@example.com"
                   />
                   @if (emailError()) {
@@ -111,7 +111,7 @@ import {
                 </div>
                 <button
                   type="submit"
-                  class="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-secondary-800 px-4 py-3 text-base font-bold text-white hover:bg-secondary-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:opacity-60 dark:focus-visible:outline-white sm:w-auto"
+                  class="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-qs-accent px-4 py-3 text-base font-bold text-white hover:bg-qs-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:opacity-60 dark:focus-visible:outline-white sm:w-auto"
                   [disabled]="isSubmitting()"
                   [attr.aria-busy]="isSubmitting()"
                 >

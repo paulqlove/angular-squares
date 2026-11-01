@@ -14,7 +14,7 @@ import { ContentShellComponent } from './content-shell.component';
       <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
       <article>
         <header class="max-w-3xl">
-          <p class="text-sm font-semibold uppercase tracking-wide text-emerald-800 dark:text-emerald-300">
+          <p class="text-sm font-semibold uppercase tracking-wide text-qs-accent text-qs-accent">
             Historical frequencies
           </p>
           <h1 class="mt-2 text-3xl font-extrabold tracking-tight text-heading sm:text-4xl">
@@ -82,8 +82,8 @@ import { ContentShellComponent } from './content-shell.component';
           <ul class="mt-4 flex flex-wrap gap-3 text-sm text-default" aria-label="Color key">
             <li class="rounded bg-blue-300 px-2 py-1 text-slate-900">3.0 or more</li>
             <li class="rounded bg-blue-200 px-2 py-1 text-slate-900">2.0 to 2.9</li>
-            <li class="rounded bg-green-300 px-2 py-1 text-slate-900">1.5 to 1.9</li>
-            <li class="rounded bg-green-200 px-2 py-1 text-slate-900">1.0 to 1.4</li>
+            <li class="rounded bg-qs-ok-soft px-2 py-1 text-slate-900">1.5 to 1.9</li>
+            <li class="rounded bg-qs-ok-soft px-2 py-1 text-slate-900">1.0 to 1.4</li>
             <li class="rounded bg-yellow-200 px-2 py-1 text-slate-900">0.5 to 0.9</li>
             <li class="rounded bg-red-100 px-2 py-1 text-slate-900">Under 0.5</li>
           </ul>
@@ -91,7 +91,7 @@ import { ContentShellComponent } from './content-shell.component';
             Source:
             <a
               href="https://www.eldo.co/super-bowl-squares-odds-probabilities-best-worst-numbers.html"
-              class="text-emerald-800 underline underline-offset-2 dark:text-emerald-300"
+              class="text-qs-accent underline underline-offset-2 text-qs-accent"
               rel="noopener noreferrer"
               target="_blank"
             >
@@ -125,36 +125,36 @@ import { ContentShellComponent } from './content-shell.component';
           <ul class="mt-4 grid gap-3 sm:grid-cols-2">
             <li>
               <a routerLink="/blog/best-super-bowl-squares-numbers" class="block rounded-xl border border-default bg-card p-4 hover:bg-card-hover">
-                <span class="font-semibold text-emerald-800 underline decoration-emerald-800/40 underline-offset-2 dark:text-emerald-300">November 5 post</span>
+                <span class="font-semibold text-qs-accent underline decoration-qs-accent/40 underline-offset-2 text-qs-accent">November 5 post</span>
                 <span class="mt-1 block text-sm text-muted">The blog note that points at this table. Copy is still marked TODO.</span>
               </a>
             </li>
             <li>
               <a routerLink="/how-to-play" class="block rounded-xl border border-default bg-card p-4 hover:bg-card-hover">
-                <span class="font-semibold text-emerald-800 underline decoration-emerald-800/40 underline-offset-2 dark:text-emerald-300">How to play</span>
+                <span class="font-semibold text-qs-accent underline decoration-qs-accent/40 underline-offset-2 text-qs-accent">How to play</span>
                 <span class="mt-1 block text-sm text-muted">How the draw and the quarter winner work.</span>
               </a>
             </li>
             <li>
               <a routerLink="/super-bowl-squares" class="block rounded-xl border border-default bg-card p-4 hover:bg-card-hover">
-                <span class="font-semibold text-emerald-800 underline decoration-emerald-800/40 underline-offset-2 dark:text-emerald-300">Super Bowl squares</span>
+                <span class="font-semibold text-qs-accent underline decoration-qs-accent/40 underline-offset-2 text-qs-accent">Super Bowl squares</span>
                 <span class="mt-1 block text-sm text-muted">The February 14, 2027 board.</span>
               </a>
             </li>
             <li>
               <a routerLink="/" fragment="probability-heatmap" class="block rounded-xl border border-default bg-card p-4 hover:bg-card-hover">
-                <span class="font-semibold text-emerald-800 underline decoration-emerald-800/40 underline-offset-2 dark:text-emerald-300">Homepage heatmap</span>
+                <span class="font-semibold text-qs-accent underline decoration-qs-accent/40 underline-offset-2 text-qs-accent">Homepage heatmap</span>
                 <span class="mt-1 block text-sm text-muted">Where the in-game chart is introduced.</span>
               </a>
             </li>
           </ul>
         </section>
 
-        <section class="mt-10 rounded-2xl bg-emerald-700 px-5 py-6 text-white">
-          <a routerLink="/dashboard" class="inline-flex min-h-11 items-center rounded-md bg-white px-4 font-semibold text-emerald-900 hover:bg-emerald-50">
+        <section class="mt-10 rounded-2xl bg-qs-accent px-5 py-6 text-white">
+          <a routerLink="/dashboard" class="inline-flex min-h-11 items-center rounded-md bg-white px-4 font-semibold text-qs-accent hover:bg-qs-accent-soft">
             Start a free game
           </a>
-          <p class="mt-3 text-sm leading-relaxed text-emerald-50">
+          <p class="mt-3 text-sm leading-relaxed text-qs-on-accent">
             See the same colors on your own board after the numbers are drawn.
             Quarter Score never collects, holds, or pays out money.
           </p>
@@ -204,8 +204,8 @@ export class BestNumbersComponent {
   public cellClass(share: number): string {
     if (share >= 3) return 'bg-blue-300';
     if (share >= 2) return 'bg-blue-200';
-    if (share >= 1.5) return 'bg-green-300';
-    if (share >= 1) return 'bg-green-200';
+    if (share >= 1.5) return 'bg-qs-ok-soft';
+    if (share >= 1) return 'bg-qs-ok-soft';
     if (share >= 0.5) return 'bg-yellow-200';
     return 'bg-red-100';
   }

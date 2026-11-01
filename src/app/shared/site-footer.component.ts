@@ -26,7 +26,7 @@ interface FooterGroup {
                 <li>
                   <a
                     [routerLink]="link.path"
-                    class="inline-flex min-h-11 min-w-[44px] items-center px-2 text-muted underline-offset-2 hover:text-heading hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
+                    class="inline-flex min-h-11 min-w-[44px] items-center px-2 text-muted underline-offset-2 hover:text-heading hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-qs-accent"
                   >
                     {{ link.label }}
                   </a>

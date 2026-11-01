@@ -12,7 +12,7 @@ import { EspnGame, SportType, SPORT_CONFIG } from '../../../../core/services/esp
           <span class="px-1.5 py-0.5 rounded text-xs"
             [class.bg-yellow-500]="game.status === 'in'"
             [class.animate-pulse]="game.status === 'in'"
-            [class.bg-green-600]="game.status === 'post'"
+            [class.bg-qs-ok]="game.status === 'post'"
             [class.bg-gray-600]="game.status === 'pre'"
           >
             @if (game.status === 'pre') { Upcoming }

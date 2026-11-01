@@ -18,7 +18,7 @@ import { WalkthroughService } from '../../../core/services/walkthrough.service';
         <!-- Pulse ring around target -->
         @if (targetRect()) {
           <div
-            class="absolute border-2 border-secondary-500 rounded-lg pointer-events-none animate-pulse-subtle"
+            class="absolute border-2 border-qs-accent rounded-lg pointer-events-none animate-pulse-subtle"
             [style.left.px]="targetRect()!.left - 4"
             [style.top.px]="targetRect()!.top - 4"
             [style.width.px]="targetRect()!.width + 8"
@@ -44,7 +44,7 @@ import { WalkthroughService } from '../../../core/services/walkthrough.service';
             @for (step of walkthroughService.steps(); track $index) {
               <div
                 class="w-2 h-2 rounded-full transition-colors"
-                [class.bg-secondary-500]="$index === walkthroughService.currentStepIndex()"
+                [class.bg-qs-accent]="$index === walkthroughService.currentStepIndex()"
                 [class.bg-control]="$index !== walkthroughService.currentStepIndex()"
               ></div>
             }
@@ -69,7 +69,7 @@ import { WalkthroughService } from '../../../core/services/walkthrough.service';
             }
             <button
               (click)="next()"
-              class="px-4 py-2 text-sm font-medium bg-secondary-500 hover:bg-secondary-600 text-white rounded-lg transition-colors"
+              class="px-4 py-2 text-sm font-medium bg-qs-accent hover:bg-qs-accent-hover text-white rounded-lg transition-colors"
             >
               {{ isLastStep() ? 'Done' : 'Next' }}
             </button>

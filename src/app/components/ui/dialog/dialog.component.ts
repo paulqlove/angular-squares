@@ -35,8 +35,8 @@ export interface DialogPart {
           <button
             (click)="onConfirm.emit()"
             class="px-4 py-2 rounded shadow-md hover:shadow-lg transition-all duration-200
-                   bg-gradient-to-r from-secondary-500 via-secondary-600 to-accent-600
-                   hover:from-secondary-600 hover:via-secondary-700 hover:to-accent-700
+                   bg-gradient-to-r from-qs-accent via-qs-accent-hover to-accent-600
+                   hover:from-qs-accent-hover hover:via-qs-accent-hover hover:to-accent-700
                    text-white"
           >
             {{ confirmText }}

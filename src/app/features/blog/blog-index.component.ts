@@ -19,7 +19,7 @@ import { BLOG_POSTS } from './blog-posts.generated';
           Posts stay free of logos, and the game never handles money.
         </p>
         <p class="mt-3 text-sm">
-          <a class="font-semibold text-emerald-800 underline underline-offset-2 dark:text-emerald-300" href="/rss.xml">
+          <a class="font-semibold text-qs-accent underline underline-offset-2 text-qs-accent" href="/rss.xml">
             Subscribe with RSS
           </a>
         </p>
@@ -37,7 +37,7 @@ import { BLOG_POSTS } from './blog-posts.generated';
               <h2 class="mt-2 text-2xl font-bold text-heading">
                 <a
                   [routerLink]="['/blog', post.slug]"
-                  class="text-emerald-800 underline decoration-emerald-800/30 underline-offset-2 hover:decoration-emerald-800 dark:text-emerald-300"
+                  class="text-qs-accent underline decoration-qs-accent/30 underline-offset-2 hover:decoration-qs-accent text-qs-accent"
                 >
                   {{ post.title }}
                 </a>

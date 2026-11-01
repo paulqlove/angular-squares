@@ -29,7 +29,7 @@ import { BLOG_POSTS } from './blog-posts.generated';
             Quarter Score never collects, holds, or pays out money.
           </p>
           <p class="mt-6">
-            <a routerLink="/blog" class="font-semibold text-emerald-800 underline underline-offset-2 dark:text-emerald-300">
+            <a routerLink="/blog" class="font-semibold text-qs-accent underline underline-offset-2 text-qs-accent">
               All posts
             </a>
           </p>
@@ -39,7 +39,7 @@ import { BLOG_POSTS } from './blog-posts.generated';
           <h1 class="text-3xl font-extrabold text-heading">Post not found</h1>
           <p class="mt-4 text-default">That post is not on the blog.</p>
           <p class="mt-6">
-            <a routerLink="/blog" class="font-semibold text-emerald-800 underline underline-offset-2 dark:text-emerald-300">
+            <a routerLink="/blog" class="font-semibold text-qs-accent underline underline-offset-2 text-qs-accent">
               Back to the blog
             </a>
           </p>

@@ -65,7 +65,7 @@ interface NavLink {
               <li class="md:ml-2">
                 <a
                   routerLink="/dashboard"
-                  class="inline-flex min-h-11 w-full items-center justify-center rounded-md bg-emerald-700 px-4 text-sm font-semibold text-white hover:bg-emerald-800 md:w-auto"
+                  class="inline-flex min-h-11 w-full items-center justify-center rounded-md bg-qs-accent px-4 text-sm font-semibold text-white hover:bg-qs-accent-hover md:w-auto"
                 >
                   Start a free game
                 </a>

@@ -11,7 +11,7 @@ import { ToastService, Toast } from '../../../core/services/toast.service';
       @for (toast of toastService.toasts(); track toast.id) {
         <div
           class="animate-toast-in flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg min-w-[280px] max-w-sm"
-          [class.bg-green-600]="toast.type === 'success'"
+          [class.bg-qs-ok]="toast.type === 'success'"
           [class.bg-red-600]="toast.type === 'error'"
           [class.bg-amber-500]="toast.type === 'warning'"
           role="alert"

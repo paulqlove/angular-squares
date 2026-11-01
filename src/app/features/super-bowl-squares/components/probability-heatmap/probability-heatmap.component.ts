@@ -81,8 +81,8 @@ export class ProbabilityHeatmapComponent {
     // Enhanced color scale with better contrast
     if (prob >= 3.0) return 'bg-blue-300';      // Darker blue
     if (prob >= 2.0) return 'bg-blue-200';
-    if (prob >= 1.5) return 'bg-green-300';     // Darker green
-    if (prob >= 1.0) return 'bg-green-200';
+    if (prob >= 1.5) return 'bg-qs-ok-soft';     // Darker green
+    if (prob >= 1.0) return 'bg-qs-ok-soft';
     if (prob >= 0.5) return 'bg-yellow-200';    // More visible yellow
     return 'bg-red-100';                        // Light red for lowest
   }
