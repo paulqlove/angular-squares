@@ -4,6 +4,8 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/services/auth.service';
+import { SeoService } from '../../core/services/seo.service';
+import { SiteFooterComponent } from '../../shared/site-footer.component';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
   heroSquares2x2,
@@ -23,12 +25,14 @@ interface Feature {
   icon: string;
   title: string;
   description: string;
+  id?: string;
+  link?: { path: string; label: string };
 }
 
 @Component({
   selector: 'app-welcome',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, NgIconComponent, RippleGridComponent, AppHeaderComponent, AuthModalComponent, SampleBoardComponent],
+  imports: [CommonModule, FormsModule, RouterLink, NgIconComponent, RippleGridComponent, AppHeaderComponent, AuthModalComponent, SampleBoardComponent, SiteFooterComponent],
   providers: [
     provideIcons({
       heroSquares2x2,
@@ -158,12 +162,17 @@ interface Feature {
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
               @for (feature of features; track feature.title) {
-                <div class="bg-card rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div [attr.id]="feature.id || null" class="bg-card rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
                   <div class="w-12 h-12 bg-control rounded-lg flex items-center justify-center mb-4">
                     <ng-icon [name]="feature.icon" class="text-2xl text-heading"></ng-icon>
                   </div>
                   <h3 class="text-lg font-semibold text-heading mb-2">{{ feature.title }}</h3>
                   <p class="text-muted">{{ feature.description }}</p>
+                  @if (feature.link) {
+                    <a [routerLink]="feature.link.path" class="mt-3 inline-flex min-h-11 items-center font-semibold text-heading underline underline-offset-2">
+                      {{ feature.link.label }}
+                    </a>
+                  }
                 </div>
               }
             </div>
@@ -171,11 +180,17 @@ interface Feature {
         </section>
 
         <!-- How It Works -->
-        <section class="bg-card py-16 md:py-24">
+        <section id="how-it-works" class="bg-card py-16 md:py-24">
           <div class="container mx-auto px-4">
-            <h2 class="text-3xl font-bold text-center text-heading mb-12">
+            <h2 class="text-3xl font-bold text-center text-heading mb-4">
               How It Works
             </h2>
+
+            <p class="text-center mb-10">
+              <a routerLink="/how-to-play" class="font-semibold text-heading underline underline-offset-2">
+                Read the full rules
+              </a>
+            </p>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
               <div class="text-center">
@@ -205,12 +220,7 @@ interface Feature {
           </div>
         </section>
 
-        <!-- Footer -->
-        <footer class="bg-page py-8">
-          <div class="container mx-auto px-4 text-center text-muted text-sm">
-            <p>Made with love for sports ball fans</p>
-          </div>
-        </footer>
+        <app-site-footer></app-site-footer>
       </div>
     </div>
 
@@ -225,6 +235,7 @@ export class WelcomeComponent implements OnInit {
   private authService = inject(AuthService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private seo = inject(SeoService);
 
   isAuthenticated = this.authService.isAuthenticated;
 
@@ -239,6 +250,14 @@ export class WelcomeComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.seo.apply({
+      title: 'QuarterScore — Football Squares for Game Day',
+      description: 'Every square, every score, live on one board.™',
+      path: '/',
+      headline: 'The ultimate football squares game',
+      published: '2026-11-01',
+      breadcrumbs: [{ name: 'Home', path: '/' }]
+    });
     const joinCode = this.route.snapshot.queryParamMap.get('join');
     if (joinCode) {
       this.pendingJoinCode = joinCode.toUpperCase();
@@ -283,7 +302,9 @@ export class WelcomeComponent implements OnInit {
     {
       icon: 'heroChartBar',
       title: 'Probability Heatmap',
-      description: 'See which squares have the best odds based on NFL history'
+      description: 'See which squares have the best odds based on NFL history',
+      id: 'probability-heatmap',
+      link: { path: '/best-squares-numbers', label: 'See the full number table' }
     }
   ];
 

@@ -14,8 +14,31 @@ import {
 } from 'firebase/database';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { ActiveBoardLimitError } from '../errors/active-board-limit.error';
+import { EspnService } from './espn.service';
+import {
+  BoardActivity,
+  FREE_ACTIVE_BOARD_LIMIT,
+  NOTIFY_EMAIL_MAX_LENGTH,
+  NOTIFY_EMAIL_PATTERN,
+  NOTIFY_SOURCE_MAX_LENGTH,
+  hasLinkedGame,
+  isBoardActive
+} from '../utils/board-activity';
 
 export type SportType = 'nfl' | 'nba' | 'ncaaf' | 'wnba' | 'afl';
+
+export interface EspnLiveSnapshot {
+  status: 'pre' | 'in' | 'post';
+  period: number;
+  clock: string;
+  completed: boolean;
+  homeScore: number;
+  awayScore: number;
+  homeTeam: string;
+  awayTeam: string;
+  quarters: { home: number; away: number }[];
+}
 
 export interface GameData {
   id?: string;
@@ -41,8 +64,9 @@ export interface GameData {
   playerColors?: { [key: string]: string };
   venmoUsername?: string;
   paidPlayers?: string[];
-  espnEventId?: string;
-  espnSport?: SportType;
+  espnEventId?: string | null;
+  espnSport?: SportType | null;
+  espnLive?: EspnLiveSnapshot;
   managerId?: string;
   managerEmail?: string;
   managerName?: string;
@@ -75,6 +99,7 @@ export interface GameListItem {
 })
 export class GameService {
   private platformId = inject(PLATFORM_ID);
+  private espnService = inject(EspnService);
   // Lazy init required for SSR hydration - see CLAUDE.md "SSR Hydration Pattern"
   private _db: Database | null = null;
   private currentGameId = signal<string | null>(null);
@@ -105,6 +130,42 @@ export class GameService {
 
   constructor() {}
 
+  private async loadOwnedBoardActivity(ownerId: string): Promise<BoardActivity[]> {
+    const userGamesRef = ref(this.db, `users/${ownerId}/games`);
+    const snapshot = await get(userGamesRef);
+    if (!snapshot.exists()) {
+      return [];
+    }
+
+    const gameIds = Object.keys(snapshot.val());
+    const boards = await Promise.all(gameIds.map(async (gameId) => {
+      const gameSnap = await get(ref(this.db, `games/${gameId}`));
+      if (!gameSnap.exists()) {
+        return null;
+      }
+      const raw = gameSnap.val() || {};
+      const espnEventId = typeof raw.espnEventId === 'string' ? raw.espnEventId : null;
+      const linkedGameFinal = hasLinkedGame(espnEventId)
+        ? await this.espnService.isEventFinal(espnEventId as string, this.normalizeSport(raw.espnSport))
+        : null;
+      const board: BoardActivity = {
+        createdAt: typeof raw.createdAt === 'number' ? raw.createdAt : null,
+        espnEventId,
+        linkedGameFinal
+      };
+      return board;
+    }));
+
+    return boards.filter((board): board is BoardActivity => board !== null);
+  }
+
+  private normalizeSport(value: unknown): SportType {
+    if (value === 'nfl' || value === 'nba' || value === 'ncaaf' || value === 'wnba' || value === 'afl') {
+      return value;
+    }
+    return 'nfl';
+  }
+
   // Generate a short, shareable game ID
   private generateGameId(): string {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Removed ambiguous chars
@@ -113,6 +174,51 @@ export class GameService {
       result += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     return result;
+  }
+
+  /**
+   * Read-only check used by the dashboard and by createGame.
+   * Does not write, delete, or rewrite any existing board.
+   */
+  async assertUnderFreeBoardLimit(ownerId: string): Promise<void> {
+    if (!this.isBrowser) {
+      throw new Error('Cannot check boards on server');
+    }
+    const boards = await this.loadOwnedBoardActivity(ownerId);
+    const now = Date.now();
+    const activeCount = boards.filter(board => isBoardActive(board, now)).length;
+    if (activeCount >= FREE_ACTIVE_BOARD_LIMIT) {
+      throw new ActiveBoardLimitError();
+    }
+  }
+
+  /** Write-only notifyMe/{pushId} entry. Callers must already be signed in. */
+  async createNotifyMe(email: string, uid: string, source: string): Promise<void> {
+    if (!this.isBrowser) {
+      throw new Error('Cannot save notification on server');
+    }
+    const trimmed = email.trim();
+    if (
+      trimmed.length === 0 ||
+      trimmed.length > NOTIFY_EMAIL_MAX_LENGTH ||
+      !NOTIFY_EMAIL_PATTERN.test(trimmed)
+    ) {
+      throw new Error('Invalid email');
+    }
+    if (!uid || uid.length > 128) {
+      throw new Error('Invalid uid');
+    }
+    if (!source || source.length > NOTIFY_SOURCE_MAX_LENGTH) {
+      throw new Error('Invalid source');
+    }
+
+    const entryRef = push(ref(this.db, 'notifyMe'));
+    await set(entryRef, {
+      email: trimmed,
+      timestamp: Date.now(),
+      uid,
+      source
+    });
   }
 
   // Create a new game
@@ -129,6 +235,10 @@ export class GameService {
     venmoUsername?: string
   ): Promise<string> {
     if (!this.isBrowser) throw new Error('Cannot create game on server');
+    await this.assertUnderFreeBoardLimit(ownerId);
+    // Drop a stale slot only after the read-only check says nothing is active.
+    // Existing game nodes are not modified.
+    await remove(ref(this.db, `users/${ownerId}/activeBoardId`));
     const gameId = this.generateGameId();
 
     const defaultGameData: GameData = {
@@ -169,6 +279,19 @@ export class GameService {
       createdAt: defaultGameData.createdAt,
       name: defaultGameData.name
     });
+
+    if (espnEventId) {
+      // The board already exists. A failed index write is repaired when the
+      // owner next opens the dashboard or the game.
+      await this.ensureLiveGameIndex(gameId, espnEventId, espnSport || 'nfl').catch(() => {});
+    }
+
+    try {
+      await set(ref(this.db, `users/${ownerId}/activeBoardId`), gameId);
+    } catch (error) {
+      // The board exists. The client-side count still enforces the limit.
+      console.warn('[GameService] Active board slot was not saved', error);
+    }
 
     return gameId;
   }
@@ -220,6 +343,7 @@ export class GameService {
           paidPlayers: rawData.paidPlayers || [],
           espnEventId: rawData.espnEventId || undefined,
           espnSport: rawData.espnSport || undefined,
+          espnLive: this.readEspnLive(rawData.espnLive),
           managerId: rawData.managerId || undefined,
           managerEmail: rawData.managerEmail || undefined,
           managerName: rawData.managerName || undefined,
@@ -293,10 +417,16 @@ export class GameService {
       updates[`${prefix}/paidPlayers`] = data.paidPlayers;
     }
     if (data.espnEventId !== undefined) {
-      updates[`${prefix}/espnEventId`] = data.espnEventId;
+      const nextId = data.espnEventId || null;
+      const nextSport = data.espnSport || 'nfl';
+      if (nextId && !this.isLinkableEspnId(nextId)) {
+        throw new Error('Invalid ESPN event id');
+      }
+      Object.assign(updates, await this.liveIndexUpdates(gameId, nextId, nextSport));
+      updates[`${prefix}/espnEventId`] = nextId;
     }
     if (data.espnSport !== undefined) {
-      updates[`${prefix}/espnSport`] = data.espnSport;
+      updates[`${prefix}/espnSport`] = data.espnSport || null;
     }
     if (data.managerId !== undefined) {
       updates[`${prefix}/managerId`] = data.managerId;
@@ -348,6 +478,7 @@ export class GameService {
         paidPlayers: rawData.paidPlayers || [],
         espnEventId: rawData.espnEventId || undefined,
         espnSport: rawData.espnSport || undefined,
+        espnLive: this.readEspnLive(rawData.espnLive),
         managerId: rawData.managerId || undefined,
         managerEmail: rawData.managerEmail || undefined,
         managerName: rawData.managerName || undefined,
@@ -406,8 +537,8 @@ export class GameService {
           managerId: game.managerId,
           managerEmail: game.managerEmail,
           managerName: game.managerName,
-          espnEventId: game.espnEventId,
-          espnSport: game.espnSport,
+          espnEventId: game.espnEventId || undefined,
+          espnSport: game.espnSport || undefined,
           venmoUsername: game.venmoUsername,
           collected,
           totalPot: squaresFilled * game.pricePerSquare
@@ -418,14 +549,36 @@ export class GameService {
     return games.sort((a, b) => b.createdAt - a.createdAt);
   }
 
-  // Delete a game
+  // Delete a game and its live-score index entry.
   async deleteGame(gameId: string, ownerId: string): Promise<void> {
     if (!this.isBrowser) return;
-    const gameRef = ref(this.db, `games/${gameId}`);
-    const userGameRef = ref(this.db, `users/${ownerId}/games/${gameId}`);
+    const espnSnap = await get(ref(this.db, `games/${gameId}/espnEventId`));
+    const updates: Record<string, unknown> = {
+      [`games/${gameId}`]: null,
+      [`users/${ownerId}/games/${gameId}`]: null,
+    };
+    const espnId = espnSnap.exists() ? espnSnap.val() : null;
+    if (typeof espnId === 'string' && this.isLinkableEspnId(espnId)) {
+      updates[`liveGames/${espnId}/${gameId}`] = null;
+    }
+    await update(ref(this.db), updates);
+  }
 
-    await remove(gameRef);
-    await remove(userGameRef);
+  // Keep liveGames/{espnId}/{boardId} in sync so the scheduled function
+  // can find linked boards without scanning every game.
+  async ensureLiveGameIndex(gameId: string, espnEventId: string, espnSport: SportType = 'nfl'): Promise<void> {
+    await this.ensureLiveGameIndexes([{ gameId, espnEventId, espnSport }]);
+  }
+
+  async ensureLiveGameIndexes(entries: { gameId: string; espnEventId: string; espnSport?: SportType | null }[]): Promise<void> {
+    if (!this.isBrowser || entries.length === 0) return;
+    const updates: Record<string, { sport: SportType }> = {};
+    for (const entry of entries) {
+      if (!this.isLinkableEspnId(entry.espnEventId) || !this.isBoardId(entry.gameId)) continue;
+      updates[`liveGames/${entry.espnEventId}/${entry.gameId}`] = { sport: entry.espnSport || 'nfl' };
+    }
+    if (Object.keys(updates).length === 0) return;
+    await update(ref(this.db), updates);
   }
 
   // Get shareable link for a game
@@ -505,8 +658,8 @@ export class GameService {
           managerId: game.managerId,
           managerEmail: game.managerEmail,
           managerName: game.managerName,
-          espnEventId: game.espnEventId,
-          espnSport: game.espnSport,
+          espnEventId: game.espnEventId || undefined,
+          espnSport: game.espnSport || undefined,
           venmoUsername: game.venmoUsername,
           collected,
           totalPot: squaresFilled * game.pricePerSquare
@@ -583,5 +736,61 @@ export class GameService {
       [`games/${gameId}/managerEmail`]: managerEmail || '',
       [`games/${gameId}/managerName`]: managerName || ''
     });
+  }
+
+  private async liveIndexUpdates(gameId: string, nextId: string | null, sport: SportType): Promise<Record<string, unknown>> {
+    const currentSnap = await get(ref(this.db, `games/${gameId}/espnEventId`));
+    const currentId = currentSnap.exists() && typeof currentSnap.val() === 'string' ? currentSnap.val() as string : null;
+    const updates: Record<string, unknown> = {};
+    if (currentId && currentId !== nextId && this.isLinkableEspnId(currentId)) {
+      updates[`liveGames/${currentId}/${gameId}`] = null;
+    }
+    if (nextId) {
+      updates[`liveGames/${nextId}/${gameId}`] = { sport };
+    }
+    return updates;
+  }
+
+  private isLinkableEspnId(id: string): boolean {
+    return /^[A-Za-z0-9_-]{1,50}$/.test(id);
+  }
+
+  private isBoardId(id: string): boolean {
+    return /^[A-Za-z0-9]{6}$/.test(id);
+  }
+
+  private readEspnLive(value: unknown): EspnLiveSnapshot | undefined {
+    if (!value || typeof value !== 'object') return undefined;
+    const raw = value as Record<string, unknown>;
+    const status = raw['status'];
+    if (status !== 'pre' && status !== 'in' && status !== 'post') return undefined;
+
+    const quartersRaw = raw['quarters'];
+    let quarterList: unknown[] = [];
+    if (Array.isArray(quartersRaw)) {
+      quarterList = quartersRaw;
+    } else if (quartersRaw && typeof quartersRaw === 'object') {
+      quarterList = Object.keys(quartersRaw)
+        .sort((a, b) => Number(a) - Number(b))
+        .map(key => (quartersRaw as Record<string, unknown>)[key]);
+    }
+
+    return {
+      status,
+      period: typeof raw['period'] === 'number' ? raw['period'] : 0,
+      clock: typeof raw['clock'] === 'string' ? raw['clock'] : '',
+      completed: raw['completed'] === true,
+      homeScore: typeof raw['homeScore'] === 'number' ? raw['homeScore'] : 0,
+      awayScore: typeof raw['awayScore'] === 'number' ? raw['awayScore'] : 0,
+      homeTeam: typeof raw['homeTeam'] === 'string' ? raw['homeTeam'] : '',
+      awayTeam: typeof raw['awayTeam'] === 'string' ? raw['awayTeam'] : '',
+      quarters: quarterList.map(quarter => {
+        const row = quarter && typeof quarter === 'object' ? quarter as Record<string, unknown> : {};
+        return {
+          home: typeof row['home'] === 'number' ? row['home'] : 0,
+          away: typeof row['away'] === 'number' ? row['away'] : 0
+        };
+      })
+    };
   }
 }

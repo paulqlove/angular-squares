@@ -94,10 +94,16 @@ games/{gameId}/
   homeTeam, awayTeam, venmoUsername
   isLocked, isRandomized, pricePerSquare
   espnEventId: string (optional - links to ESPN game)
+  espnLive: status, period, clock, linescores (Cloud Functions only)
 
 users/{userId}/games/{gameId}/
   createdAt, name
+
+liveGames/{espnId}/{boardId}/
+  sport
 ```
+
+Scheduled ESPN scoring lives in `functions/` and is deployed by hand. See [FUNCTIONS.md](./FUNCTIONS.md).
 
 ### Real-time Subscriptions
 

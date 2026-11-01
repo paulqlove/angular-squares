@@ -156,7 +156,7 @@
                 [class.text-heading]="activeTab === 'probabilities'"
                 [class.text-muted]="activeTab !== 'probabilities'"
                 class="px-4 py-2 text-lg font-bold transition-colors hover:text-heading -mb-px">
-                Odds
+                Heatmap
               </button>
               <button
                 (click)="activeTab = 'boxscore'"
@@ -196,7 +196,7 @@
                 </app-probability-heatmap>
               } @else {
                 <div class="flex items-center justify-center h-64 text-muted text-center px-4">
-                  <p>Odds will appear once the board numbers are randomized.</p>
+                  <p>The heatmap will appear once the board numbers are randomized.</p>
                 </div>
               }
             } @else {
