@@ -1,9 +1,9 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 @Component({
     selector: 'app-winners-and-payouts',
-    imports: [CommonModule],
+    imports: [],
     templateUrl: './winners-and-payouts.component.html',
     styleUrls: ['./winners-and-payouts.component.scss']
 })

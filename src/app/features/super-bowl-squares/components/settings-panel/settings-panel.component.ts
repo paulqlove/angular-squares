@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
   heroCog6Tooth,
@@ -21,7 +21,7 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
 
 @Component({
     selector: 'app-settings-panel',
-    imports: [CommonModule, NgIconComponent, FormsModule, ToggleComponent, DialogComponent],
+    imports: [NgIconComponent, FormsModule, ToggleComponent, DialogComponent],
     providers: [
         provideIcons({
             heroCog6Tooth,
@@ -46,17 +46,17 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
       (onConfirm)="onVenmoConfirm()"
       (onCancel)="showVenmoDialog = false"
     ></app-dialog>
-
+    
     <!-- Settings Panel -->
     <div class="fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity duration-200 overflow-hidden"
-         [class.opacity-0]="!isOpen"
-         [class.pointer-events-none]="!isOpen"
-         (click)="close()">
+      [class.opacity-0]="!isOpen"
+      [class.pointer-events-none]="!isOpen"
+      (click)="close()">
       <div class="fixed right-0 top-0 bottom-0 w-[90%] sm:w-full sm:max-w-md bg-dialog shadow-lg transform transition-transform duration-200 flex flex-col overflow-hidden"
-           [class.translate-x-0]="isOpen"
-           [class.translate-x-full]="!isOpen"
-           (click)="$event.stopPropagation()">
-
+        [class.translate-x-0]="isOpen"
+        [class.translate-x-full]="!isOpen"
+        (click)="$event.stopPropagation()">
+    
         <!-- Settings Header -->
         <div class="flex-none flex items-center justify-between p-4 border-b border-default">
           <h2 class="text-lg font-bold text-heading">Settings</h2>
@@ -64,7 +64,7 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
             <ng-icon name="heroXMark" class="text-2xl"></ng-icon>
           </button>
         </div>
-
+    
         <!-- Settings Content -->
         <div class="flex-1 overflow-y-auto p-4 pt-8 bg-page">
           <!-- Non-owner notice -->
@@ -77,7 +77,7 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
               <p class="text-sm text-blue-700">You are a payment manager. You can manage who has paid.</p>
             </div>
           }
-
+    
           <!-- Team Names -->
           <div class="space-y-4 mb-4">
             <div>
@@ -95,9 +95,9 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
                        focus:ring-2 focus:ring-qs-accent
                        capitalize disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="Enter away team"
-              />
+                />
             </div>
-
+    
             <div>
               <label for="homeTeam" class="block text-label text-sm font-medium mb-2">
                 Home Team
@@ -113,10 +113,10 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
                        focus:ring-2 focus:ring-qs-accent
                        capitalize disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="Enter home team"
-              />
+                />
             </div>
           </div>
-
+    
           <!-- Theme Toggle -->
           <div class="mb-6">
             <label class="block text-label text-sm font-medium mb-2">Appearance</label>
@@ -124,27 +124,27 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
               <button
                 (click)="setTheme('system')"
                 [class]="themeService.theme() === 'system' ? 'flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md bg-card text-default shadow-sm' : 'flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-muted hover:text-default'"
-              >
+                >
                 <ng-icon name="heroComputerDesktop" class="text-base"></ng-icon>
                 <span class="text-sm">System</span>
               </button>
               <button
                 (click)="setTheme('light')"
                 [class]="themeService.theme() === 'light' ? 'flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md bg-card text-default shadow-sm' : 'flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-muted hover:text-default'"
-              >
+                >
                 <ng-icon name="heroSun" class="text-base"></ng-icon>
                 <span class="text-sm">Light</span>
               </button>
               <button
                 (click)="setTheme('dark')"
                 [class]="themeService.theme() === 'dark' ? 'flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md bg-card text-default shadow-sm' : 'flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-muted hover:text-default'"
-              >
+                >
                 <ng-icon name="heroMoon" class="text-base"></ng-icon>
                 <span class="text-sm">Dark</span>
               </button>
             </div>
           </div>
-
+    
           <!-- Price Per Square -->
           <div class="mb-4">
             <label for="pricePerSquare" class="block text-label text-sm font-medium mb-2">
@@ -162,11 +162,11 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
                        focus:outline-none focus:ring-2
                        focus:ring-2 focus:ring-qs-accent
                        disabled:opacity-50 disabled:cursor-not-allowed"
-              />
+                />
             </div>
           </div>
-
-           <!-- Venmo input -->
+    
+          <!-- Venmo input -->
           <div class="">
             <label for="venmoUsername" class="block text-label text-sm font-medium mb-2">
               Venmo Username
@@ -183,27 +183,28 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
                        focus:outline-none focus:ring-2
                        focus:ring-2 focus:ring-qs-accent
                        disabled:opacity-50 disabled:cursor-not-allowed"
-              />
+                />
             </div>
-
+    
             <div class="flex items-center justify-center gap-2 mt-3">
-              <a
-                [href]="getVenmoLink()"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="text-link hover:text-link-hover text-sm inline-flex items-center gap-1"
-                *ngIf="venmoUsername"
-              >
-                Open Venmo Profile
-                <ng-icon
-                  name="heroArrowTopRightOnSquare"
-                  class="w-4 h-4"
-                  aria-hidden="true">
-                </ng-icon>
-              </a>
+              @if (venmoUsername) {
+                <a
+                  [href]="getVenmoLink()"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-link hover:text-link-hover text-sm inline-flex items-center gap-1"
+                  >
+                  Open Venmo Profile
+                  <ng-icon
+                    name="heroArrowTopRightOnSquare"
+                    class="w-4 h-4"
+                    aria-hidden="true">
+                  </ng-icon>
+                </a>
+              }
             </div>
           </div>
-
+    
           <!-- Lock Game toggle (owner only) -->
           <div class="mb-8">
             <div class="flex items-center justify-between p-4 rounded">
@@ -216,45 +217,49 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
               ></app-toggle>
             </div>
           </div>
-
-            <!-- Game Controls -->
-            <div class="space-y-4 mb-8">
+    
+          <!-- Game Controls -->
+          <div class="space-y-4 mb-8">
             <!-- Manage Payments (owner or manager) -->
             @if (isGameOwner || isManager) {
               <button
                 (click)="onManagePayments.emit()"
                 class="w-full bg-control hover:bg-control-hover text-default px-4 py-2 rounded flex items-center justify-center gap-2"
-              >
+                >
                 <ng-icon name="heroCreditCard" class="text-2xl"></ng-icon>
                 Manage Payments
               </button>
             }
-
+    
             <!-- Randomize Numbers (owner only) -->
             @if (isGameOwner) {
               <button (click)="onRandomize.emit()"
-                      [disabled]="isLocked"
+                [disabled]="isLocked"
                       class="w-full px-4 py-2 rounded flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed
                              bg-gradient-to-r from-qs-accent via-qs-accent-hover to-accent-600
                              hover:from-qs-accent-hover hover:via-qs-accent-hover hover:to-accent-700
                              text-white shadow-md hover:shadow-lg transition-all duration-200">
-                <span *ngIf="!isRandomized">🎲</span>
-                <ng-icon *ngIf="isRandomized" name="heroTrash" class="text-2xl"></ng-icon>
+                @if (!isRandomized) {
+                  <span>🎲</span>
+                }
+                @if (isRandomized) {
+                  <ng-icon name="heroTrash" class="text-2xl"></ng-icon>
+                }
                 {{ isRandomized ? 'Clear Numbers' : 'Randomize Numbers' }}
               </button>
             }
           </div>
-
-
+    
+    
         </div>
-
+    
         <!-- Footer with Clear Game button (owner only) -->
         @if (isGameOwner) {
           <div class="p-4 border-t border-default mt-auto bg-card">
             <button
               (click)="onClearGame.emit(); close()"
               class="w-full bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded flex items-center justify-center gap-2"
-            >
+              >
               <ng-icon name="heroTrash" class="text-2xl"></ng-icon>
               Clear Game
             </button>
@@ -265,8 +270,8 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
         }
       </div>
     </div>
-
-  `
+    
+    `
 })
 export class SettingsPanelComponent implements OnChanges {
   themeService = inject(ThemeService);

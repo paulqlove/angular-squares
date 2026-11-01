@@ -1,10 +1,10 @@
 import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { SQUARES_PROBABILITIES } from '../../utils/probability.utils';
 
 @Component({
     selector: 'app-probability-heatmap',
-    imports: [CommonModule],
+    imports: [],
     template: `
     <div class="relative">
       <!-- Grid Container -->

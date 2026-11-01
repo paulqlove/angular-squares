@@ -1,5 +1,5 @@
 import { Component, ElementRef, signal, inject, OnInit, effect, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../environments/environment';
@@ -31,7 +31,7 @@ interface Feature {
 
 @Component({
     selector: 'app-welcome',
-    imports: [CommonModule, FormsModule, RouterLink, NgIconComponent, RippleGridComponent, AppHeaderComponent, AuthModalComponent, SampleBoardComponent, SiteFooterComponent],
+    imports: [FormsModule, RouterLink, NgIconComponent, RippleGridComponent, AppHeaderComponent, AuthModalComponent, SampleBoardComponent, SiteFooterComponent],
     providers: [
         provideIcons({
             heroSquares2x2,

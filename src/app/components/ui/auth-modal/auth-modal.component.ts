@@ -1,11 +1,11 @@
 import { Component, Input, Output, EventEmitter, inject, OnChanges, SimpleChanges, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
     selector: 'app-auth-modal',
-    imports: [CommonModule, FormsModule],
+    imports: [FormsModule],
     template: `
     @if (isOpen && !checkingAuth()) {
       <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">

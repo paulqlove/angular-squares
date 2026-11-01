@@ -1,5 +1,5 @@
 import { Component, OnInit, signal, inject, HostListener } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
@@ -40,7 +40,7 @@ import {
 
 @Component({
     selector: 'app-dashboard',
-    imports: [CommonModule, FormsModule, NgIconComponent, AppHeaderComponent, UpgradePassDialogComponent],
+    imports: [FormsModule, NgIconComponent, AppHeaderComponent, UpgradePassDialogComponent],
     providers: [
         provideIcons({
             heroPlus,

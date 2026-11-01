@@ -4,36 +4,41 @@
     @if (isRandomized) {
       <div class="grid grid-cols-[1rem_repeat(10,minmax(0,1fr))] gap-0" role="row">
         <div class="number-cell empty-cell" role="columnheader"></div>
-        <div *ngFor="let num of homeNumbers; let i = index"
-             class="number-cell"
-             role="columnheader">
-          {{ num }}
-        </div>
+        @for (num of homeNumbers; track $index; let i = $index) {
+          <div
+            class="number-cell"
+            role="columnheader">
+            {{ num }}
+          </div>
+        }
       </div>
     }
 
     <!-- Grid rows -->
-    <div *ngFor="let awayNum of awayNumbers; let row = index"
-         [ngClass]="isRandomized ? 'grid grid-cols-[1rem_repeat(10,minmax(0,1fr))] gap-0' : 'grid grid-cols-[repeat(10,minmax(0,1fr))] gap-0'"
-         role="row">
-      <!-- Left side away numbers -->
-      @if (isRandomized) {
-        <div class="number-cell pr-4 label-width" role="rowheader">
-          {{ awayNum }}
-        </div>
-      }
-
-      <!-- Square cells -->
-      <div *ngFor="let homeNum of homeNumbers; let col = index"
-           [ngClass]="[getSquareClass(row, col), 'square-cell hover:bg-square-hover focus:ring-2 focus:ring-qs-accent focus:outline-none']"
-           role="gridcell"
-           tabindex="0"
-           [attr.aria-label]="getSquareAriaLabel(row, col)"
-           (click)="onSquareClick(row, col)"
-           (keydown)="onSquareKeydown($event, row, col)">
-        {{ getSquarePlayer(row, col) }}
+    @for (awayNum of awayNumbers; track $index; let row = $index) {
+      <div
+        [ngClass]="isRandomized ? 'grid grid-cols-[1rem_repeat(10,minmax(0,1fr))] gap-0' : 'grid grid-cols-[repeat(10,minmax(0,1fr))] gap-0'"
+        role="row">
+        <!-- Left side away numbers -->
+        @if (isRandomized) {
+          <div class="number-cell pr-4 label-width" role="rowheader">
+            {{ awayNum }}
+          </div>
+        }
+        <!-- Square cells -->
+        @for (homeNum of homeNumbers; track $index; let col = $index) {
+          <div
+            [ngClass]="[getSquareClass(row, col), 'square-cell hover:bg-square-hover focus:ring-2 focus:ring-qs-accent focus:outline-none']"
+            role="gridcell"
+            tabindex="0"
+            [attr.aria-label]="getSquareAriaLabel(row, col)"
+            (click)="onSquareClick(row, col)"
+            (keydown)="onSquareKeydown($event, row, col)">
+            {{ getSquarePlayer(row, col) }}
+          </div>
+        }
       </div>
-    </div>
+    }
 
     <!-- Team Labels -->
     @if (isRandomized) {

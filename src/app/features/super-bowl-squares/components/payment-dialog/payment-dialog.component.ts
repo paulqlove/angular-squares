@@ -1,12 +1,12 @@
 import { Component, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroCheck, heroXMark } from '@ng-icons/heroicons/outline';
 
 @Component({
     selector: 'app-payment-dialog',
-    imports: [CommonModule, FormsModule, NgIconComponent],
+    imports: [FormsModule, NgIconComponent],
     providers: [
         provideIcons({ heroCheck, heroXMark })
     ],

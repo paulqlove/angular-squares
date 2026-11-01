@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { calculateWinProbability } from '../../utils/probability.utils';
 import { TooltipDirective } from '../../../../shared/directives/tooltip.directive';
 
@@ -16,7 +16,7 @@ type PlayerEntry = {
 
 @Component({
     selector: 'app-players-list',
-    imports: [CommonModule, TooltipDirective],
+    imports: [TooltipDirective],
     templateUrl: './players-list.component.html',
     styleUrls: ['./players-list.component.scss']
 })

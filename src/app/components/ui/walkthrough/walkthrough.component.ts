@@ -1,10 +1,10 @@
 import { Component, inject, HostListener, computed, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { WalkthroughService } from '../../../core/services/walkthrough.service';
 
 @Component({
     selector: 'app-walkthrough',
-    imports: [CommonModule],
+    imports: [],
     template: `
     @if (walkthroughService.isActive() && walkthroughService.currentStep()) {
       <div class="fixed inset-0 z-[300]" (click)="onOverlayClick($event)">

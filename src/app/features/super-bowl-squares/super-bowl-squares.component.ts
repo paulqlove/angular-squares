@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, ViewChild, HostListener, signal, inject, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GameService, GameData, EspnLiveSnapshot } from '../../core/services/game.service';
@@ -40,21 +40,20 @@ import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.co
 @Component({
     selector: 'app-super-bowl-squares',
     imports: [
-        CommonModule,
-        FormsModule,
-        NgIconComponent,
-        GameBoardComponent,
-        PlayersListComponent,
-        WinnersAndPayoutsComponent,
-        GameStatusComponent,
-        AppHeaderComponent,
-        SettingsPanelComponent,
-        VenmoPopoverComponent,
-        PaymentDialogComponent,
-        ProbabilityHeatmapComponent,
-        BoxScoreComponent,
-        AuthModalComponent
-    ],
+    FormsModule,
+    NgIconComponent,
+    GameBoardComponent,
+    PlayersListComponent,
+    WinnersAndPayoutsComponent,
+    GameStatusComponent,
+    AppHeaderComponent,
+    SettingsPanelComponent,
+    VenmoPopoverComponent,
+    PaymentDialogComponent,
+    ProbabilityHeatmapComponent,
+    BoxScoreComponent,
+    AuthModalComponent
+],
     providers: [
         provideIcons({
             heroLockOpen,

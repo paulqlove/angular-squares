@@ -1,5 +1,5 @@
 import { Component, inject, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Meta } from '@angular/platform-browser';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
@@ -11,11 +11,10 @@ import { AuthService } from './core/services/auth.service';
 @Component({
     selector: 'app-root',
     imports: [
-        CommonModule,
-        RouterOutlet,
-        ToastComponent,
-        WalkthroughComponent
-    ],
+    RouterOutlet,
+    ToastComponent,
+    WalkthroughComponent
+],
     template: `
     @if (authService.isLoading()) {
       <div class="fixed inset-0 bg-page flex items-center justify-center">

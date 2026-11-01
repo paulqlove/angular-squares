@@ -10,7 +10,7 @@
     </div>
   </div>
 } @else if (gameNotFound()) {
-<!-- Game Not Found State -->
+  <!-- Game Not Found State -->
   <div class="flex items-center justify-center min-h-screen p-4 bg-page">
     <div class="max-w-md text-center">
       <div class="flex items-center justify-center w-20 h-20 mx-auto mb-6 bg-red-100 rounded-full">
@@ -25,13 +25,13 @@
       <button
         (click)="goBack()"
         class="px-6 py-3 text-white transition-colors rounded-lg bg-qs-accent hover:bg-qs-accent-hover"
-      >
+        >
         Go Back
       </button>
     </div>
   </div>
 } @else {
-<!-- Main Game View -->
+  <!-- Main Game View -->
   <app-shared-header variant="fixed">
     @if (venmoUsername) {
       <app-venmo-popover [username]="venmoUsername"></app-venmo-popover>
@@ -41,7 +41,7 @@
       class="p-2.5 text-muted hover:text-heading rounded-lg hover:bg-card transition-colors flex items-center justify-center"
       title="Share game"
       aria-label="Share game"
-    >
+      >
       <ng-icon name="heroShare" class="text-2xl"></ng-icon>
     </button>
     <button
@@ -49,7 +49,7 @@
       class="p-2.5 text-muted hover:text-heading rounded-lg hover:bg-card transition-colors flex items-center justify-center"
       title="Show tutorial"
       aria-label="Show tutorial"
-    >
+      >
       <ng-icon name="heroQuestionMarkCircle" class="text-2xl"></ng-icon>
     </button>
     <button
@@ -57,7 +57,7 @@
       class="p-2.5 text-muted hover:text-heading rounded-lg hover:bg-card transition-colors flex items-center justify-center"
       aria-label="Open settings"
       data-walkthrough="settings-button"
-    >
+      >
       <ng-icon name="heroCog6Tooth" class="text-2xl"></ng-icon>
     </button>
   </app-shared-header>
@@ -93,7 +93,7 @@
               class="p-2 transition-colors rounded-lg text-muted hover:text-heading hover:bg-control"
               title="Back to dashboard"
               aria-label="Back to dashboard"
-            >
+              >
               <ng-icon name="heroArrowLeft" class="text-xl"></ng-icon>
             </button>
           }
@@ -112,7 +112,7 @@
                   class="p-1.5 text-muted hover:text-heading hover:bg-control rounded transition-colors"
                   title="Edit name"
                   aria-label="Edit your name"
-                >
+                  >
                   <ng-icon name="heroPencilSquare" class="text-sm"></ng-icon>
                 </button>
               }
@@ -120,11 +120,11 @@
           } @else {
             <div class="flex flex-col gap-1">
               <input type="text" [(ngModel)]="currentPlayer"
-                     placeholder="Enter your name"
-                     [disabled]="isLocked"
-                     [class.border-red-500]="duplicateNameWarning()"
-                     [class.ring-red-200]="duplicateNameWarning()"
-                     class="w-full px-3 py-1.5 text-sm border rounded-lg bg-input text-default text-center sm:text-left focus:outline-none focus:ring-2 focus:ring-qs-accent disabled:opacity-50 disabled:cursor-not-allowed">
+                placeholder="Enter your name"
+                [disabled]="isLocked"
+                [class.border-red-500]="duplicateNameWarning()"
+                [class.ring-red-200]="duplicateNameWarning()"
+                class="w-full px-3 py-1.5 text-sm border rounded-lg bg-input text-default text-center sm:text-left focus:outline-none focus:ring-2 focus:ring-qs-accent disabled:opacity-50 disabled:cursor-not-allowed">
               @if (duplicateNameWarning()) {
                 <span class="text-xs text-red-500 text-center">{{ duplicateNameWarning() }}</span>
               }
@@ -210,76 +210,78 @@
 
         <!-- Players List -->
         <div class="col-span-1 lg:col-span-2" data-walkthrough="players-list">
-            <div class="flex flex-col justify-between h-full rounded-lg">
-                <!-- Header with toggle button -->
-                <div class="w-full">
-                    <div class="flex items-center justify-between px-4 pt-4 pb-[0.5rem]">
-                        <span class="text-lg font-bold text-heading">Players</span>
-                        <button
-                            (click)="isPlayersListVisible = !isPlayersListVisible"
-                            class="flex items-center gap-1 text-sm lg:hidden text-muted">
-                            {{ isPlayersListVisible ? 'Hide' : 'Show' }}
-                            <ng-icon name="heroChevronDown"
-                                    [class.rotate-180]="!isPlayersListVisible"
-                                    class="text-2xl transition-transform duration-200 transform">
-                            </ng-icon>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Players list content -->
-                <div [class.hidden]="!isPlayersListVisible" class="flex-1 p-4 pt-0 lg:block">
-                    <app-players-list
-                        [playerStats]="playerStats"
-                        [playerColors]="playerColors"
-                        [paidPlayers]="paidPlayers"
-                        [homeNumbers]="homeNumbers"
-                        [awayNumbers]="awayNumbers"
-                        [selectedSquares]="selectedSquares"
-                        (playerSelected)="onPlayerSelected($event)">
-                    </app-players-list>
-                </div>
-
-                <app-game-status
-                    [selectedSquares]="selectedSquares"
-                    [playerStats]="playerStats"
-                    [paidPlayers]="paidPlayers">
-                </app-game-status>
+          <div class="flex flex-col justify-between h-full rounded-lg">
+            <!-- Header with toggle button -->
+            <div class="w-full">
+              <div class="flex items-center justify-between px-4 pt-4 pb-[0.5rem]">
+                <span class="text-lg font-bold text-heading">Players</span>
+                <button
+                  (click)="isPlayersListVisible = !isPlayersListVisible"
+                  class="flex items-center gap-1 text-sm lg:hidden text-muted">
+                  {{ isPlayersListVisible ? 'Hide' : 'Show' }}
+                  <ng-icon name="heroChevronDown"
+                    [class.rotate-180]="!isPlayersListVisible"
+                    class="text-2xl transition-transform duration-200 transform">
+                  </ng-icon>
+                </button>
+              </div>
             </div>
+
+            <!-- Players list content -->
+            <div [class.hidden]="!isPlayersListVisible" class="flex-1 p-4 pt-0 lg:block">
+              <app-players-list
+                [playerStats]="playerStats"
+                [playerColors]="playerColors"
+                [paidPlayers]="paidPlayers"
+                [homeNumbers]="homeNumbers"
+                [awayNumbers]="awayNumbers"
+                [selectedSquares]="selectedSquares"
+                (playerSelected)="onPlayerSelected($event)">
+              </app-players-list>
+            </div>
+
+            <app-game-status
+              [selectedSquares]="selectedSquares"
+              [playerStats]="playerStats"
+              [paidPlayers]="paidPlayers">
+            </app-game-status>
+          </div>
         </div>
       </div>
 
       <!-- Winners and Payouts -->
       <div data-walkthrough="winners-payouts" (click)="$event.stopPropagation()">
         <app-winners-and-payouts
-        [winners]="winners"
-        [quarterPayouts]="quarterPayouts"
-        [playerColors]="playerColors"
-        [totalPot]="totalPot"
-        [scores]="scores"
-        [homeTeam]="homeTeam"
-        [awayTeam]="awayTeam"
-        (quarterClick)="onQuarterClick($event)">
+          [winners]="winners"
+          [quarterPayouts]="quarterPayouts"
+          [playerColors]="playerColors"
+          [totalPot]="totalPot"
+          [scores]="scores"
+          [homeTeam]="homeTeam"
+          [awayTeam]="awayTeam"
+          (quarterClick)="onQuarterClick($event)">
         </app-winners-and-payouts>
       </div>
 
       <!-- Alert notifications -->
-      <div *ngIf="showAlert"
-           class="fixed p-4 -translate-x-1/2 border-l-4 border-red-400 rounded-lg shadow-lg bottom-40 left-1/2 w-72 bg-red-50"
-           role="alert">
-        <div class="flex">
-          <div class="flex-shrink-0">
-            <svg class="w-5 h-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-            </svg>
-          </div>
-          <div class="ml-3">
-            <p class="text-sm text-red-700">
-              {{ alertMessage }}
-            </p>
+      @if (showAlert) {
+        <div
+          class="fixed p-4 -translate-x-1/2 border-l-4 border-red-400 rounded-lg shadow-lg bottom-40 left-1/2 w-72 bg-red-50"
+          role="alert">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <svg class="w-5 h-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div class="ml-3">
+              <p class="text-sm text-red-700">
+                {{ alertMessage }}
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      }
 
       <app-payment-dialog
         #paymentDialog
@@ -297,7 +299,7 @@
           <button
             (click)="closeShareModal()"
             class="p-2 transition-colors rounded-lg text-muted hover:text-heading hover:bg-control"
-          >
+            >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
             </svg>
@@ -317,7 +319,7 @@
                 class="p-3 text-white transition-colors rounded-lg bg-qs-accent hover:bg-qs-accent-hover"
                 title="Copy code"
                 aria-label="Copy game code"
-              >
+                >
                 <ng-icon name="heroClipboard" class="text-xl"></ng-icon>
               </button>
             </div>
@@ -333,13 +335,13 @@
                 [value]="getShareableLink()"
                 readonly
                 class="flex-1 px-3 py-2 text-sm truncate bg-control text-muted rounded-lg"
-              />
+                />
               <button
                 (click)="copyShareLink()"
                 class="p-2.5 text-white transition-colors rounded-lg bg-qs-accent hover:bg-qs-accent-hover"
                 title="Copy link"
                 aria-label="Copy share link"
-              >
+                >
                 <ng-icon name="heroClipboard" class="text-lg"></ng-icon>
               </button>
             </div>
@@ -356,7 +358,7 @@
         <button
           (click)="closeShareModal()"
           class="w-full px-4 py-3 mt-6 font-medium text-default transition-colors bg-control rounded-lg hover:bg-control-hover"
-        >
+          >
           Done
         </button>
       </div>
@@ -372,7 +374,7 @@
           <button
             (click)="showNameEditModal.set(false)"
             class="p-2 text-muted transition-colors rounded-lg hover:text-default hover:bg-control"
-          >
+            >
             <ng-icon name="heroXMark" class="text-xl"></ng-icon>
           </button>
         </div>
@@ -384,7 +386,7 @@
             placeholder="Enter your name"
             class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-qs-accent focus:ring-2 focus:ring-qs-accent-soft outline-none text-default"
             (keyup.enter)="saveNameEdit()"
-          />
+            />
           @if (isEditingNameTaken()) {
             <p class="mt-2 text-sm text-red-500">This name is already in use. Please choose a different name.</p>
           }
@@ -394,14 +396,14 @@
           <button
             (click)="showNameEditModal.set(false)"
             class="px-5 py-2 font-medium text-muted transition-colors rounded-lg hover:bg-control"
-          >
+            >
             Cancel
           </button>
           <button
             (click)="saveNameEdit()"
             [disabled]="isSavingName() || !editingName.trim()"
             class="px-6 py-2 font-bold text-white transition-colors rounded-lg bg-qs-accent hover:bg-qs-accent-hover disabled:opacity-50"
-          >
+            >
             @if (isSavingName()) {
               Saving...
             } @else {
@@ -437,7 +439,7 @@
             placeholder="Enter a new name"
             class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-qs-accent focus:ring-2 focus:ring-qs-accent-soft outline-none text-default"
             (keyup.enter)="saveForceNameChange()"
-          />
+            />
           @if (isForceNameTaken()) {
             <p class="mt-2 text-sm text-red-500">This name is already in use. Please choose a different name.</p>
           }
@@ -448,7 +450,7 @@
             (click)="saveForceNameChange()"
             [disabled]="isSavingForceName() || !forceNameValue.trim() || isForceNameTaken()"
             class="px-6 py-2 font-bold text-white transition-colors rounded-lg bg-qs-accent hover:bg-qs-accent-hover disabled:opacity-50"
-          >
+            >
             @if (isSavingForceName()) {
               Saving...
             } @else {

@@ -1,46 +1,48 @@
 import { Component, ElementRef, HostListener, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroCreditCard } from '@ng-icons/heroicons/outline';
 
 @Component({
     selector: 'app-venmo-popover',
-    imports: [CommonModule, NgIconComponent],
+    imports: [NgIconComponent],
     providers: [provideIcons({ heroCreditCard })],
     template: `
     <div class="relative">
       <button
         (click)="isOpen = !isOpen"
         class="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-qs-accent hover:bg-qs-accent-hover rounded-lg transition-colors"
-      >
+        >
         <ng-icon name="heroCreditCard" class="text-lg"></ng-icon>
         <span>Pay</span>
       </button>
-
-      <div *ngIf="isOpen" class="absolute right-0 top-full mt-2 bg-card rounded-lg shadow-lg border border-default p-4 w-56 z-50 space-y-3">
-        <div class="flex items-center justify-center gap-2">
-          <button (click)="copyUsername($event)" class="text-lg font-light text-default hover:text-qs-accent transition-colors">
-            {{ username }}
-          </button>
-          <button (click)="copyUsername($event)" class="text-muted hover:text-default transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-            </svg>
+    
+      @if (isOpen) {
+        <div class="absolute right-0 top-full mt-2 bg-card rounded-lg shadow-lg border border-default p-4 w-56 z-50 space-y-3">
+          <div class="flex items-center justify-center gap-2">
+            <button (click)="copyUsername($event)" class="text-lg font-light text-default hover:text-qs-accent transition-colors">
+              {{ username }}
+            </button>
+            <button (click)="copyUsername($event)" class="text-muted hover:text-default transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+            </button>
+          </div>
+          <div class="text-center text-xs text-qs-ok font-medium h-4">
+            {{ copied ? 'Copied!' : '' }}
+          </div>
+          <button
+            (click)="openVenmo($event)"
+            class="block w-full px-3 py-2 text-center text-sm font-semibold text-white bg-qs-accent hover:bg-qs-accent-hover rounded-lg transition-colors"
+            >
+            Open Venmo
           </button>
         </div>
-        <div class="text-center text-xs text-qs-ok font-medium h-4">
-          {{ copied ? 'Copied!' : '' }}
-        </div>
-        <button
-          (click)="openVenmo($event)"
-          class="block w-full px-3 py-2 text-center text-sm font-semibold text-white bg-qs-accent hover:bg-qs-accent-hover rounded-lg transition-colors"
-        >
-          Open Venmo
-        </button>
-      </div>
+      }
     </div>
-  `
+    `
 })
 export class VenmoPopoverComponent {
   @Input() username = '';
