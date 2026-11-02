@@ -60,8 +60,8 @@ interface Feature {
 
       <!-- Hero -->
       <section class="overflow-hidden">
-        <div class="mx-auto max-w-[1600px] px-4 sm:px-8 pt-10 pb-16 md:pt-16 md:pb-24 xl:pb-0">
-        <div class="grid grid-cols-1 xl:grid-cols-[1fr_minmax(0,1.05fr)] gap-10 xl:gap-16 items-center">
+        <div class="mx-auto max-w-[1600px] px-4 sm:px-8 pt-10 pb-16 md:pt-16 md:pb-24 min-[1000px]:pb-0">
+        <div class="grid grid-cols-1 min-[1000px]:grid-cols-[1fr_minmax(0,1.05fr)] gap-10 min-[1000px]:gap-16 items-center">
           <div>
             <p class="qs-eyebrow">Football squares / Free for game day</p>
             <h1 class="qs-display mt-5 max-w-[14ch]">
@@ -120,7 +120,7 @@ interface Feature {
             <p class="qs-label mt-6 text-qs-muted">Free · Players don't need an account</p>
           </div>
 
-          <app-phone-demo class="xl:-mb-[14rem] xl:-translate-x-12 min-[1600px]:-translate-x-20"></app-phone-demo>
+          <app-phone-demo class="min-[1000px]:-mb-[14rem] min-[1000px]:-translate-x-8 xl:-translate-x-12 min-[1600px]:-translate-x-20"></app-phone-demo>
         </div>
         </div>
       </section>
