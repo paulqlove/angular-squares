@@ -7,6 +7,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { GameService, GameListItem, BoardSize } from '../../core/services/game.service';
 import { QuarterSplit, SPLIT_PRESETS, DEFAULT_SPLIT, isValidSplit } from '../../core/plans';
 import { EspnService, EspnGame, SportType, SPORT_CONFIG } from '../../core/services/espn.service';
+import { getTeamLogoByAbbreviation, getTeamColors } from '../content/teams-data';
 import { ToastService } from '../../core/services/toast.service';
 import { SanitizationService } from '../../core/services/sanitization.service';
 import { WalkthroughService, WalkthroughStep } from '../../core/services/walkthrough.service';
@@ -478,8 +479,9 @@ import {
                           type="button"
                           (click)="selectEspnGame(game.id)"
                           [attr.aria-pressed]="selectedEspnGameId === game.id"
-                          class="rounded-inner border bg-qs-panel p-3 text-left transition-colors"
+                          class="relative overflow-hidden rounded-inner border p-3 text-left transition-colors"
                           [class]="selectedEspnGameId === game.id ? 'border-qs-accent outline outline-2 -outline-offset-2 outline-qs-accent' : 'border-qs-line hover:border-qs-line-strong'"
+                          [style.background]="getGameGradient(game)"
                         >
                           <div class="flex items-center justify-between gap-2">
                             <span class="qs-badge" [class]="getGameStatusClass(game.status)">{{ getGameStatusText(game) }}</span>
@@ -487,7 +489,16 @@ import {
                               <ng-icon name="heroCheckCircle" class="text-lg text-qs-accent"></ng-icon>
                             }
                           </div>
-                          <p class="mt-2 truncate font-semibold text-qs-ink">{{ game.awayTeam }} &#64; {{ game.homeTeam }}</p>
+                          <p class="mt-2 flex items-center gap-1.5 truncate font-semibold text-qs-ink">
+                            @if (getTeamLogo(game.awayTeam); as logo) {
+                              <img [src]="logo" [alt]="game.awayTeam" class="h-4 w-4 object-contain" />
+                            }
+                            {{ game.awayTeam }} &#64;
+                            @if (getTeamLogo(game.homeTeam); as logo) {
+                              <img [src]="logo" [alt]="game.homeTeam" class="h-4 w-4 object-contain" />
+                            }
+                            {{ game.homeTeam }}
+                          </p>
                           <p class="qs-label mt-1 text-[10px] text-qs-muted">
                             @if (game.status === 'pre' && game.date) {
                               {{ formatGameDate(game.date) }}
@@ -687,11 +698,21 @@ import {
                         [class]="editEspnGameId === game.id
                           ? 'p-3 border-2 border-qs-accent bg-qs-accent-soft rounded-xl text-left transition-all'
                           : 'p-3 border-2 border-default hover:border-hover rounded-xl text-left transition-all'"
+                        [style.background]="getGameGradient(game)"
                       >
                         <div class="flex items-center justify-between">
                           <div>
-                            <p class="font-semibold text-sm"
-                              [class]="editEspnGameId === game.id ? 'text-qs-ink' : 'text-heading'">{{ game.awayTeam }} &#64; {{ game.homeTeam }}</p>
+                            <p class="flex items-center gap-1.5 font-semibold text-sm"
+                              [class]="editEspnGameId === game.id ? 'text-qs-ink' : 'text-heading'">
+                              @if (getTeamLogo(game.awayTeam); as logo) {
+                                <img [src]="logo" [alt]="game.awayTeam" class="h-4 w-4 object-contain" />
+                              }
+                              {{ game.awayTeam }} &#64;
+                              @if (getTeamLogo(game.homeTeam); as logo) {
+                                <img [src]="logo" [alt]="game.homeTeam" class="h-4 w-4 object-contain" />
+                              }
+                              {{ game.homeTeam }}
+                            </p>
                             @if (game.status === 'pre' && game.date) {
                               <p class="text-xs"
                                 [class]="editEspnGameId === game.id ? 'text-qs-accent' : 'text-muted'">{{ formatGameDate(game.date) }}</p>
@@ -1267,6 +1288,19 @@ export class DashboardComponent implements OnInit {
       hour: 'numeric',
       minute: '2-digit'
     });
+  }
+
+  getTeamLogo(abbrev: string): string | null {
+    return getTeamLogoByAbbreviation(abbrev, 100);
+  }
+
+  getGameGradient(game: EspnGame): string {
+    const awayColors = getTeamColors(game.awayTeam);
+    const homeColors = getTeamColors(game.homeTeam);
+    if (awayColors && homeColors) {
+      return `linear-gradient(135deg, ${awayColors.primary}15 0%, transparent 50%, ${homeColors.primary}15 100%)`;
+    }
+    return '';
   }
 
   async signOut(): Promise<void> {

@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BoardSize, getBoardDimensions } from '../../../../core/services/game.service';
+import { getTeamLogoByAbbreviation } from '../../../content/teams-data';
 
 @Component({
     selector: 'app-game-board',
@@ -130,5 +131,9 @@ export class GameBoardComponent {
       event.preventDefault();
       this.squareClick.emit({ row, col });
     }
+  }
+
+  getTeamLogo(abbrev: string): string | null {
+    return getTeamLogoByAbbreviation(abbrev, 100);
   }
 } 
