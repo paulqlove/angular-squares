@@ -34,50 +34,32 @@
   <!-- Main Game View -->
   <app-shared-header variant="fixed">
     <button
+      type="button"
       (click)="openShareModal()"
-      class="min-h-11 min-w-11 p-2.5 text-qs-tile-muted hover:text-qs-tile-ink rounded-lg hover:bg-white/10 transition-colors flex items-center justify-center"
-      title="Share game"
-      aria-label="Share game"
+      class="qs-btn qs-btn-ghost px-3 text-qs-tile-ink hover:bg-white/10"
       >
-      <ng-icon name="heroShare" class="text-2xl"></ng-icon>
+      <ng-icon name="heroShare" class="text-lg"></ng-icon>
+      Share
     </button>
     <button
+      type="button"
       (click)="startWalkthrough()"
-      class="min-h-11 min-w-11 p-2.5 text-qs-tile-muted hover:text-qs-tile-ink rounded-lg hover:bg-white/10 transition-colors flex items-center justify-center"
+      class="min-h-11 min-w-11 p-2.5 text-qs-tile-muted hover:text-qs-tile-ink rounded-btn hover:bg-white/10 transition-colors flex items-center justify-center"
       title="Show tutorial"
       aria-label="Show tutorial"
       >
       <ng-icon name="heroQuestionMarkCircle" class="text-2xl"></ng-icon>
     </button>
-    <button
-      (click)="showSettings.set(true)"
-      class="min-h-11 min-w-11 p-2.5 text-qs-tile-muted hover:text-qs-tile-ink rounded-lg hover:bg-white/10 transition-colors flex items-center justify-center"
-      aria-label="Open settings"
-      data-walkthrough="settings-button"
-      >
-      <ng-icon name="heroCog6Tooth" class="text-2xl"></ng-icon>
-    </button>
   </app-shared-header>
 
-  <app-settings-panel
+  <app-edit-game-dialog
     [isOpen]="showSettings()"
-    (closed)="showSettings.set(false)"
-    [isRandomized]="isRandomized"
     [isLocked]="isLocked"
-    [hostNote]="hostNote"
-    [homeTeam]="homeTeam"
-    [awayTeam]="awayTeam"
-    [pricePerSquare]="currentPrice"
-    [isGameOwner]="isGameOwner()"
-    [isManager]="isManager()"
-    (onRandomize)="randomizeNumbers()"
-    (onToggleLock)="toggleLock()"
-    (onHostNoteChange)="onHostNoteChange($event)"
-    (onTeamNameChange)="onTeamNameChange($event)"
-    (onPriceChange)="onPriceChange($event)"
-    (onManagePayments)="onManagePayments()"
-    (onClearGame)="onClearGame()"
-  ></app-settings-panel>
+    [values]="{ awayTeam: awayTeam, homeTeam: homeTeam, pricePerSquare: currentPrice, hostNote: hostNote }"
+    (closed)="showSettings.set(false)"
+    (saved)="onEditGameSaved($event)"
+    (clearGame)="onClearGame(true)"
+  ></app-edit-game-dialog>
 
   <div class="container mx-auto">
     <div class="space-y-6">
@@ -133,6 +115,38 @@
           }
         </div>
       </div>
+
+      <!-- Host tools (owner and co-host) -->
+      @if (isGameOwner() || isManager()) {
+        <div class="flex flex-col gap-3 border-y border-qs-line px-3 py-3 sm:flex-row sm:items-center" data-walkthrough="host-tools">
+          <div class="flex items-center justify-between gap-2 sm:contents">
+            <p class="qs-eyebrow qs-eyebrow-bar sm:mr-2">{{ isGameOwner() ? 'Host tools' : 'Co-host tools' }}</p>
+            <span class="qs-badge sm:order-last" [class.qs-badge-ok]="!isLocked">{{ isLocked ? 'Locked' : 'Open for picks' }}</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-1 sm:items-center">
+            @if (isGameOwner()) {
+              <button type="button" (click)="toggleLock()" class="qs-btn qs-btn-secondary px-3" [attr.aria-pressed]="isLocked">
+                <ng-icon [name]="isLocked ? 'heroLockClosed' : 'heroLockOpen'" class="text-base"></ng-icon>
+                {{ isLocked ? 'Unlock' : 'Lock board' }}
+              </button>
+              <button type="button" (click)="randomizeNumbers()" [disabled]="isLocked" class="qs-btn qs-btn-secondary px-3" [title]="isLocked ? 'Unlock the board to change numbers' : ''">
+                <ng-icon [name]="isRandomized ? 'heroArrowPath' : 'heroSparkles'" class="text-base"></ng-icon>
+                {{ isRandomized ? 'Clear numbers' : 'Draw numbers' }}
+              </button>
+            }
+            <button type="button" (click)="onManagePayments()" class="qs-btn qs-btn-secondary px-3" [class.col-span-2]="!isGameOwner()">
+              <ng-icon name="heroCheckCircle" class="text-base"></ng-icon>
+              Confirm players
+            </button>
+            @if (isGameOwner()) {
+              <button type="button" (click)="showSettings.set(true)" class="qs-btn qs-btn-ghost px-3 sm:ml-auto">
+                <ng-icon name="heroPencilSquare" class="text-base"></ng-icon>
+                Edit game
+              </button>
+            }
+          </div>
+        </div>
+      }
 
       <!-- Grid container for board and players -->
       <div class="grid grid-cols-1 gap-6 lg:grid-cols-4">
