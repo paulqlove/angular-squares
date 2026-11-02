@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy, OnInit, signal } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, OnInit, signal, effect } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { SeoService } from '../../core/services/seo.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -192,6 +192,17 @@ export class TeamPageComponent implements OnInit {
   public loading = signal(true);
   public showAuthModal = signal(false);
   public isAuthenticated = this.authService.isAuthenticated;
+  private pendingCreateRedirect = false;
+
+  constructor() {
+    // Watch for auth state change after showing modal
+    effect(() => {
+      if (this.isAuthenticated() && this.pendingCreateRedirect) {
+        this.pendingCreateRedirect = false;
+        window.location.href = '/dashboard';
+      }
+    });
+  }
 
   ngOnInit(): void {
     const slug = this.route.snapshot.paramMap.get('slug');
@@ -271,13 +282,13 @@ export class TeamPageComponent implements OnInit {
     } else {
       // Store intent before auth so it persists through popup flow
       sessionStorage.setItem('qs_create_after_auth', 'true');
+      this.pendingCreateRedirect = true;
       this.showAuthModal.set(true);
     }
   }
 
   public onAuthenticated(): void {
     this.showAuthModal.set(false);
-    // Force navigation - router.navigate sometimes doesn't work after popup auth
-    window.location.href = '/dashboard';
+    // Effect will handle navigation when auth state changes
   }
 }
