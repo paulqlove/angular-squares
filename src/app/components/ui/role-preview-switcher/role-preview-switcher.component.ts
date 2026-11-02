@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { AuthService } from '../../../core/services/auth.service';
 import { PreviewPlan, PreviewRole, RolePreviewService } from '../../../core/services/role-preview.service';
 
@@ -7,7 +7,7 @@ import { PreviewPlan, PreviewRole, RolePreviewService } from '../../../core/serv
   selector: 'app-role-preview-switcher',
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
-    @if (authService.isPreviewAdmin()) {
+    @if (authService.isPreviewAdmin() && !hidden()) {
       <div
         class="no-print fixed bottom-4 [.has-host-bar_&]:bottom-24 left-4 z-[150] flex max-w-[calc(100vw-2rem)] flex-wrap items-center gap-2 rounded-card border bg-qs-panel py-1.5 pl-3 pr-1.5 shadow-pop"
         [class]="previewing() ? 'border-qs-warn' : 'border-qs-line'"
@@ -37,6 +37,16 @@ import { PreviewPlan, PreviewRole, RolePreviewService } from '../../../core/serv
             Preview
           </span>
         }
+        <button
+          type="button"
+          (click)="hidden.set(true)"
+          class="ml-1 flex h-7 w-7 items-center justify-center rounded-btn text-qs-muted hover:bg-qs-panel-2 hover:text-qs-ink"
+          aria-label="Hide preview control"
+        >
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
       </div>
     }
   `
@@ -44,6 +54,7 @@ import { PreviewPlan, PreviewRole, RolePreviewService } from '../../../core/serv
 export class RolePreviewSwitcherComponent {
   protected authService = inject(AuthService);
   protected preview = inject(RolePreviewService);
+  protected hidden = signal(false);
 
   protected previewing(): boolean {
     return this.preview.role() !== 'actual' || this.preview.plan() !== 'actual';
