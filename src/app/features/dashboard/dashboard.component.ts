@@ -179,6 +179,96 @@ import {
             }
           </div>
 
+          <!-- Admin Panel: Gifted Season Passes -->
+          @if (isAdmin()) {
+            <div class="qs-card mt-8 p-5">
+              <button
+                type="button"
+                (click)="toggleAdminPanel()"
+                class="flex w-full items-center justify-between"
+              >
+                <div>
+                  <p class="qs-label text-qs-muted">Admin</p>
+                  <p class="qs-title mt-1 text-2xl">Gift Season Passes</p>
+                </div>
+                <ng-icon
+                  [name]="showAdminPanel() ? 'heroChevronDown' : 'heroArrowRight'"
+                  class="text-xl text-qs-muted"
+                ></ng-icon>
+              </button>
+
+              @if (showAdminPanel()) {
+                <div class="mt-5 border-t border-qs-line pt-5">
+                  <!-- Add new pass -->
+                  <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+                    <div class="flex-1">
+                      <label class="qs-label text-qs-muted">Email address</label>
+                      <input
+                        type="email"
+                        [(ngModel)]="newGiftEmail"
+                        placeholder="friend@example.com"
+                        class="mt-1 w-full rounded-btn border border-qs-line bg-qs-panel px-3 py-2 text-qs-ink placeholder:text-qs-muted/60 focus:border-qs-accent focus:outline-none"
+                        (keyup.enter)="grantSeasonPass()"
+                      />
+                    </div>
+                    <div class="w-32">
+                      <label class="qs-label text-qs-muted">Days</label>
+                      <input
+                        type="number"
+                        [(ngModel)]="newGiftDays"
+                        min="1"
+                        max="365"
+                        class="mt-1 w-full rounded-btn border border-qs-line bg-qs-panel px-3 py-2 text-qs-ink focus:border-qs-accent focus:outline-none"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      (click)="grantSeasonPass()"
+                      [disabled]="isGrantingPass() || !newGiftEmail.trim()"
+                      class="qs-btn qs-btn-primary"
+                    >
+                      @if (isGrantingPass()) {
+                        Granting...
+                      } @else {
+                        Grant Pass
+                      }
+                    </button>
+                  </div>
+
+                  <!-- List of gifted passes -->
+                  <div class="mt-5">
+                    <p class="qs-label text-qs-muted mb-3">Active gifted passes</p>
+                    @if (isLoadingGiftedPasses()) {
+                      <p class="text-qs-muted">Loading...</p>
+                    } @else if (giftedPasses().length === 0) {
+                      <p class="text-qs-muted">No gifted passes yet</p>
+                    } @else {
+                      <div class="space-y-2">
+                        @for (pass of giftedPasses(); track pass.email) {
+                          <div class="flex items-center justify-between rounded-btn border border-qs-line bg-qs-panel-2 px-3 py-2">
+                            <div>
+                              <p class="font-medium text-qs-ink">{{ pass.email }}</p>
+                              <p class="text-sm" [class]="isPassExpired(pass.expiresAt) ? 'text-qs-warn' : 'text-qs-muted'">
+                                {{ formatExpiry(pass.expiresAt) }}
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              (click)="revokePass(pass.email)"
+                              class="qs-btn qs-btn-danger text-sm"
+                            >
+                              Revoke
+                            </button>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+
           <section class="mt-12" data-walkthrough="my-games" aria-labelledby="hosting-heading">
             <div class="flex items-baseline justify-between border-b border-qs-line pb-3">
               <h3 id="hosting-heading" class="qs-eyebrow qs-eyebrow-bar">01 / Hosting</h3>
@@ -1354,5 +1444,76 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Admin: Gifted Season Pass Management
+  // ─────────────────────────────────────────────────────────────────────────────
 
+  isAdmin = this.authService.isPreviewAdmin;
+  showAdminPanel = signal(false);
+  giftedPasses = signal<{ email: string; expiresAt: number; updatedAt?: number }[]>([]);
+  newGiftEmail = '';
+  newGiftDays = 210;
+  isLoadingGiftedPasses = signal(false);
+  isGrantingPass = signal(false);
+
+  toggleAdminPanel(): void {
+    const isOpen = !this.showAdminPanel();
+    this.showAdminPanel.set(isOpen);
+    if (isOpen) {
+      this.loadGiftedPasses();
+    }
+  }
+
+  async loadGiftedPasses(): Promise<void> {
+    this.isLoadingGiftedPasses.set(true);
+    try {
+      const passes = await this.gameService.listGiftedSeasonPasses();
+      this.giftedPasses.set(passes);
+    } catch {
+      this.toastService.error('Failed to load gifted passes');
+    } finally {
+      this.isLoadingGiftedPasses.set(false);
+    }
+  }
+
+  async grantSeasonPass(): Promise<void> {
+    const email = this.newGiftEmail.trim().toLowerCase();
+    if (!email || !email.includes('@')) {
+      this.toastService.error('Please enter a valid email');
+      return;
+    }
+    this.isGrantingPass.set(true);
+    try {
+      await this.gameService.grantSeasonPass(email, this.newGiftDays);
+      this.newGiftEmail = '';
+      this.toastService.success(`Season pass granted to ${email}`);
+      await this.loadGiftedPasses();
+    } catch {
+      this.toastService.error('Failed to grant season pass');
+    } finally {
+      this.isGrantingPass.set(false);
+    }
+  }
+
+  async revokePass(email: string): Promise<void> {
+    if (!confirm(`Revoke season pass for ${email}?`)) return;
+    try {
+      await this.gameService.revokeSeasonPass(email);
+      this.toastService.success(`Pass revoked for ${email}`);
+      await this.loadGiftedPasses();
+    } catch {
+      this.toastService.error('Failed to revoke pass');
+    }
+  }
+
+  formatExpiry(expiresAt: number): string {
+    const days = Math.ceil((expiresAt - Date.now()) / 86_400_000);
+    if (days <= 0) return 'Expired';
+    if (days === 1) return '1 day left';
+    return `${days} days left`;
+  }
+
+  isPassExpired(expiresAt: number): boolean {
+    return expiresAt <= Date.now();
+  }
 }

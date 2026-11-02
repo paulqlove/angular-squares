@@ -43,8 +43,25 @@ export class PlanService {
   }
 
   async refresh(uid: string): Promise<void> {
-    const [admin, entitlement] = await Promise.all([this.gameService.isAdmin(uid), this.gameService.getEntitlement(uid)]);
+    const user = this.authService.realUser();
+    const email = user?.email;
+
+    const [admin, entitlement, giftedPass] = await Promise.all([
+      this.gameService.isAdmin(uid),
+      this.gameService.getEntitlement(uid),
+      email ? this.gameService.getGiftedSeasonPass(email) : Promise.resolve(null)
+    ]);
+
     this.admin.set(admin);
+
+    // Use whichever entitlement is better: paid or gifted
+    if (giftedPass && isActive(giftedPass)) {
+      // Gifted pass is active - use it if no paid entitlement or gifted expires later
+      if (!entitlement || !isActive(entitlement) || giftedPass.expiresAt > entitlement.expiresAt) {
+        this.entitlement.set(giftedPass);
+        return;
+      }
+    }
     this.entitlement.set(entitlement);
   }
 }

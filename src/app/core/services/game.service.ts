@@ -879,4 +879,71 @@ export class GameService {
       })
     };
   }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Gifted Season Pass (admin-only feature for granting passes to friends)
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /** Encode email for use as Firebase key (replace . with ,) */
+  private encodeEmailKey(email: string): string {
+    return email.toLowerCase().replace(/\./g, ',');
+  }
+
+  /** Decode Firebase key back to email */
+  private decodeEmailKey(key: string): string {
+    return key.replace(/,/g, '.');
+  }
+
+  /** Check if an email has a gifted season pass. Returns expiry timestamp or null. */
+  async getGiftedSeasonPass(email: string): Promise<Entitlement | null> {
+    if (!this.isBrowser || !email) return null;
+    try {
+      const key = this.encodeEmailKey(email);
+      const snapshot = await get(ref(this.db, `giftedSeasonPass/${key}`));
+      const data = snapshot.val();
+      if (!data || typeof data.expiresAt !== 'number') return null;
+      return { plan: 'season', expiresAt: data.expiresAt, updatedAt: data.updatedAt };
+    } catch {
+      return null;
+    }
+  }
+
+  /** Grant a season pass to an email address. Admin only. */
+  async grantSeasonPass(email: string, durationDays = 210): Promise<void> {
+    if (!this.isBrowser) throw new Error('Cannot grant pass on server');
+    const key = this.encodeEmailKey(email);
+    const now = Date.now();
+    const expiresAt = now + durationDays * 86_400_000;
+    await set(ref(this.db, `giftedSeasonPass/${key}`), {
+      expiresAt,
+      updatedAt: now
+    });
+  }
+
+  /** Revoke a gifted season pass. Admin only. */
+  async revokeSeasonPass(email: string): Promise<void> {
+    if (!this.isBrowser) throw new Error('Cannot revoke pass on server');
+    const key = this.encodeEmailKey(email);
+    await remove(ref(this.db, `giftedSeasonPass/${key}`));
+  }
+
+  /** List all gifted season passes. Admin only. */
+  async listGiftedSeasonPasses(): Promise<{ email: string; expiresAt: number; updatedAt?: number }[]> {
+    if (!this.isBrowser) return [];
+    try {
+      const snapshot = await get(ref(this.db, 'giftedSeasonPass'));
+      const data = snapshot.val();
+      if (!data || typeof data !== 'object') return [];
+      return Object.entries(data).map(([key, value]) => {
+        const v = value as { expiresAt: number; updatedAt?: number };
+        return {
+          email: this.decodeEmailKey(key),
+          expiresAt: v.expiresAt,
+          updatedAt: v.updatedAt
+        };
+      }).sort((a, b) => b.expiresAt - a.expiresAt);
+    } catch {
+      return [];
+    }
+  }
 }
