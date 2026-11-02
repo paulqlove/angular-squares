@@ -73,6 +73,20 @@ export function getTeamBySlug(slug: string): NflTeam | undefined {
   return NFL_TEAMS.find(t => t.slug === slug);
 }
 
+export function getTeamByAbbreviation(abbrev: string): NflTeam | undefined {
+  return NFL_TEAMS.find(t => t.abbreviation.toLowerCase() === abbrev.toLowerCase());
+}
+
+export function getTeamLogoByAbbreviation(abbrev: string, size: 500 | 100 = 100): string | null {
+  const team = getTeamByAbbreviation(abbrev);
+  return team ? getTeamLogo(team, size) : null;
+}
+
+export function getTeamColors(abbrev: string): { primary: string; secondary: string } | null {
+  const team = getTeamByAbbreviation(abbrev);
+  return team ? { primary: team.primaryColor, secondary: team.secondaryColor } : null;
+}
+
 export function getTeamsByConference(conference: 'AFC' | 'NFC'): NflTeam[] {
   return NFL_TEAMS.filter(t => t.conference === conference);
 }

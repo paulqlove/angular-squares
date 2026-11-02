@@ -46,7 +46,7 @@ import { EspnService, EspnGame } from '../../core/services/espn.service';
 
           <!-- CTA -->
           <section class="rounded-2xl border border-default bg-card p-6 sm:p-8">
-            <h2 class="text-2xl font-bold text-heading">Create a {{ team.name }} squares board</h2>
+            <h2 class="text-2xl font-bold text-heading">Create a squares contest for any {{ team.name }} game</h2>
             <p class="mt-2 text-default">
               Set up a football squares game for the next {{ team.city }} {{ team.name }} game.
               Share the link with friends and watch the board fill up.
