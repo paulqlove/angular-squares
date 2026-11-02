@@ -10,10 +10,12 @@
     </span>
     <span class="sr-only">{{ awayTeam || 'Away' }} numbers run down the side, {{ homeTeam || 'Home' }} numbers run across the top.</span>
   </p>
-  <div role="grid" aria-label="Football squares game board">
+  <!-- Like the landing-page board: 1px outline and gaps, rounded corners -->
+  <div>
+  <div role="grid" aria-label="Football squares game board" class="flex flex-col gap-px overflow-hidden rounded-inner bg-qs-line p-px">
     <!-- Top row with home numbers (empty navy bar until numbers are drawn) -->
-    <div class="grid grid-cols-[1.5rem_repeat(10,minmax(0,1fr))] sm:grid-cols-[2.25rem_repeat(10,minmax(0,1fr))] gap-0" role="row">
-      <div class="number-cell axis-cell axis-top" aria-hidden="true"></div>
+    <div class="grid grid-cols-[1.5rem_repeat(10,minmax(0,1fr))] sm:grid-cols-[2.25rem_repeat(10,minmax(0,1fr))] gap-px" role="row">
+      <div class="number-cell axis-top bg-qs-panel-2" aria-hidden="true"></div>
       @for (num of homeNumbers; track $index; let i = $index) {
         <div
           class="number-cell axis-cell axis-top"
@@ -27,7 +29,7 @@
     <!-- Grid rows -->
     @for (awayNum of awayNumbers; track $index; let row = $index) {
       <div
-        class="grid grid-cols-[1.5rem_repeat(10,minmax(0,1fr))] sm:grid-cols-[2.25rem_repeat(10,minmax(0,1fr))] gap-0"
+        class="grid grid-cols-[1.5rem_repeat(10,minmax(0,1fr))] sm:grid-cols-[2.25rem_repeat(10,minmax(0,1fr))] gap-px"
         role="row">
         <!-- Left side away numbers -->
         <div class="number-cell axis-cell" [class.axis-leader]="leaderRow === row" role="rowheader">
@@ -49,4 +51,5 @@
     }
 
   </div>
+</div>
 </div>

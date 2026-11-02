@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GameService, GameData, EspnLiveSnapshot } from '../../core/services/game.service';
 import { environment } from '../../../environments/environment';
+import { PLAYER_COLORS, normalizePlayerColors } from './utils/player-colors';
 import { PreviewRole } from '../../core/services/role-preview.service';
 import { AuthService } from '../../core/services/auth.service';
 import { EspnService, EspnGame, SportType } from '../../core/services/espn.service';
@@ -38,6 +39,7 @@ import { PaymentDialogComponent } from './components/payment-dialog/payment-dial
 import { ProbabilityHeatmapComponent } from './components/probability-heatmap/probability-heatmap.component';
 import { BoxScoreComponent } from './components/box-score/box-score.component';
 import { ProfileMenuComponent } from '../../components/ui/profile-menu/profile-menu.component';
+import { ShareDialogComponent } from '../../components/ui/share-dialog/share-dialog.component';
 import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.component';
 
 @Component({
@@ -55,7 +57,8 @@ import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.co
     ProbabilityHeatmapComponent,
     BoxScoreComponent,
     AuthModalComponent,
-    ProfileMenuComponent
+    ProfileMenuComponent,
+    ShareDialogComponent
 ],
     providers: [
         provideIcons({
@@ -103,38 +106,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   playerColors: { [key: string]: string } = {};
   playerUserIds: { [name: string]: string } = {};
   totalPot: number = 0;
-  availableColors = [
-    'bg-red-200',
-    'bg-blue-200',
-    'bg-qs-ok-soft',
-    'bg-yellow-200',
-    'bg-purple-200',
-    'bg-pink-200',
-    'bg-indigo-200',
-    'bg-orange-200',
-    'bg-teal-200',
-    'bg-cyan-200',
-    'bg-lime-200',
-    'bg-qs-accent-soft',
-    'bg-qs-accent-soft',
-    'bg-violet-200',
-    'bg-fuchsia-200',
-    'bg-rose-200',
-    'bg-amber-200',
-    'bg-red-100',
-    'bg-blue-100',
-    'bg-qs-ok-soft',
-    'bg-yellow-100',
-    'bg-purple-100',
-    'bg-pink-100',
-    'bg-indigo-100',
-    'bg-orange-100',
-    'bg-teal-100',
-    'bg-cyan-100',
-    'bg-lime-100',
-    'bg-qs-accent-soft',
-    'bg-qs-accent-soft'
-  ];
+  availableColors = PLAYER_COLORS;
 
   quarterPayouts = {
     q1: 0.2,
@@ -236,7 +208,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   isLoading = signal(true);
   gameNotFound = signal(false);
   showShareModal = signal(false);
-  copiedToClipboard = signal(false);
   showNameEditModal = signal(false);
   editingName = '';
   isSavingName = signal(false);
@@ -344,7 +315,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           this.awayTeam = data.awayTeam || '';
           this.hostNote = data.hostNote || '';
           this.paidPlayers = new Set(data.paidPlayers || []);
-          this.playerColors = data.playerColors || {};
+          this.playerColors = normalizePlayerColors(data.playerColors || {});
           this.winners = data.winners || {};
           this.playerUserIds = data.playerUserIds || {};
           this.espnEventId = data.espnEventId || undefined;
@@ -453,15 +424,12 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     }
 
     const usedColors = Object.values(this.playerColors);
-    const availableColor = this.availableColors.find(color => !usedColors.includes(color));
-
-    if (availableColor) {
-      this.playerColors[playerName] = availableColor;
-      this.gameService.updateGame(this.gameId, { playerColors: this.playerColors }).catch(() => {});
-      return availableColor;
-    }
-
-    return this.availableColors[0];
+    // Unused colors first; past 10 players, cycle through the palette
+    const color = this.availableColors.find(c => !usedColors.includes(c))
+      ?? this.availableColors[usedColors.length % this.availableColors.length];
+    this.playerColors[playerName] = color;
+    this.gameService.updateGame(this.gameId, { playerColors: this.playerColors }).catch(() => {});
+    return color;
   }
 
   private sanitizePlayerName(name: string): string {
@@ -886,7 +854,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   // Share functionality
   openShareModal(): void {
     this.showShareModal.set(true);
-    this.copiedToClipboard.set(false);
   }
 
   closeShareModal(): void {
@@ -897,25 +864,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     return this.gameService.getShareableLink(this.gameId);
   }
 
-  async copyGameCode(): Promise<void> {
-    try {
-      await navigator.clipboard.writeText(this.gameId);
-      this.copiedToClipboard.set(true);
-      setTimeout(() => this.copiedToClipboard.set(false), 2000);
-    } catch (error) {
-      this.toastService.error('Failed to copy');
-    }
-  }
 
-  async copyShareLink(): Promise<void> {
-    try {
-      await navigator.clipboard.writeText(this.getShareableLink());
-      this.copiedToClipboard.set(true);
-      setTimeout(() => this.copiedToClipboard.set(false), 2000);
-    } catch (error) {
-      this.toastService.error('Failed to copy');
-    }
-  }
 
   goBack(): void {
     if (this.authService.isAuthenticated()) {

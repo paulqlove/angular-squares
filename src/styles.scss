@@ -21,6 +21,9 @@
   --qs-canvas: #ebe6da; /* board stage */
   --qs-canvas-dot: rgba(15,23,42,.16);
 
+  /* player colors: warm pastels, no greens (emerald means leader/winner). Navy text >= 7:1 in both modes */
+  --qs-p-rose: #f6c2c9; --qs-p-coral: #f9c9b2; --qs-p-apricot: #f8d6a6; --qs-p-butter: #f1e2a0; --qs-p-tan: #e3cdb2; --qs-p-sky: #c3d8f2; --qs-p-aqua: #bfdfeb; --qs-p-periwinkle: #cccff3; --qs-p-lilac: #dcc9ee; --qs-p-orchid: #eec4e1;
+
   /* ink */
   --qs-ink: #0f172a; /* navy, same as the logo */
   --qs-muted: #5b6070; /* 5.0:1+ on every light surface */
@@ -93,6 +96,7 @@
     --qs-tile: #020617; --qs-tile-ink: #f3efe8;
     --qs-shadow: 0 10px 28px -22px rgba(0,0,0,.8);
     --qs-shadow-pop: 0 16px 40px -16px rgba(0,0,0,.85);
+    --qs-p-rose: #d29aa3; --qs-p-coral: #d4a28c; --qs-p-apricot: #cfaf80; --qs-p-butter: #c9ba7c; --qs-p-tan: #b9a68e; --qs-p-sky: #93aacb; --qs-p-aqua: #91b3c1; --qs-p-periwinkle: #9ea1cc; --qs-p-lilac: #ae9cc6; --qs-p-orchid: #c49ab8;
   }
 }
 :root[data-theme="dark"] {
@@ -105,6 +109,7 @@
   --qs-tile: #020617; --qs-tile-ink: #f3efe8;
   --qs-shadow: 0 10px 28px -22px rgba(0,0,0,.8);
   --qs-shadow-pop: 0 16px 40px -16px rgba(0,0,0,.85);
+  --qs-p-rose: #d29aa3; --qs-p-coral: #d4a28c; --qs-p-apricot: #cfaf80; --qs-p-butter: #c9ba7c; --qs-p-tan: #b9a68e; --qs-p-sky: #93aacb; --qs-p-aqua: #91b3c1; --qs-p-periwinkle: #9ea1cc; --qs-p-lilac: #ae9cc6; --qs-p-orchid: #c49ab8;
 }
 
 /* Board canvas: the stage the grid sits on */
@@ -260,6 +265,18 @@
   }
   .qs-tab:hover { border-color: var(--qs-line-strong); }
   .qs-tab[aria-selected="true"], .qs-tab[aria-pressed="true"] { background: var(--qs-ink); color: var(--qs-bg); border-color: var(--qs-ink); }
+
+  /* Player square colors */
+  .qs-p-rose { background-color: var(--qs-p-rose); }
+  .qs-p-coral { background-color: var(--qs-p-coral); }
+  .qs-p-apricot { background-color: var(--qs-p-apricot); }
+  .qs-p-butter { background-color: var(--qs-p-butter); }
+  .qs-p-tan { background-color: var(--qs-p-tan); }
+  .qs-p-sky { background-color: var(--qs-p-sky); }
+  .qs-p-aqua { background-color: var(--qs-p-aqua); }
+  .qs-p-periwinkle { background-color: var(--qs-p-periwinkle); }
+  .qs-p-lilac { background-color: var(--qs-p-lilac); }
+  .qs-p-orchid { background-color: var(--qs-p-orchid); }
 
   .qs-input {
     width: 100%;

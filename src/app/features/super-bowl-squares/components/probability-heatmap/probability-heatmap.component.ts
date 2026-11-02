@@ -45,7 +45,7 @@ import { SQUARES_PROBABILITIES } from '../../utils/probability.utils';
         <div class="mt-4 text-xs text-muted text-center">
           Source: <a href="https://www.eldo.co/super-bowl-squares-odds-probabilities-best-worst-numbers.html" 
                      target="_blank" 
-                     class="text-blue-600 hover:underline">
+                     class="text-qs-accent underline-offset-2 hover:underline">
             ELDORADO, Super Bowl squares frequencies
           </a>
         </div>
@@ -78,13 +78,13 @@ export class ProbabilityHeatmapComponent {
 
     const prob = Number(this.getProbability(row, col));
     
-    // Enhanced color scale with better contrast
-    if (prob >= 3.0) return 'bg-blue-300';      // Darker blue
-    if (prob >= 2.0) return 'bg-blue-200';
-    if (prob >= 1.5) return 'bg-qs-ok-soft';     // Darker green
-    if (prob >= 1.0) return 'bg-qs-ok-soft';
-    if (prob >= 0.5) return 'bg-yellow-200';    // More visible yellow
-    return 'bg-red-100';                        // Light red for lowest
+    // One emerald ramp, same as the best-numbers page
+    if (prob >= 3.0) return 'qs-heat-5';
+    if (prob >= 2.0) return 'qs-heat-4';
+    if (prob >= 1.5) return 'qs-heat-3';
+    if (prob >= 1.0) return 'qs-heat-2';
+    if (prob >= 0.5) return 'qs-heat-1';
+    return 'qs-heat-0';
   }
 
   isSelectedPlayerSquare(row: number, col: number): boolean {
