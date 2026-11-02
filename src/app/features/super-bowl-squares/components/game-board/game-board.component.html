@@ -1,5 +1,16 @@
 <div class="relative overflow-hidden">
-  <div class="pt-8 pl-8" role="grid" aria-label="Football squares game board">
+  <!-- Axis caption: side team runs down, top team runs across -->
+  <p class="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+    <span class="flex items-center gap-1 font-semibold capitalize text-qs-ink">
+      <span class="text-base leading-none text-qs-muted" aria-hidden="true">↓</span>{{ awayTeam || 'Away' }}
+    </span>
+    <span class="text-qs-line-strong" aria-hidden="true">/</span>
+    <span class="flex items-center gap-1 font-semibold capitalize text-qs-ink">
+      {{ homeTeam || 'Home' }}<span class="text-base leading-none text-qs-muted" aria-hidden="true">→</span>
+    </span>
+    <span class="sr-only">{{ awayTeam || 'Away' }} numbers run down the side, {{ homeTeam || 'Home' }} numbers run across the top.</span>
+  </p>
+  <div role="grid" aria-label="Football squares game board">
     <!-- Top row with home numbers (empty navy bar until numbers are drawn) -->
     <div class="grid grid-cols-[1.5rem_repeat(10,minmax(0,1fr))] sm:grid-cols-[2.25rem_repeat(10,minmax(0,1fr))] gap-0" role="row">
       <div class="number-cell axis-cell axis-top" aria-hidden="true"></div>
@@ -37,16 +48,5 @@
       </div>
     }
 
-    <!-- Team Labels -->
-    @if (homeTeam || awayTeam) {
-      <div class="absolute top-8 left-0 h-full flex items-center" aria-hidden="true">
-        <div class="transform -rotate-90 origin-top-left whitespace-nowrap font-extralight text-lg text-heading capitalize">
-          {{ awayTeam }}
-        </div>
-      </div>
-      <div class="absolute top-0 left-8 w-full text-center font-extralight text-lg text-heading capitalize" aria-hidden="true">
-        {{ homeTeam }}
-      </div>
-    }
   </div>
 </div>
