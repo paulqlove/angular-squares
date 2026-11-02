@@ -78,6 +78,9 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
                 }
               </ul>
             }
+            @if (section.html) {
+              <div class="mt-4" [innerHTML]="section.html"></div>
+            }
           </section>
         }
 
