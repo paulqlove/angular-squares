@@ -24,7 +24,7 @@ QuarterScore now uses Paul's general UI design language (the "Field" look: warm 
 | UI font | Inter (never shipped; site uses Roboto) | Space Grotesk |
 | Numbers and labels | Archivo tabular / JetBrains Mono | JetBrains Mono everywhere a label, code, digit or counter appears |
 | Dark mode | Navy | Navy (unchanged) |
-| Logo | v2 lockup | v2 lockup, unchanged |
+| Logo | v2 lockup | v2.1 lockup (filled quarter) |
 
 The logo is a navy 2×2 board with the top-right quarter filled emerald (Nov 1 2026: the clock-sweep wedge was replaced with a full fill because it read as a broken image at small sizes). It sits well on warm paper because paper is a neutral, not a competing hue. Everything in the Logo usage rules section of the Brand Brief still applies.
 
@@ -276,7 +276,7 @@ Navy frame (`--qs-tile`), scores in 96 to 160px tabular sans, the board filling 
 
 ## 7. Logo
 
-Unchanged from Logo v2 (Drive: Design / Logo v2). Summary:
+Logo v2.1: Logo v2 (Drive: Design / Logo v2) with the top-right quarter filled solid emerald instead of the clock-sweep wedge (Nov 1 2026). The wedge read as a half-loaded image at header and favicon sizes. In the one-color marks the filled quarter merges with the frame; that is expected. Summary:
 
 - Primary = the lockup with the QuarterScore wordmark. Mixed-case horizontal recommended; caps lockup is an approved alternate. Bare mark only for favicon and app icons.
 - Colors: navy `#0f172a`, white, emerald `#047857` (`#34d399` on navy). Never cyan or blue as the accent, never four colors, never four separate flat squares.
