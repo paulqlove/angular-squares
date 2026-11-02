@@ -1,4 +1,5 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { SeoService } from '../../core/services/seo.service';
 import { BreadcrumbsComponent } from '../../shared/breadcrumbs.component';
@@ -79,7 +80,7 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
               </ul>
             }
             @if (section.html) {
-              <div class="mt-4" [innerHTML]="section.html"></div>
+              <div class="mt-4" [innerHTML]="trustHtml(section.html)"></div>
             }
           </section>
         }
@@ -125,10 +126,19 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
 })
 export class MarketingPageComponent {
   private route = inject(ActivatedRoute);
+  private sanitizer = inject(DomSanitizer);
   private seo = inject(SeoService);
 
   public readonly page: MarketingPage = getMarketingPage(this.route.snapshot.data['pageId']);
   public readonly breadcrumbs = pageBreadcrumbs(this.page);
+  private htmlCache = new Map<string, SafeHtml>();
+
+  public trustHtml(html: string): SafeHtml {
+    if (!this.htmlCache.has(html)) {
+      this.htmlCache.set(html, this.sanitizer.bypassSecurityTrustHtml(html));
+    }
+    return this.htmlCache.get(html)!;
+  }
 
   constructor() {
     const extra = [];
