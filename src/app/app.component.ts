@@ -5,6 +5,7 @@ import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
 import { ToastComponent } from './components/ui/toast/toast.component';
 import { WalkthroughComponent } from './components/ui/walkthrough/walkthrough.component';
+import { RolePreviewSwitcherComponent } from './components/ui/role-preview-switcher/role-preview-switcher.component';
 import { AnalyticsService } from './core/services/analytics.service';
 import { AuthService } from './core/services/auth.service';
 
@@ -13,7 +14,8 @@ import { AuthService } from './core/services/auth.service';
     imports: [
     RouterOutlet,
     ToastComponent,
-    WalkthroughComponent
+    WalkthroughComponent,
+    RolePreviewSwitcherComponent
 ],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
@@ -26,6 +28,7 @@ import { AuthService } from './core/services/auth.service';
     }
     <app-toast></app-toast>
     <app-walkthrough></app-walkthrough>
+    <app-role-preview-switcher></app-role-preview-switcher>
   `
 })
 export class AppComponent implements OnDestroy {

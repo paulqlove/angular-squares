@@ -5,6 +5,8 @@ import type { Database } from 'firebase/database';
 import { environment } from '../../../environments/environment';
 import { loadFirebaseSdk } from './firebase-sdk';
 import { SanitizationService } from './sanitization.service';
+import { PREVIEW_ADMIN_EMAIL, PreviewRole, RolePreviewService } from './role-preview.service';
+import { ToastService } from './toast.service';
 
 export interface AuthUser {
   uid: string;
@@ -27,6 +29,8 @@ const GUEST_COOKIE_KEY = 'squares_guest_user';
 export class AuthService {
   private platformId = inject(PLATFORM_ID);
   private sanitizationService = inject(SanitizationService);
+  private rolePreview = inject(RolePreviewService);
+  private toast = inject(ToastService);
   // Lazy init required for SSR hydration - see CLAUDE.md "SSR Hydration Pattern"
   private _auth: Auth | null = null;
   private _db: Database | null = null;
@@ -38,15 +42,36 @@ export class AuthService {
   private _authError = signal<string | null>(null);
 
   // Public signals
-  currentUser = this._currentUser.asReadonly();
+  /** The signed-in account, ignoring any role preview. */
+  realUser = this._currentUser.asReadonly();
+  /** Only the preview admin can switch roles. */
+  isPreviewAdmin = computed(() => {
+    const user = this._currentUser();
+    return !!user && !user.isGuest && user.email?.toLowerCase() === PREVIEW_ADMIN_EMAIL;
+  });
+  previewRole = computed<PreviewRole>(() => (this.isPreviewAdmin() ? this.rolePreview.role() : 'actual'));
+  /** The user the UI should render for: the real user, or a stand-in while previewing a role. */
+  currentUser = computed<AuthUser | null>(() => {
+    const user = this._currentUser();
+    switch (this.previewRole()) {
+      case 'player':
+        return { uid: 'preview-player', email: null, displayName: 'Preview Player', photoURL: null, isGuest: false };
+      case 'guest':
+        return { uid: 'preview-guest', email: null, displayName: 'Preview Guest', photoURL: null, isGuest: true };
+      case 'signedOut':
+        return null;
+      default:
+        return user;
+    }
+  });
   isLoading = this._isLoading.asReadonly();
   authError = this._authError.asReadonly();
 
   // Computed values
-  isAuthenticated = computed(() => this._currentUser() !== null);
-  isGuest = computed(() => this._currentUser()?.isGuest ?? false);
+  isAuthenticated = computed(() => this.currentUser() !== null);
+  isGuest = computed(() => this.currentUser()?.isGuest ?? false);
   canCreateGame = computed(() => {
-    const user = this._currentUser();
+    const user = this.currentUser();
     return user !== null && !user.isGuest;
   });
 
@@ -171,8 +196,21 @@ export class AuthService {
     });
   }
 
+  /** True (and warns) when a role preview should stop a write. Owner preview and no preview write normally. */
+  blockPreviewWrite(): boolean {
+    const role = this.previewRole();
+    if (role === 'actual' || role === 'owner') return false;
+    this.toast.warning('Preview only. Nothing was saved.');
+    this.toast.muteErrors(1500);
+    return true;
+  }
+
   // Google Sign In
   async signInWithGoogle(): Promise<AuthUser> {
+    if (this.previewRole() !== 'actual') {
+      this.toast.warning('Switch the preview back to "Me" before signing in.');
+      throw new Error('Sign-in is disabled while previewing a role');
+    }
     this._authError.set(null);
 
     try {
@@ -207,6 +245,10 @@ export class AuthService {
 
   // Guest Sign In (cookie + Firebase Anonymous Auth)
   async signInAsGuest(name: string): Promise<AuthUser> {
+    if (this.previewRole() !== 'actual') {
+      this.toast.warning('Switch the preview back to "Me" before signing in.');
+      throw new Error('Sign-in is disabled while previewing a role');
+    }
     await this.ensureInitialized();
     const sanitizedName = this.sanitizationService.sanitizeDisplayName(name);
     const guestUser: GuestUser = {
@@ -275,6 +317,10 @@ export class AuthService {
 
   // Sign Out
   async signOut(): Promise<void> {
+    if (this.previewRole() !== 'actual') {
+      this.toast.warning('Preview only. Switch back to "Me" to really sign out.');
+      return;
+    }
     try {
       await this.ensureInitialized();
       this._isLoading.set(true);

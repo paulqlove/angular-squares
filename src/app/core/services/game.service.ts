@@ -16,6 +16,7 @@ import { Observable, BehaviorSubject } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ActiveBoardLimitError } from '../errors/active-board-limit.error';
 import { EspnService } from './espn.service';
+import { AuthService } from './auth.service';
 import {
   BoardActivity,
   FREE_ACTIVE_BOARD_LIMIT,
@@ -99,6 +100,7 @@ export interface GameListItem {
 export class GameService {
   private platformId = inject(PLATFORM_ID);
   private espnService = inject(EspnService);
+  private authService = inject(AuthService);
   // Lazy init required for SSR hydration - see CLAUDE.md "SSR Hydration Pattern"
   private _db: Database | null = null;
   private currentGameId = signal<string | null>(null);
@@ -234,6 +236,7 @@ export class GameService {
     hostNote?: string
   ): Promise<string> {
     if (!this.isBrowser) throw new Error('Cannot create game on server');
+    if (this.authService.blockPreviewWrite()) throw new Error('Preview only');
     await this.assertUnderFreeBoardLimit(ownerId);
     // Drop a stale slot only after the read-only check says nothing is active.
     // Existing game nodes are not modified.
@@ -366,24 +369,19 @@ export class GameService {
   }
 
   // Update game data — uses multi-path updates from root so Firebase evaluates
-  // each path's .write rules independently (allows players to write to squares/playerColors/etc.)
+  // each path's .write rules independently.
   async updateGame(gameId: string, data: Partial<GameData>): Promise<void> {
     if (!this.isBrowser) return;
+    if (this.authService.blockPreviewWrite()) throw new Error('Preview only');
 
     const prefix = `games/${gameId}`;
     const updates: Record<string, any> = {};
 
-    if (data.selectedSquares) {
-      updates[`${prefix}/squares`] = data.selectedSquares;
-    }
     if (data.name !== undefined) {
       updates[`${prefix}/name`] = data.name;
     }
     if (data.pricePerSquare !== undefined) {
       updates[`${prefix}/pricePerSquare`] = data.pricePerSquare;
-    }
-    if (data.playerColors) {
-      updates[`${prefix}/playerColors`] = data.playerColors;
     }
     if (data.homeNumbers) {
       updates[`${prefix}/homeNumbers`] = data.homeNumbers;
@@ -412,9 +410,6 @@ export class GameService {
     if (data.hostNote !== undefined) {
       updates[`${prefix}/hostNote`] = data.hostNote;
     }
-    if (data.paidPlayers !== undefined) {
-      updates[`${prefix}/paidPlayers`] = data.paidPlayers;
-    }
     if (data.espnEventId !== undefined) {
       const nextId = data.espnEventId || null;
       const nextSport = data.espnSport || 'nfl';
@@ -436,10 +431,23 @@ export class GameService {
     if (data.managerName !== undefined) {
       updates[`${prefix}/managerName`] = data.managerName;
     }
-    if (data.playerUserIds !== undefined) {
-      updates[`${prefix}/playerUserIds`] = data.playerUserIds;
-    }
+    // Player-writable maps go per key so the rules can check each square/name.
+    const maps: [string, object | undefined][] = [
+      ['squares', data.selectedSquares],
+      ['playerColors', data.playerColors],
+      ['paidPlayers', data.paidPlayers],
+      ['playerUserIds', data.playerUserIds]
+    ];
+    await Promise.all(maps.filter(([, next]) => next).map(async ([field, next]) => {
+      const path = `${prefix}/${field}`;
+      const current: Record<string, unknown> = (await get(ref(this.db, path))).val() || {};
+      const target = next as Record<string, unknown>;
+      for (const key of new Set([...Object.keys(current), ...Object.keys(target)])) {
+        if (current[key] !== target[key]) updates[`${path}/${key}`] = target[key] ?? null;
+      }
+    }));
 
+    if (Object.keys(updates).length === 0) return;
     await update(ref(this.db), updates);
   }
 
@@ -543,6 +551,7 @@ export class GameService {
   // Delete a game and its live-score index entry.
   async deleteGame(gameId: string, ownerId: string): Promise<void> {
     if (!this.isBrowser) return;
+    if (this.authService.blockPreviewWrite()) throw new Error('Preview only');
     const espnSnap = await get(ref(this.db, `games/${gameId}/espnEventId`));
     const updates: Record<string, unknown> = {
       [`games/${gameId}`]: null,
@@ -562,7 +571,7 @@ export class GameService {
   }
 
   async ensureLiveGameIndexes(entries: { gameId: string; espnEventId: string; espnSport?: SportType | null }[]): Promise<void> {
-    if (!this.isBrowser || entries.length === 0) return;
+    if (!this.isBrowser || entries.length === 0 || this.authService.previewRole() !== 'actual') return;
     const updates: Record<string, { sport: SportType }> = {};
     for (const entry of entries) {
       if (!this.isLinkableEspnId(entry.espnEventId) || !this.isBoardId(entry.gameId)) continue;
@@ -599,7 +608,7 @@ export class GameService {
 
   // Add a game to user's joined games list
   async addJoinedGame(userId: string, gameId: string, gameName: string): Promise<void> {
-    if (!this.isBrowser) return;
+    if (!this.isBrowser || this.authService.previewRole() !== 'actual') return;
     const joinedGameRef = ref(this.db, `users/${userId}/joinedGames/${gameId}`);
     const snapshot = await get(joinedGameRef);
     if (snapshot.exists()) return; // Already joined
@@ -656,6 +665,7 @@ export class GameService {
   // Remove a game from user's joined games list
   async removeJoinedGame(userId: string, gameId: string): Promise<void> {
     if (!this.isBrowser) return;
+    if (this.authService.blockPreviewWrite()) throw new Error('Preview only');
     const joinedGameRef = ref(this.db, `users/${userId}/joinedGames/${gameId}`);
     await remove(joinedGameRef);
   }
@@ -663,6 +673,7 @@ export class GameService {
   // Propagate a player name change across all games the user participates in
   async propagateNameChange(userId: string, oldName: string, newName: string): Promise<void> {
     if (!this.isBrowser || !oldName || oldName === newName) return;
+    if (this.authService.blockPreviewWrite()) throw new Error('Preview only');
 
     const [owned, joined] = await Promise.all([
       this.getUserGames(userId),
@@ -714,6 +725,7 @@ export class GameService {
   // Update game manager
   async updateGameManager(gameId: string, managerId: string | null, managerEmail: string | null, managerName: string | null = null): Promise<void> {
     if (!this.isBrowser) return;
+    if (this.authService.blockPreviewWrite()) throw new Error('Preview only');
     await update(ref(this.db), {
       [`games/${gameId}/managerId`]: managerId || '',
       [`games/${gameId}/managerEmail`]: managerEmail || '',

@@ -10,7 +10,8 @@
     "postbuild": "node scripts/prepare-spa-shell.mjs",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:angular-squares": "node dist/angular-squares/server/server.mjs"
+    "serve:ssr:angular-squares": "node dist/angular-squares/server/server.mjs",
+    "test:rules": "PATH=\"$(brew --prefix openjdk@21 2>/dev/null)/bin:$PATH\" npx -y firebase-tools@latest emulators:exec --only database --project demo-squares \"vitest run --config test/rules/vitest.config.mts\""
   },
   "private": true,
   "dependencies": {
@@ -37,6 +38,7 @@
     "@angular/build": "^22.2.5",
     "@angular/cli": "^22.2.5",
     "@angular/compiler-cli": "^22.2.4",
+    "@firebase/rules-unit-testing": "^6.0.0",
     "@fontsource/jetbrains-mono": "^5.3.0",
     "@fontsource/space-grotesk": "^5.3.0",
     "@types/express": "^4.17.17",

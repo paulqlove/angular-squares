@@ -10,6 +10,7 @@ export interface Toast {
 export class ToastService {
   private _toasts = signal<Toast[]>([]);
   toasts = this._toasts.asReadonly();
+  private mutedUntil = 0;
 
   private generateId(): string {
     return Math.random().toString(36).substring(2, 9);
@@ -19,7 +20,13 @@ export class ToastService {
     this.addToast(message, 'success', 4000);
   }
 
+  /** Hides error toasts briefly, so a blocked preview write shows one message instead of two. */
+  muteErrors(ms: number): void {
+    this.mutedUntil = Date.now() + ms;
+  }
+
   error(message: string): void {
+    if (Date.now() < this.mutedUntil) return;
     this.addToast(message, 'error', 6000);
   }
 

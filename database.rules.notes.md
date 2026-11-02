@@ -24,3 +24,20 @@ The client check is the limit players and hosts actually hit. The rule stops a s
 ## notifyMe
 
 `notifyMe/{pushId}` is write-only create for a signed-in user. Reads, updates, and deletes are denied. The node must be `email`, `timestamp`, `uid`, and `source` only. `email` matches an email shape and is at most 254 characters. `uid` must be `auth.uid`. `source` is at most 64 characters. `timestamp` is a number within a day of `now`. The push id is at most 128 characters.
+
+## Player writes (squares, playerUserIds, playerColors, paidPlayers)
+
+Owner and co-host (`managerId`) keep full write through the game-level rule. Other signed-in users (including anonymous guests) get per-key rules only, so they can never write or wipe a whole node:
+
+- `squares/{r-c}`: claim an empty square only under a name that `playerUserIds` maps to `auth.uid` after the write (the claim can register the name in the same update). Clear only a square whose name maps to `auth.uid`. Claim and clear are denied while `isLocked`. Renaming one of your own squares to another of your names is allowed even when locked.
+- `playerUserIds/{name}`: add a name mapped to `auth.uid`, or delete your own mapping. Never change someone else's.
+- `playerColors/{name}`: add a color for a name that has none (any viewer assigns missing colors), or change your own.
+- `paidPlayers/{i}`: only rename an existing entry from one of your names to another (player rename). Adding, removing, or touching someone else's entry is owner/co-host only.
+
+`GameService.updateGame` writes these four fields as per-key diffs against the current server value, because a whole-object write is checked only at the parent and would be denied.
+
+Gaps: a name with no `playerUserIds` mapping (legacy squares) can be claimed by the first user who registers it. Name ownership is by exact key, so a square whose case differs from its mapping key cannot be cleared or renamed by the player.
+
+## Tests
+
+`npm run test:rules` runs `test/rules/` against the database emulator (project `demo-squares`, needs Java: `brew install openjdk@21`).
