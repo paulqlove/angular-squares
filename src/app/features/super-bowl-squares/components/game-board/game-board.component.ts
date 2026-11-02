@@ -39,7 +39,7 @@ export class GameBoardComponent {
   get gridColsClass(): string {
     const cols = this.cols;
     if (cols === 5) {
-      return 'grid-cols-[1.5rem_repeat(5,minmax(0,1fr))] sm:grid-cols-[2.25rem_repeat(5,minmax(0,1fr))]';
+      return 'grid-cols-[2.25rem_repeat(5,minmax(0,1fr))] sm:grid-cols-[2.5rem_repeat(5,minmax(0,1fr))]';
     }
     return 'grid-cols-[1.5rem_repeat(10,minmax(0,1fr))] sm:grid-cols-[2.25rem_repeat(10,minmax(0,1fr))]';
   }
