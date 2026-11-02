@@ -35,7 +35,7 @@ const LOCK_STEP_MS = 180;
   template: `
     <div class="phone mx-auto" role="img" aria-label="A phone showing football squares filling up with players, then the numbers being drawn">
       <div class="phone-screen" aria-hidden="true">
-        <div class="hidden xl:flex items-center justify-center bg-qs-tile pt-7 pb-3">
+        <div class="hidden min-[1000px]:flex items-center justify-center bg-qs-tile pt-7 pb-3">
           <img src="assets/brand/lockup-horizontal-reversed.svg" alt="" width="128" height="16" class="h-4 w-auto">
         </div>
 
@@ -85,13 +85,13 @@ const LOCK_STEP_MS = 180;
             }
           </div>
         </div>
-        <div class="hidden xl:block mx-auto mb-2 mt-auto h-1 w-24 rounded-full bg-qs-line-strong"></div>
+        <div class="hidden min-[1000px]:block mx-auto mb-2 mt-auto h-1 w-24 rounded-full bg-qs-line-strong"></div>
       </div>
     </div>
   `,
   styles: [`
-    /* Below xl: full-width board card */
-    @media (max-width: 1279px) {
+    /* Below 1000px: full-width board card */
+    @media (max-width: 999px) {
       .phone { max-width: none; }
       .phone-screen {
         border: 1px solid var(--qs-line);
@@ -101,8 +101,8 @@ const LOCK_STEP_MS = 180;
       }
     }
     .phone-screen { background: var(--qs-bg); }
-    /* xl+: phone mockup with bezel */
-    @media (min-width: 1280px) {
+    /* 1000px+: phone mockup with bezel */
+    @media (min-width: 1000px) {
       .phone {
         max-width: 320px;
         border: 10px solid var(--qs-tile);
@@ -110,7 +110,7 @@ const LOCK_STEP_MS = 180;
         box-shadow: var(--qs-shadow-pop);
         position: relative;
         background: var(--qs-tile);
-        zoom: 1.5;
+        zoom: 1.35;
         transform: perspective(1400px) rotateX(16deg) rotateY(-18deg);
         transform-origin: 50% 50%;
       }
@@ -133,6 +133,9 @@ const LOCK_STEP_MS = 180;
         flex-direction: column;
         min-height: 560px;
       }
+    }
+    @media (min-width: 1280px) {
+      .phone { zoom: 1.5; }
     }
     @media (min-width: 1600px) {
       .phone { zoom: 1.76; }
