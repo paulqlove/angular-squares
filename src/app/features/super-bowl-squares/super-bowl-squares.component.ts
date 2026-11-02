@@ -767,6 +767,15 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     }
   }
 
+  /** Live-score games: the feed says it's over. Manual games: a Q4 score is only entered once it's over. */
+  isGameOver(): boolean {
+    if (this.espnEventId) {
+      return !!this.latestEspnLive?.completed || this.linkedEspnGame()?.status === 'post';
+    }
+    const q4 = this.scores.q4;
+    return !!q4 && (q4.home > 0 || q4.away > 0);
+  }
+
   filledCount(): number {
     return Object.keys(this.selectedSquares).length;
   }
