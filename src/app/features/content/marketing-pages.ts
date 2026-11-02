@@ -111,21 +111,15 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
           'Home team (columns): 0, 1, 2, 3, 4, 5, 6, 7, 8, 9',
           'Each square = 1 score combination'
         ],
-        html: `<div class="overflow-x-auto"><svg viewBox="0 0 280 280" class="w-full max-w-xs" aria-label="10 by 10 grid with winning square highlighted at row 4, column 7">
-          <style>.digit{font:bold 10px system-ui;fill:#64748b}.win{fill:#22c55e}</style>
-          <rect x="24" y="0" width="256" height="24" fill="#f1f5f9"/>
-          <rect x="0" y="24" width="24" height="256" fill="#f1f5f9"/>
-          <text x="12" y="16" class="digit" text-anchor="middle">HOME →</text>
-          <text x="8" y="152" class="digit" text-anchor="middle" transform="rotate(-90 8 152)">AWAY ↓</text>
-          ${[0,1,2,3,4,5,6,7,8,9].map(i => `<text x="${49 + i*23}" y="16" class="digit" text-anchor="middle">${i}</text>`).join('')}
-          ${[0,1,2,3,4,5,6,7,8,9].map(i => `<text x="12" y="${41 + i*23}" class="digit" text-anchor="middle">${i}</text>`).join('')}
-          ${Array.from({length:100}, (_, i) => {
-            const row = Math.floor(i/10), col = i%10;
-            const isWinner = row === 4 && col === 7;
-            return `<rect x="${26 + col*23}" y="${26 + row*23}" width="21" height="21" fill="${isWinner ? '#22c55e' : '#fff'}" stroke="#cbd5e1"/>`;
-          }).join('')}
-          <text x="${26 + 7*23 + 10}" y="${26 + 4*23 + 14}" font-size="8" fill="#fff" text-anchor="middle" font-weight="bold">WIN</text>
-        </svg></div>`
+        html: `<div class="not-prose mt-6 max-w-sm">
+          <div class="mb-2 flex justify-between text-xs font-medium text-muted"><span>AWAY ↓</span><span>HOME →</span></div>
+          <div class="grid grid-cols-[1.5rem_repeat(10,minmax(0,1fr))] gap-px overflow-hidden rounded-lg border border-default bg-slate-200 dark:bg-slate-700">
+            <div class="bg-slate-100 dark:bg-slate-800"></div>
+            ${[0,1,2,3,4,5,6,7,8,9].map(i => `<div class="flex items-center justify-center bg-slate-100 dark:bg-slate-800 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-400">${i}</div>`).join('')}
+            ${[0,1,2,3,4,5,6,7,8,9].map(row => `<div class="flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-400">${row}</div>${[0,1,2,3,4,5,6,7,8,9].map(col => row === 4 && col === 7 ? '<div class="aspect-square bg-green-500 flex items-center justify-center text-[10px] font-bold text-white">WIN</div>' : '<div class="aspect-square bg-white dark:bg-slate-900"></div>').join('')}`).join('')}
+          </div>
+          <p class="mt-2 text-xs text-muted">Score 24–17 → row 4, column 7 wins</p>
+        </div>`
       },
       {
         heading: '50 squares (5 × 10) — Half board',
@@ -139,21 +133,15 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
           'Home team (columns): 0, 1, 2, 3, 4, 5, 6, 7, 8, 9',
           'Each square = 2 score combinations'
         ],
-        html: `<div class="overflow-x-auto"><svg viewBox="0 0 280 165" class="w-full max-w-xs" aria-label="5 by 10 grid with winning square highlighted at row 4,5 and column 7">
-          <style>.digit{font:bold 10px system-ui;fill:#64748b}.pair{font:bold 8px system-ui;fill:#64748b}</style>
-          <rect x="32" y="0" width="248" height="24" fill="#f1f5f9"/>
-          <rect x="0" y="24" width="32" height="140" fill="#f1f5f9"/>
-          <text x="156" y="14" class="digit" text-anchor="middle">HOME →</text>
-          <text x="10" y="94" class="digit" text-anchor="middle" transform="rotate(-90 10 94)">AWAY ↓</text>
-          ${[0,1,2,3,4,5,6,7,8,9].map(i => `<text x="${56 + i*22}" y="22" class="digit" text-anchor="middle">${i}</text>`).join('')}
-          ${['0,1','2,3','4,5','6,7','8,9'].map((p, i) => `<text x="16" y="${41 + i*26}" class="pair" text-anchor="middle">${p}</text>`).join('')}
-          ${Array.from({length:50}, (_, i) => {
-            const row = Math.floor(i/10), col = i%10;
-            const isWinner = row === 2 && col === 7;
-            return `<rect x="${34 + col*22}" y="${26 + row*26}" width="20" height="24" fill="${isWinner ? '#22c55e' : '#fff'}" stroke="#cbd5e1"/>`;
-          }).join('')}
-          <text x="${34 + 7*22 + 10}" y="${26 + 2*26 + 15}" font-size="8" fill="#fff" text-anchor="middle" font-weight="bold">WIN</text>
-        </svg></div>`
+        html: `<div class="not-prose mt-6 max-w-sm">
+          <div class="mb-2 flex justify-between text-xs font-medium text-muted"><span>AWAY ↓</span><span>HOME →</span></div>
+          <div class="grid grid-cols-[2rem_repeat(10,minmax(0,1fr))] gap-px overflow-hidden rounded-lg border border-default bg-slate-200 dark:bg-slate-700">
+            <div class="bg-slate-100 dark:bg-slate-800"></div>
+            ${[0,1,2,3,4,5,6,7,8,9].map(i => `<div class="flex items-center justify-center bg-slate-100 dark:bg-slate-800 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-400">${i}</div>`).join('')}
+            ${['0,1','2,3','4,5','6,7','8,9'].map((pair, row) => `<div class="flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-[10px] font-semibold text-slate-600 dark:text-slate-400 py-2">${pair}</div>${[0,1,2,3,4,5,6,7,8,9].map(col => row === 2 && col === 7 ? '<div class="aspect-[1/1.2] bg-green-500 flex items-center justify-center text-[10px] font-bold text-white">WIN</div>' : '<div class="aspect-[1/1.2] bg-white dark:bg-slate-900"></div>').join('')}`).join('')}
+          </div>
+          <p class="mt-2 text-xs text-muted">Score 24–17 → "4,5" row, column 7 wins</p>
+        </div>`
       },
       {
         heading: '25 squares (5 × 5) — Quarter board',
@@ -167,21 +155,15 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
           'Home team (columns): 0,1 / 2,3 / 4,5 / 6,7 / 8,9',
           'Each square = 4 score combinations'
         ],
-        html: `<div class="overflow-x-auto"><svg viewBox="0 0 195 195" class="w-full max-w-[220px]" aria-label="5 by 5 grid with winning square highlighted at row 4,5 and column 6,7">
-          <style>.digit{font:bold 10px system-ui;fill:#64748b}.pair{font:bold 9px system-ui;fill:#64748b}</style>
-          <rect x="32" y="0" width="163" height="28" fill="#f1f5f9"/>
-          <rect x="0" y="28" width="32" height="167" fill="#f1f5f9"/>
-          <text x="113" y="12" class="digit" text-anchor="middle">HOME →</text>
-          <text x="10" y="111" class="digit" text-anchor="middle" transform="rotate(-90 10 111)">AWAY ↓</text>
-          ${['0,1','2,3','4,5','6,7','8,9'].map((p, i) => `<text x="${56 + i*30}" y="24" class="pair" text-anchor="middle">${p}</text>`).join('')}
-          ${['0,1','2,3','4,5','6,7','8,9'].map((p, i) => `<text x="16" y="${48 + i*31}" class="pair" text-anchor="middle">${p}</text>`).join('')}
-          ${Array.from({length:25}, (_, i) => {
-            const row = Math.floor(i/5), col = i%5;
-            const isWinner = row === 2 && col === 3;
-            return `<rect x="${34 + col*30}" y="${30 + row*31}" width="28" height="29" fill="${isWinner ? '#22c55e' : '#fff'}" stroke="#cbd5e1"/>`;
-          }).join('')}
-          <text x="${34 + 3*30 + 14}" y="${30 + 2*31 + 18}" font-size="9" fill="#fff" text-anchor="middle" font-weight="bold">WIN</text>
-        </svg></div>`
+        html: `<div class="not-prose mt-6 max-w-[240px]">
+          <div class="mb-2 flex justify-between text-xs font-medium text-muted"><span>AWAY ↓</span><span>HOME →</span></div>
+          <div class="grid grid-cols-[2.5rem_repeat(5,minmax(0,1fr))] gap-px overflow-hidden rounded-lg border border-default bg-slate-200 dark:bg-slate-700">
+            <div class="bg-slate-100 dark:bg-slate-800"></div>
+            ${['0,1','2,3','4,5','6,7','8,9'].map(p => `<div class="flex items-center justify-center bg-slate-100 dark:bg-slate-800 py-2 text-[10px] font-semibold text-slate-600 dark:text-slate-400">${p}</div>`).join('')}
+            ${['0,1','2,3','4,5','6,7','8,9'].map((pair, row) => `<div class="flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-[10px] font-semibold text-slate-600 dark:text-slate-400">${pair}</div>${['0,1','2,3','4,5','6,7','8,9'].map((_, col) => row === 2 && col === 3 ? '<div class="aspect-square bg-green-500 flex items-center justify-center text-[10px] font-bold text-white">WIN</div>' : '<div class="aspect-square bg-white dark:bg-slate-900"></div>').join('')}`).join('')}
+          </div>
+          <p class="mt-2 text-xs text-muted">Score 24–17 → "4,5" row, "6,7" column wins</p>
+        </div>`
       },
       {
         heading: 'Which size to choose',
