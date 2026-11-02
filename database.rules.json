@@ -10,6 +10,9 @@
         "venmoUsername": {
           ".validate": "newData.isString() && newData.val().length <= 50"
         },
+        "hostNote": {
+          ".validate": "newData.isString() && newData.val().length <= 140"
+        },
         "homeTeam": {
           ".validate": "newData.isString() && newData.val().length <= 50"
         },

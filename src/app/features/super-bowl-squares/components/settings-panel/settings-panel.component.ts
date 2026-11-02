@@ -6,8 +6,7 @@ import {
   heroTrash,
   heroLockOpen,
   heroLockClosed,
-  heroArrowTopRightOnSquare,
-  heroCreditCard,
+  heroCheckCircle,
   heroXMark,
   heroSun,
   heroMoon,
@@ -15,21 +14,19 @@ import {
 } from '@ng-icons/heroicons/outline';
 import { FormsModule } from '@angular/forms';
 import { ToggleComponent } from '../../../../components/ui/toggle/toggle.component';
-import { DialogComponent, DialogPart } from '../../../../components/ui/dialog/dialog.component';
 import { SanitizationService } from '../../../../core/services/sanitization.service';
 import { ThemeService, ThemeMode } from '../../../../core/services/theme.service';
 
 @Component({
     selector: 'app-settings-panel',
-    imports: [NgIconComponent, FormsModule, ToggleComponent, DialogComponent],
+    imports: [NgIconComponent, FormsModule, ToggleComponent],
     providers: [
         provideIcons({
             heroCog6Tooth,
             heroTrash,
             heroLockOpen,
             heroLockClosed,
-            heroArrowTopRightOnSquare,
-            heroCreditCard,
+            heroCheckCircle,
             heroXMark,
             heroSun,
             heroMoon,
@@ -38,16 +35,6 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
-    <!-- Venmo Confirmation Dialog -->
-    <app-dialog
-      [isOpen]="showVenmoDialog"
-      title="Leave Site?"
-      [messageParts]="venmoMessageParts"
-      confirmText="Continue to Venmo"
-      (onConfirm)="onVenmoConfirm()"
-      (onCancel)="showVenmoDialog = false"
-    ></app-dialog>
-    
     <!-- Settings Panel -->
     <div class="fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity duration-200 overflow-hidden"
       [class.opacity-0]="!isOpen"
@@ -75,7 +62,7 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
             </div>
           } @else if (isManager && !isGameOwner) {
             <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <p class="text-sm text-blue-700">You are a payment manager. You can manage who has paid.</p>
+              <p class="text-sm text-blue-700">You are a co-host. You can help confirm players.</p>
             </div>
           }
     
@@ -149,10 +136,9 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
           <!-- Price Per Square -->
           <div class="mb-4">
             <label for="pricePerSquare" class="block text-label text-sm font-medium mb-2">
-              Price Per Square
+              Points per square
             </label>
             <div class="flex items-center gap-2">
-              <span class="text-muted">$</span>
               <input
                 type="number"
                 id="pricePerSquare"
@@ -164,48 +150,30 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
                        focus:ring-2 focus:ring-qs-accent
                        disabled:opacity-50 disabled:cursor-not-allowed"
                 />
+              <span class="text-muted">pts</span>
             </div>
           </div>
     
-          <!-- Venmo input -->
+          <!-- Host note -->
           <div class="">
-            <label for="venmoUsername" class="block text-label text-sm font-medium mb-2">
-              Venmo Username
+            <label for="hostNote" class="block text-label text-sm font-medium mb-2">
+              Note from the host
             </label>
-            <div class="relative">
-              <input
-                type="text"
-                id="venmoUsername"
-                [(ngModel)]="tempVenmoUsername"
-                (blur)="onVenmoBlur()"
-                [placeholder]="venmoUsername ? '@' + venmoUsername.replace('@', '') : '@username'"
-                [disabled]="!isGameOwner"
-                class="w-full px-3 py-2 bg-input border border-input rounded-md text-default
-                       focus:outline-none focus:ring-2
-                       focus:ring-2 focus:ring-qs-accent
-                       disabled:opacity-50 disabled:cursor-not-allowed"
-                />
-            </div>
-    
-            <div class="flex items-center justify-center gap-2 mt-3">
-              @if (venmoUsername) {
-                <a
-                  [href]="getVenmoLink()"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="text-link hover:text-link-hover text-sm inline-flex items-center gap-1"
-                  >
-                  Open Venmo Profile
-                  <ng-icon
-                    name="heroArrowTopRightOnSquare"
-                    class="w-4 h-4"
-                    aria-hidden="true">
-                  </ng-icon>
-                </a>
-              }
-            </div>
+            <input
+              type="text"
+              id="hostNote"
+              [(ngModel)]="tempHostNote"
+              (blur)="onHostNoteBlur()"
+              maxlength="140"
+              placeholder="e.g. Snacks at halftime!"
+              [disabled]="!isGameOwner"
+              class="w-full px-3 py-2 bg-input border border-input rounded-md text-default
+                     focus:outline-none focus:ring-2
+                     focus:ring-2 focus:ring-qs-accent
+                     disabled:opacity-50 disabled:cursor-not-allowed"
+              />
           </div>
-    
+
           <!-- Lock Game toggle (owner only) -->
           <div class="mb-8">
             <div class="flex items-center justify-between p-4 rounded">
@@ -221,14 +189,14 @@ import { ThemeService, ThemeMode } from '../../../../core/services/theme.service
     
           <!-- Game Controls -->
           <div class="space-y-4 mb-8">
-            <!-- Manage Payments (owner or manager) -->
+            <!-- Confirm players (owner or co-host) -->
             @if (isGameOwner || isManager) {
               <button
                 (click)="onManagePayments.emit()"
                 class="w-full bg-control hover:bg-control-hover text-default px-4 py-2 rounded flex items-center justify-center gap-2"
                 >
-                <ng-icon name="heroCreditCard" class="text-2xl"></ng-icon>
-                Manage Payments
+                <ng-icon name="heroCheckCircle" class="text-2xl"></ng-icon>
+                Confirm players
               </button>
             }
     
@@ -281,7 +249,7 @@ export class SettingsPanelComponent implements OnChanges {
   @Input() isOpen = false;
   @Input() isRandomized = false;
   @Input() isLocked = false;
-  @Input() venmoUsername = '';
+  @Input() hostNote = '';
   @Input() homeTeam = '';
   @Input() awayTeam = '';
   @Input() pricePerSquare = 10;
@@ -291,21 +259,20 @@ export class SettingsPanelComponent implements OnChanges {
   @Output() closed = new EventEmitter<void>();
   @Output() onRandomize = new EventEmitter<void>();
   @Output() onToggleLock = new EventEmitter<void>();
-  @Output() onVenmoUsernameChange = new EventEmitter<string>();
+  @Output() onHostNoteChange = new EventEmitter<string>();
   @Output() onTeamNameChange = new EventEmitter<{team: 'home' | 'away', name: string}>();
   @Output() onPriceChange = new EventEmitter<number>();
   @Output() onManagePayments = new EventEmitter<void>();
   @Output() onClearGame = new EventEmitter<void>();
 
-  showVenmoDialog = false;
-  tempVenmoUsername = '';
+  tempHostNote = '';
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['isOpen']) {
       document.body.classList.toggle('overflow-hidden', this.isOpen);
     }
-    if (changes['venmoUsername']) {
-      this.tempVenmoUsername = this.venmoUsername || '';
+    if (changes['hostNote']) {
+      this.tempHostNote = this.hostNote || '';
     }
   }
 
@@ -313,28 +280,20 @@ export class SettingsPanelComponent implements OnChanges {
     this.closed.emit();
   }
 
-  showVenmoConfirmation(): void {
-    this.showVenmoDialog = true;
-  }
-
-  getVenmoLink(): string {
-    return `https://venmo.com/${this.venmoUsername.replace('@', '')}`;
-  }
-
-  onVenmoBlur(): void {
+  onHostNoteBlur(): void {
     if (!this.isGameOwner) {
-      this.tempVenmoUsername = this.venmoUsername;
+      this.tempHostNote = this.hostNote;
       return;
     }
 
-    const sanitized = this.sanitizationService.sanitizeVenmoUsername(this.tempVenmoUsername);
-    if (sanitized === this.venmoUsername) {
+    const sanitized = this.sanitizationService.sanitizeHostNote(this.tempHostNote);
+    if (sanitized === this.hostNote) {
       return;
     }
 
-    this.venmoUsername = sanitized;
-    this.tempVenmoUsername = sanitized;
-    this.onVenmoUsernameChange.emit(sanitized);
+    this.hostNote = sanitized;
+    this.tempHostNote = sanitized;
+    this.onHostNoteChange.emit(sanitized);
   }
 
   onTeamChange(team: 'home' | 'away', name: string) {
@@ -343,20 +302,6 @@ export class SettingsPanelComponent implements OnChanges {
 
   handlePriceChange(price: number) {
     this.onPriceChange.emit(price);
-  }
-
-  onVenmoConfirm() {
-    window.open(`https://venmo.com/${this.venmoUsername}`, '_blank');
-    this.showVenmoDialog = false;
-  }
-
-  get venmoMessageParts(): DialogPart[] {
-    return [
-      { text: 'You will be redirected to ' },
-      { text: 'Venmo', bold: true, color: '#008CFF' },
-      { text: ' to pay ' },
-      { text: this.venmoUsername, bold: true }
-    ];
   }
 
   setTheme(mode: ThemeMode): void {

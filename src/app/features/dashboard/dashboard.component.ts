@@ -348,8 +348,8 @@ import {
                 <dd class="mt-1 text-lg font-semibold tabular-nums text-qs-ink">{{ game.playerCount }}</dd>
               </div>
               <div>
-                <dt class="qs-label text-[10px] text-qs-muted">Collected</dt>
-                <dd class="mt-1 text-lg font-semibold tabular-nums text-qs-ink">\${{ game.collected }}</dd>
+                <dt class="qs-label text-[10px] text-qs-muted">Confirmed</dt>
+                <dd class="mt-1 text-lg font-semibold tabular-nums text-qs-ink">{{ game.confirmedCount }}<span class="text-sm font-normal text-qs-muted">/{{ game.playerCount }}</span></dd>
               </div>
             </dl>
           </div>
@@ -461,9 +461,9 @@ import {
                 }
               </section>
 
-              <!-- 03 Price -->
+              <!-- 03 Points -->
               <section>
-                <h4 class="qs-eyebrow qs-eyebrow-bar">03 / Price per square</h4>
+                <h4 class="qs-eyebrow qs-eyebrow-bar">03 / Points per square</h4>
                 <div class="mt-3 flex flex-wrap gap-2">
                   @for (price of pricePresets; track price) {
                     <button
@@ -472,20 +472,20 @@ import {
                       [attr.aria-pressed]="newGamePrice === price"
                       (click)="selectPrice(price)"
                     >
-                      {{ price === 0 ? 'Free' : '$' + price }}
+                      {{ price === 0 ? 'None' : price + ' pts' }}
                     </button>
                   }
                   <label class="flex min-h-11 items-center gap-1 rounded-btn border border-qs-line-strong bg-qs-panel-2 px-3 focus-within:border-qs-ink">
-                    <span class="qs-label text-qs-muted">$</span>
                     <input
                       type="number"
                       [(ngModel)]="customPrice"
                       (ngModelChange)="onCustomPriceChange()"
                       placeholder="Custom"
-                      aria-label="Custom price per square"
+                      aria-label="Custom points per square"
                       min="0"
                       class="w-20 bg-transparent text-base text-qs-ink placeholder:text-qs-muted focus:outline-none"
                     />
+                    <span class="qs-label text-qs-muted">pts</span>
                   </label>
                 </div>
               </section>
@@ -511,15 +511,15 @@ import {
                   </div>
                   <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
-                      <label for="new-game-venmo" class="qs-label mb-1.5 block text-qs-muted">Venmo username <span class="normal-case tracking-normal">(optional)</span></label>
-                      <input id="new-game-venmo" type="text" [(ngModel)]="newGameVenmoUsername" placeholder="@username" class="qs-input" />
+                      <label for="new-game-host-note" class="qs-label mb-1.5 block text-qs-muted">Note from the host <span class="normal-case tracking-normal">(optional)</span></label>
+                      <input id="new-game-host-note" type="text" [(ngModel)]="newGameHostNote" maxlength="140" placeholder="e.g. Snacks at halftime!" class="qs-input" />
                     </div>
                     <div>
-                      <label for="new-game-manager" class="qs-label mb-1.5 block text-qs-muted">Payment manager <span class="normal-case tracking-normal">(optional)</span></label>
+                      <label for="new-game-manager" class="qs-label mb-1.5 block text-qs-muted">Co-host <span class="normal-case tracking-normal">(optional)</span></label>
                       <input id="new-game-manager" type="email" [(ngModel)]="newGamePaymentManager" placeholder="their@email.com" class="qs-input" />
                     </div>
                   </div>
-                  <p class="text-xs text-qs-muted">A payment manager can help track who has paid.</p>
+                  <p class="text-xs text-qs-muted">A co-host can help confirm players.</p>
                 </div>
               </section>
             </div>
@@ -699,38 +699,39 @@ import {
                 />
               </div>
 
-              <!-- Price Per Square -->
+              <!-- Points Per Square -->
               <div>
-                <label class="block text-sm font-semibold text-label mb-2">Price Per Square</label>
+                <label class="block text-sm font-semibold text-label mb-2">Points per square</label>
                 <div class="flex items-center gap-2">
-                  <span class="text-muted">$</span>
                   <input
                     type="number"
                     [(ngModel)]="editGamePrice"
                     min="0"
                     class="flex-1 px-4 py-3 bg-input border border-input rounded-xl focus:border-qs-accent focus:ring-2 focus:ring-qs-accent-soft outline-none text-default"
                   />
+                  <span class="text-muted">pts</span>
                 </div>
               </div>
 
-              <!-- Venmo Username -->
+              <!-- Host Note -->
               <div>
-                <label class="block text-sm font-semibold text-label mb-2">Venmo Username</label>
+                <label class="block text-sm font-semibold text-label mb-2">Note from the host <span class="text-muted font-normal">(optional)</span></label>
                 <input
                   type="text"
-                  [(ngModel)]="editGameVenmoUsername"
-                  placeholder="@username"
+                  [(ngModel)]="editGameHostNote"
+                  maxlength="140"
+                  placeholder="e.g. Snacks at halftime!"
                   class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-qs-accent focus:ring-2 focus:ring-qs-accent-soft outline-none text-default"
                 />
               </div>
 
-              <!-- Manager Assignment -->
+              <!-- Co-host Assignment -->
               <div>
                 <label class="block text-sm font-semibold text-label mb-2">
-                  Payment Manager
+                  Co-host
                   <span class="text-muted font-normal">(optional)</span>
                 </label>
-                <p class="text-xs text-muted mb-2">Assign a player to help manage payments. They can mark who has paid.</p>
+                <p class="text-xs text-muted mb-2">Assign a player as co-host. A co-host can help confirm players.</p>
                 @if (editingGame()?.managerId) {
                   <div class="flex items-center gap-2 p-3 bg-qs-ok-soft border border-qs-ok-soft rounded-xl dark:bg-qs-tile-ok/30 dark:border-qs-ok">
                     <span class="flex-1 text-qs-ok dark:text-qs-ok">{{ editingGame()?.managerName || editingGame()?.managerEmail || 'Assigned' }}</span>
@@ -849,7 +850,7 @@ export class DashboardComponent implements OnInit {
     {
       target: 'create-game',
       title: 'Create a New Game',
-      description: 'Click here to start your own squares pool. You can choose a sport, set the price per square, and invite friends.',
+      description: 'Click here to start your own squares game. You can choose a sport, set points per square, and invite friends.',
       position: 'bottom'
     },
     {
@@ -894,7 +895,7 @@ export class DashboardComponent implements OnInit {
   showEditModal = signal(false);
   editingGame = signal<GameListItem | null>(null);
   editGameName = '';
-  editGameVenmoUsername = '';
+  editGameHostNote = '';
   editGamePrice = 10;
   editSport: SportType = 'nfl';
   editEspnGameId = '';
@@ -913,7 +914,7 @@ export class DashboardComponent implements OnInit {
   isSavingProfile = signal(false);
 
   newGameName = '';
-  newGameVenmoUsername = '';
+  newGameHostNote = '';
   newGamePaymentManager = '';
   joinGameCode = '';
   selectedSport: SportType = 'nfl';
@@ -1079,7 +1080,7 @@ export class DashboardComponent implements OnInit {
         }
       }
 
-      const sanitizedVenmo = this.sanitizationService.sanitizeVenmoUsername(this.newGameVenmoUsername);
+      const sanitizedHostNote = this.sanitizationService.sanitizeHostNote(this.newGameHostNote);
 
       const gameId = await this.gameService.createGame(
         user.uid,
@@ -1091,7 +1092,7 @@ export class DashboardComponent implements OnInit {
         sanitizedPrice,
         this.selectedEspnGameId ? this.selectedSport : undefined,
         this.newGamePaymentManager.trim() || undefined,
-        sanitizedVenmo || undefined
+        sanitizedHostNote || undefined
       );
       this.showCreateModal.set(false);
       this.resetCreateForm();
@@ -1113,7 +1114,7 @@ export class DashboardComponent implements OnInit {
 
   resetCreateForm(): void {
     this.newGameName = '';
-    this.newGameVenmoUsername = '';
+    this.newGameHostNote = '';
     this.newGamePaymentManager = '';
     this.selectedSport = 'nfl';
     this.selectedEspnGameId = '';
@@ -1188,7 +1189,7 @@ export class DashboardComponent implements OnInit {
   async openEditModal(game: GameListItem): Promise<void> {
     this.editingGame.set(game);
     this.editGameName = game.name;
-    this.editGameVenmoUsername = game.venmoUsername || '';
+    this.editGameHostNote = game.hostNote || '';
     this.editGamePrice = game.pricePerSquare;
     this.editSport = game.espnSport || 'nfl';
     this.editEspnGameId = game.espnEventId || '';
@@ -1296,7 +1297,7 @@ export class DashboardComponent implements OnInit {
       this.managerSearchQuery = '';
       this.showManagerDropdown.set(false);
     } catch (error) {
-      this.toastService.error('Failed to assign manager');
+      this.toastService.error('Failed to assign co-host');
     }
   }
 
@@ -1311,7 +1312,7 @@ export class DashboardComponent implements OnInit {
         games.map(g => g.id === game.id ? { ...g, managerId: undefined, managerEmail: undefined, managerName: undefined } : g)
       );
     } catch (error) {
-      this.toastService.error('Failed to remove manager');
+      this.toastService.error('Failed to remove co-host');
     }
   }
 
@@ -1321,7 +1322,7 @@ export class DashboardComponent implements OnInit {
 
     const sanitizedName = this.sanitizationService.sanitizeGameName(this.editGameName);
     const sanitizedPrice = this.sanitizationService.validatePrice(this.editGamePrice);
-    const sanitizedVenmo = this.sanitizationService.sanitizeVenmoUsername(this.editGameVenmoUsername);
+    const sanitizedHostNote = this.sanitizationService.sanitizeHostNote(this.editGameHostNote);
 
     this.isSavingGame.set(true);
     try {
@@ -1330,7 +1331,7 @@ export class DashboardComponent implements OnInit {
       const updates: Record<string, any> = {
         name: sanitizedName,
         pricePerSquare: sanitizedPrice,
-        venmoUsername: sanitizedVenmo,
+        hostNote: sanitizedHostNote,
         espnEventId: this.editEspnGameId || null,
         espnSport: this.editEspnGameId ? this.editSport : null,
         homeTeam: selectedEspnGame?.homeTeam || game.homeTeam,
@@ -1346,7 +1347,7 @@ export class DashboardComponent implements OnInit {
           ...g,
           name: sanitizedName,
           pricePerSquare: sanitizedPrice,
-          venmoUsername: sanitizedVenmo,
+          hostNote: sanitizedHostNote,
           espnEventId: this.editEspnGameId || undefined,
           espnSport: this.editEspnGameId ? this.editSport : undefined,
           homeTeam: selectedEspnGame?.homeTeam || game.homeTeam,

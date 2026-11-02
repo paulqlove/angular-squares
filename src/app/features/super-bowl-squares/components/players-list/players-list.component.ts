@@ -1,3 +1,4 @@
+import { DecimalPipe } from '@angular/common';
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 
 import { calculateWinProbability } from '../../utils/probability.utils';
@@ -16,7 +17,7 @@ type PlayerEntry = {
 
 @Component({
     selector: 'app-players-list',
-    imports: [TooltipDirective],
+    imports: [TooltipDirective, DecimalPipe],
     templateUrl: './players-list.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./players-list.component.scss']
@@ -33,7 +34,7 @@ export class PlayersListComponent {
   selectedPlayer: string | null = null;
 
   private shameEmojis = ['🤢', '🤮', '💩', '🙈', '😱', '🤦', '😤', '🫣', '🤑', '🗑️'];
-  private shameLabels = ['Mooch', 'Shame!', 'Pay Up', 'Freeloader'];
+  private shameLabels = ['Slowpoke', 'Shame!', 'Check In', 'Unconfirmed'];
   private playerEmojis: Map<string, string> = new Map();
   private playerShameLabels: Map<string, string> = new Map();
 
@@ -101,6 +102,6 @@ export class PlayersListComponent {
       const randomIndex = Math.floor(Math.random() * this.shameLabels.length);
       this.playerShameLabels.set(player, this.shameLabels[randomIndex]);
     }
-    return this.playerShameLabels.get(player) || 'Pay Up';
+    return this.playerShameLabels.get(player) || 'Check In';
   }
 } 

@@ -24,13 +24,8 @@ export class SanitizationService {
     return this.sanitizeString(name, 50);
   }
 
-  sanitizeVenmoUsername(username: string): string {
-    if (!username) return '';
-    // Only allow alphanumeric, @, _, -
-    const sanitized = username
-      .replace(/[^a-zA-Z0-9@_-]/g, '')
-      .substring(0, 50);
-    return sanitized;
+  sanitizeHostNote(note: string): string {
+    return this.sanitizeString(note, 140);
   }
 
   sanitizeDisplayName(name: string): string {

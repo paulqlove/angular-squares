@@ -33,9 +33,6 @@
 } @else {
   <!-- Main Game View -->
   <app-shared-header variant="fixed">
-    @if (venmoUsername) {
-      <app-venmo-popover [username]="venmoUsername"></app-venmo-popover>
-    }
     <button
       (click)="openShareModal()"
       class="min-h-11 min-w-11 p-2.5 text-qs-tile-muted hover:text-qs-tile-ink rounded-lg hover:bg-white/10 transition-colors flex items-center justify-center"
@@ -67,7 +64,7 @@
     (closed)="showSettings.set(false)"
     [isRandomized]="isRandomized"
     [isLocked]="isLocked"
-    [venmoUsername]="venmoUsername"
+    [hostNote]="hostNote"
     [homeTeam]="homeTeam"
     [awayTeam]="awayTeam"
     [pricePerSquare]="currentPrice"
@@ -75,7 +72,7 @@
     [isManager]="isManager()"
     (onRandomize)="randomizeNumbers()"
     (onToggleLock)="toggleLock()"
-    (onVenmoUsernameChange)="onVenmoUsernameChange($event)"
+    (onHostNoteChange)="onHostNoteChange($event)"
     (onTeamNameChange)="onTeamNameChange($event)"
     (onPriceChange)="onPriceChange($event)"
     (onManagePayments)="onManagePayments()"
@@ -97,7 +94,12 @@
               <ng-icon name="heroArrowLeft" class="text-xl"></ng-icon>
             </button>
           }
-          <h2 class="qs-title text-2xl sm:text-3xl">{{ gameName }}</h2>
+          <div class="min-w-0">
+            <h2 class="qs-title text-2xl sm:text-3xl">{{ gameName }}</h2>
+            @if (hostNote) {
+              <p class="mt-1.5 max-w-prose break-words text-sm text-qs-muted"><span class="qs-label mr-2 text-qs-ink">Host note</span>{{ hostNote }}</p>
+            }
+          </div>
         </div>
 
         <!-- Player Display / Input -->
@@ -242,7 +244,7 @@
         </div>
       </div>
 
-      <!-- Winners and Payouts -->
+      <!-- Winners -->
       <div data-walkthrough="winners-payouts" (click)="$event.stopPropagation()">
         <app-winners-and-payouts
           [winners]="winners"

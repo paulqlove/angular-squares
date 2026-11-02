@@ -10,7 +10,7 @@ import {
   heroSquares2x2,
   heroUserGroup,
   heroTrophy,
-  heroCurrencyDollar,
+  heroCheckCircle,
   heroShare,
   heroChartBar,
   heroArrowRight
@@ -36,7 +36,7 @@ interface Feature {
             heroSquares2x2,
             heroUserGroup,
             heroTrophy,
-            heroCurrencyDollar,
+            heroCheckCircle,
             heroShare,
             heroChartBar,
             heroArrowRight
@@ -69,7 +69,7 @@ interface Feature {
             <p class="mt-6 text-xl font-medium">Every square, every score, live on one board.™</p>
             <p class="mt-3 max-w-xl text-lg text-qs-muted leading-relaxed">
               Create and share your football squares game in seconds.
-              Perfect for Super Bowl parties, office pools, and game day fun.
+              Perfect for Super Bowl parties, office games, and game day fun.
             </p>
 
             <div class="mt-8 flex flex-wrap gap-3">
@@ -248,9 +248,9 @@ export class WelcomeComponent implements OnInit {
       description: 'Winners calculated automatically based on quarter scores'
     },
     {
-      icon: 'heroCurrencyDollar',
-      title: 'Payment Tracking',
-      description: 'Track who has paid with Venmo integration'
+      icon: 'heroCheckCircle',
+      title: 'Player check-in',
+      description: 'Confirm who\'s in with one tap'
     },
     {
       icon: 'heroShare',
@@ -260,7 +260,7 @@ export class WelcomeComponent implements OnInit {
     {
       icon: 'heroChartBar',
       title: 'Probability Heatmap',
-      description: 'See which squares have the best odds based on NFL history',
+      description: 'See the hot squares and best numbers from NFL history',
       id: 'probability-heatmap',
       link: { path: '/best-squares-numbers', label: 'See the full number table' }
     }

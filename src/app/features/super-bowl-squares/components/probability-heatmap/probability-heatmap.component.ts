@@ -46,7 +46,7 @@ import { SQUARES_PROBABILITIES } from '../../utils/probability.utils';
           Source: <a href="https://www.eldo.co/super-bowl-squares-odds-probabilities-best-worst-numbers.html" 
                      target="_blank" 
                      class="text-blue-600 hover:underline">
-            ELDORADO Super Bowl Squares Odds & Probabilities
+            ELDORADO, Super Bowl squares frequencies
           </a>
         </div>
       </div>

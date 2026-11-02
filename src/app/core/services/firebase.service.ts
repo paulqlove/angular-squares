@@ -28,7 +28,7 @@ export interface GameData {
   awayTeam: string;
   winners?: { [key: string]: string };
   playerColors?: { [key: string]: string };
-  venmoUsername?: string;
+  hostNote?: string;
   paidPlayers?: string[];
 }
 
@@ -107,7 +107,7 @@ export class FirebaseService {
             isLocked: rawData.isLocked || false,
             homeTeam: rawData.homeTeam || '',
             awayTeam: rawData.awayTeam || '',
-            venmoUsername: rawData.venmoUsername || '',
+            hostNote: rawData.hostNote || '',
             paidPlayers: rawData.paidPlayers || []
           };
 
@@ -165,8 +165,8 @@ export class FirebaseService {
       if (data.awayTeam !== undefined) {
         updateData.awayTeam = data.awayTeam;
       }
-      if (data.venmoUsername !== undefined) {
-        updateData.venmoUsername = data.venmoUsername;
+      if (data.hostNote !== undefined) {
+        updateData.hostNote = data.hostNote;
       }
       if (data.paidPlayers !== undefined) {
         updateData.paidPlayers = data.paidPlayers;

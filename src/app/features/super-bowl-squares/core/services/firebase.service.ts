@@ -15,7 +15,7 @@ export interface GameData {
   awayTeam: string;
   winners?: { [key: string]: string };
   playerColors?: { [key: string]: string };
-  venmoUsername?: string;
+  hostNote?: string;
 }
 
 @Injectable({

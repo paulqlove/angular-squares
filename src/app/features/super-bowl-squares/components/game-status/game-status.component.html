@@ -15,11 +15,10 @@
     </div>
   </div>
 
-  <!-- Payment Progress -->
+  <!-- Confirmed Progress -->
   <div class="space-y-2">
     <div class="flex justify-between text-sm text-muted">
-      <span>Collected: ${{ getFormattedAmount(totalCollected) }}</span>
-      <span>Outstanding: ${{ getFormattedAmount(totalOutstanding) }}</span>
+      <span>Confirmed: {{ confirmedPlayers }}/{{ totalPlayers }}</span>
     </div>
     <div class="h-2 w-full bg-input rounded-full overflow-hidden">
       <div 

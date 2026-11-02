@@ -29,25 +29,13 @@ export class GameStatusComponent {
     return new Set(Object.values(this.selectedSquares)).size;
   }
 
-  get totalCollected(): number {
-    return Object.entries(this.playerStats)
-      .filter(([player]) => this.paidPlayers.has(player))
-      .reduce((sum, [_, stats]) => sum + stats.total, 0);
-  }
-
-  get totalOutstanding(): number {
-    return Object.entries(this.playerStats)
-      .filter(([player]) => !this.paidPlayers.has(player))
-      .reduce((sum, [_, stats]) => sum + stats.total, 0);
+  get confirmedPlayers(): number {
+    return Object.keys(this.playerStats).filter(player => this.paidPlayers.has(player)).length;
   }
 
   get percentPaid(): number {
-    const total = this.totalCollected + this.totalOutstanding;
-    return total > 0 ? Math.round((this.totalCollected / total) * 100) : 0;
-  }
-
-  getFormattedAmount(value: number): string {
-    return value.toFixed(2);
+    const total = Object.keys(this.playerStats).length;
+    return total > 0 ? Math.round((this.confirmedPlayers / total) * 100) : 0;
   }
 
   get unpaidPlayers(): string[] {
