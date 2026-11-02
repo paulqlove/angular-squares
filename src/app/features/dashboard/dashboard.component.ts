@@ -1004,6 +1004,10 @@ export class DashboardComponent implements OnInit {
     setTimeout(() => {
       this.walkthroughService.startIfNew('dashboard', this.dashboardWalkthroughSteps);
     }, 500);
+    // Preload gifted passes count for admins
+    if (this.isAdmin() && this.currentUser()?.email?.toLowerCase() === 'paulqlove@gmail.com') {
+      this.loadGiftedPasses();
+    }
   }
 
   startWalkthrough(): void {
