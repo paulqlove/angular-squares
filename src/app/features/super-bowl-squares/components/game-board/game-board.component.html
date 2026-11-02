@@ -24,7 +24,7 @@
           class="number-cell axis-cell axis-top"
           [class.axis-leader]="leaderCol === i"
           role="columnheader">
-          {{ num ?? '' }}
+          {{ formatNumber(num, homeNumbersPaired) }}
         </div>
       }
     </div>
@@ -36,7 +36,7 @@
         role="row">
         <!-- Left side away numbers -->
         <div class="number-cell axis-cell" [class.axis-leader]="leaderRow === row" role="rowheader">
-          {{ awayNum ?? '' }}
+          {{ formatNumber(awayNum, awayNumbersPaired) }}
         </div>
         <!-- Square cells -->
         @for (homeNum of homeNumbers; track $index; let col = $index) {

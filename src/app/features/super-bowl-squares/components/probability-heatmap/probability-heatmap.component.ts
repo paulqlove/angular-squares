@@ -18,7 +18,7 @@ import { BoardSize, getBoardDimensions } from '../../../../core/services/game.se
           <!-- Top numbers (home) -->
           @for (num of homeNumbers; track num) {
             <div class="number-cell">
-              {{ num !== null ? num : '' }}
+              {{ formatNumber(num, homeNumbersPaired) }}
             </div>
           }
         </div>
@@ -28,7 +28,7 @@ import { BoardSize, getBoardDimensions } from '../../../../core/services/game.se
           <div [class]="'grid gap-0 ' + gridColsClass">
             <!-- Side number (away) -->
             <div class="number-cell pr-4">
-              {{ awayNum !== null ? awayNum : '' }}
+              {{ formatNumber(awayNum, awayNumbersPaired) }}
             </div>
 
             <!-- Probability cells -->
@@ -72,12 +72,43 @@ export class ProbabilityHeatmapComponent {
       : 'grid-cols-[auto_repeat(10,minmax(0,1fr))]';
   }
 
+  get homeNumbersPaired(): boolean {
+    return getBoardDimensions(this.boardSize).cols === 5;
+  }
+
+  get awayNumbersPaired(): boolean {
+    return getBoardDimensions(this.boardSize).rows === 5;
+  }
+
+  formatNumber(num: number | null, isPaired: boolean): string {
+    if (num === null) return '';
+    if (!isPaired) return num.toString();
+    const first = num * 2;
+    const second = first + 1;
+    return `${first},${second}`;
+  }
+
   getProbability(row: number, col: number): string {
     if (this.homeNumbers[col] === null || this.awayNumbers[row] === null) {
       return '';
     }
-    const key = `${this.awayNumbers[row]},${this.homeNumbers[col]}`;
-    return SQUARES_PROBABILITIES[key]?.toFixed(1) || '0.0';
+
+    // For paired numbers, sum probabilities of all digit combinations in the pair
+    const homeNum = this.homeNumbers[col]!;
+    const awayNum = this.awayNumbers[row]!;
+
+    const homeDigits = this.homeNumbersPaired ? [homeNum * 2, homeNum * 2 + 1] : [homeNum];
+    const awayDigits = this.awayNumbersPaired ? [awayNum * 2, awayNum * 2 + 1] : [awayNum];
+
+    let totalProb = 0;
+    for (const away of awayDigits) {
+      for (const home of homeDigits) {
+        const key = `${away},${home}`;
+        totalProb += SQUARES_PROBABILITIES[key] || 0;
+      }
+    }
+
+    return totalProb.toFixed(1);
   }
 
   getCellClass(row: number, col: number): string {
