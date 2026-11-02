@@ -10,35 +10,23 @@ Already in flight as separate PRs. Do not redo them here.
 - Self-hosted Roboto. Removes the render-blocking Google Fonts CSS (~0.8s on mobile FCP). Open: https://github.com/paulqlove/angular-squares/pull/3
 - Meta description, OG/Twitter tags, a 1200×630 og:image, canonical, robots.txt, and sitemap.xml. Open: https://github.com/paulqlove/angular-squares/pull/4. Title there is "Quarter Score — Football Squares for Game Day". Sitemap is the homepage only. Still to add, so a preview is not a search hit: `noindex` on game routes, and `Disallow: /dashboard` in robots.txt.
 
-## Account Tiers
+## Plans
 
-### Free
-- 1 active game
-- Manual score entry
-- Basic dashboard with payment tracking
-- QR code for game join link
-- All payment links (Venmo, Cash App, Zelle, PayPal.me)
-- Guest mode + full account (Google, Facebook, Apple sign-in)
-- Guest-to-account conversion (attach existing squares)
+Source of truth: `src/app/core/plans.ts` (prices, lengths, limits). Research and reasoning: Drive doc "QuarterScore Game Formats and Paid Plans Research (Nov 2, 2026)".
 
-### Premium (~$1-2/season)
-- ESPN live score sync
-- 2+ active games
-- Push notifications for winners
-- Custom quarter payouts (default 20/20/20/40)
+| | Free | Week Pass | Season Pass |
+|---|---|---|---|
+| Price | $0 | $5.99 | $29.99 |
+| Length | — | 7 days | 210 days (college Week 0 to the NFL final, plus about a month) |
+| Active boards | 1 | 5 | 25 |
+| Ads on the host's boards | Yes | No | No |
+| Custom quarter split | No (20/20/20/40) | Yes | Yes |
+| 100/50/25-square boards | Planned for all plans | | |
 
-### Bar/Venue (~$5-10/month or season)
-- Everything in Premium
-- Custom branding/theming (colors, logo)
-- Multi-board TV display (large screen only)
-- Branded QR codes
-- Subdomain support (later: joes-bar.quarterscore.com)
-- Max squares per player (limit how many squares one person can claim)
-- Require account to play (disable guest mode per game)
-- Free game mode (no payment tracking — prizes are custom like gift cards, coupons, etc.)
-
-### Pricing
-Keep play free. The free sites dominate search. Charge the host. Public prices elsewhere run about $0.99 per game to $25 per grid, so these tiers are the low end. Branding, weekly reuse, and export can cost more. No popups. No gambling affiliates.
+- Buying more time stacks on what is left. A Season Pass outranks a Week Pass. An active Week Pass is credited toward a Season Pass (applies once checkout exists).
+- `entitlements/{uid} = { plan, expiresAt }`, written only by an admin for now (later a Stripe webhook). `admins/{uid}` gets everything.
+- Hosts stamp `games/{id}/adFreeUntil`; rules cap it at their real pass so viewers can trust it. Ads stay off until `environment.adsEnabled`; block gambling ad categories when a network is added.
+- Not yet built: checkout, 25/50-square boards, Season Pass organizer tools (email list, notifications, export). Coupons are shelved.
 
 ## Feature Details
 

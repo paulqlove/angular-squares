@@ -5,6 +5,8 @@ export const environment = {
   serverScoring: false,
   // Placeholder only. "See demo" links here and does not create a Firebase game.
   demoGameId: 'DEMO00',
+  // Free hosts' boards show an ad slot. Off until an ad network is set up; the admin still sees a placeholder.
+  adsEnabled: false,
   firebase: {
     apiKey: 'AIzaSyBij6Rm7noCjgQVLvclvqRc34UtY2wQLsE',
     authDomain: 'squares-4e4f7.firebaseapp.com',

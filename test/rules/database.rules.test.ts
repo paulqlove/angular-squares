@@ -111,6 +111,24 @@ describe('creating games', () => {
     await assertSucceeds(set(env.authenticatedContext('host'), 'games/new001', baseGame({ ownerId: 'host' })));
   });
 
+  it('a host with an active pass can create a second board while their linked board is active', async () => {
+    await seed({
+      'games/live01': baseGame({ ownerId: 'host', espnEventId: '401' }),
+      'users/host/activeBoardId': 'live01',
+      'entitlements/host': { plan: 'week', expiresAt: Date.now() + HOUR }
+    });
+    await assertSucceeds(set(env.authenticatedContext('host'), 'games/new001', baseGame({ ownerId: 'host' })));
+  });
+
+  it('a host with an expired pass cannot create a second board while their linked board is active', async () => {
+    await seed({
+      'games/live01': baseGame({ ownerId: 'host', espnEventId: '401' }),
+      'users/host/activeBoardId': 'live01',
+      'entitlements/host': { plan: 'week', expiresAt: Date.now() - HOUR }
+    });
+    await assertFails(set(env.authenticatedContext('host'), 'games/new001', baseGame({ ownerId: 'host' })));
+  });
+
   it('nobody can make themselves an admin from the app', async () => {
     await assertFails(set(env.authenticatedContext('host'), 'admins/host', true));
   });
@@ -466,5 +484,166 @@ describe('users', () => {
   it('a user can clear their own active board slot', async () => {
     await seed({ 'users/alice/activeBoardId': 'game01' });
     await assertSucceeds(set(player(), 'users/alice/activeBoardId', null));
+  });
+});
+
+describe('entitlements', () => {
+  const admin = () => env.authenticatedContext('boss');
+  const pass = (extra: Record<string, unknown> = {}) => ({ plan: 'season', expiresAt: Date.now() + HOUR, updatedAt: Date.now(), ...extra });
+
+  beforeEach(async () => {
+    await seed({ 'admins/boss': true, 'entitlements/alice': pass() });
+  });
+
+  it('a user can read their own pass', async () => {
+    await assertSucceeds(read(player(), 'entitlements/alice'));
+  });
+
+  it('a user cannot read someone else\'s pass', async () => {
+    await assertFails(read(owner(), 'entitlements/alice'));
+    await assertFails(read(visitor(), 'entitlements/alice'));
+  });
+
+  it('an admin can read anyone\'s pass', async () => {
+    await assertSucceeds(read(admin(), 'entitlements/alice'));
+  });
+
+  it('a user cannot grant themselves a pass', async () => {
+    await assertFails(set(owner(), 'entitlements/owner', pass()));
+  });
+
+  it('a user cannot extend their own pass', async () => {
+    await assertFails(set(player(), 'entitlements/alice/expiresAt', Date.now() + 1000 * HOUR));
+  });
+
+  it('a user cannot delete someone else\'s pass', async () => {
+    await assertFails(set(owner(), 'entitlements/alice', null));
+  });
+
+  it('an admin can write a valid pass', async () => {
+    await assertSucceeds(set(admin(), 'entitlements/owner', pass({ plan: 'week' })));
+    await assertSucceeds(set(admin(), 'entitlements/bob', { plan: 'season', expiresAt: Date.now() + HOUR }));
+  });
+
+  it('an admin cannot write a pass with an unknown plan', async () => {
+    await assertFails(set(admin(), 'entitlements/owner', pass({ plan: 'lifetime' })));
+  });
+
+  it('an admin cannot write a pass without an expiry', async () => {
+    await assertFails(set(admin(), 'entitlements/owner', { plan: 'week' }));
+  });
+
+  it('an admin cannot write a pass with a non-positive or non-numeric expiry', async () => {
+    await assertFails(set(admin(), 'entitlements/owner', pass({ expiresAt: 0 })));
+    await assertFails(set(admin(), 'entitlements/owner', pass({ expiresAt: 'soon' })));
+  });
+
+  it('an admin cannot write a pass with a non-numeric updatedAt or extra fields', async () => {
+    await assertFails(set(admin(), 'entitlements/owner', pass({ updatedAt: 'now' })));
+    await assertFails(set(admin(), 'entitlements/owner', pass({ boards: 99 })));
+  });
+});
+
+describe('adFreeUntil', () => {
+  const field = `${G}/adFreeUntil`;
+
+  it('an owner can always set it to zero', async () => {
+    await assertSucceeds(set(owner(), field, 0));
+  });
+
+  it('an owner with an active pass can set it up to their pass expiry', async () => {
+    const expiresAt = Date.now() + HOUR;
+    await seed({ 'entitlements/owner': { plan: 'week', expiresAt } });
+    await assertSucceeds(set(owner(), field, expiresAt));
+  });
+
+  it('an owner cannot set it beyond their pass expiry', async () => {
+    const expiresAt = Date.now() + HOUR;
+    await seed({ 'entitlements/owner': { plan: 'week', expiresAt } });
+    await assertFails(set(owner(), field, expiresAt + 1));
+  });
+
+  it('an owner without a pass cannot set a non-zero value', async () => {
+    await assertFails(set(owner(), field, Date.now() + HOUR));
+  });
+
+  it('an owner cannot set a negative or non-numeric value', async () => {
+    await assertFails(set(owner(), field, -1));
+    await assertFails(set(owner(), field, 'forever'));
+  });
+
+  it('an admin owner can set any value', async () => {
+    await seed({ 'admins/owner': true });
+    await assertSucceeds(set(owner(), field, Date.now() + 1000 * HOUR));
+  });
+
+  it('a player cannot set it', async () => {
+    await seed({ 'entitlements/alice': { plan: 'week', expiresAt: Date.now() + HOUR } });
+    await assertFails(set(player(), field, 0));
+  });
+
+  it('a signed-out visitor can read it', async () => {
+    await seed({ [field]: 0 });
+    await assertSucceeds(read(visitor(), field));
+  });
+});
+
+describe('quarterSplit', () => {
+  const field = `${G}/quarterSplit`;
+  const split = { q1: 200, q2: 200, q3: 200, q4: 400 };
+  const entitle = (uid: string) => seed({ [`entitlements/${uid}`]: { plan: 'season', expiresAt: Date.now() + HOUR } });
+
+  it('an owner with an active pass can set a valid split', async () => {
+    await entitle('owner');
+    await assertSucceeds(set(owner(), field, split));
+  });
+
+  it('an owner cannot set a split that does not sum to 1000', async () => {
+    await entitle('owner');
+    await assertFails(set(owner(), field, { ...split, q4: 399 }));
+    await assertFails(set(owner(), field, { ...split, q4: 401 }));
+  });
+
+  it('an owner cannot set a split with a missing quarter', async () => {
+    await entitle('owner');
+    await assertFails(set(owner(), field, { q1: 500, q2: 500, q3: 0 }));
+  });
+
+  it('an owner cannot set a non-integer, out-of-range, or extra quarter', async () => {
+    await entitle('owner');
+    await assertFails(set(owner(), field, { q1: 200.5, q2: 199.5, q3: 200, q4: 400 }));
+    await assertFails(set(owner(), field, { q1: 1100, q2: -100, q3: 0, q4: 0 }));
+    await assertFails(set(owner(), field, { ...split, q5: 0 }));
+  });
+
+  it('an owner without a pass cannot set a split', async () => {
+    await assertFails(set(owner(), field, split));
+  });
+
+  it('an owner with an expired pass cannot set a split', async () => {
+    await seed({ 'entitlements/owner': { plan: 'week', expiresAt: Date.now() - HOUR } });
+    await assertFails(set(owner(), field, split));
+  });
+
+  it('an admin owner can set a split', async () => {
+    await seed({ 'admins/owner': true });
+    await assertSucceeds(set(owner(), field, split));
+  });
+
+  it('a co-host can set a split only with their own pass', async () => {
+    await entitle('owner');
+    await assertFails(set(cohost(), field, split));
+    await entitle('cohost');
+    await assertSucceeds(set(cohost(), field, split));
+  });
+
+  it('a player with a pass cannot set a split', async () => {
+    await entitle('alice');
+    await assertFails(set(player(), field, split));
+  });
+
+  it('an owner without a pass can delete a split', async () => {
+    await seed({ [field]: split });
+    await assertSucceeds(set(owner(), field, null));
   });
 });

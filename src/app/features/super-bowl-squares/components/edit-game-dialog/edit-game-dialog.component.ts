@@ -1,20 +1,22 @@
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, HostListener, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { heroXMark, heroTrash } from '@ng-icons/heroicons/outline';
+import { heroXMark, heroTrash, heroLockClosed } from '@ng-icons/heroicons/outline';
+import { DEFAULT_SPLIT, QuarterSplit, SPLIT_PRESETS, isValidSplit } from '../../../../core/plans';
 
 export interface EditGameValues {
   awayTeam: string;
   homeTeam: string;
   pricePerSquare: number;
   hostNote: string;
+  quarterSplit: QuarterSplit | null;
 }
 
 /** Owner-only "Edit game" popup. Edits a draft and saves once. */
 @Component({
   selector: 'app-edit-game-dialog',
   imports: [FormsModule, NgIconComponent],
-  providers: [provideIcons({ heroXMark, heroTrash })],
+  providers: [provideIcons({ heroXMark, heroTrash, heroLockClosed })],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @if (isOpen) {
@@ -63,6 +65,39 @@ export interface EditGameValues {
               <p class="mt-1 text-right text-xs tabular-nums text-qs-muted">{{ draft.hostNote.length }}/140</p>
             </div>
 
+            <div>
+              <p class="qs-label mb-1.5 text-qs-muted">Quarter split</p>
+              @if (!canCustomSplit || splitLocked) {
+                <div class="flex items-center justify-between gap-3 rounded-inner border border-qs-line bg-qs-panel-2 px-3 py-2.5">
+                  <span class="font-mono text-sm tabular-nums text-qs-ink">{{ splitText() }}</span>
+                  <ng-icon name="heroLockClosed" class="text-base text-qs-muted"></ng-icon>
+                </div>
+                <p class="mt-1.5 text-xs text-qs-muted">
+                  {{ !canCustomSplit ? 'Custom splits come with a Week or Season Pass.' : 'The split locks once numbers are drawn.' }}
+                </p>
+              } @else {
+                <div class="flex flex-wrap gap-1.5">
+                  @for (preset of presets; track preset.id) {
+                    <button type="button" class="qs-tab min-h-9 px-2.5 text-[10.5px]" [attr.aria-pressed]="activePreset() === preset.id" (click)="applyPreset(preset.split)">{{ preset.label }}</button>
+                  }
+                  <button type="button" class="qs-tab min-h-9 px-2.5 text-[10.5px]" [attr.aria-pressed]="activePreset() === 'custom'" (click)="customOpen = true">Custom</button>
+                </div>
+                @if (customOpen || activePreset() === 'custom') {
+                  <div class="mt-3 grid grid-cols-4 gap-2">
+                    @for (q of quarters; track q.key) {
+                      <div>
+                        <label [for]="'split-' + q.key" class="qs-label mb-1 block text-[10px] text-qs-muted">{{ q.label }}</label>
+                        <input [id]="'split-' + q.key" type="number" min="0" max="100" step="0.5" [(ngModel)]="pct[q.key]" class="qs-input px-2 text-center tabular-nums" />
+                      </div>
+                    }
+                  </div>
+                }
+                <p class="mt-1.5 text-xs tabular-nums" [class]="splitValid() ? 'text-qs-muted' : 'text-qs-bad'">
+                  {{ splitText() }} · {{ splitValid() ? 'Totals 100%' : 'Must total 100% (' + remaining() + ' left), one decimal at most' }}
+                </p>
+              }
+            </div>
+
             <div class="rounded-inner border border-qs-line p-4">
               <p class="qs-label text-qs-bad">Danger zone</p>
               <p class="mt-1 text-sm text-qs-muted">Clears squares, numbers, scores and settings. This can't be undone.</p>
@@ -75,7 +110,7 @@ export interface EditGameValues {
 
           <div class="flex items-center justify-end gap-2 border-t border-qs-line bg-qs-panel-2 px-6 py-4">
             <button type="button" (click)="close()" class="qs-btn qs-btn-ghost text-qs-muted">Cancel</button>
-            <button type="button" (click)="save()" class="qs-btn qs-btn-primary min-w-32">Save</button>
+            <button type="button" (click)="save()" [disabled]="canCustomSplit && !splitLocked && !splitValid()" class="qs-btn qs-btn-primary min-w-32">Save</button>
           </div>
         </div>
       </div>
@@ -85,19 +120,32 @@ export interface EditGameValues {
 export class EditGameDialogComponent implements OnChanges {
   @Input() isOpen = false;
   @Input() isLocked = false;
-  @Input() values: EditGameValues = { awayTeam: '', homeTeam: '', pricePerSquare: 10, hostNote: '' };
+  @Input() canCustomSplit = false;
+  /** Splits lock once numbers are drawn. */
+  @Input() splitLocked = false;
+  @Input() values: EditGameValues = { awayTeam: '', homeTeam: '', pricePerSquare: 10, hostNote: '', quarterSplit: null };
 
   @Output() closed = new EventEmitter<void>();
   @Output() saved = new EventEmitter<EditGameValues>();
   @Output() clearGame = new EventEmitter<void>();
 
   confirmingClear = false;
+  customOpen = false;
+  /** Split being edited, in percent (20 = 20%). */
+  pct: { [k in keyof QuarterSplit]: number } = { q1: 20, q2: 20, q3: 20, q4: 40 };
+  readonly presets = SPLIT_PRESETS;
+  readonly quarters: { key: keyof QuarterSplit; label: string }[] = [
+    { key: 'q1', label: 'Q1' }, { key: 'q2', label: 'Q2' }, { key: 'q3', label: 'Q3' }, { key: 'q4', label: 'Q4' }
+  ];
   draft: EditGameValues = { ...this.values };
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['isOpen']?.currentValue) {
       this.draft = { ...this.values };
       this.confirmingClear = false;
+      this.customOpen = false;
+      const split = isValidSplit(this.values.quarterSplit) ? this.values.quarterSplit : DEFAULT_SPLIT;
+      this.pct = { q1: split.q1 / 10, q2: split.q2 / 10, q3: split.q3 / 10, q4: split.q4 / 10 };
     }
   }
 
@@ -119,8 +167,41 @@ export class EditGameDialogComponent implements OnChanges {
     this.close();
   }
 
+  applyPreset(split: QuarterSplit): void {
+    this.pct = { q1: split.q1 / 10, q2: split.q2 / 10, q3: split.q3 / 10, q4: split.q4 / 10 };
+    this.customOpen = false;
+  }
+
+  /** The edited split in tenths of a percent, or null if it isn't a whole-tenths split. */
+  tenths(): QuarterSplit | null {
+    const t = (v: number) => Math.round(Number(v) * 10);
+    const ok = this.quarters.every(q => Number.isFinite(Number(this.pct[q.key])) && Math.abs(Number(this.pct[q.key]) * 10 - t(this.pct[q.key])) < 1e-6);
+    return ok ? { q1: t(this.pct.q1), q2: t(this.pct.q2), q3: t(this.pct.q3), q4: t(this.pct.q4) } : null;
+  }
+
+  splitValid(): boolean {
+    return isValidSplit(this.tenths());
+  }
+
+  remaining(): string {
+    const total = this.quarters.reduce((sum, q) => sum + (Number(this.pct[q.key]) || 0), 0);
+    return (Math.round((100 - total) * 10) / 10).toString() + '%';
+  }
+
+  activePreset(): string {
+    const t = this.tenths();
+    return this.presets.find(p => t && p.split.q1 === t.q1 && p.split.q2 === t.q2 && p.split.q3 === t.q3 && p.split.q4 === t.q4)?.id ?? 'custom';
+  }
+
+  splitText(): string {
+    const fmt = (v: number) => (Math.round(Number(v) * 10) / 10).toString();
+    return [this.pct.q1, this.pct.q2, this.pct.q3, this.pct.q4].map(fmt).join(' / ');
+  }
+
   save(): void {
-    this.saved.emit({ ...this.draft });
+    const split = this.tenths();
+    const isDefault = split && split.q1 === 200 && split.q2 === 200 && split.q3 === 200 && split.q4 === 400;
+    this.saved.emit({ ...this.draft, quarterSplit: isDefault ? null : split });
     this.close();
   }
 }

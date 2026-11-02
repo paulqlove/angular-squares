@@ -38,6 +38,17 @@ Owner and co-host (`managerId`) keep full write through the game-level rule. Oth
 
 Gaps: a name with no `playerUserIds` mapping (legacy squares) can be claimed by the first user who registers it. Name ownership is by exact key, so a square whose case differs from its mapping key cannot be cleared or renamed by the player.
 
+## Paid plans (entitlements, adFreeUntil, quarterSplit)
+
+- `entitlements/{uid}` = `{ plan: 'week' | 'season', expiresAt, updatedAt? }`. Readable by the user and admins. Writable only by admins (the admin SDK bypasses rules). Active means `expiresAt > now`.
+- Game create: an active entitlement bypasses the one-active-board check, like the admin bypass. Paid board counts are client-side only.
+- `games/{id}/adFreeUntil`: number >= 0. Non-zero needs admin or a value <= the writer's `expiresAt`. Viewers read it from the game, since they cannot read the host's entitlement.
+- `games/{id}/quarterSplit`: `q1..q4` integers 0..1000 summing to 1000, no other keys. Writing needs admin or an active entitlement for the writer (owner or co-host). Delete is always allowed for owner/co-host because `.validate` does not run on delete.
+
+Every entitlement comparison is guarded with `expiresAt.isNumber()`. A missing entitlement makes `null > now` a type error, and an error fails the whole rule expression, including unrelated `||` branches.
+
+Gaps: `adFreeUntil` and `quarterSplit` are checked only when written. They stay on the game after the pass expires or is revoked. Readers must compare `adFreeUntil` with the current time. A co-host can stamp `adFreeUntil` up to their own pass, not the owner's.
+
 ## Tests
 
 `npm run test:rules` runs `test/rules/` against the database emulator (project `demo-squares`, needs Java: `brew install openjdk@21`).

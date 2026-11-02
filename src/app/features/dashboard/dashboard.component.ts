@@ -15,6 +15,7 @@ import { ShareDialogComponent } from '../../components/ui/share-dialog/share-dia
 import { ProfileMenuComponent } from '../../components/ui/profile-menu/profile-menu.component';
 import { HeadroomDirective } from '../../shared/directives/headroom.directive';
 import { UpgradePassDialogComponent } from './components/upgrade-pass-dialog/upgrade-pass-dialog.component';
+import { PlanService } from '../../core/services/plan.service';
 import { ActiveBoardLimitError } from '../../core/errors/active-board-limit.error';
 import {
   heroPlus,
@@ -149,6 +150,34 @@ import {
 
         <!-- Hosting -->
         @if (canCreateGame()) {
+          <div class="qs-card mt-8 flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between" aria-label="Your plan">
+            <div class="min-w-0">
+              <p class="qs-label text-qs-muted">Your plan</p>
+              <p class="qs-title mt-1 text-2xl">
+                {{ planService.features().label }}
+                @if (planService.daysLeft()) {
+                  <span class="qs-label align-middle text-qs-muted">· {{ planService.daysLeft() }} days left</span>
+                }
+              </p>
+              <ul class="mt-3 flex flex-wrap gap-2">
+                <li class="qs-badge">
+                  {{ activeBoards() ?? '–' }} of {{ planService.features().activeBoards === Infinity ? '∞' : planService.features().activeBoards }} active boards
+                </li>
+                <li class="qs-badge" [class.qs-badge-ok]="planService.features().customSplits">
+                  {{ planService.features().customSplits ? 'Custom quarter splits' : 'Splits locked 20/20/20/40' }}
+                </li>
+                <li class="qs-badge" [class.qs-badge-ok]="planService.features().adFree">
+                  {{ planService.features().adFree ? 'Ad free' : 'Ads on your boards' }}
+                </li>
+              </ul>
+            </div>
+            @if (planService.plan() !== 'season' && planService.plan() !== 'admin') {
+              <button type="button" (click)="openUpgrade($event)" class="qs-btn qs-btn-secondary shrink-0">
+                {{ planService.plan() === 'week' ? 'Get Season Pass' : 'See passes' }}
+              </button>
+            }
+          </div>
+
           <section class="mt-12" data-walkthrough="my-games" aria-labelledby="hosting-heading">
             <div class="flex items-baseline justify-between border-b border-qs-line pb-3">
               <h3 id="hosting-heading" class="qs-eyebrow qs-eyebrow-bar">01 / Hosting</h3>
@@ -719,6 +748,9 @@ export class DashboardComponent implements OnInit {
 
   currentUser = this.authService.currentUser;
   canCreateGame = this.authService.canCreateGame;
+  protected planService = inject(PlanService);
+  protected readonly Infinity = Infinity;
+  activeBoards = signal<number | null>(null);
 
   myGames = signal<GameListItem[]>([]);
   readonly boardCells: number[] = Array.from({ length: 100 }, (_, i) => i);
@@ -796,6 +828,7 @@ export class DashboardComponent implements OnInit {
         ]);
         this.myGames.set(owned);
         this.joinedGames.set(joined);
+        this.gameService.activeBoardCount(user.uid).then(n => this.activeBoards.set(n), () => {});
         const linked = owned.filter(game => !!game.espnEventId);
         if (linked.length > 0) {
           this.gameService.ensureLiveGameIndexes(linked.map(game => ({
@@ -838,6 +871,11 @@ export class DashboardComponent implements OnInit {
     } finally {
       this.isCheckingBoardLimit.set(false);
     }
+  }
+
+  openUpgrade(event: Event): void {
+    if (event.currentTarget instanceof HTMLElement) this.upgradeReturnFocus = event.currentTarget;
+    this.showUpgradeDialog.set(true);
   }
 
   closeUpgrade(): void {

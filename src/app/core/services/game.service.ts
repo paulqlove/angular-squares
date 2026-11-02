@@ -16,6 +16,8 @@ import { Observable, BehaviorSubject } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ActiveBoardLimitError } from '../errors/active-board-limit.error';
 import { EspnService } from './espn.service';
+import { RolePreviewService } from './role-preview.service';
+import { Entitlement, PLANS, QuarterSplit, isActive } from '../plans';
 import { AuthService } from './auth.service';
 import {
   BoardActivity,
@@ -72,6 +74,10 @@ export interface GameData {
   managerEmail?: string;
   managerName?: string;
   playerUserIds?: { [name: string]: string };
+  /** Host's plan stamp: no ads on this board until this time (ms). */
+  adFreeUntil?: number;
+  /** Custom per-quarter split in tenths of a percent (paid plans). */
+  quarterSplit?: QuarterSplit | null;
 }
 
 export interface GameListItem {
@@ -101,6 +107,7 @@ export class GameService {
   private platformId = inject(PLATFORM_ID);
   private espnService = inject(EspnService);
   private authService = inject(AuthService);
+  private rolePreview = inject(RolePreviewService);
   // Lazy init required for SSR hydration - see CLAUDE.md "SSR Hydration Pattern"
   private _db: Database | null = null;
   private currentGameId = signal<string | null>(null);
@@ -185,22 +192,54 @@ export class GameService {
     if (!this.isBrowser) {
       throw new Error('Cannot check boards on server');
     }
-    if (await this.isAdmin(ownerId)) return;
-    const boards = await this.loadOwnedBoardActivity(ownerId);
-    const now = Date.now();
-    const activeCount = boards.filter(board => isBoardActive(board, now)).length;
-    if (activeCount >= FREE_ACTIVE_BOARD_LIMIT) {
+    const limit = await this.boardLimit(ownerId);
+    if (limit === Number.POSITIVE_INFINITY) return;
+    if ((await this.activeBoardCount(ownerId)) >= limit) {
       throw new ActiveBoardLimitError();
     }
   }
 
+  /** Boards this host has active right now (counted against their plan). */
+  async activeBoardCount(ownerId: string): Promise<number> {
+    const now = Date.now();
+    return (await this.loadOwnedBoardActivity(ownerId)).filter(board => isBoardActive(board, now)).length;
+  }
+
   /** Admins (set by hand at admins/{uid} in the console) have no board limit. */
-  private async isAdmin(uid: string): Promise<boolean> {
+  async isAdmin(uid: string): Promise<boolean> {
     try {
       return (await get(ref(this.db, `admins/${uid}`))).val() === true;
     } catch {
       return false;
     }
+  }
+
+  /** entitlements/{uid}: the host's paid plan, or null. Readable only by its owner and admins. */
+  async getEntitlement(uid: string): Promise<Entitlement | null> {
+    if (!this.isBrowser) return null;
+    try {
+      return ((await get(ref(this.db, `entitlements/${uid}`))).val() as Entitlement | null) ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  /** Active boards allowed for this host: admin unlimited, else the active plan's limit, else Free. */
+  private async boardLimit(uid: string): Promise<number> {
+    if (await this.isAdmin(uid)) {
+      // The admin can preview a plan's limits from the View-as switcher.
+      const preview = this.rolePreview.plan();
+      return preview === 'actual' ? PLANS.admin.activeBoards : PLANS[preview].activeBoards;
+    }
+    const entitlement = await this.getEntitlement(uid);
+    return isActive(entitlement) ? PLANS[entitlement!.plan].activeBoards : FREE_ACTIVE_BOARD_LIMIT;
+  }
+
+  /** How long a new or opened board stays ad-free for this host (0 = ads). Rules cap it at the real pass. */
+  async adFreeUntilFor(uid: string): Promise<number> {
+    if (await this.isAdmin(uid)) return Date.now() + 3650 * 86_400_000;
+    const entitlement = await this.getEntitlement(uid);
+    return isActive(entitlement) ? entitlement!.expiresAt : 0;
   }
 
   /** Write-only notifyMe/{pushId} entry. Callers must already be signed in. */
@@ -277,6 +316,7 @@ export class GameService {
       awayTeam: awayTeam || '',
       hostNote: hostNote || '',
       paidPlayers: [],
+      adFreeUntil: await this.adFreeUntilFor(ownerId),
       ...(espnEventId ? { espnEventId } : {}),
       ...(espnSport ? { espnSport } : {}),
       ...(managerEmail ? { managerEmail } : {})
@@ -359,6 +399,8 @@ export class GameService {
           managerId: rawData.managerId || undefined,
           managerEmail: rawData.managerEmail || undefined,
           managerName: rawData.managerName || undefined,
+          adFreeUntil: rawData.adFreeUntil || 0,
+          quarterSplit: rawData.quarterSplit || null,
           playerUserIds: rawData.playerUserIds || undefined
         };
 
@@ -419,6 +461,12 @@ export class GameService {
     }
     if (data.hostNote !== undefined) {
       updates[`${prefix}/hostNote`] = data.hostNote;
+    }
+    if (data.adFreeUntil !== undefined) {
+      updates[`${prefix}/adFreeUntil`] = data.adFreeUntil;
+    }
+    if (data.quarterSplit !== undefined) {
+      updates[`${prefix}/quarterSplit`] = data.quarterSplit;
     }
     if (data.espnEventId !== undefined) {
       const nextId = data.espnEventId || null;
@@ -499,6 +547,8 @@ export class GameService {
         managerId: rawData.managerId || undefined,
         managerEmail: rawData.managerEmail || undefined,
         managerName: rawData.managerName || undefined,
+          adFreeUntil: rawData.adFreeUntil || 0,
+          quarterSplit: rawData.quarterSplit || null,
         playerUserIds: rawData.playerUserIds || undefined
       };
     }

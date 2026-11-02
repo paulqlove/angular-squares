@@ -6,6 +6,9 @@ import { GameService, GameData, EspnLiveSnapshot } from '../../core/services/gam
 import { environment } from '../../../environments/environment';
 import { PLAYER_COLORS, normalizePlayerColors } from './utils/player-colors';
 import { PreviewRole } from '../../core/services/role-preview.service';
+import { PlanService } from '../../core/services/plan.service';
+import { QuarterSplit, splitFractions } from '../../core/plans';
+import { AdSlotComponent } from '../../components/ui/ad-slot/ad-slot.component';
 import { AuthService } from '../../core/services/auth.service';
 import { EspnService, EspnGame, SportType } from '../../core/services/espn.service';
 import { ToastService } from '../../core/services/toast.service';
@@ -58,7 +61,8 @@ import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.co
     BoxScoreComponent,
     AuthModalComponent,
     ProfileMenuComponent,
-    ShareDialogComponent
+    ShareDialogComponent,
+    AdSlotComponent
 ],
     providers: [
         provideIcons({
@@ -106,6 +110,9 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   playerColors: { [key: string]: string } = {};
   playerUserIds: { [name: string]: string } = {};
   totalPot: number = 0;
+  quarterSplit: QuarterSplit | null = null;
+  adFreeUntil = 0;
+  private adStampDone = false;
   availableColors = PLAYER_COLORS;
 
   quarterPayouts = {
@@ -140,6 +147,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   // Injected services
   private gameService = inject(GameService);
   private authService = inject(AuthService);
+  protected planService = inject(PlanService);
   private espnService = inject(EspnService);
   private toastService = inject(ToastService);
   private walkthroughService = inject(WalkthroughService);
@@ -320,6 +328,9 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           this.homeTeam = data.homeTeam || '';
           this.awayTeam = data.awayTeam || '';
           this.hostNote = data.hostNote || '';
+          this.quarterSplit = data.quarterSplit || null;
+          this.quarterPayouts = splitFractions(data.quarterSplit);
+          this.adFreeUntil = data.adFreeUntil || 0;
           this.paidPlayers = new Set(data.paidPlayers || []);
           this.playerColors = normalizePlayerColors(data.playerColors || {});
           this.winners = data.winners || {};
@@ -331,6 +342,10 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           // Check if current user is the game owner or manager
           this.ownerId.set(data.ownerId || '');
           this.managerId.set(data.managerId || null);
+          if (!this.adStampDone && this.isGameOwner() && this.authService.previewRole() === 'actual') {
+            this.adStampDone = true;
+            void this.stampAdFree();
+          }
 
           Object.values(this.selectedSquares).forEach(playerName => {
             if (!this.playerColors[playerName]) {
@@ -754,8 +769,15 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     const awayTeam = this.sanitizationService.sanitizeTeamName(values.awayTeam);
     const hostNote = this.sanitizationService.sanitizeHostNote(values.hostNote);
     const price = this.isLocked ? this.currentPrice : this.sanitizationService.validatePrice(values.pricePerSquare);
+    const canSplit = this.planService.features().customSplits && !this.isRandomized;
+    const split = canSplit ? values.quarterSplit : this.quarterSplit;
     try {
-      await this.gameService.updateGame(this.gameId, { homeTeam, awayTeam, hostNote, pricePerSquare: price });
+      await this.gameService.updateGame(this.gameId, {
+        homeTeam, awayTeam, hostNote, pricePerSquare: price,
+        ...(canSplit ? { quarterSplit: split } : {})
+      });
+      this.quarterSplit = split;
+      this.quarterPayouts = splitFractions(split);
       this.homeTeam = homeTeam;
       this.awayTeam = awayTeam;
       this.hostNote = hostNote;
@@ -774,6 +796,25 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     }
     const q4 = this.scores.q4;
     return !!q4 && (q4.home > 0 || q4.away > 0);
+  }
+
+  /** Ads show on free hosts' boards. The admin can preview a plan from the View-as switcher. */
+  showAd(): boolean {
+    if (this.authService.isPreviewAdmin() && this.planService.plan() !== 'admin') {
+      return !this.planService.features().adFree;
+    }
+    return Date.now() >= this.adFreeUntil;
+  }
+
+  /** The host stamps how long this board is ad-free; the rules cap it at their real pass. */
+  private async stampAdFree(): Promise<void> {
+    const uid = this.authService.realUser()?.uid;
+    if (!uid) return;
+    const until = await this.gameService.adFreeUntilFor(uid);
+    if (until > this.adFreeUntil) {
+      this.adFreeUntil = until;
+      this.gameService.updateGame(this.gameId, { adFreeUntil: until }).catch(() => {});
+    }
   }
 
   filledCount(): number {
