@@ -15,8 +15,8 @@ export function getTeamLogo(team: NflTeam, size: 500 | 100 = 500): string {
   if (team.abbreviation === 'WAS') {
     return '/assets/team-logos/was.png';
   }
-  // ESPN team logos by lowercase abbreviation
-  return `https://a.espncdn.com/i/teamlogos/nfl/${size}/${team.abbreviation.toLowerCase()}.png`;
+  // ESPN team logos by team ID (more reliable than abbreviations)
+  return `https://a.espncdn.com/i/teamlogos/nfl/500/${team.espnId}.png`;
 }
 
 export const NFL_TEAMS: NflTeam[] = [
