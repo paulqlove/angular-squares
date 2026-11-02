@@ -73,8 +73,16 @@ export function getTeamBySlug(slug: string): NflTeam | undefined {
   return NFL_TEAMS.find(t => t.slug === slug);
 }
 
+// ESPN uses different abbreviations for some teams
+const ESPN_ABBREV_ALIASES: Record<string, string> = {
+  'WSH': 'WAS',  // Washington Commanders
+  'JAC': 'JAX',  // Jacksonville Jaguars
+};
+
 export function getTeamByAbbreviation(abbrev: string): NflTeam | undefined {
-  return NFL_TEAMS.find(t => t.abbreviation.toLowerCase() === abbrev.toLowerCase());
+  const normalized = abbrev.toUpperCase();
+  const mapped = ESPN_ABBREV_ALIASES[normalized] || normalized;
+  return NFL_TEAMS.find(t => t.abbreviation.toUpperCase() === mapped);
 }
 
 export function getTeamLogoByAbbreviation(abbrev: string, size: 500 | 100 = 100): string | null {
