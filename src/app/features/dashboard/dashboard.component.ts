@@ -11,6 +11,7 @@ import { SanitizationService } from '../../core/services/sanitization.service';
 import { WalkthroughService, WalkthroughStep } from '../../core/services/walkthrough.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { AppHeaderComponent } from '../../components/ui/app-header/app-header.component';
+import { ShareDialogComponent } from '../../components/ui/share-dialog/share-dialog.component';
 import { ProfileMenuComponent } from '../../components/ui/profile-menu/profile-menu.component';
 import { HeadroomDirective } from '../../shared/directives/headroom.directive';
 import { UpgradePassDialogComponent } from './components/upgrade-pass-dialog/upgrade-pass-dialog.component';
@@ -42,7 +43,7 @@ import {
 
 @Component({
     selector: 'app-dashboard',
-    imports: [FormsModule, NgTemplateOutlet, NgIconComponent, AppHeaderComponent, HeadroomDirective, ProfileMenuComponent, UpgradePassDialogComponent],
+    imports: [FormsModule, NgTemplateOutlet, NgIconComponent, AppHeaderComponent, HeadroomDirective, ProfileMenuComponent, ShareDialogComponent, UpgradePassDialogComponent],
     providers: [
         provideIcons({
             heroPlus,
@@ -440,72 +441,7 @@ import {
       }
 
       <!-- Share Modal -->
-      @if (shareModalGameId()) {
-        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" (click)="shareModalGameId.set(null)">
-          <div class="bg-dialog rounded-2xl shadow-2xl max-w-md w-full animate-modal-in" (click)="$event.stopPropagation()">
-            <div class="flex items-center justify-between p-6 border-b border-default">
-              <h3 class="text-xl font-bold text-heading">Share Game</h3>
-              <button
-                (click)="shareModalGameId.set(null)"
-                class="p-2 text-muted hover:text-default hover:bg-control rounded-lg transition-colors"
-              >
-                <ng-icon name="heroXMark" class="text-2xl"></ng-icon>
-              </button>
-            </div>
-
-            <div class="p-6 space-y-5">
-              <div>
-                <label class="block text-sm font-semibold text-label mb-2">Game Code</label>
-                <div class="flex items-center gap-2">
-                  <code class="flex-1 bg-control px-4 py-4 rounded-xl font-mono text-2xl tracking-widest text-center text-heading">
-                    {{ shareModalGameId() }}
-                  </code>
-                  <button
-                    (click)="copyToClipboard(shareModalGameId()!)"
-                    class="p-4 bg-qs-accent hover:bg-qs-accent-hover text-white rounded-xl transition-colors"
-                  >
-                    Copy
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <label class="block text-sm font-semibold text-label mb-2">Share Link</label>
-                <div class="flex items-center gap-2">
-                  <input
-                    type="text"
-                    [value]="getShareLink(shareModalGameId()!)"
-                    readonly
-                    class="flex-1 px-4 py-3 bg-control rounded-xl text-sm truncate text-muted"
-                  />
-                  <button
-                    (click)="copyToClipboard(getShareLink(shareModalGameId()!))"
-                    class="px-4 py-3 bg-qs-accent hover:bg-qs-accent-hover text-white rounded-xl transition-colors"
-                  >
-                    Copy
-                  </button>
-                </div>
-              </div>
-
-              <!-- Copied notification -->
-              @if (copiedToClipboard()) {
-                <div class="bg-qs-ok-soft border border-qs-ok-soft text-qs-ok px-4 py-2 rounded-lg text-sm text-center dark:bg-qs-tile-ok/30 dark:border-qs-ok dark:text-qs-ok">
-                  Copied to clipboard!
-                </div>
-              }
-            </div>
-
-            <div class="p-6 border-t border-default bg-input rounded-b-2xl">
-              <button
-                (click)="shareModalGameId.set(null)"
-                class="qs-btn qs-btn-secondary w-full"
-              >
-                Done
-              </button>
-            </div>
-          </div>
-        </div>
-      }
+      <app-share-dialog [isOpen]="!!shareModalGameId()" [gameId]="shareModalGameId() || ''" [link]="shareModalGameId() ? getShareLink(shareModalGameId()!) : ''" (closed)="shareModalGameId.set(null)"></app-share-dialog>
 
       <!-- Edit Game Modal -->
       @if (showEditModal()) {
@@ -784,7 +720,6 @@ export class DashboardComponent implements OnInit {
   shareModalGameId = signal<string | null>(null);
   espnGames = signal<EspnGame[]>([]);
   isLoadingEspnGames = signal(false);
-  copiedToClipboard = signal(false);
   gameNameError = signal(false);
 
   // Edit modal state
@@ -1043,15 +978,6 @@ export class DashboardComponent implements OnInit {
     return this.gameService.getShareableLink(gameId);
   }
 
-  async copyToClipboard(text: string): Promise<void> {
-    try {
-      await navigator.clipboard.writeText(text);
-      this.copiedToClipboard.set(true);
-      setTimeout(() => this.copiedToClipboard.set(false), 2000);
-    } catch (error) {
-      this.toastService.error('Failed to copy');
-    }
-  }
 
   formatDate(timestamp: number): string {
     return new Date(timestamp).toLocaleDateString();

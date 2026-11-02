@@ -8,16 +8,16 @@ interface DemoPlayer {
 type Phase = 'filling' | 'drawing' | 'locked';
 
 const PLAYERS: DemoPlayer[] = [
-  { initials: 'AL', color: 'bg-red-200' },
-  { initials: 'SA', color: 'bg-blue-200' },
-  { initials: 'JO', color: 'bg-amber-200' },
-  { initials: 'MI', color: 'bg-teal-200' },
-  { initials: 'LE', color: 'bg-pink-200' },
-  { initials: 'CA', color: 'bg-orange-200' },
-  { initials: 'RI', color: 'bg-lime-200' },
-  { initials: 'NI', color: 'bg-fuchsia-200' },
-  { initials: 'MA', color: 'bg-green-200' },
-  { initials: 'PA', color: 'bg-purple-200' }
+  { initials: 'AL', color: 'qs-p-rose' },
+  { initials: 'SA', color: 'qs-p-sky' },
+  { initials: 'JO', color: 'qs-p-butter' },
+  { initials: 'MI', color: 'qs-p-aqua' },
+  { initials: 'LE', color: 'qs-p-orchid' },
+  { initials: 'CA', color: 'qs-p-coral' },
+  { initials: 'RI', color: 'qs-p-apricot' },
+  { initials: 'NI', color: 'qs-p-lilac' },
+  { initials: 'MA', color: 'qs-p-tan' },
+  { initials: 'PA', color: 'qs-p-periwinkle' }
 ];
 
 const FILL_STEP_MS = 35;
