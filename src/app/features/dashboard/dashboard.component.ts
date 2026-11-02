@@ -327,8 +327,20 @@ import {
                   </div>
                 } @else if (espnGames().length === 0) {
                   <p class="mt-3 rounded-inner border border-dashed border-qs-line-strong p-4 text-sm text-qs-muted">No games on the schedule for this sport right now.</p>
+                } @else if (!gameListOpen && selectedEspnGame(); as game) {
+                  <!-- Picked: collapse to the choice so the rest of the form is right there -->
+                  <div class="mt-3 flex items-center justify-between gap-3 rounded-inner border border-qs-accent bg-qs-panel p-3 outline outline-2 -outline-offset-2 outline-qs-accent">
+                    <div class="min-w-0">
+                      <span class="qs-badge" [class]="getGameStatusClass(game.status)">{{ getGameStatusText(game) }}</span>
+                      <p class="mt-2 truncate font-semibold text-qs-ink">{{ game.awayTeam }} &#64; {{ game.homeTeam }}</p>
+                      @if (game.status === 'pre' && game.date) {
+                        <p class="qs-label mt-1 text-[10px] text-qs-muted">{{ formatGameDate(game.date) }}</p>
+                      }
+                    </div>
+                    <button type="button" (click)="gameListOpen = true" class="qs-btn qs-btn-secondary shrink-0 px-3">Change</button>
+                  </div>
                 } @else {
-                  <div class="qs-canvas mt-3 rounded-inner p-2 sm:max-h-72 sm:overflow-y-auto">
+                  <div class="qs-canvas mt-3 max-h-80 overflow-y-auto overscroll-contain rounded-inner p-2 sm:max-h-72">
                     <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
                       @for (game of espnGames(); track game.id) {
                         <button
@@ -747,6 +759,8 @@ export class DashboardComponent implements OnInit {
   joinGameCode = '';
   selectedSport: SportType = 'nfl';
   selectedEspnGameId = '';
+  /** The New game list collapses to the picked game; Change reopens it. */
+  gameListOpen = true;
   newGamePrice = 10;
   customPrice: number | null = null;
 
@@ -812,6 +826,7 @@ export class DashboardComponent implements OnInit {
     this.isCheckingBoardLimit.set(true);
     try {
       await this.gameService.assertUnderFreeBoardLimit(user.uid);
+      this.gameListOpen = true;
       this.showCreateModal.set(true);
       this.fetchEspnGames();
     } catch (error) {
@@ -844,11 +859,17 @@ export class DashboardComponent implements OnInit {
   selectSport(sport: SportType): void {
     this.selectedSport = sport;
     this.selectedEspnGameId = '';
+    this.gameListOpen = true;
     this.fetchEspnGames();
   }
 
   selectEspnGame(gameId: string): void {
     this.selectedEspnGameId = gameId;
+    this.gameListOpen = false;
+  }
+
+  selectedEspnGame(): EspnGame | undefined {
+    return this.espnGames().find(g => g.id === this.selectedEspnGameId);
   }
 
   selectPrice(price: number): void {
