@@ -16,6 +16,7 @@ import {
   heroArrowRight
 } from '@ng-icons/heroicons/outline';
 import { AppHeaderComponent } from '../../components/ui/app-header/app-header.component';
+import { HeadroomDirective } from '../../shared/directives/headroom.directive';
 import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.component';
 import { PhoneDemoComponent } from './phone-demo.component';
 
@@ -29,7 +30,7 @@ interface Feature {
 
 @Component({
     selector: 'app-welcome',
-    imports: [FormsModule, RouterLink, NgIconComponent, AppHeaderComponent, AuthModalComponent, PhoneDemoComponent, SiteFooterComponent],
+    imports: [FormsModule, RouterLink, NgIconComponent, AppHeaderComponent, HeadroomDirective, AuthModalComponent, PhoneDemoComponent, SiteFooterComponent],
     providers: [
         provideIcons({
             heroSquares2x2,
@@ -44,13 +45,13 @@ interface Feature {
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
     <div class="min-h-screen bg-qs-bg text-qs-ink">
-      <app-shared-header heading="p">
+      <app-shared-header heading="p" appHeadroom>
         @if (isAuthenticated()) {
           <button type="button" (click)="goToDashboard()" class="qs-btn qs-btn-ghost">
             Dashboard
           </button>
         } @else {
-          <button type="button" (click)="showAuthModal.set(true)" class="qs-btn qs-btn-ghost">
+          <button type="button" (click)="showAuthModal.set(true)" class="qs-btn qs-btn-primary">
             Sign in
           </button>
         }

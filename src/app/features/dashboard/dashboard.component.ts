@@ -11,6 +11,7 @@ import { SanitizationService } from '../../core/services/sanitization.service';
 import { WalkthroughService, WalkthroughStep } from '../../core/services/walkthrough.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { AppHeaderComponent } from '../../components/ui/app-header/app-header.component';
+import { HeadroomDirective } from '../../shared/directives/headroom.directive';
 import { UpgradePassDialogComponent } from './components/upgrade-pass-dialog/upgrade-pass-dialog.component';
 import { ActiveBoardLimitError } from '../../core/errors/active-board-limit.error';
 import {
@@ -40,7 +41,7 @@ import {
 
 @Component({
     selector: 'app-dashboard',
-    imports: [FormsModule, NgIconComponent, AppHeaderComponent, UpgradePassDialogComponent],
+    imports: [FormsModule, NgIconComponent, AppHeaderComponent, HeadroomDirective, UpgradePassDialogComponent],
     providers: [
         provideIcons({
             heroPlus,
@@ -70,7 +71,7 @@ import {
     template: `
     <div class="min-h-screen bg-page" [attr.inert]="showUpgradeDialog() ? '' : null">
       <!-- Header -->
-      <app-shared-header variant="solid">
+      <app-shared-header variant="solid" appHeadroom>
         <!-- Help Button -->
         <button
           (click)="startWalkthrough()"

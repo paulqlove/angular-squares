@@ -2,6 +2,7 @@ import { Component, Input, inject, signal, ChangeDetectionStrategy } from '@angu
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
 import { SiteFooterComponent } from '../../shared/site-footer.component';
+import { HeadroomDirective } from '../../shared/directives/headroom.directive';
 
 interface NavLink {
   path: string;
@@ -10,7 +11,7 @@ interface NavLink {
 
 @Component({
     selector: 'app-content-shell',
-    imports: [RouterLink, SiteFooterComponent],
+    imports: [RouterLink, SiteFooterComponent, HeadroomDirective],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
     <a
@@ -20,7 +21,7 @@ interface NavLink {
       Skip to content
     </a>
     <div class="flex min-h-screen flex-col bg-page">
-      <header class="no-print qs-on-navy bg-qs-tile text-qs-tile-ink">
+      <header appHeadroom class="no-print qs-on-navy bg-qs-tile text-qs-tile-ink">
         <div class="mx-auto flex max-w-5xl flex-wrap items-center gap-3 px-4 py-2">
           <a routerLink="/" class="flex min-h-11 items-center gap-2 rounded-md">
             <img src="assets/brand/lockup-horizontal-reversed.svg" alt="QuarterScore" width="192" height="24" class="h-6 w-auto">
