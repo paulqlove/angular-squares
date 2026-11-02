@@ -19,6 +19,7 @@ import { AppHeaderComponent } from '../../components/ui/app-header/app-header.co
 import { HeadroomDirective } from '../../shared/directives/headroom.directive';
 import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.component';
 import { PhoneDemoComponent } from './phone-demo.component';
+import { NFL_TEAMS } from '../content/teams-data';
 
 interface Feature {
   icon: string;
@@ -177,10 +178,42 @@ interface Feature {
         </div>
       </section>
 
+      <!-- Pick Your Team -->
+      <section class="border-t border-qs-line py-16 md:py-24">
+        <div class="mx-auto max-w-[1600px] px-4 sm:px-8">
+          <p class="qs-eyebrow">Section 03 / Pick your team</p>
+          <div class="mt-3 flex flex-wrap items-end justify-between gap-4">
+            <h2 class="qs-title text-3xl md:text-4xl">Start with your <span class="text-qs-accent">team.</span></h2>
+            <a routerLink="/teams" class="qs-btn qs-btn-secondary">View all teams</a>
+          </div>
+          <p class="mt-4 max-w-2xl text-lg text-qs-muted">
+            Create a squares board themed for your favorite NFL team.
+          </p>
+
+          <div class="mt-10 grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 md:gap-3">
+            @for (team of teams; track team.slug) {
+              <a
+                [routerLink]="'/team/' + team.slug"
+                class="group relative aspect-square overflow-hidden rounded-lg transition-transform hover:scale-105 hover:z-10"
+                [style.background]="'linear-gradient(135deg, ' + team.primaryColor + ' 0%, ' + team.secondaryColor + ' 100%)'"
+                [attr.aria-label]="team.city + ' ' + team.name"
+              >
+                <span class="absolute inset-0 flex items-center justify-center text-lg font-bold text-white drop-shadow-sm sm:text-xl md:text-2xl">
+                  {{ team.abbreviation }}
+                </span>
+                <span class="absolute inset-x-0 bottom-0 bg-black/50 px-1 py-0.5 text-center text-[8px] font-medium text-white opacity-0 transition-opacity group-hover:opacity-100 sm:text-[10px]">
+                  {{ team.name }}
+                </span>
+              </a>
+            }
+          </div>
+        </div>
+      </section>
+
       <!-- How It Works -->
       <section id="how-it-works" class="border-t border-qs-line bg-qs-panel-2 py-16 md:py-24">
         <div class="mx-auto max-w-[1600px] px-4 sm:px-8">
-          <p class="qs-eyebrow">Section 03 / How it works</p>
+          <p class="qs-eyebrow">Section 04 / How it works</p>
           <div class="mt-3 flex flex-wrap items-end justify-between gap-4">
             <h2 class="qs-title text-3xl md:text-4xl">Three steps to kickoff.</h2>
             <a routerLink="/how-to-play" class="qs-btn qs-btn-secondary">Read the full rules</a>
@@ -246,6 +279,8 @@ export class WelcomeComponent implements OnInit {
       numbers: 'Both axes use paired digits (0,1 / 2,3 / ...)'
     }
   ];
+
+  readonly teams = NFL_TEAMS;
 
   constructor() {
     effect(() => {
