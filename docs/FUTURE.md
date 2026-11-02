@@ -21,12 +21,12 @@ Source of truth: `src/app/core/plans.ts` (prices, lengths, limits). Research and
 | Active boards | 1 | 5 | 25 |
 | Ads on the host's boards | Yes | No | No |
 | Custom quarter split | No (20/20/20/40) | Yes | Yes |
-| 100/50/25-square boards | Planned for all plans | | |
+| 100/50/25-square boards | ✓ Available | ✓ | ✓ |
 
 - Buying more time stacks on what is left. A Season Pass outranks a Week Pass. An active Week Pass is credited toward a Season Pass (applies once checkout exists).
 - `entitlements/{uid} = { plan, expiresAt }`, written only by an admin for now (later a Stripe webhook). `admins/{uid}` gets everything.
 - Hosts stamp `games/{id}/adFreeUntil`; rules cap it at their real pass so viewers can trust it. Ads stay off until `environment.adsEnabled`; block gambling ad categories when a network is added.
-- Not yet built: checkout, 25/50-square boards, Season Pass organizer tools (email list, notifications, export). Coupons are shelved.
+- Not yet built: checkout, Season Pass organizer tools (email list, notifications, export). Coupons are shelved.
 
 ### Bar/Venue Tier ($49-99/season)
 
@@ -104,7 +104,7 @@ P1. Unfurlers do not run JS, so a shared game has no per-game title or image. Af
 P0. At 375px the empty green grid fills the first screen. Replace it with a real sample board. Full-width Create game, plus See demo and Join with code. Trust line: free, no account required to play.
 
 ### Board sizes and season boards
-P2. Grids of 100, 50, and 25. Optional four number sets, reverse or final-only payouts, and a random number reveal. Reusable weekly boards with standings. Fundraiser prizes stay the Bar-tier free-game mode.
+~~P2. Grids of 100, 50, and 25.~~ ✓ Done — board size selection (100/50/25) added to game creation. Still to build: optional four number sets, reverse or final-only payouts, and a random number reveal. Reusable weekly boards with standings. Fundraiser prizes stay the Bar-tier free-game mode.
 
 ### PWA
 Manifest, add to home screen, and an offline board for game day.

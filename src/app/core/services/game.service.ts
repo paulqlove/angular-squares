@@ -31,6 +31,18 @@ import {
 
 export type SportType = 'nfl' | 'nba' | 'ncaaf' | 'wnba' | 'afl';
 
+/** Board size: 100 (10x10), 50 (5x10), or 25 (5x5) squares. */
+export type BoardSize = 100 | 50 | 25;
+
+/** Get dimensions for a board size: { rows, cols } */
+export function getBoardDimensions(size: BoardSize): { rows: number; cols: number } {
+  switch (size) {
+    case 25: return { rows: 5, cols: 5 };
+    case 50: return { rows: 5, cols: 10 };
+    default: return { rows: 10, cols: 10 };
+  }
+}
+
 export interface EspnLiveSnapshot {
   status: 'pre' | 'in' | 'post';
   period: number;
@@ -49,6 +61,8 @@ export interface GameData {
   ownerId: string;
   ownerName: string;
   createdAt: number;
+  /** Board size: 100 (10x10), 50 (5x10), or 25 (5x5). Defaults to 100. */
+  boardSize?: BoardSize;
   selectedSquares: { [key: string]: string };
   homeNumbers: (number | null)[];
   awayNumbers: (number | null)[];
@@ -91,6 +105,8 @@ export interface GameListItem {
   squaresFilled: number;
   isLocked: boolean;
   pricePerSquare: number;
+  /** Board size: 100 (10x10), 50 (5x10), or 25 (5x5). Defaults to 100. */
+  boardSize: BoardSize;
   managerId?: string;
   managerEmail?: string;
   managerName?: string;
@@ -282,7 +298,8 @@ export class GameService {
     pricePerSquare?: number,
     espnSport?: SportType,
     managerEmail?: string,
-    hostNote?: string
+    hostNote?: string,
+    boardSize?: BoardSize
   ): Promise<string> {
     if (!this.isBrowser) throw new Error('Cannot create game on server');
     if (this.authService.blockPreviewWrite()) throw new Error('Preview only');
@@ -292,15 +309,19 @@ export class GameService {
     await remove(ref(this.db, `users/${ownerId}/activeBoardId`));
     const gameId = this.generateGameId();
 
+    const size: BoardSize = boardSize || 100;
+    const { rows, cols } = getBoardDimensions(size);
+
     const defaultGameData: GameData = {
       id: gameId,
       name: gameName || 'Football Squares',
       ownerId: ownerId,
       ownerName: ownerName,
       createdAt: Date.now(),
+      boardSize: size,
       selectedSquares: {},
-      homeNumbers: Array(10).fill(null),
-      awayNumbers: Array(10).fill(null),
+      homeNumbers: Array(cols).fill(null),
+      awayNumbers: Array(rows).fill(null),
       scores: {
         q1: { home: 0, away: 0 },
         q2: { home: 0, away: 0 },
@@ -369,15 +390,18 @@ export class GameService {
     this.gameSubscription = onValue(gameRef, (snapshot) => {
       if (snapshot.exists()) {
         const rawData = snapshot.val();
+        const boardSize: BoardSize = rawData.boardSize === 25 || rawData.boardSize === 50 ? rawData.boardSize : 100;
+        const { rows, cols } = getBoardDimensions(boardSize);
         const data: GameData = {
           id: gameId,
           name: rawData.name || 'Football Squares',
           ownerId: rawData.ownerId || '',
           ownerName: rawData.ownerName || 'Unknown',
           createdAt: rawData.createdAt || Date.now(),
+          boardSize,
           selectedSquares: {},
-          homeNumbers: rawData.homeNumbers || Array(10).fill(null),
-          awayNumbers: rawData.awayNumbers || Array(10).fill(null),
+          homeNumbers: rawData.homeNumbers || Array(cols).fill(null),
+          awayNumbers: rawData.awayNumbers || Array(rows).fill(null),
           scores: rawData.scores || {
             q1: { home: 0, away: 0 },
             q2: { home: 0, away: 0 },
@@ -517,15 +541,18 @@ export class GameService {
 
     if (snapshot.exists()) {
       const rawData = snapshot.val();
+      const boardSize: BoardSize = rawData.boardSize === 25 || rawData.boardSize === 50 ? rawData.boardSize : 100;
+      const { rows, cols } = getBoardDimensions(boardSize);
       return {
         id: gameId,
         name: rawData.name || 'Football Squares',
         ownerId: rawData.ownerId || '',
         ownerName: rawData.ownerName || 'Unknown',
         createdAt: rawData.createdAt || Date.now(),
+        boardSize,
         selectedSquares: rawData.squares || {},
-        homeNumbers: rawData.homeNumbers || Array(10).fill(null),
-        awayNumbers: rawData.awayNumbers || Array(10).fill(null),
+        homeNumbers: rawData.homeNumbers || Array(cols).fill(null),
+        awayNumbers: rawData.awayNumbers || Array(rows).fill(null),
         scores: rawData.scores || {
           q1: { home: 0, away: 0 },
           q2: { home: 0, away: 0 },
@@ -594,6 +621,7 @@ export class GameService {
           squaresFilled,
           isLocked: game.isLocked,
           pricePerSquare: game.pricePerSquare,
+          boardSize: game.boardSize || 100,
           managerId: game.managerId,
           managerEmail: game.managerEmail,
           managerName: game.managerName,
@@ -708,6 +736,7 @@ export class GameService {
           squaresFilled,
           isLocked: game.isLocked,
           pricePerSquare: game.pricePerSquare,
+          boardSize: game.boardSize || 100,
           managerId: game.managerId,
           managerEmail: game.managerEmail,
           managerName: game.managerName,

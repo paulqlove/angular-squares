@@ -2,7 +2,7 @@ import { computed, Component, OnInit, OnDestroy, ViewChild, HostListener, signal
 
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { GameService, GameData, EspnLiveSnapshot } from '../../core/services/game.service';
+import { GameService, GameData, EspnLiveSnapshot, BoardSize, getBoardDimensions } from '../../core/services/game.service';
 import { environment } from '../../../environments/environment';
 import { PLAYER_COLORS, normalizePlayerColors } from './utils/player-colors';
 import { PreviewRole } from '../../core/services/role-preview.service';
@@ -93,13 +93,14 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   gameId: string = '';
   gameName: string = 'Football Squares';
   gameOwnerId: string = '';
+  boardSize: BoardSize = 100;
   homeTeam: string = '';
   awayTeam: string = '';
   selectedSquares: { [key: string]: string } = {};
   playerStats: { [key: string]: { squares: number, total: number } } = {};
   currentPrice: number = 10;
-  homeNumbers: (number | null)[] = Array(10).fill(null);
-  awayNumbers: (number | null)[] = Array(10).fill(null);
+  homeNumbers: (number | null)[] = [];
+  awayNumbers: (number | null)[] = [];
   scores = {
     q1: { home: 0, away: 0 },
     q2: { home: 0, away: 0 },
@@ -318,9 +319,11 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
         if (data) {
           this.gameName = data.name || 'Football Squares';
           this.gameOwnerId = data.ownerId || '';
+          this.boardSize = data.boardSize || 100;
+          const { rows, cols } = getBoardDimensions(this.boardSize);
           this.selectedSquares = data.selectedSquares || {};
-          this.homeNumbers = data.homeNumbers || Array(10).fill(null);
-          this.awayNumbers = data.awayNumbers || Array(10).fill(null);
+          this.homeNumbers = data.homeNumbers || Array(cols).fill(null);
+          this.awayNumbers = data.awayNumbers || Array(rows).fill(null);
           this.scores = data.scores || this.scores;
           this.currentPrice = data.pricePerSquare || 10;
           this.isRandomized = data.isRandomized || false;
@@ -721,9 +724,11 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   }
 
   async randomizeNumbers(): Promise<void> {
+    const { rows, cols } = getBoardDimensions(this.boardSize);
+
     if (this.isRandomized) {
-      this.homeNumbers = Array(10).fill(null);
-      this.awayNumbers = Array(10).fill(null);
+      this.homeNumbers = Array(cols).fill(null);
+      this.awayNumbers = Array(rows).fill(null);
       this.isRandomized = false;
 
       await this.gameService.updateGame(this.gameId, {
@@ -734,9 +739,12 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const numbers = Array.from({length: 10}, (_, i) => i);
-    const homeNumbers = [...numbers].sort(() => Math.random() - 0.5);
-    const awayNumbers = [...numbers].sort(() => Math.random() - 0.5);
+    const allDigits = Array.from({length: 10}, (_, i) => i);
+    const shuffled = [...allDigits].sort(() => Math.random() - 0.5);
+
+    // For smaller boards, take a subset of digits and shuffle them
+    const homeNumbers = shuffled.slice(0, cols).sort(() => Math.random() - 0.5);
+    const awayNumbers = shuffled.slice(0, rows).sort(() => Math.random() - 0.5);
 
     this.homeNumbers = homeNumbers;
     this.awayNumbers = awayNumbers;
@@ -880,10 +888,11 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const { rows, cols } = getBoardDimensions(this.boardSize);
     const defaultGameState: Partial<GameData> = {
       selectedSquares: {},
-      homeNumbers: Array(10).fill(null),
-      awayNumbers: Array(10).fill(null),
+      homeNumbers: Array(cols).fill(null),
+      awayNumbers: Array(rows).fill(null),
       scores: {
         q1: { home: 0, away: 0 },
         q2: { home: 0, away: 0 },

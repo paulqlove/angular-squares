@@ -184,6 +184,7 @@
                 [highlightedSquare]="highlightedSquare"
                 [currentLeaderSquare]="currentLeaderSquare"
                 [isRandomized]="isRandomized"
+                [boardSize]="boardSize"
                 (squareClick)="onSquareClick($event)">
               </app-game-board>
             } @else if (activeTab === 'probabilities') {
@@ -194,7 +195,8 @@
                   [homeTeam]="homeTeam"
                   [awayTeam]="awayTeam"
                   [selectedSquares]="selectedSquares"
-                  [selectedPlayer]="selectedPlayer">
+                  [selectedPlayer]="selectedPlayer"
+                  [boardSize]="boardSize">
                 </app-probability-heatmap>
               } @else {
                 <div class="flex h-64 items-center justify-center px-4 text-center text-qs-muted">

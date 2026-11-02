@@ -171,6 +171,17 @@ module.exports = {
     'border-qs-line', 'border-qs-line-strong', 'border-qs-accent',
     'rounded-card', 'rounded-btn', 'rounded-inner', 'rounded-chip',
     'shadow-card', 'shadow-pop',
+    // Dynamic grid classes for different board sizes
+    'grid-cols-[1.5rem_repeat(5,minmax(0,1fr))]',
+    'grid-cols-[1.5rem_repeat(10,minmax(0,1fr))]',
+    'sm:grid-cols-[2.25rem_repeat(5,minmax(0,1fr))]',
+    'sm:grid-cols-[2.25rem_repeat(10,minmax(0,1fr))]',
+    // Mini board preview grids
+    'grid-cols-5',
+    'grid-cols-10',
+    // Probability heatmap grids
+    'grid-cols-[auto_repeat(5,minmax(0,1fr))]',
+    'grid-cols-[auto_repeat(10,minmax(0,1fr))]',
   ],
   plugins: [],
 };
