@@ -27,14 +27,17 @@ import {
   heroPencilSquare,
   heroXMark,
   heroQuestionMarkCircle,
-  heroCog6Tooth
+  heroArrowPath,
+  heroSparkles,
+  heroCheckCircle
 } from '@ng-icons/heroicons/outline';
 import { GameStatusComponent } from './components/game-status/game-status.component';
 import { AppHeaderComponent } from '../../components/ui/app-header/app-header.component';
-import { SettingsPanelComponent } from './components/settings-panel/settings-panel.component';
+import { EditGameDialogComponent, EditGameValues } from './components/edit-game-dialog/edit-game-dialog.component';
 import { PaymentDialogComponent } from './components/payment-dialog/payment-dialog.component';
 import { ProbabilityHeatmapComponent } from './components/probability-heatmap/probability-heatmap.component';
 import { BoxScoreComponent } from './components/box-score/box-score.component';
+import { ProfileMenuComponent } from '../../components/ui/profile-menu/profile-menu.component';
 import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.component';
 
 @Component({
@@ -47,11 +50,12 @@ import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.co
     WinnersAndPayoutsComponent,
     GameStatusComponent,
     AppHeaderComponent,
-    SettingsPanelComponent,
+    EditGameDialogComponent,
     PaymentDialogComponent,
     ProbabilityHeatmapComponent,
     BoxScoreComponent,
-    AuthModalComponent
+    AuthModalComponent,
+    ProfileMenuComponent
 ],
     providers: [
         provideIcons({
@@ -66,7 +70,9 @@ import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.co
             heroPencilSquare,
             heroXMark,
             heroQuestionMarkCircle,
-            heroCog6Tooth
+            heroArrowPath,
+            heroSparkles,
+            heroCheckCircle
         })
     ],
     templateUrl: './super-bowl-squares.component.html',
@@ -189,9 +195,9 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       position: 'left'
     },
     {
-      target: 'settings-button',
-      title: 'Game Settings',
-      description: 'Game owners can manage team names, points, lock the board, and sync live ESPN scores here.',
+      target: 'host-tools',
+      title: 'Host tools',
+      description: 'Lock the board, draw the numbers, confirm players, and edit team names, points and your note.',
       position: 'bottom'
     },
     {
@@ -746,29 +752,44 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       return;
     }
     this.isLocked = !this.isLocked;
-    await this.gameService.updateGame(this.gameId, { isLocked: this.isLocked });
-  }
-
-  onTeamNameChange(event: {team: 'home' | 'away', name: string}): void {
-    const sanitizedName = this.sanitizationService.sanitizeTeamName(event.name);
-    if (event.team === 'home') {
-      this.homeTeam = sanitizedName;
-    } else {
-      this.awayTeam = sanitizedName;
+    try {
+      await this.gameService.updateGame(this.gameId, { isLocked: this.isLocked });
+    } catch {
+      this.isLocked = !this.isLocked;
     }
-    this.gameService.updateGame(this.gameId, {
-      homeTeam: this.homeTeam,
-      awayTeam: this.awayTeam
-    });
   }
 
-  onPriceChange(price: number): void {
-    this.currentPrice = this.sanitizationService.validatePrice(price);
-    this.gameService.updateGame(this.gameId, {
-      pricePerSquare: this.currentPrice
-    });
-    this.calculatePlayerStats();
+  /** Saves the Edit game popup in one write. */
+  async onEditGameSaved(values: EditGameValues): Promise<void> {
+    if (!this.isGameOwner()) return;
+    const homeTeam = this.sanitizationService.sanitizeTeamName(values.homeTeam);
+    const awayTeam = this.sanitizationService.sanitizeTeamName(values.awayTeam);
+    const hostNote = this.sanitizationService.sanitizeHostNote(values.hostNote);
+    const price = this.isLocked ? this.currentPrice : this.sanitizationService.validatePrice(values.pricePerSquare);
+    try {
+      await this.gameService.updateGame(this.gameId, { homeTeam, awayTeam, hostNote, pricePerSquare: price });
+      this.homeTeam = homeTeam;
+      this.awayTeam = awayTeam;
+      this.hostNote = hostNote;
+      this.currentPrice = price;
+      this.calculatePlayerStats();
+      this.toastService.success('Game saved');
+    } catch {
+      this.toastService.error('Failed to save game. Please try again.');
+    }
   }
+
+  filledCount(): number {
+    return Object.keys(this.selectedSquares).length;
+  }
+
+  /** Tour steps; the host-tools step only for owner and co-host. */
+  private walkthroughSteps(): WalkthroughStep[] {
+    const host = this.isGameOwner() || this.isManager();
+    return this.gameboardWalkthroughSteps.filter(step => host || step.target !== 'host-tools');
+  }
+
+
 
   @HostListener('document:click')
   onDocumentClick(): void {
@@ -794,12 +815,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     this.highlightedSquare = this.highlightedSquare === key ? null : key;
   }
 
-  onHostNoteChange(note: string) {
-    this.hostNote = this.sanitizationService.sanitizeHostNote(note);
-    this.gameService.updateGame(this.gameId, {
-      hostNote: this.hostNote
-    });
-  }
 
   onManagePayments() {
     // Only owners and managers can manage payments
@@ -817,13 +832,13 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     });
   }
 
-  async onClearGame() {
+  async onClearGame(confirmed = false) {
     // Only owners can clear game
     if (!this.isGameOwner()) {
       return;
     }
 
-    if (!confirm('Are you sure you want to clear all game data? This cannot be undone.')) {
+    if (!confirmed && !confirm('Are you sure you want to clear all game data? This cannot be undone.')) {
       return;
     }
 
@@ -1039,12 +1054,12 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   // Walkthrough methods
   startWalkthrough(): void {
     this.walkthroughService.resetCompletion('gameboard');
-    this.walkthroughService.start('gameboard', this.gameboardWalkthroughSteps);
+    this.walkthroughService.start('gameboard', this.walkthroughSteps());
   }
 
   private triggerWalkthroughIfNew(): void {
     setTimeout(() => {
-      this.walkthroughService.startIfNew('gameboard', this.gameboardWalkthroughSteps);
+      this.walkthroughService.startIfNew('gameboard', this.walkthroughSteps());
     }, 1000);
   }
 

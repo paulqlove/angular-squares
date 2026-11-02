@@ -1,55 +1,39 @@
-<div class="rounded-lg p-4 mt-8">
-  <h2 class="text-lg font-bold mb-4 text-heading">Winners</h2>
+<div class="mb-3 flex items-baseline justify-between border-b border-qs-line pb-3">
+  <h3 class="qs-eyebrow qs-eyebrow-bar">03 / Winners</h3>
+  <span class="qs-label text-qs-muted">Board total · {{ totalPot | number: '1.0-2' }} pts</span>
+</div>
 
-  <div class="winners-container">
-    @for (quarter of ['q1', 'q2', 'q3', 'q4']; track quarter) {
-      <div class="quarter-card"
-           [class]="winners[quarter] ? playerColors[winners[quarter]] : 'bg-card'"
-           [class.quarter-card--no-winner]="!winners[quarter]"
-           [class.cursor-pointer]="winners[quarter]"
-           [style.border-color]="winners[quarter] ? saturateColor(playerColors[winners[quarter]]) : ''"
-           (click)="winners[quarter] && quarterClick.emit(quarter)">
-        <div class="card-content">
-          <div class="winner-section">
-            <h3 class="font-medium" [class]="winners[quarter] ? 'text-slate-900' : 'text-heading'">{{ getQuarterLabel(quarter) }}</h3>
-            <div class="winner-info">
-              @if (winners[quarter]) {
-                <span>🏆</span>
-                <span class="text-slate-900">{{ winners[quarter] }}</span>
-              } @else {
-                <span class="text-muted">No winner yet</span>
-              }
-            </div>
-            @if (scores[quarter] && (scores[quarter].home > 0 || scores[quarter].away > 0)) {
-              <div class="text-xs" [class]="winners[quarter] ? 'text-slate-600' : 'text-muted'">
-                {{ awayTeam || 'Away' }} {{ scores[quarter].away }} - {{ homeTeam || 'Home' }} {{ scores[quarter].home }}
-              </div>
-            }
-          </div>
-
-          <div class="payout-section">
-            <div class="text-sm" [class]="winners[quarter] ? 'text-slate-700' : 'text-muted'">Points</div>
-            <div class="text-lg font-medium" [class]="winners[quarter] ? 'text-slate-900' : 'text-default'">
-              {{ getQuarterPoints(quarter) | number: '1.0-2' }} pts
-            </div>
-          </div>
-        </div>
+<div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+  @for (quarter of quarters; track quarter) {
+    <button
+      type="button"
+      class="flex min-h-36 flex-col rounded-inner p-4 text-left transition-[filter] disabled:cursor-default"
+      [class]="winners[quarter] ? 'bg-qs-tile-ok hover:brightness-110' : 'bg-qs-tile'"
+      [disabled]="!winners[quarter]"
+      [attr.aria-label]="getQuarterLabel(quarter) + (winners[quarter] ? ', won by ' + winners[quarter] + '. Show the winning square' : ', no winner yet')"
+      (click)="quarterClick.emit(quarter)">
+      <div class="flex items-center justify-between gap-2">
+        <span class="qs-label text-qs-tile-muted">{{ getQuarterLabel(quarter) }}</span>
+        <span class="qs-label text-qs-tile-muted">{{ getQuarterPoints(quarter) | number: '1.0-2' }} pts</span>
       </div>
-    }
-
-    <div class="quarter-card bg-qs-tile border-qs-tile">
-      <div class="card-content">
-        <div>
-          <h3 class="text-qs-tile-ink font-medium">Board total</h3>
-        </div>
-        
-        <div class="payout-section">
-          <div class="text-qs-tile-muted text-sm">Points</div>
-          <div class="text-qs-tile-ink text-2xl font-bold">
-            {{ totalPot | number: '1.0-2' }} pts
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div> 
+      <p class="mt-3 text-3xl font-semibold leading-none tabular-nums text-qs-tile-ink sm:text-4xl">
+        @if (hasScore(quarter)) {
+          {{ scores[quarter].away }}<span class="mx-1 text-qs-tile-muted">–</span>{{ scores[quarter].home }}
+        } @else {
+          <span class="text-qs-tile-muted">–</span>
+        }
+      </p>
+      @if (hasScore(quarter)) {
+        <p class="qs-label mt-1.5 truncate text-[10px] text-qs-tile-muted">{{ awayTeam || 'Away' }} · {{ homeTeam || 'Home' }}</p>
+      }
+      <p class="mt-auto flex items-center gap-2 pt-3 font-medium text-qs-tile-ink">
+        @if (winners[quarter]) {
+          <span class="h-2.5 w-2.5 shrink-0 rounded-full" [class]="playerColors[winners[quarter]]" aria-hidden="true"></span>
+          <span class="truncate">{{ winners[quarter] }}</span>
+        } @else {
+          <span class="text-sm font-normal text-qs-tile-muted">No winner yet</span>
+        }
+      </p>
+    </button>
+  }
+</div>

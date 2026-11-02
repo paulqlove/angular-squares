@@ -1,5 +1,5 @@
 import { DecimalPipe } from '@angular/common';
-import { Component, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Output, EventEmitter, ChangeDetectionStrategy, HostListener } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
@@ -49,6 +49,15 @@ export class PaymentDialogComponent {
       this.paidPlayers.add(playerName);
     }
     this.onPaidStatusChange.emit(Array.from(this.paidPlayers));
+  }
+
+  confirmedCount(): number {
+    return this.getPlayersList().filter(p => p.paid).length;
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.isOpen) this.close();
   }
 
   open() {

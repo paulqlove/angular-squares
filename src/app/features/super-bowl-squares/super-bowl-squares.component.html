@@ -34,52 +34,33 @@
   <!-- Main Game View -->
   <app-shared-header variant="fixed">
     <button
-      (click)="openShareModal()"
-      class="min-h-11 min-w-11 p-2.5 text-qs-tile-muted hover:text-qs-tile-ink rounded-lg hover:bg-white/10 transition-colors flex items-center justify-center"
-      title="Share game"
-      aria-label="Share game"
-      >
-      <ng-icon name="heroShare" class="text-2xl"></ng-icon>
-    </button>
-    <button
+      type="button"
       (click)="startWalkthrough()"
-      class="min-h-11 min-w-11 p-2.5 text-qs-tile-muted hover:text-qs-tile-ink rounded-lg hover:bg-white/10 transition-colors flex items-center justify-center"
-      title="Show tutorial"
-      aria-label="Show tutorial"
+      class="min-h-11 min-w-11 items-center justify-center rounded-btn p-2.5 text-qs-tile-muted transition-colors hover:bg-white/10 hover:text-qs-tile-ink sm:flex"
+      [class.hidden]="!!currentUser()"
+      [class.flex]="!currentUser()"
+      title="How it works"
+      aria-label="How it works"
       >
       <ng-icon name="heroQuestionMarkCircle" class="text-2xl"></ng-icon>
     </button>
-    <button
-      (click)="showSettings.set(true)"
-      class="min-h-11 min-w-11 p-2.5 text-qs-tile-muted hover:text-qs-tile-ink rounded-lg hover:bg-white/10 transition-colors flex items-center justify-center"
-      aria-label="Open settings"
-      data-walkthrough="settings-button"
-      >
-      <ng-icon name="heroCog6Tooth" class="text-2xl"></ng-icon>
-    </button>
+    @if (currentUser()) {
+      <app-profile-menu [allowNameEdit]="false" [showDashboardLink]="true" [showTourLink]="true" (tour)="startWalkthrough()"></app-profile-menu>
+    } @else {
+      <button type="button" (click)="showAuthModal.set(true)" class="qs-btn qs-btn-primary">Sign in</button>
+    }
   </app-shared-header>
 
-  <app-settings-panel
+  <app-edit-game-dialog
     [isOpen]="showSettings()"
-    (closed)="showSettings.set(false)"
-    [isRandomized]="isRandomized"
     [isLocked]="isLocked"
-    [hostNote]="hostNote"
-    [homeTeam]="homeTeam"
-    [awayTeam]="awayTeam"
-    [pricePerSquare]="currentPrice"
-    [isGameOwner]="isGameOwner()"
-    [isManager]="isManager()"
-    (onRandomize)="randomizeNumbers()"
-    (onToggleLock)="toggleLock()"
-    (onHostNoteChange)="onHostNoteChange($event)"
-    (onTeamNameChange)="onTeamNameChange($event)"
-    (onPriceChange)="onPriceChange($event)"
-    (onManagePayments)="onManagePayments()"
-    (onClearGame)="onClearGame()"
-  ></app-settings-panel>
+    [values]="{ awayTeam: awayTeam, homeTeam: homeTeam, pricePerSquare: currentPrice, hostNote: hostNote }"
+    (closed)="showSettings.set(false)"
+    (saved)="onEditGameSaved($event)"
+    (clearGame)="onClearGame(true)"
+  ></app-edit-game-dialog>
 
-  <div class="container mx-auto">
+  <div class="mx-auto max-w-[1600px] px-1 pb-16 pt-2 sm:px-5">
     <div class="space-y-6">
       <!-- Game Info Bar -->
       <div class="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
@@ -95,7 +76,13 @@
             </button>
           }
           <div class="min-w-0">
-            <h2 class="qs-title text-2xl sm:text-3xl">{{ gameName }}</h2>
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+              <h2 class="qs-title text-2xl sm:text-3xl">{{ gameName }}</h2>
+              <button type="button" (click)="openShareModal()" class="qs-btn qs-btn-secondary min-h-9 px-3">
+                <ng-icon name="heroShare" class="text-base"></ng-icon>
+                Share
+              </button>
+            </div>
             @if (hostNote) {
               <p class="mt-1.5 max-w-prose break-words text-sm text-qs-muted"><span class="qs-label mr-2 text-qs-ink">Host note</span>{{ hostNote }}</p>
             }
@@ -134,34 +121,52 @@
         </div>
       </div>
 
-      <!-- Grid container for board and players -->
-      <div class="grid grid-cols-1 gap-6 lg:grid-cols-4">
-        <!-- Game Board -->
-        <div class="col-span-1 lg:col-span-2" data-walkthrough="game-board">
+      <!-- Host tools (owner and co-host) -->
+      @if (isGameOwner() || isManager()) {
+        <div class="flex flex-col gap-3 border-y border-qs-line px-3 py-3 sm:flex-row sm:items-center" data-walkthrough="host-tools">
+          <div class="flex items-center justify-between gap-2 sm:contents">
+            <p class="qs-eyebrow qs-eyebrow-bar sm:mr-2">{{ isGameOwner() ? 'Host tools' : 'Co-host tools' }}</p>
+            <span class="qs-badge sm:order-last" [class.qs-badge-ok]="!isLocked">{{ isLocked ? 'Locked' : 'Open for picks' }}</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-1 sm:items-center">
+            @if (isGameOwner()) {
+              <button type="button" (click)="toggleLock()" class="qs-btn qs-btn-secondary px-3" [attr.aria-pressed]="isLocked">
+                <ng-icon [name]="isLocked ? 'heroLockClosed' : 'heroLockOpen'" class="text-base"></ng-icon>
+                {{ isLocked ? 'Unlock' : 'Lock board' }}
+              </button>
+              <button type="button" (click)="randomizeNumbers()" [disabled]="isLocked" class="qs-btn qs-btn-secondary px-3" [title]="isLocked ? 'Unlock the board to change numbers' : ''">
+                <ng-icon [name]="isRandomized ? 'heroArrowPath' : 'heroSparkles'" class="text-base"></ng-icon>
+                {{ isRandomized ? 'Clear numbers' : 'Draw numbers' }}
+              </button>
+            }
+            <button type="button" (click)="onManagePayments()" class="qs-btn qs-btn-secondary px-3" [class.col-span-2]="!isGameOwner()">
+              <ng-icon name="heroCheckCircle" class="text-base"></ng-icon>
+              Confirm players
+            </button>
+            @if (isGameOwner()) {
+              <button type="button" (click)="showSettings.set(true)" class="qs-btn qs-btn-ghost px-3 sm:ml-auto">
+                <ng-icon name="heroPencilSquare" class="text-base"></ng-icon>
+                Edit game
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Board + players -->
+      <div class="grid grid-cols-1 gap-8 px-3 lg:grid-cols-12">
+        <!-- 01 Board -->
+        <section class="lg:col-span-7" data-walkthrough="game-board" aria-labelledby="board-heading">
+          <div class="mb-3 flex items-baseline justify-between border-b border-qs-line pb-3">
+            <h3 id="board-heading" class="qs-eyebrow qs-eyebrow-bar">01 / Board</h3>
+            <span class="qs-label text-qs-muted">{{ filledCount() }}/100 picked</span>
+          </div>
           <div class="qs-card p-3 sm:p-5">
             <!-- Tabs -->
-            <div class="flex flex-wrap gap-2 mb-4" role="tablist">
-              <button
-                (click)="activeTab = 'board'"
-                role="tab"
-                [attr.aria-selected]="activeTab === 'board'"
-                class="qs-tab px-3 sm:px-4">
-                Game Board
-              </button>
-              <button
-                (click)="activeTab = 'probabilities'"
-                role="tab"
-                [attr.aria-selected]="activeTab === 'probabilities'"
-                class="qs-tab px-3 sm:px-4">
-                Heatmap
-              </button>
-              <button
-                (click)="activeTab = 'boxscore'"
-                role="tab"
-                [attr.aria-selected]="activeTab === 'boxscore'"
-                class="qs-tab px-3 sm:px-4">
-                Box Score
-              </button>
+            <div class="mb-4 flex flex-wrap gap-2" role="tablist">
+              <button (click)="activeTab = 'board'" role="tab" [attr.aria-selected]="activeTab === 'board'" class="qs-tab px-3 sm:px-4">Board</button>
+              <button (click)="activeTab = 'probabilities'" role="tab" [attr.aria-selected]="activeTab === 'probabilities'" class="qs-tab px-3 sm:px-4">Heatmap</button>
+              <button (click)="activeTab = 'boxscore'" role="tab" [attr.aria-selected]="activeTab === 'boxscore'" class="qs-tab px-3 sm:px-4">Box score</button>
             </div>
 
             <!-- Tab Content -->
@@ -190,8 +195,8 @@
                   [selectedPlayer]="selectedPlayer">
                 </app-probability-heatmap>
               } @else {
-                <div class="flex items-center justify-center h-64 text-muted text-center px-4">
-                  <p>The heatmap will appear once the board numbers are randomized.</p>
+                <div class="flex h-64 items-center justify-center px-4 text-center text-qs-muted">
+                  <p>The heatmap appears once the numbers are drawn.</p>
                 </div>
               }
             } @else {
@@ -201,29 +206,30 @@
               </app-box-score>
             }
           </div>
-        </div>
+        </section>
 
-        <!-- Players List -->
-        <div class="col-span-1 lg:col-span-2" data-walkthrough="players-list">
-          <div class="flex flex-col justify-between h-full rounded-lg">
-            <!-- Header with toggle button -->
-            <div class="w-full">
-              <div class="flex items-center justify-between px-4 pt-4 pb-[0.5rem]">
-                <span class="qs-eyebrow qs-eyebrow-bar">Players</span>
-                <button
-                  (click)="isPlayersListVisible = !isPlayersListVisible"
-                  class="flex items-center gap-1 text-sm lg:hidden text-muted">
-                  {{ isPlayersListVisible ? 'Hide' : 'Show' }}
-                  <ng-icon name="heroChevronDown"
-                    [class.rotate-180]="!isPlayersListVisible"
-                    class="text-2xl transition-transform duration-200 transform">
-                  </ng-icon>
-                </button>
-              </div>
-            </div>
-
-            <!-- Players list content -->
-            <div [class.hidden]="!isPlayersListVisible" class="flex-1 p-4 pt-0 lg:block">
+        <!-- 02 Players -->
+        <section class="lg:relative lg:col-span-5" data-walkthrough="players-list" aria-labelledby="players-heading">
+          <!-- On desktop the column is pinned to the board's height; the list scrolls inside -->
+          <div class="flex flex-col lg:absolute lg:inset-0">
+          <div class="mb-3 flex items-baseline justify-between border-b border-qs-line pb-3">
+            <h3 id="players-heading" class="qs-eyebrow qs-eyebrow-bar">02 / Players</h3>
+            <button
+              type="button"
+              (click)="isPlayersListVisible = !isPlayersListVisible"
+              [attr.aria-expanded]="isPlayersListVisible"
+              class="qs-label flex items-center gap-1 text-qs-muted hover:text-qs-ink lg:hidden">
+              {{ isPlayersListVisible ? 'Hide' : 'Show' }}
+              <ng-icon name="heroChevronDown" [class.rotate-180]="isPlayersListVisible" class="text-base transition-transform"></ng-icon>
+            </button>
+          </div>
+          <div class="qs-card flex min-h-0 flex-1 flex-col overflow-hidden">
+            <app-game-status class="shrink-0"
+              [selectedSquares]="selectedSquares"
+              [playerStats]="playerStats"
+              [paidPlayers]="paidPlayers">
+            </app-game-status>
+            <div [class.hidden]="!isPlayersListVisible" class="min-h-0 flex-1 overflow-y-auto border-t border-qs-line lg:block">
               <app-players-list
                 [playerStats]="playerStats"
                 [playerColors]="playerColors"
@@ -234,18 +240,13 @@
                 (playerSelected)="onPlayerSelected($event)">
               </app-players-list>
             </div>
-
-            <app-game-status
-              [selectedSquares]="selectedSquares"
-              [playerStats]="playerStats"
-              [paidPlayers]="paidPlayers">
-            </app-game-status>
           </div>
-        </div>
+          </div>
+        </section>
       </div>
 
-      <!-- Winners -->
-      <div data-walkthrough="winners-payouts" (click)="$event.stopPropagation()">
+      <!-- 03 Winners -->
+      <section class="px-3" data-walkthrough="winners-payouts" (click)="$event.stopPropagation()">
         <app-winners-and-payouts
           [winners]="winners"
           [quarterPayouts]="quarterPayouts"
@@ -256,7 +257,7 @@
           [awayTeam]="awayTeam"
           (quarterClick)="onQuarterClick($event)">
         </app-winners-and-payouts>
-      </div>
+      </section>
 
       <!-- Alert notifications -->
       @if (showAlert) {

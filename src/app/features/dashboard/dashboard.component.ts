@@ -6,12 +6,12 @@ import { NgTemplateOutlet } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
 import { GameService, GameListItem } from '../../core/services/game.service';
 import { EspnService, EspnGame, SportType, SPORT_CONFIG } from '../../core/services/espn.service';
-import { ThemeService, ThemeMode } from '../../core/services/theme.service';
 import { ToastService } from '../../core/services/toast.service';
 import { SanitizationService } from '../../core/services/sanitization.service';
 import { WalkthroughService, WalkthroughStep } from '../../core/services/walkthrough.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { AppHeaderComponent } from '../../components/ui/app-header/app-header.component';
+import { ProfileMenuComponent } from '../../components/ui/profile-menu/profile-menu.component';
 import { HeadroomDirective } from '../../shared/directives/headroom.directive';
 import { UpgradePassDialogComponent } from './components/upgrade-pass-dialog/upgrade-pass-dialog.component';
 import { ActiveBoardLimitError } from '../../core/errors/active-board-limit.error';
@@ -42,7 +42,7 @@ import {
 
 @Component({
     selector: 'app-dashboard',
-    imports: [FormsModule, NgTemplateOutlet, NgIconComponent, AppHeaderComponent, HeadroomDirective, UpgradePassDialogComponent],
+    imports: [FormsModule, NgTemplateOutlet, NgIconComponent, AppHeaderComponent, HeadroomDirective, ProfileMenuComponent, UpgradePassDialogComponent],
     providers: [
         provideIcons({
             heroPlus,
@@ -83,110 +83,7 @@ import {
           <ng-icon name="heroQuestionMarkCircle" class="text-xl"></ng-icon>
         </button>
 
-        <!-- Profile Dropdown -->
-        <div class="relative" data-walkthrough="profile-dropdown">
-          <button
-            type="button"
-            (click)="toggleProfileDropdown($event)"
-            [attr.aria-expanded]="showProfileDropdown()"
-            aria-haspopup="true"
-            aria-controls="profile-menu"
-            class="flex min-h-11 items-center gap-2 rounded-btn border border-white/15 py-1 pl-1.5 pr-3 transition-colors hover:bg-white/10"
-          >
-            @if (currentUser()?.photoURL) {
-              <img [src]="$safeNavigationMigration(currentUser()?.photoURL)" alt="" class="h-8 w-8 rounded-full" />
-            } @else {
-              <span class="flex h-8 w-8 items-center justify-center rounded-full bg-qs-accent text-sm font-semibold text-qs-on-accent" aria-hidden="true">
-                {{ (currentUser()?.displayName || currentUser()?.email)?.charAt(0)?.toUpperCase() || '?' }}
-              </span>
-            }
-            <span class="hidden max-w-40 truncate text-sm font-medium text-qs-tile-ink sm:inline">
-              {{ currentUser()?.displayName || currentUser()?.email }}
-            </span>
-            <span class="sr-only sm:hidden">Profile menu</span>
-            <ng-icon name="heroChevronDown" class="text-sm text-qs-tile-muted transition-transform" [class.rotate-180]="showProfileDropdown()"></ng-icon>
-          </button>
-
-          @if (showProfileDropdown()) {
-            <div
-              id="profile-menu"
-              class="absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-card border border-qs-line bg-qs-panel text-qs-ink shadow-pop animate-menu-in"
-              (click)="$event.stopPropagation()"
-            >
-              <div class="flex items-center gap-3 border-b border-qs-line p-4">
-                @if (currentUser()?.photoURL) {
-                  <img [src]="$safeNavigationMigration(currentUser()?.photoURL)" alt="" class="h-10 w-10 rounded-full" />
-                } @else {
-                  <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-qs-accent font-semibold text-qs-on-accent" aria-hidden="true">
-                    {{ (currentUser()?.displayName || currentUser()?.email)?.charAt(0)?.toUpperCase() || '?' }}
-                  </span>
-                }
-                <div class="min-w-0 flex-1">
-                  <p class="truncate font-semibold">{{ currentUser()?.displayName || 'No name set' }}</p>
-                  <p class="truncate text-sm text-qs-muted">{{ currentUser()?.email || 'Guest account' }}</p>
-                </div>
-                @if (currentUser()?.isGuest) {
-                  <span class="qs-badge qs-badge-warn">Guest</span>
-                }
-              </div>
-
-              <div class="space-y-5 p-4">
-                <div>
-                  <label for="profile-name" class="qs-label mb-1.5 block text-qs-muted">Display name</label>
-                  <div class="flex gap-2">
-                    <input
-                      id="profile-name"
-                      type="text"
-                      [(ngModel)]="profileName"
-                      placeholder="Your name"
-                      class="qs-input min-w-0 flex-1"
-                      (keyup.enter)="saveProfile()"
-                    />
-                    <button
-                      type="button"
-                      (click)="saveProfile()"
-                      [disabled]="isSavingProfile() || !profileName.trim()"
-                      [attr.aria-busy]="isSavingProfile()"
-                      class="qs-btn qs-btn-ink shrink-0"
-                    >
-                      Save
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <p id="theme-label" class="qs-label mb-1.5 text-qs-muted">Theme</p>
-                  <div class="grid grid-cols-3 gap-1 rounded-btn border border-qs-line bg-qs-panel-2 p-1" role="radiogroup" aria-labelledby="theme-label">
-                    @for (opt of themeOptions; track opt.value) {
-                      <button
-                        type="button"
-                        role="radio"
-                        [attr.aria-checked]="themeService.theme() === opt.value"
-                        (click)="setTheme(opt.value)"
-                        class="qs-label flex min-h-9 items-center justify-center gap-1.5 rounded-[4px] transition-colors"
-                        [class]="themeService.theme() === opt.value ? 'bg-qs-ink text-qs-bg' : 'text-qs-muted hover:text-qs-ink'"
-                      >
-                        <ng-icon [name]="opt.icon" class="text-sm"></ng-icon>
-                        {{ opt.label }}
-                      </button>
-                    }
-                  </div>
-                </div>
-              </div>
-
-              <div class="border-t border-qs-line p-2">
-                <button
-                  type="button"
-                  (click)="signOut()"
-                  class="qs-btn qs-btn-ghost w-full justify-start text-qs-bad hover:!bg-qs-bad-soft"
-                >
-                  <ng-icon name="heroArrowRightOnRectangle" class="text-base"></ng-icon>
-                  Sign out
-                </button>
-              </div>
-            </div>
-          }
-        </div>
+        <app-profile-menu walkthroughTarget="profile-dropdown"></app-profile-menu>
       </app-shared-header>
 
       <main class="mx-auto max-w-[1600px] px-4 sm:px-8 pt-10 pb-20 md:pt-14">
@@ -838,7 +735,6 @@ export class DashboardComponent implements OnInit {
   private toastService = inject(ToastService);
   private walkthroughService = inject(WalkthroughService);
   private sanitizationService = inject(SanitizationService);
-  themeService = inject(ThemeService);
 
   private dashboardWalkthroughSteps: WalkthroughStep[] = [
     {
@@ -909,9 +805,6 @@ export class DashboardComponent implements OnInit {
   isSavingGame = signal(false);
 
   // Profile dropdown state
-  showProfileDropdown = signal(false);
-  profileName = '';
-  isSavingProfile = signal(false);
 
   newGameName = '';
   newGameHostNote = '';
@@ -923,11 +816,6 @@ export class DashboardComponent implements OnInit {
   customPrice: number | null = null;
 
   pricePresets = [0, 5, 10, 20, 50];
-  readonly themeOptions: { value: 'system' | 'light' | 'dark'; label: string; icon: string }[] = [
-    { value: 'system', label: 'Auto', icon: 'heroComputerDesktop' },
-    { value: 'light', label: 'Light', icon: 'heroSun' },
-    { value: 'dark', label: 'Dark', icon: 'heroMoon' }
-  ];
   sportOptions: { value: SportType; label: string }[] = [
     { value: 'nfl', label: 'NFL' },
     { value: 'ncaaf', label: 'NCAA Football' },
@@ -1364,59 +1252,13 @@ export class DashboardComponent implements OnInit {
   }
 
   // Profile dropdown methods
-  toggleProfileDropdown(event: Event): void {
-    event.stopPropagation();
-    const isOpening = !this.showProfileDropdown();
-    this.showProfileDropdown.set(isOpening);
-    if (isOpening) {
-      const user = this.currentUser();
-      this.profileName = user?.displayName || '';
-    }
-  }
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
     if (this.showCreateModal()) {
       this.showCreateModal.set(false);
-    } else if (this.showProfileDropdown()) {
-      this.showProfileDropdown.set(false);
     }
   }
 
-  @HostListener('document:click')
-  onDocumentClick(): void {
-    if (this.showProfileDropdown()) {
-      this.showProfileDropdown.set(false);
-    }
-  }
 
-  async saveProfile(): Promise<void> {
-    const sanitizedName = this.sanitizationService.sanitizeDisplayName(this.profileName);
-    if (!sanitizedName) return;
-
-    this.isSavingProfile.set(true);
-    try {
-      const user = this.currentUser();
-      const oldName = user?.displayName || '';
-      if (user?.isGuest) {
-        this.authService.updateGuestName(sanitizedName);
-      } else {
-        await this.authService.updateDisplayName(sanitizedName);
-      }
-      this.profileName = sanitizedName;
-
-      // Propagate name change to all games
-      if (user && oldName && oldName !== sanitizedName) {
-        await this.gameService.propagateNameChange(user.uid, oldName, sanitizedName);
-      }
-    } catch (error) {
-      console.error('Failed to save profile:', error);
-    } finally {
-      this.isSavingProfile.set(false);
-    }
-  }
-
-  setTheme(mode: ThemeMode): void {
-    this.themeService.setTheme(mode);
-  }
 }
