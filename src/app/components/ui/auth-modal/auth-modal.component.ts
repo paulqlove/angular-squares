@@ -136,8 +136,22 @@ export class AuthModalComponent implements OnChanges {
   async signInWithGoogle(): Promise<void> {
     try {
       await this.authService.signInWithGoogle();
+      // Check for pending create redirect from team page
+      if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('qs_create_after_auth') === 'true') {
+        window.location.href = '/dashboard';
+        return;
+      }
       this.authenticated.emit();
-    } catch {}
+    } catch {
+      // Even if there was an error, check if user is now authenticated
+      if (this.authService.isAuthenticated()) {
+        if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('qs_create_after_auth') === 'true') {
+          window.location.href = '/dashboard';
+          return;
+        }
+        this.authenticated.emit();
+      }
+    }
   }
 
   async continueAsGuest(): Promise<void> {
