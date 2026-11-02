@@ -621,6 +621,14 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     this.calculateWinners();
   }
 
+  /** Check if a score digit matches a stored number (handles paired numbers for smaller boards) */
+  private digitMatchesNumber(digit: number, storedNumber: number | null, isPaired: boolean): boolean {
+    if (storedNumber === null) return false;
+    if (!isPaired) return storedNumber === digit;
+    // For paired numbers: stored 0 = digits 0,1; stored 1 = digits 2,3; etc.
+    return Math.floor(digit / 2) === storedNumber;
+  }
+
   private calculateWinners(): void {
     const newWinners: { [key: string]: string } = {};
 
@@ -630,8 +638,8 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
       const winningSquare = Object.entries(this.selectedSquares).find(([key]) => {
         const [row, col] = key.split('-').map(Number);
-        return this.awayNumbers[row] === awayLastDigit &&
-               this.homeNumbers[col] === homeLastDigit;
+        return this.digitMatchesNumber(awayLastDigit, this.awayNumbers[row], this.awayNumbersPaired) &&
+               this.digitMatchesNumber(homeLastDigit, this.homeNumbers[col], this.homeNumbersPaired);
       });
 
       return winningSquare ? winningSquare[1] : null;
@@ -670,8 +678,8 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       const awayLastDigit = awayScore % 10;
       const winningSquare = Object.entries(this.selectedSquares).find(([key]) => {
         const [row, col] = key.split('-').map(Number);
-        return this.awayNumbers[row] === awayLastDigit &&
-               this.homeNumbers[col] === homeLastDigit;
+        return this.digitMatchesNumber(awayLastDigit, this.awayNumbers[row], this.awayNumbersPaired) &&
+               this.digitMatchesNumber(homeLastDigit, this.homeNumbers[col], this.homeNumbersPaired);
       });
       return winningSquare ? winningSquare[1] : null;
     };
@@ -712,8 +720,10 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
     const homeDigit = currentScore.home % 10;
     const awayDigit = currentScore.away % 10;
-    const row = this.awayNumbers.findIndex(n => n === awayDigit);
-    const col = this.homeNumbers.findIndex(n => n === homeDigit);
+
+    // Find the matching row and column (handling paired numbers)
+    const row = this.awayNumbers.findIndex(n => this.digitMatchesNumber(awayDigit, n, this.awayNumbersPaired));
+    const col = this.homeNumbers.findIndex(n => this.digitMatchesNumber(homeDigit, n, this.homeNumbersPaired));
     if (row === -1 || col === -1) return null;
     return `${row}-${col}`;
   }
@@ -739,15 +749,21 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const allDigits = Array.from({length: 10}, (_, i) => i);
-    const shuffled = [...allDigits].sort(() => Math.random() - 0.5);
+    // For 10-column/row boards: single digits 0-9
+    // For 5-column/row boards: paired digits stored as group index (0-4)
+    //   Group 0 = digits 0,1; Group 1 = digits 2,3; etc.
+    const generateNumbers = (count: number): number[] => {
+      if (count === 10) {
+        // Standard 10 digits, shuffled
+        return Array.from({length: 10}, (_, i) => i).sort(() => Math.random() - 0.5);
+      } else {
+        // 5 groups (paired digits), shuffled
+        return Array.from({length: 5}, (_, i) => i).sort(() => Math.random() - 0.5);
+      }
+    };
 
-    // For smaller boards, take a subset of digits and shuffle them
-    const homeNumbers = shuffled.slice(0, cols).sort(() => Math.random() - 0.5);
-    const awayNumbers = shuffled.slice(0, rows).sort(() => Math.random() - 0.5);
-
-    this.homeNumbers = homeNumbers;
-    this.awayNumbers = awayNumbers;
+    this.homeNumbers = generateNumbers(cols);
+    this.awayNumbers = generateNumbers(rows);
     this.isRandomized = true;
 
     await this.gameService.updateGame(this.gameId, {
@@ -755,6 +771,26 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       awayNumbers: this.awayNumbers,
       isRandomized: this.isRandomized
     });
+  }
+
+  /** Format a number for display - shows paired digits for 5-col/row boards */
+  formatNumber(num: number | null, isPaired: boolean): string {
+    if (num === null) return '';
+    if (!isPaired) return num.toString();
+    // Paired: group 0 = "0,1", group 1 = "2,3", etc.
+    const first = num * 2;
+    const second = first + 1;
+    return `${first},${second}`;
+  }
+
+  /** Check if columns use paired digits */
+  get homeNumbersPaired(): boolean {
+    return getBoardDimensions(this.boardSize).cols === 5;
+  }
+
+  /** Check if rows use paired digits */
+  get awayNumbersPaired(): boolean {
+    return getBoardDimensions(this.boardSize).rows === 5;
   }
 
   async toggleLock(): Promise<void> {

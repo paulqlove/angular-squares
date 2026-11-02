@@ -41,6 +41,26 @@ export class GameBoardComponent {
     return 'grid-cols-[1.5rem_repeat(10,minmax(0,1fr))] sm:grid-cols-[2.25rem_repeat(10,minmax(0,1fr))]';
   }
 
+  /** Check if columns use paired digits (5-col boards) */
+  get homeNumbersPaired(): boolean {
+    return this.cols === 5;
+  }
+
+  /** Check if rows use paired digits (5-row boards) */
+  get awayNumbersPaired(): boolean {
+    return this.rows === 5;
+  }
+
+  /** Format a number for display - shows paired digits for 5-col/row boards */
+  formatNumber(num: number | null, isPaired: boolean): string {
+    if (num === null) return '';
+    if (!isPaired) return num.toString();
+    // Paired: group 0 = "0,1", group 1 = "2,3", etc.
+    const first = num * 2;
+    const second = first + 1;
+    return `${first},${second}`;
+  }
+
   @Output() squareClick = new EventEmitter<{ row: number; col: number }>();
 
   getSquareClass(row: number, col: number): string {
