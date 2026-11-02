@@ -185,11 +185,21 @@ export class GameService {
     if (!this.isBrowser) {
       throw new Error('Cannot check boards on server');
     }
+    if (await this.isAdmin(ownerId)) return;
     const boards = await this.loadOwnedBoardActivity(ownerId);
     const now = Date.now();
     const activeCount = boards.filter(board => isBoardActive(board, now)).length;
     if (activeCount >= FREE_ACTIVE_BOARD_LIMIT) {
       throw new ActiveBoardLimitError();
+    }
+  }
+
+  /** Admins (set by hand at admins/{uid} in the console) have no board limit. */
+  private async isAdmin(uid: string): Promise<boolean> {
+    try {
+      return (await get(ref(this.db, `admins/${uid}`))).val() === true;
+    } catch {
+      return false;
     }
   }
 
