@@ -247,15 +247,21 @@ export class GameService {
       const preview = this.rolePreview.plan();
       return preview === 'actual' ? PLANS.admin.activeBoards : PLANS[preview].activeBoards;
     }
-    const entitlement = await this.getEntitlement(uid);
-    return isActive(entitlement) ? PLANS[entitlement!.plan].activeBoards : FREE_ACTIVE_BOARD_LIMIT;
+    const entitlement = await this.bestEntitlement(uid);
+    return entitlement ? PLANS[entitlement.plan].activeBoards : FREE_ACTIVE_BOARD_LIMIT;
+  }
+
+  /** The host's active pass, paid or gifted (whichever lasts longer), or null. */
+  private async bestEntitlement(uid: string): Promise<Entitlement | null> {
+    const email = this.authService.realUser()?.email;
+    const [paid, gifted] = await Promise.all([this.getEntitlement(uid), email ? this.getGiftedSeasonPass(email) : null]);
+    return [paid, gifted].filter(e => isActive(e)).sort((a, b) => b!.expiresAt - a!.expiresAt)[0] ?? null;
   }
 
   /** How long a new or opened board stays ad-free for this host (0 = ads). Rules cap it at the real pass. */
   async adFreeUntilFor(uid: string): Promise<number> {
     if (await this.isAdmin(uid)) return Date.now() + 3650 * 86_400_000;
-    const entitlement = await this.getEntitlement(uid);
-    return isActive(entitlement) ? entitlement!.expiresAt : 0;
+    return (await this.bestEntitlement(uid))?.expiresAt ?? 0;
   }
 
   /** Write-only notifyMe/{pushId} entry. Callers must already be signed in. */
