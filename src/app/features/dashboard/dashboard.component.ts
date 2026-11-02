@@ -1009,10 +1009,17 @@ export class DashboardComponent implements OnInit {
     if (this.isAdmin() && this.currentUser()?.email?.toLowerCase() === 'paulqlove@gmail.com') {
       this.loadGiftedPasses();
     }
-    // Check for create query param (e.g., from team page after sign in)
-    if (this.route.snapshot.queryParamMap.get('create') === 'true') {
-      // Clear the query param and open create modal
-      this.router.navigate([], { queryParams: {}, replaceUrl: true });
+    // Check for create intent (query param or sessionStorage from team page)
+    const createFromQuery = this.route.snapshot.queryParamMap.get('create') === 'true';
+    const createFromStorage = typeof sessionStorage !== 'undefined' && sessionStorage.getItem('qs_create_after_auth') === 'true';
+    if (createFromQuery || createFromStorage) {
+      // Clear both indicators
+      if (createFromQuery) {
+        this.router.navigate([], { queryParams: {}, replaceUrl: true });
+      }
+      if (createFromStorage) {
+        sessionStorage.removeItem('qs_create_after_auth');
+      }
       setTimeout(() => this.openCreateModalDirect(), 100);
     }
   }

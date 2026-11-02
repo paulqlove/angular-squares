@@ -269,12 +269,14 @@ export class TeamPageComponent implements OnInit {
     if (this.isAuthenticated()) {
       this.router.navigate(['/dashboard'], { queryParams: { create: 'true' } });
     } else {
+      // Store intent before auth so it persists through popup flow
+      sessionStorage.setItem('qs_create_after_auth', 'true');
       this.showAuthModal.set(true);
     }
   }
 
   public onAuthenticated(): void {
     this.showAuthModal.set(false);
-    this.router.navigate(['/dashboard'], { queryParams: { create: 'true' } });
+    this.router.navigate(['/dashboard']);
   }
 }
