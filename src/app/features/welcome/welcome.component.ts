@@ -60,8 +60,8 @@ interface Feature {
 
       <!-- Hero -->
       <section class="overflow-hidden">
-        <div class="mx-auto max-w-[1600px] px-4 sm:px-8 pt-10 pb-16 md:pt-16 md:pb-24 xl:pb-0">
-        <div class="grid grid-cols-1 xl:grid-cols-[1fr_minmax(0,1.05fr)] gap-10 xl:gap-16 items-center">
+        <div class="mx-auto max-w-[1600px] px-4 sm:px-8 pt-10 pb-16 md:pt-16 md:pb-24 lg:pb-0">
+        <div class="grid grid-cols-1 lg:grid-cols-[1fr_minmax(0,1.05fr)] gap-10 lg:gap-16 items-center">
           <div>
             <p class="qs-eyebrow">Football squares / Free for game day</p>
             <h1 class="qs-display mt-5 max-w-[14ch]">
