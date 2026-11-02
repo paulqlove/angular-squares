@@ -122,6 +122,48 @@ export class EspnService {
     }
   }
 
+  async getTeamSchedule(teamId: string, sport: SportType = 'nfl'): Promise<EspnGame[]> {
+    if (!this.isBrowser) return [];
+
+    try {
+      const baseUrl = this.API_URLS[sport].replace('/scoreboard', '');
+      const response = await fetch(`${baseUrl}/teams/${teamId}/schedule`);
+      const data = await response.json();
+
+      if (!data?.events) return [];
+
+      const now = new Date();
+      const periodCount = SPORT_CONFIG[sport].periods;
+
+      return data.events
+        .filter((event: any) => new Date(event.date) >= now)
+        .slice(0, 8)
+        .map((event: any) => {
+          const competition = event.competitions?.[0];
+          const homeCompetitor = competition?.competitors?.find((c: any) => c.homeAway === 'home');
+          const awayCompetitor = competition?.competitors?.find((c: any) => c.homeAway === 'away');
+
+          return {
+            id: event.id,
+            name: event.name || event.shortName || '',
+            homeTeam: homeCompetitor?.team?.displayName || homeCompetitor?.team?.name || 'Home',
+            awayTeam: awayCompetitor?.team?.displayName || awayCompetitor?.team?.name || 'Away',
+            homeScore: 0,
+            awayScore: 0,
+            period: 0,
+            clock: '',
+            status: 'pre' as const,
+            completed: false,
+            quarters: Array(periodCount).fill({ home: 0, away: 0 }),
+            date: event.date || ''
+          };
+        });
+    } catch (error) {
+      console.error('Failed to fetch team schedule:', error);
+      return [];
+    }
+  }
+
   private parseGames(data: any, sport: SportType): EspnGame[] {
     if (!data?.events) return [];
 

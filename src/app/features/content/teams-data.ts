@@ -10,6 +10,10 @@ export interface NflTeam {
   secondaryColor: string;
 }
 
+export function getTeamLogo(team: NflTeam, size: 500 | 100 = 500): string {
+  return `https://a.espncdn.com/i/teamlogos/nfl/${size}/${team.abbreviation.toLowerCase()}.png`;
+}
+
 export const NFL_TEAMS: NflTeam[] = [
   // AFC East
   { name: 'Bills', city: 'Buffalo', slug: 'buffalo-bills', abbreviation: 'BUF', espnId: '2', conference: 'AFC', division: 'East', primaryColor: '#00338D', secondaryColor: '#C60C30' },
