@@ -277,6 +277,7 @@ export class TeamPageComponent implements OnInit {
 
   public onAuthenticated(): void {
     this.showAuthModal.set(false);
-    this.router.navigate(['/dashboard']);
+    // Force navigation - router.navigate sometimes doesn't work after popup auth
+    window.location.href = '/dashboard';
   }
 }
