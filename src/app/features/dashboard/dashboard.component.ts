@@ -110,7 +110,7 @@ import {
           @if (showProfileDropdown()) {
             <div
               id="profile-menu"
-              class="absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-card border border-qs-line bg-qs-panel text-qs-ink shadow-pop animate-modal-in"
+              class="absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-card border border-qs-line bg-qs-panel text-qs-ink shadow-pop animate-menu-in"
               (click)="$event.stopPropagation()"
             >
               <div class="flex items-center gap-3 border-b border-qs-line p-4">
@@ -817,6 +817,15 @@ import {
     }
     .animate-modal-in {
       animation: modal-in 0.2s ease-out;
+    }
+    @keyframes menu-in {
+      from { opacity: 0; transform: translateY(-4px); }
+    }
+    .animate-menu-in {
+      animation: menu-in 120ms cubic-bezier(.2,.7,.2,1);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .animate-menu-in { animation: none; }
     }
   `]
 })
