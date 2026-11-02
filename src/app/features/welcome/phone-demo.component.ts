@@ -50,7 +50,7 @@ const LOCK_STEP_MS = 180;
           </div>
 
           <div class="qs-canvas p-2">
-            <div class="grid grid-cols-[0.9rem_repeat(10,minmax(0,1fr))] gap-px overflow-hidden rounded-chip bg-qs-line p-px">
+            <div class="grid grid-cols-[1.5rem_repeat(10,minmax(0,1fr))] min-[1000px]:grid-cols-[0.9rem_repeat(10,minmax(0,1fr))] gap-px overflow-hidden rounded-chip bg-qs-line p-px">
               <div class="bg-qs-panel-2"></div>
               @for (digit of home(); track $index) {
                 <div class="axis" [class.axis-locked]="homeLocked()[$index]">{{ digit ?? '' }}</div>
@@ -144,11 +144,11 @@ const LOCK_STEP_MS = 180;
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 0.9rem;
+      min-height: 1.5rem;
       background: var(--qs-tile);
       color: var(--qs-tile-muted);
       font-family: var(--qs-font-mono);
-      font-size: 9px;
+      font-size: 11px;
       font-weight: 500;
       transition: color var(--qs-t-fast) var(--qs-ease);
     }
@@ -158,10 +158,20 @@ const LOCK_STEP_MS = 180;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 8px;
+      font-size: clamp(10px, 2.5vw, 14px);
       font-weight: 600;
       line-height: 1;
       color: #0f172a;
+    }
+    /* Smaller text in phone mockup mode */
+    @media (min-width: 1000px) {
+      .axis {
+        min-height: 0.9rem;
+        font-size: 9px;
+      }
+      .square {
+        font-size: 8px;
+      }
     }
     .square-claimed { animation: claim-in var(--qs-t-state) var(--qs-ease); }
     @keyframes claim-in {
