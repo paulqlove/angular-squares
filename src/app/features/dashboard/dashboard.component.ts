@@ -541,6 +541,11 @@ import {
               <!-- 05 Quarter split -->
               <section>
                 <h4 class="qs-eyebrow qs-eyebrow-bar">05 / Quarter split</h4>
+                @if (!planService.features().customSplits) {
+                  <p class="mt-3 text-sm text-qs-muted">
+                    <span class="font-mono tabular-nums text-qs-ink">20 / 20 / 20 / 40</span> · Custom splits come with a Week or Season Pass.
+                  </p>
+                } @else {
                 <div class="mt-3 flex flex-wrap gap-1.5">
                   @for (preset of splitPresets; track preset.id) {
                     <button type="button" class="qs-tab min-h-9 px-2.5 text-[10.5px]" [attr.aria-pressed]="newGameActivePreset() === preset.id" (click)="applyNewGameSplitPreset(preset.split)">{{ preset.label }}</button>
@@ -560,6 +565,7 @@ import {
                 <p class="mt-1.5 text-xs tabular-nums" [class]="newGameSplitValid() ? 'text-qs-muted' : 'text-qs-bad'">
                   {{ newGameSplitText() }} · {{ newGameSplitValid() ? 'Totals 100%' : 'Must total 100% (' + newGameSplitRemaining() + ' left)' }}
                 </p>
+                }
               </section>
 
               <!-- 06 Details -->
@@ -1156,7 +1162,7 @@ export class DashboardComponent implements OnInit {
       // Get quarter split - null if default, otherwise the custom split
       const split = this.newGameSplitTenths();
       const isDefaultSplit = split && split.q1 === 200 && split.q2 === 200 && split.q3 === 200 && split.q4 === 400;
-      const quarterSplit = isDefaultSplit ? null : split;
+      const quarterSplit = isDefaultSplit || !this.planService.features().customSplits ? null : split;
 
       const gameId = await this.gameService.createGame(
         user.uid,

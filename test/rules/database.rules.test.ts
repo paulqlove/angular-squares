@@ -647,3 +647,60 @@ describe('quarterSplit', () => {
     await assertSucceeds(set(owner(), field, null));
   });
 });
+
+describe('gifted Season Pass', () => {
+  const KEY = 'gifted@example,com';
+  const gifted = (uid = 'owner', verified = true) =>
+    env.authenticatedContext(uid, { email: 'Gifted@Example.com', email_verified: verified });
+  const gift = (expiresAt = Date.now() + HOUR) => seed({ [`giftedSeasonPass/${KEY}`]: { expiresAt } });
+  const split = { q1: 250, q2: 250, q3: 250, q4: 250 };
+
+  it('only an admin can grant, list or revoke gifts', async () => {
+    await seed({ 'admins/boss': true });
+    const boss = env.authenticatedContext('boss');
+    await assertSucceeds(set(boss, `giftedSeasonPass/${KEY}`, { expiresAt: Date.now() + HOUR }));
+    await assertSucceeds(read(boss, 'giftedSeasonPass'));
+    await assertFails(set(owner(), `giftedSeasonPass/${KEY}`, { expiresAt: Date.now() + HOUR }));
+    await assertFails(read(owner(), 'giftedSeasonPass'));
+    await assertSucceeds(set(boss, `giftedSeasonPass/${KEY}`, null));
+  });
+
+  it('a gifted host can create a second board while their linked board is active', async () => {
+    await seed({
+      'games/live01': baseGame({ ownerId: 'owner', espnEventId: '401' }),
+      'users/owner/activeBoardId': 'live01'
+    });
+    await gift();
+    await assertSucceeds(set(gifted(), 'games/new001', baseGame({ ownerId: 'owner' })));
+  });
+
+  it('an expired or unverified gift does not lift the board limit', async () => {
+    await seed({
+      'games/live01': baseGame({ ownerId: 'owner', espnEventId: '401' }),
+      'users/owner/activeBoardId': 'live01'
+    });
+    await gift(Date.now() - HOUR);
+    await assertFails(set(gifted(), 'games/new001', baseGame({ ownerId: 'owner' })));
+    await gift();
+    await assertFails(set(gifted('owner', false), 'games/new001', baseGame({ ownerId: 'owner' })));
+  });
+
+  it('a gifted owner can set a quarter split; a gift for another email does not count', async () => {
+    await gift();
+    await assertSucceeds(set(gifted(), `${G}/quarterSplit`, split));
+    const other = env.authenticatedContext('owner', { email: 'someone@example.com', email_verified: true });
+    await assertFails(set(other, `${G}/quarterSplit`, split));
+  });
+
+  it('a gifted owner can stamp adFreeUntil up to the gift expiry', async () => {
+    const expiresAt = Date.now() + HOUR;
+    await gift(expiresAt);
+    await assertSucceeds(set(gifted(), `${G}/adFreeUntil`, expiresAt));
+    await assertFails(set(gifted(), `${G}/adFreeUntil`, expiresAt + 1));
+  });
+
+  it('a signed-in user without an email still gets the normal rules', async () => {
+    await assertFails(set(owner(), `${G}/quarterSplit`, split));
+    await assertSucceeds(set(owner(), `${G}/adFreeUntil`, 0));
+  });
+});
