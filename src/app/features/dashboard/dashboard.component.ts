@@ -86,101 +86,104 @@ import {
         <!-- Profile Dropdown -->
         <div class="relative" data-walkthrough="profile-dropdown">
           <button
+            type="button"
             (click)="toggleProfileDropdown($event)"
-            class="flex items-center gap-2 bg-header-accent hover:bg-white/10 rounded-full px-3 py-1.5 transition-colors cursor-pointer"
-            title="Profile menu"
+            [attr.aria-expanded]="showProfileDropdown()"
+            aria-haspopup="true"
+            aria-controls="profile-menu"
+            class="flex min-h-11 items-center gap-2 rounded-btn border border-white/15 py-1 pl-1.5 pr-3 transition-colors hover:bg-white/10"
           >
             @if (currentUser()?.photoURL) {
-              <img
-                [src]="$safeNavigationMigration(currentUser()?.photoURL)"
-                alt="Profile"
-                class="w-7 h-7 rounded-full ring-2 ring-qs-accent"
-              />
+              <img [src]="$safeNavigationMigration(currentUser()?.photoURL)" alt="" class="h-8 w-8 rounded-full" />
             } @else {
-              <div class="w-7 h-7 rounded-full bg-qs-accent flex items-center justify-center">
-                <span class="text-white font-semibold text-sm">
-                  {{ (currentUser()?.displayName || currentUser()?.email)?.charAt(0)?.toUpperCase() || '?' }}
-                </span>
-              </div>
+              <span class="flex h-8 w-8 items-center justify-center rounded-full bg-qs-accent text-sm font-semibold text-qs-on-accent" aria-hidden="true">
+                {{ (currentUser()?.displayName || currentUser()?.email)?.charAt(0)?.toUpperCase() || '?' }}
+              </span>
             }
-            <span class="text-sm font-medium text-header hidden sm:inline">
+            <span class="hidden max-w-40 truncate text-sm font-medium text-qs-tile-ink sm:inline">
               {{ currentUser()?.displayName || currentUser()?.email }}
             </span>
-            @if (currentUser()?.isGuest) {
-              <span class="text-xs qs-badge border-0 bg-white/10 text-qs-tile-ink">Guest</span>
-            }
-            <ng-icon name="heroChevronDown" class="text-sm text-header-muted"></ng-icon>
+            <span class="sr-only sm:hidden">Profile menu</span>
+            <ng-icon name="heroChevronDown" class="text-sm text-qs-tile-muted transition-transform" [class.rotate-180]="showProfileDropdown()"></ng-icon>
           </button>
 
           @if (showProfileDropdown()) {
-            <div class="absolute right-0 mt-2 w-64 bg-dialog rounded-xl shadow-lg border border-default p-4 z-50" (click)="$event.stopPropagation()">
-              <!-- Name input -->
-              <div class="mb-4">
-                <label class="block text-xs font-semibold text-muted mb-1.5">Display Name</label>
-                <div class="flex flex-wrap gap-2">
-                  <input
-                    type="text"
-                    [(ngModel)]="profileName"
-                    placeholder="Enter your name"
-                    class="flex-1 min-w-0 px-3 py-2 bg-input border border-input rounded-lg text-sm text-default focus:border-qs-accent focus:ring-1 focus:ring-qs-accent-soft outline-none"
-                    (keyup.enter)="saveProfile()"
-                  />
-                  <button
-                    (click)="saveProfile()"
-                    [disabled]="isSavingProfile() || !profileName.trim()"
-                    class="flex-1 px-3 py-2 bg-qs-accent hover:bg-qs-accent-hover disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-colors"
-                  >
-                    @if (isSavingProfile()) {
-                      ...
-                    } @else {
-                      Save
-                    }
-                  </button>
+            <div
+              id="profile-menu"
+              class="absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-card border border-qs-line bg-qs-panel text-qs-ink shadow-pop animate-modal-in"
+              (click)="$event.stopPropagation()"
+            >
+              <div class="flex items-center gap-3 border-b border-qs-line p-4">
+                @if (currentUser()?.photoURL) {
+                  <img [src]="$safeNavigationMigration(currentUser()?.photoURL)" alt="" class="h-10 w-10 rounded-full" />
+                } @else {
+                  <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-qs-accent font-semibold text-qs-on-accent" aria-hidden="true">
+                    {{ (currentUser()?.displayName || currentUser()?.email)?.charAt(0)?.toUpperCase() || '?' }}
+                  </span>
+                }
+                <div class="min-w-0 flex-1">
+                  <p class="truncate font-semibold">{{ currentUser()?.displayName || 'No name set' }}</p>
+                  <p class="truncate text-sm text-qs-muted">{{ currentUser()?.email || 'Guest account' }}</p>
                 </div>
-                @if (currentUser()?.email) {
-                  <p class="text-xs text-muted mt-1">{{ currentUser()?.email }}</p>
+                @if (currentUser()?.isGuest) {
+                  <span class="qs-badge qs-badge-warn">Guest</span>
                 }
               </div>
 
-              <!-- Theme toggle -->
-              <div class="mb-4">
-                <label class="block text-xs font-semibold text-muted mb-1.5">Theme</label>
-                <div class="flex items-center bg-control rounded-lg p-1">
-                  <button
-                    (click)="setTheme('system')"
-                    [class]="themeService.theme() === 'system' ? 'flex-1 p-2 rounded-md bg-qs-accent text-white' : 'flex-1 p-2 rounded-md text-muted hover:text-default'"
-                    title="System theme"
-                    aria-label="System theme"
-                  >
-                    <ng-icon name="heroComputerDesktop" class="text-base"></ng-icon>
-                  </button>
-                  <button
-                    (click)="setTheme('light')"
-                    [class]="themeService.theme() === 'light' ? 'flex-1 p-2 rounded-md bg-qs-accent text-white' : 'flex-1 p-2 rounded-md text-muted hover:text-default'"
-                    title="Light theme"
-                    aria-label="Light theme"
-                  >
-                    <ng-icon name="heroSun" class="text-base"></ng-icon>
-                  </button>
-                  <button
-                    (click)="setTheme('dark')"
-                    [class]="themeService.theme() === 'dark' ? 'flex-1 p-2 rounded-md bg-qs-accent text-white' : 'flex-1 p-2 rounded-md text-muted hover:text-default'"
-                    title="Dark theme"
-                    aria-label="Dark theme"
-                  >
-                    <ng-icon name="heroMoon" class="text-base"></ng-icon>
-                  </button>
+              <div class="space-y-5 p-4">
+                <div>
+                  <label for="profile-name" class="qs-label mb-1.5 block text-qs-muted">Display name</label>
+                  <div class="flex gap-2">
+                    <input
+                      id="profile-name"
+                      type="text"
+                      [(ngModel)]="profileName"
+                      placeholder="Your name"
+                      class="qs-input min-w-0 flex-1"
+                      (keyup.enter)="saveProfile()"
+                    />
+                    <button
+                      type="button"
+                      (click)="saveProfile()"
+                      [disabled]="isSavingProfile() || !profileName.trim()"
+                      [attr.aria-busy]="isSavingProfile()"
+                      class="qs-btn qs-btn-ink shrink-0"
+                    >
+                      Save
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <p id="theme-label" class="qs-label mb-1.5 text-qs-muted">Theme</p>
+                  <div class="grid grid-cols-3 gap-1 rounded-btn border border-qs-line bg-qs-panel-2 p-1" role="radiogroup" aria-labelledby="theme-label">
+                    @for (opt of themeOptions; track opt.value) {
+                      <button
+                        type="button"
+                        role="radio"
+                        [attr.aria-checked]="themeService.theme() === opt.value"
+                        (click)="setTheme(opt.value)"
+                        class="qs-label flex min-h-9 items-center justify-center gap-1.5 rounded-[4px] transition-colors"
+                        [class]="themeService.theme() === opt.value ? 'bg-qs-ink text-qs-bg' : 'text-qs-muted hover:text-qs-ink'"
+                      >
+                        <ng-icon [name]="opt.icon" class="text-sm"></ng-icon>
+                        {{ opt.label }}
+                      </button>
+                    }
+                  </div>
                 </div>
               </div>
 
-              <!-- Sign out -->
-              <button
-                (click)="signOut()"
-                class="qs-btn qs-btn-ghost w-full text-qs-bad hover:!bg-qs-bad-soft"
-              >
-                <ng-icon name="heroArrowRightOnRectangle" class="text-base"></ng-icon>
-                Sign Out
-              </button>
+              <div class="border-t border-qs-line p-2">
+                <button
+                  type="button"
+                  (click)="signOut()"
+                  class="qs-btn qs-btn-ghost w-full justify-start text-qs-bad hover:!bg-qs-bad-soft"
+                >
+                  <ng-icon name="heroArrowRightOnRectangle" class="text-base"></ng-icon>
+                  Sign out
+                </button>
+              </div>
             </div>
           }
         </div>
@@ -371,207 +374,167 @@ import {
       <!-- Create Game Modal -->
       @if (showCreateModal()) {
         <div
-          class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
           (click)="showCreateModal.set(false)"
         >
           <div
-            class="bg-dialog rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-modal-in"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="create-game-title"
+            class="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-card border border-qs-line bg-qs-panel shadow-pop animate-modal-in"
             (click)="$event.stopPropagation()"
           >
-            <!-- Modal Header -->
-            <div class="flex items-center justify-between p-6 border-b border-default">
+            <div class="flex items-start justify-between gap-4 border-b border-qs-line px-6 pb-5 pt-6">
               <div>
-                <h3 class="text-xl font-bold text-heading">Create New Game</h3>
-                <p class="text-sm text-muted">Set up your squares pool</p>
+                <p class="qs-eyebrow">New game</p>
+                <h3 id="create-game-title" class="qs-title mt-2 text-3xl">Set up your <span class="text-qs-accent">board</span></h3>
               </div>
               <button
+                type="button"
                 (click)="showCreateModal.set(false)"
-                class="p-2 text-muted hover:text-default hover:bg-control rounded-lg transition-colors"
+                class="qs-btn qs-btn-ghost -mr-2 w-11 px-0 text-qs-muted hover:text-qs-ink"
+                aria-label="Close"
               >
-                <ng-icon name="heroXMark" class="text-2xl"></ng-icon>
+                <ng-icon name="heroXMark" class="text-xl"></ng-icon>
               </button>
             </div>
 
-            <!-- Modal Body -->
-            <div class="p-6 space-y-6">
-              <!-- Sport Tabs -->
-              <div>
-                <label class="block text-sm font-semibold text-label mb-3">Sport</label>
-                <div class="flex gap-2 overflow-x-auto">
+            <div class="flex-1 space-y-8 overflow-y-auto px-6 py-6">
+              <!-- 01 Sport -->
+              <section>
+                <h4 class="qs-eyebrow qs-eyebrow-bar">01 / Sport</h4>
+                <div class="mt-3 flex flex-wrap gap-2" role="tablist" aria-label="Sport">
                   @for (sport of sportOptions; track sport.value) {
                     <button
+                      type="button"
+                      role="tab"
+                      class="qs-tab"
+                      [attr.aria-selected]="selectedSport === sport.value"
                       (click)="selectSport(sport.value)"
-                      [class]="selectedSport === sport.value
-                        ? 'px-6 py-2.5 bg-header text-header rounded-lg font-medium transition-colors whitespace-nowrap'
-                        : 'px-6 py-2.5 bg-control text-default hover:bg-control-hover rounded-lg font-medium transition-colors whitespace-nowrap'"
                     >
                       {{ sport.label }}
                     </button>
                   }
                 </div>
-              </div>
+              </section>
 
-              <!-- Game Selection -->
-              <div>
-                <label class="block text-sm font-semibold text-label mb-3">Select Game</label>
+              <!-- 02 Game -->
+              <section>
+                <h4 class="qs-eyebrow qs-eyebrow-bar">02 / Game</h4>
                 @if (isLoadingEspnGames()) {
-                  <div class="flex items-center justify-center py-8">
-                    <svg class="animate-spin h-6 w-6 text-qs-accent" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-                    </svg>
-                  </div>
-                } @else {
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-64 overflow-y-auto">
-                    <!-- Manual Scores Option - Hidden for now
-                    <button
-                      (click)="selectEspnGame('')"
-                      [class]="selectedEspnGameId === ''
-                        ? 'p-4 border-2 border-qs-accent bg-qs-accent-soft rounded-xl text-left transition-all'
-                        : 'p-4 border-2 border-default hover:border-hover rounded-xl text-left transition-all'"
-                    >
-                      <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-lg bg-control flex items-center justify-center"
-                          [class.bg-qs-accent-soft]="selectedEspnGameId === ''">
-                          <ng-icon name="heroPencilSquare" class="text-lg text-muted"
-                            [class.text-qs-accent]="selectedEspnGameId === ''"></ng-icon>
-                        </div>
-                        <div>
-                          <p class="font-semibold"
-                            [class]="selectedEspnGameId === '' ? 'text-qs-ink' : 'text-heading'">Manual Scores</p>
-                          <p class="text-xs"
-                            [class]="selectedEspnGameId === '' ? 'text-qs-accent' : 'text-muted'">Enter scores yourself</p>
-                        </div>
-                      </div>
-                    </button>
-                    -->
-
-                    <!-- ESPN Games -->
-                    @for (game of espnGames(); track game.id) {
-                      <button
-                        (click)="selectEspnGame(game.id)"
-                        [class]="selectedEspnGameId === game.id
-                          ? 'p-4 border-2 border-qs-accent bg-qs-accent-soft rounded-xl text-left transition-all'
-                          : 'p-4 border-2 border-default hover:border-hover rounded-xl text-left transition-all'"
-                      >
-                        <div class="flex items-center justify-between mb-2">
-                          <span class="text-xs font-medium px-2 py-0.5 rounded-full"
-                            [class]="getGameStatusClass(game.status)">
-                            {{ getGameStatusText(game) }}
-                          </span>
-                        </div>
-                        <p class="font-semibold text-sm"
-                          [class]="selectedEspnGameId === game.id ? 'text-qs-ink' : 'text-heading'">{{ game.awayTeam }} &#64; {{ game.homeTeam }}</p>
-                        @if (game.status === 'pre' && game.date) {
-                          <p class="text-xs mt-1"
-                            [class]="selectedEspnGameId === game.id ? 'text-qs-accent' : 'text-muted'">{{ formatGameDate(game.date) }}</p>
-                        }
-                        @if (game.status !== 'pre') {
-                          <p class="text-xs mt-1"
-                            [class]="selectedEspnGameId === game.id ? 'text-qs-accent' : 'text-muted'">{{ game.awayScore }} - {{ game.homeScore }}</p>
-                        }
-                      </button>
+                  <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2" aria-busy="true">
+                    @for (i of [0, 1, 2, 3]; track i) {
+                      <div class="h-[76px] animate-pulse rounded-inner bg-qs-panel-2"></div>
                     }
                   </div>
+                } @else if (espnGames().length === 0) {
+                  <p class="mt-3 rounded-inner border border-dashed border-qs-line-strong p-4 text-sm text-qs-muted">No games on the schedule for this sport right now.</p>
+                } @else {
+                  <div class="qs-canvas mt-3 rounded-inner p-2 sm:max-h-72 sm:overflow-y-auto">
+                    <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      @for (game of espnGames(); track game.id) {
+                        <button
+                          type="button"
+                          (click)="selectEspnGame(game.id)"
+                          [attr.aria-pressed]="selectedEspnGameId === game.id"
+                          class="rounded-inner border bg-qs-panel p-3 text-left transition-colors"
+                          [class]="selectedEspnGameId === game.id ? 'border-qs-accent outline outline-2 -outline-offset-2 outline-qs-accent' : 'border-qs-line hover:border-qs-line-strong'"
+                        >
+                          <div class="flex items-center justify-between gap-2">
+                            <span class="qs-badge" [class]="getGameStatusClass(game.status)">{{ getGameStatusText(game) }}</span>
+                            @if (selectedEspnGameId === game.id) {
+                              <ng-icon name="heroCheckCircle" class="text-lg text-qs-accent"></ng-icon>
+                            }
+                          </div>
+                          <p class="mt-2 truncate font-semibold text-qs-ink">{{ game.awayTeam }} &#64; {{ game.homeTeam }}</p>
+                          <p class="qs-label mt-1 text-[10px] text-qs-muted">
+                            @if (game.status === 'pre' && game.date) {
+                              {{ formatGameDate(game.date) }}
+                            } @else if (game.status !== 'pre') {
+                              {{ game.awayScore }} – {{ game.homeScore }}
+                            }
+                          </p>
+                        </button>
+                      }
+                    </div>
+                  </div>
                 }
-              </div>
+              </section>
 
-              <!-- Price Selection -->
-              <div>
-                <label class="block text-sm font-semibold text-label mb-3">Price per Square</label>
-                <div class="flex flex-wrap gap-2">
+              <!-- 03 Price -->
+              <section>
+                <h4 class="qs-eyebrow qs-eyebrow-bar">03 / Price per square</h4>
+                <div class="mt-3 flex flex-wrap gap-2">
                   @for (price of pricePresets; track price) {
                     <button
+                      type="button"
+                      class="qs-tab min-w-16"
+                      [attr.aria-pressed]="newGamePrice === price"
                       (click)="selectPrice(price)"
-                      [class]="newGamePrice === price
-                        ? 'px-5 py-2.5 bg-qs-accent text-white rounded-lg font-medium transition-colors'
-                        : 'px-5 py-2.5 bg-control text-default hover:bg-control-hover rounded-lg font-medium transition-colors'"
                     >
                       {{ price === 0 ? 'Free' : '$' + price }}
                     </button>
                   }
-                  <div class="flex items-center gap-1 px-3 py-2 bg-control rounded-lg">
-                    <span class="text-muted">$</span>
+                  <label class="flex min-h-11 items-center gap-1 rounded-btn border border-qs-line-strong bg-qs-panel-2 px-3 focus-within:border-qs-ink">
+                    <span class="qs-label text-qs-muted">$</span>
                     <input
                       type="number"
                       [(ngModel)]="customPrice"
                       (ngModelChange)="onCustomPriceChange()"
                       placeholder="Custom"
+                      aria-label="Custom price per square"
                       min="0"
-                      class="w-16 bg-transparent text-default font-medium focus:outline-none"
+                      class="w-20 bg-transparent text-base text-qs-ink placeholder:text-qs-muted focus:outline-none"
                     />
-                  </div>
+                  </label>
                 </div>
-              </div>
+              </section>
 
-              <!-- Game Name -->
-              <div>
-                <label class="block text-sm font-semibold text-label mb-3">Game Name <span class="text-qs-bad">*</span></label>
-                <input
-                  type="text"
-                  [(ngModel)]="newGameName"
-                  placeholder="e.g., Super Bowl Party 2024"
-                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-qs-accent focus:ring-2 focus:ring-qs-accent-soft outline-none text-default"
-                  [class.border-qs-bad]="gameNameError()"
-                />
-                @if (gameNameError()) {
-                  <p class="mt-2 text-sm text-qs-bad">Game name is required</p>
-                }
-              </div>
-
-              <!-- Venmo Username -->
-              <div>
-                <label class="block text-sm font-semibold text-label mb-3">
-                  Venmo Username
-                  <span class="text-muted font-normal">(optional)</span>
-                </label>
-                <input
-                  type="text"
-                  [(ngModel)]="newGameVenmoUsername"
-                  placeholder="@username"
-                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-qs-accent focus:ring-2 focus:ring-qs-accent-soft outline-none text-default"
-                />
-              </div>
-
-              <!-- Payment Manager -->
-              <div>
-                <label class="block text-sm font-semibold text-label mb-3">
-                  Payment Manager
-                  <span class="text-muted font-normal">(optional)</span>
-                </label>
-                <p class="text-xs text-muted mb-2">Assign someone to help manage payments. Enter their email address.</p>
-                <input
-                  type="email"
-                  [(ngModel)]="newGamePaymentManager"
-                  placeholder="Enter their email address"
-                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-qs-accent focus:ring-2 focus:ring-qs-accent-soft outline-none text-default"
-                />
-              </div>
+              <!-- 04 Details -->
+              <section>
+                <h4 class="qs-eyebrow qs-eyebrow-bar">04 / Details</h4>
+                <div class="mt-3 space-y-4">
+                  <div>
+                    <label for="new-game-name" class="qs-label mb-1.5 block text-qs-muted">Game name <span class="text-qs-bad">*</span></label>
+                    <input
+                      id="new-game-name"
+                      type="text"
+                      [(ngModel)]="newGameName"
+                      placeholder="Super Bowl party"
+                      class="qs-input"
+                      [class.qs-input-error]="gameNameError()"
+                      [attr.aria-invalid]="gameNameError()"
+                    />
+                    @if (gameNameError()) {
+                      <p class="mt-1.5 text-sm text-qs-bad">Give your game a name.</p>
+                    }
+                  </div>
+                  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                      <label for="new-game-venmo" class="qs-label mb-1.5 block text-qs-muted">Venmo username <span class="normal-case tracking-normal">(optional)</span></label>
+                      <input id="new-game-venmo" type="text" [(ngModel)]="newGameVenmoUsername" placeholder="@username" class="qs-input" />
+                    </div>
+                    <div>
+                      <label for="new-game-manager" class="qs-label mb-1.5 block text-qs-muted">Payment manager <span class="normal-case tracking-normal">(optional)</span></label>
+                      <input id="new-game-manager" type="email" [(ngModel)]="newGamePaymentManager" placeholder="their@email.com" class="qs-input" />
+                    </div>
+                  </div>
+                  <p class="text-xs text-qs-muted">A payment manager can help track who has paid.</p>
+                </div>
+              </section>
             </div>
 
-            <!-- Modal Footer -->
-            <div class="flex items-center justify-end gap-3 p-6 border-t border-default bg-input">
-              <button
-                (click)="showCreateModal.set(false)"
-                class="qs-btn qs-btn-ghost text-qs-muted"
-              >
-                Cancel
-              </button>
-              <button
-                (click)="createGame()"
-                [disabled]="isCreating()"
-                class="qs-btn qs-btn-primary px-8"
-              >
+            <div class="flex items-center justify-end gap-2 border-t border-qs-line bg-qs-panel-2 px-6 py-4">
+              <button type="button" (click)="showCreateModal.set(false)" class="qs-btn qs-btn-ghost text-qs-muted">Cancel</button>
+              <button type="button" (click)="createGame()" [disabled]="isCreating()" [attr.aria-busy]="isCreating()" class="qs-btn qs-btn-primary min-w-40">
                 @if (isCreating()) {
-                  <span class="flex items-center gap-2">
-                    <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-                    </svg>
-                    Creating...
-                  </span>
+                  <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                  </svg>
+                  Creating
                 } @else {
-                  Create Game
+                  Create game
                 }
               </button>
             </div>
@@ -950,6 +913,11 @@ export class DashboardComponent implements OnInit {
   customPrice: number | null = null;
 
   pricePresets = [0, 5, 10, 20, 50];
+  readonly themeOptions: { value: 'system' | 'light' | 'dark'; label: string; icon: string }[] = [
+    { value: 'system', label: 'Auto', icon: 'heroComputerDesktop' },
+    { value: 'light', label: 'Light', icon: 'heroSun' },
+    { value: 'dark', label: 'Dark', icon: 'heroMoon' }
+  ];
   sportOptions: { value: SportType; label: string }[] = [
     { value: 'nfl', label: 'NFL' },
     { value: 'ncaaf', label: 'NCAA Football' },
@@ -1393,6 +1361,15 @@ export class DashboardComponent implements OnInit {
     if (isOpening) {
       const user = this.currentUser();
       this.profileName = user?.displayName || '';
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.showCreateModal()) {
+      this.showCreateModal.set(false);
+    } else if (this.showProfileDropdown()) {
+      this.showProfileDropdown.set(false);
     }
   }
 

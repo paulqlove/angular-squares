@@ -259,7 +259,21 @@
     border-color: var(--qs-line);
   }
   .qs-tab:hover { border-color: var(--qs-line-strong); }
-  .qs-tab[aria-selected="true"] { background: var(--qs-ink); color: var(--qs-bg); border-color: var(--qs-ink); }
+  .qs-tab[aria-selected="true"], .qs-tab[aria-pressed="true"] { background: var(--qs-ink); color: var(--qs-bg); border-color: var(--qs-ink); }
+
+  .qs-input {
+    width: 100%;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid var(--qs-line-strong);
+    border-radius: var(--qs-r-btn);
+    background: var(--qs-panel-2);
+    color: var(--qs-ink);
+    font-size: 16px;
+  }
+  .qs-input::placeholder { color: var(--qs-muted); }
+  .qs-input:focus { outline: none; border-color: var(--qs-ink); box-shadow: 0 0 0 1px var(--qs-ink); }
+  .qs-input-error { border-color: var(--qs-bad); background: var(--qs-bad-soft); }
 
   .qs-card {
     background: var(--qs-panel);
