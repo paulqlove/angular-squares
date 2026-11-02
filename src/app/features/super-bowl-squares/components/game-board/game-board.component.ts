@@ -38,8 +38,13 @@ export class GameBoardComponent {
   /** CSS class for grid columns based on board size */
   get gridColsClass(): string {
     const cols = this.cols;
+    const rows = this.rows;
     if (cols === 5) {
       return 'grid-cols-[2.25rem_repeat(5,minmax(0,1fr))] sm:grid-cols-[2.5rem_repeat(5,minmax(0,1fr))]';
+    }
+    if (rows === 5) {
+      // 50-square board: 10 cols but paired row digits need wider header
+      return 'grid-cols-[2.25rem_repeat(10,minmax(0,1fr))] sm:grid-cols-[2.5rem_repeat(10,minmax(0,1fr))]';
     }
     return 'grid-cols-[1.5rem_repeat(10,minmax(0,1fr))] sm:grid-cols-[2.25rem_repeat(10,minmax(0,1fr))]';
   }
