@@ -181,92 +181,103 @@ import {
 
           <!-- Admin Panel: Gifted Season Passes -->
           @if (isAdmin()) {
-            <div class="qs-card mt-8 p-5">
-              <button
-                type="button"
-                (click)="toggleAdminPanel()"
-                class="flex w-full items-center justify-between"
-              >
-                <div>
-                  <p class="qs-label text-qs-muted">Admin</p>
-                  <p class="qs-title mt-1 text-2xl">Gift Season Passes</p>
-                </div>
-                <ng-icon
-                  [name]="showAdminPanel() ? 'heroChevronDown' : 'heroArrowRight'"
-                  class="text-xl text-qs-muted"
-                ></ng-icon>
-              </button>
+            <section class="mt-12" aria-labelledby="admin-heading">
+              <div class="flex items-baseline justify-between border-b border-qs-line pb-3">
+                <button
+                  type="button"
+                  (click)="toggleAdminPanel()"
+                  class="qs-eyebrow qs-eyebrow-bar flex items-center gap-2 hover:text-qs-ink transition-colors"
+                  id="admin-heading"
+                >
+                  <ng-icon
+                    [name]="showAdminPanel() ? 'heroChevronDown' : 'heroArrowRight'"
+                    class="text-sm"
+                  ></ng-icon>
+                  Admin / Season Passes
+                </button>
+                @if (!isLoadingGiftedPasses()) {
+                  <span class="qs-label text-qs-muted">{{ giftedPasses().length }} gifted</span>
+                }
+              </div>
 
               @if (showAdminPanel()) {
-                <div class="mt-5 border-t border-qs-line pt-5">
-                  <!-- Add new pass -->
-                  <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
-                    <div class="flex-1">
-                      <label class="qs-label text-qs-muted">Email address</label>
-                      <input
-                        type="email"
-                        [(ngModel)]="newGiftEmail"
-                        placeholder="friend@example.com"
-                        class="mt-1 w-full rounded-btn border border-qs-line bg-qs-panel px-3 py-2 text-qs-ink placeholder:text-qs-muted/60 focus:border-qs-accent focus:outline-none"
-                        (keyup.enter)="grantSeasonPass()"
-                      />
-                    </div>
-                    <div class="w-32">
-                      <label class="qs-label text-qs-muted">Days</label>
+                <div class="mt-5 space-y-4">
+                  <!-- Grant new pass - inline form -->
+                  <div class="flex items-center gap-2 rounded-card border border-qs-line bg-qs-panel p-1">
+                    <input
+                      type="email"
+                      [(ngModel)]="newGiftEmail"
+                      placeholder="Email address"
+                      class="min-w-0 flex-1 bg-transparent px-3 py-2 text-qs-ink placeholder:text-qs-muted/60 focus:outline-none"
+                      (keyup.enter)="grantSeasonPass()"
+                    />
+                    <div class="flex items-center gap-1 border-l border-qs-line pl-2">
                       <input
                         type="number"
                         [(ngModel)]="newGiftDays"
                         min="1"
                         max="365"
-                        class="mt-1 w-full rounded-btn border border-qs-line bg-qs-panel px-3 py-2 text-qs-ink focus:border-qs-accent focus:outline-none"
+                        class="w-16 bg-transparent px-2 py-2 text-center text-qs-ink focus:outline-none"
                       />
+                      <span class="text-sm text-qs-muted pr-1">days</span>
                     </div>
                     <button
                       type="button"
                       (click)="grantSeasonPass()"
                       [disabled]="isGrantingPass() || !newGiftEmail.trim()"
-                      class="qs-btn qs-btn-primary"
+                      class="qs-btn qs-btn-primary shrink-0"
                     >
-                      @if (isGrantingPass()) {
-                        Granting...
-                      } @else {
-                        Grant Pass
-                      }
+                      {{ isGrantingPass() ? 'Adding...' : 'Add' }}
                     </button>
                   </div>
 
                   <!-- List of gifted passes -->
-                  <div class="mt-5">
-                    <p class="qs-label text-qs-muted mb-3">Active gifted passes</p>
-                    @if (isLoadingGiftedPasses()) {
-                      <p class="text-qs-muted">Loading...</p>
-                    } @else if (giftedPasses().length === 0) {
-                      <p class="text-qs-muted">No gifted passes yet</p>
-                    } @else {
-                      <div class="space-y-2">
-                        @for (pass of giftedPasses(); track pass.email) {
-                          <div class="flex items-center justify-between rounded-btn border border-qs-line bg-qs-panel-2 px-3 py-2">
-                            <div>
-                              <p class="font-medium text-qs-ink">{{ pass.email }}</p>
-                              <p class="text-sm" [class]="isPassExpired(pass.expiresAt) ? 'text-qs-warn' : 'text-qs-muted'">
-                                {{ formatExpiry(pass.expiresAt) }}
-                              </p>
-                            </div>
-                            <button
-                              type="button"
-                              (click)="revokePass(pass.email)"
-                              class="qs-btn qs-btn-danger text-sm"
-                            >
-                              Revoke
-                            </button>
-                          </div>
-                        }
-                      </div>
-                    }
-                  </div>
+                  @if (isLoadingGiftedPasses()) {
+                    <div class="qs-card animate-pulse bg-qs-panel-2 h-20"></div>
+                  } @else if (giftedPasses().length === 0) {
+                    <p class="text-center text-qs-muted py-6">No gifted passes yet</p>
+                  } @else {
+                    <div class="overflow-hidden rounded-card border border-qs-line">
+                      <table class="w-full text-left">
+                        <thead class="bg-qs-panel-2 text-xs uppercase tracking-wider text-qs-muted">
+                          <tr>
+                            <th class="px-4 py-2 font-medium">Email</th>
+                            <th class="px-4 py-2 font-medium text-right">Status</th>
+                            <th class="px-4 py-2 w-20"></th>
+                          </tr>
+                        </thead>
+                        <tbody class="divide-y divide-qs-line bg-qs-panel">
+                          @for (pass of giftedPasses(); track pass.email) {
+                            <tr class="group">
+                              <td class="px-4 py-3 text-qs-ink">{{ pass.email }}</td>
+                              <td class="px-4 py-3 text-right">
+                                <span
+                                  class="inline-block rounded-full px-2 py-0.5 text-xs font-medium"
+                                  [class]="isPassExpired(pass.expiresAt)
+                                    ? 'bg-qs-warn-soft text-qs-warn'
+                                    : 'bg-qs-ok-soft text-qs-ok'"
+                                >
+                                  {{ formatExpiry(pass.expiresAt) }}
+                                </span>
+                              </td>
+                              <td class="px-4 py-3 text-right">
+                                <button
+                                  type="button"
+                                  (click)="revokePass(pass.email)"
+                                  class="text-xs text-qs-muted hover:text-qs-warn transition-colors opacity-0 group-hover:opacity-100"
+                                >
+                                  Revoke
+                                </button>
+                              </td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
+                  }
                 </div>
               }
-            </div>
+            </section>
           }
 
           <section class="mt-12" data-walkthrough="my-games" aria-labelledby="hosting-heading">
