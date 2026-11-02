@@ -1,6 +1,7 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 import { SQUARES_PROBABILITIES } from '../../utils/probability.utils';
+import { BoardSize, getBoardDimensions } from '../../../../core/services/game.service';
 
 @Component({
     selector: 'app-probability-heatmap',
@@ -10,10 +11,10 @@ import { SQUARES_PROBABILITIES } from '../../utils/probability.utils';
       <!-- Grid Container -->
       <div class="grid-container">
         <!-- Numbers row -->
-        <div class="grid grid-cols-[auto_repeat(10,minmax(0,1fr))] gap-0">
+        <div [class]="'grid gap-0 ' + gridColsClass">
           <!-- Empty cell for top-left corner -->
           <div class="number-cell empty-cell"></div>
-          
+
           <!-- Top numbers (home) -->
           @for (num of homeNumbers; track num) {
             <div class="number-cell">
@@ -24,12 +25,12 @@ import { SQUARES_PROBABILITIES } from '../../utils/probability.utils';
 
         <!-- Grid rows -->
         @for (awayNum of awayNumbers; track awayNum; let row = $index) {
-          <div class="grid grid-cols-[auto_repeat(10,minmax(0,1fr))] gap-0">
+          <div [class]="'grid gap-0 ' + gridColsClass">
             <!-- Side number (away) -->
             <div class="number-cell pr-4">
               {{ awayNum !== null ? awayNum : '' }}
             </div>
-            
+
             <!-- Probability cells -->
             @for (homeNum of homeNumbers; track homeNum; let col = $index) {
               <div [class]="getCellClass(row, col)"
@@ -62,6 +63,14 @@ export class ProbabilityHeatmapComponent {
   @Input() awayTeam: string = '';
   @Input() selectedSquares: { [key: string]: string } = {};
   @Input() selectedPlayer: string | null = null;
+  @Input() boardSize: BoardSize = 100;
+
+  get gridColsClass(): string {
+    const cols = getBoardDimensions(this.boardSize).cols;
+    return cols === 5
+      ? 'grid-cols-[auto_repeat(5,minmax(0,1fr))]'
+      : 'grid-cols-[auto_repeat(10,minmax(0,1fr))]';
+  }
 
   getProbability(row: number, col: number): string {
     if (this.homeNumbers[col] === null || this.awayNumbers[row] === null) {

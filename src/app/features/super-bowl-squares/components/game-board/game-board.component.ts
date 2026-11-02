@@ -1,5 +1,7 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { BoardSize, getBoardDimensions } from '../../../../core/services/game.service';
+
 @Component({
     selector: 'app-game-board',
     imports: [CommonModule],
@@ -18,6 +20,26 @@ export class GameBoardComponent {
   @Input() highlightedSquare: string | null = null;
   @Input() currentLeaderSquare: string | null = null;
   @Input() isRandomized: boolean = false;
+  @Input() boardSize: BoardSize = 100;
+
+  /** Number of columns in the grid (10 for 100/50, 5 for 25) */
+  get cols(): number {
+    return getBoardDimensions(this.boardSize).cols;
+  }
+
+  /** Number of rows in the grid (10 for 100, 5 for 50/25) */
+  get rows(): number {
+    return getBoardDimensions(this.boardSize).rows;
+  }
+
+  /** CSS class for grid columns based on board size */
+  get gridColsClass(): string {
+    const cols = this.cols;
+    if (cols === 5) {
+      return 'grid-cols-[1.5rem_repeat(5,minmax(0,1fr))] sm:grid-cols-[2.25rem_repeat(5,minmax(0,1fr))]';
+    }
+    return 'grid-cols-[1.5rem_repeat(10,minmax(0,1fr))] sm:grid-cols-[2.25rem_repeat(10,minmax(0,1fr))]';
+  }
 
   @Output() squareClick = new EventEmitter<{ row: number; col: number }>();
 

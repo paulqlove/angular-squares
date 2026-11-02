@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NgTemplateOutlet } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
-import { GameService, GameListItem } from '../../core/services/game.service';
+import { GameService, GameListItem, BoardSize } from '../../core/services/game.service';
 import { EspnService, EspnGame, SportType, SPORT_CONFIG } from '../../core/services/espn.service';
 import { ToastService } from '../../core/services/toast.service';
 import { SanitizationService } from '../../core/services/sanitization.service';
@@ -260,15 +260,15 @@ import {
           </p>
 
           <div class="mt-5 flex items-center gap-5">
-            <div class="grid w-[68px] shrink-0 grid-cols-10 gap-px rounded-[3px] bg-qs-line p-px" aria-hidden="true">
-              @for (i of boardCells; track i) {
+            <div [class]="'grid w-[68px] shrink-0 gap-px rounded-[3px] bg-qs-line p-px ' + getMiniGridClass(game.boardSize)" aria-hidden="true">
+              @for (i of getBoardCells(game.boardSize); track i) {
                 <span class="aspect-square" [class]="i < game.squaresFilled ? 'bg-qs-accent' : 'bg-qs-panel'"></span>
               }
             </div>
             <dl class="grid flex-1 grid-cols-3 gap-3">
               <div>
                 <dt class="qs-label text-[10px] text-qs-muted">Squares</dt>
-                <dd class="mt-1 text-lg font-semibold tabular-nums text-qs-ink">{{ game.squaresFilled }}<span class="text-sm font-normal text-qs-muted">/100</span></dd>
+                <dd class="mt-1 text-lg font-semibold tabular-nums text-qs-ink">{{ game.squaresFilled }}<span class="text-sm font-normal text-qs-muted">/{{ game.boardSize }}</span></dd>
               </div>
               <div>
                 <dt class="qs-label text-[10px] text-qs-muted">Players</dt>
@@ -400,9 +400,27 @@ import {
                 }
               </section>
 
-              <!-- 03 Points -->
+              <!-- 03 Board size -->
               <section>
-                <h4 class="qs-eyebrow qs-eyebrow-bar">03 / Points per square</h4>
+                <h4 class="qs-eyebrow qs-eyebrow-bar">03 / Board size</h4>
+                <div class="mt-3 flex flex-wrap gap-2">
+                  @for (size of boardSizeOptions; track size.value) {
+                    <button
+                      type="button"
+                      class="qs-tab"
+                      [attr.aria-pressed]="newGameBoardSize === size.value"
+                      (click)="newGameBoardSize = size.value"
+                    >
+                      {{ size.label }}
+                    </button>
+                  }
+                </div>
+                <p class="mt-2 text-xs text-qs-muted">{{ boardSizeOptions.find(s => s.value === newGameBoardSize)?.description }}</p>
+              </section>
+
+              <!-- 04 Points -->
+              <section>
+                <h4 class="qs-eyebrow qs-eyebrow-bar">04 / Points per square</h4>
                 <div class="mt-3 flex flex-wrap gap-2">
                   @for (price of pricePresets; track price) {
                     <button
@@ -429,7 +447,7 @@ import {
                 </div>
               </section>
 
-              <!-- 04 Details -->
+              <!-- 05 Details -->
               <section>
                 <h4 class="qs-eyebrow qs-eyebrow-bar">04 / Details</h4>
                 <div class="mt-3 space-y-4">
@@ -753,8 +771,19 @@ export class DashboardComponent implements OnInit {
   activeBoards = signal<number | null>(null);
 
   myGames = signal<GameListItem[]>([]);
-  readonly boardCells: number[] = Array.from({ length: 100 }, (_, i) => i);
   joinedGames = signal<GameListItem[]>([]);
+
+  /** Get cells array for mini board preview based on board size */
+  getBoardCells(size: BoardSize): number[] {
+    return Array.from({ length: size }, (_, i) => i);
+  }
+
+  /** Get CSS class for mini board grid based on board size */
+  getMiniGridClass(size: BoardSize): string {
+    if (size === 25) return 'grid-cols-5';
+    if (size === 50) return 'grid-cols-10';
+    return 'grid-cols-10';
+  }
   isLoadingGames = signal(true);
   isCreating = signal(false);
   isCheckingBoardLimit = signal(false);
@@ -795,8 +824,14 @@ export class DashboardComponent implements OnInit {
   gameListOpen = true;
   newGamePrice = 10;
   customPrice: number | null = null;
+  newGameBoardSize: BoardSize = 100;
 
   pricePresets = [0, 5, 10, 20, 50];
+  boardSizeOptions: { value: BoardSize; label: string; description: string }[] = [
+    { value: 100, label: '100 squares', description: '10×10 grid (classic)' },
+    { value: 50, label: '50 squares', description: '5×10 grid' },
+    { value: 25, label: '25 squares', description: '5×5 grid' }
+  ];
   sportOptions: { value: SportType; label: string }[] = [
     { value: 'nfl', label: 'NFL' },
     { value: 'ncaaf', label: 'NCAA Football' },
@@ -974,7 +1009,8 @@ export class DashboardComponent implements OnInit {
         sanitizedPrice,
         this.selectedEspnGameId ? this.selectedSport : undefined,
         this.newGamePaymentManager.trim() || undefined,
-        sanitizedHostNote || undefined
+        sanitizedHostNote || undefined,
+        this.newGameBoardSize
       );
       this.showCreateModal.set(false);
       this.resetCreateForm();
@@ -1002,6 +1038,7 @@ export class DashboardComponent implements OnInit {
     this.selectedEspnGameId = '';
     this.newGamePrice = 10;
     this.customPrice = null;
+    this.newGameBoardSize = 100;
     this.gameNameError.set(false);
   }
 
