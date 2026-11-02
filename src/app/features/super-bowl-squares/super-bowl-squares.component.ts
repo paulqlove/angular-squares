@@ -1,4 +1,5 @@
-import { computed, Component, OnInit, OnDestroy, ViewChild, HostListener, signal, inject, effect, ChangeDetectionStrategy } from '@angular/core';
+import { computed, Component, OnInit, OnDestroy, ViewChild, HostListener, signal, inject, effect, ChangeDetectionStrategy, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -262,6 +263,15 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   private liveIndexEnsuredFor: string | null = null;
   private latestEspnLive: EspnLiveSnapshot | null = null;
 
+  // Number reveal animation state
+  private platformId = inject(PLATFORM_ID);
+  isAnimatingNumbers = signal(false);
+  displayHomeNumbers = signal<(number | null)[]>([]);
+  displayAwayNumbers = signal<(number | null)[]>([]);
+  homeNumbersLocked = signal<boolean[]>([]);
+  awayNumbersLocked = signal<boolean[]>([]);
+  private animationIntervalId: ReturnType<typeof setInterval> | null = null;
+
   ngOnInit(): void {
     void this.bindRoute();
   }
@@ -395,6 +405,17 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           if (this.authService.currentUser()) {
             this.triggerWalkthroughIfNew();
           }
+
+          // Initialize display numbers if not already set (before checking animation)
+          if (this.displayHomeNumbers().length === 0) {
+            this.displayHomeNumbers.set([...this.homeNumbers]);
+            this.displayAwayNumbers.set([...this.awayNumbers]);
+            this.homeNumbersLocked.set(Array(this.homeNumbers.length).fill(true));
+            this.awayNumbersLocked.set(Array(this.awayNumbers.length).fill(true));
+          }
+
+          // Check if we need to play number reveal animation (first time seeing these numbers)
+          this.checkAndPlayAnimation();
         } else {
           this.gameNotFound.set(true);
         }
@@ -408,6 +429,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
     this.gameService.unsubscribe();
     this.stopPolling();
+    this.stopAnimation();
   }
 
   private startPolling(): void {
@@ -741,6 +763,15 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       this.awayNumbers = Array(rows).fill(null);
       this.isRandomized = false;
 
+      // Clear animation state
+      this.displayHomeNumbers.set([...this.homeNumbers]);
+      this.displayAwayNumbers.set([...this.awayNumbers]);
+      this.homeNumbersLocked.set(Array(cols).fill(false));
+      this.awayNumbersLocked.set(Array(rows).fill(false));
+
+      // Reset the animation cookie for this game (re-generate will play animation again)
+      this.clearNumbersSeenFlag();
+
       await this.gameService.updateGame(this.gameId, {
         homeNumbers: this.homeNumbers,
         awayNumbers: this.awayNumbers,
@@ -766,11 +797,160 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     this.awayNumbers = generateNumbers(rows);
     this.isRandomized = true;
 
+    // Clear the seen flag so animation plays
+    this.clearNumbersSeenFlag();
+
     await this.gameService.updateGame(this.gameId, {
       homeNumbers: this.homeNumbers,
       awayNumbers: this.awayNumbers,
       isRandomized: this.isRandomized
     });
+
+    // Trigger the reveal animation
+    this.playNumberRevealAnimation(this.homeNumbers, this.awayNumbers);
+  }
+
+  /** Check if user has already seen the number reveal for this game version */
+  private hasSeenNumbers(): boolean {
+    if (!isPlatformBrowser(this.platformId)) return true;
+    try {
+      const key = `qs-numbers-seen-${this.gameId}`;
+      const stored = localStorage.getItem(key);
+      if (!stored) return false;
+      const data = JSON.parse(stored);
+      // Compare stored numbers with current to detect re-generation
+      return JSON.stringify(data.home) === JSON.stringify(this.homeNumbers) &&
+             JSON.stringify(data.away) === JSON.stringify(this.awayNumbers);
+    } catch {
+      return false;
+    }
+  }
+
+  /** Mark that user has seen the current numbers */
+  private markNumbersSeen(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    try {
+      const key = `qs-numbers-seen-${this.gameId}`;
+      localStorage.setItem(key, JSON.stringify({
+        home: this.homeNumbers,
+        away: this.awayNumbers
+      }));
+    } catch {
+      // localStorage not available
+    }
+  }
+
+  /** Clear the seen flag (for when numbers are regenerated) */
+  private clearNumbersSeenFlag(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    try {
+      const key = `qs-numbers-seen-${this.gameId}`;
+      localStorage.removeItem(key);
+    } catch {
+      // localStorage not available
+    }
+  }
+
+  /** Play the number reveal animation (like the landing page mockup) */
+  private playNumberRevealAnimation(finalHome: (number | null)[], finalAway: (number | null)[]): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      this.displayHomeNumbers.set([...finalHome]);
+      this.displayAwayNumbers.set([...finalAway]);
+      this.homeNumbersLocked.set(Array(finalHome.length).fill(true));
+      this.awayNumbersLocked.set(Array(finalAway.length).fill(true));
+      this.markNumbersSeen();
+      return;
+    }
+
+    // Respect reduced motion preference
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      this.displayHomeNumbers.set([...finalHome]);
+      this.displayAwayNumbers.set([...finalAway]);
+      this.homeNumbersLocked.set(Array(finalHome.length).fill(true));
+      this.awayNumbersLocked.set(Array(finalAway.length).fill(true));
+      this.markNumbersSeen();
+      return;
+    }
+
+    this.isAnimatingNumbers.set(true);
+    const cols = finalHome.length;
+    const rows = finalAway.length;
+
+    // Initialize with random numbers
+    this.displayHomeNumbers.set(this.generateRandomDisplay(cols));
+    this.displayAwayNumbers.set(this.generateRandomDisplay(rows));
+    this.homeNumbersLocked.set(Array(cols).fill(false));
+    this.awayNumbersLocked.set(Array(rows).fill(false));
+
+    // Flicker interval (rapid random changes)
+    const FLICKER_MS = 70;
+    this.animationIntervalId = setInterval(() => {
+      const homeLocked = this.homeNumbersLocked();
+      const awayLocked = this.awayNumbersLocked();
+      this.displayHomeNumbers.update(d => d.map((v, i) => homeLocked[i] ? v : this.randomDigit(cols)));
+      this.displayAwayNumbers.update(d => d.map((v, i) => awayLocked[i] ? v : this.randomDigit(rows)));
+    }, FLICKER_MS);
+
+    // Lock numbers one by one with delay
+    const LOCK_STEP_MS = 180;
+    const INITIAL_DELAY = 600;
+
+    setTimeout(() => {
+      // Lock home numbers (top row) left to right
+      for (let i = 0; i < cols; i++) {
+        setTimeout(() => {
+          this.displayHomeNumbers.update(d => d.map((v, j) => j === i ? finalHome[i] : v));
+          this.homeNumbersLocked.update(l => l.map((v, j) => v || j === i));
+        }, i * LOCK_STEP_MS);
+      }
+
+      // Lock away numbers (side column) top to bottom, after home is done
+      const homeDelay = cols * LOCK_STEP_MS;
+      for (let i = 0; i < rows; i++) {
+        setTimeout(() => {
+          this.displayAwayNumbers.update(d => d.map((v, j) => j === i ? finalAway[i] : v));
+          this.awayNumbersLocked.update(l => l.map((v, j) => v || j === i));
+
+          // After last away number locks, stop flickering
+          if (i === rows - 1) {
+            this.stopAnimation();
+            this.markNumbersSeen();
+          }
+        }, homeDelay + i * LOCK_STEP_MS);
+      }
+    }, INITIAL_DELAY);
+  }
+
+  private generateRandomDisplay(count: number): number[] {
+    return Array.from({ length: count }, () => this.randomDigit(count));
+  }
+
+  private randomDigit(maxDigits: number): number {
+    // For 10-col: 0-9, for 5-col: 0-4
+    return Math.floor(Math.random() * maxDigits);
+  }
+
+  private stopAnimation(): void {
+    if (this.animationIntervalId) {
+      clearInterval(this.animationIntervalId);
+      this.animationIntervalId = null;
+    }
+    this.isAnimatingNumbers.set(false);
+  }
+
+  /** Check on load if we need to animate (first time seeing these numbers) */
+  private checkAndPlayAnimation(): void {
+    if (!this.isRandomized) return;
+    if (this.hasSeenNumbers()) {
+      // User has seen these numbers, show them locked immediately
+      this.displayHomeNumbers.set([...this.homeNumbers]);
+      this.displayAwayNumbers.set([...this.awayNumbers]);
+      this.homeNumbersLocked.set(Array(this.homeNumbers.length).fill(true));
+      this.awayNumbersLocked.set(Array(this.awayNumbers.length).fill(true));
+    } else {
+      // First time seeing these numbers, play animation
+      this.playNumberRevealAnimation(this.homeNumbers, this.awayNumbers);
+    }
   }
 
   /** Format a number for display - shows paired digits for 5-col/row boards */

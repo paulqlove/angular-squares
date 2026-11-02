@@ -176,8 +176,10 @@
               <app-game-board
                 [selectedSquares]="selectedSquares"
                 [playerColors]="playerColors"
-                [homeNumbers]="homeNumbers"
-                [awayNumbers]="awayNumbers"
+                [homeNumbers]="displayHomeNumbers()"
+                [awayNumbers]="displayAwayNumbers()"
+                [homeNumbersLocked]="homeNumbersLocked()"
+                [awayNumbersLocked]="awayNumbersLocked()"
                 [homeTeam]="homeTeam"
                 [awayTeam]="awayTeam"
                 [selectedPlayer]="selectedPlayer"
