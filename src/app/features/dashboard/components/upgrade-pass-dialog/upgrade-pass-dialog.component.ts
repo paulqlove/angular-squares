@@ -131,7 +131,7 @@ import { PLANS } from '../../../../core/plans';
                 class="inline-flex min-h-11 items-center justify-center rounded-xl px-4 py-2.5 text-base font-medium text-default hover:bg-control focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 dark:focus-visible:outline-white"
                 (click)="dismiss()"
               >
-                Not now
+                {{ submitted() ? 'Close' : 'Not now' }}
               </button>
             </div>
           </div>
