@@ -55,10 +55,10 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     id: 'how-to-play',
     path: '/how-to-play',
     title: 'How to Play Football Squares — Quarter Score',
-    description: 'How to play football squares: a 10 by 10 grid, numbers drawn after the board fills, and a winner each quarter from the last digit of each score.',
+    description: 'How to play football squares: 100, 50, or 25 squares, numbers drawn after the board fills, and a winner each quarter from the last digit of each score.',
     h1: 'How to play football squares',
     eyebrow: 'Rules',
-    lede: 'Football squares is a free board for friends and fans. One hundred squares, two teams, and a winner at the end of each quarter. You do not need to know the sport.',
+    lede: 'Football squares is a free board for friends and fans. Choose 100, 50, or 25 squares, add two teams, and pick a winner at the end of each quarter. You do not need to know the sport.',
     published: '2026-11-01',
     steps: [
       {
@@ -90,6 +90,62 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
         paragraphs: [
           'Scores use the last digit only. A score of 17 counts as 7. A score of 20 counts as 0. If the away team’s last digit is on row 7 and the home team’s last digit is on column 0, the square where that row and column meet is the quarter’s square.',
           'Many groups play for bragging rights each quarter and a bigger brag for the final. Quarter Score can show a suggested split of 20 percent, 20 percent, 20 percent, and 40 percent for the final. That split is only a label. It is not a payment.'
+        ]
+      },
+      {
+        heading: 'Board sizes: 100, 50, and 25 squares',
+        paragraphs: [
+          'Not every party has 100 people. Quarter Score offers three board sizes. The classic 100-square board works best for large groups. The 50-square and 25-square boards use paired digits so fewer people can still play.'
+        ]
+      },
+      {
+        heading: '100 squares (10 × 10) — The classic',
+        paragraphs: [
+          'Ten rows, ten columns, one hundred squares. Each axis uses the single digits 0 through 9, one digit per row or column. Every square maps to exactly one score combination.',
+          'Example: If the away team scores 24 and the home team scores 17, the last digits are 4 and 7. The square at row 4, column 7 wins.'
+        ],
+        bullets: [
+          'Grid: 10 rows × 10 columns',
+          'Away team (rows): 0, 1, 2, 3, 4, 5, 6, 7, 8, 9',
+          'Home team (columns): 0, 1, 2, 3, 4, 5, 6, 7, 8, 9',
+          'Each square = 1 score combination'
+        ]
+      },
+      {
+        heading: '50 squares (5 × 10) — Half board',
+        paragraphs: [
+          'Five rows, ten columns. The away team (rows) uses paired digits: row 1 covers 0 and 1, row 2 covers 2 and 3, and so on. The home team (columns) still uses single digits 0 through 9.',
+          'Example: If the away team scores 24 and the home team scores 17, the away digit 4 falls in the "4,5" row, and the home digit 7 is column 7. That square wins. Each square covers two possible away digits but one home digit.'
+        ],
+        bullets: [
+          'Grid: 5 rows × 10 columns',
+          'Away team (rows): 0,1 / 2,3 / 4,5 / 6,7 / 8,9',
+          'Home team (columns): 0, 1, 2, 3, 4, 5, 6, 7, 8, 9',
+          'Each square = 2 score combinations'
+        ]
+      },
+      {
+        heading: '25 squares (5 × 5) — Quarter board',
+        paragraphs: [
+          'Five rows, five columns. Both teams use paired digits. Each row and column covers two digits: 0,1 / 2,3 / 4,5 / 6,7 / 8,9. Every square covers four possible score combinations.',
+          'Example: If the away team scores 24 and the home team scores 17, the away digit 4 lands in the "4,5" row and the home digit 7 lands in the "6,7" column. That square wins. The same square would also win for away 25, home 16 or away 24, home 16 or away 25, home 17.'
+        ],
+        bullets: [
+          'Grid: 5 rows × 5 columns',
+          'Away team (rows): 0,1 / 2,3 / 4,5 / 6,7 / 8,9',
+          'Home team (columns): 0,1 / 2,3 / 4,5 / 6,7 / 8,9',
+          'Each square = 4 score combinations'
+        ]
+      },
+      {
+        heading: 'Which size to choose',
+        paragraphs: [
+          'Pick the board that matches your group. A party of 20 people might take 5 squares each on a 100-square board, or claim different squares on a smaller board. Smaller boards fill faster and give each square more chances to win.'
+        ],
+        bullets: [
+          '100 squares: Large parties, offices, or pools where many people join.',
+          '50 squares: Medium groups who want a full board without needing 100 names.',
+          '25 squares: Small gatherings of 10 to 25 people, or casual game-day fun.'
         ]
       },
       {
