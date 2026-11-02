@@ -1,6 +1,6 @@
 import { Component, OnInit, signal, inject, HostListener, ChangeDetectionStrategy } from '@angular/core';
 
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NgTemplateOutlet } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
@@ -878,6 +878,7 @@ export class DashboardComponent implements OnInit {
   private gameService = inject(GameService);
   private espnService = inject(EspnService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private toastService = inject(ToastService);
   private walkthroughService = inject(WalkthroughService);
   private sanitizationService = inject(SanitizationService);
@@ -1007,6 +1008,31 @@ export class DashboardComponent implements OnInit {
     // Preload gifted passes count for admins
     if (this.isAdmin() && this.currentUser()?.email?.toLowerCase() === 'paulqlove@gmail.com') {
       this.loadGiftedPasses();
+    }
+    // Check for create query param (e.g., from team page after sign in)
+    if (this.route.snapshot.queryParamMap.get('create') === 'true') {
+      // Clear the query param and open create modal
+      this.router.navigate([], { queryParams: {}, replaceUrl: true });
+      setTimeout(() => this.openCreateModalDirect(), 100);
+    }
+  }
+
+  /** Open create modal directly without event (for query param trigger) */
+  private async openCreateModalDirect(): Promise<void> {
+    const user = this.currentUser();
+    if (!user) return;
+    this.isCheckingBoardLimit.set(true);
+    try {
+      await this.gameService.assertUnderFreeBoardLimit(user.uid);
+      this.gameListOpen = true;
+      this.showCreateModal.set(true);
+      this.fetchEspnGames();
+    } catch (error) {
+      if (error instanceof ActiveBoardLimitError) {
+        this.showUpgradeDialog.set(true);
+      }
+    } finally {
+      this.isCheckingBoardLimit.set(false);
     }
   }
 
