@@ -112,16 +112,16 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
           'Each square = 1 score combination'
         ],
         html: `<figure class="not-prose mt-6 max-w-xs">
-          <div class="overflow-hidden rounded-lg border border-slate-300 dark:border-slate-600">
-            <table class="w-full border-collapse text-center text-[11px]">
+          <div class="overflow-hidden rounded-lg border border-slate-400 dark:border-slate-500">
+            <table class="w-full text-center text-[11px]" style="border-spacing:0">
               <thead>
-                <tr class="bg-slate-100 dark:bg-slate-800">
-                  <th class="w-6 p-1 text-[9px] text-slate-500 dark:text-slate-400"><span class="block">↓</span><span class="block">→</span></th>
-                  ${[0,1,2,3,4,5,6,7,8,9].map(i => `<th class="p-1 font-semibold text-slate-600 dark:text-slate-300">${i}</th>`).join('')}
+                <tr class="bg-slate-100 dark:bg-slate-700">
+                  <th class="w-6 p-1 text-[9px] text-slate-500 dark:text-slate-400 border-b border-r border-slate-300 dark:border-slate-500"><span class="block">↓</span><span class="block">→</span></th>
+                  ${[0,1,2,3,4,5,6,7,8,9].map(i => `<th class="p-1 font-semibold text-slate-600 dark:text-slate-300 border-b border-r border-slate-300 dark:border-slate-500 last:border-r-0">${i}</th>`).join('')}
                 </tr>
               </thead>
               <tbody>
-                ${[0,1,2,3,4,5,6,7,8,9].map(row => `<tr>${`<td class="bg-slate-100 dark:bg-slate-800 p-1 font-semibold text-slate-600 dark:text-slate-300">${row}</td>`}${[0,1,2,3,4,5,6,7,8,9].map(col => row === 4 && col === 7 ? '<td class="bg-green-500 p-1 font-bold text-white">WIN</td>' : '<td class="bg-white dark:bg-slate-900 p-1"></td>').join('')}</tr>`).join('')}
+                ${[0,1,2,3,4,5,6,7,8,9].map(row => `<tr>${`<td class="bg-slate-100 dark:bg-slate-700 p-1 font-semibold text-slate-600 dark:text-slate-300 border-b border-r border-slate-300 dark:border-slate-500">${row}</td>`}${[0,1,2,3,4,5,6,7,8,9].map(col => row === 4 && col === 7 ? '<td class="bg-green-500 p-1 font-bold text-white border-b border-r border-slate-300 dark:border-slate-500">WIN</td>' : '<td class="bg-white dark:bg-slate-800 p-1 border-b border-r border-slate-300 dark:border-slate-500"></td>').join('')}</tr>`).join('')}
               </tbody>
             </table>
           </div>
@@ -141,16 +141,16 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
           'Each square = 2 score combinations'
         ],
         html: `<figure class="not-prose mt-6 max-w-sm">
-          <div class="overflow-hidden rounded-lg border border-slate-300 dark:border-slate-600">
-            <table class="w-full border-collapse text-center text-[11px]">
+          <div class="overflow-hidden rounded-lg border border-slate-400 dark:border-slate-500">
+            <table class="w-full text-center text-[11px]" style="border-spacing:0">
               <thead>
-                <tr class="bg-slate-100 dark:bg-slate-800">
-                  <th class="w-8 p-1 text-[9px] text-slate-500 dark:text-slate-400"><span class="block">↓</span><span class="block">→</span></th>
-                  ${[0,1,2,3,4,5,6,7,8,9].map(i => `<th class="p-1 font-semibold text-slate-600 dark:text-slate-300">${i}</th>`).join('')}
+                <tr class="bg-slate-100 dark:bg-slate-700">
+                  <th class="w-8 p-1 text-[9px] text-slate-500 dark:text-slate-400 border-b border-r border-slate-300 dark:border-slate-500"><span class="block">↓</span><span class="block">→</span></th>
+                  ${[0,1,2,3,4,5,6,7,8,9].map(i => `<th class="p-1 font-semibold text-slate-600 dark:text-slate-300 border-b border-r border-slate-300 dark:border-slate-500">${i}</th>`).join('')}
                 </tr>
               </thead>
               <tbody>
-                ${['0,1','2,3','4,5','6,7','8,9'].map((pair, row) => `<tr>${`<td class="bg-slate-100 dark:bg-slate-800 p-1 text-[10px] font-semibold text-slate-600 dark:text-slate-300">${pair}</td>`}${[0,1,2,3,4,5,6,7,8,9].map(col => row === 2 && col === 7 ? '<td class="bg-green-500 p-1.5 font-bold text-white">WIN</td>' : '<td class="bg-white dark:bg-slate-900 p-1.5"></td>').join('')}</tr>`).join('')}
+                ${['0,1','2,3','4,5','6,7','8,9'].map((pair, row) => `<tr>${`<td class="bg-slate-100 dark:bg-slate-700 p-1 text-[10px] font-semibold text-slate-600 dark:text-slate-300 border-b border-r border-slate-300 dark:border-slate-500">${pair}</td>`}${[0,1,2,3,4,5,6,7,8,9].map(col => row === 2 && col === 7 ? '<td class="bg-green-500 p-1.5 font-bold text-white border-b border-r border-slate-300 dark:border-slate-500">WIN</td>' : '<td class="bg-white dark:bg-slate-800 p-1.5 border-b border-r border-slate-300 dark:border-slate-500"></td>').join('')}</tr>`).join('')}
               </tbody>
             </table>
           </div>
@@ -170,16 +170,16 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
           'Each square = 4 score combinations'
         ],
         html: `<figure class="not-prose mt-6 max-w-[220px]">
-          <div class="overflow-hidden rounded-lg border border-slate-300 dark:border-slate-600">
-            <table class="w-full border-collapse text-center text-[11px]">
+          <div class="overflow-hidden rounded-lg border border-slate-400 dark:border-slate-500">
+            <table class="w-full text-center text-[11px]" style="border-spacing:0">
               <thead>
-                <tr class="bg-slate-100 dark:bg-slate-800">
-                  <th class="w-9 p-1 text-[9px] text-slate-500 dark:text-slate-400"><span class="block">↓</span><span class="block">→</span></th>
-                  ${['0,1','2,3','4,5','6,7','8,9'].map(p => `<th class="p-1.5 text-[10px] font-semibold text-slate-600 dark:text-slate-300">${p}</th>`).join('')}
+                <tr class="bg-slate-100 dark:bg-slate-700">
+                  <th class="w-9 p-1 text-[9px] text-slate-500 dark:text-slate-400 border-b border-r border-slate-300 dark:border-slate-500"><span class="block">↓</span><span class="block">→</span></th>
+                  ${['0,1','2,3','4,5','6,7','8,9'].map(p => `<th class="p-1.5 text-[10px] font-semibold text-slate-600 dark:text-slate-300 border-b border-r border-slate-300 dark:border-slate-500">${p}</th>`).join('')}
                 </tr>
               </thead>
               <tbody>
-                ${['0,1','2,3','4,5','6,7','8,9'].map((pair, row) => `<tr>${`<td class="bg-slate-100 dark:bg-slate-800 p-1 text-[10px] font-semibold text-slate-600 dark:text-slate-300">${pair}</td>`}${['0,1','2,3','4,5','6,7','8,9'].map((_, col) => row === 2 && col === 3 ? '<td class="bg-green-500 p-2 font-bold text-white">WIN</td>' : '<td class="bg-white dark:bg-slate-900 p-2"></td>').join('')}</tr>`).join('')}
+                ${['0,1','2,3','4,5','6,7','8,9'].map((pair, row) => `<tr>${`<td class="bg-slate-100 dark:bg-slate-700 p-1 text-[10px] font-semibold text-slate-600 dark:text-slate-300 border-b border-r border-slate-300 dark:border-slate-500">${pair}</td>`}${['0,1','2,3','4,5','6,7','8,9'].map((_, col) => row === 2 && col === 3 ? '<td class="bg-green-500 p-2 font-bold text-white border-b border-r border-slate-300 dark:border-slate-500">WIN</td>' : '<td class="bg-white dark:bg-slate-800 p-2 border-b border-r border-slate-300 dark:border-slate-500"></td>').join('')}</tr>`).join('')}
               </tbody>
             </table>
           </div>
