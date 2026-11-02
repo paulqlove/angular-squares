@@ -1,0 +1,451 @@
+import { readFileSync } from 'node:fs';
+import { afterAll, beforeAll, beforeEach, describe, it } from 'vitest';
+import {
+  assertFails,
+  assertSucceeds,
+  initializeTestEnvironment,
+  RulesTestContext,
+  RulesTestEnvironment
+} from '@firebase/rules-unit-testing';
+
+const GAME = 'game01';
+const G = `games/${GAME}`;
+const HOUR = 3600000;
+
+let env: RulesTestEnvironment;
+
+const owner = () => env.authenticatedContext('owner');
+const cohost = () => env.authenticatedContext('cohost');
+const player = () => env.authenticatedContext('alice');
+const guest = () => env.authenticatedContext('guest', { firebase: { sign_in_provider: 'anonymous' } });
+const visitor = () => env.unauthenticatedContext();
+
+const db = (ctx: RulesTestContext) => ctx.database();
+const write = (ctx: RulesTestContext, updates: Record<string, unknown>) => db(ctx).ref().update(updates);
+const set = (ctx: RulesTestContext, path: string, value: unknown) => db(ctx).ref(path).set(value);
+const read = (ctx: RulesTestContext, path: string) => db(ctx).ref(path).get();
+
+function baseGame(extra: Record<string, unknown> = {}) {
+  return {
+    name: 'Office Pool',
+    ownerId: 'owner',
+    ownerName: 'Olive',
+    managerId: 'cohost',
+    createdAt: Date.now(),
+    isLocked: false,
+    isRandomized: false,
+    pricePerSquare: 10,
+    homeTeam: 'Home',
+    awayTeam: 'Away',
+    hostNote: '',
+    squares: { '0-0': 'Alice', '0-1': 'Guesty', '0-2': 'Bob' },
+    playerUserIds: { Alice: 'alice', Guesty: 'guest', Bob: 'bob' },
+    playerColors: { Alice: 'bg-red-200', Bob: 'bg-blue-200' },
+    paidPlayers: ['Alice', 'Bob'],
+    scores: { q1: { home: 0, away: 0 } },
+    ...extra
+  };
+}
+
+async function seed(data: Record<string, unknown>): Promise<void> {
+  await env.withSecurityRulesDisabled(ctx => ctx.database().ref().update(data));
+}
+
+beforeAll(async () => {
+  env = await initializeTestEnvironment({
+    projectId: 'demo-squares',
+    database: { rules: readFileSync(process.env['RULES_FILE'] ?? 'database.rules.json', 'utf8') }
+  });
+});
+
+afterAll(async () => {
+  await env?.cleanup();
+});
+
+beforeEach(async () => {
+  await env.clearDatabase();
+  await seed({ [G]: baseGame() });
+});
+
+describe('reading games', () => {
+  it('a signed-out visitor can read a game', async () => {
+    await assertSucceeds(read(visitor(), G));
+  });
+
+  it('a signed-out visitor cannot claim a square', async () => {
+    await assertFails(write(visitor(), { [`${G}/squares/5-5`]: 'Sneaky' }));
+  });
+
+  it('a signed-out visitor cannot write any game field', async () => {
+    await assertFails(set(visitor(), `${G}/name`, 'Hacked'));
+  });
+
+  it('a signed-out visitor cannot create a game', async () => {
+    await assertFails(set(visitor(), 'games/new001', baseGame({ ownerId: 'nobody' })));
+  });
+});
+
+describe('creating games', () => {
+  it('a signed-in host can create a new game', async () => {
+    await assertSucceeds(set(env.authenticatedContext('host'), 'games/new001', baseGame({ ownerId: 'host' })));
+  });
+
+  it('a player cannot overwrite an existing game they do not own', async () => {
+    await assertFails(set(player(), G, baseGame({ ownerId: 'alice' })));
+  });
+
+  it('a host cannot create a second board while their linked board is active', async () => {
+    await seed({
+      'games/live01': baseGame({ ownerId: 'host', espnEventId: '401' }),
+      'users/host/activeBoardId': 'live01'
+    });
+    await assertFails(set(env.authenticatedContext('host'), 'games/new001', baseGame({ ownerId: 'host' })));
+  });
+
+  it('a host cannot create a second board within 48 hours of an unlinked one', async () => {
+    await seed({
+      'games/free01': baseGame({ ownerId: 'host', createdAt: Date.now() - HOUR }),
+      'users/host/activeBoardId': 'free01'
+    });
+    await assertFails(set(env.authenticatedContext('host'), 'games/new001', baseGame({ ownerId: 'host' })));
+  });
+
+  it('a host can create a new board once their unlinked board is older than 48 hours', async () => {
+    await seed({
+      'games/free01': baseGame({ ownerId: 'host', createdAt: Date.now() - 49 * HOUR }),
+      'users/host/activeBoardId': 'free01'
+    });
+    await assertSucceeds(set(env.authenticatedContext('host'), 'games/new001', baseGame({ ownerId: 'host' })));
+  });
+
+  it('a host can create a new board when their active board was deleted', async () => {
+    await seed({ 'users/host/activeBoardId': 'gone01' });
+    await assertSucceeds(set(env.authenticatedContext('host'), 'games/new001', baseGame({ ownerId: 'host' })));
+  });
+});
+
+describe('squares', () => {
+  it('a player can claim an empty square under their own name', async () => {
+    await assertSucceeds(write(player(), { [`${G}/squares/3-3`]: 'Alice' }));
+  });
+
+  it('a guest can claim an empty square and register a new name in the same write', async () => {
+    await assertSucceeds(write(env.authenticatedContext('newguest', { firebase: { sign_in_provider: 'anonymous' } }), {
+      [`${G}/squares/4-4`]: 'Newbie',
+      [`${G}/playerUserIds/Newbie`]: 'newguest'
+    }));
+  });
+
+  it('a player cannot claim a square under a name that belongs to someone else', async () => {
+    await assertFails(write(player(), { [`${G}/squares/3-3`]: 'Bob' }));
+  });
+
+  it('a player cannot claim a square under an unregistered name without registering it', async () => {
+    await assertFails(write(player(), { [`${G}/squares/3-3`]: 'Nobody' }));
+  });
+
+  it('a player cannot overwrite someone else\'s square', async () => {
+    await assertFails(write(player(), { [`${G}/squares/0-2`]: 'Alice' }));
+  });
+
+  it('a guest cannot clear someone else\'s square', async () => {
+    await assertFails(write(guest(), { [`${G}/squares/0-0`]: null }));
+  });
+
+  it('a player can clear their own square', async () => {
+    await assertSucceeds(write(player(), { [`${G}/squares/0-0`]: null }));
+  });
+
+  it('a guest can clear their own square', async () => {
+    await assertSucceeds(write(guest(), { [`${G}/squares/0-1`]: null }));
+  });
+
+  it('a player cannot wipe the whole squares node', async () => {
+    await assertFails(set(player(), `${G}/squares`, {}));
+  });
+
+  it('a player cannot replace the squares node with only their own squares', async () => {
+    await assertFails(set(player(), `${G}/squares`, { '0-0': 'Alice' }));
+  });
+
+  it('a player cannot claim a square while the game is locked', async () => {
+    await seed({ [`${G}/isLocked`]: true });
+    await assertFails(write(player(), { [`${G}/squares/3-3`]: 'Alice' }));
+  });
+
+  it('a player cannot clear their own square while the game is locked', async () => {
+    await seed({ [`${G}/isLocked`]: true });
+    await assertFails(write(player(), { [`${G}/squares/0-0`]: null }));
+  });
+
+  it('a player can rename their own squares, color, paid entry and name mapping in one write, even while locked', async () => {
+    await seed({ [`${G}/isLocked`]: true });
+    await assertSucceeds(write(player(), {
+      [`${G}/squares/0-0`]: 'Alicia',
+      [`${G}/playerColors/Alice`]: null,
+      [`${G}/playerColors/Alicia`]: 'bg-red-200',
+      [`${G}/paidPlayers/0`]: 'Alicia',
+      [`${G}/playerUserIds/Alice`]: null,
+      [`${G}/playerUserIds/Alicia`]: 'alice'
+    }));
+  });
+
+  it('the owner can overwrite any square', async () => {
+    await assertSucceeds(write(owner(), { [`${G}/squares/0-2`]: 'Alice' }));
+  });
+
+  it('the owner can clear the whole squares node', async () => {
+    await assertSucceeds(set(owner(), `${G}/squares`, null));
+  });
+
+  it('the owner can claim squares while the game is locked', async () => {
+    await seed({ [`${G}/isLocked`]: true });
+    await assertSucceeds(write(owner(), { [`${G}/squares/9-9`]: 'Walk-in' }));
+  });
+
+  it('the co-host can clear someone else\'s square', async () => {
+    await assertSucceeds(write(cohost(), { [`${G}/squares/0-0`]: null }));
+  });
+
+  it('even the owner cannot write a square with an invalid key', async () => {
+    await assertFails(write(owner(), { [`${G}/squares/10-1`]: 'Alice' }));
+  });
+
+  it('even the owner cannot write a square name longer than 50 characters', async () => {
+    await assertFails(write(owner(), { [`${G}/squares/1-1`]: 'x'.repeat(51) }));
+  });
+});
+
+describe('player maps', () => {
+  it('a player can map a new name to their own uid', async () => {
+    await assertSucceeds(write(player(), { [`${G}/playerUserIds/Ali`]: 'alice' }));
+  });
+
+  it('a player cannot map a new name to someone else\'s uid', async () => {
+    await assertFails(write(player(), { [`${G}/playerUserIds/Ali`]: 'bob' }));
+  });
+
+  it('a guest cannot take over an existing name mapping', async () => {
+    await assertFails(write(guest(), { [`${G}/playerUserIds/Alice`]: 'guest' }));
+  });
+
+  it('a guest cannot delete someone else\'s name mapping', async () => {
+    await assertFails(write(guest(), { [`${G}/playerUserIds/Alice`]: null }));
+  });
+
+  it('a player cannot wipe the whole name mapping node', async () => {
+    await assertFails(set(player(), `${G}/playerUserIds`, null));
+  });
+
+  it('a guest can assign a color to a player who has none', async () => {
+    await assertSucceeds(write(guest(), { [`${G}/playerColors/Guesty`]: 'bg-green-200' }));
+  });
+
+  it('a player can change their own color', async () => {
+    await assertSucceeds(write(player(), { [`${G}/playerColors/Alice`]: 'bg-green-200' }));
+  });
+
+  it('a guest cannot change someone else\'s color', async () => {
+    await assertFails(write(guest(), { [`${G}/playerColors/Alice`]: 'bg-green-200' }));
+  });
+
+  it('a player cannot wipe the whole colors node', async () => {
+    await assertFails(set(player(), `${G}/playerColors`, {}));
+  });
+
+  it('a guest cannot mark themselves as paid', async () => {
+    await assertFails(write(guest(), { [`${G}/paidPlayers/2`]: 'Guesty' }));
+  });
+
+  it('a player cannot remove themselves from the paid list', async () => {
+    await assertFails(write(player(), { [`${G}/paidPlayers/0`]: null }));
+  });
+
+  it('a player cannot rename someone else\'s paid entry', async () => {
+    await assertFails(write(player(), { [`${G}/paidPlayers/1`]: 'Alice' }));
+  });
+
+  it('a player cannot replace the whole paid list', async () => {
+    await assertFails(set(player(), `${G}/paidPlayers`, ['Alice', 'Bob', 'Guesty']));
+  });
+
+  it('the co-host can update the paid list', async () => {
+    await assertSucceeds(set(cohost(), `${G}/paidPlayers`, ['Alice', 'Bob', 'Guesty']));
+  });
+});
+
+describe('owner-only fields', () => {
+  const fields: [string, unknown][] = [
+    ['name', 'Renamed'],
+    ['homeTeam', 'Other'],
+    ['awayTeam', 'Other'],
+    ['hostNote', 'Pay up'],
+    ['pricePerSquare', 1],
+    ['isLocked', true],
+    ['isRandomized', true],
+    ['homeNumbers', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]],
+    ['awayNumbers', [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]],
+    ['scores', { q1: { home: 7, away: 3 } }],
+    ['winners', { q1: 'Alice' }],
+    ['managerId', 'alice'],
+    ['ownerId', 'alice']
+  ];
+
+  for (const [field, value] of fields) {
+    it(`a player cannot change ${field}`, async () => {
+      await assertFails(write(player(), { [`${G}/${field}`]: value }));
+    });
+
+    it(`a guest cannot change ${field}`, async () => {
+      await assertFails(write(guest(), { [`${G}/${field}`]: value }));
+    });
+  }
+
+  it('the owner can lock the game, set numbers, scores and the host note in one write', async () => {
+    await assertSucceeds(write(owner(), {
+      [`${G}/isLocked`]: true,
+      [`${G}/homeNumbers`]: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+      [`${G}/scores/q1`]: { home: 7, away: 3 },
+      [`${G}/hostNote`]: 'Venmo me'
+    }));
+  });
+
+  it('the co-host can update scores and winners', async () => {
+    await assertSucceeds(write(cohost(), {
+      [`${G}/scores/q1`]: { home: 14, away: 10 },
+      [`${G}/winners/q1`]: 'Alice'
+    }));
+  });
+
+  it('the owner can clear the game back to defaults', async () => {
+    await assertSucceeds(write(owner(), {
+      [`${G}/squares`]: null,
+      [`${G}/playerColors`]: null,
+      [`${G}/paidPlayers`]: null,
+      [`${G}/winners`]: {},
+      [`${G}/isLocked`]: false,
+      [`${G}/hostNote`]: ''
+    }));
+  });
+
+  it('the owner can save a 140-character host note', async () => {
+    await assertSucceeds(set(owner(), `${G}/hostNote`, 'x'.repeat(140)));
+  });
+
+  it('the owner cannot save a 141-character host note', async () => {
+    await assertFails(set(owner(), `${G}/hostNote`, 'x'.repeat(141)));
+  });
+
+  it('the owner can delete the game', async () => {
+    await assertSucceeds(set(owner(), G, null));
+  });
+
+  it('a player cannot delete the game', async () => {
+    await assertFails(set(player(), G, null));
+  });
+});
+
+describe('liveGames index', () => {
+  const entry = `liveGames/401/${GAME}`;
+
+  it('the owner can index their board under an ESPN game', async () => {
+    await assertSucceeds(set(owner(), entry, { sport: 'nfl' }));
+  });
+
+  it('the co-host can index the board under an ESPN game', async () => {
+    await assertSucceeds(set(cohost(), entry, { sport: 'nba' }));
+  });
+
+  it('a player cannot index someone else\'s board', async () => {
+    await assertFails(set(player(), entry, { sport: 'nfl' }));
+  });
+
+  it('a signed-out visitor cannot index a board', async () => {
+    await assertFails(set(visitor(), entry, { sport: 'nfl' }));
+  });
+
+  it('the owner cannot index with an unknown sport', async () => {
+    await assertFails(set(owner(), entry, { sport: 'curling' }));
+  });
+
+  it('the owner cannot add extra fields to an index entry', async () => {
+    await assertFails(set(owner(), entry, { sport: 'nfl', extra: 1 }));
+  });
+
+  it('nobody can read the liveGames index from a client', async () => {
+    await seed({ [entry]: { sport: 'nfl' } });
+    await assertFails(read(owner(), 'liveGames'));
+    await assertFails(read(owner(), entry));
+  });
+});
+
+describe('notifyMe', () => {
+  const entry = (uid: string) => ({ email: 'a@b.co', timestamp: Date.now(), uid, source: 'welcome' });
+
+  it('a signed-in user can leave their email', async () => {
+    await assertSucceeds(set(player(), 'notifyMe/push1', entry('alice')));
+  });
+
+  it('a guest can leave their email', async () => {
+    await assertSucceeds(set(guest(), 'notifyMe/push1', entry('guest')));
+  });
+
+  it('a user cannot leave an email under someone else\'s uid', async () => {
+    await assertFails(set(player(), 'notifyMe/push1', entry('bob')));
+  });
+
+  it('a user cannot overwrite an existing entry', async () => {
+    await seed({ 'notifyMe/push1': entry('alice') });
+    await assertFails(set(player(), 'notifyMe/push1', entry('alice')));
+  });
+
+  it('a user cannot leave a malformed email', async () => {
+    await assertFails(set(player(), 'notifyMe/push1', { ...entry('alice'), email: 'nope' }));
+  });
+
+  it('a user cannot add extra fields to an entry', async () => {
+    await assertFails(set(player(), 'notifyMe/push1', { ...entry('alice'), extra: 'x' }));
+  });
+
+  it('a signed-out visitor cannot leave an email', async () => {
+    await assertFails(set(visitor(), 'notifyMe/push1', entry('alice')));
+  });
+
+  it('nobody can read notifyMe entries', async () => {
+    await seed({ 'notifyMe/push1': entry('alice') });
+    await assertFails(read(player(), 'notifyMe/push1'));
+    await assertFails(read(owner(), 'notifyMe'));
+  });
+});
+
+describe('users', () => {
+  it('a user can read and write their own profile data', async () => {
+    await assertSucceeds(set(player(), 'users/alice/joinedGames/game01', { joinedAt: Date.now(), gameName: 'Office Pool' }));
+    await assertSucceeds(read(player(), 'users/alice'));
+  });
+
+  it('a user cannot read someone else\'s profile data', async () => {
+    await assertFails(read(player(), 'users/bob'));
+  });
+
+  it('a guest cannot write to someone else\'s profile data', async () => {
+    await assertFails(set(guest(), 'users/alice/activeBoardId', 'game01'));
+  });
+
+  it('a signed-out visitor cannot read any profile data', async () => {
+    await assertFails(read(visitor(), 'users/alice'));
+  });
+
+  it('a user can set a well-formed active board id', async () => {
+    await assertSucceeds(set(player(), 'users/alice/activeBoardId', 'game01'));
+  });
+
+  it('a user cannot set a malformed active board id', async () => {
+    await assertFails(set(player(), 'users/alice/activeBoardId', '../x'));
+  });
+
+  it('a user can clear their own active board slot', async () => {
+    await seed({ 'users/alice/activeBoardId': 'game01' });
+    await assertSucceeds(set(player(), 'users/alice/activeBoardId', null));
+  });
+});

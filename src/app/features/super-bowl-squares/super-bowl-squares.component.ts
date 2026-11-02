@@ -1,9 +1,10 @@
-import { Component, OnInit, OnDestroy, ViewChild, HostListener, signal, inject, effect, ChangeDetectionStrategy } from '@angular/core';
+import { computed, Component, OnInit, OnDestroy, ViewChild, HostListener, signal, inject, effect, ChangeDetectionStrategy } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GameService, GameData, EspnLiveSnapshot } from '../../core/services/game.service';
 import { environment } from '../../../environments/environment';
+import { PreviewRole } from '../../core/services/role-preview.service';
 import { AuthService } from '../../core/services/auth.service';
 import { EspnService, EspnGame, SportType } from '../../core/services/espn.service';
 import { ToastService } from '../../core/services/toast.service';
@@ -209,6 +210,13 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     // Reactively update currentPlayer when auth state changes (e.g., Google sign-in after page load)
     effect(() => {
       const user = this.authService.currentUser();
+      const previewRole = this.authService.previewRole();
+      if (previewRole !== this.lastPreviewRole) {
+        // Role preview switched: play as the previewed user (or nobody when signed out)
+        this.lastPreviewRole = previewRole;
+        this._currentPlayer = user?.displayName || user?.email || '';
+        return;
+      }
       if (user?.displayName && !this._currentPlayer) {
         this._currentPlayer = user.displayName;
       } else if (user?.email && !this._currentPlayer) {
@@ -232,8 +240,22 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
   // Auth state
   currentUser = this.authService.currentUser;
-  isGameOwner = signal(false);
-  isManager = signal(false);
+  isGameOwner = computed(() => {
+    const role = this.authService.previewRole();
+    if (role === 'owner' || role === 'cohost') return role === 'owner';
+    const user = this.authService.currentUser();
+    return !!user && user.uid === this.ownerId();
+  });
+  isManager = computed(() => {
+    const role = this.authService.previewRole();
+    if (role === 'owner' || role === 'cohost') return role === 'cohost';
+    const user = this.authService.currentUser();
+    const managerId = this.managerId();
+    return !!user && !!managerId && user.uid === managerId;
+  });
+  private lastPreviewRole: PreviewRole = 'actual';
+  private ownerId = signal('');
+  private managerId = signal<string | null>(null);
 
   // ESPN sync state
   linkedEspnGame = signal<EspnGame | null>(null);
@@ -324,9 +346,8 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           this.latestEspnLive = data.espnLive || null;
 
           // Check if current user is the game owner or manager
-          const user = this.authService.currentUser();
-          this.isGameOwner.set(!!user && user.uid === data.ownerId);
-          this.isManager.set(!!user && !!data.managerId && user.uid === data.managerId);
+          this.ownerId.set(data.ownerId || '');
+          this.managerId.set(data.managerId || null);
 
           Object.values(this.selectedSquares).forEach(playerName => {
             if (!this.playerColors[playerName]) {
