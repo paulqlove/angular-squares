@@ -1,3 +1,4 @@
+import { DecimalPipe } from '@angular/common';
 import { Component, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
@@ -6,7 +7,7 @@ import { heroCheck, heroXMark } from '@ng-icons/heroicons/outline';
 
 @Component({
     selector: 'app-payment-dialog',
-    imports: [FormsModule, NgIconComponent],
+    imports: [FormsModule, NgIconComponent, DecimalPipe],
     providers: [
         provideIcons({ heroCheck, heroXMark })
     ],

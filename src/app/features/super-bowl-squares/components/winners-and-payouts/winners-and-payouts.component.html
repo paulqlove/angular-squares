@@ -1,5 +1,5 @@
 <div class="rounded-lg p-4 mt-8">
-  <h2 class="text-lg font-bold mb-4 text-heading">Winners & Payouts</h2>
+  <h2 class="text-lg font-bold mb-4 text-heading">Winners</h2>
 
   <div class="winners-container">
     @for (quarter of ['q1', 'q2', 'q3', 'q4']; track quarter) {
@@ -28,25 +28,25 @@
           </div>
 
           <div class="payout-section">
-            <div class="text-sm" [class]="winners[quarter] ? 'text-slate-700' : 'text-muted'">Payout</div>
+            <div class="text-sm" [class]="winners[quarter] ? 'text-slate-700' : 'text-muted'">Points</div>
             <div class="text-lg font-medium" [class]="winners[quarter] ? 'text-slate-900' : 'text-default'">
-              ${{ (totalPot * quarterPayouts[quarter]).toFixed(2) }}
+              {{ getQuarterPoints(quarter) | number: '1.0-2' }} pts
             </div>
           </div>
         </div>
       </div>
     }
 
-    <div class="quarter-card bg-square border-warm">
+    <div class="quarter-card bg-qs-tile border-qs-tile">
       <div class="card-content">
         <div>
-          <h3 class="text-white font-medium">Total Pot</h3>
+          <h3 class="text-qs-tile-ink font-medium">Board total</h3>
         </div>
         
         <div class="payout-section">
-          <div class="text-white/70 text-sm">Payouts</div>
-          <div class="text-white text-2xl font-bold">
-            ${{ totalPot.toFixed(2) }}
+          <div class="text-qs-tile-muted text-sm">Points</div>
+          <div class="text-qs-tile-ink text-2xl font-bold">
+            {{ totalPot | number: '1.0-2' }} pts
           </div>
         </div>
       </div>

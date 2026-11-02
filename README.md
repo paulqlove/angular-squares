@@ -62,7 +62,7 @@ npm start  # Dev server at localhost:4200
 - 10x10 game board with player colors (31 color variants)
 - Real-time score tracking (4 quarters)
 - Number randomization with animation
-- Payment tracking (Venmo integration)
+- Player check-in (host confirms who is in; no money handling)
 - Probability heatmap (historical NFL data)
 - Multi-game support with shareable 6-character codes
 - Google/Email/Guest authentication

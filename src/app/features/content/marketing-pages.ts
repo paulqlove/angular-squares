@@ -211,7 +211,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
           'One link for the group chat, the office, or the party.',
           'Players claim squares without creating an account.',
           'Each quarter, the last digit of each score names the square.',
-          'Prizes stay between your friends. Bragging rights are enough.'
+          'Celebrate moments, not money. Bragging rights are enough.'
         ]
       },
       {
@@ -252,7 +252,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
         ]
       },
       {
-        heading: 'Stakes that fit the day',
+        heading: 'Rewards that fit the day',
         paragraphs: [
           'First pick of leftovers, a pass on dishes, or picking the next movie is plenty. Say it out loud before you draw numbers.'
         ],
@@ -295,7 +295,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
         heading: 'What you set up',
         paragraphs: [
           'Create a game and choose NFL as the sport. Add the two team names in plain text. Send the link. Friends type their names on open squares. When you are ready, randomize the digits and lock the board.',
-          'Each quarter, the last digit of each score points at one square. The person who claimed it wins that quarter’s bragging rights, or whatever prize your group agreed to.'
+          'Each quarter, the last digit of each score points at one square. The person who claimed it wins that quarter’s bragging rights.'
         ]
       },
       {
@@ -342,7 +342,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       {
         heading: 'Use January as a practice run',
         paragraphs: [
-          'Groups who will also play the February 14 game can use a playoff board to settle the house rules. Decide overtime, empty squares, and prizes once, then copy that note onto the big-game board.',
+          'Groups who will also play the February 14 game can use a playoff board to settle the house rules. Decide overtime and empty squares once, then copy that note onto the big-game board.',
           'Live score entry is still the host’s job if you type the score yourself. The fun part for everyone else is watching their square.'
         ]
       }
@@ -400,21 +400,21 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     id: 'football-squares-fundraiser',
     path: '/football-squares-fundraiser',
     title: 'Donation Squares for a Football Fundraiser — Quarter Score',
-    description: 'Donation-style football squares for a school, team, or charity. Free to claim, optional donations, and no cash prizes. Quarter Score never handles the money.',
+    description: 'Donation-style football squares for a school, team, or charity. Free to claim, optional donations, and nothing of value for players. Quarter Score never handles the money.',
     h1: 'Donation squares',
     eyebrow: 'A fundraiser where the cause wins',
-    lede: 'Squares can bring supporters around a game. These are formats where the cause is the winner. If you want cash prizes for players, stop and check your state’s charitable gaming rules first. In many states that is regulated or not allowed.',
+    lede: 'Squares can bring supporters around a game. These are formats where the cause is the winner. If you want players to receive anything of value, stop and check your state’s charitable gaming rules first. In many states that is regulated or not allowed.',
     published: '2026-11-01',
-    disclaimer: 'Quarter Score is a free board and scoring tool. We never collect, hold, or pay out money. Raffles, pools, and games of chance are regulated by state law and often limited to qualified nonprofits. Check your state’s rules and your school, district, or organization’s policies before you start. This page is not legal advice.',
+    disclaimer: 'Quarter Score is a free board and scoring tool. We never collect, hold, or pay out money. Raffles and games of chance are regulated by state law and often limited to qualified nonprofits. Check your state’s rules and your school, district, or organization’s policies before you start. This page is not legal advice.',
     sections: [
       {
-        heading: 'Formats that keep the prize out of the player’s pocket',
+        heading: 'Formats that keep the focus on the cause',
         paragraphs: [
           'Pick one of these and write it at the top of the board. Do not mix them.'
         ],
         bullets: [
-          'Free to claim, with a separate optional donation. Anyone can take a square without donating. Donors and non-donors have the same chance at a donated prize, such as a sponsor’s gift card to the school store or a team lunch. The donation link lives somewhere else. Quarter Score does not process it.',
-          'A donation board with no prizes. Supporters give per square and get a thank-you on the board. Nobody receives anything of value for the square.',
+          'Free to claim, with a separate optional donation. Anyone can take a square without donating. Donors and non-donors have the same chance at a donated thank-you gift, such as a sponsor’s gift card to the school store or a team lunch. The donation link lives somewhere else. Quarter Score does not process it.',
+          'A donation board with nothing to win. Supporters give per square and get a thank-you on the board. Nobody receives anything of value for the square.',
           'The winning square picks the charity. Donors name a charity, and the funds go to the charity named on the winning square. The person who claimed it does not receive the money.'
         ]
       },

@@ -1,9 +1,10 @@
+import { DecimalPipe } from '@angular/common';
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 
 
 @Component({
     selector: 'app-winners-and-payouts',
-    imports: [],
+    imports: [DecimalPipe],
     templateUrl: './winners-and-payouts.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./winners-and-payouts.component.scss']
@@ -39,6 +40,10 @@ export class WinnersAndPayoutsComponent {
       q4: 'Final Score'
     };
     return quarterMap[quarter] || quarter;
+  }
+
+  getQuarterPoints(quarter: string): number {
+    return Math.round(this.totalPot * this.quarterPayouts[quarter] * 100) / 100;
   }
 
   getPayoutAmount(quarter: string): string {

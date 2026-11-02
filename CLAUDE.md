@@ -90,7 +90,7 @@ games/{gameId}/
   homeNumbers/awayNumbers: number[]
   scores: { q1, q2, q3, q4 }
   playerColors, winners, paidPlayers
-  homeTeam, awayTeam, venmoUsername
+  homeTeam, awayTeam, hostNote (free-text host note, max 140)
   isLocked, isRandomized, pricePerSquare
   espnEventId: string (optional - links to ESPN game for live scores)
   espnLive: clock, period, status, per-quarter linescores (written by Cloud Functions)
@@ -106,7 +106,7 @@ liveGames/{espnId}/{boardId}/
 
 - **Square selection**: Key format is `"row-col"` (e.g., "3-7")
 - **Winner calculation**: Match last digit of each team's score to row/column numbers
-- **Payout distribution**: Q1: 20%, Q2: 20%, Q3: 20%, Q4: 40%
+- **Points split**: Q1: 20%, Q2: 20%, Q3: 20%, Q4: 40% of the board total (points, never money)
 - **Probability heatmap**: Historical NFL data in `features/super-bowl-squares/utils/probability.utils.ts`
 
 ## ESPN Live Scores

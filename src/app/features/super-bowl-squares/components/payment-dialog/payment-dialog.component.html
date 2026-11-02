@@ -2,7 +2,7 @@
      [class.hidden]="!isOpen">
   <div class="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4 overflow-hidden">
     <div class="p-4  flex justify-between items-center">
-      <h2 class="text-xl font-bold text-heading">Manage Payments</h2>
+      <h2 class="text-xl font-bold text-heading">Confirm players</h2>
       <button (click)="close()" class="text-qs-muted hover:text-qs-ink">
         <ng-icon name="heroXMark" class="w-6 h-6"></ng-icon>
       </button>
@@ -18,7 +18,7 @@
               </div>
               <span>{{ player.name }}</span>
               <span class="text-sm text-qs-muted">
-                ({{ player.squares }} {{ player.squares === 1 ? 'square' : 'squares' }} - ${{ player.total }})
+                ({{ player.squares }} {{ player.squares === 1 ? 'square' : 'squares' }} · {{ player.total | number: '1.0-2' }} pts)
               </span>
             </div>
             <button (click)="togglePaidStatus(player.name)"
@@ -27,7 +27,7 @@
                     [class.bg-qs-panel-2]="!player.paid"
                     [class.text-qs-ink]="!player.paid"
                     class="px-3 py-1 rounded-full text-sm font-medium">
-              {{ player.paid ? 'Paid' : 'Mark as Paid' }}
+              {{ player.paid ? 'Confirmed' : 'Confirm' }}
             </button>
           </div>
         }

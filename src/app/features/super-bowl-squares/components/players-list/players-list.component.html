@@ -20,7 +20,7 @@
             }
             @if (paidPlayers.has(entry.player)) {
               <span class="px-2 py-0.5 text-xs font-medium bg-qs-ok-soft text-qs-ok rounded-full">
-                Paid
+                Confirmed
               </span>
             }
             @if (shouldShowShame(entry.player)) {
@@ -31,7 +31,7 @@
           </div>
           <div class="text-right">
             <div class="text-default font-medium">{{ entry.stats.squares }}&nbsp;{{ entry.stats.squares === 1 ? 'square' : 'squares' }}</div>
-            <div class="text-muted text-sm">${{ entry.stats.total.toFixed(2) }}</div>
+            <div class="text-muted text-sm">{{ entry.stats.total | number: '1.0-2' }} pts</div>
           </div>
         </button>
       }

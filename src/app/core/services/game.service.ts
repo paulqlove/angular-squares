@@ -62,7 +62,7 @@ export interface GameData {
   awayTeam: string;
   winners?: { [key: string]: string };
   playerColors?: { [key: string]: string };
-  venmoUsername?: string;
+  hostNote?: string;
   paidPlayers?: string[];
   espnEventId?: string | null;
   espnSport?: SportType | null;
@@ -89,9 +89,8 @@ export interface GameListItem {
   managerName?: string;
   espnEventId?: string;
   espnSport?: SportType;
-  venmoUsername?: string;
-  collected: number;
-  totalPot: number;
+  hostNote?: string;
+  confirmedCount: number;
 }
 
 @Injectable({
@@ -232,7 +231,7 @@ export class GameService {
     pricePerSquare?: number,
     espnSport?: SportType,
     managerEmail?: string,
-    venmoUsername?: string
+    hostNote?: string
   ): Promise<string> {
     if (!this.isBrowser) throw new Error('Cannot create game on server');
     await this.assertUnderFreeBoardLimit(ownerId);
@@ -263,7 +262,7 @@ export class GameService {
       isRandomized: false,
       homeTeam: homeTeam || '',
       awayTeam: awayTeam || '',
-      venmoUsername: venmoUsername || '',
+      hostNote: hostNote || '',
       paidPlayers: [],
       ...(espnEventId ? { espnEventId } : {}),
       ...(espnSport ? { espnSport } : {}),
@@ -339,7 +338,7 @@ export class GameService {
           isLocked: rawData.isLocked || false,
           homeTeam: rawData.homeTeam || '',
           awayTeam: rawData.awayTeam || '',
-          venmoUsername: rawData.venmoUsername || '',
+          hostNote: rawData.hostNote || '',
           paidPlayers: rawData.paidPlayers || [],
           espnEventId: rawData.espnEventId || undefined,
           espnSport: rawData.espnSport || undefined,
@@ -410,8 +409,8 @@ export class GameService {
     if (data.awayTeam !== undefined) {
       updates[`${prefix}/awayTeam`] = data.awayTeam;
     }
-    if (data.venmoUsername !== undefined) {
-      updates[`${prefix}/venmoUsername`] = data.venmoUsername;
+    if (data.hostNote !== undefined) {
+      updates[`${prefix}/hostNote`] = data.hostNote;
     }
     if (data.paidPlayers !== undefined) {
       updates[`${prefix}/paidPlayers`] = data.paidPlayers;
@@ -474,7 +473,7 @@ export class GameService {
         isLocked: rawData.isLocked || false,
         homeTeam: rawData.homeTeam || '',
         awayTeam: rawData.awayTeam || '',
-        venmoUsername: rawData.venmoUsername || '',
+        hostNote: rawData.hostNote || '',
         paidPlayers: rawData.paidPlayers || [],
         espnEventId: rawData.espnEventId || undefined,
         espnSport: rawData.espnSport || undefined,
@@ -515,14 +514,7 @@ export class GameService {
       if (game) {
         const playerNames = new Set(Object.values(game.selectedSquares));
         const squaresFilled = Object.keys(game.selectedSquares).length;
-        const paidSet = new Set(game.paidPlayers || []);
-        const squaresPerPlayer: Record<string, number> = {};
-        for (const player of Object.values(game.selectedSquares)) {
-          squaresPerPlayer[player] = (squaresPerPlayer[player] || 0) + 1;
-        }
-        const collected = Object.entries(squaresPerPlayer)
-          .filter(([player]) => paidSet.has(player))
-          .reduce((sum, [, count]) => sum + count * game.pricePerSquare, 0);
+        const confirmedCount = (game.paidPlayers || []).filter(p => playerNames.has(p)).length;
         games.push({
           id: gameId,
           name: game.name,
@@ -539,9 +531,8 @@ export class GameService {
           managerName: game.managerName,
           espnEventId: game.espnEventId || undefined,
           espnSport: game.espnSport || undefined,
-          venmoUsername: game.venmoUsername,
-          collected,
-          totalPot: squaresFilled * game.pricePerSquare
+          hostNote: game.hostNote,
+          confirmedCount
         });
       }
     }
@@ -636,14 +627,7 @@ export class GameService {
       if (game) {
         const playerNames = new Set(Object.values(game.selectedSquares));
         const squaresFilled = Object.keys(game.selectedSquares).length;
-        const paidSet = new Set(game.paidPlayers || []);
-        const squaresPerPlayer: Record<string, number> = {};
-        for (const player of Object.values(game.selectedSquares)) {
-          squaresPerPlayer[player] = (squaresPerPlayer[player] || 0) + 1;
-        }
-        const collected = Object.entries(squaresPerPlayer)
-          .filter(([player]) => paidSet.has(player))
-          .reduce((sum, [, count]) => sum + count * game.pricePerSquare, 0);
+        const confirmedCount = (game.paidPlayers || []).filter(p => playerNames.has(p)).length;
         games.push({
           id: gameId,
           name: game.name,
@@ -660,9 +644,8 @@ export class GameService {
           managerName: game.managerName,
           espnEventId: game.espnEventId || undefined,
           espnSport: game.espnSport || undefined,
-          venmoUsername: game.venmoUsername,
-          collected,
-          totalPot: squaresFilled * game.pricePerSquare
+          hostNote: game.hostNote,
+          confirmedCount
         });
       }
     }

@@ -91,7 +91,7 @@ games/{gameId}/
   homeNumbers/awayNumbers: number[]
   scores: { q1, q2, q3, q4 }
   playerColors, winners, paidPlayers
-  homeTeam, awayTeam, venmoUsername
+  homeTeam, awayTeam, hostNote (free-text host note, max 140)
   isLocked, isRandomized, pricePerSquare
   espnEventId: string (optional - links to ESPN game)
   espnLive: status, period, clock, linescores (Cloud Functions only)

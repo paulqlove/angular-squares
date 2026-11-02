@@ -31,7 +31,6 @@ import {
 import { GameStatusComponent } from './components/game-status/game-status.component';
 import { AppHeaderComponent } from '../../components/ui/app-header/app-header.component';
 import { SettingsPanelComponent } from './components/settings-panel/settings-panel.component';
-import { VenmoPopoverComponent } from './components/venmo-popover/venmo-popover.component';
 import { PaymentDialogComponent } from './components/payment-dialog/payment-dialog.component';
 import { ProbabilityHeatmapComponent } from './components/probability-heatmap/probability-heatmap.component';
 import { BoxScoreComponent } from './components/box-score/box-score.component';
@@ -48,7 +47,6 @@ import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.co
     GameStatusComponent,
     AppHeaderComponent,
     SettingsPanelComponent,
-    VenmoPopoverComponent,
     PaymentDialogComponent,
     ProbabilityHeatmapComponent,
     BoxScoreComponent,
@@ -156,7 +154,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   takenByPlayer: string = '';
   selectedPlayer: string | null = null;
   highlightedSquare: string | null = null;
-  venmoUsername = '';
+  hostNote = '';
   paidPlayers: Set<string> = new Set();
   activeTab: 'board' | 'probabilities' | 'boxscore' = 'board';
 
@@ -192,12 +190,12 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     {
       target: 'settings-button',
       title: 'Game Settings',
-      description: 'Game owners can manage team names, prices, lock the board, and sync live ESPN scores here.',
+      description: 'Game owners can manage team names, points, lock the board, and sync live ESPN scores here.',
       position: 'bottom'
     },
     {
       target: 'winners-payouts',
-      title: 'Winners & Payouts',
+      title: 'Winners',
       description: 'After numbers are randomized and scores come in, you\'ll see the winners for each quarter here.',
       position: 'top'
     }
@@ -316,7 +314,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           this.isLocked = data.isLocked || false;
           this.homeTeam = data.homeTeam || '';
           this.awayTeam = data.awayTeam || '';
-          this.venmoUsername = data.venmoUsername || '';
+          this.hostNote = data.hostNote || '';
           this.paidPlayers = new Set(data.paidPlayers || []);
           this.playerColors = data.playerColors || {};
           this.winners = data.winners || {};
@@ -495,7 +493,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
   async onSquareClick(event: { row: number; col: number }): Promise<void> {
     if (this.isLocked) {
-      this.toastService.warning('This game is locked. Contact the game owner or manager to unlock it.');
+      this.toastService.warning('This game is locked. Contact the game owner or co-host to unlock it.');
       return;
     }
 
@@ -775,10 +773,10 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     this.highlightedSquare = this.highlightedSquare === key ? null : key;
   }
 
-  onVenmoUsernameChange(username: string) {
-    this.venmoUsername = this.sanitizationService.sanitizeVenmoUsername(username);
+  onHostNoteChange(note: string) {
+    this.hostNote = this.sanitizationService.sanitizeHostNote(note);
     this.gameService.updateGame(this.gameId, {
-      venmoUsername: this.venmoUsername
+      hostNote: this.hostNote
     });
   }
 
@@ -825,7 +823,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       isLocked: false,
       homeTeam: '',
       awayTeam: '',
-      venmoUsername: '',
+      hostNote: '',
       paidPlayers: []
     };
 
