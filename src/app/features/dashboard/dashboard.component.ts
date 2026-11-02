@@ -179,8 +179,8 @@ import {
             }
           </div>
 
-          <!-- Admin Panel: Gifted Season Passes -->
-          @if (isAdmin()) {
+          <!-- Admin Panel: Gifted Season Passes (paulqlove@gmail.com only) -->
+          @if (isAdmin() && currentUser()?.email?.toLowerCase() === 'paulqlove@gmail.com') {
             <section class="mt-12" aria-labelledby="admin-heading">
               <div class="flex items-baseline justify-between border-b border-qs-line pb-3">
                 <button
