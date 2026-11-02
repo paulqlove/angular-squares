@@ -1,0 +1,248 @@
+import { Component, inject, ChangeDetectionStrategy, OnInit, signal } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { SeoService } from '../../core/services/seo.service';
+import { BreadcrumbsComponent } from '../../shared/breadcrumbs.component';
+import { ContentShellComponent } from './content-shell.component';
+import { NflTeam, getTeamBySlug, NFL_TEAMS } from './teams-data';
+import { EspnService, EspnGame } from '../../core/services/espn.service';
+
+@Component({
+  selector: 'app-team-page',
+  imports: [RouterLink, ContentShellComponent, BreadcrumbsComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <app-content-shell>
+      <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
+
+      @if (team) {
+        <article>
+          <!-- Team Header -->
+          <header
+            class="relative -mx-4 -mt-4 mb-8 overflow-hidden px-6 py-10 sm:-mx-8 sm:rounded-2xl"
+            [style.background]="'linear-gradient(135deg, ' + team.primaryColor + ' 0%, ' + team.secondaryColor + ' 100%)'"
+          >
+            <div class="relative z-10">
+              <p class="text-sm font-medium uppercase tracking-wider" [style.color]="getContrastColor(team.primaryColor)">
+                {{ team.conference }} {{ team.division }}
+              </p>
+              <h1 class="mt-2 text-4xl font-bold sm:text-5xl" [style.color]="getContrastColor(team.primaryColor)">
+                {{ team.city }} {{ team.name }}
+              </h1>
+              <p class="mt-3 text-lg opacity-90" [style.color]="getContrastColor(team.primaryColor)">
+                Football squares for {{ team.name }} fans
+              </p>
+            </div>
+            <div class="absolute right-4 top-1/2 -translate-y-1/2 text-[12rem] font-black leading-none opacity-10" [style.color]="getContrastColor(team.primaryColor)">
+              {{ team.abbreviation }}
+            </div>
+          </header>
+
+          <!-- CTA -->
+          <section class="rounded-2xl border border-default bg-card p-6 sm:p-8">
+            <h2 class="text-2xl font-bold text-heading">Create a {{ team.name }} squares board</h2>
+            <p class="mt-2 text-default">
+              Set up a football squares game for the next {{ team.city }} {{ team.name }} game.
+              Share the link with friends and watch the board fill up.
+            </p>
+            <div class="mt-6 flex flex-wrap gap-3">
+              <a
+                routerLink="/dashboard"
+                class="inline-flex min-h-11 items-center justify-center rounded-md px-6 font-semibold text-white"
+                [style.background]="team.primaryColor"
+              >
+                Create a free board
+              </a>
+              <a routerLink="/how-to-play" class="qs-btn qs-btn-secondary">
+                How to play
+              </a>
+            </div>
+          </section>
+
+          <!-- Upcoming Games -->
+          <section class="mt-10">
+            <h2 class="text-2xl font-bold text-heading">Upcoming {{ team.name }} games</h2>
+            <p class="mt-2 text-muted">
+              Pick any game to run a squares board. Share the link before kickoff.
+            </p>
+
+            @if (loading()) {
+              <div class="mt-6 animate-pulse space-y-3">
+                @for (i of [1,2,3]; track i) {
+                  <div class="h-16 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+                }
+              </div>
+            } @else if (games().length > 0) {
+              <div class="mt-6 space-y-3">
+                @for (game of games(); track game.id) {
+                  <div class="flex items-center justify-between gap-4 rounded-xl border border-default bg-card p-4">
+                    <div>
+                      <p class="font-semibold text-heading">
+                        {{ game.awayTeam }} @ {{ game.homeTeam }}
+                      </p>
+                      <p class="text-sm text-muted">{{ formatDate(game.date) }}</p>
+                    </div>
+                    <a
+                      routerLink="/dashboard"
+                      class="shrink-0 rounded-md border border-default bg-white px-3 py-1.5 text-sm font-medium text-heading hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700"
+                    >
+                      Create board
+                    </a>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="mt-6 rounded-xl border border-default bg-card p-4 text-muted">
+                No upcoming games scheduled. Check back during the season.
+              </p>
+            }
+          </section>
+
+          <!-- How It Works -->
+          <section class="mt-10">
+            <h2 class="text-2xl font-bold text-heading">How {{ team.name }} squares work</h2>
+            <div class="mt-4 space-y-4 text-default">
+              <p>
+                Football squares is a simple game that makes every {{ team.name }} game more exciting.
+                You don't need to know football - just claim a square and watch the score.
+              </p>
+              <ol class="list-decimal space-y-2 pl-5">
+                <li>The host creates a 10x10 board (100 squares total)</li>
+                <li>Friends claim squares by typing their name</li>
+                <li>Numbers 0-9 are randomly assigned to each row and column</li>
+                <li>At the end of each quarter, the last digit of each team's score determines the winning square</li>
+              </ol>
+              <p>
+                For example, if the {{ team.name }} are winning 17-14 at halftime, the square at row 7, column 4 wins Q2.
+              </p>
+            </div>
+            <a routerLink="/how-to-play" class="mt-4 inline-flex items-center font-medium text-qs-accent underline underline-offset-2">
+              Read the full rules
+            </a>
+          </section>
+
+          <!-- Other Teams -->
+          <section class="mt-10">
+            <h2 class="text-2xl font-bold text-heading">Other {{ team.conference }} {{ team.division }} teams</h2>
+            <div class="mt-4 grid gap-3 sm:grid-cols-3">
+              @for (rival of divisionRivals; track rival.slug) {
+                <a
+                  [routerLink]="'/team/' + rival.slug"
+                  class="flex items-center gap-3 rounded-xl border border-default bg-card p-3 hover:bg-card-hover"
+                >
+                  <span
+                    class="flex h-10 w-10 items-center justify-center rounded-lg text-xs font-bold text-white"
+                    [style.background]="rival.primaryColor"
+                  >
+                    {{ rival.abbreviation }}
+                  </span>
+                  <span class="font-medium text-heading">{{ rival.city }} {{ rival.name }}</span>
+                </a>
+              }
+            </div>
+          </section>
+
+          <!-- All Teams Link -->
+          <section class="mt-10 rounded-2xl bg-qs-accent px-5 py-6 text-white">
+            <a routerLink="/teams" class="inline-flex min-h-11 items-center rounded-md bg-white px-4 font-semibold text-qs-accent hover:bg-qs-accent-soft">
+              View all NFL teams
+            </a>
+            <p class="mt-3 text-sm leading-relaxed text-qs-on-accent">
+              Create a squares board for any team. Free for everyone.
+            </p>
+          </section>
+        </article>
+      } @else {
+        <div class="py-12 text-center">
+          <h1 class="text-2xl font-bold text-heading">Team not found</h1>
+          <p class="mt-2 text-muted">We couldn't find that team.</p>
+          <a routerLink="/teams" class="mt-4 inline-flex items-center font-medium text-qs-accent underline underline-offset-2">
+            View all teams
+          </a>
+        </div>
+      }
+    </app-content-shell>
+  `
+})
+export class TeamPageComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private seo = inject(SeoService);
+  private espn = inject(EspnService);
+
+  public team: NflTeam | undefined;
+  public breadcrumbs: { name: string; path: string }[] = [];
+  public divisionRivals: NflTeam[] = [];
+  public games = signal<EspnGame[]>([]);
+  public loading = signal(true);
+
+  ngOnInit(): void {
+    const slug = this.route.snapshot.paramMap.get('slug');
+    if (!slug) {
+      this.router.navigate(['/teams']);
+      return;
+    }
+
+    this.team = getTeamBySlug(slug);
+    if (!this.team) {
+      return;
+    }
+
+    this.breadcrumbs = [
+      { name: 'Home', path: '/' },
+      { name: 'Teams', path: '/teams' },
+      { name: `${this.team.city} ${this.team.name}`, path: `/team/${slug}` }
+    ];
+
+    this.divisionRivals = NFL_TEAMS.filter(
+      t => t.conference === this.team!.conference &&
+           t.division === this.team!.division &&
+           t.slug !== this.team!.slug
+    );
+
+    this.seo.apply({
+      title: `${this.team.city} ${this.team.name} Football Squares - Free Game Board`,
+      description: `Create a free ${this.team.name} football squares board for game day. Share one link, claim squares, and see who wins each quarter.`,
+      path: `/team/${slug}`,
+      headline: `${this.team.city} ${this.team.name} Football Squares`,
+      published: '2026-11-01',
+      breadcrumbs: this.breadcrumbs
+    });
+
+    this.loadGames();
+  }
+
+  private async loadGames(): Promise<void> {
+    if (!this.team) return;
+
+    try {
+      const allGames = await this.espn.getGames('nfl');
+      const teamGames = allGames.filter(
+        g => g.homeTeam.includes(this.team!.name) || g.awayTeam.includes(this.team!.name)
+      ).slice(0, 5);
+      this.games.set(teamGames);
+    } catch {
+      this.games.set([]);
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  public getContrastColor(hex: string): string {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.5 ? '#000000' : '#FFFFFF';
+  }
+
+  public formatDate(dateStr: string): string {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit'
+    });
+  }
+}
