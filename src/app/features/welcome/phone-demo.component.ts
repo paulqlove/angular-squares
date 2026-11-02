@@ -35,7 +35,7 @@ const LOCK_STEP_MS = 180;
   template: `
     <div class="phone mx-auto" role="img" aria-label="A phone showing football squares filling up with players, then the numbers being drawn">
       <div class="phone-screen" aria-hidden="true">
-        <div class="hidden sm:flex items-center justify-center bg-qs-tile pt-7 pb-3">
+        <div class="hidden xl:flex items-center justify-center bg-qs-tile pt-7 pb-3">
           <img src="assets/brand/lockup-horizontal-reversed.svg" alt="" width="128" height="16" class="h-4 w-auto">
         </div>
 
@@ -85,19 +85,34 @@ const LOCK_STEP_MS = 180;
             }
           </div>
         </div>
-        <div class="hidden sm:block mx-auto mb-2 mt-auto h-1 w-24 rounded-full bg-qs-line-strong"></div>
+        <div class="hidden xl:block mx-auto mb-2 mt-auto h-1 w-24 rounded-full bg-qs-line-strong"></div>
       </div>
     </div>
   `,
   styles: [`
-    .phone { max-width: 320px; }
-    @media (min-width: 640px) {
+    /* Below xl: full-width board card */
+    @media (max-width: 1279px) {
+      .phone { max-width: none; }
+      .phone-screen {
+        border: 1px solid var(--qs-line);
+        border-radius: var(--qs-r-card);
+        background: var(--qs-panel);
+        box-shadow: var(--qs-shadow);
+      }
+    }
+    .phone-screen { background: var(--qs-bg); }
+    /* xl+: phone mockup with bezel */
+    @media (min-width: 1280px) {
       .phone {
+        max-width: 320px;
         border: 10px solid var(--qs-tile);
         border-radius: 44px;
         box-shadow: var(--qs-shadow-pop);
         position: relative;
         background: var(--qs-tile);
+        zoom: 1.5;
+        transform: perspective(1400px) rotateX(16deg) rotateY(-18deg);
+        transform-origin: 50% 50%;
       }
       .phone::before {
         content: "";
@@ -119,26 +134,8 @@ const LOCK_STEP_MS = 180;
         min-height: 560px;
       }
     }
-    .phone-screen { background: var(--qs-bg); }
-    /* Oversized and angled on wide screens; the hero crops it */
-    @media (min-width: 1280px) {
-      .phone {
-        zoom: 1.5;
-        transform: perspective(1400px) rotateX(16deg) rotateY(-18deg);
-        transform-origin: 50% 50%;
-      }
-    }
     @media (min-width: 1600px) {
       .phone { zoom: 1.76; }
-    }
-    @media (max-width: 639px) {
-      .phone { max-width: none; }
-      .phone-screen {
-        border: 1px solid var(--qs-line);
-        border-radius: var(--qs-r-card);
-        background: var(--qs-panel);
-        box-shadow: var(--qs-shadow);
-      }
     }
     .axis {
       display: flex;
