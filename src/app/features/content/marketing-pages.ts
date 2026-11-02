@@ -528,14 +528,14 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
         heading: 'What is stored',
         paragraphs: [
           'If you sign in, the account provider gives us an identifier and, when you allow it, your name, email, and photo. A guest can save a display name in a cookie on that device so the board can show it. You can clear that cookie in your browser.',
-          'Boards store the game name, team names, the names typed onto squares, scores, and settings such as whether the board is locked. That information lives in Google Firebase Realtime Database and is visible to anyone with the game link.'
+          'Boards store the game name, team names, the names typed onto squares, scores, and settings such as whether the board is locked. That information is visible to anyone with the game link.'
         ]
       },
       {
         heading: 'What we do not do',
         paragraphs: [
           'We do not sell personal information. We do not ask for payment card numbers. Analytics, when it is turned on, is cookieless and is not used to build an advertising profile. If a measurement id is not configured, analytics does not load.',
-          'Hosting, sign-in, and the database are provided by Google Firebase. Their systems process the data required to deliver those services.'
+          'Hosting, sign-in, and the database are provided by Google. Their systems process the data required to deliver those services.'
         ]
       },
       {
