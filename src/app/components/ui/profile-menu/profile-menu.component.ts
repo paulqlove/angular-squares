@@ -7,6 +7,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { GameService } from '../../../core/services/game.service';
 import { SanitizationService } from '../../../core/services/sanitization.service';
 import { ThemeMode, ThemeService } from '../../../core/services/theme.service';
+import { PlanService } from '../../../core/services/plan.service';
 
 /** Header avatar chip with the profile menu: display name, theme, sign out. Shared by the dashboard and game page. */
 @Component({
@@ -63,6 +64,11 @@ import { ThemeMode, ThemeService } from '../../../core/services/theme.service';
             </div>
             @if (currentUser()?.isGuest) {
               <span class="qs-badge qs-badge-warn">Guest</span>
+            }
+            @else if (planService.plan() !== 'free') {
+              <span class="qs-badge qs-badge-ok shrink-0" [title]="planService.daysLeft() ? planService.daysLeft() + ' days left' : ''">
+                {{ planService.features().label }}{{ planService.daysLeft() ? ' · ' + planService.daysLeft() + 'd' : '' }}
+              </span>
             }
           </div>
 
@@ -150,6 +156,7 @@ export class ProfileMenuComponent {
 
   protected authService = inject(AuthService);
   protected themeService = inject(ThemeService);
+  protected planService = inject(PlanService);
   private gameService = inject(GameService);
   private router = inject(Router);
   private sanitizationService = inject(SanitizationService);

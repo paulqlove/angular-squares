@@ -24,6 +24,7 @@ import {
   UPGRADE_NOTIFY_EVENT
 } from '../../../../core/utils/board-activity';
 
+import { PLANS } from '../../../../core/plans';
 @Component({
     selector: 'app-upgrade-pass-dialog',
     imports: [FormsModule],
@@ -64,23 +65,27 @@ import {
 
             <section class="rounded-xl border border-default p-3 sm:p-4" aria-labelledby="upgrade-pass-name">
               <p class="text-sm font-semibold uppercase tracking-wide text-label">Coming soon</p>
-              <div class="mt-1 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                <h3 id="upgrade-pass-name" class="text-lg font-bold text-heading">QuarterScore Big Game Pass</h3>
-                <p class="text-2xl font-bold text-heading">
-                  $4.99
-                  <span class="text-base font-semibold text-default">one-time</span>
-                </p>
+              <h3 id="upgrade-pass-name" class="sr-only">QuarterScore passes</h3>
+              <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                @for (pass of passes; track pass.label) {
+                  <div class="rounded-inner border border-qs-line bg-qs-panel-2 p-3">
+                    <p class="font-semibold text-qs-ink">{{ pass.label }}</p>
+                    <p class="mt-1 text-2xl font-semibold tabular-nums text-qs-ink">\${{ pass.priceUsd }} <span class="text-sm font-normal text-qs-muted">/ {{ pass.days }} days</span></p>
+                  </div>
+                }
               </div>
-              <ul class="mt-2 list-disc space-y-1 pl-5 text-base text-default">
-                <li>Run multiple boards at once, each with live scoring and the heatmap</li>
-                <li>Team-color themes</li>
+              <ul class="mt-3 list-disc space-y-1 pl-5 text-base text-default">
+                <li>Up to {{ passes[0].activeBoards }} active boards with a Week Pass, {{ passes[1].activeBoards }} with a Season Pass</li>
+                <li>No ads on your boards</li>
+                <li>Custom quarter splits</li>
+                <li>Add time anytime; it stacks on what's left</li>
               </ul>
               <p id="upgrade-pass-note" class="mt-3 text-sm leading-5 text-default">No payment today. Your email is only used to tell you when it's ready.</p>
             </section>
 
             @if (submitted()) {
               <p #status tabindex="-1" role="status" class="rounded-xl border border-default bg-input p-4 text-base text-default focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 dark:focus-visible:outline-white">
-                You're on the list. We'll email you when Big Game Pass is available.
+                You're on the list. We'll email you when passes are available.
               </p>
             } @else {
               <form (ngSubmit)="submit()" novalidate class="space-y-3">
@@ -157,6 +162,7 @@ import {
   `]
 })
 export class UpgradePassDialogComponent implements AfterViewInit, OnDestroy {
+  readonly passes = [PLANS.week, PLANS.season];
   @Output() dismissed = new EventEmitter<void>();
   @ViewChild('closeButton') closeButton?: ElementRef<HTMLButtonElement>;
   @ViewChild('dialogRoot') dialogRoot?: ElementRef<HTMLElement>;

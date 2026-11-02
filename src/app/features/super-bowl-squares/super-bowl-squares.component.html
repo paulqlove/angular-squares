@@ -86,7 +86,9 @@
   <app-edit-game-dialog
     [isOpen]="showSettings()"
     [isLocked]="isLocked"
-    [values]="{ awayTeam: awayTeam, homeTeam: homeTeam, pricePerSquare: currentPrice, hostNote: hostNote }"
+    [values]="{ awayTeam: awayTeam, homeTeam: homeTeam, pricePerSquare: currentPrice, hostNote: hostNote, quarterSplit: quarterSplit }"
+    [canCustomSplit]="planService.features().customSplits"
+    [splitLocked]="isRandomized"
     (closed)="showSettings.set(false)"
     (saved)="onEditGameSaved($event)"
     (clearGame)="onClearGame(true)"
@@ -259,6 +261,12 @@
           (quarterClick)="onQuarterClick($event)">
         </app-winners-and-payouts>
       </section>
+
+      @if (showAd()) {
+        <section class="px-3">
+          <app-ad-slot></app-ad-slot>
+        </section>
+      }
 
       <!-- Alert notifications -->
       @if (showAlert) {
