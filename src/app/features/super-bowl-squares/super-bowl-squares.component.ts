@@ -644,7 +644,17 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       return winningSquare ? winningSquare[1] : null;
     };
 
-    Object.entries(this.scores).forEach(([quarter, score]) => {
+    // Scores are cumulative, so a quarter counts as played if it or any later quarter has points.
+    // Unplayed quarters sit at 0-0 and must not award the 0-0 square.
+    const quarters = ['q1', 'q2', 'q3', 'q4'] as const;
+    let lastPlayed = -1;
+    quarters.forEach((quarter, i) => {
+      const score = this.scores[quarter];
+      if (score && (score.home > 0 || score.away > 0)) lastPlayed = i;
+    });
+    quarters.forEach((quarter, i) => {
+      if (i > lastPlayed) return;
+      const score = this.scores[quarter];
       const winner = getWinner(score.home, score.away);
       if (winner) {
         newWinners[quarter] = winner;
@@ -652,7 +662,10 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     });
 
     this.winners = newWinners;
-    this.gameService.updateGame(this.gameId, { winners: newWinners });
+    // Only the owner and co-host can write winners; other viewers just compute them locally.
+    if (this.isGameOwner() || this.isManager()) {
+      this.gameService.updateGame(this.gameId, { winners: newWinners }).catch(() => {});
+    }
   }
 
   private calculateWinnersFromEspn(currentPeriod: number, completed: boolean): void {
