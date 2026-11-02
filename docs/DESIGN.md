@@ -26,7 +26,7 @@ QuarterScore now uses Paul's general UI design language (the "Field" look: warm 
 | Dark mode | Navy | Navy (unchanged) |
 | Logo | v2 lockup | v2 lockup, unchanged |
 
-The logo is unchanged: navy board with the emerald clock-sweep quarter. It sits well on warm paper because paper is a neutral, not a competing hue. Everything in the Logo usage rules section of the Brand Brief still applies.
+The logo is a navy 2×2 board with the top-right quarter filled emerald (Nov 1 2026: the clock-sweep wedge was replaced with a full fill because it read as a broken image at small sizes). It sits well on warm paper because paper is a neutral, not a competing hue. Everything in the Logo usage rules section of the Brand Brief still applies.
 
 ---
 
