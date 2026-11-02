@@ -1,30 +1,23 @@
-<div class="rounded-lg p-4">
-  <h2 class="text-heading text-lg font-bold mb-4">Game Status</h2>
-  <div class="grid grid-cols-3 gap-4 text-center mb-6">
+<div class="p-4 sm:p-5">
+  <dl class="grid grid-cols-4 gap-3">
     <div>
-      <div class="text-2xl font-bold text-default">{{ filledSquares }}</div>
-      <div class="text-sm text-muted">Filled</div>
+      <dt class="qs-label text-[10px] text-qs-muted">Picked</dt>
+      <dd class="mt-1 text-xl font-semibold tabular-nums text-qs-ink">{{ filledSquares }}</dd>
     </div>
     <div>
-      <div class="text-2xl font-bold text-default">{{ remainingSquares }}</div>
-      <div class="text-sm text-muted">Remaining</div>
+      <dt class="qs-label text-[10px] text-qs-muted">Open</dt>
+      <dd class="mt-1 text-xl font-semibold tabular-nums text-qs-ink">{{ remainingSquares }}</dd>
     </div>
     <div>
-      <div class="text-2xl font-bold text-default">{{ totalPlayers }}</div>
-      <div class="text-sm text-muted">Players</div>
+      <dt class="qs-label text-[10px] text-qs-muted">Players</dt>
+      <dd class="mt-1 text-xl font-semibold tabular-nums text-qs-ink">{{ totalPlayers }}</dd>
     </div>
+    <div>
+      <dt class="qs-label text-[10px] text-qs-muted">Confirmed</dt>
+      <dd class="mt-1 text-xl font-semibold tabular-nums text-qs-ink">{{ confirmedPlayers }}<span class="text-sm font-normal text-qs-muted">/{{ totalPlayers }}</span></dd>
+    </div>
+  </dl>
+  <div class="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-qs-panel-2" role="progressbar" [attr.aria-valuenow]="percentPaid" aria-valuemin="0" aria-valuemax="100" aria-label="Players confirmed">
+    <div class="h-full bg-qs-accent transition-all" [ngStyle]="{ width: percentPaid + '%' }"></div>
   </div>
-
-  <!-- Confirmed Progress -->
-  <div class="space-y-2">
-    <div class="flex justify-between text-sm text-muted">
-      <span>Confirmed: {{ confirmedPlayers }}/{{ totalPlayers }}</span>
-    </div>
-    <div class="h-2 w-full bg-input rounded-full overflow-hidden">
-      <div 
-        class="h-full bg-qs-ok transition-all"
-        [ngStyle]="{ width: percentPaid + '%' }"
-      ></div>
-    </div>
-  </div>
-</div> 
+</div>

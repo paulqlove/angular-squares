@@ -37,6 +37,7 @@ import { EditGameDialogComponent, EditGameValues } from './components/edit-game-
 import { PaymentDialogComponent } from './components/payment-dialog/payment-dialog.component';
 import { ProbabilityHeatmapComponent } from './components/probability-heatmap/probability-heatmap.component';
 import { BoxScoreComponent } from './components/box-score/box-score.component';
+import { ProfileMenuComponent } from '../../components/ui/profile-menu/profile-menu.component';
 import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.component';
 
 @Component({
@@ -53,7 +54,8 @@ import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.co
     PaymentDialogComponent,
     ProbabilityHeatmapComponent,
     BoxScoreComponent,
-    AuthModalComponent
+    AuthModalComponent,
+    ProfileMenuComponent
 ],
     providers: [
         provideIcons({
@@ -775,6 +777,10 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     } catch {
       this.toastService.error('Failed to save game. Please try again.');
     }
+  }
+
+  filledCount(): number {
+    return Object.keys(this.selectedSquares).length;
   }
 
   /** Tour steps; the host-tools step only for owner and co-host. */

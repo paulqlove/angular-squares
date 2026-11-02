@@ -21,6 +21,19 @@
   color: var(--qs-tile-ink);
 }
 
+/* Top bar is as tall as the side bar is wide */
+.number-cell.axis-top {
+  height: 1.5rem;
+
+  @include tablet {
+    height: 2.25rem;
+  }
+
+  @include desktop {
+    height: 2.25rem;
+  }
+}
+
 /* Current leader's row and column digit */
 .axis-leader {
   background: var(--qs-accent);

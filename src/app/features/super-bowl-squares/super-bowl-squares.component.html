@@ -50,6 +50,11 @@
       >
       <ng-icon name="heroQuestionMarkCircle" class="text-2xl"></ng-icon>
     </button>
+    @if (currentUser()) {
+      <app-profile-menu [allowNameEdit]="false" [showDashboardLink]="true"></app-profile-menu>
+    } @else {
+      <button type="button" (click)="showAuthModal.set(true)" class="qs-btn qs-btn-primary">Sign in</button>
+    }
   </app-shared-header>
 
   <app-edit-game-dialog
@@ -61,7 +66,7 @@
     (clearGame)="onClearGame(true)"
   ></app-edit-game-dialog>
 
-  <div class="container mx-auto">
+  <div class="mx-auto max-w-[1600px] px-1 pb-16 pt-2 sm:px-5">
     <div class="space-y-6">
       <!-- Game Info Bar -->
       <div class="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
@@ -148,34 +153,20 @@
         </div>
       }
 
-      <!-- Grid container for board and players -->
-      <div class="grid grid-cols-1 gap-6 lg:grid-cols-4">
-        <!-- Game Board -->
-        <div class="col-span-1 lg:col-span-2" data-walkthrough="game-board">
+      <!-- Board + players -->
+      <div class="grid grid-cols-1 gap-8 px-3 lg:grid-cols-12">
+        <!-- 01 Board -->
+        <section class="lg:col-span-7" data-walkthrough="game-board" aria-labelledby="board-heading">
+          <div class="mb-3 flex items-baseline justify-between border-b border-qs-line pb-3">
+            <h3 id="board-heading" class="qs-eyebrow qs-eyebrow-bar">01 / Board</h3>
+            <span class="qs-label text-qs-muted">{{ filledCount() }}/100 picked</span>
+          </div>
           <div class="qs-card p-3 sm:p-5">
             <!-- Tabs -->
-            <div class="flex flex-wrap gap-2 mb-4" role="tablist">
-              <button
-                (click)="activeTab = 'board'"
-                role="tab"
-                [attr.aria-selected]="activeTab === 'board'"
-                class="qs-tab px-3 sm:px-4">
-                Game Board
-              </button>
-              <button
-                (click)="activeTab = 'probabilities'"
-                role="tab"
-                [attr.aria-selected]="activeTab === 'probabilities'"
-                class="qs-tab px-3 sm:px-4">
-                Heatmap
-              </button>
-              <button
-                (click)="activeTab = 'boxscore'"
-                role="tab"
-                [attr.aria-selected]="activeTab === 'boxscore'"
-                class="qs-tab px-3 sm:px-4">
-                Box Score
-              </button>
+            <div class="mb-4 flex flex-wrap gap-2" role="tablist">
+              <button (click)="activeTab = 'board'" role="tab" [attr.aria-selected]="activeTab === 'board'" class="qs-tab px-3 sm:px-4">Board</button>
+              <button (click)="activeTab = 'probabilities'" role="tab" [attr.aria-selected]="activeTab === 'probabilities'" class="qs-tab px-3 sm:px-4">Heatmap</button>
+              <button (click)="activeTab = 'boxscore'" role="tab" [attr.aria-selected]="activeTab === 'boxscore'" class="qs-tab px-3 sm:px-4">Box score</button>
             </div>
 
             <!-- Tab Content -->
@@ -204,8 +195,8 @@
                   [selectedPlayer]="selectedPlayer">
                 </app-probability-heatmap>
               } @else {
-                <div class="flex items-center justify-center h-64 text-muted text-center px-4">
-                  <p>The heatmap will appear once the board numbers are randomized.</p>
+                <div class="flex h-64 items-center justify-center px-4 text-center text-qs-muted">
+                  <p>The heatmap appears once the numbers are drawn.</p>
                 </div>
               }
             } @else {
@@ -215,29 +206,28 @@
               </app-box-score>
             }
           </div>
-        </div>
+        </section>
 
-        <!-- Players List -->
-        <div class="col-span-1 lg:col-span-2" data-walkthrough="players-list">
-          <div class="flex flex-col justify-between h-full rounded-lg">
-            <!-- Header with toggle button -->
-            <div class="w-full">
-              <div class="flex items-center justify-between px-4 pt-4 pb-[0.5rem]">
-                <span class="qs-eyebrow qs-eyebrow-bar">Players</span>
-                <button
-                  (click)="isPlayersListVisible = !isPlayersListVisible"
-                  class="flex items-center gap-1 text-sm lg:hidden text-muted">
-                  {{ isPlayersListVisible ? 'Hide' : 'Show' }}
-                  <ng-icon name="heroChevronDown"
-                    [class.rotate-180]="!isPlayersListVisible"
-                    class="text-2xl transition-transform duration-200 transform">
-                  </ng-icon>
-                </button>
-              </div>
-            </div>
-
-            <!-- Players list content -->
-            <div [class.hidden]="!isPlayersListVisible" class="flex-1 p-4 pt-0 lg:block">
+        <!-- 02 Players -->
+        <section class="lg:col-span-5" data-walkthrough="players-list" aria-labelledby="players-heading">
+          <div class="mb-3 flex items-baseline justify-between border-b border-qs-line pb-3">
+            <h3 id="players-heading" class="qs-eyebrow qs-eyebrow-bar">02 / Players</h3>
+            <button
+              type="button"
+              (click)="isPlayersListVisible = !isPlayersListVisible"
+              [attr.aria-expanded]="isPlayersListVisible"
+              class="qs-label flex items-center gap-1 text-qs-muted hover:text-qs-ink lg:hidden">
+              {{ isPlayersListVisible ? 'Hide' : 'Show' }}
+              <ng-icon name="heroChevronDown" [class.rotate-180]="isPlayersListVisible" class="text-base transition-transform"></ng-icon>
+            </button>
+          </div>
+          <div class="qs-card overflow-hidden">
+            <app-game-status
+              [selectedSquares]="selectedSquares"
+              [playerStats]="playerStats"
+              [paidPlayers]="paidPlayers">
+            </app-game-status>
+            <div [class.hidden]="!isPlayersListVisible" class="border-t border-qs-line lg:block">
               <app-players-list
                 [playerStats]="playerStats"
                 [playerColors]="playerColors"
@@ -248,18 +238,12 @@
                 (playerSelected)="onPlayerSelected($event)">
               </app-players-list>
             </div>
-
-            <app-game-status
-              [selectedSquares]="selectedSquares"
-              [playerStats]="playerStats"
-              [paidPlayers]="paidPlayers">
-            </app-game-status>
           </div>
-        </div>
+        </section>
       </div>
 
-      <!-- Winners -->
-      <div data-walkthrough="winners-payouts" (click)="$event.stopPropagation()">
+      <!-- 03 Winners -->
+      <section class="px-3" data-walkthrough="winners-payouts" (click)="$event.stopPropagation()">
         <app-winners-and-payouts
           [winners]="winners"
           [quarterPayouts]="quarterPayouts"
@@ -270,7 +254,7 @@
           [awayTeam]="awayTeam"
           (quarterClick)="onQuarterClick($event)">
         </app-winners-and-payouts>
-      </div>
+      </section>
 
       <!-- Alert notifications -->
       @if (showAlert) {
