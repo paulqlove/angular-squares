@@ -1,14 +1,16 @@
 import { Component, inject, ChangeDetectionStrategy, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { SeoService } from '../../core/services/seo.service';
+import { AuthService } from '../../core/services/auth.service';
 import { BreadcrumbsComponent } from '../../shared/breadcrumbs.component';
 import { ContentShellComponent } from './content-shell.component';
+import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.component';
 import { NflTeam, getTeamBySlug, getTeamLogo, NFL_TEAMS } from './teams-data';
 import { EspnService, EspnGame } from '../../core/services/espn.service';
 
 @Component({
   selector: 'app-team-page',
-  imports: [RouterLink, ContentShellComponent, BreadcrumbsComponent],
+  imports: [RouterLink, ContentShellComponent, BreadcrumbsComponent, AuthModalComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-content-shell>
@@ -50,13 +52,14 @@ import { EspnService, EspnGame } from '../../core/services/espn.service';
               Share the link with friends and watch the board fill up.
             </p>
             <div class="mt-6 flex flex-wrap gap-3">
-              <a
-                routerLink="/dashboard"
+              <button
+                type="button"
+                (click)="createBoard()"
                 class="inline-flex min-h-11 items-center justify-center rounded-md px-6 font-semibold text-white"
                 [style.background]="team.primaryColor"
               >
                 Create a free board
-              </a>
+              </button>
               <a routerLink="/how-to-play" class="qs-btn qs-btn-secondary">
                 How to play
               </a>
@@ -86,12 +89,13 @@ import { EspnService, EspnGame } from '../../core/services/espn.service';
                       </p>
                       <p class="text-sm text-muted">{{ formatDate(game.date) }}</p>
                     </div>
-                    <a
-                      routerLink="/dashboard"
+                    <button
+                      type="button"
+                      (click)="createBoard()"
                       class="shrink-0 rounded-md border border-default bg-white px-3 py-1.5 text-sm font-medium text-heading hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700"
                     >
                       Create board
-                    </a>
+                    </button>
                   </div>
                 }
               </div>
@@ -166,6 +170,12 @@ import { EspnService, EspnGame } from '../../core/services/espn.service';
         </div>
       }
     </app-content-shell>
+
+    <app-auth-modal
+      [isOpen]="showAuthModal()"
+      (authenticated)="onAuthenticated()"
+      (closed)="showAuthModal.set(false)">
+    </app-auth-modal>
   `
 })
 export class TeamPageComponent implements OnInit {
@@ -173,12 +183,15 @@ export class TeamPageComponent implements OnInit {
   private router = inject(Router);
   private seo = inject(SeoService);
   private espn = inject(EspnService);
+  private authService = inject(AuthService);
 
   public team: NflTeam | undefined;
   public breadcrumbs: { name: string; path: string }[] = [];
   public divisionRivals: NflTeam[] = [];
   public games = signal<EspnGame[]>([]);
   public loading = signal(true);
+  public showAuthModal = signal(false);
+  public isAuthenticated = this.authService.isAuthenticated;
 
   ngOnInit(): void {
     const slug = this.route.snapshot.paramMap.get('slug');
@@ -250,5 +263,18 @@ export class TeamPageComponent implements OnInit {
       hour: 'numeric',
       minute: '2-digit'
     });
+  }
+
+  public createBoard(): void {
+    if (this.isAuthenticated()) {
+      this.router.navigate(['/dashboard']);
+    } else {
+      this.showAuthModal.set(true);
+    }
+  }
+
+  public onAuthenticated(): void {
+    this.showAuthModal.set(false);
+    this.router.navigate(['/dashboard']);
   }
 }
