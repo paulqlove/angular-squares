@@ -41,6 +41,14 @@ export class GameBoardComponent {
     return baseColor + leader;
   }
 
+  get leaderRow(): number | null {
+    return this.currentLeaderSquare ? Number(this.currentLeaderSquare.split('-')[0]) : null;
+  }
+
+  get leaderCol(): number | null {
+    return this.currentLeaderSquare ? Number(this.currentLeaderSquare.split('-')[1]) : null;
+  }
+
   getSquarePlayer(row: number, col: number): string {
     const key = `${row}-${col}`;
     return this.selectedSquares[key] || '';

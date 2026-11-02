@@ -15,6 +15,18 @@
   }
 }
 
+/* Axis bars: navy tiles with light digits, like the landing-page phone */
+.axis-cell {
+  background: var(--qs-tile);
+  color: var(--qs-tile-ink);
+}
+
+/* Current leader's row and column digit */
+.axis-leader {
+  background: var(--qs-accent);
+  color: var(--qs-on-accent);
+}
+
 .square-cell {
   @extend .number-cell;
   @apply text-[8px] sm:text-xs cursor-pointer p-1 text-center truncate overflow-hidden whitespace-nowrap;
