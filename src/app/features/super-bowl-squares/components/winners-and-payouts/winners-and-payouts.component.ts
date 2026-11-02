@@ -16,13 +16,15 @@ export class WinnersAndPayoutsComponent {
   @Input() scores: { [key: string]: { home: number; away: number } } = {};
   @Input() homeTeam: string = '';
   @Input() awayTeam: string = '';
+  /** Q4 reads "Final" only once the game is over. */
+  @Input() gameOver = false;
 
   @Output() quarterClick = new EventEmitter<string>();
 
   readonly quarters = ['q1', 'q2', 'q3', 'q4'];
 
   getQuarterLabel(quarter: string): string {
-    const quarterMap: { [key: string]: string } = { q1: 'Q1', q2: 'Q2', q3: 'Q3', q4: 'Final' };
+    const quarterMap: { [key: string]: string } = { q1: 'Q1', q2: 'Q2', q3: 'Q3', q4: this.gameOver ? 'Final' : 'Q4' };
     return quarterMap[quarter] || quarter;
   }
 
