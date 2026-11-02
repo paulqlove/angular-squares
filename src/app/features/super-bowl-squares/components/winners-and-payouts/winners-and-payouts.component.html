@@ -17,13 +17,13 @@
         <span class="qs-label text-qs-tile-muted">{{ getQuarterPoints(quarter) | number: '1.0-2' }} pts</span>
       </div>
       <p class="mt-3 text-3xl font-semibold leading-none tabular-nums text-qs-tile-ink sm:text-4xl">
-        @if (hasScore(quarter)) {
+        @if (hasScore(quarter) || winners[quarter]) {
           {{ scores[quarter].away }}<span class="mx-1 text-qs-tile-muted">–</span>{{ scores[quarter].home }}
         } @else {
           <span class="text-qs-tile-muted">–</span>
         }
       </p>
-      @if (hasScore(quarter)) {
+      @if (hasScore(quarter) || winners[quarter]) {
         <p class="qs-label mt-1.5 truncate text-[10px] text-qs-tile-muted">{{ awayTeam || 'Away' }} · {{ homeTeam || 'Home' }}</p>
       }
       <p class="mt-auto flex items-center gap-2 pt-3 font-medium text-qs-tile-ink">
