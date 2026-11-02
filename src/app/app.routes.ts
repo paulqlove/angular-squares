@@ -62,6 +62,16 @@ export const routes: Routes = [
   marketingRoute('terms'),
   marketingRoute('privacy'),
   {
+    path: 'teams',
+    loadComponent: () =>
+      import('./features/content/teams-index.component').then(m => m.TeamsIndexComponent)
+  },
+  {
+    path: 'team/:slug',
+    loadComponent: () =>
+      import('./features/content/team-page.component').then(m => m.TeamPageComponent)
+  },
+  {
     path: '**',
     loadComponent: () =>
       import('./features/not-found/not-found.component').then(m => m.NotFoundComponent)

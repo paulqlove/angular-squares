@@ -12,6 +12,17 @@ const blogDir = path.join(root, 'content', 'blog');
 const clientRoutes = new Set(['dashboard', 'game/:gameId', '**']);
 const pageLastmod = '2026-11-01';
 
+const nflTeams = [
+  { slug: 'buffalo-bills' }, { slug: 'miami-dolphins' }, { slug: 'new-england-patriots' }, { slug: 'new-york-jets' },
+  { slug: 'baltimore-ravens' }, { slug: 'cincinnati-bengals' }, { slug: 'cleveland-browns' }, { slug: 'pittsburgh-steelers' },
+  { slug: 'houston-texans' }, { slug: 'indianapolis-colts' }, { slug: 'jacksonville-jaguars' }, { slug: 'tennessee-titans' },
+  { slug: 'denver-broncos' }, { slug: 'kansas-city-chiefs' }, { slug: 'las-vegas-raiders' }, { slug: 'los-angeles-chargers' },
+  { slug: 'dallas-cowboys' }, { slug: 'new-york-giants' }, { slug: 'philadelphia-eagles' }, { slug: 'washington-commanders' },
+  { slug: 'chicago-bears' }, { slug: 'detroit-lions' }, { slug: 'green-bay-packers' }, { slug: 'minnesota-vikings' },
+  { slug: 'atlanta-falcons' }, { slug: 'carolina-panthers' }, { slug: 'new-orleans-saints' }, { slug: 'tampa-bay-buccaneers' },
+  { slug: 'arizona-cardinals' }, { slug: 'los-angeles-rams' }, { slug: 'seattle-seahawks' }, { slug: 'san-francisco-49ers' }
+];
+
 const requiredFields = ['title', 'description', 'date', 'slug', 'ogImage'];
 
 function readRoutes() {
@@ -126,6 +137,12 @@ function publicPaths(routePaths, posts) {
     if (routePath === 'blog/:slug') {
       for (const post of posts) {
         paths.push(`/blog/${post.slug}`);
+      }
+      continue;
+    }
+    if (routePath === 'team/:slug') {
+      for (const team of nflTeams) {
+        paths.push(`/team/${team.slug}`);
       }
       continue;
     }
