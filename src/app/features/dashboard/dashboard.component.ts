@@ -2,6 +2,7 @@ import { Component, OnInit, signal, inject, HostListener, ChangeDetectionStrateg
 
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { NgTemplateOutlet } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
 import { GameService, GameListItem } from '../../core/services/game.service';
 import { EspnService, EspnGame, SportType, SPORT_CONFIG } from '../../core/services/espn.service';
@@ -41,7 +42,7 @@ import {
 
 @Component({
     selector: 'app-dashboard',
-    imports: [FormsModule, NgIconComponent, AppHeaderComponent, HeadroomDirective, UpgradePassDialogComponent],
+    imports: [FormsModule, NgTemplateOutlet, NgIconComponent, AppHeaderComponent, HeadroomDirective, UpgradePassDialogComponent],
     providers: [
         provideIcons({
             heroPlus,
@@ -185,332 +186,187 @@ import {
         </div>
       </app-shared-header>
 
-      <main class="container mx-auto px-4 py-8">
-        <!-- Hero Section -->
-        <div class="qs-card p-8 mb-8" data-walkthrough="hero-section">
-          <div class="flex items-center gap-3 mb-6">
-            <span class="text-3xl">🏈</span>
-            <h2 class="text-2xl font-bold text-heading dark:text-white tracking-tight">Start or Join a Game</h2>
+      <main class="mx-auto max-w-[1600px] px-4 sm:px-8 pt-10 pb-20 md:pt-14">
+        <!-- Heading + actions -->
+        <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between" data-walkthrough="hero-section">
+          <div>
+            <p class="qs-eyebrow">Dashboard</p>
+            <h2 class="qs-title mt-3 text-4xl sm:text-5xl">Your <span class="text-qs-accent">games</span></h2>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Create Game Card -->
+          <div class="flex flex-col gap-3 sm:flex-row">
+            <div
+              class="flex min-h-11 items-stretch overflow-hidden rounded-btn border border-qs-line-strong bg-qs-panel focus-within:outline focus-within:outline-[3px] focus-within:outline-offset-2 focus-within:outline-qs-ink"
+              data-walkthrough="join-game"
+            >
+              <label for="join-code" class="qs-label flex items-center border-r border-qs-line bg-qs-panel-2 px-3 text-qs-muted whitespace-nowrap">Code</label>
+              <input
+                id="join-code"
+                type="text"
+                [(ngModel)]="joinGameCode"
+                placeholder="ABC123"
+                maxlength="6"
+                autocomplete="off"
+                class="w-full min-w-0 bg-transparent px-3 font-mono text-base uppercase tracking-[0.3em] text-qs-ink placeholder:text-qs-muted/60 focus:outline-none sm:w-36"
+                (keyup.enter)="joinGame()"
+              />
+              <button
+                type="button"
+                (click)="joinGame()"
+                [disabled]="joinGameCode.length !== 6"
+                class="qs-btn qs-btn-ink rounded-none"
+              >
+                Join
+              </button>
+            </div>
+
             @if (canCreateGame()) {
               <button
+                type="button"
                 (click)="openCreateModal($event)"
                 [disabled]="isCheckingBoardLimit()"
                 [attr.aria-busy]="isCheckingBoardLimit()"
-                class="group bg-control hover:bg-control-hover dark:bg-white/10 dark:hover:bg-white/20 backdrop-blur border border-default dark:border-white/20 rounded-xl p-6 text-left transition-all hover:scale-[1.02] hover:shadow-lg disabled:cursor-wait disabled:opacity-70 disabled:hover:scale-100"
+                class="qs-btn qs-btn-primary disabled:cursor-wait"
                 data-walkthrough="create-game"
               >
-                <div class="flex items-center gap-4 mb-3">
-                  <div class="w-12 h-12 rounded-xl bg-qs-accent flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <ng-icon name="heroPlus" class="text-2xl text-white"></ng-icon>
-                  </div>
-                  <div>
-                    <h3 class="text-lg font-bold text-heading dark:text-white">New Game</h3>
-                    <p class="text-sm text-muted">Create a squares pool</p>
-                  </div>
-                </div>
-                <p class="text-sm text-muted">Set up your own game with custom settings and share it with friends.</p>
+                <ng-icon name="heroPlus" class="text-base"></ng-icon>
+                New game
               </button>
-            } @else {
-              <div class="bg-amber-100 dark:bg-amber-500/20 backdrop-blur border border-amber-300 dark:border-amber-400/30 rounded-xl p-6">
-                <div class="flex items-center gap-4 mb-3">
-                  <div class="w-12 h-12 rounded-xl bg-amber-500 flex items-center justify-center">
-                    <ng-icon name="heroUserGroup" class="text-2xl text-white"></ng-icon>
-                  </div>
-                  <div>
-                    <h3 class="text-lg font-bold text-amber-900 dark:text-white">Guest Mode</h3>
-                    <p class="text-sm text-amber-700 dark:text-amber-200">Sign in to create games</p>
-                  </div>
-                </div>
-                <p class="text-sm text-amber-700 dark:text-amber-100 mb-4">Create an account to host your own squares pools.</p>
-                <button
-                  (click)="signOut()"
-                  class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-lg text-sm font-medium transition-colors"
-                >
-                  Sign In
-                </button>
-              </div>
             }
-
-            <!-- Join Game Card -->
-            <div class="bg-control dark:bg-white/10 backdrop-blur border border-default dark:border-white/20 rounded-xl p-6" data-walkthrough="join-game">
-              <div class="flex items-center gap-4 mb-3">
-                <div class="w-12 h-12 rounded-xl bg-qs-ink flex items-center justify-center">
-                  <ng-icon name="heroTicket" class="text-2xl text-white"></ng-icon>
-                </div>
-                <div>
-                  <h3 class="text-lg font-bold text-heading dark:text-white">Join with Code</h3>
-                  <p class="text-sm text-muted">Have a 6-digit code?</p>
-                </div>
-              </div>
-              <div class="flex gap-2 min-w-0">
-                <input
-                  type="text"
-                  [(ngModel)]="joinGameCode"
-                  placeholder="XXXXXX"
-                  class="flex-1 min-w-0 px-4 py-3 bg-qs-panel-2 border border-qs-line-strong rounded-btn text-qs-ink placeholder-muted uppercase tracking-widest font-mono text-center focus:outline-none focus:ring-2 focus:ring-qs-accent focus:border-transparent"
-                  maxlength="6"
-                  (keyup.enter)="joinGame()"
-                />
-                <button
-                  (click)="joinGame()"
-                  [disabled]="joinGameCode.length !== 6"
-                  class="qs-btn qs-btn-primary shrink-0"
-                >
-                  <ng-icon name="heroArrowRight" class="text-xl"></ng-icon>
-                </button>
-              </div>
-            </div>
           </div>
         </div>
 
-        <!-- My Games Section -->
-        @if (canCreateGame()) {
-          <div class="mb-4" data-walkthrough="my-games">
-            <h2 class="text-xl font-bold text-heading tracking-tight">My Games</h2>
+        @if (!canCreateGame()) {
+          <div class="mt-8 flex flex-col gap-4 rounded-card border border-qs-line bg-qs-warn-soft p-5 sm:flex-row sm:items-center sm:justify-between">
+            <p class="text-qs-warn">
+              <span class="font-semibold">You're playing as a guest.</span>
+              Sign in with Google to host your own games.
+            </p>
+            <button type="button" (click)="signOut()" class="qs-btn qs-btn-ink shrink-0">Sign in</button>
           </div>
+        }
 
-          @if (isLoadingGames()) {
-            <div class="flex items-center justify-center py-16">
-              <svg class="animate-spin h-10 w-10 text-qs-accent" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-              </svg>
-            </div>
-          } @else if (myGames().length === 0) {
-            <div class="bg-card rounded-2xl shadow-sm p-12 text-center">
-              <div class="w-20 h-20 rounded-full bg-control flex items-center justify-center mx-auto mb-4">
-                <ng-icon name="heroSquares2x2" class="text-4xl text-muted"></ng-icon>
-              </div>
-              <h3 class="text-lg font-semibold text-heading mb-2">No games yet</h3>
-              <p class="text-muted mb-6">Create your first squares pool to get started!</p>
-              <button
-                (click)="openCreateModal($event)"
-                [disabled]="isCheckingBoardLimit()"
-                [attr.aria-busy]="isCheckingBoardLimit()"
-                class="inline-flex min-h-11 items-center gap-2 px-6 py-3 bg-qs-accent hover:bg-qs-accent-hover disabled:cursor-wait disabled:opacity-70 text-white rounded-xl font-medium transition-colors"
-              >
-                <ng-icon name="heroPlus" class="text-xl"></ng-icon>
-                Create Game
-              </button>
-            </div>
-          } @else {
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              @for (game of myGames(); track game.id) {
-                <div class="bg-card rounded-2xl shadow-sm hover:shadow-md transition-all overflow-hidden group border border-card">
-                  <!-- Game Header -->
-                  <div class="bg-qs-panel-2 p-4">
-                    <div class="flex items-center justify-between mb-2">
-                      <h3 class="font-bold text-heading dark:text-white truncate">{{ game.name }}</h3>
-                      @if (game.isLocked) {
-                        <span class="flex items-center gap-1 text-xs bg-amber-500 text-white px-2 py-1 rounded-full">
-                          <ng-icon name="heroLockClosed" class="text-xs"></ng-icon>
-                          Locked
-                        </span>
-                      } @else {
-                        <span class="flex items-center gap-1 text-xs bg-qs-ok text-white px-2 py-1 rounded-full">
-                          <ng-icon name="heroPlay" class="text-xs"></ng-icon>
-                          Active
-                        </span>
-                      }
-                    </div>
-                    <p class="text-sm text-muted">
-                      @if (game.homeTeam && game.awayTeam) {
-                        {{ game.awayTeam }} vs {{ game.homeTeam }}
-                      } @else {
-                        <span class="italic">No teams set</span>
-                      }
-                    </p>
-                  </div>
-
-                  <!-- Game Content -->
-                  <div class="p-4">
-                    <!-- Progress Bar -->
-                    <div class="mb-3">
-                      <div class="flex justify-between text-sm mb-1">
-                        <span class="text-muted">Squares Filled</span>
-                        <span class="font-semibold text-default">{{ game.squaresFilled }}/100</span>
-                      </div>
-                      <div class="h-2 bg-control rounded-full overflow-hidden">
-                        <div
-                          class="h-full bg-qs-accent rounded-full transition-all duration-500"
-                          [style.width.%]="game.squaresFilled"
-                        ></div>
-                      </div>
-                    </div>
-
-                    <div class="mb-4">
-                      <div class="flex justify-between text-sm mb-1">
-                        <span class="text-muted">Collected</span>
-                        <span class="font-semibold text-default">\${{ game.collected }} / \${{ game.totalPot }}</span>
-                      </div>
-                      <div class="h-2 bg-control rounded-full overflow-hidden">
-                        <div
-                          class="h-full bg-qs-ok rounded-full transition-all duration-500"
-                          [style.width.%]="game.totalPot > 0 ? (game.collected / game.totalPot) * 100 : 0"
-                        ></div>
-                      </div>
-                    </div>
-
-                    <!-- Stats Row -->
-                    <div class="flex items-center gap-4 text-sm text-muted mb-4">
-                      <span class="flex items-center gap-1">
-                        <ng-icon name="heroUserGroup" class="text-base"></ng-icon>
-                        {{ game.playerCount }} players
-                      </span>
-                      <span class="text-muted">|</span>
-                      <span class="font-mono text-xs bg-control px-2 py-0.5 rounded">{{ game.id }}</span>
-                    </div>
-
-                    <!-- Actions -->
-                    <div class="flex items-center gap-2">
-                      <button
-                        (click)="openGame(game.id)"
-                        class="qs-btn qs-btn-primary flex-1"
-                      >
-                        Open Game
-                      </button>
-                      <button
-                        (click)="shareGame(game.id)"
-                        class="p-2.5 text-muted hover:text-qs-accent hover:bg-qs-accent-soft rounded-xl transition-colors"
-                        title="Share game"
-                        aria-label="Share game"
-                      >
-                        <ng-icon name="heroShare" class="text-lg"></ng-icon>
-                      </button>
-                      <button
-                        (click)="openEditModal(game)"
-                        class="p-2.5 text-muted hover:text-default hover:bg-control rounded-xl transition-colors"
-                        title="Edit game"
-                        aria-label="Edit game"
-                      >
-                        <ng-icon name="heroCog6Tooth" class="text-lg"></ng-icon>
-                      </button>
-                      <button
-                        (click)="deleteGame(game.id)"
-                        class="p-2.5 text-muted hover:text-qs-bad hover:bg-qs-bad-soft rounded-xl transition-colors"
-                        title="Delete game"
-                        aria-label="Delete game"
-                      >
-                        <ng-icon name="heroTrash" class="text-lg"></ng-icon>
-                      </button>
-                    </div>
-                  </div>
-
-                  <!-- Footer -->
-                  <div class="px-4 py-3 bg-input border-t border-default">
-                    <span class="text-xs text-muted">Created {{ formatDate(game.createdAt) }}</span>
-                  </div>
-                </div>
+        <!-- Hosting -->
+        @if (canCreateGame()) {
+          <section class="mt-12" data-walkthrough="my-games" aria-labelledby="hosting-heading">
+            <div class="flex items-baseline justify-between border-b border-qs-line pb-3">
+              <h3 id="hosting-heading" class="qs-eyebrow qs-eyebrow-bar">01 / Hosting</h3>
+              @if (!isLoadingGames()) {
+                <span class="qs-label text-qs-muted">{{ myGames().length }} {{ myGames().length === 1 ? 'game' : 'games' }}</span>
               }
             </div>
-          }
-        }
 
-        <!-- Joined Games Section -->
-        @if (joinedGames().length > 0) {
-          <div class="mt-10 mb-4">
-            <div class="flex items-center gap-2 mb-1">
-              <ng-icon name="heroUserGroup" class="text-xl text-muted"></ng-icon>
-              <h2 class="text-xl font-bold text-heading tracking-tight">Joined Games</h2>
-            </div>
-            <p class="text-sm text-muted">Games you've joined by selecting squares</p>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            @for (game of joinedGames(); track game.id) {
-              <div class="bg-card rounded-2xl shadow-sm hover:shadow-md transition-all overflow-hidden group border border-card border-l-4 border-l-qs-accent">
-                <!-- Game Header -->
-                <div class="bg-qs-panel-2 p-4">
-                  <div class="flex items-center justify-between mb-2">
-                    <h3 class="font-bold text-heading dark:text-white truncate">{{ game.name }}</h3>
-                    <span class="flex items-center gap-1 text-xs bg-qs-accent-soft text-qs-accent px-2 py-1 rounded-full dark:bg-qs-accent/20 text-qs-accent">
-                      <ng-icon name="heroUserGroup" class="text-xs"></ng-icon>
-                      Joined
-                    </span>
-                  </div>
-                  <p class="text-sm text-muted">
-                    @if (game.homeTeam && game.awayTeam) {
-                      {{ game.awayTeam }} vs {{ game.homeTeam }}
-                    } @else {
-                      <span class="italic">No teams set</span>
-                    }
-                  </p>
-                  <p class="text-xs text-muted mt-1">
-                    Hosted by {{ game.ownerName }}
-                  </p>
-                </div>
-
-                <!-- Game Content -->
-                <div class="p-4">
-                  <!-- Progress Bar -->
-                  <div class="mb-3">
-                    <div class="flex justify-between text-sm mb-1">
-                      <span class="text-muted">Squares Filled</span>
-                      <span class="font-semibold text-default">{{ game.squaresFilled }}/100</span>
-                    </div>
-                    <div class="h-2 bg-control rounded-full overflow-hidden">
-                      <div
-                        class="h-full bg-qs-accent rounded-full transition-all duration-500"
-                        [style.width.%]="game.squaresFilled"
-                      ></div>
-                    </div>
-                  </div>
-
-                  <div class="mb-4">
-                    <div class="flex justify-between text-sm mb-1">
-                      <span class="text-muted">Collected</span>
-                      <span class="font-semibold text-default">\${{ game.collected }} / \${{ game.totalPot }}</span>
-                    </div>
-                    <div class="h-2 bg-control rounded-full overflow-hidden">
-                      <div
-                        class="h-full bg-qs-ok rounded-full transition-all duration-500"
-                        [style.width.%]="game.totalPot > 0 ? (game.collected / game.totalPot) * 100 : 0"
-                      ></div>
-                    </div>
-                  </div>
-
-                  <!-- Stats Row -->
-                  <div class="flex items-center gap-4 text-sm text-muted mb-4">
-                    <span class="flex items-center gap-1">
-                      <ng-icon name="heroUserGroup" class="text-base"></ng-icon>
-                      {{ game.playerCount }} players
-                    </span>
-                    <span class="text-muted">|</span>
-                    <span class="font-mono text-xs bg-control px-2 py-0.5 rounded">{{ game.id }}</span>
-                  </div>
-
-                  <!-- Actions (Open and Share only) -->
-                  <div class="flex items-center gap-2">
-                    <button
-                      (click)="openGame(game.id)"
-                      class="qs-btn qs-btn-primary flex-1"
-                    >
-                      Open Game
-                    </button>
-                    <button
-                      (click)="shareGame(game.id)"
-                      class="p-2.5 text-muted hover:text-qs-accent hover:bg-qs-accent-soft rounded-xl transition-colors"
-                      title="Share game"
-                      aria-label="Share game"
-                    >
-                      <ng-icon name="heroShare" class="text-lg"></ng-icon>
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Footer -->
-                <div class="px-4 py-3 bg-input border-t border-default">
-                  <span class="text-xs text-muted">Created {{ formatDate(game.createdAt) }}</span>
-                </div>
+            @if (isLoadingGames()) {
+              <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3" aria-busy="true">
+                @for (i of [0, 1, 2]; track i) {
+                  <div class="qs-card h-64 animate-pulse bg-qs-panel-2"></div>
+                }
+              </div>
+            } @else if (myGames().length === 0) {
+              <div class="qs-card mt-5 p-10 text-center">
+                <p class="qs-title text-2xl">No games yet</p>
+                <p class="mt-2 text-qs-muted">Create a board, share the code, and let everyone pick their squares.</p>
+                <button
+                  type="button"
+                  (click)="openCreateModal($event)"
+                  [disabled]="isCheckingBoardLimit()"
+                  [attr.aria-busy]="isCheckingBoardLimit()"
+                  class="qs-btn qs-btn-primary mt-6 disabled:cursor-wait"
+                >
+                  <ng-icon name="heroPlus" class="text-base"></ng-icon>
+                  Create your first game
+                </button>
+              </div>
+            } @else {
+              <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                @for (game of myGames(); track game.id) {
+                  <ng-container *ngTemplateOutlet="gameCard; context: { $implicit: game, joined: false }"></ng-container>
+                }
               </div>
             }
-          </div>
+          </section>
+        }
+
+        <!-- Joined -->
+        @if (joinedGames().length > 0) {
+          <section class="mt-12" aria-labelledby="joined-heading">
+            <div class="flex items-baseline justify-between border-b border-qs-line pb-3">
+              <h3 id="joined-heading" class="qs-eyebrow qs-eyebrow-bar">{{ canCreateGame() ? '02' : '01' }} / Joined</h3>
+              <span class="qs-label text-qs-muted">{{ joinedGames().length }} {{ joinedGames().length === 1 ? 'game' : 'games' }}</span>
+            </div>
+            <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+              @for (game of joinedGames(); track game.id) {
+                <ng-container *ngTemplateOutlet="gameCard; context: { $implicit: game, joined: true }"></ng-container>
+              }
+            </div>
+          </section>
         }
       </main>
+
+      <ng-template #gameCard let-game let-joined="joined">
+        <article class="qs-card flex flex-col p-5 transition-colors hover:border-qs-line-strong">
+          <div class="flex items-center justify-between gap-3">
+            <span class="qs-badge qs-badge-code font-mono">{{ game.id }}</span>
+            @if (joined) {
+              <span class="qs-label truncate text-qs-muted">Host · {{ game.ownerName }}</span>
+            } @else if (game.isLocked) {
+              <span class="qs-badge">
+                <ng-icon name="heroLockClosed" class="text-xs"></ng-icon>
+                Locked
+              </span>
+            } @else {
+              <span class="qs-badge qs-badge-ok">Open</span>
+            }
+          </div>
+
+          <h4 class="mt-4 truncate text-xl font-semibold tracking-tight text-qs-ink">{{ game.name }}</h4>
+          <p class="mt-1 truncate text-sm text-qs-muted">
+            @if (game.homeTeam && game.awayTeam) {
+              {{ game.awayTeam }} vs {{ game.homeTeam }}
+            } @else {
+              Teams not set
+            }
+            · Created {{ formatDate(game.createdAt) }}
+          </p>
+
+          <div class="mt-5 flex items-center gap-5">
+            <div class="grid w-[68px] shrink-0 grid-cols-10 gap-px rounded-[3px] bg-qs-line p-px" aria-hidden="true">
+              @for (i of boardCells; track i) {
+                <span class="aspect-square" [class]="i < game.squaresFilled ? 'bg-qs-accent' : 'bg-qs-panel'"></span>
+              }
+            </div>
+            <dl class="grid flex-1 grid-cols-3 gap-3">
+              <div>
+                <dt class="qs-label text-[10px] text-qs-muted">Squares</dt>
+                <dd class="mt-1 text-lg font-semibold tabular-nums text-qs-ink">{{ game.squaresFilled }}<span class="text-sm font-normal text-qs-muted">/100</span></dd>
+              </div>
+              <div>
+                <dt class="qs-label text-[10px] text-qs-muted">Players</dt>
+                <dd class="mt-1 text-lg font-semibold tabular-nums text-qs-ink">{{ game.playerCount }}</dd>
+              </div>
+              <div>
+                <dt class="qs-label text-[10px] text-qs-muted">Collected</dt>
+                <dd class="mt-1 text-lg font-semibold tabular-nums text-qs-ink">\${{ game.collected }}</dd>
+              </div>
+            </dl>
+          </div>
+
+          <div class="mt-5 flex items-center gap-1 border-t border-qs-line pt-4">
+            <button type="button" (click)="openGame(game.id)" class="qs-btn qs-btn-secondary mr-auto flex-1 hover:!border-qs-ink">Open game</button>
+            <button type="button" (click)="shareGame(game.id)" class="qs-btn qs-btn-ghost w-11 px-0 text-qs-muted hover:text-qs-ink" title="Share game" aria-label="Share game">
+              <ng-icon name="heroShare" class="text-lg"></ng-icon>
+            </button>
+            @if (!joined) {
+              <button type="button" (click)="openEditModal(game)" class="qs-btn qs-btn-ghost w-11 px-0 text-qs-muted hover:text-qs-ink" title="Edit game" aria-label="Edit game">
+                <ng-icon name="heroCog6Tooth" class="text-lg"></ng-icon>
+              </button>
+              <button type="button" (click)="deleteGame(game.id)" class="qs-btn qs-btn-ghost w-11 px-0 text-qs-muted hover:!bg-qs-bad-soft hover:text-qs-bad" title="Delete game" aria-label="Delete game">
+                <ng-icon name="heroTrash" class="text-lg"></ng-icon>
+              </button>
+            }
+          </div>
+        </article>
+      </ng-template>
 
       <!-- Create Game Modal -->
       @if (showCreateModal()) {
@@ -1014,7 +870,7 @@ export class DashboardComponent implements OnInit {
   private dashboardWalkthroughSteps: WalkthroughStep[] = [
     {
       target: 'hero-section',
-      title: 'Welcome to Football Squares!',
+      title: 'Welcome to QuarterScore!',
       description: 'This is where you can create new games or join existing ones. Let\'s take a quick tour!',
       position: 'bottom'
     },
@@ -1048,6 +904,7 @@ export class DashboardComponent implements OnInit {
   canCreateGame = this.authService.canCreateGame;
 
   myGames = signal<GameListItem[]>([]);
+  readonly boardCells: number[] = Array.from({ length: 100 }, (_, i) => i);
   joinedGames = signal<GameListItem[]>([]);
   isLoadingGames = signal(true);
   isCreating = signal(false);
