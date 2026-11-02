@@ -21,6 +21,8 @@ export class GameBoardComponent {
   @Input() currentLeaderSquare: string | null = null;
   @Input() isRandomized: boolean = false;
   @Input() boardSize: BoardSize = 100;
+  @Input() homeNumbersLocked: boolean[] = [];
+  @Input() awayNumbersLocked: boolean[] = [];
 
   /** Number of columns in the grid (10 for 100/50, 5 for 25) */
   get cols(): number {
@@ -59,6 +61,16 @@ export class GameBoardComponent {
     const first = num * 2;
     const second = first + 1;
     return `${first},${second}`;
+  }
+
+  /** Check if a home number (column header) is locked (for animation) */
+  isHomeLocked(index: number): boolean {
+    return this.homeNumbersLocked[index] ?? true;
+  }
+
+  /** Check if an away number (row header) is locked (for animation) */
+  isAwayLocked(index: number): boolean {
+    return this.awayNumbersLocked[index] ?? true;
   }
 
   @Output() squareClick = new EventEmitter<{ row: number; col: number }>();
