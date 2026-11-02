@@ -99,23 +99,26 @@
       <!-- Game Info Bar -->
       <div class="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
         <div class="flex items-center gap-2">
-          @if (currentUser() && !currentUser()?.isGuest) {
-            <button
-              (click)="goBack()"
-              class="p-2 transition-colors rounded-lg text-muted hover:text-heading hover:bg-control"
-              title="Back to dashboard"
-              aria-label="Back to dashboard"
-              >
-              <ng-icon name="heroArrowLeft" class="text-xl"></ng-icon>
-            </button>
-          }
           <div class="min-w-0">
             <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
               <h2 class="qs-title text-2xl sm:text-3xl">{{ gameName }}</h2>
-              <button type="button" (click)="openShareModal()" class="qs-btn qs-btn-secondary min-h-9 px-3">
-                <ng-icon name="heroShare" class="text-base"></ng-icon>
-                Share
-              </button>
+              <div class="flex items-center gap-2">
+                <button type="button" (click)="openShareModal()" class="qs-btn qs-btn-secondary min-h-9 px-3">
+                  <ng-icon name="heroShare" class="text-base"></ng-icon>
+                  Share
+                </button>
+                @if (currentUser() && !currentUser()?.isGuest) {
+                  <button
+                    (click)="goBack()"
+                    class="qs-btn qs-btn-ghost min-h-9 px-3"
+                    title="Your games"
+                    aria-label="Your games"
+                    >
+                    <ng-icon name="heroSquares2x2" class="text-base"></ng-icon>
+                    <span class="hidden sm:inline">Your games</span>
+                  </button>
+                }
+              </div>
             </div>
             @if (hostNote) {
               <p class="mt-1.5 max-w-prose break-words text-sm text-qs-muted"><span class="qs-label mr-2 text-qs-ink">Host note</span>{{ hostNote }}</p>
