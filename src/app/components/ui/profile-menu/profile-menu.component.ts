@@ -1,8 +1,8 @@
-import { Component, Input, HostListener, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, HostListener, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { heroChevronDown, heroArrowRightOnRectangle, heroComputerDesktop, heroSun, heroMoon, heroSquares2x2 } from '@ng-icons/heroicons/outline';
+import { heroChevronDown, heroArrowRightOnRectangle, heroComputerDesktop, heroSun, heroMoon, heroSquares2x2, heroQuestionMarkCircle } from '@ng-icons/heroicons/outline';
 import { AuthService } from '../../../core/services/auth.service';
 import { GameService } from '../../../core/services/game.service';
 import { SanitizationService } from '../../../core/services/sanitization.service';
@@ -12,7 +12,7 @@ import { ThemeMode, ThemeService } from '../../../core/services/theme.service';
 @Component({
   selector: 'app-profile-menu',
   imports: [FormsModule, RouterLink, NgIconComponent],
-  providers: [provideIcons({ heroChevronDown, heroArrowRightOnRectangle, heroComputerDesktop, heroSun, heroMoon, heroSquares2x2 })],
+  providers: [provideIcons({ heroChevronDown, heroArrowRightOnRectangle, heroComputerDesktop, heroSun, heroMoon, heroSquares2x2, heroQuestionMarkCircle })],
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
     @keyframes menu-in { from { opacity: 0; transform: translateY(-4px); } }
@@ -113,6 +113,12 @@ import { ThemeMode, ThemeService } from '../../../core/services/theme.service';
           </div>
 
           <div class="border-t border-qs-line p-2">
+            @if (showTourLink) {
+              <button type="button" (click)="showProfileDropdown.set(false); tour.emit()" class="qs-btn qs-btn-ghost w-full justify-start text-qs-ink sm:hidden">
+                <ng-icon name="heroQuestionMarkCircle" class="text-base"></ng-icon>
+                How it works
+              </button>
+            }
             @if (showDashboardLink && !currentUser()?.isGuest) {
               <a routerLink="/dashboard" class="qs-btn qs-btn-ghost w-full justify-start text-qs-ink">
                 <ng-icon name="heroSquares2x2" class="text-base"></ng-icon>
@@ -138,6 +144,9 @@ export class ProfileMenuComponent {
   @Input() allowNameEdit = true;
   @Input() showDashboardLink = false;
   @Input() walkthroughTarget: string | null = null;
+  /** Adds a "How it works" item (phones only); the header shows a help icon on larger screens. */
+  @Input() showTourLink = false;
+  @Output() tour = new EventEmitter<void>();
 
   protected authService = inject(AuthService);
   protected themeService = inject(ThemeService);
