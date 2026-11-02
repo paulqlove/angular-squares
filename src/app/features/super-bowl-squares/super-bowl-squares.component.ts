@@ -759,15 +759,18 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     const { rows, cols } = getBoardDimensions(this.boardSize);
 
     if (this.isRandomized) {
+      // Stop any running animation first
+      this.stopAnimation();
+
       this.homeNumbers = Array(cols).fill(null);
       this.awayNumbers = Array(rows).fill(null);
       this.isRandomized = false;
 
-      // Clear animation state
+      // Clear animation state - set locked to true since empty cells are "done"
       this.displayHomeNumbers.set([...this.homeNumbers]);
       this.displayAwayNumbers.set([...this.awayNumbers]);
-      this.homeNumbersLocked.set(Array(cols).fill(false));
-      this.awayNumbersLocked.set(Array(rows).fill(false));
+      this.homeNumbersLocked.set(Array(cols).fill(true));
+      this.awayNumbersLocked.set(Array(rows).fill(true));
 
       // Reset the animation cookie for this game (re-generate will play animation again)
       this.clearNumbersSeenFlag();
@@ -940,9 +943,18 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
   /** Check on load if we need to animate (first time seeing these numbers) */
   private checkAndPlayAnimation(): void {
-    if (!this.isRandomized) return;
+    if (!this.isRandomized) {
+      // Numbers cleared - stop any running animation and show empty state
+      this.stopAnimation();
+      this.displayHomeNumbers.set([...this.homeNumbers]);
+      this.displayAwayNumbers.set([...this.awayNumbers]);
+      this.homeNumbersLocked.set(Array(this.homeNumbers.length).fill(true));
+      this.awayNumbersLocked.set(Array(this.awayNumbers.length).fill(true));
+      return;
+    }
     if (this.hasSeenNumbers()) {
       // User has seen these numbers, show them locked immediately
+      this.stopAnimation();
       this.displayHomeNumbers.set([...this.homeNumbers]);
       this.displayAwayNumbers.set([...this.awayNumbers]);
       this.homeNumbersLocked.set(Array(this.homeNumbers.length).fill(true));
