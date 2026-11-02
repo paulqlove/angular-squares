@@ -4,7 +4,7 @@ import { Directive, ElementRef, HostListener, inject, signal } from '@angular/co
 @Directive({
   selector: '[appHeadroom]',
   host: {
-    class: 'block sticky top-0 z-[100] transition-transform duration-200 motion-reduce:transition-none',
+    class: 'block sticky top-0 z-40 transition-transform duration-200 motion-reduce:transition-none',
     '[class.-translate-y-full]': 'hidden()',
     '(focusin)': 'hidden.set(false)'
   }
