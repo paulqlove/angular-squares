@@ -3,7 +3,7 @@
     "games": {
       "$gameId": {
         ".read": true,
-        ".write": "auth != null && (data.child('ownerId').val() == auth.uid || data.child('managerId').val() == auth.uid || (!data.exists() && (!root.child('users').child(auth.uid).child('activeBoardId').exists() || !root.child('games').child(root.child('users').child(auth.uid).child('activeBoardId').val()).exists() || (root.child('games').child(root.child('users').child(auth.uid).child('activeBoardId').val()).child('espnEventId').val() == null && root.child('games').child(root.child('users').child(auth.uid).child('activeBoardId').val()).child('createdAt').isNumber() && now >= root.child('games').child(root.child('users').child(auth.uid).child('activeBoardId').val()).child('createdAt').val() + 172800000))))",
+        ".write": "auth != null && (data.child('ownerId').val() == auth.uid || data.child('managerId').val() == auth.uid || (!data.exists() && (root.child('admins').child(auth.uid).val() == true || !root.child('users').child(auth.uid).child('activeBoardId').exists() || !root.child('games').child(root.child('users').child(auth.uid).child('activeBoardId').val()).exists() || (root.child('games').child(root.child('users').child(auth.uid).child('activeBoardId').val()).child('espnEventId').val() == null && root.child('games').child(root.child('users').child(auth.uid).child('activeBoardId').val()).child('createdAt').isNumber() && now >= root.child('games').child(root.child('users').child(auth.uid).child('activeBoardId').val()).child('createdAt').val() + 172800000))))",
         "name": {
           ".validate": "newData.isString() && newData.val().length <= 100"
         },
@@ -190,6 +190,12 @@
       "$email": {
         ".read": "auth != null",
         ".write": "auth != null && newData.val() == auth.uid"
+      }
+    },
+    "admins": {
+      "$uid": {
+        ".read": "auth != null && auth.uid == $uid",
+        ".write": false
       }
     }
   }

@@ -102,6 +102,25 @@ describe('creating games', () => {
     await assertFails(set(env.authenticatedContext('host'), 'games/new001', baseGame({ ownerId: 'host' })));
   });
 
+  it('an admin can create a second board while their linked board is active', async () => {
+    await seed({
+      'games/live01': baseGame({ ownerId: 'host', espnEventId: '401' }),
+      'users/host/activeBoardId': 'live01',
+      'admins/host': true
+    });
+    await assertSucceeds(set(env.authenticatedContext('host'), 'games/new001', baseGame({ ownerId: 'host' })));
+  });
+
+  it('nobody can make themselves an admin from the app', async () => {
+    await assertFails(set(env.authenticatedContext('host'), 'admins/host', true));
+  });
+
+  it('a user can read only their own admin flag', async () => {
+    await seed({ 'admins/host': true });
+    await assertSucceeds(read(env.authenticatedContext('host'), 'admins/host'));
+    await assertFails(read(env.authenticatedContext('player'), 'admins/host'));
+  });
+
   it('a host cannot create a second board within 48 hours of an unlinked one', async () => {
     await seed({
       'games/free01': baseGame({ ownerId: 'host', createdAt: Date.now() - HOUR }),
