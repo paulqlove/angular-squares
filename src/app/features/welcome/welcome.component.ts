@@ -19,7 +19,7 @@ import { AppHeaderComponent } from '../../components/ui/app-header/app-header.co
 import { HeadroomDirective } from '../../shared/directives/headroom.directive';
 import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.component';
 import { PhoneDemoComponent } from './phone-demo.component';
-import { NFL_TEAMS } from '../content/teams-data';
+import { NFL_TEAMS, getTeamLogo, NflTeam } from '../content/teams-data';
 
 interface Feature {
   icon: string;
@@ -198,10 +198,13 @@ interface Feature {
                 [style.background]="'linear-gradient(135deg, ' + team.primaryColor + ' 0%, ' + team.secondaryColor + ' 100%)'"
                 [attr.aria-label]="team.city + ' ' + team.name"
               >
-                <span class="absolute inset-0 flex items-center justify-center text-lg font-bold text-white drop-shadow-sm sm:text-xl md:text-2xl">
-                  {{ team.abbreviation }}
-                </span>
-                <span class="absolute inset-x-0 bottom-0 bg-black/50 px-1 py-0.5 text-center text-[8px] font-medium text-white opacity-0 transition-opacity group-hover:opacity-100 sm:text-[10px]">
+                <img
+                  [src]="getLogoUrl(team)"
+                  [alt]="team.name"
+                  class="absolute inset-0 m-auto h-3/4 w-3/4 object-contain drop-shadow-md"
+                  loading="lazy"
+                >
+                <span class="absolute inset-x-0 bottom-0 bg-black/60 px-1 py-1 text-center text-[9px] font-medium text-white opacity-0 transition-opacity group-hover:opacity-100 sm:text-[10px]">
                   {{ team.name }}
                 </span>
               </a>
@@ -367,6 +370,10 @@ export class WelcomeComponent implements OnInit {
   openJoinCode(): void {
     this.showJoinCode.set(true);
     setTimeout(() => this.joinInput?.nativeElement.focus());
+  }
+
+  getLogoUrl(team: NflTeam): string {
+    return getTeamLogo(team, 100);
   }
 
   private pendingJoinCode = '';

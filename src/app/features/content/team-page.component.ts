@@ -3,7 +3,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { SeoService } from '../../core/services/seo.service';
 import { BreadcrumbsComponent } from '../../shared/breadcrumbs.component';
 import { ContentShellComponent } from './content-shell.component';
-import { NflTeam, getTeamBySlug, NFL_TEAMS } from './teams-data';
+import { NflTeam, getTeamBySlug, getTeamLogo, NFL_TEAMS } from './teams-data';
 import { EspnService, EspnGame } from '../../core/services/espn.service';
 
 @Component({
@@ -21,19 +21,24 @@ import { EspnService, EspnGame } from '../../core/services/espn.service';
             class="relative -mx-4 -mt-4 mb-8 overflow-hidden px-6 py-10 sm:-mx-8 sm:rounded-2xl"
             [style.background]="'linear-gradient(135deg, ' + team.primaryColor + ' 0%, ' + team.secondaryColor + ' 100%)'"
           >
-            <div class="relative z-10">
-              <p class="text-sm font-medium uppercase tracking-wider" [style.color]="getContrastColor(team.primaryColor)">
-                {{ team.conference }} {{ team.division }}
-              </p>
-              <h1 class="mt-2 text-4xl font-bold sm:text-5xl" [style.color]="getContrastColor(team.primaryColor)">
-                {{ team.city }} {{ team.name }}
-              </h1>
-              <p class="mt-3 text-lg opacity-90" [style.color]="getContrastColor(team.primaryColor)">
-                Football squares for {{ team.name }} fans
-              </p>
-            </div>
-            <div class="absolute right-4 top-1/2 -translate-y-1/2 text-[12rem] font-black leading-none opacity-10" [style.color]="getContrastColor(team.primaryColor)">
-              {{ team.abbreviation }}
+            <div class="relative z-10 flex items-center gap-6">
+              <img
+                [src]="getLogoUrl(team)"
+                [alt]="team.city + ' ' + team.name + ' logo'"
+                class="h-20 w-20 shrink-0 drop-shadow-lg sm:h-28 sm:w-28"
+                loading="eager"
+              >
+              <div>
+                <p class="text-sm font-medium uppercase tracking-wider" [style.color]="getContrastColor(team.primaryColor)">
+                  {{ team.conference }} {{ team.division }}
+                </p>
+                <h1 class="mt-1 text-3xl font-bold sm:text-5xl" [style.color]="getContrastColor(team.primaryColor)">
+                  {{ team.city }} {{ team.name }}
+                </h1>
+                <p class="mt-2 text-base opacity-90 sm:text-lg" [style.color]="getContrastColor(team.primaryColor)">
+                  Football squares for {{ team.name }} fans
+                </p>
+              </div>
             </div>
           </header>
 
@@ -215,16 +220,17 @@ export class TeamPageComponent implements OnInit {
     if (!this.team) return;
 
     try {
-      const allGames = await this.espn.getGames('nfl');
-      const teamGames = allGames.filter(
-        g => g.homeTeam.includes(this.team!.name) || g.awayTeam.includes(this.team!.name)
-      ).slice(0, 5);
+      const teamGames = await this.espn.getTeamSchedule(this.team.espnId, 'nfl');
       this.games.set(teamGames);
     } catch {
       this.games.set([]);
     } finally {
       this.loading.set(false);
     }
+  }
+
+  public getLogoUrl(team: NflTeam): string {
+    return getTeamLogo(team, 500);
   }
 
   public getContrastColor(hex: string): string {
