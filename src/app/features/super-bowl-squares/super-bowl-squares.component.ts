@@ -186,6 +186,12 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
   constructor() {
     // Reactively update currentPlayer when auth state changes (e.g., Google sign-in after page load)
+    // Lift toasts and the preview switcher above the floating host bar
+    effect(() => {
+      const hasHostBar = this.isGameOwner() || this.isManager();
+      if (typeof document !== 'undefined') document.body.classList.toggle('has-host-bar', hasHostBar);
+    });
+
     effect(() => {
       const user = this.authService.currentUser();
       const previewRole = this.authService.previewRole();
@@ -379,6 +385,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (typeof document !== 'undefined') document.body.classList.remove('has-host-bar');
     this.destroyed = true;
     this.subscription.unsubscribe();
     this.gameService.unsubscribe();

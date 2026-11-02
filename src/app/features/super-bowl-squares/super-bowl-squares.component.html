@@ -51,6 +51,38 @@
     }
   </app-shared-header>
 
+  <!-- Host tools: floating bar, bottom center, owner and co-host only -->
+  @if (isGameOwner() || isManager()) {
+    <div class="no-print fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-[90] mx-auto sm:bottom-4 sm:max-w-fit" data-walkthrough="host-tools">
+      <div role="toolbar" [attr.aria-label]="isGameOwner() ? 'Host tools' : 'Co-host tools'"
+        class="flex items-stretch gap-1 rounded-[12px] border border-qs-line bg-[color-mix(in_srgb,var(--qs-panel)_88%,transparent)] p-1.5 shadow-pop backdrop-blur-md sm:items-center sm:gap-2 sm:p-2">
+        <p class="qs-eyebrow qs-eyebrow-bar hidden px-2 lg:block">{{ isGameOwner() ? 'Host tools' : 'Co-host' }}</p>
+        @if (isGameOwner()) {
+          <!-- The next game-day step is the primary button: lock, then draw -->
+          <button type="button" (click)="toggleLock()" class="qs-btn host-btn" [class.qs-btn-primary]="!isLocked" [class.qs-btn-secondary]="isLocked" [attr.aria-pressed]="isLocked">
+            <ng-icon [name]="isLocked ? 'heroLockClosed' : 'heroLockOpen'" class="text-base"></ng-icon>
+            <span class="sm:hidden">{{ isLocked ? 'Unlock' : 'Lock' }}</span><span class="hidden sm:inline">{{ isLocked ? 'Unlock' : 'Lock board' }}</span>
+          </button>
+          <button type="button" (click)="randomizeNumbers()" [disabled]="isLocked && isRandomized" class="qs-btn host-btn" [class.qs-btn-primary]="isLocked && !isRandomized" [class.qs-btn-secondary]="!(isLocked && !isRandomized)" [title]="isLocked && isRandomized ? 'Unlock the board to clear numbers' : ''">
+            <ng-icon [name]="isRandomized ? 'heroArrowPath' : 'heroSparkles'" class="text-base"></ng-icon>
+            <span class="sm:hidden">{{ isRandomized ? 'Clear' : 'Draw' }}</span><span class="hidden sm:inline">{{ isRandomized ? 'Clear numbers' : 'Draw numbers' }}</span>
+          </button>
+        }
+        <button type="button" (click)="onManagePayments()" class="qs-btn qs-btn-secondary host-btn">
+          <ng-icon name="heroCheckCircle" class="text-base"></ng-icon>
+          <span class="sm:hidden">Confirm</span><span class="hidden sm:inline">Confirm players</span>
+        </button>
+        @if (isGameOwner()) {
+          <button type="button" (click)="showSettings.set(true)" class="qs-btn qs-btn-ghost host-btn">
+            <ng-icon name="heroPencilSquare" class="text-base"></ng-icon>
+            <span class="sm:hidden">Edit</span><span class="hidden sm:inline">Edit game</span>
+          </button>
+        }
+        <span class="qs-badge hidden shrink-0 sm:inline-flex" [class.qs-badge-ok]="!isLocked">{{ isLocked ? 'Locked' : 'Open for picks' }}</span>
+      </div>
+    </div>
+  }
+
   <app-edit-game-dialog
     [isOpen]="showSettings()"
     [isLocked]="isLocked"
@@ -60,7 +92,7 @@
     (clearGame)="onClearGame(true)"
   ></app-edit-game-dialog>
 
-  <div class="mx-auto max-w-[1600px] px-1 pb-16 pt-2 sm:px-5">
+  <div class="mx-auto max-w-[1600px] px-1 pb-16 pt-2 sm:px-5" [class.pb-32]="isGameOwner() || isManager()">
     <div class="space-y-6">
       <!-- Game Info Bar -->
       <div class="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
@@ -120,39 +152,6 @@
           }
         </div>
       </div>
-
-      <!-- Host tools (owner and co-host) -->
-      @if (isGameOwner() || isManager()) {
-        <div class="qs-card mx-3 flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:px-4" data-walkthrough="host-tools">
-          <div class="flex items-center justify-between gap-2 sm:contents">
-            <p class="qs-eyebrow qs-eyebrow-bar sm:mr-2">{{ isGameOwner() ? 'Host tools' : 'Co-host tools' }}</p>
-            <span class="qs-badge sm:order-last" [class.qs-badge-ok]="!isLocked">{{ isLocked ? 'Locked' : 'Open for picks' }}</span>
-          </div>
-          <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-1 sm:items-center">
-            @if (isGameOwner()) {
-              <!-- The next game-day step is the primary button: lock, then draw -->
-              <button type="button" (click)="toggleLock()" class="qs-btn px-3" [class.qs-btn-primary]="!isLocked" [class.qs-btn-secondary]="isLocked" [attr.aria-pressed]="isLocked">
-                <ng-icon [name]="isLocked ? 'heroLockClosed' : 'heroLockOpen'" class="text-base"></ng-icon>
-                {{ isLocked ? 'Unlock' : 'Lock board' }}
-              </button>
-              <button type="button" (click)="randomizeNumbers()" [disabled]="isLocked && isRandomized" class="qs-btn px-3" [class.qs-btn-primary]="isLocked && !isRandomized" [class.qs-btn-secondary]="!(isLocked && !isRandomized)" [title]="isLocked && isRandomized ? 'Unlock the board to clear numbers' : ''">
-                <ng-icon [name]="isRandomized ? 'heroArrowPath' : 'heroSparkles'" class="text-base"></ng-icon>
-                {{ isRandomized ? 'Clear numbers' : 'Draw numbers' }}
-              </button>
-            }
-            <button type="button" (click)="onManagePayments()" class="qs-btn qs-btn-secondary px-3" [class.col-span-2]="!isGameOwner()">
-              <ng-icon name="heroCheckCircle" class="text-base"></ng-icon>
-              Confirm players
-            </button>
-            @if (isGameOwner()) {
-              <button type="button" (click)="showSettings.set(true)" class="qs-btn qs-btn-ghost px-3 sm:ml-auto">
-                <ng-icon name="heroPencilSquare" class="text-base"></ng-icon>
-                Edit game
-              </button>
-            }
-          </div>
-        </div>
-      }
 
       <!-- Board + players -->
       <div class="grid grid-cols-1 gap-8 px-3 lg:grid-cols-12">
