@@ -111,15 +111,22 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
           'Home team (columns): 0, 1, 2, 3, 4, 5, 6, 7, 8, 9',
           'Each square = 1 score combination'
         ],
-        html: `<div class="not-prose mt-6 max-w-sm">
-          <div class="mb-2 flex justify-between text-xs font-medium text-muted"><span>AWAY ↓</span><span>HOME →</span></div>
-          <div class="grid grid-cols-[1.5rem_repeat(10,minmax(0,1fr))] gap-px overflow-hidden rounded-lg border border-default bg-slate-200 dark:bg-slate-700">
-            <div class="bg-slate-100 dark:bg-slate-800"></div>
-            ${[0,1,2,3,4,5,6,7,8,9].map(i => `<div class="flex items-center justify-center bg-slate-100 dark:bg-slate-800 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-400">${i}</div>`).join('')}
-            ${[0,1,2,3,4,5,6,7,8,9].map(row => `<div class="flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-400">${row}</div>${[0,1,2,3,4,5,6,7,8,9].map(col => row === 4 && col === 7 ? '<div class="aspect-square bg-green-500 flex items-center justify-center text-[10px] font-bold text-white">WIN</div>' : '<div class="aspect-square bg-white dark:bg-slate-900"></div>').join('')}`).join('')}
+        html: `<figure class="not-prose mt-6 max-w-xs">
+          <div class="overflow-hidden rounded-lg border border-slate-300 dark:border-slate-600">
+            <table class="w-full border-collapse text-center text-[11px]">
+              <thead>
+                <tr class="bg-slate-100 dark:bg-slate-800">
+                  <th class="w-6 p-1 text-[9px] text-slate-500 dark:text-slate-400"><span class="block">↓</span><span class="block">→</span></th>
+                  ${[0,1,2,3,4,5,6,7,8,9].map(i => `<th class="p-1 font-semibold text-slate-600 dark:text-slate-300">${i}</th>`).join('')}
+                </tr>
+              </thead>
+              <tbody>
+                ${[0,1,2,3,4,5,6,7,8,9].map(row => `<tr>${`<td class="bg-slate-100 dark:bg-slate-800 p-1 font-semibold text-slate-600 dark:text-slate-300">${row}</td>`}${[0,1,2,3,4,5,6,7,8,9].map(col => row === 4 && col === 7 ? '<td class="bg-green-500 p-1 font-bold text-white">WIN</td>' : '<td class="bg-white dark:bg-slate-900 p-1"></td>').join('')}</tr>`).join('')}
+              </tbody>
+            </table>
           </div>
-          <p class="mt-2 text-xs text-muted">Score 24–17 → row 4, column 7 wins</p>
-        </div>`
+          <figcaption class="mt-2 text-xs text-muted">Score 24–17 → row 4, column 7 wins</figcaption>
+        </figure>`
       },
       {
         heading: '50 squares (5 × 10) — Half board',
@@ -133,15 +140,22 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
           'Home team (columns): 0, 1, 2, 3, 4, 5, 6, 7, 8, 9',
           'Each square = 2 score combinations'
         ],
-        html: `<div class="not-prose mt-6 max-w-sm">
-          <div class="mb-2 flex justify-between text-xs font-medium text-muted"><span>AWAY ↓</span><span>HOME →</span></div>
-          <div class="grid grid-cols-[2rem_repeat(10,minmax(0,1fr))] gap-px overflow-hidden rounded-lg border border-default bg-slate-200 dark:bg-slate-700">
-            <div class="bg-slate-100 dark:bg-slate-800"></div>
-            ${[0,1,2,3,4,5,6,7,8,9].map(i => `<div class="flex items-center justify-center bg-slate-100 dark:bg-slate-800 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-400">${i}</div>`).join('')}
-            ${['0,1','2,3','4,5','6,7','8,9'].map((pair, row) => `<div class="flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-[10px] font-semibold text-slate-600 dark:text-slate-400 py-2">${pair}</div>${[0,1,2,3,4,5,6,7,8,9].map(col => row === 2 && col === 7 ? '<div class="aspect-[1/1.2] bg-green-500 flex items-center justify-center text-[10px] font-bold text-white">WIN</div>' : '<div class="aspect-[1/1.2] bg-white dark:bg-slate-900"></div>').join('')}`).join('')}
+        html: `<figure class="not-prose mt-6 max-w-sm">
+          <div class="overflow-hidden rounded-lg border border-slate-300 dark:border-slate-600">
+            <table class="w-full border-collapse text-center text-[11px]">
+              <thead>
+                <tr class="bg-slate-100 dark:bg-slate-800">
+                  <th class="w-8 p-1 text-[9px] text-slate-500 dark:text-slate-400"><span class="block">↓</span><span class="block">→</span></th>
+                  ${[0,1,2,3,4,5,6,7,8,9].map(i => `<th class="p-1 font-semibold text-slate-600 dark:text-slate-300">${i}</th>`).join('')}
+                </tr>
+              </thead>
+              <tbody>
+                ${['0,1','2,3','4,5','6,7','8,9'].map((pair, row) => `<tr>${`<td class="bg-slate-100 dark:bg-slate-800 p-1 text-[10px] font-semibold text-slate-600 dark:text-slate-300">${pair}</td>`}${[0,1,2,3,4,5,6,7,8,9].map(col => row === 2 && col === 7 ? '<td class="bg-green-500 p-1.5 font-bold text-white">WIN</td>' : '<td class="bg-white dark:bg-slate-900 p-1.5"></td>').join('')}</tr>`).join('')}
+              </tbody>
+            </table>
           </div>
-          <p class="mt-2 text-xs text-muted">Score 24–17 → "4,5" row, column 7 wins</p>
-        </div>`
+          <figcaption class="mt-2 text-xs text-muted">Score 24–17 → "4,5" row, column 7 wins</figcaption>
+        </figure>`
       },
       {
         heading: '25 squares (5 × 5) — Quarter board',
@@ -155,15 +169,22 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
           'Home team (columns): 0,1 / 2,3 / 4,5 / 6,7 / 8,9',
           'Each square = 4 score combinations'
         ],
-        html: `<div class="not-prose mt-6 max-w-[240px]">
-          <div class="mb-2 flex justify-between text-xs font-medium text-muted"><span>AWAY ↓</span><span>HOME →</span></div>
-          <div class="grid grid-cols-[2.5rem_repeat(5,minmax(0,1fr))] gap-px overflow-hidden rounded-lg border border-default bg-slate-200 dark:bg-slate-700">
-            <div class="bg-slate-100 dark:bg-slate-800"></div>
-            ${['0,1','2,3','4,5','6,7','8,9'].map(p => `<div class="flex items-center justify-center bg-slate-100 dark:bg-slate-800 py-2 text-[10px] font-semibold text-slate-600 dark:text-slate-400">${p}</div>`).join('')}
-            ${['0,1','2,3','4,5','6,7','8,9'].map((pair, row) => `<div class="flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-[10px] font-semibold text-slate-600 dark:text-slate-400">${pair}</div>${['0,1','2,3','4,5','6,7','8,9'].map((_, col) => row === 2 && col === 3 ? '<div class="aspect-square bg-green-500 flex items-center justify-center text-[10px] font-bold text-white">WIN</div>' : '<div class="aspect-square bg-white dark:bg-slate-900"></div>').join('')}`).join('')}
+        html: `<figure class="not-prose mt-6 max-w-[220px]">
+          <div class="overflow-hidden rounded-lg border border-slate-300 dark:border-slate-600">
+            <table class="w-full border-collapse text-center text-[11px]">
+              <thead>
+                <tr class="bg-slate-100 dark:bg-slate-800">
+                  <th class="w-9 p-1 text-[9px] text-slate-500 dark:text-slate-400"><span class="block">↓</span><span class="block">→</span></th>
+                  ${['0,1','2,3','4,5','6,7','8,9'].map(p => `<th class="p-1.5 text-[10px] font-semibold text-slate-600 dark:text-slate-300">${p}</th>`).join('')}
+                </tr>
+              </thead>
+              <tbody>
+                ${['0,1','2,3','4,5','6,7','8,9'].map((pair, row) => `<tr>${`<td class="bg-slate-100 dark:bg-slate-800 p-1 text-[10px] font-semibold text-slate-600 dark:text-slate-300">${pair}</td>`}${['0,1','2,3','4,5','6,7','8,9'].map((_, col) => row === 2 && col === 3 ? '<td class="bg-green-500 p-2 font-bold text-white">WIN</td>' : '<td class="bg-white dark:bg-slate-900 p-2"></td>').join('')}</tr>`).join('')}
+              </tbody>
+            </table>
           </div>
-          <p class="mt-2 text-xs text-muted">Score 24–17 → "4,5" row, "6,7" column wins</p>
-        </div>`
+          <figcaption class="mt-2 text-xs text-muted">Score 24–17 → "4,5" row, "6,7" column wins</figcaption>
+        </figure>`
       },
       {
         heading: 'Which size to choose',
