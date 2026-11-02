@@ -11,8 +11,8 @@ export interface NflTeam {
 }
 
 export function getTeamLogo(team: NflTeam, size: 500 | 100 = 500): string {
-  // ESPN uses team IDs for logos, not abbreviations
-  return `https://a.espncdn.com/i/teamlogos/nfl/${size}/scoreboard/${team.espnId}.png`;
+  // ESPN team logos by ID - use combiner for resizing
+  return `https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/${team.espnId}.png&h=${size}&w=${size}`;
 }
 
 export const NFL_TEAMS: NflTeam[] = [
