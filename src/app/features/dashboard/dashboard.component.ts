@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { NgTemplateOutlet } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
 import { GameService, GameListItem, BoardSize } from '../../core/services/game.service';
+import { QuarterSplit, SPLIT_PRESETS, DEFAULT_SPLIT, isValidSplit } from '../../core/plans';
 import { EspnService, EspnGame, SportType, SPORT_CONFIG } from '../../core/services/espn.service';
 import { ToastService } from '../../core/services/toast.service';
 import { SanitizationService } from '../../core/services/sanitization.service';
@@ -447,9 +448,33 @@ import {
                 </div>
               </section>
 
-              <!-- 05 Details -->
+              <!-- 05 Quarter split -->
               <section>
-                <h4 class="qs-eyebrow qs-eyebrow-bar">04 / Details</h4>
+                <h4 class="qs-eyebrow qs-eyebrow-bar">05 / Quarter split</h4>
+                <div class="mt-3 flex flex-wrap gap-1.5">
+                  @for (preset of splitPresets; track preset.id) {
+                    <button type="button" class="qs-tab min-h-9 px-2.5 text-[10.5px]" [attr.aria-pressed]="newGameActivePreset() === preset.id" (click)="applyNewGameSplitPreset(preset.split)">{{ preset.label }}</button>
+                  }
+                  <button type="button" class="qs-tab min-h-9 px-2.5 text-[10.5px]" [attr.aria-pressed]="newGameActivePreset() === 'custom'" (click)="newGameSplitCustomOpen = true">Custom</button>
+                </div>
+                @if (newGameSplitCustomOpen || newGameActivePreset() === 'custom') {
+                  <div class="mt-3 grid grid-cols-4 gap-2">
+                    @for (q of quarters; track q.key) {
+                      <div>
+                        <label [for]="'new-split-' + q.key" class="qs-label mb-1 block text-[10px] text-qs-muted">{{ q.label }}</label>
+                        <input [id]="'new-split-' + q.key" type="number" min="0" max="100" step="0.5" [(ngModel)]="newGameSplitPct[q.key]" class="qs-input px-2 text-center tabular-nums" />
+                      </div>
+                    }
+                  </div>
+                }
+                <p class="mt-1.5 text-xs tabular-nums" [class]="newGameSplitValid() ? 'text-qs-muted' : 'text-qs-bad'">
+                  {{ newGameSplitText() }} · {{ newGameSplitValid() ? 'Totals 100%' : 'Must total 100% (' + newGameSplitRemaining() + ' left)' }}
+                </p>
+              </section>
+
+              <!-- 06 Details -->
+              <section>
+                <h4 class="qs-eyebrow qs-eyebrow-bar">06 / Details</h4>
                 <div class="mt-3 space-y-4">
                   <div>
                     <label for="new-game-name" class="qs-label mb-1.5 block text-qs-muted">Game name <span class="text-qs-bad">*</span></label>
@@ -483,7 +508,7 @@ import {
 
             <div class="flex items-center justify-end gap-2 border-t border-qs-line bg-qs-panel-2 px-6 py-4">
               <button type="button" (click)="showCreateModal.set(false)" class="qs-btn qs-btn-ghost text-qs-muted">Cancel</button>
-              <button type="button" (click)="createGame()" [disabled]="isCreating()" [attr.aria-busy]="isCreating()" class="qs-btn qs-btn-primary min-w-40">
+              <button type="button" (click)="createGame()" [disabled]="isCreating() || !newGameSplitValid()" [attr.aria-busy]="isCreating()" class="qs-btn qs-btn-primary min-w-40">
                 @if (isCreating()) {
                   <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" aria-hidden="true">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
@@ -826,6 +851,14 @@ export class DashboardComponent implements OnInit {
   customPrice: number | null = null;
   newGameBoardSize: BoardSize = 100;
 
+  // Quarter split state for game creation
+  newGameSplitPct: { [k in keyof QuarterSplit]: number } = { q1: 20, q2: 20, q3: 20, q4: 40 };
+  newGameSplitCustomOpen = false;
+  readonly splitPresets = SPLIT_PRESETS;
+  readonly quarters: { key: keyof QuarterSplit; label: string }[] = [
+    { key: 'q1', label: 'Q1' }, { key: 'q2', label: 'Q2' }, { key: 'q3', label: 'Q3' }, { key: 'q4', label: 'Q4' }
+  ];
+
   pricePresets = [0, 5, 10, 20, 50];
   boardSizeOptions: { value: BoardSize; label: string; description: string }[] = [
     { value: 100, label: '100 squares', description: '10×10 grid (classic)' },
@@ -956,6 +989,37 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  // Quarter split methods for game creation
+  applyNewGameSplitPreset(split: QuarterSplit): void {
+    this.newGameSplitPct = { q1: split.q1 / 10, q2: split.q2 / 10, q3: split.q3 / 10, q4: split.q4 / 10 };
+    this.newGameSplitCustomOpen = false;
+  }
+
+  newGameSplitTenths(): QuarterSplit | null {
+    const t = (v: number) => Math.round(Number(v) * 10);
+    const ok = this.quarters.every(q => Number.isFinite(Number(this.newGameSplitPct[q.key])) && Math.abs(Number(this.newGameSplitPct[q.key]) * 10 - t(this.newGameSplitPct[q.key])) < 1e-6);
+    return ok ? { q1: t(this.newGameSplitPct.q1), q2: t(this.newGameSplitPct.q2), q3: t(this.newGameSplitPct.q3), q4: t(this.newGameSplitPct.q4) } : null;
+  }
+
+  newGameSplitValid(): boolean {
+    return isValidSplit(this.newGameSplitTenths());
+  }
+
+  newGameSplitRemaining(): string {
+    const total = this.quarters.reduce((sum, q) => sum + (Number(this.newGameSplitPct[q.key]) || 0), 0);
+    return (Math.round((100 - total) * 10) / 10).toString() + '%';
+  }
+
+  newGameActivePreset(): string {
+    const t = this.newGameSplitTenths();
+    return this.splitPresets.find(p => t && p.split.q1 === t.q1 && p.split.q2 === t.q2 && p.split.q3 === t.q3 && p.split.q4 === t.q4)?.id ?? 'custom';
+  }
+
+  newGameSplitText(): string {
+    const fmt = (v: number) => (Math.round(Number(v) * 10) / 10).toString();
+    return [this.newGameSplitPct.q1, this.newGameSplitPct.q2, this.newGameSplitPct.q3, this.newGameSplitPct.q4].map(fmt).join(' / ');
+  }
+
   getGameStatusClass(status: string): string {
     switch (status) {
       case 'pre': return 'bg-qs-panel-2 text-qs-muted';
@@ -999,6 +1063,11 @@ export class DashboardComponent implements OnInit {
 
       const sanitizedHostNote = this.sanitizationService.sanitizeHostNote(this.newGameHostNote);
 
+      // Get quarter split - null if default, otherwise the custom split
+      const split = this.newGameSplitTenths();
+      const isDefaultSplit = split && split.q1 === 200 && split.q2 === 200 && split.q3 === 200 && split.q4 === 400;
+      const quarterSplit = isDefaultSplit ? null : split;
+
       const gameId = await this.gameService.createGame(
         user.uid,
         user.displayName || 'Unknown',
@@ -1010,7 +1079,8 @@ export class DashboardComponent implements OnInit {
         this.selectedEspnGameId ? this.selectedSport : undefined,
         this.newGamePaymentManager.trim() || undefined,
         sanitizedHostNote || undefined,
-        this.newGameBoardSize
+        this.newGameBoardSize,
+        quarterSplit
       );
       this.showCreateModal.set(false);
       this.resetCreateForm();
@@ -1039,6 +1109,8 @@ export class DashboardComponent implements OnInit {
     this.newGamePrice = 10;
     this.customPrice = null;
     this.newGameBoardSize = 100;
+    this.newGameSplitPct = { q1: 20, q2: 20, q3: 20, q4: 40 };
+    this.newGameSplitCustomOpen = false;
     this.gameNameError.set(false);
   }
 

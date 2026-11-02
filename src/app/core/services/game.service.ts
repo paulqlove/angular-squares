@@ -299,7 +299,8 @@ export class GameService {
     espnSport?: SportType,
     managerEmail?: string,
     hostNote?: string,
-    boardSize?: BoardSize
+    boardSize?: BoardSize,
+    quarterSplit?: QuarterSplit | null
   ): Promise<string> {
     if (!this.isBrowser) throw new Error('Cannot create game on server');
     if (this.authService.blockPreviewWrite()) throw new Error('Preview only');
@@ -338,6 +339,7 @@ export class GameService {
       hostNote: hostNote || '',
       paidPlayers: [],
       adFreeUntil: await this.adFreeUntilFor(ownerId),
+      quarterSplit: quarterSplit || null,
       ...(espnEventId ? { espnEventId } : {}),
       ...(espnSport ? { espnSport } : {}),
       ...(managerEmail ? { managerEmail } : {})
