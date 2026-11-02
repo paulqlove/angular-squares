@@ -1,6 +1,5 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { EspnGame, SportType, SPORT_CONFIG } from '../../../../core/services/espn.service';
-import { getTeamLogoByAbbreviation } from '../../../content/teams-data';
 
 @Component({
   selector: 'app-box-score',
@@ -36,14 +35,7 @@ import { getTeamLogoByAbbreviation } from '../../../content/teams-data';
           </thead>
           <tbody>
             <tr class="border-b border-white/10">
-              <td class="py-1 font-semibold">
-                <span class="flex items-center gap-1.5">
-                  @if (getTeamLogo(game.awayTeam); as logo) {
-                    <img [src]="logo" [alt]="game.awayTeam" class="h-4 w-4 object-contain" />
-                  }
-                  {{ game.awayTeam }}
-                </span>
-              </td>
+              <td class="py-1 font-semibold">{{ game.awayTeam }}</td>
               <td class="text-center py-1 text-qs-tile-ink">{{ getQuarterScore(0, 'away') }}</td>
               <td class="text-center py-1 text-qs-tile-ink">{{ getQuarterScore(1, 'away') }}</td>
               <td class="text-center py-1 text-qs-tile-ink">{{ getQuarterScore(2, 'away') }}</td>
@@ -51,14 +43,7 @@ import { getTeamLogoByAbbreviation } from '../../../content/teams-data';
               <td class="text-center py-1 font-bold text-white">{{ game.awayScore }}</td>
             </tr>
             <tr>
-              <td class="py-1 font-semibold">
-                <span class="flex items-center gap-1.5">
-                  @if (getTeamLogo(game.homeTeam); as logo) {
-                    <img [src]="logo" [alt]="game.homeTeam" class="h-4 w-4 object-contain" />
-                  }
-                  {{ game.homeTeam }}
-                </span>
-              </td>
+              <td class="py-1 font-semibold">{{ game.homeTeam }}</td>
               <td class="text-center py-1 text-qs-tile-ink">{{ getQuarterScore(0, 'home') }}</td>
               <td class="text-center py-1 text-qs-tile-ink">{{ getQuarterScore(1, 'home') }}</td>
               <td class="text-center py-1 text-qs-tile-ink">{{ getQuarterScore(2, 'home') }}</td>
@@ -83,9 +68,5 @@ export class BoxScoreComponent {
 
   getPeriodLabel(): string {
     return SPORT_CONFIG[this.espnSport]?.periodLabel || 'Q';
-  }
-
-  getTeamLogo(abbrev: string): string | null {
-    return getTeamLogoByAbbreviation(abbrev, 100);
   }
 }

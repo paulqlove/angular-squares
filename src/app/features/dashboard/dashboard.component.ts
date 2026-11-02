@@ -479,9 +479,8 @@ import {
                           type="button"
                           (click)="selectEspnGame(game.id)"
                           [attr.aria-pressed]="selectedEspnGameId === game.id"
-                          class="relative overflow-hidden rounded-inner border p-3 text-left transition-colors"
+                          class="rounded-inner border bg-qs-panel p-3 text-left transition-colors"
                           [class]="selectedEspnGameId === game.id ? 'border-qs-accent outline outline-2 -outline-offset-2 outline-qs-accent' : 'border-qs-line hover:border-qs-line-strong'"
-                          [style.background]="getGameGradient(game)"
                         >
                           <div class="flex items-center justify-between gap-2">
                             <span class="qs-badge" [class]="getGameStatusClass(game.status)">{{ getGameStatusText(game) }}</span>
@@ -490,11 +489,11 @@ import {
                             }
                           </div>
                           <p class="mt-2 flex items-center gap-1.5 truncate font-semibold text-qs-ink">
-                            @if (getTeamLogo(game.awayTeam); as logo) {
+                            @if (selectedSport === 'nfl' && getTeamLogo(game.awayTeam); as logo) {
                               <img [src]="logo" [alt]="game.awayTeam" class="h-4 w-4 object-contain" />
                             }
                             {{ game.awayTeam }} &#64;
-                            @if (getTeamLogo(game.homeTeam); as logo) {
+                            @if (selectedSport === 'nfl' && getTeamLogo(game.homeTeam); as logo) {
                               <img [src]="logo" [alt]="game.homeTeam" class="h-4 w-4 object-contain" />
                             }
                             {{ game.homeTeam }}
@@ -698,17 +697,16 @@ import {
                         [class]="editEspnGameId === game.id
                           ? 'p-3 border-2 border-qs-accent bg-qs-accent-soft rounded-xl text-left transition-all'
                           : 'p-3 border-2 border-default hover:border-hover rounded-xl text-left transition-all'"
-                        [style.background]="getGameGradient(game)"
                       >
                         <div class="flex items-center justify-between">
                           <div>
                             <p class="flex items-center gap-1.5 font-semibold text-sm"
                               [class]="editEspnGameId === game.id ? 'text-qs-ink' : 'text-heading'">
-                              @if (getTeamLogo(game.awayTeam); as logo) {
+                              @if (editSport === 'nfl' && getTeamLogo(game.awayTeam); as logo) {
                                 <img [src]="logo" [alt]="game.awayTeam" class="h-4 w-4 object-contain" />
                               }
                               {{ game.awayTeam }} &#64;
-                              @if (getTeamLogo(game.homeTeam); as logo) {
+                              @if (editSport === 'nfl' && getTeamLogo(game.homeTeam); as logo) {
                                 <img [src]="logo" [alt]="game.homeTeam" class="h-4 w-4 object-contain" />
                               }
                               {{ game.homeTeam }}
