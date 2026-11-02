@@ -267,7 +267,7 @@ export class TeamPageComponent implements OnInit {
 
   public createBoard(): void {
     if (this.isAuthenticated()) {
-      this.router.navigate(['/dashboard']);
+      this.router.navigate(['/dashboard'], { queryParams: { create: 'true' } });
     } else {
       this.showAuthModal.set(true);
     }
@@ -275,6 +275,6 @@ export class TeamPageComponent implements OnInit {
 
   public onAuthenticated(): void {
     this.showAuthModal.set(false);
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/dashboard'], { queryParams: { create: 'true' } });
   }
 }
