@@ -28,6 +28,33 @@ Source of truth: `src/app/core/plans.ts` (prices, lengths, limits). Research and
 - Hosts stamp `games/{id}/adFreeUntil`; rules cap it at their real pass so viewers can trust it. Ads stay off until `environment.adsEnabled`; block gambling ad categories when a network is added.
 - Not yet built: checkout, 25/50-square boards, Season Pass organizer tools (email list, notifications, export). Coupons are shelved.
 
+### Bar/Venue Tier ($49-99/season)
+
+A separate B2B offering for sports bars and venues:
+
+- **Customer email capture** (players sign up with email to join)
+- Unlimited boards per season
+- Free game mode (prizes are coupons, gift cards, etc. — no cash, no gambling concerns)
+- Custom branding/theming (colors, logo)
+- Multi-board TV display (large screen only)
+- Branded QR codes
+- Subdomain support (later: joes-bar.quarterscore.com)
+
+**Value prop for bars**: "Capture 50-100 customer emails per season" is worth $200+ in Facebook ad equivalent. The game is free entertainment that brings people back weekly.
+
+**Bar/Venue pricing rationale**: $10 is too cheap for B2B — signals "toy" not "tool." Bars spend $500/month on Untappd, $200 on trivia nights. Price at $49-99/season so serious buyers take it seriously.
+
+### Bar Outreach Strategy
+
+**Market size**: ~60,000 bars in the US, 10-15k are true sports bars showing NFL. Most do paper squares or nothing. Cold outreach converts 1-3%, so realistically hundreds of sign-ups in year one, not thousands.
+
+**Outreach approach**: Use AI (Grok, etc.) to identify and reach sports bars. Pitch the email capture angle: "Run free squares games during Sunday football. Capture customer emails. Give away coupons instead of cash — no gambling, just engagement."
+
+**Pricing options to test**:
+- $49/season (impulse buy, still signals value)
+- $99/year (covers NFL + college)
+- $29/month during season (recurring, Sept-Feb only)
+
 ## Feature Details
 
 ### QR Code Generator
