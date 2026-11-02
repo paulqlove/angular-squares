@@ -194,12 +194,15 @@ export class GameService {
     }
     const limit = await this.boardLimit(ownerId);
     if (limit === Number.POSITIVE_INFINITY) return;
-    const boards = await this.loadOwnedBoardActivity(ownerId);
-    const now = Date.now();
-    const activeCount = boards.filter(board => isBoardActive(board, now)).length;
-    if (activeCount >= limit) {
+    if ((await this.activeBoardCount(ownerId)) >= limit) {
       throw new ActiveBoardLimitError();
     }
+  }
+
+  /** Boards this host has active right now (counted against their plan). */
+  async activeBoardCount(ownerId: string): Promise<number> {
+    const now = Date.now();
+    return (await this.loadOwnedBoardActivity(ownerId)).filter(board => isBoardActive(board, now)).length;
   }
 
   /** Admins (set by hand at admins/{uid} in the console) have no board limit. */
