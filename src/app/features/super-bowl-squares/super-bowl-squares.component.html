@@ -123,18 +123,19 @@
 
       <!-- Host tools (owner and co-host) -->
       @if (isGameOwner() || isManager()) {
-        <div class="flex flex-col gap-3 border-y border-qs-line px-3 py-3 sm:flex-row sm:items-center" data-walkthrough="host-tools">
+        <div class="qs-card mx-3 flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:px-4" data-walkthrough="host-tools">
           <div class="flex items-center justify-between gap-2 sm:contents">
             <p class="qs-eyebrow qs-eyebrow-bar sm:mr-2">{{ isGameOwner() ? 'Host tools' : 'Co-host tools' }}</p>
             <span class="qs-badge sm:order-last" [class.qs-badge-ok]="!isLocked">{{ isLocked ? 'Locked' : 'Open for picks' }}</span>
           </div>
           <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-1 sm:items-center">
             @if (isGameOwner()) {
-              <button type="button" (click)="toggleLock()" class="qs-btn qs-btn-secondary px-3" [attr.aria-pressed]="isLocked">
+              <!-- The next game-day step is the primary button: lock, then draw -->
+              <button type="button" (click)="toggleLock()" class="qs-btn px-3" [class.qs-btn-primary]="!isLocked" [class.qs-btn-secondary]="isLocked" [attr.aria-pressed]="isLocked">
                 <ng-icon [name]="isLocked ? 'heroLockClosed' : 'heroLockOpen'" class="text-base"></ng-icon>
                 {{ isLocked ? 'Unlock' : 'Lock board' }}
               </button>
-              <button type="button" (click)="randomizeNumbers()" [disabled]="isLocked" class="qs-btn qs-btn-secondary px-3" [title]="isLocked ? 'Unlock the board to change numbers' : ''">
+              <button type="button" (click)="randomizeNumbers()" [disabled]="isLocked && isRandomized" class="qs-btn px-3" [class.qs-btn-primary]="isLocked && !isRandomized" [class.qs-btn-secondary]="!(isLocked && !isRandomized)" [title]="isLocked && isRandomized ? 'Unlock the board to clear numbers' : ''">
                 <ng-icon [name]="isRandomized ? 'heroArrowPath' : 'heroSparkles'" class="text-base"></ng-icon>
                 {{ isRandomized ? 'Clear numbers' : 'Draw numbers' }}
               </button>
