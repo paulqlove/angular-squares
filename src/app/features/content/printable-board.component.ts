@@ -59,10 +59,17 @@ import { ContentShellComponent } from './content-shell.component';
         </section>
 
         <section class="print-sheet mt-10" aria-labelledby="grid-heading">
-          <h2 id="grid-heading" class="text-2xl font-bold text-heading">Blank board</h2>
+          <h2 id="grid-heading" class="text-2xl font-bold text-heading no-print">Blank board</h2>
+
+          <!-- Print header with branding -->
+          <div class="hidden print:flex items-center justify-between mb-4">
+            <img src="assets/brand/lockup-horizontal.svg" alt="QuarterScore" class="h-6">
+            <span class="text-xs text-slate-500">quarterscore.com</span>
+          </div>
+
           <div class="mt-4 grid gap-3 text-sm text-default sm:grid-cols-2">
-            <p><span class="font-semibold text-heading">Home team:</span> ____________________</p>
-            <p><span class="font-semibold text-heading">Away team:</span> ____________________</p>
+            <p><span class="font-semibold text-heading">Home team (columns →):</span> ____________________</p>
+            <p><span class="font-semibold text-heading">Away team (rows ↓):</span> ____________________</p>
           </div>
           <p class="mt-2 text-sm text-muted md:hidden no-print">Scroll sideways to see the whole grid.</p>
           <div class="mt-4 max-w-full min-w-0 overflow-x-auto" tabindex="0" aria-label="Blank football squares grid.">
@@ -72,7 +79,10 @@ import { ContentShellComponent } from './content-shell.component';
               </caption>
               <thead>
                 <tr>
-                  <th scope="col" class="w-16 bg-card p-2 text-xs font-semibold text-heading">Away \\ Home</th>
+                  <th scope="col" class="w-20 bg-slate-100 p-2 text-[10px] font-semibold text-slate-700 border border-slate-300">
+                    <span class="block">AWAY ↓</span>
+                    <span class="block text-slate-400">HOME →</span>
+                  </th>
                   @for (column of columns; track column) {
                     <th scope="col" class="h-12 border border-slate-900 bg-white p-1 text-xs font-semibold text-slate-900">
                       <span class="sr-only">Home digit box {{ column }}</span>
@@ -95,8 +105,11 @@ import { ContentShellComponent } from './content-shell.component';
             </table>
           </div>
           <p class="mt-4 max-w-3xl text-sm leading-relaxed text-default">
-            Columns are the home team’s last digit. Rows are the away team’s last digit.
-            Quarter Score never collects, holds, or pays out money.
+            <strong>How to read:</strong> Columns are the home team’s last digit. Rows are the away team’s last digit.
+            Find the square where the row and column meet to see the winner.
+          </p>
+          <p class="mt-2 text-xs text-muted">
+            QuarterScore never collects, holds, or pays out money. · quarterscore.com
           </p>
         </section>
 

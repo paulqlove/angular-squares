@@ -152,10 +152,35 @@ interface Feature {
         </div>
       </section>
 
+      <!-- Board Sizes -->
+      <section class="border-t border-qs-line py-16 md:py-24">
+        <div class="mx-auto max-w-[1600px] px-4 sm:px-8">
+          <p class="qs-eyebrow">Section 02 / Board sizes</p>
+          <h2 class="qs-title mt-3 text-3xl md:text-4xl">Pick the right size for your <span class="text-qs-accent">group.</span></h2>
+          <p class="mt-4 max-w-2xl text-lg text-qs-muted">
+            Not every party has 100 people. Choose from three board sizes to match your crowd.
+          </p>
+
+          <div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
+            @for (board of boardSizes; track board.size) {
+              <div class="qs-card p-6 flex flex-col">
+                <div class="flex items-center justify-between">
+                  <span class="qs-title text-4xl text-qs-accent">{{ board.size }}</span>
+                  <span class="qs-badge">{{ board.grid }}</span>
+                </div>
+                <h3 class="qs-title mt-4 text-xl">{{ board.title }}</h3>
+                <p class="mt-2 text-qs-muted flex-1">{{ board.description }}</p>
+                <p class="mt-4 text-sm text-qs-muted">{{ board.numbers }}</p>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+
       <!-- How It Works -->
       <section id="how-it-works" class="border-t border-qs-line bg-qs-panel-2 py-16 md:py-24">
         <div class="mx-auto max-w-[1600px] px-4 sm:px-8">
-          <p class="qs-eyebrow">Section 02 / How it works</p>
+          <p class="qs-eyebrow">Section 03 / How it works</p>
           <div class="mt-3 flex flex-wrap items-end justify-between gap-4">
             <h2 class="qs-title text-3xl md:text-4xl">Three steps to kickoff.</h2>
             <a routerLink="/how-to-play" class="qs-btn qs-btn-secondary">Read the full rules</a>
@@ -198,6 +223,30 @@ export class WelcomeComponent implements OnInit {
     { title: 'Play and win', description: 'Claim your squares, watch the game, and see who wins each quarter' }
   ];
 
+  readonly boardSizes = [
+    {
+      size: 100,
+      grid: '10 × 10',
+      title: 'Classic Board',
+      description: 'The traditional football squares game. Each square gets one digit pair (0-9 for each team). Best for large groups.',
+      numbers: 'Single digits 0–9 on each axis'
+    },
+    {
+      size: 50,
+      grid: '5 × 10',
+      title: 'Half Board',
+      description: 'Five rows, ten columns. The away team uses paired digits (0-1, 2-3, etc.) while home uses single digits.',
+      numbers: 'Away: paired (0,1 / 2,3 / ...) · Home: single 0–9'
+    },
+    {
+      size: 25,
+      grid: '5 × 5',
+      title: 'Quarter Board',
+      description: 'Perfect for small groups. Both teams use paired digits, so each square covers four possible score combinations.',
+      numbers: 'Both axes use paired digits (0,1 / 2,3 / ...)'
+    }
+  ];
+
   constructor() {
     effect(() => {
       if (this.authService.isAuthenticated()) {
@@ -234,33 +283,33 @@ export class WelcomeComponent implements OnInit {
   features: Feature[] = [
     {
       icon: 'heroSquares2x2',
-      title: '10x10 Game Board',
-      description: 'Classic football squares grid with automatic number randomization'
+      title: '100, 50, or 25 Squares',
+      description: 'Classic 10x10 grid or smaller boards for fewer players. Paired digits on compact boards.'
     },
     {
       icon: 'heroUserGroup',
-      title: 'Multiplayer',
-      description: 'Real-time updates so everyone sees changes instantly'
+      title: 'Real-time Multiplayer',
+      description: 'Everyone sees squares claimed instantly. No refreshing needed.'
     },
     {
       icon: 'heroTrophy',
       title: 'Auto Winners',
-      description: 'Winners calculated automatically based on quarter scores'
+      description: 'Winners calculated automatically as scores update each quarter'
     },
     {
       icon: 'heroCheckCircle',
-      title: 'Player check-in',
-      description: 'Confirm who\'s in with one tap'
+      title: 'Player Check-in',
+      description: 'Host confirms who\'s in with one tap. Track payments easily.'
     },
     {
       icon: 'heroShare',
       title: 'Easy Sharing',
-      description: 'Share games with a simple code or link'
+      description: 'Share with a 6-digit code or direct link. Players don\'t need accounts.'
     },
     {
       icon: 'heroChartBar',
       title: 'Probability Heatmap',
-      description: 'See the hot squares and best numbers from NFL history',
+      description: 'See which squares win most often based on NFL history',
       id: 'probability-heatmap',
       link: { path: '/best-squares-numbers', label: 'See the full number table' }
     }
