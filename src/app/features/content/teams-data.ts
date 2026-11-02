@@ -11,6 +11,10 @@ export interface NflTeam {
 }
 
 export function getTeamLogo(team: NflTeam, size: 500 | 100 = 500): string {
+  // Washington Commanders: use local logo (ESPN has outdated Redskins logo)
+  if (team.abbreviation === 'WAS') {
+    return '/assets/team-logos/was.png';
+  }
   // ESPN team logos by lowercase abbreviation
   return `https://a.espncdn.com/i/teamlogos/nfl/${size}/${team.abbreviation.toLowerCase()}.png`;
 }
