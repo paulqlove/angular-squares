@@ -272,5 +272,6 @@ writePosts(posts);
 writePrerenderRoutes(paths);
 writeSitemap(paths, posts);
 writeRss(posts);
-await writePdf();
+// PDF is pre-generated with Playwright for better quality
+// await writePdf();
 console.log(`Content build: ${posts.length} post(s), ${paths.length} prerendered path(s).`);
