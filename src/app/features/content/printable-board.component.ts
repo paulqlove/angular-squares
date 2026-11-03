@@ -34,8 +34,8 @@ import { ContentShellComponent } from './content-shell.component';
         }
       }
       .axis-top {
-        background: var(--qs-tile);
-        color: var(--qs-tile-ink);
+        background: #f1f5f9;
+        color: #94a3b8;
         aspect-ratio: auto;
         height: 1.5rem;
       }
@@ -45,12 +45,12 @@ import { ContentShellComponent } from './content-shell.component';
         }
       }
       .axis-side {
-        background: var(--qs-tile);
-        color: var(--qs-tile-ink);
+        background: #f1f5f9;
+        color: #94a3b8;
       }
       .corner {
-        background: var(--qs-panel-2);
-        color: var(--qs-muted);
+        background: #f1f5f9;
+        color: #64748b;
         aspect-ratio: auto;
         height: 1.5rem;
         font-size: 0.5rem;
