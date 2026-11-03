@@ -448,10 +448,22 @@ import {
                 </div>
               </section>
 
-              <!-- 02 Game -->
+              <!-- 02 Game / Teams -->
               <section>
-                <h4 class="qs-eyebrow qs-eyebrow-bar">02 / Game</h4>
-                @if (isLoadingEspnGames()) {
+                <h4 class="qs-eyebrow qs-eyebrow-bar">02 / {{ selectedSport === 'custom' ? 'Teams' : 'Game' }}</h4>
+                @if (selectedSport === 'custom') {
+                  <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                      <label for="custom-away" class="qs-label mb-1.5 block text-qs-muted">Away team</label>
+                      <input id="custom-away" type="text" [(ngModel)]="customAwayTeam" maxlength="50" placeholder="e.g. Lincoln High" class="qs-input" />
+                    </div>
+                    <div>
+                      <label for="custom-home" class="qs-label mb-1.5 block text-qs-muted">Home team</label>
+                      <input id="custom-home" type="text" [(ngModel)]="customHomeTeam" maxlength="50" placeholder="e.g. Washington High" class="qs-input" />
+                    </div>
+                  </div>
+                  <p class="mt-2 text-xs text-qs-muted">Enter scores manually from the game page after creating the board.</p>
+                } @else if (isLoadingEspnGames()) {
                   <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2" aria-busy="true">
                     @for (i of [0, 1, 2, 3]; track i) {
                       <div class="h-[76px] animate-pulse rounded-inner bg-qs-panel-2"></div>
@@ -953,7 +965,7 @@ export class DashboardComponent implements OnInit {
   editGameName = '';
   editGameHostNote = '';
   editGamePrice = 10;
-  editSport: SportType = 'nfl';
+  editSport: SportType | 'custom' = 'nfl';
   editEspnGameId = '';
   editEspnGames = signal<EspnGame[]>([]);
   isLoadingEditEspnGames = signal(false);
@@ -970,8 +982,10 @@ export class DashboardComponent implements OnInit {
   newGameHostNote = '';
   newGamePaymentManager = '';
   joinGameCode = '';
-  selectedSport: SportType = 'nfl';
+  selectedSport: SportType | 'custom' = 'nfl';
   selectedEspnGameId = '';
+  customAwayTeam = '';
+  customHomeTeam = '';
   /** The New game list collapses to the picked game; Change reopens it. */
   gameListOpen = true;
   newGamePrice = 10;
@@ -992,12 +1006,13 @@ export class DashboardComponent implements OnInit {
     { value: 50, label: '50 squares', description: '5×10 grid' },
     { value: 25, label: '25 squares', description: '5×5 grid' }
   ];
-  sportOptions: { value: SportType; label: string }[] = [
+  sportOptions: { value: SportType | 'custom'; label: string }[] = [
     { value: 'nfl', label: 'NFL' },
     { value: 'ncaaf', label: 'NCAA Football' },
     { value: 'nba', label: 'NBA' },
     { value: 'wnba', label: 'WNBA' },
-    { value: 'afl', label: 'AFL' }
+    { value: 'afl', label: 'AFL' },
+    { value: 'custom', label: 'Custom' }
   ];
 
   ngOnInit(): void {
@@ -1116,6 +1131,10 @@ export class DashboardComponent implements OnInit {
   }
 
   async fetchEspnGames(): Promise<void> {
+    if (this.selectedSport === 'custom') {
+      this.espnGames.set([]);
+      return;
+    }
     this.isLoadingEspnGames.set(true);
     try {
       const games = await this.espnService.getGames(this.selectedSport);
@@ -1125,11 +1144,13 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  selectSport(sport: SportType): void {
+  selectSport(sport: SportType | 'custom'): void {
     this.selectedSport = sport;
     this.selectedEspnGameId = '';
     this.gameListOpen = true;
-    this.fetchEspnGames();
+    if (sport !== 'custom') {
+      this.fetchEspnGames();
+    }
   }
 
   /** A team page's "Create board" stores the game so it arrives pre-selected. */
@@ -1231,7 +1252,11 @@ export class DashboardComponent implements OnInit {
     try {
       let homeTeam: string | undefined;
       let awayTeam: string | undefined;
-      if (this.selectedEspnGameId) {
+      if (this.selectedSport === 'custom') {
+        // Custom game - use manually entered team names
+        homeTeam = this.sanitizationService.sanitizeTeamName(this.customHomeTeam) || undefined;
+        awayTeam = this.sanitizationService.sanitizeTeamName(this.customAwayTeam) || undefined;
+      } else if (this.selectedEspnGameId) {
         const espnGame = this.espnGames().find(g => g.id === this.selectedEspnGameId);
         if (espnGame) {
           homeTeam = espnGame.homeTeam;
@@ -1254,7 +1279,7 @@ export class DashboardComponent implements OnInit {
         homeTeam,
         awayTeam,
         sanitizedPrice,
-        this.selectedEspnGameId ? this.selectedSport : undefined,
+        this.selectedEspnGameId && this.selectedSport !== 'custom' ? this.selectedSport : undefined,
         this.newGamePaymentManager.trim() || undefined,
         sanitizedHostNote || undefined,
         this.newGameBoardSize,
@@ -1284,6 +1309,8 @@ export class DashboardComponent implements OnInit {
     this.newGamePaymentManager = '';
     this.selectedSport = 'nfl';
     this.selectedEspnGameId = '';
+    this.customAwayTeam = '';
+    this.customHomeTeam = '';
     this.newGamePrice = 10;
     this.customPrice = null;
     this.newGameBoardSize = 100;
@@ -1396,6 +1423,10 @@ export class DashboardComponent implements OnInit {
   }
 
   async fetchEditEspnGames(): Promise<void> {
+    if (this.editSport === 'custom') {
+      this.editEspnGames.set([]);
+      return;
+    }
     this.isLoadingEditEspnGames.set(true);
     try {
       const games = await this.espnService.getGames(this.editSport);
@@ -1405,10 +1436,12 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  selectEditSport(sport: SportType): void {
+  selectEditSport(sport: SportType | 'custom'): void {
     this.editSport = sport;
     this.editEspnGameId = '';
-    this.fetchEditEspnGames();
+    if (sport !== 'custom') {
+      this.fetchEditEspnGames();
+    }
   }
 
   selectEditEspnGame(gameId: string): void {
@@ -1506,7 +1539,7 @@ export class DashboardComponent implements OnInit {
         pricePerSquare: sanitizedPrice,
         hostNote: sanitizedHostNote,
         espnEventId: this.editEspnGameId || null,
-        espnSport: this.editEspnGameId ? this.editSport : null,
+        espnSport: this.editEspnGameId && this.editSport !== 'custom' ? this.editSport : null,
         homeTeam: selectedEspnGame?.homeTeam || game.homeTeam,
         awayTeam: selectedEspnGame?.awayTeam || game.awayTeam
       };
@@ -1522,7 +1555,7 @@ export class DashboardComponent implements OnInit {
           pricePerSquare: sanitizedPrice,
           hostNote: sanitizedHostNote,
           espnEventId: this.editEspnGameId || undefined,
-          espnSport: this.editEspnGameId ? this.editSport : undefined,
+          espnSport: this.editEspnGameId && this.editSport !== 'custom' ? this.editSport : undefined,
           homeTeam: selectedEspnGame?.homeTeam || game.homeTeam,
           awayTeam: selectedEspnGame?.awayTeam || game.awayTeam,
           ...(espnChanged ? { scores: { q1: { home: 0, away: 0 }, q2: { home: 0, away: 0 }, q3: { home: 0, away: 0 }, q4: { home: 0, away: 0 } }, winners: {} } : {})

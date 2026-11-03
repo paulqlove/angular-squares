@@ -643,6 +643,17 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     this.calculateWinners();
   }
 
+  onManualScoreChange(quarter: string, team: 'home' | 'away', event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const value = this.sanitizationService.validateScore(parseInt(input.value, 10) || 0);
+    const key = `q${quarter}` as keyof typeof this.scores;
+    this.scores[key][team] = value;
+    this.gameService.updateGame(this.gameId, {
+      scores: this.scores
+    });
+    this.calculateWinners();
+  }
+
   /** Check if a score digit matches a stored number (handles paired numbers for smaller boards) */
   private digitMatchesNumber(digit: number, storedNumber: number | null, isPaired: boolean): boolean {
     if (storedNumber === null) return false;
