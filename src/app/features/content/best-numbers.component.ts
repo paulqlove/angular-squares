@@ -13,7 +13,7 @@ import { ContentShellComponent } from './content-shell.component';
     <app-content-shell >
       <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
       <article>
-        <header class="max-w-3xl">
+        <header>
           <p class="qs-eyebrow">
             Historical frequencies
           </p>
@@ -27,7 +27,7 @@ import { ContentShellComponent } from './content-shell.component';
           </p>
         </header>
 
-        <section class="mt-10 max-w-3xl" aria-labelledby="why-heading">
+        <section class="mt-10" aria-labelledby="why-heading">
           <h2 id="why-heading" class="text-2xl font-bold text-heading">Why 0, 7, 3, and 4 lead</h2>
           <p class="mt-3 leading-relaxed text-default">
             Football scoring clumps. A touchdown with an extra point is 7. A field goal is 3.
@@ -46,7 +46,7 @@ import { ContentShellComponent } from './content-shell.component';
 
         <section class="mt-10" aria-labelledby="table-heading">
           <h2 id="table-heading" class="text-2xl font-bold text-heading">Every digit pair</h2>
-          <p class="mt-3 max-w-3xl leading-relaxed text-default">
+          <p class="mt-3 leading-relaxed text-default">
             Rows are the away team’s last digit. Columns are the home team’s last digit.
             Each cell is that pair’s share of historical final scores. Numbers are rounded,
             so the grid totals 99.9 rather than 100.
@@ -102,7 +102,7 @@ import { ContentShellComponent } from './content-shell.component';
           </p>
         </section>
 
-        <section class="mt-10 max-w-3xl" aria-labelledby="quarters-heading">
+        <section class="mt-10" aria-labelledby="quarters-heading">
           <h2 id="quarters-heading" class="text-2xl font-bold text-heading">Quarters are not a second table</h2>
           <p class="mt-3 leading-relaxed text-default">
             This page is one grid, not four. Early quarters often sit on smaller scores, so 0 is
@@ -112,7 +112,7 @@ import { ContentShellComponent } from './content-shell.component';
           </p>
         </section>
 
-        <section class="mt-10 max-w-3xl" aria-labelledby="luck-heading">
+        <section class="mt-10" aria-labelledby="luck-heading">
           <h2 id="luck-heading" class="text-2xl font-bold text-heading">Have fun with it</h2>
           <p class="mt-3 leading-relaxed text-default">
             Numbers are drawn after the names are on the board, so a “good” digit is luck.

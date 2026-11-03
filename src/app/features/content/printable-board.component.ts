@@ -70,7 +70,7 @@ import { ContentShellComponent } from './content-shell.component';
         <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
       </div>
       <article>
-        <header class="no-print max-w-3xl">
+        <header class="no-print">
           <p class="qs-eyebrow">
             Free grid
           </p>
@@ -92,7 +92,7 @@ import { ContentShellComponent } from './content-shell.component';
           </div>
         </header>
 
-        <section class="no-print mt-10 max-w-3xl" aria-labelledby="paper-heading">
+        <section class="no-print mt-10" aria-labelledby="paper-heading">
           <h2 id="paper-heading" class="text-2xl font-bold text-heading">How to fill a paper board</h2>
           <ol class="mt-4 list-decimal space-y-3 pl-5 leading-relaxed text-default">
             <li>Write the home team over the columns and the away team beside the rows. Plain names are enough.</li>
@@ -160,7 +160,7 @@ import { ContentShellComponent } from './content-shell.component';
             }
           </div>
 
-          <p class="mt-4 max-w-3xl text-sm leading-relaxed text-default">
+          <p class="mt-4 text-sm leading-relaxed text-default">
             <strong>How to read:</strong> Columns are the home team's last digit. Rows are the away team's last digit.
             Find the square where the row and column meet to see the winner.
           </p>
