@@ -240,6 +240,7 @@ interface Feature {
     <!-- Auth Modal -->
     <app-auth-modal
       [isOpen]="showAuthModal()"
+      mode="host"
       (authenticated)="onAuthenticated()"
       (closed)="showAuthModal.set(false)">
     </app-auth-modal>

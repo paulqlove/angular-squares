@@ -28,9 +28,18 @@ import { AuthService } from '../../../core/services/auth.service';
               <path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"></path>
             </svg>
           </button>
-          <h2 id="auth-modal-title" class="text-2xl font-bold text-heading text-center mb-6">Join This Game</h2>
+          @if (mode === 'host') {
+            <h2 id="auth-modal-title" class="text-2xl font-bold text-heading text-center">Sign in to host a game</h2>
+            <p class="mt-3 mb-6 text-center text-qs-muted">
+              Hosting needs an account so your boards are saved and only you can run them.
+              Your players don't need one. They join with just a name.
+            </p>
+          } @else {
+            <h2 id="auth-modal-title" class="text-2xl font-bold text-heading text-center mb-6">Join This Game</h2>
+          }
 
           <div class="space-y-4">
+            @if (mode !== 'host') {
             <!-- Guest Mode (top) -->
             <div class="space-y-3">
               <input
@@ -62,6 +71,7 @@ import { AuthService } from '../../../core/services/auth.service';
                 <span class="px-4 bg-dialog text-muted">or</span>
               </div>
             </div>
+            }
 
             <!-- Google Sign In (bottom) -->
             <button
@@ -77,6 +87,9 @@ import { AuthService } from '../../../core/services/auth.service';
               </svg>
               Sign in with Google
             </button>
+            @if (mode === 'host') {
+              <p class="text-xs text-muted text-center">We never see or store your password.</p>
+            }
           </div>
         </div>
       </div>
@@ -85,6 +98,8 @@ import { AuthService } from '../../../core/services/auth.service';
 })
 export class AuthModalComponent implements OnChanges {
   @Input() isOpen = false;
+  /** 'host': creating a game needs an account, so guest mode is hidden. */
+  @Input() mode: 'join' | 'host' = 'join';
   @Output() authenticated = new EventEmitter<void>();
   @Output() closed = new EventEmitter<void>();
 
