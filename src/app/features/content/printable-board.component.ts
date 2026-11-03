@@ -43,7 +43,7 @@ import { ContentShellComponent } from './content-shell.component';
           <h2 id="preview-heading" class="text-xl font-semibold text-heading">What's in the PDF</h2>
           <p class="mt-2 text-muted">A clean 10×10 grid with space for team names and drawn numbers.</p>
 
-          <div class="mt-6 qs-canvas inline-block rounded-card p-3 sm:p-4">
+          <div class="mt-6 qs-canvas rounded-card p-3 sm:p-4">
             <p class="mb-2 flex items-center gap-2 text-sm">
               <span class="font-semibold text-qs-ink">
                 <span class="text-qs-muted">↓</span> Away
@@ -53,7 +53,7 @@ import { ContentShellComponent } from './content-shell.component';
                 Home <span class="text-qs-muted">→</span>
               </span>
             </p>
-            <div class="grid grid-cols-[1.5rem_repeat(10,minmax(0,1fr))] gap-px overflow-hidden rounded-inner bg-qs-line p-px sm:grid-cols-[2rem_repeat(10,minmax(0,1fr))]">
+            <div class="grid grid-cols-[2rem_repeat(10,1fr)] gap-px overflow-hidden rounded-inner bg-qs-line p-px sm:grid-cols-[2.5rem_repeat(10,1fr)]">
               <!-- Header row -->
               <div class="flex h-6 items-center justify-center bg-qs-panel-2 sm:h-8"></div>
               @for (i of digits; track i) {
