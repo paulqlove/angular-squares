@@ -57,26 +57,25 @@ export class EspnService {
         d.getDate().toString().padStart(2, '0');
 
       const dateStr = formatDate(today);
-      const fetches: Promise<Response>[] = [
-        fetch(this.API_URLS[sport]),
-        fetch(`${this.API_URLS[sport]}?dates=${dateStr}`)
-      ];
 
-      // For NCAA, fetch the whole week (games are mostly on Saturday)
+      // For NCAA, fetch FBS games with higher limit; for others, fetch today + default
+      let fetches: Promise<Response>[];
+
       if (sport === 'ncaaf') {
-        // Find next Saturday and fetch that week
+        // FBS only (groups=80), limit=300 to get all games
         const nextSaturday = new Date(today);
         const daysUntilSat = (6 - today.getDay() + 7) % 7 || 7;
         nextSaturday.setDate(today.getDate() + daysUntilSat);
 
-        // Also fetch previous Saturday in case we're mid-week
-        const prevSaturday = new Date(today);
-        prevSaturday.setDate(today.getDate() - ((today.getDay() + 1) % 7 || 7));
-
-        fetches.push(
-          fetch(`${this.API_URLS[sport]}?dates=${formatDate(nextSaturday)}`),
-          fetch(`${this.API_URLS[sport]}?dates=${formatDate(prevSaturday)}`)
-        );
+        fetches = [
+          fetch(`${this.API_URLS[sport]}?groups=80&limit=300`),
+          fetch(`${this.API_URLS[sport]}?groups=80&limit=300&dates=${formatDate(nextSaturday)}`)
+        ];
+      } else {
+        fetches = [
+          fetch(this.API_URLS[sport]),
+          fetch(`${this.API_URLS[sport]}?dates=${dateStr}`)
+        ];
       }
 
       const responses = await Promise.all(fetches);
