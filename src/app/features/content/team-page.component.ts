@@ -24,7 +24,7 @@ import { EspnService, EspnGame } from '../../core/services/espn.service';
             class="relative -mx-4 -mt-4 mb-8 overflow-hidden px-6 py-10 sm:-mx-8 sm:rounded-2xl"
             [style.background]="'linear-gradient(135deg, ' + team.primaryColor + ' 0%, ' + team.secondaryColor + ' 100%)'"
           >
-            <div class="relative z-10 flex items-center gap-6 px-2">
+            <div class="relative z-10 flex items-center gap-6 ps-6">
               <app-team-helmet [color]="team.primaryColor" [initials]="team.abbreviation" [size]="104" />
               <div>
                 <p class="text-sm font-medium uppercase tracking-wider" [style.color]="getContrastColor(team.primaryColor)">
