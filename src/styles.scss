@@ -4,6 +4,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Prevent horizontal scroll from wide content */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
 /* QuarterScore design tokens, v2 (Nov 2026).
  * Source: Drive > Ventures > QuarterScore > Design > "QuarterScore Design Guidelines v2".
  * Prefix is --qs- so nothing collides with host-picked team colors (--home, --away).
