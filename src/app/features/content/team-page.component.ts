@@ -5,12 +5,13 @@ import { AuthService } from '../../core/services/auth.service';
 import { BreadcrumbsComponent } from '../../shared/breadcrumbs.component';
 import { ContentShellComponent } from './content-shell.component';
 import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.component';
-import { NflTeam, getTeamBySlug, getTeamLogo, NFL_TEAMS } from './teams-data';
+import { NflTeam, getTeamBySlug, NFL_TEAMS } from './teams-data';
+import { TeamHelmetComponent } from '../../shared/team-helmet.component';
 import { EspnService, EspnGame } from '../../core/services/espn.service';
 
 @Component({
   selector: 'app-team-page',
-  imports: [RouterLink, ContentShellComponent, BreadcrumbsComponent, AuthModalComponent],
+  imports: [RouterLink, ContentShellComponent, BreadcrumbsComponent, AuthModalComponent, TeamHelmetComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-content-shell>
@@ -24,12 +25,7 @@ import { EspnService, EspnGame } from '../../core/services/espn.service';
             [style.background]="'linear-gradient(135deg, ' + team.primaryColor + ' 0%, ' + team.secondaryColor + ' 100%)'"
           >
             <div class="relative z-10 flex items-center gap-6">
-              <img
-                [src]="getLogoUrl(team)"
-                [alt]="team.city + ' ' + team.name + ' logo'"
-                class="h-20 w-20 shrink-0 drop-shadow-lg sm:h-28 sm:w-28"
-                loading="eager"
-              >
+              <app-team-helmet [color]="team.primaryColor" [initials]="team.abbreviation" [size]="104" />
               <div>
                 <p class="text-sm font-medium uppercase tracking-wider" [style.color]="getContrastColor(team.primaryColor)">
                   {{ team.conference }} {{ team.division }}
@@ -123,8 +119,8 @@ import { EspnService, EspnGame } from '../../core/services/espn.service';
                 <div class="sheet-grid grid min-w-[560px]" style="grid-template-columns: 64px 40px repeat(10, minmax(0, 1fr));">
                   <div class="flex h-16 items-center justify-center gap-3 rounded-t-md text-2xl font-bold uppercase tracking-wide"
                        style="grid-column: 1 / -1; padding-left: 104px;" [style.background]="sheet().home.bg" [style.color]="sheet().home.fg">
-                    @if (sheet().home.logo; as logo) {
-                      <img [src]="logo" alt="" class="h-12 w-12 rounded-full bg-white object-contain p-1">
+                    @if (sheet().home.abbr; as abbr) {
+                      <app-team-helmet [color]="sheet().home.bg" [initials]="abbr" [size]="64" />
                     }
                     {{ sheet().home.label }}
                   </div>
@@ -132,8 +128,8 @@ import { EspnService, EspnGame } from '../../core/services/espn.service';
                        style="grid-row: 2 / span 11;"
                        [style.background]="sheet().away.bg" [style.color]="sheet().away.fg">
                     <div class="flex items-center gap-3 whitespace-nowrap" style="transform: rotate(-90deg);">
-                      @if (sheet().away.logo; as logo) {
-                        <img [src]="logo" alt="" class="h-12 w-12 shrink-0 rounded-full bg-white object-contain p-1">
+                      @if (sheet().away.abbr; as abbr) {
+                        <app-team-helmet [color]="sheet().away.bg" [initials]="abbr" [size]="64" />
                       }
                       {{ sheet().away.label }}
                     </div>
@@ -254,9 +250,9 @@ export class TeamPageComponent implements OnInit {
     const game = this.printGame() ?? this.games()[0];
     const band = (name: string | undefined) => {
       const t = name ? findTeam(name) : undefined;
-      if (!t) return { label: name || 'Opponent', bg: '#e2e8f0', fg: '#0f172a', logo: '', tint: '#f1f5f9' };
+      if (!t) return { label: name || 'Opponent', bg: '#e2e8f0', fg: '#0f172a', abbr: '', tint: '#f1f5f9' };
       const tint = `color-mix(in srgb, ${t.primaryColor} 16%, white)`;
-      return { label: t.name, bg: t.primaryColor, fg: this.getContrastColor(t.primaryColor), logo: getTeamLogo(t, 100), tint };
+      return { label: t.name, bg: t.primaryColor, fg: this.getContrastColor(t.primaryColor), abbr: t.abbreviation, tint };
     };
     if (!game) return { home: band(this.team?.abbreviation), away: band(undefined), date: '' };
     return { home: band(game.homeTeam), away: band(game.awayTeam), date: this.formatDate(game.date) };
@@ -321,10 +317,6 @@ export class TeamPageComponent implements OnInit {
     } finally {
       this.loading.set(false);
     }
-  }
-
-  public getLogoUrl(team: NflTeam): string {
-    return getTeamLogo(team, 500);
   }
 
   public getContrastColor(hex: string): string {
