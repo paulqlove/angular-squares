@@ -116,20 +116,20 @@ import { EspnService, EspnGame } from '../../core/services/espn.service';
               </div>
               <p class="mt-3 text-lg font-bold">{{ sheet().away.label }} at {{ sheet().home.label }}</p>
               <div class="mt-3 overflow-x-auto">
-                <div class="sheet-grid grid min-w-[560px]" style="grid-template-columns: 64px 40px repeat(10, minmax(0, 1fr));">
-                  <div class="flex h-16 items-center justify-center gap-3 rounded-t-md text-2xl font-bold uppercase tracking-wide"
-                       style="grid-column: 1 / -1; padding-left: 104px;" [style.background]="sheet().home.bg" [style.color]="sheet().home.fg">
+                <div class="sheet-grid grid min-w-[560px]" style="grid-template-columns: 84px 40px repeat(10, minmax(0, 1fr));">
+                  <div class="flex h-[84px] items-center justify-center gap-4 rounded-t-md text-2xl font-bold uppercase tracking-wide"
+                       style="grid-column: 1 / -1; padding-left: 124px;" [style.background]="sheet().home.bg" [style.color]="sheet().home.fg">
                     @if (sheet().home.abbr; as abbr) {
-                      <app-team-helmet [color]="sheet().home.bg" [initials]="abbr" [size]="80" />
+                      <app-team-helmet [color]="sheet().home.bg" [initials]="abbr" [size]="72" />
                     }
                     {{ sheet().home.label }}
                   </div>
                   <div class="flex flex-col items-center justify-center rounded-bl-md text-2xl font-bold uppercase tracking-wide"
                        style="grid-row: 2 / span 11;"
                        [style.background]="sheet().away.bg" [style.color]="sheet().away.fg">
-                    <div class="flex items-center gap-3 whitespace-nowrap" style="transform: rotate(-90deg);">
+                    <div class="flex items-center gap-4 whitespace-nowrap" style="transform: rotate(-90deg);">
                       @if (sheet().away.abbr; as abbr) {
-                        <app-team-helmet [color]="sheet().away.bg" [initials]="abbr" [size]="80" />
+                        <app-team-helmet [color]="sheet().away.bg" [initials]="abbr" [size]="72" />
                       }
                       {{ sheet().away.label }}
                     </div>

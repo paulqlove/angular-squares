@@ -7,13 +7,13 @@ import { Component, ChangeDetectionStrategy, Input } from '@angular/core';
   template: `
     <svg viewBox="0 0 124 104" [attr.width]="size" [attr.height]="size * 104 / 124" [attr.role]="label ? 'img' : null"
          [attr.aria-label]="label || null" [attr.aria-hidden]="label ? null : 'true'" class="block shrink-0">
-      <g [attr.stroke]="outline" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+      <g transform="translate(124 0) scale(-1 1)" [attr.stroke]="outline" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
         <path d="M26 50 C32 24 54 8 78 8 C102 8 118 28 118 52 C118 70 110 82 100 88 C90 88 80 98 66 98 C57 98 52 90 56 82 L48 58 Z"
               [attr.fill]="color" />
         <path d="M12 68 H50 M12 68 V92 H26 C36 92 44 86 50 76 M12 80 H56 M30 52 L38 80 M48 58 L30 80" fill="none" />
         <circle cx="72" cy="70" r="4.5" fill="none" />
       </g>
-      <text x="83" y="49" text-anchor="middle" font-family="'Space Grotesk', system-ui, sans-serif" font-weight="700" font-size="25"
+      <text x="41" y="49" text-anchor="middle" font-family="'Space Grotesk', system-ui, sans-serif" font-weight="700" font-size="25"
             [attr.fill]="ink">{{ initials }}</text>
     </svg>
   `
