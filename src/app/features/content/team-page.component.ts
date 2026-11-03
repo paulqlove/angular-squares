@@ -173,6 +173,7 @@ import { EspnService, EspnGame } from '../../core/services/espn.service';
 
     <app-auth-modal
       [isOpen]="showAuthModal()"
+      mode="host"
       (authenticated)="onAuthenticated()"
       (closed)="showAuthModal.set(false)">
     </app-auth-modal>

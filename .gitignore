@@ -55,3 +55,5 @@ firebase-debug.log
 *-debug.log
 functions/node_modules/
 functions/lib/
+
+.claude/settings.local.json
