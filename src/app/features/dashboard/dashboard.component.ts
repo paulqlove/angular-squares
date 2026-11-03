@@ -691,57 +691,74 @@ import {
                 </div>
               </div>
 
-              <!-- ESPN Game Selection -->
-              <div>
-                <label class="block text-sm font-semibold text-label mb-2">ESPN Game</label>
-                @if (isLoadingEditEspnGames()) {
-                  <div class="flex items-center justify-center py-6">
-                    <svg class="animate-spin h-6 w-6 text-qs-accent" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-                    </svg>
+              <!-- Custom Team Names or ESPN Game Selection -->
+              @if (editSport === 'custom') {
+                <div>
+                  <label class="block text-sm font-semibold text-label mb-2">Teams</label>
+                  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                      <label for="edit-custom-away" class="qs-label mb-1.5 block text-qs-muted">Away team</label>
+                      <input id="edit-custom-away" type="text" [(ngModel)]="editCustomAwayTeam" maxlength="50" placeholder="e.g. Lincoln High" class="qs-input" />
+                    </div>
+                    <div>
+                      <label for="edit-custom-home" class="qs-label mb-1.5 block text-qs-muted">Home team</label>
+                      <input id="edit-custom-home" type="text" [(ngModel)]="editCustomHomeTeam" maxlength="50" placeholder="e.g. Washington High" class="qs-input" />
+                    </div>
                   </div>
-                } @else {
-                  <div class="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto">
-                    @for (game of editEspnGames(); track game.id) {
-                      <button
-                        (click)="selectEditEspnGame(game.id)"
-                        [class]="editEspnGameId === game.id
-                          ? 'p-3 border-2 border-qs-accent bg-qs-accent-soft rounded-xl text-left transition-all'
-                          : 'p-3 border-2 border-default hover:border-hover rounded-xl text-left transition-all'"
-                      >
-                        <div class="flex items-center justify-between">
-                          <div>
-                            <p class="flex items-center gap-1.5 font-semibold text-sm"
-                              [class]="editEspnGameId === game.id ? 'text-qs-ink' : 'text-heading'">
-                              @if (editSport === 'nfl' && getTeamLogo(game.awayTeam); as logo) {
-                                <img [src]="logo" [alt]="game.awayTeam" class="h-4 w-4 object-contain" />
+                  <p class="mt-2 text-xs text-qs-muted">Enter scores manually from the game page.</p>
+                </div>
+              } @else {
+                <div>
+                  <label class="block text-sm font-semibold text-label mb-2">ESPN Game</label>
+                  @if (isLoadingEditEspnGames()) {
+                    <div class="flex items-center justify-center py-6">
+                      <svg class="animate-spin h-6 w-6 text-qs-accent" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                      </svg>
+                    </div>
+                  } @else {
+                    <div class="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto">
+                      @for (game of editEspnGames(); track game.id) {
+                        <button
+                          (click)="selectEditEspnGame(game.id)"
+                          [class]="editEspnGameId === game.id
+                            ? 'p-3 border-2 border-qs-accent bg-qs-accent-soft rounded-xl text-left transition-all'
+                            : 'p-3 border-2 border-default hover:border-hover rounded-xl text-left transition-all'"
+                        >
+                          <div class="flex items-center justify-between">
+                            <div>
+                              <p class="flex items-center gap-1.5 font-semibold text-sm"
+                                [class]="editEspnGameId === game.id ? 'text-qs-ink' : 'text-heading'">
+                                @if (editSport === 'nfl' && getTeamLogo(game.awayTeam); as logo) {
+                                  <img [src]="logo" [alt]="game.awayTeam" class="h-4 w-4 object-contain" />
+                                }
+                                {{ game.awayTeam }} &#64;
+                                @if (editSport === 'nfl' && getTeamLogo(game.homeTeam); as logo) {
+                                  <img [src]="logo" [alt]="game.homeTeam" class="h-4 w-4 object-contain" />
+                                }
+                                {{ game.homeTeam }}
+                              </p>
+                              @if (game.status === 'pre' && game.date) {
+                                <p class="text-xs"
+                                  [class]="editEspnGameId === game.id ? 'text-qs-accent' : 'text-muted'">{{ formatGameDate(game.date) }}</p>
                               }
-                              {{ game.awayTeam }} &#64;
-                              @if (editSport === 'nfl' && getTeamLogo(game.homeTeam); as logo) {
-                                <img [src]="logo" [alt]="game.homeTeam" class="h-4 w-4 object-contain" />
+                              @if (game.status !== 'pre') {
+                                <p class="text-xs"
+                                  [class]="editEspnGameId === game.id ? 'text-qs-accent' : 'text-muted'">{{ game.awayScore }} - {{ game.homeScore }}</p>
                               }
-                              {{ game.homeTeam }}
-                            </p>
-                            @if (game.status === 'pre' && game.date) {
-                              <p class="text-xs"
-                                [class]="editEspnGameId === game.id ? 'text-qs-accent' : 'text-muted'">{{ formatGameDate(game.date) }}</p>
-                            }
-                            @if (game.status !== 'pre') {
-                              <p class="text-xs"
-                                [class]="editEspnGameId === game.id ? 'text-qs-accent' : 'text-muted'">{{ game.awayScore }} - {{ game.homeScore }}</p>
-                            }
+                            </div>
+                            <span class="text-xs font-medium px-2 py-0.5 rounded-full"
+                              [class]="getGameStatusClass(game.status)">
+                              {{ getGameStatusText(game) }}
+                            </span>
                           </div>
-                          <span class="text-xs font-medium px-2 py-0.5 rounded-full"
-                            [class]="getGameStatusClass(game.status)">
-                            {{ getGameStatusText(game) }}
-                          </span>
-                        </div>
-                      </button>
-                    }
-                  </div>
-                }
-              </div>
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
+              }
 
               <!-- Game Name -->
               <div>
@@ -967,6 +984,8 @@ export class DashboardComponent implements OnInit {
   editGamePrice = 10;
   editSport: SportType | 'custom' = 'nfl';
   editEspnGameId = '';
+  editCustomHomeTeam = '';
+  editCustomAwayTeam = '';
   editEspnGames = signal<EspnGame[]>([]);
   isLoadingEditEspnGames = signal(false);
   editGamePlayers = signal<{ name: string; uid: string }[]>([]);
@@ -1391,14 +1410,20 @@ export class DashboardComponent implements OnInit {
     this.editGameName = game.name;
     this.editGameHostNote = game.hostNote || '';
     this.editGamePrice = game.pricePerSquare;
-    this.editSport = game.espnSport || 'nfl';
+    // Detect custom games: no ESPN event means custom
+    const isCustomGame = !game.espnEventId;
+    this.editSport = isCustomGame ? 'custom' : (game.espnSport || 'nfl');
     this.editEspnGameId = game.espnEventId || '';
+    this.editCustomHomeTeam = game.homeTeam || '';
+    this.editCustomAwayTeam = game.awayTeam || '';
     this.managerSearchQuery = '';
     this.managerSearchResults.set([]);
     this.selectedManagerIndex.set(-1);
     this.showManagerDropdown.set(false);
     this.showEditModal.set(true);
-    this.fetchEditEspnGames();
+    if (!isCustomGame) {
+      this.fetchEditEspnGames();
+    }
 
     const fullGame = await this.gameService.getGame(game.id);
     if (fullGame?.playerUserIds) {
@@ -1439,7 +1464,9 @@ export class DashboardComponent implements OnInit {
   selectEditSport(sport: SportType | 'custom'): void {
     this.editSport = sport;
     this.editEspnGameId = '';
-    if (sport !== 'custom') {
+    if (sport === 'custom') {
+      this.editEspnGames.set([]);
+    } else {
       this.fetchEditEspnGames();
     }
   }
@@ -1534,14 +1561,26 @@ export class DashboardComponent implements OnInit {
     try {
       const selectedEspnGame = this.editEspnGames().find(g => g.id === this.editEspnGameId);
       const espnChanged = (this.editEspnGameId || undefined) !== game.espnEventId;
+
+      // Determine team names: custom game uses edited fields, ESPN game uses selected game
+      let homeTeam: string;
+      let awayTeam: string;
+      if (this.editSport === 'custom') {
+        homeTeam = this.sanitizationService.sanitizeTeamName(this.editCustomHomeTeam) || game.homeTeam || '';
+        awayTeam = this.sanitizationService.sanitizeTeamName(this.editCustomAwayTeam) || game.awayTeam || '';
+      } else {
+        homeTeam = selectedEspnGame?.homeTeam || game.homeTeam || '';
+        awayTeam = selectedEspnGame?.awayTeam || game.awayTeam || '';
+      }
+
       const updates: Record<string, any> = {
         name: sanitizedName,
         pricePerSquare: sanitizedPrice,
         hostNote: sanitizedHostNote,
         espnEventId: this.editEspnGameId || null,
         espnSport: this.editEspnGameId && this.editSport !== 'custom' ? this.editSport : null,
-        homeTeam: selectedEspnGame?.homeTeam || game.homeTeam,
-        awayTeam: selectedEspnGame?.awayTeam || game.awayTeam
+        homeTeam,
+        awayTeam
       };
       if (espnChanged) {
         updates['scores'] = { q1: { home: 0, away: 0 }, q2: { home: 0, away: 0 }, q3: { home: 0, away: 0 }, q4: { home: 0, away: 0 } };
@@ -1556,8 +1595,8 @@ export class DashboardComponent implements OnInit {
           hostNote: sanitizedHostNote,
           espnEventId: this.editEspnGameId || undefined,
           espnSport: this.editEspnGameId && this.editSport !== 'custom' ? this.editSport : undefined,
-          homeTeam: selectedEspnGame?.homeTeam || game.homeTeam,
-          awayTeam: selectedEspnGame?.awayTeam || game.awayTeam,
+          homeTeam,
+          awayTeam,
           ...(espnChanged ? { scores: { q1: { home: 0, away: 0 }, q2: { home: 0, away: 0 }, q3: { home: 0, away: 0 }, q4: { home: 0, away: 0 } }, winners: {} } : {})
         } : g)
       );
