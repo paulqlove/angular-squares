@@ -154,8 +154,8 @@ export class AuthModalComponent implements OnChanges {
       const email = this.linkEmail.trim();
       await this.authService.sendEmailLink(email, this.linkName.trim(), host ? '/dashboard' : window.location.pathname);
       this.emailSentTo.set(email);
-    } catch {
-      this.emailError.set("We couldn't send the link. Check the email and try again.");
+    } catch (e) {
+      this.emailError.set(e instanceof Error ? e.message : "We couldn't send the link. Check the email and try again.");
     } finally {
       this.sending.set(false);
     }

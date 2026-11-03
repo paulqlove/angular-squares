@@ -24,6 +24,7 @@ export interface GuestUser {
 const GUEST_COOKIE_KEY = 'squares_guest_user';
 
 const EMAIL_LINK_KEY = 'qs_email_link';
+const SEND_LINK_URL = 'https://us-central1-squares-4e4f7.cloudfunctions.net/sendSignInLink';
 
 @Injectable({
   providedIn: 'root'
@@ -251,11 +252,16 @@ export class AuthService {
       this.toast.warning('Switch the preview back to "Me" before signing in.');
       throw new Error('Sign-in is disabled while previewing a role');
     }
-    await this.ensureInitialized();
-    await this.sdk!.auth.sendSignInLinkToEmail(this.auth, email, {
-      url: `${window.location.origin}/auth/email-link`,
-      handleCodeInApp: true
+    // Our Cloud Function sends a branded email from quarterscore.com (Firebase's built-in one can't be customized).
+    const response = await fetch(SEND_LINK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: { email } })
     });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok || body.error) {
+      throw new Error(body.error?.message || "We couldn't send the link. Check the email and try again.");
+    }
     localStorage.setItem(EMAIL_LINK_KEY, JSON.stringify({ email, name, next }));
   }
 

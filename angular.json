@@ -47,6 +47,11 @@
                 "output": "/"
               },
               {
+                "glob": "{icon-*.png,apple-touch-icon.png,site.webmanifest}",
+                "input": "public",
+                "output": "/"
+              },
+              {
                 "glob": "robots.txt",
                 "input": "src",
                 "output": "/"
