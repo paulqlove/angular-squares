@@ -88,8 +88,14 @@ interface Feature {
               </button>
             </div>
 
-            @if (showJoinCode()) {
-              <div id="join-code-panel" class="mt-5 w-full sm:max-w-sm">
+            <!-- Grows open (grid rows 0fr to 1fr) so the page glides instead of jumping. -->
+            <div
+              class="grid transition-[grid-template-rows,opacity] duration-200 ease-[cubic-bezier(.2,.7,.2,1)] motion-reduce:transition-none"
+              [class]="showJoinCode() ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'"
+              [attr.inert]="showJoinCode() ? null : ''"
+            >
+              <div class="min-h-0 overflow-hidden -m-[5px] p-[5px]">
+              <div id="join-code-panel" class="pt-5 w-full sm:max-w-sm">
                 <label for="join-code" class="qs-label text-qs-muted">Game code</label>
                 <div class="mt-2 flex items-center gap-2">
                   <input
@@ -115,7 +121,8 @@ interface Feature {
                   </button>
                 </div>
               </div>
-            }
+              </div>
+            </div>
 
             <p class="qs-label mt-6 text-qs-muted">Free · Players don't need an account</p>
           </div>
