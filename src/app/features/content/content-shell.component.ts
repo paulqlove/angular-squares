@@ -20,7 +20,7 @@ interface NavLink {
     >
       Skip to content
     </a>
-    <div class="flex min-h-screen flex-col bg-page">
+    <div class="flex min-h-screen flex-col bg-page overflow-x-hidden">
       <header appHeadroom class="no-print qs-on-navy bg-qs-tile text-qs-tile-ink">
         <div class="mx-auto flex max-w-5xl flex-wrap items-center gap-3 px-4 py-2">
           <a routerLink="/" class="flex min-h-11 items-center gap-2 rounded-md">
