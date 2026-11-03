@@ -1,0 +1,29 @@
+name: Delete preview (PR closed)
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: read
+
+jobs:
+  cleanup:
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Delete this PR's preview channel
+        env:
+          SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SQUARES_4E4F7 }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          echo "$SA" > "$RUNNER_TEMP/sa.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
+          # Channel ids are pr<number>-<branch prefix>; delete any that belong to this PR.
+          for c in $(npx -y firebase-tools@latest hosting:channel:list --project squares-4e4f7 --json \
+            | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{for(const c of JSON.parse(s).result.channels){const id=c.name.split('/').pop();if(id.startsWith('pr'+process.env.PR+'-'))console.log(id)}})"); do
+            npx -y firebase-tools@latest hosting:channel:delete "$c" --force --project squares-4e4f7
+          done
