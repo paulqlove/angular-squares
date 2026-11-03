@@ -34,7 +34,7 @@ if (!shell.includes('name="robots"')) {
 shell = shell.replace(/<link\s+rel="canonical"[^>]*>\s*/i, '');
 shell = shell.replace(
   /<title>[^<]*<\/title>/,
-  '<title>Quarter Score</title>'
+  '<title>QuarterScore</title>'
 );
 shell = shell.replace(/<script type="application\/ld\+json" data-seo-jsonld="true">[\s\S]*?<\/script>/g, '');
 shell = shell.replace(/<script id="ng-state" type="application\/json">[\s\S]*?<\/script>/g, '');
@@ -42,24 +42,24 @@ shell = shell.replace(/<meta property="article:published_time"[^>]*>/g, '');
 shell = shell.replace(/<!--nghm-->/g, '');
 shell = shell.replace(
   /<meta name="description" content="[^"]*">/,
-  '<meta name="description" content="Quarter Score">'
+  '<meta name="description" content="QuarterScore">'
 );
 shell = shell.replace(/<meta property="og:url" content="[^"]*">/g, '');
 shell = shell.replace(
   /<meta property="og:title" content="[^"]*">/,
-  '<meta property="og:title" content="Quarter Score">'
+  '<meta property="og:title" content="QuarterScore">'
 );
 shell = shell.replace(
   /<meta property="og:description" content="[^"]*">/,
-  '<meta property="og:description" content="Quarter Score">'
+  '<meta property="og:description" content="QuarterScore">'
 );
 shell = shell.replace(
   /<meta name="twitter:title" content="[^"]*">/,
-  '<meta name="twitter:title" content="Quarter Score">'
+  '<meta name="twitter:title" content="QuarterScore">'
 );
 shell = shell.replace(
   /<meta name="twitter:description" content="[^"]*">/,
-  '<meta name="twitter:description" content="Quarter Score">'
+  '<meta name="twitter:description" content="QuarterScore">'
 );
 
 fs.writeFileSync(path.join(browserDir, 'spa.html'), shell);

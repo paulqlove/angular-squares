@@ -26,7 +26,7 @@ import { BLOG_POSTS } from './blog-posts.generated';
           </header>
           <div class="prose-content mt-8" [innerHTML]="post.html"></div>
           <p class="mt-10 text-sm text-muted">
-            Quarter Score never collects, holds, or pays out money.
+            QuarterScore never collects, holds, or pays out money.
           </p>
           <p class="mt-6">
             <a routerLink="/blog" class="font-semibold text-qs-accent underline underline-offset-2 text-qs-accent">
@@ -65,7 +65,7 @@ export class BlogPostComponent {
         { name: this.post.title, path: `/blog/${this.post.slug}` }
       ];
       this.seo.apply({
-        title: `${this.post.title} — Quarter Score`,
+        title: `${this.post.title} — QuarterScore`,
         description: this.post.description,
         path: `/blog/${this.post.slug}`,
         headline: this.post.title,
@@ -84,8 +84,8 @@ export class BlogPostComponent {
       { name: 'Blog', path: '/blog' }
     ];
     this.seo.apply({
-      title: 'Post not found — Quarter Score',
-      description: 'That Quarter Score blog post is not on the site.',
+      title: 'Post not found — QuarterScore',
+      description: 'That QuarterScore blog post is not on the site.',
       path: `/blog/${slug}`,
       headline: 'Post not found',
       breadcrumbs: this.breadcrumbs,

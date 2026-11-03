@@ -306,11 +306,23 @@ export class WelcomeComponent implements OnInit {
   ngOnInit(): void {
     this.seo.apply({
       title: 'QuarterScore — Football Squares for Game Day',
-      description: 'Every square, every score, live on one board.™',
+      description: 'Run free football squares online. Make a 100, 50 or 25 square board, share one link, and live scores pick each quarter\'s winner.',
       path: '/',
       headline: 'The Ultimate Football Squares Game',
       published: '2026-11-01',
-      breadcrumbs: [{ name: 'Home', path: '/' }]
+      breadcrumbs: [{ name: 'Home', path: '/' }],
+      extraJsonLd: [
+        { '@context': 'https://schema.org', '@type': 'WebSite', name: 'QuarterScore', url: 'https://quarterscore.com/' },
+        {
+          '@context': 'https://schema.org',
+          '@type': 'WebApplication',
+          name: 'QuarterScore',
+          url: 'https://quarterscore.com/',
+          applicationCategory: 'EntertainmentApplication',
+          operatingSystem: 'Any (web browser)',
+          offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' }
+        }
+      ]
     });
     const joinCode = this.route.snapshot.queryParamMap.get('join');
     if (joinCode) {

@@ -22,7 +22,7 @@ Required frontmatter:
 
 | Field | Notes |
 | --- | --- |
-| `title` | Shown as the H1. The HTML title adds “— Quarter Score”. |
+| `title` | Shown as the H1. The HTML title adds “— QuarterScore”. |
 | `description` | Unique summary. Also used as the meta description. |
 | `date` | Publish date as a quoted string, `"YYYY-MM-DD"`. The November 5, 2026 post uses `"2026-11-05"`. |
 | `slug` | Lowercase words separated by hyphens. The URL is `/blog/{slug}`. |
@@ -43,7 +43,7 @@ Required frontmatter:
 
 - Say “game,” “friends and fans,” “bragging rights,” and “prizes.”
 - Do not say “bet,” “wager,” “gamble,” or “cash payout.”
-- If you mention payment tracking, say that Quarter Score never collects, holds, or pays out money.
+- If you mention payment tracking, say that QuarterScore never collects, holds, or pays out money.
 - Do not use NFL, team, or Super Bowl logos. Plain team names are fine. Do not imply the site is an official league product.
 - Mark unfinished writing with `TODO` so it is obvious in the page and in review.
 - Link to the evergreen pages that match the brief (`/how-to-play`, `/faq`, `/super-bowl-squares`, `/best-squares-numbers`, `/printable-football-squares`, and the rest of the footer). The call to action for a normal post is [Start a free game](/dashboard).

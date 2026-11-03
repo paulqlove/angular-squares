@@ -22,7 +22,7 @@ import { ContentShellComponent } from './content-shell.component';
           </h1>
           <p class="mt-4 text-lg leading-relaxed text-muted">
             Some last digits show up more often than others in professional football scores.
-            This is the same table Quarter Score uses on a board’s heatmap. It describes the past.
+            This is the same table QuarterScore uses on a board’s heatmap. It describes the past.
             It does not predict your game, and it is not a reason to sweat your draw.
           </p>
         </header>
@@ -97,7 +97,7 @@ import { ContentShellComponent } from './content-shell.component';
             >
               ELDORADO, Super Bowl squares frequencies
             </a>.
-            Quarter Score does not republish that site’s charts. This grid is the table already
+            QuarterScore does not republish that site’s charts. This grid is the table already
             shipped in the app.
           </p>
         </section>
@@ -150,7 +150,7 @@ import { ContentShellComponent } from './content-shell.component';
           </a>
           <p class="mt-3 text-sm leading-relaxed text-qs-on-accent">
             See the same colors on your own board after the numbers are drawn.
-            Quarter Score never collects, holds, or pays out money.
+            QuarterScore never collects, holds, or pays out money.
           </p>
         </section>
       </article>
@@ -178,8 +178,8 @@ export class BestNumbersComponent {
     this.awayTotals = away;
 
     this.seo.apply({
-      title: 'Best Squares Numbers from Scoring History — Quarter Score',
-      description: 'Best Super Bowl squares numbers, from the same historical digit table as the Quarter Score heatmap. See how often each last-digit pair has shown up.',
+      title: 'Best Squares Numbers from Scoring History — QuarterScore',
+      description: 'Best Super Bowl squares numbers, from the same historical digit table as the QuarterScore heatmap. See how often each last-digit pair has shown up.',
       path: '/best-squares-numbers',
       headline: 'Best squares numbers',
       published: '2026-11-01',

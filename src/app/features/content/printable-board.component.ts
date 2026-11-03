@@ -166,7 +166,7 @@ export class PrintableBoardComponent {
 
   constructor() {
     this.seo.apply({
-      title: 'Printable Football Squares — Free 10 by 10 Grid — Quarter Score',
+      title: 'Printable Football Squares — Free 10 by 10 Grid — QuarterScore',
       description: 'Printable football squares: a free blank 10 by 10 grid, a print view, and a PDF download. No logos. Draw the numbers after every name is written.',
       path: '/printable-football-squares',
       headline: 'Printable football squares',

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>Quarter Score Blog</title>
+    <title>QuarterScore Blog</title>
     <link>https://quarterscore.com/blog</link>
-    <description>Football squares notes from Quarter Score. Free games for friends and fans.</description>
+    <description>Football squares notes from QuarterScore. Free games for friends and fans.</description>
     <language>en-us</language>
     <atom:link href="https://quarterscore.com/rss.xml" rel="self" type="application/rss+xml"/>
 

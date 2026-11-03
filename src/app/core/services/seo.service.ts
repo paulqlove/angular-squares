@@ -56,14 +56,14 @@ export class SeoService {
     this.upsert('name', 'twitter:description', config.description);
     this.upsert('name', 'twitter:image', image);
     this.upsert('name', 'twitter:image:alt', imageAlt);
-    if (config.published) {
+    if (config.ogType === 'article' && config.published) {
       this.upsert('property', 'article:published_time', config.published);
     }
     this.setCanonical(canonical);
     this.setRss(!!config.includeRss);
 
     const blocks: Record<string, unknown>[] = [
-      this.articleBlock(config, canonical, image),
+      config.ogType === 'article' ? this.articleBlock(config, canonical, image) : this.pageBlock(config, canonical),
       this.breadcrumbBlock(config.breadcrumbs),
       ...(config.extraJsonLd ?? [])
     ];
@@ -115,6 +115,18 @@ export class SeoService {
     };
   }
 
+  private pageBlock(config: SeoConfig, canonical: string): Record<string, unknown> {
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      '@id': canonical,
+      url: canonical,
+      name: config.headline,
+      description: config.description,
+      isPartOf: { '@type': 'WebSite', name: 'QuarterScore', url: `${SITE_ORIGIN}/` }
+    };
+  }
+
   private breadcrumbBlock(items: BreadcrumbItem[]): Record<string, unknown> {
     return {
       '@context': 'https://schema.org',
@@ -153,7 +165,7 @@ export class SeoService {
     const link = existing ?? this.document.createElement('link');
     link.setAttribute('rel', 'alternate');
     link.setAttribute('type', 'application/rss+xml');
-    link.setAttribute('title', 'Quarter Score Blog');
+    link.setAttribute('title', 'QuarterScore Blog');
     link.setAttribute('href', `${SITE_ORIGIN}/rss.xml`);
     if (!existing) {
       head.appendChild(link);
