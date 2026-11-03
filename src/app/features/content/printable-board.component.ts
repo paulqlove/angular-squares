@@ -8,6 +8,60 @@ import { ContentShellComponent } from './content-shell.component';
     selector: 'app-printable-board',
     imports: [RouterLink, ContentShellComponent, BreadcrumbsComponent],
     changeDetection: ChangeDetectionStrategy.Eager,
+    styles: `
+      .board-grid {
+        display: grid;
+        grid-template-columns: 2rem repeat(10, 1fr);
+        gap: 1px;
+      }
+      @media (min-width: 640px) {
+        .board-grid {
+          grid-template-columns: 3rem repeat(10, 1fr);
+        }
+      }
+      .board-cell {
+        aspect-ratio: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.625rem;
+        font-weight: 500;
+      }
+      @media (min-width: 640px) {
+        .board-cell {
+          font-size: 0.75rem;
+        }
+      }
+      .axis-cell {
+        background: var(--qs-tile);
+        color: var(--qs-tile-ink);
+        aspect-ratio: auto;
+        height: 1.5rem;
+      }
+      @media (min-width: 640px) {
+        .axis-cell {
+          height: 2.25rem;
+        }
+      }
+      .corner-cell {
+        background: var(--qs-panel-2);
+        aspect-ratio: auto;
+        height: 1.5rem;
+        font-size: 0.5rem;
+        flex-direction: column;
+        line-height: 1.2;
+      }
+      @media (min-width: 640px) {
+        .corner-cell {
+          height: 2.25rem;
+          font-size: 0.625rem;
+        }
+      }
+      .side-axis {
+        aspect-ratio: 1;
+        height: auto;
+      }
+    `,
     template: `
     <app-content-shell [wide]="true">
       <div class="no-print">
@@ -58,7 +112,7 @@ import { ContentShellComponent } from './content-shell.component';
           </p>
         </section>
 
-        <section class="print-sheet mt-10 overflow-hidden" aria-labelledby="grid-heading">
+        <section class="print-sheet mt-10" aria-labelledby="grid-heading">
           <h2 id="grid-heading" class="text-2xl font-bold text-heading no-print">Blank board</h2>
 
           <!-- Print header with branding -->
@@ -67,49 +121,52 @@ import { ContentShellComponent } from './content-shell.component';
             <span class="text-xs text-slate-500">quarterscore.com</span>
           </div>
 
-          <div class="mt-4 grid gap-3 text-sm text-default sm:grid-cols-2">
-            <p><span class="font-semibold text-heading">Home team (columns →):</span> ____________________</p>
-            <p><span class="font-semibold text-heading">Away team (rows ↓):</span> ____________________</p>
+          <p class="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+            <span class="flex items-center gap-1 font-semibold text-qs-ink">
+              <span class="text-base leading-none text-qs-muted" aria-hidden="true">&#8595;</span>
+              Away team: ____________
+            </span>
+            <span class="text-qs-line-strong" aria-hidden="true">/</span>
+            <span class="flex items-center gap-1 font-semibold text-qs-ink">
+              Home team: ____________
+              <span class="text-base leading-none text-qs-muted" aria-hidden="true">&#8594;</span>
+            </span>
+          </p>
+
+          <!-- Responsive CSS Grid board (full width) -->
+          <div
+            role="grid"
+            aria-label="Blank football squares grid"
+            class="board-grid w-full overflow-hidden rounded-md bg-qs-line p-px"
+          >
+            <!-- Top row: corner + 10 header cells -->
+            <div class="board-cell corner-cell text-qs-muted">
+              <span>AWAY &#8595;</span>
+              <span>HOME &#8594;</span>
+            </div>
+            @for (col of columns; track col) {
+              <div class="board-cell axis-cell" role="columnheader">
+                <span class="sr-only">Home digit box {{ col }}</span>
+              </div>
+            }
+
+            <!-- 10 rows: side header + 10 squares -->
+            @for (row of columns; track row) {
+              <div class="board-cell axis-cell side-axis" role="rowheader">
+                <span class="sr-only">Away digit box {{ row }}</span>
+              </div>
+              @for (col of columns; track col) {
+                <div class="board-cell bg-white" role="gridcell"></div>
+              }
+            }
           </div>
-          <p class="mt-2 text-sm text-muted md:hidden no-print">Scroll sideways to see the whole grid.</p>
-          <div class="mt-4 w-[calc(100vw-2rem)] max-w-full overflow-x-auto sm:w-auto" tabindex="0" aria-label="Blank football squares grid.">
-            <table class="print-grid min-w-[720px] border-collapse text-center">
-              <caption class="sr-only">
-                Blank 10 by 10 football squares board. Header boxes are empty so you can write the drawn digits.
-              </caption>
-              <thead>
-                <tr>
-                  <th scope="col" class="w-20 bg-slate-100 p-2 text-[10px] font-semibold text-slate-700 border border-slate-300">
-                    <span class="block">AWAY ↓</span>
-                    <span class="block text-slate-400">HOME →</span>
-                  </th>
-                  @for (column of columns; track column) {
-                    <th scope="col" class="h-12 border border-slate-900 bg-white p-1 text-xs font-semibold text-slate-900">
-                      <span class="sr-only">Home digit box {{ column }}</span>
-                    </th>
-                  }
-                </tr>
-              </thead>
-              <tbody>
-                @for (row of columns; track row) {
-                  <tr>
-                    <th scope="row" class="h-12 border border-slate-900 bg-white p-1 text-xs font-semibold text-slate-900">
-                      <span class="sr-only">Away digit box {{ row }}</span>
-                    </th>
-                    @for (column of columns; track column) {
-                      <td class="h-12 border border-slate-900 bg-white"></td>
-                    }
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
+
           <p class="mt-4 max-w-3xl text-sm leading-relaxed text-default">
-            <strong>How to read:</strong> Columns are the home team’s last digit. Rows are the away team’s last digit.
+            <strong>How to read:</strong> Columns are the home team's last digit. Rows are the away team's last digit.
             Find the square where the row and column meet to see the winner.
           </p>
           <p class="mt-2 text-xs text-muted">
-            QuarterScore never collects, holds, or pays out money. · quarterscore.com
+            QuarterScore never collects, holds, or pays out money. quarterscore.com
           </p>
         </section>
 
@@ -166,7 +223,7 @@ export class PrintableBoardComponent {
 
   constructor() {
     this.seo.apply({
-      title: 'Printable Football Squares — Free 10 by 10 Grid — QuarterScore',
+      title: 'Printable Football Squares - Free 10 by 10 Grid - QuarterScore',
       description: 'Printable football squares: a free blank 10 by 10 grid, a print view, and a PDF download. No logos. Draw the numbers after every name is written.',
       path: '/printable-football-squares',
       headline: 'Printable football squares',
