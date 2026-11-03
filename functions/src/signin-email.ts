@@ -48,13 +48,14 @@ export function renderEmail(link: string, email: string): { subject: string; htm
   ].join("\n");
   const html = `<!DOCTYPE html>
 <html lang="en">
+<head><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light"></head>
 <body style="margin:0;padding:0;background:#f6f3ee;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#0f172a;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f6f3ee;padding:32px 16px;">
     <tr><td align="center">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#fffefc;border:1px solid #e4dfd6;border-radius:10px;">
-        <tr><td style="background:#0f172a;border-radius:10px 10px 0 0;padding:20px 28px;">
-          <img src="${SITE}/assets/logo.png" width="28" height="28" alt="" style="vertical-align:middle;border:0;">
-          <span style="vertical-align:middle;margin-left:8px;font-size:18px;font-weight:700;color:#f3efe8;">QuarterScore</span>
+        <tr><td style="border-bottom:1px solid #e4dfd6;padding:20px 28px;">
+          <img src="${SITE}/icon-192.png" width="28" height="28" alt="" style="vertical-align:middle;border:0;">
+          <span style="vertical-align:middle;margin-left:8px;font-size:18px;font-weight:700;color:#0f172a;">QuarterScore</span>
         </td></tr>
         <tr><td style="padding:28px;">
           <h1 style="margin:0 0 12px;font-size:24px;line-height:1.2;">Sign in to QuarterScore</h1>
