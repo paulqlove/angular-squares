@@ -109,6 +109,11 @@ P0. At 375px the empty green grid fills the first screen. Replace it with a real
 ### PWA
 Manifest, add to home screen, and an offline board for game day.
 
+### Team themes
+✓ Done for the NFL. Team pages show a printable board in team colors, with Print board and Create board on each upcoming game. Generic helmets in team colors with the team's initials stand in for NFL logos, which are trademarked. The live game board keeps its own look.
+
+Decided: no team themes for college, NBA, MLB, or other leagues and sports. Those boards keep the standard look.
+
 ## Quality
 
 Oct 31, 2026 lab pass on quarterscore.com. Mobile Lighthouse 69 / 80 / 100 / 91 (perf, a11y, best practices, SEO). Desktop perf 100. Mobile LCP 4.8s. PageSpeed field data was not collected (API quota). Re-run before calling the perf work done.
