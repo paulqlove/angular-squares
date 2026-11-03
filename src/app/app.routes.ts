@@ -30,6 +30,11 @@ export const routes: Routes = [
         m => m.SuperBowlSquaresComponent
       )
   },
+  {
+    path: 'auth/email-link',
+    loadComponent: () =>
+      import('./features/auth/email-link.component').then(m => m.EmailLinkComponent)
+  },
   marketingRoute('how-to-play'),
   marketingRoute('faq'),
   marketingRoute('super-bowl-squares'),

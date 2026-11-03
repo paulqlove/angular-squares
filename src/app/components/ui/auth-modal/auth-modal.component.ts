@@ -87,6 +87,28 @@ import { AuthService } from '../../../core/services/auth.service';
               </svg>
               Sign in with Google
             </button>
+
+            @if (emailSentTo()) {
+              <div class="rounded-inner bg-qs-ok-soft p-4 text-sm text-qs-ok" role="status">
+                <p class="font-semibold">Check your email</p>
+                <p class="mt-1">We sent a sign-in link to {{ emailSentTo() }}. Open it on this device to finish. No password needed.</p>
+              </div>
+            } @else if (!showEmailForm()) {
+              <button type="button" (click)="showEmailForm.set(true)" class="qs-btn qs-btn-ghost w-full">Sign in with email instead</button>
+            } @else {
+              <form class="space-y-2" (ngSubmit)="sendEmailLink()">
+                <label for="auth-name" class="qs-label block text-qs-muted">Your name</label>
+                <input id="auth-name" name="name" type="text" autocomplete="name" [(ngModel)]="linkName" class="qs-input w-full" placeholder="Shown on boards" />
+                <label for="auth-email" class="qs-label block text-qs-muted">Email</label>
+                <input id="auth-email" name="email" type="email" autocomplete="email" required [(ngModel)]="linkEmail" class="qs-input w-full" placeholder="you@example.com" />
+                @if (emailError()) {
+                  <p class="text-sm text-qs-bad">{{ emailError() }}</p>
+                }
+                <button type="submit" class="qs-btn qs-btn-secondary w-full" [disabled]="sending() || !linkName.trim() || !validEmail()">
+                  {{ sending() ? 'Sending…' : 'Email me a sign-in link' }}
+                </button>
+              </form>
+            }
             @if (mode === 'host') {
               <p class="text-xs text-muted text-center">We never see or store your password.</p>
             }
@@ -112,6 +134,32 @@ export class AuthModalComponent implements OnChanges {
   checkingAuth = signal(false);
 
   guestName = '';
+  linkName = '';
+  linkEmail = '';
+  showEmailForm = signal(false);
+  sending = signal(false);
+  emailSentTo = signal<string | null>(null);
+  emailError = signal<string | null>(null);
+
+  validEmail(): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.linkEmail.trim());
+  }
+
+  async sendEmailLink(): Promise<void> {
+    if (this.sending() || !this.validEmail() || !this.linkName.trim()) return;
+    this.sending.set(true);
+    this.emailError.set(null);
+    const host = this.mode === 'host' || sessionStorage.getItem('qs_create_after_auth') === 'true';
+    try {
+      const email = this.linkEmail.trim();
+      await this.authService.sendEmailLink(email, this.linkName.trim(), host ? '/dashboard' : window.location.pathname);
+      this.emailSentTo.set(email);
+    } catch {
+      this.emailError.set("We couldn't send the link. Check the email and try again.");
+    } finally {
+      this.sending.set(false);
+    }
+  }
 
   private returnFocus: HTMLElement | null = null;
 

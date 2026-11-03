@@ -23,6 +23,8 @@ export interface GuestUser {
 
 const GUEST_COOKIE_KEY = 'squares_guest_user';
 
+const EMAIL_LINK_KEY = 'qs_email_link';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -241,6 +243,50 @@ export class AuthService {
     } finally {
       this._isLoading.set(false);
     }
+  }
+
+  /** Emails a one-time sign-in link (no password). Remembers the email, name and where to go next on this device. */
+  async sendEmailLink(email: string, name: string, next: string): Promise<void> {
+    if (this.previewRole() !== 'actual') {
+      this.toast.warning('Switch the preview back to "Me" before signing in.');
+      throw new Error('Sign-in is disabled while previewing a role');
+    }
+    await this.ensureInitialized();
+    await this.sdk!.auth.sendSignInLinkToEmail(this.auth, email, {
+      url: `${window.location.origin}/auth/email-link`,
+      handleCodeInApp: true
+    });
+    localStorage.setItem(EMAIL_LINK_KEY, JSON.stringify({ email, name, next }));
+  }
+
+  /** The email, name and next page saved when the link was sent from this device, if any. */
+  pendingEmailLink(): { email: string; name: string; next: string } | null {
+    try {
+      return JSON.parse(localStorage.getItem(EMAIL_LINK_KEY) || 'null');
+    } catch {
+      return null;
+    }
+  }
+
+  async isEmailLink(url: string): Promise<boolean> {
+    await this.ensureInitialized();
+    return this.sdk!.auth.isSignInWithEmailLink(this.auth, url);
+  }
+
+  /** Finishes sign-in from the emailed link. Sets the display name if the account has none. */
+  async completeEmailLink(email: string, name: string, url: string): Promise<AuthUser> {
+    await this.ensureInitialized();
+    const { user } = await this.sdk!.auth.signInWithEmailLink(this.auth, email, url);
+    const displayName = user.displayName || this.sanitizationService.sanitizeDisplayName(name) || null;
+    if (!user.displayName && displayName) {
+      await this.sdk!.auth.updateProfile(user, { displayName });
+    }
+    const authUser: AuthUser = { uid: user.uid, email: user.email, displayName, photoURL: user.photoURL, isGuest: false };
+    this._currentUser.set(authUser);
+    this.clearGuestCookie();
+    localStorage.removeItem(EMAIL_LINK_KEY);
+    if (user.email) this.indexUserEmail(user.email, user.uid);
+    return authUser;
   }
 
   // Guest Sign In (cookie + Firebase Anonymous Auth)
