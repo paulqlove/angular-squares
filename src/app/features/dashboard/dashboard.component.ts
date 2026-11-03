@@ -1033,7 +1033,7 @@ export class DashboardComponent implements OnInit {
       await this.gameService.assertUnderFreeBoardLimit(user.uid);
       this.gameListOpen = true;
       this.showCreateModal.set(true);
-      this.fetchEspnGames();
+      this.fetchEspnGames().then(() => this.applyPendingEspnGame());
     } catch (error) {
       if (error instanceof ActiveBoardLimitError) {
         this.showUpgradeDialog.set(true);
@@ -1130,6 +1130,21 @@ export class DashboardComponent implements OnInit {
     this.selectedEspnGameId = '';
     this.gameListOpen = true;
     this.fetchEspnGames();
+  }
+
+  /** A team page's "Create board" stores the game so it arrives pre-selected. */
+  private applyPendingEspnGame(): void {
+    const raw = sessionStorage.getItem('qs_create_game');
+    if (!raw) return;
+    sessionStorage.removeItem('qs_create_game');
+    try {
+      const game = JSON.parse(raw) as EspnGame;
+      if (this.selectedSport !== 'nfl') return;
+      if (!this.espnGames().some(g => g.id === game.id)) this.espnGames.update(list => [game, ...list]);
+      this.selectEspnGame(game.id);
+    } catch {
+      // Ignore a malformed entry
+    }
   }
 
   selectEspnGame(gameId: string): void {

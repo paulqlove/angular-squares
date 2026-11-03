@@ -451,6 +451,32 @@
   }
 }
 
+/* Team page: print only the themed sheet, in color */
+.team-sheet {
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+@media print {
+  html.print-team-sheet body *:not(:has(.team-sheet)):not(.team-sheet):not(.team-sheet *) {
+    display: none !important;
+  }
+
+  html.print-team-sheet .team-sheet {
+    border: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  html.print-team-sheet .team-sheet .overflow-x-auto {
+    overflow: visible !important;
+  }
+
+  html.print-team-sheet .team-sheet .sheet-grid {
+    min-width: 0 !important;
+  }
+}
+
 @media print and (orientation: portrait) {
   .print-grid td {
     height: 0.6in;

@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy, OnInit, signal, effect } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, OnInit, signal, effect, computed } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { SeoService } from '../../core/services/seo.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -89,13 +89,14 @@ import { EspnService, EspnGame } from '../../core/services/espn.service';
                       </p>
                       <p class="text-sm text-muted">{{ formatDate(game.date) }}</p>
                     </div>
-                    <button
-                      type="button"
-                      (click)="createBoard()"
-                      class="shrink-0 rounded-md border border-default bg-white px-3 py-1.5 text-sm font-medium text-heading hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700"
-                    >
-                      Create board
-                    </button>
+                    <div class="flex shrink-0 flex-wrap justify-end gap-2">
+                      <button type="button" (click)="printSheet(game)" class="qs-btn qs-btn-secondary">
+                        Print board
+                      </button>
+                      <button type="button" (click)="createForGame(game)" class="qs-btn qs-btn-primary">
+                        Create board
+                      </button>
+                    </div>
                   </div>
                 }
               </div>
@@ -104,6 +105,59 @@ import { EspnService, EspnGame } from '../../core/services/espn.service';
                 No upcoming games scheduled. Check back during the season.
               </p>
             }
+          </section>
+
+          <!-- Team-themed printable board -->
+          <section class="mt-10" aria-labelledby="sheet-heading">
+            <h2 id="sheet-heading" class="text-2xl font-bold text-heading">{{ team.name }} squares board</h2>
+            <p class="mt-2 text-muted">
+              Print it for the wall, or choose "Save as PDF" in the print window. Write names first, then draw the digits.
+            </p>
+            <div class="team-sheet mt-4 rounded-[10px] border border-default bg-white p-4 text-slate-900 sm:p-6">
+              <div class="flex items-center justify-between gap-3">
+                <img src="assets/brand/lockup-horizontal.svg" alt="QuarterScore" class="h-6">
+                <span class="text-xs text-slate-600">{{ sheet().date }}</span>
+              </div>
+              <p class="mt-3 text-lg font-bold">{{ sheet().away.label }} at {{ sheet().home.label }}</p>
+              <div class="mt-3 overflow-x-auto">
+                <div class="sheet-grid grid min-w-[560px]" style="grid-template-columns: 64px 40px repeat(10, minmax(0, 1fr));">
+                  <div class="flex h-16 items-center justify-center gap-3 rounded-t-md text-2xl font-bold uppercase tracking-wide"
+                       style="grid-column: 1 / -1; padding-left: 104px;" [style.background]="sheet().home.bg" [style.color]="sheet().home.fg">
+                    @if (sheet().home.logo; as logo) {
+                      <img [src]="logo" alt="" class="h-12 w-12 rounded-full bg-white object-contain p-1">
+                    }
+                    {{ sheet().home.label }}
+                  </div>
+                  <div class="flex flex-col items-center justify-center rounded-bl-md text-2xl font-bold uppercase tracking-wide"
+                       style="grid-row: 2 / span 11;"
+                       [style.background]="sheet().away.bg" [style.color]="sheet().away.fg">
+                    <div class="flex items-center gap-3 whitespace-nowrap" style="transform: rotate(-90deg);">
+                      @if (sheet().away.logo; as logo) {
+                        <img [src]="logo" alt="" class="h-12 w-12 shrink-0 rounded-full bg-white object-contain p-1">
+                      }
+                      {{ sheet().away.label }}
+                    </div>
+                  </div>
+                  <div class="h-10 border border-slate-900 bg-slate-100"></div>
+                  @for (c of digits; track c) {
+                    <div class="h-10 border border-slate-900" [style.background]="sheet().home.tint" aria-hidden="true"></div>
+                  }
+                  @for (r of digits; track r) {
+                    <div class="h-12 border border-slate-900" [style.background]="sheet().away.tint" aria-hidden="true"></div>
+                    @for (c of digits; track c) {
+                      <div class="h-12 border border-slate-900" aria-hidden="true"></div>
+                    }
+                  }
+                </div>
+              </div>
+              <p class="mt-3 text-xs text-slate-600">
+                Columns are the {{ sheet().home.label }} score's last digit, rows are the {{ sheet().away.label }}'s.
+                Run this board live at quarterscore.com.
+              </p>
+            </div>
+            <button type="button" (click)="printSheet()" class="qs-btn qs-btn-primary mt-4">
+              Print this board
+            </button>
           </section>
 
           <!-- How It Works -->
@@ -192,6 +246,21 @@ export class TeamPageComponent implements OnInit {
   public games = signal<EspnGame[]>([]);
   public loading = signal(true);
   public showAuthModal = signal(false);
+  public readonly digits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+  private printGame = signal<EspnGame | null>(null);
+
+  /** Matchup shown on the themed sheet: the chosen game, else the next game, else this team vs a blank opponent. */
+  public sheet = computed(() => {
+    const game = this.printGame() ?? this.games()[0];
+    const band = (name: string | undefined) => {
+      const t = name ? findTeam(name) : undefined;
+      if (!t) return { label: name || 'Opponent', bg: '#e2e8f0', fg: '#0f172a', logo: '', tint: '#f1f5f9' };
+      const tint = `color-mix(in srgb, ${t.primaryColor} 16%, white)`;
+      return { label: t.name, bg: t.primaryColor, fg: this.getContrastColor(t.primaryColor), logo: getTeamLogo(t, 100), tint };
+    };
+    if (!game) return { home: band(this.team?.abbreviation), away: band(undefined), date: '' };
+    return { home: band(game.homeTeam), away: band(game.awayTeam), date: this.formatDate(game.date) };
+  });
   public isAuthenticated = this.authService.isAuthenticated;
   private pendingCreateRedirect = false;
 
@@ -277,6 +346,26 @@ export class TeamPageComponent implements OnInit {
     });
   }
 
+  public printSheet(game?: EspnGame): void {
+    if (game) this.printGame.set(game);
+    const root = document.documentElement;
+    root.classList.add('print-team-sheet');
+    window.addEventListener('afterprint', () => root.classList.remove('print-team-sheet'), { once: true });
+    setTimeout(() => window.print(), 50);
+  }
+
+  /** Create a board with this game already picked on the dashboard. */
+  public createForGame(game: EspnGame): void {
+    const home = findTeam(game.homeTeam);
+    const away = findTeam(game.awayTeam);
+    sessionStorage.setItem('qs_create_game', JSON.stringify({
+      ...game,
+      homeTeam: home?.abbreviation ?? game.homeTeam,
+      awayTeam: away?.abbreviation ?? game.awayTeam
+    }));
+    this.createBoard();
+  }
+
   public createBoard(): void {
     if (this.isAuthenticated()) {
       this.router.navigate(['/dashboard'], { queryParams: { create: 'true' } });
@@ -292,4 +381,9 @@ export class TeamPageComponent implements OnInit {
     this.showAuthModal.set(false);
     // Effect will handle navigation when auth state changes
   }
+}
+
+/** ESPN schedules use full names ("Kansas City Chiefs"); the scoreboard uses abbreviations. */
+function findTeam(name: string): NflTeam | undefined {
+  return NFL_TEAMS.find(t => `${t.city} ${t.name}` === name || t.abbreviation === name);
 }
