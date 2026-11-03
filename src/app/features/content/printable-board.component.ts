@@ -81,18 +81,11 @@ import { ContentShellComponent } from './content-shell.component';
             A blank 10 by 10 grid with no logos. Print it for the wall, or download the PDF.
             Write names first. Write the digits only after the draw.
           </p>
-          <div class="mt-6 flex flex-col gap-3 sm:flex-row">
-            <button
-              type="button"
-              class="inline-flex min-h-11 items-center justify-center rounded-md bg-qs-accent px-4 font-semibold text-white hover:bg-qs-accent-hover"
-              (click)="printBoard()"
-            >
-              Print this board
-            </button>
+          <div class="mt-6">
             <a
               href="assets/printable-football-squares.pdf"
               download="printable-football-squares.pdf"
-              class="inline-flex min-h-11 items-center justify-center rounded-md border border-default bg-card px-4 font-semibold text-heading hover:bg-card-hover"
+              class="inline-flex min-h-11 items-center justify-center rounded-md bg-qs-accent px-4 font-semibold text-white hover:bg-qs-accent-hover"
             >
               Download PDF
             </a>
@@ -238,7 +231,4 @@ export class PrintableBoardComponent {
     });
   }
 
-  public printBoard(): void {
-    window.print();
-  }
 }
