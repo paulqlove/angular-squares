@@ -211,7 +211,12 @@
             } @else {
               <app-box-score
                 [game]="linkedEspnGame()"
-                [espnSport]="espnSport">
+                [espnSport]="espnSport"
+                [scores]="{ q1: scores.q1, q2: scores.q2, q3: scores.q3, q4: scores.q4 }"
+                [homeTeam]="homeTeam"
+                [awayTeam]="awayTeam"
+                [isOwner]="!espnEventId && (isGameOwner() || isManager())"
+                (scoresChange)="onBoxScoreChange($event)">
               </app-box-score>
             }
           </div>
@@ -268,70 +273,6 @@
           (quarterClick)="onQuarterClick($event)">
         </app-winners-and-payouts>
       </section>
-
-      <!-- Manual Score Entry (for non-ESPN games, owner only) -->
-      @if ((isGameOwner() || isManager()) && !espnEventId) {
-        <section class="px-3">
-          <div class="rounded-card border border-qs-line bg-qs-panel p-4">
-            <h3 class="qs-eyebrow mb-4">Update scores</h3>
-            <p class="mb-4 text-sm text-qs-muted">Enter cumulative scores after each quarter.</p>
-            <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
-              <div class="space-y-2">
-                <label class="qs-label block text-qs-muted">Q1</label>
-                <div class="space-y-1.5">
-                  <div class="flex items-center gap-2">
-                    <span class="w-12 truncate text-xs text-qs-muted">{{ awayTeam || 'Away' }}</span>
-                    <input type="number" min="0" [value]="scores.q1.away" (change)="onManualScoreChange('1', 'away', $event)" class="qs-input w-16 px-2 text-center tabular-nums" />
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <span class="w-12 truncate text-xs text-qs-muted">{{ homeTeam || 'Home' }}</span>
-                    <input type="number" min="0" [value]="scores.q1.home" (change)="onManualScoreChange('1', 'home', $event)" class="qs-input w-16 px-2 text-center tabular-nums" />
-                  </div>
-                </div>
-              </div>
-              <div class="space-y-2">
-                <label class="qs-label block text-qs-muted">Q2</label>
-                <div class="space-y-1.5">
-                  <div class="flex items-center gap-2">
-                    <span class="w-12 truncate text-xs text-qs-muted">{{ awayTeam || 'Away' }}</span>
-                    <input type="number" min="0" [value]="scores.q2.away" (change)="onManualScoreChange('2', 'away', $event)" class="qs-input w-16 px-2 text-center tabular-nums" />
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <span class="w-12 truncate text-xs text-qs-muted">{{ homeTeam || 'Home' }}</span>
-                    <input type="number" min="0" [value]="scores.q2.home" (change)="onManualScoreChange('2', 'home', $event)" class="qs-input w-16 px-2 text-center tabular-nums" />
-                  </div>
-                </div>
-              </div>
-              <div class="space-y-2">
-                <label class="qs-label block text-qs-muted">Q3</label>
-                <div class="space-y-1.5">
-                  <div class="flex items-center gap-2">
-                    <span class="w-12 truncate text-xs text-qs-muted">{{ awayTeam || 'Away' }}</span>
-                    <input type="number" min="0" [value]="scores.q3.away" (change)="onManualScoreChange('3', 'away', $event)" class="qs-input w-16 px-2 text-center tabular-nums" />
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <span class="w-12 truncate text-xs text-qs-muted">{{ homeTeam || 'Home' }}</span>
-                    <input type="number" min="0" [value]="scores.q3.home" (change)="onManualScoreChange('3', 'home', $event)" class="qs-input w-16 px-2 text-center tabular-nums" />
-                  </div>
-                </div>
-              </div>
-              <div class="space-y-2">
-                <label class="qs-label block text-qs-muted">Final</label>
-                <div class="space-y-1.5">
-                  <div class="flex items-center gap-2">
-                    <span class="w-12 truncate text-xs text-qs-muted">{{ awayTeam || 'Away' }}</span>
-                    <input type="number" min="0" [value]="scores.q4.away" (change)="onManualScoreChange('4', 'away', $event)" class="qs-input w-16 px-2 text-center tabular-nums" />
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <span class="w-12 truncate text-xs text-qs-muted">{{ homeTeam || 'Home' }}</span>
-                    <input type="number" min="0" [value]="scores.q4.home" (change)="onManualScoreChange('4', 'home', $event)" class="qs-input w-16 px-2 text-center tabular-nums" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      }
 
       @if (showAd()) {
         <section class="px-3">

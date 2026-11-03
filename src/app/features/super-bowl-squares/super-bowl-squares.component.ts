@@ -41,7 +41,7 @@ import { AppHeaderComponent } from '../../components/ui/app-header/app-header.co
 import { EditGameDialogComponent, EditGameValues } from './components/edit-game-dialog/edit-game-dialog.component';
 import { PaymentDialogComponent } from './components/payment-dialog/payment-dialog.component';
 import { ProbabilityHeatmapComponent } from './components/probability-heatmap/probability-heatmap.component';
-import { BoxScoreComponent } from './components/box-score/box-score.component';
+import { BoxScoreComponent, ManualScores } from './components/box-score/box-score.component';
 import { ProfileMenuComponent } from '../../components/ui/profile-menu/profile-menu.component';
 import { ShareDialogComponent } from '../../components/ui/share-dialog/share-dialog.component';
 import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.component';
@@ -643,11 +643,11 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     this.calculateWinners();
   }
 
-  onManualScoreChange(quarter: string, team: 'home' | 'away', event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const value = this.sanitizationService.validateScore(parseInt(input.value, 10) || 0);
-    const key = `q${quarter}` as keyof typeof this.scores;
-    this.scores[key][team] = value;
+  onBoxScoreChange(newScores: ManualScores): void {
+    this.scores.q1 = { home: newScores.q1.home, away: newScores.q1.away };
+    this.scores.q2 = { home: newScores.q2.home, away: newScores.q2.away };
+    this.scores.q3 = { home: newScores.q3.home, away: newScores.q3.away };
+    this.scores.q4 = { home: newScores.q4.home, away: newScores.q4.away };
     this.gameService.updateGame(this.gameId, {
       scores: this.scores
     });
