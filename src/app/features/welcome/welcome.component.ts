@@ -67,7 +67,7 @@ interface Feature {
             <h1 class="qs-display mt-5 max-w-[14ch]">
               The Ultimate Football <span class="text-qs-accent">Squares</span> Game
             </h1>
-            <p class="mt-6 text-xl font-medium">Every square, every score, live on one board.™</p>
+            <p class="mt-6 text-xl font-medium">Every square, every score, live on one board.</p>
             <p class="mt-3 max-w-xl text-lg text-qs-muted leading-relaxed">
               Create and share your football squares game in seconds.
               Perfect for Super Bowl parties, office games, and game day fun.
