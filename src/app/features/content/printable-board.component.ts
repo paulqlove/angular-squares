@@ -9,42 +9,48 @@ import { ContentShellComponent } from './content-shell.component';
     imports: [RouterLink, ContentShellComponent, BreadcrumbsComponent],
     changeDetection: ChangeDetectionStrategy.Eager,
     styles: `
-      .board-grid {
+      .grid-row {
         display: grid;
         grid-template-columns: 2rem repeat(10, 1fr);
         gap: 1px;
       }
       @media (min-width: 640px) {
-        .board-grid {
+        .grid-row {
           grid-template-columns: 3rem repeat(10, 1fr);
         }
       }
-      .board-cell {
+      .cell {
         aspect-ratio: 1;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 0.625rem;
         font-weight: 500;
+        background: white;
       }
       @media (min-width: 640px) {
-        .board-cell {
+        .cell {
           font-size: 0.75rem;
         }
       }
-      .axis-cell {
+      .axis-top {
         background: var(--qs-tile);
         color: var(--qs-tile-ink);
         aspect-ratio: auto;
         height: 1.5rem;
       }
       @media (min-width: 640px) {
-        .axis-cell {
+        .axis-top {
           height: 2.25rem;
         }
       }
-      .corner-cell {
+      .axis-side {
+        background: var(--qs-tile);
+        color: var(--qs-tile-ink);
+      }
+      .corner {
         background: var(--qs-panel-2);
+        color: var(--qs-muted);
         aspect-ratio: auto;
         height: 1.5rem;
         font-size: 0.5rem;
@@ -52,14 +58,10 @@ import { ContentShellComponent } from './content-shell.component';
         line-height: 1.2;
       }
       @media (min-width: 640px) {
-        .corner-cell {
+        .corner {
           height: 2.25rem;
           font-size: 0.625rem;
         }
-      }
-      .side-axis {
-        aspect-ratio: 1;
-        height: auto;
       }
     `,
     template: `
@@ -137,27 +139,31 @@ import { ContentShellComponent } from './content-shell.component';
           <div
             role="grid"
             aria-label="Blank football squares grid"
-            class="board-grid w-full overflow-hidden rounded-md bg-qs-line p-px"
+            class="flex w-full flex-col gap-px overflow-hidden rounded-md bg-qs-line p-px"
           >
             <!-- Top row: corner + 10 header cells -->
-            <div class="board-cell corner-cell text-qs-muted">
-              <span>AWAY &#8595;</span>
-              <span>HOME &#8594;</span>
-            </div>
-            @for (col of columns; track col) {
-              <div class="board-cell axis-cell" role="columnheader">
-                <span class="sr-only">Home digit box {{ col }}</span>
+            <div class="grid-row" role="row">
+              <div class="cell corner">
+                <span>AWAY &#8595;</span>
+                <span>HOME &#8594;</span>
               </div>
-            }
+              @for (col of columns; track col) {
+                <div class="cell axis-top" role="columnheader">
+                  <span class="sr-only">Home digit box {{ col }}</span>
+                </div>
+              }
+            </div>
 
             <!-- 10 rows: side header + 10 squares -->
             @for (row of columns; track row) {
-              <div class="board-cell axis-cell side-axis" role="rowheader">
-                <span class="sr-only">Away digit box {{ row }}</span>
+              <div class="grid-row" role="row">
+                <div class="cell axis-side" role="rowheader">
+                  <span class="sr-only">Away digit box {{ row }}</span>
+                </div>
+                @for (col of columns; track col) {
+                  <div class="cell" role="gridcell"></div>
+                }
               </div>
-              @for (col of columns; track col) {
-                <div class="board-cell bg-white" role="gridcell"></div>
-              }
             }
           </div>
 
