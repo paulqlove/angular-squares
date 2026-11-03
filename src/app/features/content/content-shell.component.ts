@@ -1,4 +1,4 @@
-import { Component, Input, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
 import { SiteFooterComponent } from '../../shared/site-footer.component';
@@ -68,8 +68,8 @@ interface NavLink {
         </div>
       </header>
 
-      <main id="main" class="flex-1 px-4 py-8 sm:py-12 overflow-x-hidden">
-        <div [class]="(wide ? 'mx-auto max-w-5xl' : 'mx-auto max-w-3xl') + ' overflow-x-hidden'">
+      <main id="main" class="flex-1 px-4 sm:px-8 py-8 sm:py-12 overflow-x-hidden">
+        <div class="mx-auto max-w-5xl overflow-x-hidden">
           <ng-content></ng-content>
         </div>
       </main>
@@ -79,7 +79,6 @@ interface NavLink {
   `
 })
 export class ContentShellComponent {
-  @Input() public wide = false;
 
   public readonly menuOpen = signal(false);
 

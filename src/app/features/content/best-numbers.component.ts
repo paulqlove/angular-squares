@@ -10,7 +10,7 @@ import { ContentShellComponent } from './content-shell.component';
     imports: [RouterLink, ContentShellComponent, BreadcrumbsComponent],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
-    <app-content-shell [wide]="true">
+    <app-content-shell >
       <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
       <article>
         <header class="max-w-3xl">

@@ -65,7 +65,7 @@ import { ContentShellComponent } from './content-shell.component';
       }
     `,
     template: `
-    <app-content-shell [wide]="true">
+    <app-content-shell >
       <div class="no-print">
         <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
       </div>
