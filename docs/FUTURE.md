@@ -114,6 +114,19 @@ Manifest, add to home screen, and an offline board for game day.
 
 Decided: no team themes for college, NBA, MLB, or other leagues and sports. Those boards keep the standard look.
 
+## UX Improvements
+
+### Help Menu (replaces walkthrough auto-launch)
+The `?` icon in the header currently auto-launches a walkthrough. Replace with a help dropdown showing contextual topics:
+
+- **How to update scores** (for custom/manual games)
+- **How to share your game** (link, QR code)
+- **Presentation mode / TV view**
+- **How winners are calculated**
+- **Start walkthrough** (keep as an option, not auto)
+
+The walkthrough is still available but user-initiated. Help topics should be contextual — show "Update scores" only for game owners on non-ESPN games, etc.
+
 ## Quality
 
 Oct 31, 2026 lab pass on quarterscore.com. Mobile Lighthouse 69 / 80 / 100 / 91 (perf, a11y, best practices, SEO). Desktop perf 100. Mobile LCP 4.8s. PageSpeed field data was not collected (API quota). Re-run before calling the perf work done.
