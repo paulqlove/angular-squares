@@ -22,7 +22,7 @@ interface NavLink {
     </a>
     <div class="flex min-h-screen flex-col bg-page overflow-x-hidden">
       <header appHeadroom class="no-print qs-on-navy bg-qs-tile text-qs-tile-ink">
-        <div class="mx-auto flex max-w-5xl flex-wrap items-center gap-3 px-4 py-2">
+        <div class="mx-auto flex max-w-[1600px] flex-wrap items-center gap-3 px-4 sm:px-8 py-2">
           <a routerLink="/" class="flex min-h-11 items-center gap-2 rounded-md">
             <img src="assets/brand/lockup-horizontal-reversed.svg" alt="QuarterScore" width="192" height="24" class="h-6 w-auto">
           </a>
