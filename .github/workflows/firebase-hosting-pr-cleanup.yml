@@ -20,10 +20,12 @@ jobs:
           SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SQUARES_4E4F7 }}
           PR: ${{ github.event.pull_request.number }}
         run: |
+          set -euo pipefail
           echo "$SA" > "$RUNNER_TEMP/sa.json"
           export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
+          npm i -g firebase-tools@latest --silent
+          out=$(firebase hosting:channel:list --project squares-4e4f7 --json || true)
           # Channel ids are pr<number>-<branch prefix>; delete any that belong to this PR.
-          for c in $(npx -y firebase-tools@latest hosting:channel:list --project squares-4e4f7 --json \
-            | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{for(const c of JSON.parse(s).result.channels){const id=c.name.split('/').pop();if(id.startsWith('pr'+process.env.PR+'-'))console.log(id)}})"); do
-            npx -y firebase-tools@latest hosting:channel:delete "$c" --force --project squares-4e4f7
-          done
+          ids=$(echo "$out" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const j=JSON.parse(s);if(j.status!=='success'){console.error(s);process.exit(1)}for(const c of j.result.channels){const id=c.name.split('/').pop();if(id.startsWith('pr'+process.env.PR+'-'))console.log(id)}})")
+          if [ -z "$ids" ]; then echo "No preview channel for PR $PR"; exit 0; fi
+          for c in $ids; do firebase hosting:channel:delete "$c" --force --project squares-4e4f7; done
