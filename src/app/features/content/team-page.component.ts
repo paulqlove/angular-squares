@@ -24,14 +24,13 @@ import { EspnService, EspnGame } from '../../core/services/espn.service';
             class="relative -mx-4 -mt-4 mb-8 overflow-hidden px-6 py-10 sm:-mx-8 sm:rounded-2xl"
             [style.background]="'linear-gradient(135deg, ' + team.primaryColor + ' 0%, ' + team.secondaryColor + ' 100%)'"
           >
-            <div class="relative z-10 flex items-center gap-4 sm:gap-6">
-              <app-team-helmet [color]="team.primaryColor" [initials]="team.abbreviation" [size]="80" class="shrink-0 sm:hidden" />
-              <app-team-helmet [color]="team.primaryColor" [initials]="team.abbreviation" [size]="104" class="hidden shrink-0 sm:block" />
-              <div class="min-w-0">
+            <div class="relative z-10 flex items-center gap-6 px-2">
+              <app-team-helmet [color]="team.primaryColor" [initials]="team.abbreviation" [size]="104" />
+              <div>
                 <p class="text-sm font-medium uppercase tracking-wider" [style.color]="getContrastColor(team.primaryColor)">
                   {{ team.conference }} {{ team.division }}
                 </p>
-                <h1 class="mt-1 font-bold" [style.color]="getContrastColor(team.primaryColor)" style="font-size: clamp(1.5rem, 5vw, 3rem);">
+                <h1 class="mt-1 text-3xl font-bold sm:text-5xl" [style.color]="getContrastColor(team.primaryColor)">
                   {{ team.city }} {{ team.name }}
                 </h1>
                 <p class="mt-2 text-base opacity-90 sm:text-lg" [style.color]="getContrastColor(team.primaryColor)">
