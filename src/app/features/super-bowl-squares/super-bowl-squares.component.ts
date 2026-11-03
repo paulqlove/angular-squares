@@ -1234,11 +1234,15 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   }
 
   private toLinkedGame(id: string, live: EspnLiveSnapshot): EspnGame {
+    const homeTeam = live.homeTeam || this.homeTeam || 'Home';
+    const awayTeam = live.awayTeam || this.awayTeam || 'Away';
     return {
       id,
-      name: `${live.awayTeam || this.awayTeam || 'Away'} at ${live.homeTeam || this.homeTeam || 'Home'}`,
-      homeTeam: live.homeTeam || this.homeTeam || 'Home',
-      awayTeam: live.awayTeam || this.awayTeam || 'Away',
+      name: `${awayTeam} at ${homeTeam}`,
+      homeTeam,
+      awayTeam,
+      homeTeamFull: homeTeam,
+      awayTeamFull: awayTeam,
       homeScore: live.homeScore,
       awayScore: live.awayScore,
       period: live.period,

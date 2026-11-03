@@ -1224,7 +1224,9 @@ export class DashboardComponent implements OnInit {
     if (!query) return this.espnGames();
     return this.espnGames().filter(g =>
       g.homeTeam.toLowerCase().includes(query) ||
-      g.awayTeam.toLowerCase().includes(query)
+      g.awayTeam.toLowerCase().includes(query) ||
+      g.homeTeamFull.toLowerCase().includes(query) ||
+      g.awayTeamFull.toLowerCase().includes(query)
     );
   }
 
@@ -1233,7 +1235,9 @@ export class DashboardComponent implements OnInit {
     if (!query) return this.editEspnGames();
     return this.editEspnGames().filter(g =>
       g.homeTeam.toLowerCase().includes(query) ||
-      g.awayTeam.toLowerCase().includes(query)
+      g.awayTeam.toLowerCase().includes(query) ||
+      g.homeTeamFull.toLowerCase().includes(query) ||
+      g.awayTeamFull.toLowerCase().includes(query)
     );
   }
 

@@ -9,6 +9,8 @@ export interface EspnGame {
   name: string;
   homeTeam: string;
   awayTeam: string;
+  homeTeamFull: string;  // Full display name for search
+  awayTeamFull: string;  // Full display name for search
   homeScore: number;
   awayScore: number;
   period: number;
@@ -50,32 +52,51 @@ export class EspnService {
 
     try {
       const today = new Date();
-      const dateStr = today.getFullYear().toString() +
-        (today.getMonth() + 1).toString().padStart(2, '0') +
-        today.getDate().toString().padStart(2, '0');
+      const formatDate = (d: Date) => d.getFullYear().toString() +
+        (d.getMonth() + 1).toString().padStart(2, '0') +
+        d.getDate().toString().padStart(2, '0');
 
-      // Fetch default scoreboard (live/recent) and today's games in parallel
-      const [defaultRes, todayRes] = await Promise.all([
+      const dateStr = formatDate(today);
+      const fetches: Promise<Response>[] = [
         fetch(this.API_URLS[sport]),
         fetch(`${this.API_URLS[sport]}?dates=${dateStr}`)
-      ]);
-      const [defaultData, todayData] = await Promise.all([
-        defaultRes.json(),
-        todayRes.json()
-      ]);
+      ];
 
-      const defaultGames = this.parseGames(defaultData, sport);
-      const todayGames = this.parseGames(todayData, sport);
+      // For NCAA, fetch the whole week (games are mostly on Saturday)
+      if (sport === 'ncaaf') {
+        // Find next Saturday and fetch that week
+        const nextSaturday = new Date(today);
+        const daysUntilSat = (6 - today.getDay() + 7) % 7 || 7;
+        nextSaturday.setDate(today.getDate() + daysUntilSat);
+
+        // Also fetch previous Saturday in case we're mid-week
+        const prevSaturday = new Date(today);
+        prevSaturday.setDate(today.getDate() - ((today.getDay() + 1) % 7 || 7));
+
+        fetches.push(
+          fetch(`${this.API_URLS[sport]}?dates=${formatDate(nextSaturday)}`),
+          fetch(`${this.API_URLS[sport]}?dates=${formatDate(prevSaturday)}`)
+        );
+      }
+
+      const responses = await Promise.all(fetches);
+      const dataArrays = await Promise.all(responses.map(r => r.json()));
 
       // Merge and deduplicate by game id
       const seen = new Set<string>();
       const merged: EspnGame[] = [];
-      for (const game of [...todayGames, ...defaultGames]) {
-        if (!seen.has(game.id)) {
-          seen.add(game.id);
-          merged.push(game);
+      for (const data of dataArrays) {
+        for (const game of this.parseGames(data, sport)) {
+          if (!seen.has(game.id)) {
+            seen.add(game.id);
+            merged.push(game);
+          }
         }
       }
+
+      // Sort by date
+      merged.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
       return merged;
     } catch (error) {
       console.error('Failed to fetch ESPN games:', error);
@@ -143,11 +164,15 @@ export class EspnService {
           const homeCompetitor = competition?.competitors?.find((c: any) => c.homeAway === 'home');
           const awayCompetitor = competition?.competitors?.find((c: any) => c.homeAway === 'away');
 
+          const homeTeamFull = homeCompetitor?.team?.displayName || homeCompetitor?.team?.name || 'Home';
+          const awayTeamFull = awayCompetitor?.team?.displayName || awayCompetitor?.team?.name || 'Away';
           return {
             id: event.id,
             name: event.name || event.shortName || '',
-            homeTeam: homeCompetitor?.team?.displayName || homeCompetitor?.team?.name || 'Home',
-            awayTeam: awayCompetitor?.team?.displayName || awayCompetitor?.team?.name || 'Away',
+            homeTeam: homeCompetitor?.team?.abbreviation || homeTeamFull,
+            awayTeam: awayCompetitor?.team?.abbreviation || awayTeamFull,
+            homeTeamFull,
+            awayTeamFull,
             homeScore: 0,
             awayScore: 0,
             period: 0,
@@ -201,6 +226,8 @@ export class EspnService {
         name: event.name || `${awayCompetitor?.team?.abbreviation || 'Away'} at ${homeCompetitor?.team?.abbreviation || 'Home'}`,
         homeTeam: homeCompetitor?.team?.abbreviation || homeCompetitor?.team?.shortDisplayName || 'Home',
         awayTeam: awayCompetitor?.team?.abbreviation || awayCompetitor?.team?.shortDisplayName || 'Away',
+        homeTeamFull: homeCompetitor?.team?.displayName || homeCompetitor?.team?.name || homeCompetitor?.team?.abbreviation || 'Home',
+        awayTeamFull: awayCompetitor?.team?.displayName || awayCompetitor?.team?.name || awayCompetitor?.team?.abbreviation || 'Away',
         homeScore: parseInt(homeCompetitor?.score || '0', 10),
         awayScore: parseInt(awayCompetitor?.score || '0', 10),
         period: status?.period || 0,
