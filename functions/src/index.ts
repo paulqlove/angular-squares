@@ -68,7 +68,7 @@ const RESEND_COOLDOWN_MS = 60_000;
  * Deploy by hand: firebase deploy --only functions:sendSignInLink
  */
 export const sendSignInLink = onCall(
-  { region: "us-central1", secrets: [RESEND_API_KEY], memory: "256MiB", maxInstances: 5, timeoutSeconds: 15 },
+  { region: "us-central1", secrets: [RESEND_API_KEY], memory: "256MiB", maxInstances: 5, timeoutSeconds: 15, invoker: "public" },
   async (request) => {
     const email = typeof request.data?.email === "string" ? request.data.email.trim().toLowerCase() : "";
     if (!isValidEmail(email)) throw new HttpsError("invalid-argument", "Enter a valid email address.");
