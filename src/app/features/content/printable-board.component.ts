@@ -72,8 +72,8 @@ import { ContentShellComponent } from './content-shell.component';
             <p><span class="font-semibold text-heading">Away team (rows ↓):</span> ____________________</p>
           </div>
           <p class="mt-2 text-sm text-muted md:hidden no-print">Scroll sideways to see the whole grid.</p>
-          <div class="mt-4 max-w-full min-w-0 overflow-x-auto" tabindex="0" aria-label="Blank football squares grid.">
-            <table class="print-grid w-full min-w-[720px] border-collapse text-center">
+          <div class="mt-4 w-[calc(100vw-2rem)] max-w-full overflow-x-auto sm:w-auto" tabindex="0" aria-label="Blank football squares grid.">
+            <table class="print-grid min-w-[720px] border-collapse text-center">
               <caption class="sr-only">
                 Blank 10 by 10 football squares board. Header boxes are empty so you can write the drawn digits.
               </caption>
