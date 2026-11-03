@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject, HostListener, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, signal, inject, effect, HostListener, ChangeDetectionStrategy } from '@angular/core';
 
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -429,7 +429,7 @@ import {
               </button>
             </div>
 
-            <div class="flex-1 space-y-8 overflow-y-auto px-6 py-6">
+            <div class="flex-1 space-y-8 overflow-y-auto overscroll-contain px-6 py-6">
               <!-- 01 Sport -->
               <section>
                 <h4 class="qs-eyebrow qs-eyebrow-bar">01 / Sport</h4>
@@ -669,7 +669,7 @@ import {
       <!-- Edit Game Modal -->
       @if (showEditModal()) {
         <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" (click)="closeEditModal()">
-          <div class="bg-dialog rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-modal-in" (click)="$event.stopPropagation()">
+          <div class="bg-dialog rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto overscroll-contain animate-modal-in" (click)="$event.stopPropagation()">
             <div class="flex items-center justify-between p-6 border-b border-default">
               <div>
                 <h3 class="text-xl font-bold text-heading">Edit Game</h3>
@@ -931,6 +931,16 @@ export class DashboardComponent implements OnInit {
   private toastService = inject(ToastService);
   private walkthroughService = inject(WalkthroughService);
   private sanitizationService = inject(SanitizationService);
+
+  constructor() {
+    // Lock body scroll when any modal is open
+    effect(() => {
+      const anyModalOpen = this.showCreateModal() || this.showEditModal() || this.showUpgradeDialog();
+      if (typeof document !== 'undefined') {
+        document.body.style.overflow = anyModalOpen ? 'hidden' : '';
+      }
+    });
+  }
 
   private dashboardWalkthroughSteps: WalkthroughStep[] = [
     {
