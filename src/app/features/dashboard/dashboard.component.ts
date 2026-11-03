@@ -484,9 +484,19 @@ import {
                     <button type="button" (click)="gameListOpen = true" class="qs-btn qs-btn-secondary shrink-0 px-3">Change</button>
                   </div>
                 } @else {
+                  @if (espnGames().length > 10) {
+                    <div class="mt-3">
+                      <input
+                        type="text"
+                        [(ngModel)]="espnGameSearch"
+                        placeholder="Search teams..."
+                        class="qs-input w-full"
+                      />
+                    </div>
+                  }
                   <div class="qs-canvas mt-3 max-h-80 overflow-y-auto overscroll-contain rounded-inner p-2 sm:max-h-72">
                     <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                      @for (game of espnGames(); track game.id) {
+                      @for (game of filteredEspnGames(); track game.id) {
                         <button
                           type="button"
                           (click)="selectEspnGame(game.id)"
@@ -718,8 +728,18 @@ import {
                       </svg>
                     </div>
                   } @else {
+                    @if (editEspnGames().length > 10) {
+                      <div class="mb-2">
+                        <input
+                          type="text"
+                          [(ngModel)]="editEspnGameSearch"
+                          placeholder="Search teams..."
+                          class="qs-input w-full"
+                        />
+                      </div>
+                    }
                     <div class="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto">
-                      @for (game of editEspnGames(); track game.id) {
+                      @for (game of filteredEditEspnGames(); track game.id) {
                         <button
                           (click)="selectEditEspnGame(game.id)"
                           [class]="editEspnGameId === game.id
@@ -984,6 +1004,7 @@ export class DashboardComponent implements OnInit {
   editGamePrice = 10;
   editSport: SportType | 'custom' = 'nfl';
   editEspnGameId = '';
+  editEspnGameSearch = '';
   editCustomHomeTeam = '';
   editCustomAwayTeam = '';
   editEspnGames = signal<EspnGame[]>([]);
@@ -1003,6 +1024,7 @@ export class DashboardComponent implements OnInit {
   joinGameCode = '';
   selectedSport: SportType | 'custom' = 'nfl';
   selectedEspnGameId = '';
+  espnGameSearch = '';
   customAwayTeam = '';
   customHomeTeam = '';
   /** The New game list collapses to the picked game; Change reopens it. */
@@ -1166,6 +1188,7 @@ export class DashboardComponent implements OnInit {
   selectSport(sport: SportType | 'custom'): void {
     this.selectedSport = sport;
     this.selectedEspnGameId = '';
+    this.espnGameSearch = '';
     this.gameListOpen = true;
     if (sport !== 'custom') {
       this.fetchEspnGames();
@@ -1194,6 +1217,24 @@ export class DashboardComponent implements OnInit {
 
   selectedEspnGame(): EspnGame | undefined {
     return this.espnGames().find(g => g.id === this.selectedEspnGameId);
+  }
+
+  filteredEspnGames(): EspnGame[] {
+    const query = this.espnGameSearch.toLowerCase().trim();
+    if (!query) return this.espnGames();
+    return this.espnGames().filter(g =>
+      g.homeTeam.toLowerCase().includes(query) ||
+      g.awayTeam.toLowerCase().includes(query)
+    );
+  }
+
+  filteredEditEspnGames(): EspnGame[] {
+    const query = this.editEspnGameSearch.toLowerCase().trim();
+    if (!query) return this.editEspnGames();
+    return this.editEspnGames().filter(g =>
+      g.homeTeam.toLowerCase().includes(query) ||
+      g.awayTeam.toLowerCase().includes(query)
+    );
   }
 
   selectPrice(price: number): void {
@@ -1328,6 +1369,7 @@ export class DashboardComponent implements OnInit {
     this.newGamePaymentManager = '';
     this.selectedSport = 'nfl';
     this.selectedEspnGameId = '';
+    this.espnGameSearch = '';
     this.customAwayTeam = '';
     this.customHomeTeam = '';
     this.newGamePrice = 10;
@@ -1445,6 +1487,7 @@ export class DashboardComponent implements OnInit {
     this.editGamePlayers.set([]);
     this.showManagerDropdown.set(false);
     this.editEspnGames.set([]);
+    this.editEspnGameSearch = '';
   }
 
   async fetchEditEspnGames(): Promise<void> {
@@ -1464,6 +1507,7 @@ export class DashboardComponent implements OnInit {
   selectEditSport(sport: SportType | 'custom'): void {
     this.editSport = sport;
     this.editEspnGameId = '';
+    this.editEspnGameSearch = '';
     if (sport === 'custom') {
       this.editEspnGames.set([]);
     } else {
