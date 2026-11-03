@@ -5,12 +5,15 @@ import { Component, ChangeDetectionStrategy, Input } from '@angular/core';
   selector: 'app-team-helmet',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <svg viewBox="0 0 128 96" [attr.width]="size" [attr.height]="size * 0.75" [attr.role]="label ? 'img' : null"
+    <svg viewBox="0 0 124 104" [attr.width]="size" [attr.height]="size * 104 / 124" [attr.role]="label ? 'img' : null"
          [attr.aria-label]="label || null" [attr.aria-hidden]="label ? null : 'true'" class="block shrink-0">
-      <path d="M16 66 C10 34 34 8 70 8 C98 8 116 28 116 50 L116 56 L94 56 C88 56 86 60 86 66 L86 80 C86 84 83 86 79 86 L36 86 C24 86 18 78 16 66 Z"
-            [attr.fill]="color" [attr.stroke]="outline" stroke-width="3.5" stroke-linejoin="round" />
-      <path d="M94 62 H122 M92 74 H122 M122 58 V82 M104 62 V82" fill="none" [attr.stroke]="outline" stroke-width="4" stroke-linecap="round" />
-      <text x="54" y="58" text-anchor="middle" font-family="'Space Grotesk', system-ui, sans-serif" font-weight="700" font-size="27"
+      <g [attr.stroke]="outline" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M26 50 C32 24 54 8 78 8 C102 8 118 28 118 52 C118 70 110 82 100 88 C90 88 80 98 66 98 C57 98 52 90 56 82 L48 58 Z"
+              [attr.fill]="color" />
+        <path d="M12 68 H50 M12 68 V92 H26 C36 92 44 86 50 76 M12 80 H56 M30 52 L38 80 M48 58 L30 80" fill="none" />
+        <circle cx="72" cy="70" r="4.5" fill="none" />
+      </g>
+      <text x="83" y="49" text-anchor="middle" font-family="'Space Grotesk', system-ui, sans-serif" font-weight="700" font-size="25"
             [attr.fill]="ink">{{ initials }}</text>
     </svg>
   `

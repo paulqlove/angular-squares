@@ -120,7 +120,7 @@ import { EspnService, EspnGame } from '../../core/services/espn.service';
                   <div class="flex h-16 items-center justify-center gap-3 rounded-t-md text-2xl font-bold uppercase tracking-wide"
                        style="grid-column: 1 / -1; padding-left: 104px;" [style.background]="sheet().home.bg" [style.color]="sheet().home.fg">
                     @if (sheet().home.abbr; as abbr) {
-                      <app-team-helmet [color]="sheet().home.bg" [initials]="abbr" [size]="64" />
+                      <app-team-helmet [color]="sheet().home.bg" [initials]="abbr" [size]="80" />
                     }
                     {{ sheet().home.label }}
                   </div>
@@ -129,7 +129,7 @@ import { EspnService, EspnGame } from '../../core/services/espn.service';
                        [style.background]="sheet().away.bg" [style.color]="sheet().away.fg">
                     <div class="flex items-center gap-3 whitespace-nowrap" style="transform: rotate(-90deg);">
                       @if (sheet().away.abbr; as abbr) {
-                        <app-team-helmet [color]="sheet().away.bg" [initials]="abbr" [size]="64" />
+                        <app-team-helmet [color]="sheet().away.bg" [initials]="abbr" [size]="80" />
                       }
                       {{ sheet().away.label }}
                     </div>
