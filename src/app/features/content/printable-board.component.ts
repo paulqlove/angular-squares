@@ -58,7 +58,7 @@ import { ContentShellComponent } from './content-shell.component';
           </p>
         </section>
 
-        <section class="print-sheet mt-10" aria-labelledby="grid-heading">
+        <section class="print-sheet mt-10 overflow-hidden" aria-labelledby="grid-heading">
           <h2 id="grid-heading" class="text-2xl font-bold text-heading no-print">Blank board</h2>
 
           <!-- Print header with branding -->

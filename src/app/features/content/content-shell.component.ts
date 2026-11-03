@@ -68,8 +68,8 @@ interface NavLink {
         </div>
       </header>
 
-      <main id="main" class="flex-1 px-4 py-8 sm:py-12">
-        <div [class]="wide ? 'mx-auto max-w-5xl' : 'mx-auto max-w-3xl'">
+      <main id="main" class="flex-1 px-4 py-8 sm:py-12 overflow-x-hidden">
+        <div [class]="(wide ? 'mx-auto max-w-5xl' : 'mx-auto max-w-3xl') + ' overflow-x-hidden'">
           <ng-content></ng-content>
         </div>
       </main>
