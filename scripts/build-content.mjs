@@ -9,7 +9,7 @@ import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const origin = 'https://quarterscore.com';
 const blogDir = path.join(root, 'content', 'blog');
-const clientRoutes = new Set(['dashboard', 'game/:gameId', '**']);
+const clientRoutes = new Set(['dashboard', 'game/:gameId', 'auth/email-link', '**']);
 const pageLastmod = '2026-11-01';
 
 const nflTeams = [
@@ -189,9 +189,9 @@ function writeRss(posts) {
   const rss = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>Quarter Score Blog</title>
+    <title>QuarterScore Blog</title>
     <link>${origin}/blog</link>
-    <description>Football squares notes from Quarter Score. Free games for friends and fans.</description>
+    <description>Football squares notes from QuarterScore. Free games for friends and fans.</description>
     <language>en-us</language>
     <atom:link href="${origin}/rss.xml" rel="self" type="application/rss+xml"/>
 ${items.join('\n')}
@@ -245,7 +245,7 @@ async function writePdf() {
     font,
     color: ink
   });
-  page.drawText('Quarter Score never collects, holds, or pays out money.', {
+  page.drawText('QuarterScore never collects, holds, or pays out money.', {
     x: 36,
     y: 48,
     size: 9,

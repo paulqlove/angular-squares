@@ -49,13 +49,13 @@ export interface MarketingPage {
   cta: PageCta;
 }
 
-const MONEY_LINE = 'Quarter Score never collects, holds, or pays out money. Keep it to bragging rights or a donation to a cause.';
+const MONEY_LINE = 'QuarterScore never collects, holds, or pays out money. Keep it to bragging rights or a donation to a cause.';
 
 export const MARKETING_PAGES: Record<string, MarketingPage> = {
   'how-to-play': {
     id: 'how-to-play',
     path: '/how-to-play',
-    title: 'How to Play Football Squares — Quarter Score',
+    title: 'How to Play Football Squares — QuarterScore',
     description: 'How to play football squares: 100, 50, or 25 squares, numbers drawn after the board fills, and a winner each quarter from the last digit of each score.',
     h1: 'How to play football squares',
     eyebrow: 'Rules',
@@ -90,13 +90,13 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
         heading: 'How a quarter is decided',
         paragraphs: [
           'Scores use the last digit only. A score of 17 counts as 7. A score of 20 counts as 0. If the away team’s last digit is on row 7 and the home team’s last digit is on column 0, the square where that row and column meet is the quarter’s square.',
-          'Many groups play for bragging rights each quarter and a bigger brag for the final. Quarter Score can show a suggested split of 20 percent, 20 percent, 20 percent, and 40 percent for the final. That split is only a label. It is not a payment.'
+          'Many groups play for bragging rights each quarter and a bigger brag for the final. QuarterScore can show a suggested split of 20 percent, 20 percent, 20 percent, and 40 percent for the final. That split is only a label. It is not a payment.'
         ]
       },
       {
         heading: 'Board sizes: 100, 50, and 25 squares',
         paragraphs: [
-          'Not every party has 100 people. Quarter Score offers three board sizes. The classic 100-square board works best for large groups. The 50-square and 25-square boards use paired digits so fewer people can still play.'
+          'Not every party has 100 people. QuarterScore offers three board sizes. The classic 100-square board works best for large groups. The 50-square and 25-square boards use paired digits so fewer people can still play.'
         ]
       },
       {
@@ -225,16 +225,16 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
   faq: {
     id: 'faq',
     path: '/faq',
-    title: 'Football Squares FAQ — Quarter Score',
-    description: 'Football squares FAQ: cost, accounts, how numbers are drawn, private games, overtime, unfilled boards, and whether Quarter Score handles money.',
+    title: 'Football Squares FAQ — QuarterScore',
+    description: 'Football squares FAQ: cost, accounts, how numbers are drawn, private games, overtime, unfilled boards, and whether QuarterScore handles money.',
     h1: 'Football squares FAQ',
     eyebrow: 'Questions',
     lede: 'Short answers for hosts and players. Squares here is a free game for friends and fans, with bragging rights.',
     published: '2026-11-01',
     faqs: [
       {
-        question: 'Does Quarter Score cost money?',
-        answer: 'No. Creating a board and claiming squares is free. Quarter Score never collects, holds, or pays out money.'
+        question: 'Does QuarterScore cost money?',
+        answer: 'No. Creating a board and claiming squares is free. QuarterScore never collects, holds, or pays out money.'
       },
       {
         question: 'Do players need an account?',
@@ -265,8 +265,8 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
         answer: 'Yes. Open Best numbers for the historical table, or use the heatmap on a live board after the digits are drawn. The table is about how often digit pairs have appeared. It is not a promise about your game.'
       },
       {
-        question: 'Does Quarter Score handle money?',
-        answer: 'No. Quarter Score never collects, holds, or pays out money. Hosts who track who brought a contribution do that outside the app, and they follow their own local rules.'
+        question: 'Does QuarterScore handle money?',
+        answer: 'No. QuarterScore never collects, holds, or pays out money. Hosts who track who brought a contribution do that outside the app, and they follow their own local rules.'
       }
     ],
     sections: [
@@ -292,7 +292,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
   'super-bowl-squares': {
     id: 'super-bowl-squares',
     path: '/super-bowl-squares',
-    title: 'Super Bowl Squares for February 14, 2027 — Quarter Score',
+    title: 'Super Bowl Squares for February 14, 2027 — QuarterScore',
     description: 'Super Bowl squares for Super Bowl LXI on February 14, 2027. Make a free board before the teams are set and share one link with friends.',
     h1: 'Super Bowl squares',
     notice: 'QuarterScore is not affiliated with, endorsed by, or sponsored by the NFL, NBA, or NCAA. Team and event names are used only to describe the games.',
@@ -342,7 +342,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
   'thanksgiving-football-squares': {
     id: 'thanksgiving-football-squares',
     path: '/thanksgiving-football-squares',
-    title: 'Thanksgiving Football Squares — Quarter Score',
+    title: 'Thanksgiving Football Squares — QuarterScore',
     description: 'Football squares for Thanksgiving: a free board for the table, one game or three, with a link guests can open between dinner and dessert.',
     h1: 'Thanksgiving football squares',
     eyebrow: 'November 26, 2026',
@@ -389,7 +389,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
   'nfl-squares': {
     id: 'nfl-squares',
     path: '/nfl-squares',
-    title: 'NFL Squares for Any Game — Quarter Score',
+    title: 'NFL Squares for Any Game — QuarterScore',
     description: 'NFL squares on a free 10 by 10 board. Share a link, claim squares by name, and follow each quarter without a spreadsheet.',
     h1: 'NFL squares',
     eyebrow: 'Any week of the season',
@@ -430,7 +430,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
   'nfl-playoff-squares': {
     id: 'nfl-playoff-squares',
     path: '/nfl-playoff-squares',
-    title: 'NFL Playoff Squares — Quarter Score',
+    title: 'NFL Playoff Squares — QuarterScore',
     description: 'NFL playoff squares for wild card weekend, the divisional round, and the conference championships. One free board per game, same link style all January.',
     h1: 'NFL playoff squares',
     eyebrow: 'January 2027',
@@ -467,7 +467,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
   'college-football-squares': {
     id: 'college-football-squares',
     path: '/college-football-squares',
-    title: 'College Football Squares — Quarter Score',
+    title: 'College Football Squares — QuarterScore',
     description: 'College football squares for bowl games and the playoff. Create a free NCAA board, share one link, and score each quarter from the last digits.',
     h1: 'College football squares',
     eyebrow: 'Bowls and the playoff',
@@ -504,13 +504,13 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
   'football-squares-fundraiser': {
     id: 'football-squares-fundraiser',
     path: '/football-squares-fundraiser',
-    title: 'Donation Squares for a Football Fundraiser — Quarter Score',
-    description: 'Donation-style football squares for a school, team, or charity. Free to claim, optional donations, and nothing of value for players. Quarter Score never handles the money.',
+    title: 'Donation Squares for a Football Fundraiser — QuarterScore',
+    description: 'Donation-style football squares for a school, team, or charity. Free to claim, optional donations, and nothing of value for players. QuarterScore never handles the money.',
     h1: 'Donation squares',
     eyebrow: 'A fundraiser where the cause wins',
     lede: 'Squares can bring supporters around a game. These are formats where the cause is the winner. If you want players to receive anything of value, stop and check your state’s charitable gaming rules first. In many states that is regulated or not allowed.',
     published: '2026-11-01',
-    disclaimer: 'Quarter Score is a free board and scoring tool. We never collect, hold, or pay out money. Raffles and games of chance are regulated by state law and often limited to qualified nonprofits. Check your state’s rules and your school, district, or organization’s policies before you start. This page is not legal advice.',
+    disclaimer: 'QuarterScore is a free board and scoring tool. We never collect, hold, or pay out money. Raffles and games of chance are regulated by state law and often limited to qualified nonprofits. Check your state’s rules and your school, district, or organization’s policies before you start. This page is not legal advice.',
     sections: [
       {
         heading: 'Formats that keep the focus on the cause',
@@ -518,7 +518,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
           'Pick one of these and write it at the top of the board. Do not mix them.'
         ],
         bullets: [
-          'Free to claim, with a separate optional donation. Anyone can take a square without donating. Donors and non-donors have the same chance at a donated thank-you gift, such as a sponsor’s gift card to the school store or a team lunch. The donation link lives somewhere else. Quarter Score does not process it.',
+          'Free to claim, with a separate optional donation. Anyone can take a square without donating. Donors and non-donors have the same chance at a donated thank-you gift, such as a sponsor’s gift card to the school store or a team lunch. The donation link lives somewhere else. QuarterScore does not process it.',
           'A donation board with nothing to win. Supporters give per square and get a thank-you on the board. Nobody receives anything of value for the square.',
           'The winning square picks the charity. Donors name a charity, and the funds go to the charity named on the winning square. The person who claimed it does not receive the money.'
         ]
@@ -533,25 +533,25 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       {
         heading: 'How the board helps',
         paragraphs: [
-          'Use Quarter Score for names, the number draw, and the quarter-by-quarter result. Put the thank-you and the rule in the game name or in the message where you share the link. Collect any donation through the tool your organization already uses.'
+          'Use QuarterScore for names, the number draw, and the quarter-by-quarter result. Put the thank-you and the rule in the game name or in the message where you share the link. Collect any donation through the tool your organization already uses.'
         ]
       }
     ],
     related: [
       { path: '/faq', label: 'FAQ', text: 'The money answer, in one line.' },
       { path: '/how-to-play', label: 'How to play', text: 'How the grid and the draw work.' },
-      { path: '/terms', label: 'Terms', text: 'The rule that Quarter Score does not handle money.' }
+      { path: '/terms', label: 'Terms', text: 'The rule that QuarterScore does not handle money.' }
     ],
     cta: {
       path: '/how-to-play',
       label: 'Read the rules first',
-      note: 'Check your local rules before you invite anyone. Quarter Score never collects, holds, or pays out money.'
+      note: 'Check your local rules before you invite anyone. QuarterScore never collects, holds, or pays out money.'
     }
   },
   'nba-squares': {
     id: 'nba-squares',
     path: '/nba-squares',
-    title: 'NBA Squares — Quarter Score',
+    title: 'NBA Squares — QuarterScore',
     description: 'NBA squares uses the same last-digit board as football. Create a free basketball game, share the link, and follow each quarter.',
     h1: 'NBA squares',
     eyebrow: 'After the football season',
@@ -586,18 +586,18 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
   terms: {
     id: 'terms',
     path: '/terms',
-    title: 'Terms of Use — Quarter Score',
-    description: 'Terms for using Quarter Score, a free football squares board. The site never collects, holds, or pays out money.',
+    title: 'Terms of Use — QuarterScore',
+    description: 'Terms for using QuarterScore, a free football squares board. The site never collects, holds, or pays out money.',
     h1: 'Terms of use',
     eyebrow: 'Legal',
-    lede: 'Quarter Score is a free board for organizing a squares game with friends and fans. These terms are the rules for using the site.',
+    lede: 'QuarterScore is a free board for organizing a squares game with friends and fans. These terms are the rules for using the site.',
     published: '2026-11-01',
     sections: [
       {
         heading: 'The service',
         paragraphs: [
           'You can create a board, share its link, claim squares by name, draw digits, and record scores. The site is provided as-is, without a promise that it will always be available or error-free.',
-          'Quarter Score never collects, holds, or pays out money. Anything your group arranges stays between the people in that group. Hosts are responsible for following the law where they live, including rules on games of chance.'
+          'QuarterScore never collects, holds, or pays out money. Anything your group arranges stays between the people in that group. Hosts are responsible for following the law where they live, including rules on games of chance.'
         ]
       },
       {
@@ -622,11 +622,11 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
   privacy: {
     id: 'privacy',
     path: '/privacy',
-    title: 'Privacy — Quarter Score',
-    description: 'What Quarter Score stores: account details if you sign in, a guest name on your device, and the squares, scores, and settings on boards you join.',
+    title: 'Privacy — QuarterScore',
+    description: 'What QuarterScore stores: account details if you sign in, a guest name on your device, and the squares, scores, and settings on boards you join.',
     h1: 'Privacy',
     eyebrow: 'Legal',
-    lede: 'Quarter Score stores what it needs to run a board. It does not sell personal information, and it never collects, holds, or pays out money.',
+    lede: 'QuarterScore stores what it needs to run a board. It does not sell personal information, and it never collects, holds, or pays out money.',
     published: '2026-11-01',
     sections: [
       {

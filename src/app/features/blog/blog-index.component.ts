@@ -61,10 +61,10 @@ export class BlogIndexComponent {
 
   constructor() {
     this.seo.apply({
-      title: 'Blog — Quarter Score',
-      description: 'The Quarter Score blog: football squares for friends and fans, from number history to party boards. Free to read, and the game never handles money.',
+      title: 'Blog — QuarterScore',
+      description: 'The QuarterScore blog: football squares for friends and fans, from number history to party boards. Free to read, and the game never handles money.',
       path: '/blog',
-      headline: 'Quarter Score blog',
+      headline: 'QuarterScore blog',
       published: this.posts[0]?.date ?? '2026-11-05',
       breadcrumbs: this.breadcrumbs,
       includeRss: true
