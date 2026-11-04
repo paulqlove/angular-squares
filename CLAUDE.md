@@ -135,3 +135,7 @@ Game owners can link a board to an ESPN game. `environment.serverScoring` defaul
 ## Prompt Gaps
 
 When you encounter a situation where you had to backtrack, made an incorrect assumption, or needed clarification mid-task, append an entry to `PROMPT_GAPS.md` with: what you got wrong, what assumption you made, and what instruction in CLAUDE.md would have prevented it. Write it as a suggested CLAUDE.md addition, not a bug report.
+
+## Team
+
+Paul's agent team (Chief of Staff, marketing, engineering, CFO, coach, skeptic, etc.) lives in the private repo `paulqlove/team-hq`. On Paul's Mac it's already available (`~/.claude/team`). In a cloud or phone session, when Paul asks for the team, a vote, or an agent: clone `https://github.com/paulqlove/team-hq` (e.g. `gh repo clone paulqlove/team-hq ../team-hq`), read its `CLAUDE.md` and `CHARTER.md`, and use the agents and skills in its `.claude/` folder. Commit and push team-hq changes there, not here.
