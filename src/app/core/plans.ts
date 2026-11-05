@@ -156,3 +156,25 @@ export function effectiveQuarterShares(
   spread(pool, live(QUARTER_KEYS));
   return out;
 }
+
+/**
+ * Whole-number points per quarter. Each quarter rounds down, then the leftover points go to the
+ * quarters with the biggest remainders (ties go to the later quarter), so the quarters add up to
+ * the points actually awarded.
+ */
+export function quarterPoints(
+  totalPot: number,
+  shares: { [k in QuarterKey]: number }
+): { [k in QuarterKey]: number } {
+  const exact = QUARTER_KEYS.map(k => totalPot * shares[k]);
+  const out = exact.map(v => Math.floor(v + 1e-9));
+  const target = Math.round(exact.reduce((sum, v) => sum + v, 0));
+  const byRemainder = QUARTER_KEYS.map((_, i) => i)
+    .filter(i => shares[QUARTER_KEYS[i]] > 0)
+    .sort((a, b) => (exact[b] - out[b]) - (exact[a] - out[a]) || b - a);
+  let left = target - out.reduce((sum, v) => sum + v, 0);
+  for (let n = 0; left > 0 && byRemainder.length > 0; n = (n + 1) % byRemainder.length, left--) {
+    out[byRemainder[n]] += 1;
+  }
+  return { q1: out[0], q2: out[1], q3: out[2], q4: out[3] };
+}

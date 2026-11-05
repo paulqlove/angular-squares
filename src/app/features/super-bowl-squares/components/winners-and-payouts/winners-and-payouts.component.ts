@@ -1,6 +1,6 @@
 import { DecimalPipe } from '@angular/common';
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
-import { DEFAULT_EMPTY_QUARTER_RULE, EmptyQuarterRule, effectiveQuarterShares } from '../../../../core/plans';
+import { DEFAULT_EMPTY_QUARTER_RULE, EmptyQuarterRule, effectiveQuarterShares, quarterPoints } from '../../../../core/plans';
 import { quarterLabel } from '../../../../core/utils/quarter-label';
 
 /** Per-quarter score tiles: score, points, and the winner. */
@@ -34,7 +34,7 @@ export class WinnersAndPayoutsComponent {
 
   getQuarterPoints(quarter: string): number {
     const shares = effectiveQuarterShares(this.quarterPayouts, this.emptyFlags(), this.emptyQuarterRule);
-    return Math.round(this.totalPot * shares[quarter as keyof typeof shares] * 100) / 100;
+    return quarterPoints(this.totalPot, shares)[quarter as keyof typeof shares];
   }
 
   /** A finished quarter whose winning square nobody holds. */

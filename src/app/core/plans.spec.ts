@@ -1,4 +1,4 @@
-import { DAY_MS, DEFAULT_SPLIT, PLANS, effectiveQuarterShares, isEmptyQuarterRule, applyPurchase, daysLeft, extendExpiry, isValidSplit, seasonPriceFor, splitFractions } from './plans';
+import { DAY_MS, DEFAULT_SPLIT, PLANS, effectiveQuarterShares, isEmptyQuarterRule, quarterPoints, applyPurchase, daysLeft, extendExpiry, isValidSplit, seasonPriceFor, splitFractions } from './plans';
 
 const NOW = Date.UTC(2026, 10, 2);
 
@@ -106,5 +106,40 @@ describe('effectiveQuarterShares', () => {
     expect(isEmptyQuarterRule('redistribute')).toBe(true);
     expect(isEmptyQuarterRule('refund')).toBe(false);
     expect(isEmptyQuarterRule(null)).toBe(false);
+  });
+});
+
+describe('quarterPoints', () => {
+  const classic = splitFractions(null);
+
+  it('is exact when the split divides evenly', () => {
+    expect(quarterPoints(100, classic)).toEqual({ q1: 20, q2: 20, q3: 20, q4: 40 });
+  });
+
+  it('never returns decimals and always adds up to the pot', () => {
+    for (const pot of [1, 7, 33, 99, 165, 370, 1234]) {
+      const pts = quarterPoints(pot, splitFractions({ q1: 150, q2: 200, q3: 250, q4: 400 }));
+      expect(Object.values(pts).every(v => Number.isInteger(v))).toBe(true);
+      expect(pts.q1 + pts.q2 + pts.q3 + pts.q4).toBe(pot);
+    }
+  });
+
+  it('three equal thirds hand the spare point to the later quarter', () => {
+    const thirds = effectiveQuarterShares(classic, { q1: false, q2: false, q3: false, q4: true }, 'final');
+    expect(quarterPoints(100, thirds)).toEqual({ q1: 33, q2: 33, q3: 34, q4: 0 });
+  });
+
+  it('adds up to what was awarded when an empty quarter has nowhere to go', () => {
+    const none = effectiveQuarterShares(classic, { q1: true, q2: true, q3: true, q4: true }, 'final');
+    expect(quarterPoints(100, none)).toEqual({ q1: 0, q2: 0, q3: 0, q4: 0 });
+  });
+
+  it('rounds a fractional pot to a whole number', () => {
+    const pts = quarterPoints(12.5, classic);
+    expect(pts.q1 + pts.q2 + pts.q3 + pts.q4).toBe(13);
+  });
+
+  it('is all zeros for an empty board', () => {
+    expect(quarterPoints(0, classic)).toEqual({ q1: 0, q2: 0, q3: 0, q4: 0 });
   });
 });
