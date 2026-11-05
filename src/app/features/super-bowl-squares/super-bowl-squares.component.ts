@@ -192,7 +192,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       target: 'host-tools',
       title: 'Host tools',
       description: 'Lock the board, draw the numbers, confirm players, and edit team names, points and your note.',
-      position: 'bottom'
+      position: 'top'
     },
     {
       target: 'winners-payouts',

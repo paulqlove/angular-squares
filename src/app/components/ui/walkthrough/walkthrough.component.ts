@@ -97,6 +97,7 @@ export class WalkthroughComponent {
     const position = step?.position || 'bottom';
     const padding = 16;
     const tooltipWidth = 320;
+    const tooltipHeight = 230;
 
     if (!rect) {
       return {
@@ -115,7 +116,8 @@ export class WalkthroughComponent {
     switch (position) {
       case 'top':
         left = rect.left + rect.width / 2 - tooltipWidth / 2;
-        top = rect.top - padding - 200;
+        top = rect.top - padding - tooltipHeight;
+        if (top < padding) top = rect.bottom + padding;
         break;
       case 'left':
         left = rect.left - tooltipWidth - padding;
@@ -135,11 +137,14 @@ export class WalkthroughComponent {
       default:
         left = rect.left + rect.width / 2 - tooltipWidth / 2;
         top = rect.bottom + padding;
+        if (top + tooltipHeight > viewportHeight - padding && rect.top - padding - tooltipHeight >= padding) {
+          top = rect.top - padding - tooltipHeight;
+        }
         break;
     }
 
     left = Math.max(padding, Math.min(left, viewportWidth - tooltipWidth - padding));
-    top = Math.max(padding, Math.min(top, viewportHeight - 250));
+    top = Math.max(padding, Math.min(top, viewportHeight - tooltipHeight - padding));
 
     return {
       left: `${left}px`,
