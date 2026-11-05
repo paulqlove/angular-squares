@@ -1,7 +1,7 @@
 /* TV sizing: cells fill the viewport height, names wrap instead of truncating */
 .present-board .number-cell:not(.axis-top),
 .present-board .square-cell {
-  height: calc((100vh - 11rem) / var(--rows, 10)) !important;
+  height: calc((100vh - 12.5rem) / var(--rows, 10)) !important;
 }
 
 .present-board .square-cell {
