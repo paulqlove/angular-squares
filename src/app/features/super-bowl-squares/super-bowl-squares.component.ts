@@ -183,6 +183,12 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       position: 'left'
     },
     {
+      target: 'share-present',
+      title: 'Share and present',
+      description: 'Share gives you the game code, the invite link and a TV link. Present fills a TV or big screen with the live board, scores and winners.',
+      position: 'bottom'
+    },
+    {
       target: 'host-tools',
       title: 'Host tools',
       description: 'Lock the board, draw the numbers, confirm players, and edit team names, points and your note.',
@@ -1086,10 +1092,10 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     return Object.keys(this.selectedSquares).length;
   }
 
-  /** Tour steps; the host-tools step only for owner and co-host. */
+  /** Tour steps; the host-only steps only for owner and co-host. */
   private walkthroughSteps(): WalkthroughStep[] {
     const host = this.isGameOwner() || this.isManager();
-    return this.gameboardWalkthroughSteps.filter(step => host || step.target !== 'host-tools');
+    return this.gameboardWalkthroughSteps.filter(step => host || (step.target !== 'host-tools' && step.target !== 'share-present'));
   }
 
 
