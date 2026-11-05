@@ -45,6 +45,7 @@ export class PresentComponent implements OnInit, OnDestroy {
   protected readonly qr = signal<string>('');
   protected readonly rotating = signal<boolean>(false);
   protected readonly showHelp = signal<boolean>(false);
+  protected readonly slideDir = signal<'left' | 'right'>('right');
 
   private boardIds: string[] = [];
   private index = 0;
@@ -154,6 +155,7 @@ export class PresentComponent implements OnInit, OnDestroy {
 
   private advance(): void {
     if (this.boardIds.length < 2 || Date.now() < this.pinnedUntil) return;
+    this.slideDir.set('right');
     this.index = (this.index + 1) % this.boardIds.length;
     this.skips = this.boardIds.length - 1;
     this.open(this.boardIds[this.index]);
@@ -216,6 +218,7 @@ export class PresentComponent implements OnInit, OnDestroy {
   private step(dir: number): void {
     const n = this.boardIds.length;
     if (n < 2 || this.index < 0) return;
+    this.slideDir.set(dir > 0 ? 'right' : 'left');
     this.index = (this.index + dir + n) % n;
     this.skips = 0;
     const id = this.boardIds[this.index];

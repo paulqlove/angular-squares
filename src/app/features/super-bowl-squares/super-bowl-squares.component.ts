@@ -158,7 +158,9 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   private sanitizationService = inject(SanitizationService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private gameSub: Subscription | null = null;
   private hostBoardIds: string[] = [];
+  protected slideDir = signal<'left' | 'right' | ''>('');
 
   private gameboardWalkthroughSteps: WalkthroughStep[] = [
     {
@@ -309,12 +311,24 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   }
 
   private async loadGame(gameId: string): Promise<void> {
+    // Switching boards reuses this component: drop the previous board's listener and state
+    this.gameSub?.unsubscribe();
+    this.gameSub = null;
+    this.gameNotFound.set(false);
     this.isLoading.set(true);
     this.liveIndexEnsuredFor = null;
     this.latestEspnLive = null;
+    this.selectedPlayer = null;
+    this.highlightedSquare = null;
+    this.displayHomeNumbers.set([]);
+    this.displayAwayNumbers.set([]);
+    this.linkedEspnGame.set(null);
+    this.stopPolling();
+    this.stopAnimation();
 
     // Check if game exists
     const exists = await this.gameService.gameExists(gameId);
+    if (this.destroyed || this.gameId !== gameId) return;
     if (!exists) {
       this.gameNotFound.set(true);
       this.isLoading.set(false);
@@ -323,8 +337,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
     // Subscribe to game updates (skip initial null from BehaviorSubject since we already verified game exists)
     let isFirstEmission = true;
-    this.subscription.add(
-      this.gameService.subscribeToGame(gameId).subscribe((data: GameData | null) => {
+    this.gameSub = this.gameService.subscribeToGame(gameId).subscribe((data: GameData | null) => {
         // Skip the initial null emission from BehaviorSubject - we already verified game exists
         if (isFirstEmission && !data) {
           isFirstEmission = false;
@@ -426,8 +439,8 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
         } else {
           this.gameNotFound.set(true);
         }
-      })
-    );
+      });
+    this.subscription.add(this.gameSub);
   }
 
   ngOnDestroy(): void {
@@ -1089,6 +1102,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     const ids = this.hostBoardIds;
     const index = ids.indexOf(this.gameId);
     if (!dir || ids.length < 2 || index < 0) return;
+    this.slideDir.set(dir > 0 ? 'right' : 'left');
     this.router.navigate(['/game', ids[(index + dir + ids.length) % ids.length]]);
   }
 

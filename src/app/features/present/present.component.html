@@ -25,7 +25,7 @@
   }
 
   @if (game(); as g) {
-    <div class="grid min-h-0 flex-1 grid-cols-12 gap-4">
+    <div class="grid min-h-0 flex-1 grid-cols-12 gap-4" [class.slide-in-from-right]="slideDir() === 'right'" [class.slide-in-from-left]="slideDir() === 'left'">
       <div class="qs-card present-board col-span-8 p-3" [style.--rows]="boardRows(g)">
         <app-game-board
           [selectedSquares]="g.selectedSquares || {}"
