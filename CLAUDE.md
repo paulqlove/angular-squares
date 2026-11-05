@@ -127,10 +127,11 @@ Game owners can link a board to an ESPN game. `environment.serverScoring` defaul
 
 ## Deployment
 
-- **Platform**: GitHub Pages (custom domain: quarterscore.com)
+- **Platform**: Firebase Hosting, project `squares-4e4f7` (custom domain: quarterscore.com)
 - **Base href**: `/` (critical — custom domain serves from root, not a subdirectory)
 - **Build command**: `npm run build` outputs to `dist/angular-squares/`
-- **Deploy command**: `ng deploy` (uses angular-cli-ghpages, config in angular.json)
+- **Deploy**: merging to `main` runs `.github/workflows/firebase-hosting-merge.yml`, which builds and deploys to the `live` channel. PRs get a preview channel from `firebase-hosting-pr.yml`. There is no manual deploy command, and `ng deploy` / GitHub Pages is no longer used.
+- **Prerender routes**: `npm start` and builds run `scripts/build-content.mjs`, which fails on any route it doesn't know. Add client-only routes to its `clientRoutes` set.
 
 ## Prompt Gaps
 
