@@ -1197,6 +1197,10 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     return this.gameService.getShareableLink(this.gameId);
   }
 
+  getTvLink(): string {
+    return this.getShareableLink().replace('/game/', '/present/');
+  }
+
 
 
   goBack(): void {

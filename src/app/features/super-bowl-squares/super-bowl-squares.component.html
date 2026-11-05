@@ -301,7 +301,7 @@
   </div>
 
   <!-- Share Modal -->
-  <app-share-dialog [isOpen]="showShareModal()" [gameId]="gameId" [link]="getShareableLink()" (closed)="closeShareModal()"></app-share-dialog>
+  <app-share-dialog [isOpen]="showShareModal()" [gameId]="gameId" [link]="getShareableLink()" [tvLink]="getTvLink()" (closed)="closeShareModal()"></app-share-dialog>
 
   <!-- Name Edit Modal -->
   @if (showNameEditModal()) {

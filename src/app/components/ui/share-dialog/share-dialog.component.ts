@@ -51,6 +51,19 @@ import { heroXMark, heroClipboard, heroCheck } from '@ng-icons/heroicons/outline
                 </button>
               </div>
             </div>
+            @if (tvLink) {
+              <div>
+                <label for="share-tv-link" class="qs-label mb-1.5 block text-qs-muted">TV link</label>
+                <div class="flex items-stretch gap-2">
+                  <input id="share-tv-link" type="text" [value]="tvLink" readonly class="qs-input min-w-0 flex-1 truncate text-sm text-qs-muted" (focus)="$any($event.target).select()" />
+                  <button type="button" (click)="copy(tvLink, 'tv')" class="qs-btn qs-btn-primary min-w-28" aria-label="Copy TV link">
+                    <ng-icon [name]="copied() === 'tv' ? 'heroCheck' : 'heroClipboard'" class="text-base"></ng-icon>
+                    {{ copied() === 'tv' ? 'Copied' : 'Copy' }}
+                  </button>
+                </div>
+                <p class="mt-1.5 text-xs text-qs-muted">Open on a TV or any screen to show the live board. No sign-in needed.</p>
+              </div>
+            }
             <p class="sr-only" aria-live="polite">{{ copied() ? 'Copied to clipboard' : '' }}</p>
           </div>
 
@@ -66,9 +79,10 @@ export class ShareDialogComponent {
   @Input() isOpen = false;
   @Input() gameId = '';
   @Input() link = '';
+  @Input() tvLink = '';
   @Output() closed = new EventEmitter<void>();
 
-  copied = signal<'code' | 'link' | null>(null);
+  copied = signal<'code' | 'link' | 'tv' | null>(null);
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
@@ -80,7 +94,7 @@ export class ShareDialogComponent {
     this.closed.emit();
   }
 
-  async copy(text: string, which: 'code' | 'link'): Promise<void> {
+  async copy(text: string, which: 'code' | 'link' | 'tv'): Promise<void> {
     try {
       await navigator.clipboard.writeText(text);
       this.copied.set(which);
