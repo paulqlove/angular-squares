@@ -91,7 +91,6 @@ export class PresentComponent implements OnInit, OnDestroy {
   }
 
   protected exit(): void {
-    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
     this.router.navigate([this.gameId() && !this.rotating() ? '/game/' + this.gameId() : '/dashboard']);
   }
 
@@ -130,11 +129,6 @@ export class PresentComponent implements OnInit, OnDestroy {
   protected setInterval(seconds: number): void {
     this.interval.set(seconds);
     this.startTimer();
-  }
-
-  protected toggleFullscreen(): void {
-    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
-    else document.documentElement.requestFullscreen().catch(() => {});
   }
 
   protected total(g: GameData): number {
