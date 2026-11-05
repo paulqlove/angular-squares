@@ -1,6 +1,7 @@
-import { Component, Input, Output, EventEmitter, HostListener, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, HostListener, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroXMark, heroClipboard, heroCheck } from '@ng-icons/heroicons/outline';
+import { GameService } from '../../../core/services/game.service';
 
 /** Share popup: game code and link, each with a copy button. Used by the dashboard and game page. */
 @Component({
@@ -51,8 +52,7 @@ import { heroXMark, heroClipboard, heroCheck } from '@ng-icons/heroicons/outline
                 </button>
               </div>
             </div>
-            @if (tvLink) {
-              <div>
+            <div>
                 <label for="share-tv-link" class="qs-label mb-1.5 block text-qs-muted">TV link</label>
                 <div class="flex items-stretch gap-2">
                   <input id="share-tv-link" type="text" [value]="tvLink" readonly class="qs-input min-w-0 flex-1 truncate text-sm text-qs-muted" (focus)="$any($event.target).select()" />
@@ -63,7 +63,6 @@ import { heroXMark, heroClipboard, heroCheck } from '@ng-icons/heroicons/outline
                 </div>
                 <p class="mt-1.5 text-xs text-qs-muted">Open on a TV or any screen to show the live board. No sign-in needed.</p>
               </div>
-            }
             <p class="sr-only" aria-live="polite">{{ copied() ? 'Copied to clipboard' : '' }}</p>
           </div>
 
@@ -78,11 +77,19 @@ import { heroXMark, heroClipboard, heroCheck } from '@ng-icons/heroicons/outline
 export class ShareDialogComponent {
   @Input() isOpen = false;
   @Input() gameId = '';
-  @Input() link = '';
-  @Input() tvLink = '';
   @Output() closed = new EventEmitter<void>();
 
+  private readonly gameService = inject(GameService);
+
   copied = signal<'code' | 'link' | 'tv' | null>(null);
+
+  get link(): string {
+    return this.gameService.getShareableLink(this.gameId);
+  }
+
+  get tvLink(): string {
+    return this.gameService.getTvLink(this.gameId);
+  }
 
   @HostListener('document:keydown.escape')
   onEscape(): void {

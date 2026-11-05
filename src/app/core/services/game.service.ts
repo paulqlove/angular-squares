@@ -688,11 +688,19 @@ export class GameService {
 
   // Get shareable link for a game
   getShareableLink(gameId: string): string {
-    const baseUrl = window.location.origin;
+    return `${this.appBaseUrl()}/game/${gameId}`;
+  }
+
+  // Display link for TVs and other screens: live board, no sign-in needed
+  getTvLink(gameId: string): string {
+    return `${this.appBaseUrl()}/present/${gameId}`;
+  }
+
+  private appBaseUrl(): string {
     const basePath = window.location.pathname.includes('/angular-squares')
       ? '/angular-squares'
       : '';
-    return `${baseUrl}${basePath}/game/${gameId}`;
+    return `${window.location.origin}${basePath}`;
   }
 
   // Cleanup subscription

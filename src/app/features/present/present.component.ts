@@ -114,7 +114,7 @@ export class PresentComponent implements OnInit, OnDestroy {
   }
 
   protected async copyLink(): Promise<void> {
-    const url = `${location.origin}/present/${this.gameId()}`;
+    const url = this.gameService.getTvLink(this.gameId());
     try {
       await navigator.clipboard.writeText(url);
       this.toast.success('TV link copied');

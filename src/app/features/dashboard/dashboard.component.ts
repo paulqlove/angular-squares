@@ -655,7 +655,7 @@ import {
       }
 
       <!-- Share Modal -->
-      <app-share-dialog [isOpen]="!!shareModalGameId()" [gameId]="shareModalGameId() || ''" [link]="shareModalGameId() ? getShareLink(shareModalGameId()!) : ''" (closed)="shareModalGameId.set(null)"></app-share-dialog>
+      <app-share-dialog [isOpen]="!!shareModalGameId()" [gameId]="shareModalGameId() || ''" (closed)="shareModalGameId.set(null)"></app-share-dialog>
 
       <!-- Edit Game Modal -->
       @if (showEditModal()) {
@@ -1408,10 +1408,6 @@ export class DashboardComponent implements OnInit {
         this.toastService.error('Failed to delete game');
       }
     }
-  }
-
-  getShareLink(gameId: string): string {
-    return this.gameService.getShareableLink(gameId);
   }
 
 
