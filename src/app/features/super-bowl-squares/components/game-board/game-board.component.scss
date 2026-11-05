@@ -58,6 +58,15 @@
   font-weight: 600;
   // Player names should always be dark since player colors are pastel
   color: #0f172a !important; // slate-900
+
+  // 640px and up: cells are tall enough to wrap long names onto up to three lines
+  @include breakpoint('sm') {
+    white-space: normal;
+    text-overflow: clip;
+    word-break: break-word;
+    line-height: 1.1;
+    padding: 2px;
+  }
 }
 
 .square-highlight {

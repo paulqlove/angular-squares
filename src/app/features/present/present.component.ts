@@ -1,0 +1,222 @@
+import { Component, OnDestroy, OnInit, PLATFORM_ID, ViewEncapsulation, computed, inject, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { AuthService } from '../../core/services/auth.service';
+import { GameData, GameService, getBoardDimensions } from '../../core/services/game.service';
+import { GameBoardComponent } from '../super-bowl-squares/components/game-board/game-board.component';
+import { PLAYER_COLORS, normalizePlayerColors } from '../super-bowl-squares/utils/player-colors';
+
+const PIN_MS = 30000;
+const QUARTERS = ['q1', 'q2', 'q3', 'q4'] as const;
+
+@Component({
+  selector: 'app-present',
+  imports: [GameBoardComponent],
+  templateUrl: './present.component.html',
+  styleUrl: './present.component.scss',
+  encapsulation: ViewEncapsulation.None
+})
+export class PresentComponent implements OnInit, OnDestroy {
+  private readonly auth = inject(AuthService);
+  private readonly gameService = inject(GameService);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+
+  protected readonly intervals: number[] = [10, 20, 30, 60];
+  protected readonly quarters = QUARTERS;
+  protected readonly game = signal<GameData | null>(null);
+  protected readonly gameId = signal<string>('');
+  protected readonly colors = computed<{ [name: string]: string }>(() => {
+    const g = this.game();
+    if (!g) return {};
+    const colors = normalizePlayerColors(g.playerColors ?? {});
+    for (const name of Object.values(g.selectedSquares ?? {})) {
+      if (colors[name]) continue;
+      const used = Object.values(colors);
+      colors[name] = PLAYER_COLORS.find(c => !used.includes(c)) ?? PLAYER_COLORS[used.length % PLAYER_COLORS.length];
+    }
+    return colors;
+  });
+  protected readonly interval = signal<number>(20);
+  protected readonly qr = signal<string>('');
+  protected readonly rotating = signal<boolean>(false);
+  protected readonly showHelp = signal<boolean>(false);
+
+  private boardIds: string[] = [];
+  private index = 0;
+  private lastScore = '';
+  private pinnedUntil = 0;
+  private skips = 0;
+  private sub: Subscription | null = null;
+  private timer: ReturnType<typeof setInterval> | null = null;
+
+  async ngOnInit(): Promise<void> {
+    if (!isPlatformBrowser(this.platformId)) return;
+    const id = this.route.snapshot.paramMap.get('gameId');
+    if (id) {
+      this.open(id);
+      return;
+    }
+    await this.auth.waitForAuthReady();
+    const user = this.auth.currentUser();
+    if (!user || user.isGuest) {
+      this.router.navigate(['/']);
+      return;
+    }
+    const games = await this.gameService.getUserGames(user.uid);
+    this.boardIds = games.map(g => g.id);
+    if (!this.boardIds.length) {
+      this.router.navigate(['/dashboard']);
+      return;
+    }
+    this.rotating.set(true);
+    this.open(this.boardIds[0]);
+    this.startTimer();
+  }
+
+  ngOnDestroy(): void {
+    this.stopTimer();
+    this.sub?.unsubscribe();
+    this.gameService.unsubscribe();
+  }
+
+  protected boardRows(g: GameData): number {
+    return this.rows(g);
+  }
+
+  protected claimed(): number {
+    return Object.keys(this.game()?.selectedSquares ?? {}).length;
+  }
+
+  protected exit(): void {
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    this.router.navigate([this.gameId() && !this.rotating() ? '/game/' + this.gameId() : '/dashboard']);
+  }
+
+  protected leaderSquare(): string | null {
+    const g = this.game();
+    return g?.isRandomized ? this.squareFor(g, this.latestScore(g)) : null;
+  }
+
+  protected winnerSquares(): string[] {
+    const g = this.game();
+    if (!g?.isRandomized) return [];
+    return QUARTERS.flatMap(q => {
+      const winner = g.winners?.[q];
+      const key = winner && g.scores?.[q] ? this.squareFor(g, g.scores[q]) : null;
+      return key && g.selectedSquares?.[key] === winner ? [key] : [];
+    });
+  }
+
+  protected live(): { home: number; away: number; status: string } | null {
+    const g = this.game();
+    if (!g) return null;
+    const e = g.espnLive;
+    if (e) {
+      const status = e.status === 'pre' ? 'Pregame' : e.completed ? 'Final' : `Q${e.period} ${e.clock}`;
+      return { home: e.homeScore, away: e.awayScore, status };
+    }
+    const s = this.latestScore(g);
+    return { home: s.home, away: s.away, status: '' };
+  }
+
+  protected openSquares(): number {
+    const g = this.game();
+    return g ? this.total(g) - this.claimed() : 0;
+  }
+
+  protected setInterval(seconds: number): void {
+    this.interval.set(seconds);
+    this.startTimer();
+  }
+
+  protected toggleFullscreen(): void {
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    else document.documentElement.requestFullscreen().catch(() => {});
+  }
+
+  protected total(g: GameData): number {
+    return this.rows(g) * this.cols(g);
+  }
+
+  protected players(): number {
+    return new Set(Object.values(this.game()?.selectedSquares ?? {})).size;
+  }
+
+  protected verified(): number {
+    const paid = new Set(this.game()?.paidPlayers ?? []);
+    return new Set(Object.values(this.game()?.selectedSquares ?? {}).filter(p => paid.has(p))).size;
+  }
+
+  private advance(): void {
+    if (this.boardIds.length < 2 || Date.now() < this.pinnedUntil) return;
+    this.index = (this.index + 1) % this.boardIds.length;
+    this.skips = this.boardIds.length - 1;
+    this.open(this.boardIds[this.index]);
+  }
+
+  private cols(g: GameData): number {
+    return getBoardDimensions(g.boardSize ?? 100).cols;
+  }
+
+  private latestScore(g: GameData): { home: number; away: number } {
+    for (const q of [...QUARTERS].reverse()) {
+      const s = g.scores?.[q];
+      if (s && (s.home > 0 || s.away > 0)) return s;
+    }
+    return { home: 0, away: 0 };
+  }
+
+  private matches(score: number, stored: number | null, paired: boolean): boolean {
+    const digit = score % 10;
+    return paired ? Math.floor(digit / 2) === stored : digit === stored;
+  }
+
+  private open(id: string): void {
+    this.sub?.unsubscribe();
+    this.gameId.set(id);
+    this.lastScore = '';
+    this.game.set(null);
+    this.makeQr(id);
+    this.sub = this.gameService.subscribeToGame(id).subscribe(g => {
+      if (!g) return;
+      if (this.rotating() && this.skips > 0 && !this.lastScore && g.espnLive?.completed) {
+        this.skips--;
+        this.advance();
+        return;
+      }
+      const s = this.latestScore(g);
+      const key = `${s.home}-${s.away}-${g.espnLive?.period ?? 0}`;
+      if (this.lastScore && key !== this.lastScore) this.pinnedUntil = Date.now() + PIN_MS;
+      this.lastScore = key;
+      this.game.set(g);
+    });
+  }
+
+  private async makeQr(id: string): Promise<void> {
+    const QRCode = await import('qrcode');
+    this.qr.set(await QRCode.toDataURL(this.gameService.getShareableLink(id), { margin: 1, width: 400 }));
+  }
+
+  private rows(g: GameData): number {
+    return getBoardDimensions(g.boardSize ?? 100).rows;
+  }
+
+  private squareFor(g: GameData, s: { home: number; away: number }): string | null {
+    const row = g.awayNumbers.findIndex(n => this.matches(s.away, n, this.rows(g) === 5));
+    const col = g.homeNumbers.findIndex(n => this.matches(s.home, n, this.cols(g) === 5));
+    return row === -1 || col === -1 ? null : `${row}-${col}`;
+  }
+
+  private startTimer(): void {
+    this.stopTimer();
+    if (this.rotating()) this.timer = setInterval(() => this.advance(), this.interval() * 1000);
+  }
+
+  private stopTimer(): void {
+    if (this.timer) clearInterval(this.timer);
+    this.timer = null;
+  }
+}

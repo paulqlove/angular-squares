@@ -1,0 +1,36 @@
+/* TV sizing: cells fill the viewport height, names wrap instead of truncating */
+.present-board .number-cell:not(.axis-top),
+.present-board .square-cell {
+  height: calc((100vh - 11rem) / var(--rows, 10)) !important;
+}
+
+.present-board .square-cell {
+  white-space: normal !important;
+  line-height: 1.1;
+  padding: 2px !important;
+  font-size: clamp(0.7rem, 1.1vw, 1.5rem) !important;
+  cursor: default !important;
+}
+
+.present-board .axis-cell {
+  font-size: clamp(1rem, 1.6vw, 2rem);
+}
+
+/* Caption above the board: bigger for a TV */
+.present-board app-game-board p {
+  font-size: clamp(1rem, 1.4vw, 1.75rem) !important;
+}
+.present-board app-game-board p img {
+  height: 1.4em;
+  width: 1.4em;
+}
+
+/* Quarter winners: dark ring. Current leader: emerald ring and glow. */
+.present-board .square-winner {
+  box-shadow: inset 0 0 0 4px #0f172a;
+}
+.present-board .square-leader {
+  box-shadow: inset 0 0 0 5px var(--qs-accent), 0 0 24px var(--qs-accent);
+  position: relative;
+  z-index: 1;
+}

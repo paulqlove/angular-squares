@@ -20,6 +20,7 @@ export class GameBoardComponent {
   @Input() selectedPlayer: string | null = null;
   @Input() highlightedSquare: string | null = null;
   @Input() currentLeaderSquare: string | null = null;
+  @Input() winnerSquares: string[] = [];
   @Input() isRandomized: boolean = false;
   @Input() boardSize: BoardSize = 100;
   @Input() homeNumbersLocked: boolean[] = [];

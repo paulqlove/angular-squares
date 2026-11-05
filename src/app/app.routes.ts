@@ -31,6 +31,16 @@ export const routes: Routes = [
       )
   },
   {
+    path: 'present',
+    loadComponent: () =>
+      import('./features/present/present.component').then(m => m.PresentComponent)
+  },
+  {
+    path: 'present/:gameId',
+    loadComponent: () =>
+      import('./features/present/present.component').then(m => m.PresentComponent)
+  },
+  {
     path: 'auth/email-link',
     loadComponent: () =>
       import('./features/auth/email-link.component').then(m => m.EmailLinkComponent)

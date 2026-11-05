@@ -1,0 +1,87 @@
+<div class="flex h-screen flex-col overflow-hidden bg-qs-bg px-4 py-3 text-qs-ink lg:px-6">
+  <div class="mb-3 flex shrink-0 flex-wrap items-center justify-between gap-3">
+    <h1 class="qs-title truncate text-2xl lg:text-4xl">{{ game()?.name }}</h1>
+    <div class="flex flex-wrap items-center gap-2">
+      @if (rotating()) {
+        <span class="qs-label text-qs-muted">Switch every</span>
+        @for (s of intervals; track s) {
+          <button type="button" class="qs-tab px-3" role="tab" [attr.aria-selected]="interval() === s" (click)="setInterval(s)">{{ s }}s</button>
+        }
+      }
+      <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" (click)="showHelp.set(!showHelp())">Show on TV</button>
+      <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" (click)="toggleFullscreen()">Fullscreen</button>
+      <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" (click)="exit()">Exit</button>
+    </div>
+  </div>
+
+  @if (showHelp()) {
+    <div class="qs-card mb-3 shrink-0 p-3 text-sm">
+      <p><strong>Chrome / Edge:</strong> menu → Cast, save and share → Cast, then pick your TV.</p>
+      <p><strong>Safari:</strong> Control Center → Screen Mirroring (AirPlay).</p>
+      <p><strong>Firefox:</strong> no casting. Open this page in your TV's browser, or connect with HDMI.</p>
+    </div>
+  }
+
+  @if (game(); as g) {
+    <div class="grid min-h-0 flex-1 grid-cols-12 gap-4">
+      <div class="qs-card present-board col-span-8 p-3" [style.--rows]="boardRows(g)">
+        <app-game-board
+          [selectedSquares]="g.selectedSquares || {}"
+          [playerColors]="colors()"
+          [homeNumbers]="g.homeNumbers"
+          [awayNumbers]="g.awayNumbers"
+          [homeTeam]="g.homeTeam"
+          [awayTeam]="g.awayTeam"
+          [currentLeaderSquare]="leaderSquare()"
+          [winnerSquares]="winnerSquares()"
+          [isRandomized]="g.isRandomized"
+          [boardSize]="g.boardSize || 100">
+        </app-game-board>
+      </div>
+
+      <div class="col-span-4 flex min-h-0 flex-col gap-3">
+        @if (live(); as l) {
+          <div class="qs-card p-4">
+            <p class="qs-label mb-2 text-qs-muted">{{ l.status || 'Score' }}</p>
+            <div class="flex items-baseline justify-between text-3xl font-bold lg:text-4xl">
+              <span class="uppercase">{{ g.awayTeam }}</span><span>{{ l.away }}</span>
+            </div>
+            <div class="flex items-baseline justify-between text-3xl font-bold lg:text-4xl">
+              <span class="uppercase">{{ g.homeTeam }}</span><span>{{ l.home }}</span>
+            </div>
+          </div>
+        }
+
+        <div class="qs-card flex min-h-0 flex-1 flex-col p-4">
+          <p class="qs-label mb-1 text-qs-muted">Winners</p>
+          @for (q of quarters; track q) {
+            <div class="flex flex-1 items-center justify-between border-b border-qs-line text-2xl last:border-0 lg:text-3xl">
+              <span class="qs-label text-qs-muted">{{ q.toUpperCase() }}</span>
+              @if (g.winners?.[q]; as w) {
+                <span [class]="colors()[w] + ' truncate rounded-inner px-3 py-0.5 font-semibold text-slate-900'">{{ w }}</span>
+              } @else {
+                <span class="text-qs-muted">—</span>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="qs-card grid grid-cols-3 gap-2 p-4 text-center">
+          <div><p class="text-2xl font-bold lg:text-3xl">{{ claimed() }}/{{ total(g) }}</p><p class="qs-label text-qs-muted">Claimed</p></div>
+          <div><p class="text-2xl font-bold lg:text-3xl">{{ openSquares() }}</p><p class="qs-label text-qs-muted">Open</p></div>
+          <div><p class="text-2xl font-bold lg:text-3xl">{{ verified() }}/{{ players() }}</p><p class="qs-label text-qs-muted">Players verified</p></div>
+        </div>
+
+        @if (qr()) {
+          <div class="qs-card flex min-h-0 items-center gap-4 p-3">
+            <img [src]="qr()" alt="QR code to join this board" class="aspect-square h-[min(14rem,22vh)] shrink-0 rounded-inner bg-white" />
+            <div class="min-w-0">
+              <p class="text-base font-semibold uppercase tracking-wider text-qs-muted">Scan to join</p>
+              <p class="text-2xl font-semibold lg:text-3xl">{{ g.name }}</p>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

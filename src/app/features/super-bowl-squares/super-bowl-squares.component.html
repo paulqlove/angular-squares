@@ -107,6 +107,9 @@
                   <ng-icon name="heroShare" class="text-base"></ng-icon>
                   Share
                 </button>
+                @if (isGameOwner() || isManager()) {
+                  <a [routerLink]="['/present', gameId]" class="qs-btn qs-btn-secondary min-h-9 px-3">Present</a>
+                }
                 @if (currentUser() && !currentUser()?.isGuest) {
                   <button
                     (click)="goBack()"
