@@ -196,7 +196,8 @@ export class PresentComponent implements OnInit, OnDestroy {
   }
 
   private async makeQr(id: string): Promise<void> {
-    const QRCode = await import('qrcode');
+    // qrcode is CommonJS: production bundles expose it only as the default export
+    const QRCode = (await import('qrcode')).default;
     this.qr.set(await QRCode.toDataURL(this.gameService.getShareableLink(id), { margin: 1, width: 400 }));
   }
 
