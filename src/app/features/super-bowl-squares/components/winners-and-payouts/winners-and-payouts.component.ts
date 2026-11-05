@@ -1,5 +1,6 @@
 import { DecimalPipe } from '@angular/common';
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
+import { quarterLabel } from '../../../../core/utils/quarter-label';
 
 /** Per-quarter score tiles: score, points, and the winner. */
 @Component({
@@ -24,8 +25,7 @@ export class WinnersAndPayoutsComponent {
   readonly quarters = ['q1', 'q2', 'q3', 'q4'];
 
   getQuarterLabel(quarter: string): string {
-    const quarterMap: { [key: string]: string } = { q1: 'Q1', q2: 'Q2', q3: 'Q3', q4: this.gameOver ? 'Final' : 'Q4' };
-    return quarterMap[quarter] || quarter;
+    return quarterLabel(quarter, this.gameOver);
   }
 
   getQuarterPoints(quarter: string): number {
