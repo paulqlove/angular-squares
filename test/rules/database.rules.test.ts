@@ -317,6 +317,7 @@ describe('owner-only fields', () => {
     ['homeTeam', 'Other'],
     ['awayTeam', 'Other'],
     ['hostNote', 'Pay up'],
+    ['emptyQuarterRule', 'redistribute'],
     ['pricePerSquare', 1],
     ['isLocked', true],
     ['isRandomized', true],
@@ -702,5 +703,54 @@ describe('gifted Season Pass', () => {
   it('a signed-in user without an email still gets the normal rules', async () => {
     await assertFails(set(owner(), `${G}/quarterSplit`, split));
     await assertSucceeds(set(owner(), `${G}/adFreeUntil`, 0));
+  });
+});
+
+describe('emptyQuarterRule', () => {
+  const field = `${G}/emptyQuarterRule`;
+
+  it('the owner can set either rule, and it needs no pass', async () => {
+    await assertSucceeds(set(owner(), field, 'final'));
+    await assertSucceeds(set(owner(), field, 'redistribute'));
+  });
+
+  it('the co-host can change it', async () => {
+    await assertSucceeds(set(cohost(), field, 'redistribute'));
+  });
+
+  it('rejects any other value', async () => {
+    await assertFails(set(owner(), field, 'refund'));
+    await assertFails(set(owner(), field, ''));
+    await assertFails(set(owner(), field, 1));
+    await assertFails(set(owner(), field, true));
+    await assertFails(set(owner(), field, { rule: 'final' }));
+  });
+
+  it('can be cleared back to the default', async () => {
+    await set(owner(), field, 'redistribute');
+    await assertSucceeds(set(owner(), field, null));
+  });
+
+  it('can be saved together with the other Edit game fields', async () => {
+    await assertSucceeds(write(owner(), {
+      [`${G}/hostNote`]: 'Snacks at halftime',
+      [`${G}/pricePerSquare`]: 5,
+      [`${G}/emptyQuarterRule`]: 'redistribute'
+    }));
+  });
+
+  it('a player, a guest and a signed-out visitor cannot change it', async () => {
+    await seed({ [field]: 'final' });
+    await assertFails(set(player(), field, 'redistribute'));
+    await assertFails(set(guest(), field, 'redistribute'));
+    await assertFails(set(visitor(), field, 'redistribute'));
+  });
+
+  it('a new game can be created with a rule', async () => {
+    await assertSucceeds(set(env.authenticatedContext('host'), 'games/new001', baseGame({ ownerId: 'host', emptyQuarterRule: 'final' })));
+  });
+
+  it('a new game cannot be created with a bad rule', async () => {
+    await assertFails(set(env.authenticatedContext('host'), 'games/new001', baseGame({ ownerId: 'host', emptyQuarterRule: 'refund' })));
   });
 });
