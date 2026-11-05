@@ -5,6 +5,8 @@ import { Subscription } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { GameData, GameService, getBoardDimensions } from '../../core/services/game.service';
 import { boardArrowStep } from '../../core/utils/board-keys';
+import { isGameOver, quarterLabel } from '../../core/utils/quarter-label';
+import { EspnGame, EspnService } from '../../core/services/espn.service';
 import { GameBoardComponent } from '../super-bowl-squares/components/game-board/game-board.component';
 import { PLAYER_COLORS, normalizePlayerColors } from '../super-bowl-squares/utils/player-colors';
 
@@ -20,6 +22,7 @@ const QUARTERS = ['q1', 'q2', 'q3', 'q4'] as const;
 })
 export class PresentComponent implements OnInit, OnDestroy {
   private readonly auth = inject(AuthService);
+  private readonly espn = inject(EspnService);
   private readonly gameService = inject(GameService);
   private readonly location = inject(Location);
   private readonly platformId = inject(PLATFORM_ID);
@@ -29,6 +32,8 @@ export class PresentComponent implements OnInit, OnDestroy {
   protected readonly intervals: number[] = [10, 20, 30, 60];
   protected readonly quarters = QUARTERS;
   protected readonly game = signal<GameData | null>(null);
+  /** ESPN's own status for linked boards that have no espnLive node (the browser poller does not write one). */
+  private readonly espnGame = signal<EspnGame | null>(null);
   protected readonly gameId = signal<string>('');
   protected readonly colors = computed<{ [name: string]: string }>(() => {
     const g = this.game();
@@ -54,9 +59,11 @@ export class PresentComponent implements OnInit, OnDestroy {
   private skips = 0;
   private sub: Subscription | null = null;
   private timer: ReturnType<typeof setInterval> | null = null;
+  private espnTimer: ReturnType<typeof setInterval> | null = null;
 
   async ngOnInit(): Promise<void> {
     if (!isPlatformBrowser(this.platformId)) return;
+    this.espnTimer = setInterval(() => this.refreshEspn(), 30000);
     const id = this.route.snapshot.paramMap.get('gameId');
     if (id) this.open(id);
     await this.auth.waitForAuthReady();
@@ -87,6 +94,7 @@ export class PresentComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.stopTimer();
+    if (this.espnTimer) clearInterval(this.espnTimer);
     this.sub?.unsubscribe();
     this.gameService.unsubscribe();
   }
@@ -118,12 +126,29 @@ export class PresentComponent implements OnInit, OnDestroy {
     });
   }
 
+  /** Same rule as the game page: see isGameOver in core/utils/quarter-label.ts. */
+  protected gameOver(): boolean {
+    const g = this.game();
+    if (!g) return false;
+    return isGameOver({
+      espnEventId: g.espnEventId,
+      espnLive: g.espnLive,
+      linkedStatus: this.espnGame()?.status,
+      q4: g.scores?.q4,
+      q4Winner: g.winners?.['q4']
+    });
+  }
+
+  protected label(quarter: string): string {
+    return quarterLabel(quarter, this.gameOver());
+  }
+
   protected live(): { home: number; away: number; status: string } | null {
     const g = this.game();
     if (!g) return null;
-    const e = g.espnLive;
+    const e = g.espnLive ?? this.espnGame();
     if (e) {
-      const status = e.status === 'pre' ? 'Pregame' : e.completed ? 'Final' : `Q${e.period} ${e.clock}`;
+      const status = e.status === 'pre' ? 'Pregame' : e.completed ? 'Final' : `${e.period > 4 ? 'OT' : 'Q' + e.period} ${e.clock}`;
       return { home: e.homeScore, away: e.awayScore, status };
     }
     const s = this.latestScore(g);
@@ -183,6 +208,7 @@ export class PresentComponent implements OnInit, OnDestroy {
     this.gameId.set(id);
     this.lastScore = '';
     this.game.set(null);
+    this.espnGame.set(null);
     this.makeQr(id);
     this.sub = this.gameService.subscribeToGame(id).subscribe(g => {
       if (!g) return;
@@ -196,6 +222,7 @@ export class PresentComponent implements OnInit, OnDestroy {
       if (this.lastScore && key !== this.lastScore) this.pinnedUntil = Date.now() + PIN_MS;
       this.lastScore = key;
       this.game.set(g);
+      if (!this.espnGame()) this.refreshEspn();
     });
   }
 
@@ -203,6 +230,18 @@ export class PresentComponent implements OnInit, OnDestroy {
     // qrcode is CommonJS: production bundles expose it only as the default export
     const QRCode = (await import('qrcode')).default;
     this.qr.set(await QRCode.toDataURL(this.gameService.getShareableLink(id), { margin: 1, width: 400 }));
+  }
+
+  private refreshEspn(): void {
+    const g = this.game();
+    if (!g?.espnEventId || g.espnLive || this.espnGame()?.status === 'post') return;
+    const id = this.gameId();
+    this.espn
+      .getGame(g.espnEventId, g.espnSport ?? 'nfl')
+      .then(game => {
+        if (this.gameId() === id) this.espnGame.set(game);
+      })
+      .catch(() => {});
   }
 
   private rows(g: GameData): number {

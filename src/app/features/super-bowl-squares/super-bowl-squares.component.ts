@@ -4,6 +4,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { boardArrowStep } from '../../core/utils/board-keys';
+import { isGameOver } from '../../core/utils/quarter-label';
 import { GameService, GameData, EspnLiveSnapshot, BoardSize, getBoardDimensions } from '../../core/services/game.service';
 import { environment } from '../../../environments/environment';
 import { PLAYER_COLORS, normalizePlayerColors } from './utils/player-colors';
@@ -1051,13 +1052,15 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** Live-score games: the feed says it's over. Manual games: a Q4 score is only entered once it's over. */
+  /** Same rule as Presentation mode: see isGameOver in core/utils/quarter-label.ts. */
   isGameOver(): boolean {
-    if (this.espnEventId) {
-      return !!this.latestEspnLive?.completed || this.linkedEspnGame()?.status === 'post';
-    }
-    const q4 = this.scores.q4;
-    return !!q4 && (q4.home > 0 || q4.away > 0);
+    return isGameOver({
+      espnEventId: this.espnEventId,
+      espnLive: this.latestEspnLive,
+      linkedStatus: this.linkedEspnGame()?.status,
+      q4: this.scores.q4,
+      q4Winner: this.winners['q4']
+    });
   }
 
   /** Ads show on free hosts' boards. The admin can preview a plan from the View-as switcher. */

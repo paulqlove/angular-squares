@@ -58,7 +58,7 @@
           <p class="qs-label mb-1 text-qs-muted">Winners</p>
           @for (q of quarters; track q) {
             <div class="flex flex-1 items-center justify-between border-b border-qs-line text-2xl last:border-0 lg:text-3xl">
-              <span class="qs-label text-qs-muted">{{ q.toUpperCase() }}</span>
+              <span class="qs-label text-qs-muted">{{ label(q) }}</span>
               @if (g.winners?.[q]; as w) {
                 <span [class]="colors()[w] + ' truncate rounded-inner px-3 py-0.5 font-semibold text-slate-900'">{{ w }}</span>
               } @else {
