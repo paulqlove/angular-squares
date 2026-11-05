@@ -32,7 +32,6 @@ import {
   heroClipboard,
   heroPencilSquare,
   heroXMark,
-  heroQuestionMarkCircle,
   heroArrowPath,
   heroSparkles,
   heroCheckCircle
@@ -43,6 +42,7 @@ import { EditGameDialogComponent, EditGameValues } from './components/edit-game-
 import { PaymentDialogComponent } from './components/payment-dialog/payment-dialog.component';
 import { ProbabilityHeatmapComponent } from './components/probability-heatmap/probability-heatmap.component';
 import { BoxScoreComponent, ManualScores } from './components/box-score/box-score.component';
+import { HelpMenuComponent } from '../../components/ui/help-menu/help-menu.component';
 import { ProfileMenuComponent } from '../../components/ui/profile-menu/profile-menu.component';
 import { ShareDialogComponent } from '../../components/ui/share-dialog/share-dialog.component';
 import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.component';
@@ -63,6 +63,7 @@ import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.co
     ProbabilityHeatmapComponent,
     BoxScoreComponent,
     AuthModalComponent,
+    HelpMenuComponent,
     ProfileMenuComponent,
     ShareDialogComponent,
     AdSlotComponent
@@ -79,7 +80,6 @@ import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.co
             heroClipboard,
             heroPencilSquare,
             heroXMark,
-            heroQuestionMarkCircle,
             heroArrowPath,
             heroSparkles,
             heroCheckCircle
@@ -419,11 +419,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           } else if (!this.espnEventId && this.linkedEspnGame()) {
             this.linkedEspnGame.set(null);
             this.stopPolling();
-          }
-
-          // Trigger walkthrough on first load (only if already authenticated)
-          if (this.authService.currentUser()) {
-            this.triggerWalkthroughIfNew();
           }
 
           // Initialize display numbers if not already set (before checking animation)
@@ -1226,9 +1221,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       this.pendingSquare = null;
       await this.onSquareClick(square);
     }
-
-    // Trigger walkthrough for first-time users
-    this.triggerWalkthroughIfNew();
   }
 
   onAuthModalClosed(): void {
@@ -1356,12 +1348,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   startWalkthrough(): void {
     this.walkthroughService.resetCompletion('gameboard');
     this.walkthroughService.start('gameboard', this.walkthroughSteps());
-  }
-
-  private triggerWalkthroughIfNew(): void {
-    setTimeout(() => {
-      this.walkthroughService.startIfNew('gameboard', this.walkthroughSteps());
-    }, 1000);
   }
 
   // Name edit modal methods

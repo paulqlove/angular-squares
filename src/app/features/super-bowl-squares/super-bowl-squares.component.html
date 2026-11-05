@@ -33,19 +33,9 @@
 } @else {
   <!-- Main Game View -->
   <app-shared-header variant="fixed">
-    <button
-      type="button"
-      (click)="startWalkthrough()"
-      class="min-h-11 min-w-11 items-center justify-center rounded-btn p-2.5 text-qs-tile-muted transition-colors hover:bg-white/10 hover:text-qs-tile-ink sm:flex"
-      [class.hidden]="!!currentUser()"
-      [class.flex]="!currentUser()"
-      title="How it works"
-      aria-label="How it works"
-      >
-      <ng-icon name="heroQuestionMarkCircle" class="text-2xl"></ng-icon>
-    </button>
+    <app-help-menu [showShare]="true" (tour)="startWalkthrough()" (share)="openShareModal()"></app-help-menu>
     @if (currentUser()) {
-      <app-profile-menu [allowNameEdit]="false" [showDashboardLink]="true" [showTourLink]="true" (tour)="startWalkthrough()"></app-profile-menu>
+      <app-profile-menu [allowNameEdit]="false" [showDashboardLink]="true"></app-profile-menu>
     } @else {
       <button type="button" (click)="showAuthModal.set(true)" class="qs-btn qs-btn-primary">Sign in</button>
     }
