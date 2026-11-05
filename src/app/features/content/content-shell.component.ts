@@ -1,6 +1,7 @@
-import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
+import { AuthService } from '../../core/services/auth.service';
 import { SiteFooterComponent } from '../../shared/site-footer.component';
 import { HeadroomDirective } from '../../shared/directives/headroom.directive';
 
@@ -60,7 +61,7 @@ interface NavLink {
                   routerLink="/dashboard"
                   class="qs-btn qs-btn-primary w-full md:w-auto"
                 >
-                  Start a free game
+                  {{ signedIn() ? 'Dashboard' : 'Start a free game' }}
                 </a>
               </li>
             </ul>
@@ -91,6 +92,13 @@ export class ContentShellComponent {
   ];
 
   private router = inject(Router);
+  private auth = inject(AuthService);
+
+  /** Signed-in hosts already have a dashboard; the call to action becomes a link to it. */
+  public readonly signedIn = computed(() => {
+    const user = this.auth.currentUser();
+    return !!user && !user.isGuest;
+  });
 
   constructor() {
     this.router.events.pipe(

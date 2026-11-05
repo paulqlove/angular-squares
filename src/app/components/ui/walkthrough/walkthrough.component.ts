@@ -8,27 +8,22 @@ import { WalkthroughService } from '../../../core/services/walkthrough.service';
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
     @if (walkthroughService.isActive() && walkthroughService.currentStep()) {
-      <div class="fixed inset-0 z-[300]" (click)="onOverlayClick($event)">
-        <!-- Overlay with cutout -->
-        <div
-          class="absolute inset-0 transition-all duration-300"
-          [style]="overlayStyle()"
-        ></div>
-
-        <!-- Pulse ring around target -->
+      <!-- No backdrop: the page stays visible and usable; only the target is outlined -->
+      <div class="pointer-events-none fixed inset-0 z-[300]">
         @if (targetRect()) {
           <div
-            class="absolute border-2 border-qs-accent rounded-lg pointer-events-none animate-pulse-subtle"
-            [style.left.px]="targetRect()!.left - 4"
-            [style.top.px]="targetRect()!.top - 4"
-            [style.width.px]="targetRect()!.width + 8"
-            [style.height.px]="targetRect()!.height + 8"
+            class="absolute rounded-lg border-[3px] border-qs-accent transition-all duration-200"
+            [style.left.px]="targetRect()!.left - 6"
+            [style.top.px]="targetRect()!.top - 6"
+            [style.width.px]="targetRect()!.width + 12"
+            [style.height.px]="targetRect()!.height + 12"
+            style="box-shadow: 0 0 0 6px color-mix(in srgb, var(--qs-accent) 25%, transparent), 0 0 28px color-mix(in srgb, var(--qs-accent) 45%, transparent)"
           ></div>
         }
 
         <!-- Tooltip -->
         <div
-          class="absolute bg-dialog rounded-xl shadow-2xl border border-default p-5 max-w-sm animate-tooltip-in"
+          class="pointer-events-auto absolute bg-dialog rounded-xl shadow-2xl border border-default p-5 max-w-sm animate-tooltip-in"
           [style]="tooltipStyle()"
           (click)="$event.stopPropagation()"
         >
@@ -96,23 +91,6 @@ export class WalkthroughComponent {
     return this.walkthroughService.currentStepIndex() === this.walkthroughService.totalSteps() - 1;
   });
 
-  overlayStyle = computed(() => {
-    const rect = this.targetRect();
-    if (!rect) {
-      return {
-        background: 'rgba(0, 0, 0, 0.75)'
-      };
-    }
-
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    const radius = Math.max(rect.width, rect.height) / 2 + 20;
-
-    return {
-      background: `radial-gradient(circle at ${centerX}px ${centerY}px, transparent ${radius}px, rgba(0, 0, 0, 0.75) ${radius + 2}px)`
-    };
-  });
-
   tooltipStyle = computed(() => {
     const rect = this.targetRect();
     const step = this.walkthroughService.currentStep();
@@ -176,8 +154,9 @@ export class WalkthroughComponent {
     this.walkthroughService.updateTargetRect();
   }
 
-  onOverlayClick(event: MouseEvent): void {
-    event.stopPropagation();
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.walkthroughService.isActive()) this.skip();
   }
 
   next(): void {

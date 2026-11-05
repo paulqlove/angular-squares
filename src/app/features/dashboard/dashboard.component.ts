@@ -14,6 +14,7 @@ import { WalkthroughService, WalkthroughStep } from '../../core/services/walkthr
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { AppHeaderComponent } from '../../components/ui/app-header/app-header.component';
 import { ShareDialogComponent } from '../../components/ui/share-dialog/share-dialog.component';
+import { HelpMenuComponent } from '../../components/ui/help-menu/help-menu.component';
 import { ProfileMenuComponent } from '../../components/ui/profile-menu/profile-menu.component';
 import { HeadroomDirective } from '../../shared/directives/headroom.directive';
 import { UpgradePassDialogComponent } from './components/upgrade-pass-dialog/upgrade-pass-dialog.component';
@@ -40,13 +41,12 @@ import {
   heroSun,
   heroMoon,
   heroComputerDesktop,
-  heroChevronDown,
-  heroQuestionMarkCircle
+  heroChevronDown
 } from '@ng-icons/heroicons/outline';
 
 @Component({
     selector: 'app-dashboard',
-    imports: [FormsModule, NgTemplateOutlet, NgIconComponent, AppHeaderComponent, HeadroomDirective, ProfileMenuComponent, ShareDialogComponent, UpgradePassDialogComponent],
+    imports: [FormsModule, NgTemplateOutlet, NgIconComponent, AppHeaderComponent, HeadroomDirective, HelpMenuComponent, ProfileMenuComponent, ShareDialogComponent, UpgradePassDialogComponent],
     providers: [
         provideIcons({
             heroPlus,
@@ -69,23 +69,14 @@ import {
             heroSun,
             heroMoon,
             heroComputerDesktop,
-            heroChevronDown,
-            heroQuestionMarkCircle
+            heroChevronDown
         })
     ],
     template: `
     <div class="min-h-screen bg-page" [attr.inert]="showUpgradeDialog() ? '' : null">
       <!-- Header -->
       <app-shared-header variant="solid" appHeadroom>
-        <!-- Help Button -->
-        <button
-          (click)="startWalkthrough()"
-          class="p-2 text-header-muted hover:text-header rounded-lg hover:bg-header-accent transition-colors flex items-center justify-center"
-          title="Show tutorial"
-          aria-label="Show tutorial"
-        >
-          <ng-icon name="heroQuestionMarkCircle" class="text-xl"></ng-icon>
-        </button>
+        <app-help-menu (tour)="startWalkthrough()"></app-help-menu>
 
         <app-profile-menu walkthroughTarget="profile-dropdown"></app-profile-menu>
       </app-shared-header>

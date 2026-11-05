@@ -39,6 +39,7 @@ export class WalkthroughService {
     this._steps.set(steps);
     this._currentStepIndex.set(0);
     this._isActive.set(true);
+    this.scrollToTarget();
     this.updateTargetRect();
   }
 
@@ -51,6 +52,7 @@ export class WalkthroughService {
     const nextIndex = this._currentStepIndex() + 1;
     if (nextIndex < this._steps().length) {
       this._currentStepIndex.set(nextIndex);
+      this.scrollToTarget();
       this.updateTargetRect();
     } else {
       this.complete();
@@ -61,6 +63,7 @@ export class WalkthroughService {
     const prevIndex = this._currentStepIndex() - 1;
     if (prevIndex >= 0) {
       this._currentStepIndex.set(prevIndex);
+      this.scrollToTarget();
       this.updateTargetRect();
     }
   }
@@ -88,6 +91,24 @@ export class WalkthroughService {
   resetCompletion(id: string): void {
     if (!this.isBrowser) return;
     localStorage.removeItem(`walkthrough_${id}_completed`);
+  }
+
+  /** Brings an off-screen target into view before it is measured. Only called when the step changes, never from scroll handlers. */
+  private scrollToTarget(): void {
+    const step = this.currentStep();
+    const element = step && document.querySelector(`[data-walkthrough="${step.target}"]`);
+    if (!element) return;
+    const rect = element.getBoundingClientRect();
+    if (element.closest('header')) {
+      // The sticky header slides away when the page is scrolled down; going to the top brings it back
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    } else if (rect.top < 0 || rect.bottom > window.innerHeight) {
+      element.scrollIntoView({ block: 'center', behavior: 'instant' });
+    } else {
+      return;
+    }
+    // The header's slide-in takes 200ms and moves its contents without a scroll event: measure again once it settles
+    setTimeout(() => this.updateTargetRect(), 250);
   }
 
   updateTargetRect(): void {

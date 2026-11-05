@@ -1,6 +1,7 @@
-import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
 import { SeoService } from '../../core/services/seo.service';
 import { BreadcrumbsComponent } from '../../shared/breadcrumbs.component';
 import { ContentShellComponent } from './content-shell.component';
@@ -110,7 +111,7 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
             [routerLink]="page.cta.path"
             class="inline-flex min-h-11 items-center rounded-md bg-white px-4 font-semibold text-qs-accent hover:bg-qs-accent-soft"
           >
-            {{ page.cta.label }}
+            {{ signedIn() && page.cta.path === '/dashboard' ? 'Dashboard' : page.cta.label }}
           </a>
           <p class="mt-3 text-sm leading-relaxed text-qs-on-accent">{{ page.cta.note }}</p>
         </section>
@@ -128,6 +129,12 @@ export class MarketingPageComponent {
   private route = inject(ActivatedRoute);
   private sanitizer = inject(DomSanitizer);
   private seo = inject(SeoService);
+  private auth = inject(AuthService);
+
+  public readonly signedIn = computed(() => {
+    const user = this.auth.currentUser();
+    return !!user && !user.isGuest;
+  });
 
   public readonly page: MarketingPage = getMarketingPage(this.route.snapshot.data['pageId']);
   public readonly breadcrumbs = pageBreadcrumbs(this.page);
