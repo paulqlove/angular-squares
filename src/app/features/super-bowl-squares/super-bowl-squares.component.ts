@@ -2,7 +2,7 @@ import { computed, Component, OnInit, OnDestroy, ViewChild, HostListener, signal
 import { isPlatformBrowser } from '@angular/common';
 
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { GameService, GameData, EspnLiveSnapshot, BoardSize, getBoardDimensions } from '../../core/services/game.service';
 import { environment } from '../../../environments/environment';
 import { PLAYER_COLORS, normalizePlayerColors } from './utils/player-colors';
@@ -50,6 +50,7 @@ import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.co
     selector: 'app-super-bowl-squares',
     imports: [
     FormsModule,
+    RouterLink,
     NgIconComponent,
     GameBoardComponent,
     PlayersListComponent,
