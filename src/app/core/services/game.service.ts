@@ -600,6 +600,15 @@ export class GameService {
   }
 
   // Get games created by a user
+  /** The host's board ids, newest first (same order as the dashboard). */
+  async getUserGameIds(userId: string): Promise<string[]> {
+    if (!this.isBrowser) return [];
+    const snapshot = await get(ref(this.db, `users/${userId}/games`));
+    if (!snapshot.exists()) return [];
+    const entries = Object.entries(snapshot.val() as Record<string, { createdAt?: number }>);
+    return entries.sort((a, b) => (b[1]?.createdAt ?? 0) - (a[1]?.createdAt ?? 0)).map(([id]) => id);
+  }
+
   async getUserGames(userId: string): Promise<GameListItem[]> {
     if (!this.isBrowser) return [];
     const userGamesRef = ref(this.db, `users/${userId}/games`);
