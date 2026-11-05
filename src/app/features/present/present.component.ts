@@ -1,9 +1,10 @@
-import { Component, OnDestroy, OnInit, PLATFORM_ID, ViewEncapsulation, computed, inject, signal } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Component, HostListener, OnDestroy, OnInit, PLATFORM_ID, ViewEncapsulation, computed, inject, signal } from '@angular/core';
+import { Location, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { GameData, GameService, getBoardDimensions } from '../../core/services/game.service';
+import { boardArrowStep } from '../../core/utils/board-keys';
 import { GameBoardComponent } from '../super-bowl-squares/components/game-board/game-board.component';
 import { PLAYER_COLORS, normalizePlayerColors } from '../super-bowl-squares/utils/player-colors';
 
@@ -20,6 +21,7 @@ const QUARTERS = ['q1', 'q2', 'q3', 'q4'] as const;
 export class PresentComponent implements OnInit, OnDestroy {
   private readonly auth = inject(AuthService);
   private readonly gameService = inject(GameService);
+  private readonly location = inject(Location);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -55,18 +57,18 @@ export class PresentComponent implements OnInit, OnDestroy {
   async ngOnInit(): Promise<void> {
     if (!isPlatformBrowser(this.platformId)) return;
     const id = this.route.snapshot.paramMap.get('gameId');
-    if (id) {
-      this.open(id);
-      return;
-    }
+    if (id) this.open(id);
     await this.auth.waitForAuthReady();
     const user = this.auth.currentUser();
     if (!user || user.isGuest) {
-      this.router.navigate(['/']);
+      if (!id) this.router.navigate(['/']);
       return;
     }
-    const games = await this.gameService.getUserGames(user.uid);
-    this.boardIds = games.map(g => g.id);
+    this.boardIds = await this.gameService.getUserGameIds(user.uid);
+    if (id) {
+      this.index = this.boardIds.indexOf(id);
+      return;
+    }
     if (!this.boardIds.length) {
       this.router.navigate(['/dashboard']);
       return;
@@ -74,6 +76,12 @@ export class PresentComponent implements OnInit, OnDestroy {
     this.rotating.set(true);
     this.open(this.boardIds[0]);
     this.startTimer();
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  onKeydown(event: KeyboardEvent): void {
+    const dir = boardArrowStep(event);
+    if (dir) this.step(dir);
   }
 
   ngOnDestroy(): void {
@@ -203,6 +211,17 @@ export class PresentComponent implements OnInit, OnDestroy {
     const row = g.awayNumbers.findIndex(n => this.matches(s.away, n, this.rows(g) === 5));
     const col = g.homeNumbers.findIndex(n => this.matches(s.home, n, this.cols(g) === 5));
     return row === -1 || col === -1 ? null : `${row}-${col}`;
+  }
+
+  private step(dir: number): void {
+    const n = this.boardIds.length;
+    if (n < 2 || this.index < 0) return;
+    this.index = (this.index + dir + n) % n;
+    this.skips = 0;
+    const id = this.boardIds[this.index];
+    this.open(id);
+    if (this.rotating()) this.startTimer();
+    else this.location.replaceState('/present/' + id);
   }
 
   private startTimer(): void {

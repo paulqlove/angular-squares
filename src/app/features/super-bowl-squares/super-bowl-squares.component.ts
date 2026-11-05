@@ -3,6 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { boardArrowStep } from '../../core/utils/board-keys';
 import { GameService, GameData, EspnLiveSnapshot, BoardSize, getBoardDimensions } from '../../core/services/game.service';
 import { environment } from '../../../environments/environment';
 import { PLAYER_COLORS, normalizePlayerColors } from './utils/player-colors';
@@ -157,6 +158,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   private sanitizationService = inject(SanitizationService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private hostBoardIds: string[] = [];
 
   private gameboardWalkthroughSteps: WalkthroughStep[] = [
     {
@@ -289,6 +291,10 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       this._currentPlayer = user.displayName;
     } else if (user?.email) {
       this._currentPlayer = user.email;
+    }
+
+    if (user && !user.isGuest) {
+      this.gameService.getUserGameIds(user.uid).then(ids => (this.hostBoardIds = ids)).catch(() => {});
     }
 
     this.subscription.add(
@@ -1076,6 +1082,15 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   }
 
 
+
+  @HostListener('document:keydown', ['$event'])
+  onArrowKey(event: KeyboardEvent): void {
+    const dir = boardArrowStep(event);
+    const ids = this.hostBoardIds;
+    const index = ids.indexOf(this.gameId);
+    if (!dir || ids.length < 2 || index < 0) return;
+    this.router.navigate(['/game', ids[(index + dir + ids.length) % ids.length]]);
+  }
 
   @HostListener('document:click')
   onDocumentClick(): void {
