@@ -288,7 +288,7 @@ import {
               </div>
             } @else if (myGames().length === 0) {
               <div class="qs-card mt-5 p-10 text-center">
-                <p class="qs-title text-2xl">No games yet</p>
+                <p class="qs-title text-2xl">No boards yet</p>
                 <p class="mt-2 text-qs-muted">Create a board, share the code, and let everyone pick their squares.</p>
                 <button
                   type="button"
@@ -298,7 +298,7 @@ import {
                   class="qs-btn qs-btn-primary mt-6 disabled:cursor-wait"
                 >
                   <ng-icon name="heroPlus" class="text-base"></ng-icon>
-                  Create your first game
+                  Create your first board
                 </button>
               </div>
             } @else {
@@ -1059,9 +1059,6 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadMyGames();
-    setTimeout(() => {
-      this.walkthroughService.startIfNew('dashboard', this.dashboardWalkthroughSteps);
-    }, 500);
     // Preload gifted passes count for admins
     if (this.isAdmin() && this.currentUser()?.email?.toLowerCase() === 'paulqlove@gmail.com') {
       this.loadGiftedPasses();
