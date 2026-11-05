@@ -1,7 +1,7 @@
 # Angular Squares - TODO
 
 **Based on:** [Enhancement Plan](../ENHANCEMENT_PLAN.md)
-**Last Updated:** February 5, 2026
+**Last Updated:** November 4, 2026
 
 ---
 
@@ -116,3 +116,8 @@ _Session notes and decisions go here_
 | Shared header component | Feb 2026 | Consolidated 3 page headers into AppHeaderComponent, extracted SettingsPanelComponent |
 | Box Score tab | Feb 2026 | ESPN-linked box score with quarter-by-quarter breakdown |
 | Venmo Pay dropdown | Feb 2026 | Replaced dialog with dropdown popover — copy username, open Venmo link |
+| Presentation mode | Nov 2026 | `/present` and `/present/:gameId`: TV board, score, winners, stats, QR; rotation through hosted boards |
+| Arrow-key board switching | Nov 2026 | Left/right between hosted boards on the game page and in presentation mode, slide-in animation |
+| Fix game-not-found on board switch | Nov 2026 | Old board's subscription now removed on route change; leaked state reset |
+| Wrap names on wider boards | Nov 2026 | Square names wrap up to three lines at 640px and up |
+| Docs: Firebase Hosting | Nov 2026 | CLAUDE.md deployment section updated; GitHub Pages is retired |

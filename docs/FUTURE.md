@@ -49,8 +49,7 @@ A separate B2B offering for sports bars and venues:
 - Unlimited boards per season
 - Free game mode (prizes are coupons, gift cards, etc. — no cash, no gambling concerns)
 - Custom branding/theming (colors, logo)
-- Multi-board TV display (large screen only)
-- Branded QR codes
+- Branded QR codes (low chance of happening)
 - Subdomain support (later: joes-bar.quarterscore.com)
 
 **Value prop for bars**: "Capture 50-100 customer emails per season" is worth $200+ in Facebook ad equivalent. The game is free entertainment that brings people back weekly.
@@ -71,13 +70,15 @@ A separate B2B offering for sports bars and venues:
 ## Feature Details
 
 ### QR Code Generator
-QR linking to game URL for bars to print/display. Players scan to join.
+✓ Done for the TV screen: presentation mode shows a QR to the game page ("Scan to join", or "Scan to follow along" once the board is full). A printable, branded QR for bars is a low chance of happening.
 
 ### Bar Branding
 In-app theme picker first (colors, logo upload). Subdomains later (joes-bar.quarterscore.com).
 
 ### Multi-Board TV Display
-Large-screen-only view showing multiple games simultaneously. Designed for bar TVs. Competitors ship a single-board cast-to-TV view; the multi-board view stays the venue feature.
+✓ Done, single-board and rotating (Nov 2026): `/present/:gameId` fills the screen with the player-colored board, live score and clock, Q1-Q4 winners (chips in the winner's color, winning squares ringed, current leader glowing), claimed/open/players-verified stats and a QR. `/present` rotates through the host's boards every 10/20/30/60s, pins a board for 30s after its score changes and skips finished games. Left/right arrow keys switch between hosted boards on the game page and in presentation mode, and the new board slides in. Casting relies on Chrome/Edge Cast, Safari AirPlay or HDMI; a real Cast receiver app is not planned.
+
+Showing several boards at once on one screen was considered and dropped: it doesn't make sense.
 
 ### Custom Quarter Payouts
 Set % per quarter during game creation. Must total 100%. Default remains 20/20/20/40.
