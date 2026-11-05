@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { NgTemplateOutlet } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
 import { GameService, GameListItem, BoardSize } from '../../core/services/game.service';
-import { QuarterSplit, SPLIT_PRESETS, DEFAULT_SPLIT, isValidSplit } from '../../core/plans';
+import { QuarterSplit, SPLIT_PRESETS, DEFAULT_SPLIT, DEFAULT_EMPTY_QUARTER_RULE, EmptyQuarterRule, isValidSplit } from '../../core/plans';
 import { EspnService, EspnGame, SportType, SPORT_CONFIG } from '../../core/services/espn.service';
 import { getTeamLogoByAbbreviation, getTeamColors } from '../content/teams-data';
 import { ToastService } from '../../core/services/toast.service';
@@ -14,6 +14,7 @@ import { WalkthroughService, WalkthroughStep } from '../../core/services/walkthr
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { AppHeaderComponent } from '../../components/ui/app-header/app-header.component';
 import { ShareDialogComponent } from '../../components/ui/share-dialog/share-dialog.component';
+import { EmptyQuarterRuleComponent } from '../../components/ui/empty-quarter-rule/empty-quarter-rule.component';
 import { HelpMenuComponent } from '../../components/ui/help-menu/help-menu.component';
 import { ProfileMenuComponent } from '../../components/ui/profile-menu/profile-menu.component';
 import { HeadroomDirective } from '../../shared/directives/headroom.directive';
@@ -46,7 +47,7 @@ import {
 
 @Component({
     selector: 'app-dashboard',
-    imports: [FormsModule, NgTemplateOutlet, NgIconComponent, AppHeaderComponent, HeadroomDirective, HelpMenuComponent, ProfileMenuComponent, ShareDialogComponent, UpgradePassDialogComponent],
+    imports: [FormsModule, NgTemplateOutlet, NgIconComponent, AppHeaderComponent, HeadroomDirective, HelpMenuComponent, ProfileMenuComponent, ShareDialogComponent, EmptyQuarterRuleComponent, UpgradePassDialogComponent],
     providers: [
         provideIcons({
             heroPlus,
@@ -600,6 +601,9 @@ import {
                   {{ newGameSplitText() }} · {{ newGameSplitValid() ? 'Totals 100%' : 'Must total 100% (' + newGameSplitRemaining() + ' left)' }}
                 </p>
                 }
+                <div class="mt-5">
+                  <app-empty-quarter-rule name="new-empty-quarter-rule" [(value)]="newGameEmptyRule"></app-empty-quarter-rule>
+                </div>
               </section>
 
               <!-- 06 Details -->
@@ -808,6 +812,9 @@ import {
                 />
               </div>
 
+              <!-- Empty quarter rule -->
+              <app-empty-quarter-rule name="dash-edit-empty-quarter-rule" [(value)]="editEmptyRule"></app-empty-quarter-rule>
+
               <!-- Co-host Assignment -->
               <div>
                 <label class="block text-sm font-semibold text-label mb-2">
@@ -1005,6 +1012,7 @@ export class DashboardComponent implements OnInit {
   editGamePrice = 10;
   editSport: SportType | 'custom' = 'nfl';
   editEspnGameId = '';
+  editEmptyRule: EmptyQuarterRule = DEFAULT_EMPTY_QUARTER_RULE;
   editEspnGameSearch = '';
   editCustomHomeTeam = '';
   editCustomAwayTeam = '';
@@ -1037,6 +1045,7 @@ export class DashboardComponent implements OnInit {
   // Quarter split state for game creation
   newGameSplitPct: { [k in keyof QuarterSplit]: number } = { q1: 20, q2: 20, q3: 20, q4: 40 };
   newGameSplitCustomOpen = false;
+  newGameEmptyRule: EmptyQuarterRule = DEFAULT_EMPTY_QUARTER_RULE;
   readonly splitPresets = SPLIT_PRESETS;
   readonly quarters: { key: keyof QuarterSplit; label: string }[] = [
     { key: 'q1', label: 'Q1' }, { key: 'q2', label: 'Q2' }, { key: 'q3', label: 'Q3' }, { key: 'q4', label: 'Q4' }
@@ -1345,7 +1354,8 @@ export class DashboardComponent implements OnInit {
         this.newGamePaymentManager.trim() || undefined,
         sanitizedHostNote || undefined,
         this.newGameBoardSize,
-        quarterSplit
+        quarterSplit,
+        this.newGameEmptyRule
       );
       this.showCreateModal.set(false);
       this.resetCreateForm();
@@ -1379,6 +1389,7 @@ export class DashboardComponent implements OnInit {
     this.newGameBoardSize = 100;
     this.newGameSplitPct = { q1: 20, q2: 20, q3: 20, q4: 40 };
     this.newGameSplitCustomOpen = false;
+    this.newGameEmptyRule = DEFAULT_EMPTY_QUARTER_RULE;
     this.gameNameError.set(false);
   }
 
@@ -1454,6 +1465,7 @@ export class DashboardComponent implements OnInit {
     const isCustomGame = !game.espnEventId;
     this.editSport = isCustomGame ? 'custom' : (game.espnSport || 'nfl');
     this.editEspnGameId = game.espnEventId || '';
+    this.editEmptyRule = game.emptyQuarterRule ?? DEFAULT_EMPTY_QUARTER_RULE;
     this.editCustomHomeTeam = game.homeTeam || '';
     this.editCustomAwayTeam = game.awayTeam || '';
     this.managerSearchQuery = '';
@@ -1619,6 +1631,7 @@ export class DashboardComponent implements OnInit {
         name: sanitizedName,
         pricePerSquare: sanitizedPrice,
         hostNote: sanitizedHostNote,
+        emptyQuarterRule: this.editEmptyRule,
         espnEventId: this.editEspnGameId || null,
         espnSport: this.editEspnGameId && this.editSport !== 'custom' ? this.editSport : null,
         homeTeam,
@@ -1635,6 +1648,7 @@ export class DashboardComponent implements OnInit {
           name: sanitizedName,
           pricePerSquare: sanitizedPrice,
           hostNote: sanitizedHostNote,
+          emptyQuarterRule: this.editEmptyRule,
           espnEventId: this.editEspnGameId || undefined,
           espnSport: this.editEspnGameId && this.editSport !== 'custom' ? this.editSport : undefined,
           homeTeam,

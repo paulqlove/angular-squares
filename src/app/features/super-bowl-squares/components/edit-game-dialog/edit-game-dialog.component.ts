@@ -2,7 +2,8 @@ import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, HostL
 import { FormsModule } from '@angular/forms';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroXMark, heroTrash, heroLockClosed } from '@ng-icons/heroicons/outline';
-import { DEFAULT_SPLIT, QuarterSplit, SPLIT_PRESETS, isValidSplit } from '../../../../core/plans';
+import { DEFAULT_EMPTY_QUARTER_RULE, DEFAULT_SPLIT, EmptyQuarterRule, QuarterSplit, SPLIT_PRESETS, isValidSplit } from '../../../../core/plans';
+import { EmptyQuarterRuleComponent } from '../../../../components/ui/empty-quarter-rule/empty-quarter-rule.component';
 
 export interface EditGameValues {
   awayTeam: string;
@@ -10,12 +11,13 @@ export interface EditGameValues {
   pricePerSquare: number;
   hostNote: string;
   quarterSplit: QuarterSplit | null;
+  emptyQuarterRule: EmptyQuarterRule;
 }
 
 /** Owner-only "Edit game" popup. Edits a draft and saves once. */
 @Component({
   selector: 'app-edit-game-dialog',
-  imports: [FormsModule, NgIconComponent],
+  imports: [FormsModule, NgIconComponent, EmptyQuarterRuleComponent],
   providers: [provideIcons({ heroXMark, heroTrash, heroLockClosed })],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
@@ -98,6 +100,8 @@ export interface EditGameValues {
               }
             </div>
 
+            <app-empty-quarter-rule name="edit-empty-quarter-rule" [(value)]="draft.emptyQuarterRule"></app-empty-quarter-rule>
+
             <div class="rounded-inner border border-qs-line p-4">
               <p class="qs-label text-qs-bad">Danger zone</p>
               <p class="mt-1 text-sm text-qs-muted">Clears squares, numbers, scores and settings. This can't be undone.</p>
@@ -123,7 +127,7 @@ export class EditGameDialogComponent implements OnChanges {
   @Input() canCustomSplit = false;
   /** Splits lock once numbers are drawn. */
   @Input() splitLocked = false;
-  @Input() values: EditGameValues = { awayTeam: '', homeTeam: '', pricePerSquare: 10, hostNote: '', quarterSplit: null };
+  @Input() values: EditGameValues = { awayTeam: '', homeTeam: '', pricePerSquare: 10, hostNote: '', quarterSplit: null, emptyQuarterRule: DEFAULT_EMPTY_QUARTER_RULE };
 
   @Output() closed = new EventEmitter<void>();
   @Output() saved = new EventEmitter<EditGameValues>();

@@ -10,7 +10,7 @@ import { environment } from '../../../environments/environment';
 import { PLAYER_COLORS, normalizePlayerColors } from './utils/player-colors';
 import { PreviewRole } from '../../core/services/role-preview.service';
 import { PlanService } from '../../core/services/plan.service';
-import { QuarterSplit, splitFractions } from '../../core/plans';
+import { DEFAULT_EMPTY_QUARTER_RULE, EmptyQuarterRule, QuarterSplit, splitFractions } from '../../core/plans';
 import { AdSlotComponent } from '../../components/ui/ad-slot/ad-slot.component';
 import { AuthService } from '../../core/services/auth.service';
 import { EspnService, EspnGame, SportType } from '../../core/services/espn.service';
@@ -116,6 +116,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   playerUserIds: { [name: string]: string } = {};
   totalPot: number = 0;
   quarterSplit: QuarterSplit | null = null;
+  emptyQuarterRule: EmptyQuarterRule = DEFAULT_EMPTY_QUARTER_RULE;
   adFreeUntil = 0;
   private adStampDone = false;
   availableColors = PLAYER_COLORS;
@@ -370,6 +371,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           this.hostNote = data.hostNote || '';
           this.quarterSplit = data.quarterSplit || null;
           this.quarterPayouts = splitFractions(data.quarterSplit);
+          this.emptyQuarterRule = data.emptyQuarterRule || DEFAULT_EMPTY_QUARTER_RULE;
           this.adFreeUntil = data.adFreeUntil || 0;
           this.paidPlayers = new Set(data.paidPlayers || []);
           this.playerColors = normalizePlayerColors(data.playerColors || {});
@@ -1043,8 +1045,10 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     try {
       await this.gameService.updateGame(this.gameId, {
         homeTeam, awayTeam, hostNote, pricePerSquare: price,
+        emptyQuarterRule: values.emptyQuarterRule,
         ...(canSplit ? { quarterSplit: split } : {})
       });
+      this.emptyQuarterRule = values.emptyQuarterRule;
       this.quarterSplit = split;
       this.quarterPayouts = splitFractions(split);
       this.homeTeam = homeTeam;
@@ -1056,6 +1060,22 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     } catch {
       this.toastService.error('Failed to save game. Please try again.');
     }
+  }
+
+  /**
+   * How many quarters are finished (always the first N). An unclaimed square only settles a quarter once it is over.
+   * Linked boards follow the feed's period, because the poller writes the running total into later quarters.
+   */
+  completedQuarterCount(): number {
+    if (this.isGameOver()) return 4;
+    if (this.espnEventId) return Math.max(0, Math.min(3, (this.linkedEspnGame()?.period ?? 0) - 1));
+    const quarters = ['q1', 'q2', 'q3', 'q4'] as const;
+    let lastPlayed = -1;
+    quarters.forEach((quarter, i) => {
+      const score = this.scores[quarter];
+      if (score && (score.home > 0 || score.away > 0)) lastPlayed = i;
+    });
+    return lastPlayed + 1;
   }
 
   /** Same rule as Presentation mode: see isGameOver in core/utils/quarter-label.ts. */

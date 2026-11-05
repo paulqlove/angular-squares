@@ -17,7 +17,7 @@ import { environment } from '../../../environments/environment';
 import { ActiveBoardLimitError } from '../errors/active-board-limit.error';
 import { EspnService } from './espn.service';
 import { RolePreviewService } from './role-preview.service';
-import { Entitlement, PLANS, QuarterSplit, isActive } from '../plans';
+import { DEFAULT_EMPTY_QUARTER_RULE, Entitlement, EmptyQuarterRule, PLANS, QuarterSplit, isActive, isEmptyQuarterRule } from '../plans';
 import { AuthService } from './auth.service';
 import {
   BoardActivity,
@@ -92,6 +92,8 @@ export interface GameData {
   adFreeUntil?: number;
   /** Custom per-quarter split in tenths of a percent (paid plans). */
   quarterSplit?: QuarterSplit | null;
+  /** What an unclaimed winning square does to that quarter's points. Missing means the default. */
+  emptyQuarterRule?: EmptyQuarterRule;
 }
 
 export interface GameListItem {
@@ -113,6 +115,7 @@ export interface GameListItem {
   espnEventId?: string;
   espnSport?: SportType;
   hostNote?: string;
+  emptyQuarterRule?: EmptyQuarterRule;
   confirmedCount: number;
 }
 
@@ -306,7 +309,8 @@ export class GameService {
     managerEmail?: string,
     hostNote?: string,
     boardSize?: BoardSize,
-    quarterSplit?: QuarterSplit | null
+    quarterSplit?: QuarterSplit | null,
+    emptyQuarterRule?: EmptyQuarterRule
   ): Promise<string> {
     if (!this.isBrowser) throw new Error('Cannot create game on server');
     if (this.authService.blockPreviewWrite()) throw new Error('Preview only');
@@ -346,6 +350,7 @@ export class GameService {
       paidPlayers: [],
       adFreeUntil: await this.adFreeUntilFor(ownerId),
       quarterSplit: quarterSplit || null,
+      emptyQuarterRule: emptyQuarterRule || DEFAULT_EMPTY_QUARTER_RULE,
       ...(espnEventId ? { espnEventId } : {}),
       ...(espnSport ? { espnSport } : {}),
       ...(managerEmail ? { managerEmail } : {})
@@ -433,6 +438,7 @@ export class GameService {
           managerName: rawData.managerName || undefined,
           adFreeUntil: rawData.adFreeUntil || 0,
           quarterSplit: rawData.quarterSplit || null,
+          emptyQuarterRule: isEmptyQuarterRule(rawData.emptyQuarterRule) ? rawData.emptyQuarterRule : undefined,
           playerUserIds: rawData.playerUserIds || undefined
         };
 
@@ -499,6 +505,9 @@ export class GameService {
     }
     if (data.quarterSplit !== undefined) {
       updates[`${prefix}/quarterSplit`] = data.quarterSplit;
+    }
+    if (data.emptyQuarterRule !== undefined) {
+      updates[`${prefix}/emptyQuarterRule`] = data.emptyQuarterRule;
     }
     if (data.espnEventId !== undefined) {
       const nextId = data.espnEventId || null;
@@ -584,6 +593,7 @@ export class GameService {
         managerName: rawData.managerName || undefined,
           adFreeUntil: rawData.adFreeUntil || 0,
           quarterSplit: rawData.quarterSplit || null,
+          emptyQuarterRule: isEmptyQuarterRule(rawData.emptyQuarterRule) ? rawData.emptyQuarterRule : undefined,
         playerUserIds: rawData.playerUserIds || undefined
       };
     }
@@ -645,6 +655,7 @@ export class GameService {
           espnEventId: game.espnEventId || undefined,
           espnSport: game.espnSport || undefined,
           hostNote: game.hostNote,
+          emptyQuarterRule: isEmptyQuarterRule(game.emptyQuarterRule) ? game.emptyQuarterRule : undefined,
           confirmedCount
         });
       }

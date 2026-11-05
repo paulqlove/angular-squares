@@ -87,3 +87,72 @@ export function splitFractions(split: QuarterSplit | null | undefined): { q1: nu
   const s = isValidSplit(split) ? split : DEFAULT_SPLIT;
   return { q1: s.q1 / 1000, q2: s.q2 / 1000, q3: s.q3 / 1000, q4: s.q4 / 1000 };
 }
+
+/**
+ * What happens to a quarter's points when nobody holds the winning square.
+ * final: they roll into Q4. If Q4 has no winner either, Q4's points are split among the other quarters.
+ * redistribute: they are split among the other quarters in proportion to those quarters' shares.
+ */
+export type EmptyQuarterRule = 'final' | 'redistribute';
+
+export const DEFAULT_EMPTY_QUARTER_RULE: EmptyQuarterRule = 'final';
+
+export const EMPTY_QUARTER_RULES: { id: EmptyQuarterRule; label: string; description: string }[] = [
+  {
+    id: 'final',
+    label: 'Roll to Q4',
+    description: "An empty quarter's points go to Q4. If Q4 has no winner either, Q4's points are split among the other quarters."
+  },
+  {
+    id: 'redistribute',
+    label: 'Split across quarters',
+    description: "An empty quarter's points are split among the other quarters, in proportion to their shares."
+  }
+];
+
+export function isEmptyQuarterRule(value: unknown): value is EmptyQuarterRule {
+  return value === 'final' || value === 'redistribute';
+}
+
+type QuarterKey = 'q1' | 'q2' | 'q3' | 'q4';
+const QUARTER_KEYS: QuarterKey[] = ['q1', 'q2', 'q3', 'q4'];
+
+/**
+ * Each quarter's share of the board after empty quarters are settled.
+ * `shares` are fractions (see splitFractions); `empty` marks quarters that are finished with no winner.
+ * Quarters with a 0 share never receive points. Points with nowhere to go stay unawarded.
+ */
+export function effectiveQuarterShares(
+  shares: { [k in QuarterKey]: number },
+  empty: { [k in QuarterKey]: boolean },
+  rule: EmptyQuarterRule | null | undefined
+): { [k in QuarterKey]: number } {
+  const out = { ...shares };
+  const emptyKeys = QUARTER_KEYS.filter(k => empty[k] && shares[k] > 0);
+  if (emptyKeys.length === 0) return out;
+
+  const spread = (pool: number, among: QuarterKey[]): void => {
+    const base = among.reduce((sum, k) => sum + shares[k], 0);
+    if (base <= 0) return;
+    for (const k of among) out[k] += pool * (shares[k] / base);
+  };
+  const live = (keys: QuarterKey[]): QuarterKey[] => keys.filter(k => !empty[k] && shares[k] > 0);
+
+  if ((rule ?? DEFAULT_EMPTY_QUARTER_RULE) === 'final' && shares.q4 > 0) {
+    const early = emptyKeys.filter(k => k !== 'q4');
+    const pool = early.reduce((sum, k) => sum + shares[k], 0);
+    early.forEach(k => (out[k] = 0));
+    if (!empty.q4) {
+      out.q4 += pool;
+    } else {
+      out.q4 = 0;
+      spread(pool + shares.q4, live(['q1', 'q2', 'q3']));
+    }
+    return out;
+  }
+
+  const pool = emptyKeys.reduce((sum, k) => sum + shares[k], 0);
+  emptyKeys.forEach(k => (out[k] = 0));
+  spread(pool, live(QUARTER_KEYS));
+  return out;
+}

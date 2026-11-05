@@ -201,7 +201,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
         heading: 'Overtime, empty squares, and ties',
         paragraphs: [
           'Agree on the rules before kickoff and post them where the group can see them. The usual house rule is that overtime points count toward the final score, so the last square uses the score when the game actually ends.',
-          'If a winning square was never claimed, there is no name on it. Decide ahead of time whether that quarter is skipped or redrawn. If a quarter ends on the same digits as the quarter before, the same square wins again.'
+          'If a winning square was never claimed, there is no name on it and that quarter has no winner. QuarterScore moves the quarter\'s points using the rule the host picked: roll them into Q4, or split them across the other quarters. If a quarter ends on the same digits as the quarter before, the same square wins again.'
         ],
         bullets: [
           'Draw numbers only after the board is as full as you want it.',
@@ -254,7 +254,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       },
       {
         question: 'What if the board is not full?',
-        answer: 'Empty squares can still be the winning square if the score lands there. Decide in advance what an unclaimed square means for that quarter. You can also leave the board unlocked until more people claim a square.'
+        answer: "Empty squares can still be the winning square if the score lands there. When that happens the quarter has no winner, and QuarterScore moves its points for you. The host picks the rule when creating the board and can change it later from Edit game: roll the points into Q4 (if Q4 has no winner either, Q4's points are split among the other quarters), or split them across the other quarters. You can also leave the board unlocked until more people claim a square."
       },
       {
         question: 'What if the score does not change in a quarter?',

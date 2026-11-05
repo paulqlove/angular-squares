@@ -92,6 +92,7 @@ games/{gameId}/
   playerColors, winners, paidPlayers
   homeTeam, awayTeam, hostNote (free-text host note, max 140)
   isLocked, isRandomized, pricePerSquare
+  quarterSplit (optional custom split), emptyQuarterRule: 'final' | 'redistribute' (default 'final')
   espnEventId: string (optional - links to ESPN game for live scores)
   espnLive: clock, period, status, per-quarter linescores (written by Cloud Functions)
 
@@ -107,6 +108,7 @@ liveGames/{espnId}/{boardId}/
 - **Square selection**: Key format is `"row-col"` (e.g., "3-7")
 - **Winner calculation**: Match last digit of each team's score to row/column numbers
 - **Points split**: Q1: 20%, Q2: 20%, Q3: 20%, Q4: 40% of the board total (points, never money)
+- **Empty quarters**: a finished quarter whose winning square is unclaimed moves its points per `emptyQuarterRule` (`effectiveQuarterShares` in `core/plans.ts`). `final` rolls them into Q4, and an empty Q4 is split among the other quarters. `redistribute` splits them across the other quarters in proportion to their shares. `database.rules.json` validates the field; CI deploys hosting only, so deploy rules separately
 - **Probability heatmap**: Historical NFL data in `features/super-bowl-squares/utils/probability.utils.ts`
 
 ## ESPN Live Scores

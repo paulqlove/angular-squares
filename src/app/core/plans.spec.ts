@@ -1,4 +1,4 @@
-import { DAY_MS, DEFAULT_SPLIT, PLANS, applyPurchase, daysLeft, extendExpiry, isValidSplit, seasonPriceFor, splitFractions } from './plans';
+import { DAY_MS, DEFAULT_SPLIT, PLANS, effectiveQuarterShares, isEmptyQuarterRule, applyPurchase, daysLeft, extendExpiry, isValidSplit, seasonPriceFor, splitFractions } from './plans';
 
 const NOW = Date.UTC(2026, 10, 2);
 
@@ -49,5 +49,62 @@ describe('plans', () => {
   it('falls back to 20/20/20/40 for a missing or invalid split', () => {
     expect(splitFractions(undefined)).toEqual({ q1: 0.2, q2: 0.2, q3: 0.2, q4: 0.4 });
     expect(splitFractions({ q1: 250, q2: 250, q3: 250, q4: 250 })).toEqual({ q1: 0.25, q2: 0.25, q3: 0.25, q4: 0.25 });
+  });
+});
+
+describe('effectiveQuarterShares', () => {
+  const classic = splitFractions(null);
+  const none = { q1: false, q2: false, q3: false, q4: false };
+  const round = (s: { q1: number; q2: number; q3: number; q4: number }) =>
+    [s.q1, s.q2, s.q3, s.q4].map(v => Math.round(v * 1000) / 1000);
+
+  it('changes nothing when no quarter is empty', () => {
+    expect(effectiveQuarterShares(classic, none, 'final')).toEqual(classic);
+    expect(effectiveQuarterShares(classic, none, 'redistribute')).toEqual(classic);
+  });
+
+  it('final: an empty early quarter rolls into Q4', () => {
+    expect(round(effectiveQuarterShares(classic, { ...none, q2: true }, 'final'))).toEqual([0.2, 0, 0.2, 0.6]);
+    expect(round(effectiveQuarterShares(classic, { ...none, q1: true, q3: true }, 'final'))).toEqual([0, 0.2, 0, 0.8]);
+  });
+
+  it('final: an empty Q4 is split among the other quarters, including rolled points', () => {
+    expect(round(effectiveQuarterShares(classic, { ...none, q4: true }, 'final'))).toEqual([0.333, 0.333, 0.333, 0]);
+    expect(round(effectiveQuarterShares(classic, { ...none, q1: true, q4: true }, 'final'))).toEqual([0, 0.5, 0.5, 0]);
+  });
+
+  it('final: nothing is awarded when every quarter is empty', () => {
+    expect(round(effectiveQuarterShares(classic, { q1: true, q2: true, q3: true, q4: true }, 'final'))).toEqual([0, 0, 0, 0]);
+  });
+
+  it('redistribute: empty quarters are spread in proportion to the others', () => {
+    expect(round(effectiveQuarterShares(classic, { ...none, q1: true }, 'redistribute'))).toEqual([0, 0.25, 0.25, 0.5]);
+    expect(round(effectiveQuarterShares(classic, { ...none, q4: true }, 'redistribute'))).toEqual([0.333, 0.333, 0.333, 0]);
+  });
+
+  it('a quarter that has not been played yet still receives points', () => {
+    expect(round(effectiveQuarterShares(classic, { ...none, q1: true }, 'redistribute'))[3]).toBe(0.5);
+  });
+
+  it('quarters with a 0 share are ignored and never receive points', () => {
+    const halfFinal = splitFractions({ q1: 0, q2: 500, q3: 0, q4: 500 });
+    expect(round(effectiveQuarterShares(halfFinal, { ...none, q1: true, q3: true }, 'final'))).toEqual([0, 0.5, 0, 0.5]);
+    expect(round(effectiveQuarterShares(halfFinal, { ...none, q2: true }, 'redistribute'))).toEqual([0, 0, 0, 1]);
+  });
+
+  it('final falls back to redistribute when Q4 has no share', () => {
+    const noFinal = splitFractions({ q1: 300, q2: 300, q3: 400, q4: 0 });
+    expect(round(effectiveQuarterShares(noFinal, { ...none, q1: true }, 'final'))).toEqual([0, 0.429, 0.571, 0]);
+  });
+
+  it('a missing rule behaves like final', () => {
+    expect(effectiveQuarterShares(classic, { ...none, q2: true }, undefined)).toEqual(effectiveQuarterShares(classic, { ...none, q2: true }, 'final'));
+  });
+
+  it('only accepts the two known rules', () => {
+    expect(isEmptyQuarterRule('final')).toBe(true);
+    expect(isEmptyQuarterRule('redistribute')).toBe(true);
+    expect(isEmptyQuarterRule('refund')).toBe(false);
+    expect(isEmptyQuarterRule(null)).toBe(false);
   });
 });

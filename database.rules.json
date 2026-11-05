@@ -120,6 +120,9 @@
         "adFreeUntil": {
           ".validate": "newData.isNumber() && newData.val() >= 0 && (newData.val() == 0 || root.child('admins').child(auth.uid).val() == true || (root.child('entitlements').child(auth.uid).child('expiresAt').isNumber() && newData.val() <= root.child('entitlements').child(auth.uid).child('expiresAt').val()) || (auth.token.email_verified == true && root.child('giftedSeasonPass').child(auth.token.email.toLowerCase().replace('.', ',')).child('expiresAt').isNumber() && newData.val() <= root.child('giftedSeasonPass').child(auth.token.email.toLowerCase().replace('.', ',')).child('expiresAt').val()))"
         },
+        "emptyQuarterRule": {
+          ".validate": "newData.isString() && (newData.val() == 'final' || newData.val() == 'redistribute')"
+        },
         "quarterSplit": {
           ".validate": "newData.hasChildren(['q1', 'q2', 'q3', 'q4']) && newData.child('q1').val() + newData.child('q2').val() + newData.child('q3').val() + newData.child('q4').val() == 1000 && (root.child('admins').child(auth.uid).val() == true || (root.child('entitlements').child(auth.uid).child('expiresAt').isNumber() && root.child('entitlements').child(auth.uid).child('expiresAt').val() > now) || (auth.token.email_verified == true && root.child('giftedSeasonPass').child(auth.token.email.toLowerCase().replace('.', ',')).child('expiresAt').isNumber() && root.child('giftedSeasonPass').child(auth.token.email.toLowerCase().replace('.', ',')).child('expiresAt').val() > now))",
           "q1": {
