@@ -275,6 +275,9 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   private pollingInterval: ReturnType<typeof setInterval> | null = null;
   private liveIndexEnsuredFor: string | null = null;
   private latestEspnLive: EspnLiveSnapshot | null = null;
+  /** Event id the summary feed says is final. Past games drop off the scoreboard feed, so this covers them. */
+  private linkedFinalEventId = signal<string | null>(null);
+  private finalCheckedFor: string | null = null;
 
   // Number reveal animation state
   private platformId = inject(PLATFORM_ID);
@@ -1083,7 +1086,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     return isGameOver({
       espnEventId: this.espnEventId,
       espnLive: this.latestEspnLive,
-      linkedStatus: this.linkedEspnGame()?.status,
+      linkedStatus: this.linkedEspnGame()?.status ?? (this.espnEventId && this.linkedFinalEventId() === this.espnEventId ? 'post' : null),
       q4: this.scores.q4,
       q4Winner: this.winners['q4']
     });
@@ -1310,6 +1313,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     if (this.destroyed || this.espnEventId !== requestedId) return;
     if (environment.serverScoring && this.latestEspnLive) return;
     this.linkedEspnGame.set(game);
+    if (!game) void this.checkLinkedEventFinal(requestedId);
 
     if (!poll || environment.serverScoring) return;
 
@@ -1318,6 +1322,15 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     } else {
       this.stopPolling();
     }
+  }
+
+  private async checkLinkedEventFinal(eventId: string): Promise<void> {
+    if (this.finalCheckedFor === eventId) return;
+    this.finalCheckedFor = eventId;
+    const final = await this.espnService.isEventFinal(eventId, this.espnSport);
+    if (this.destroyed || this.espnEventId !== eventId) return;
+    if (final === null) this.finalCheckedFor = null;
+    else if (final) this.linkedFinalEventId.set(eventId);
   }
 
   async syncFromEspn(): Promise<void> {
