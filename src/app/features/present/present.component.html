@@ -8,15 +8,17 @@
           <button type="button" class="qs-tab px-3" role="tab" [attr.aria-selected]="interval() === s" (click)="setInterval(s)">{{ s }}s</button>
         }
       }
-      @if (gameId() && !rotating()) {
-        <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" (click)="copyLink()">Copy TV link</button>
+      @if (isHost()) {
+        @if (gameId() && !rotating()) {
+          <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" (click)="copyLink()">Copy TV link</button>
+        }
+        <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" (click)="showHelp.set(!showHelp())">Show on TV</button>
+        <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" (click)="exit()">Exit</button>
       }
-      <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" (click)="showHelp.set(!showHelp())">Show on TV</button>
-      <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" (click)="exit()">Exit</button>
     </div>
   </div>
 
-  @if (showHelp()) {
+  @if (isHost() && showHelp()) {
     <div class="qs-card mb-3 shrink-0 p-4 text-sm">
       <p class="mb-2 font-semibold">Show this on your TV</p>
       <ul class="space-y-1">

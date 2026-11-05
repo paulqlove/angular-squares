@@ -48,6 +48,10 @@ export class PresentComponent implements OnInit, OnDestroy {
     }
     return colors;
   });
+  protected readonly isHost = computed(() => {
+    const user = this.auth.currentUser();
+    return !!user && !user.isGuest;
+  });
   protected readonly interval = signal<number>(20);
   protected readonly qr = signal<string>('');
   protected readonly rotating = signal<boolean>(false);
