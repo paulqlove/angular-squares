@@ -207,7 +207,7 @@ interface Feature {
               >
                 <img
                   [src]="getLogoUrl(team)"
-                  [alt]="team.name"
+                  alt=""
                   class="absolute inset-0 m-auto h-3/4 w-3/4 object-contain drop-shadow-md"
                   loading="lazy"
                 >
