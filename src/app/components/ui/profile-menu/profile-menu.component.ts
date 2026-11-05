@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, HostListener, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, ElementRef, Input, Output, EventEmitter, HostListener, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
@@ -24,7 +24,7 @@ import { PlanService } from '../../../core/services/plan.service';
         <div class="relative" [attr.data-walkthrough]="walkthroughTarget">
       <button
         type="button"
-        (click)="toggleProfileDropdown($event)"
+        (click)="toggleProfileDropdown()"
         [attr.aria-expanded]="showProfileDropdown()"
         aria-haspopup="true"
         aria-controls="profile-menu"
@@ -48,7 +48,6 @@ import { PlanService } from '../../../core/services/plan.service';
         <div
           id="profile-menu"
           class="absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-card border border-qs-line bg-qs-panel text-qs-ink shadow-pop animate-menu-in"
-          (click)="$event.stopPropagation()"
         >
           <div class="flex items-center gap-3 border-b border-qs-line p-4">
             @if (currentUser()?.photoURL) {
@@ -171,9 +170,12 @@ export class ProfileMenuComponent {
     { value: 'dark', label: 'Dark', icon: 'heroMoon' }
   ];
 
-  @HostListener('document:click')
-  onDocumentClick(): void {
-    this.showProfileDropdown.set(false);
+  private host = inject(ElementRef<HTMLElement>);
+
+  /** Closes on any click outside this menu, including a click on another menu's button. */
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event): void {
+    if (!this.host.nativeElement.contains(event.target as Node)) this.showProfileDropdown.set(false);
   }
 
   @HostListener('document:keydown.escape')
@@ -181,8 +183,7 @@ export class ProfileMenuComponent {
     this.showProfileDropdown.set(false);
   }
 
-  toggleProfileDropdown(event: Event): void {
-    event.stopPropagation();
+  toggleProfileDropdown(): void {
     const isOpening = !this.showProfileDropdown();
     this.showProfileDropdown.set(isOpening);
     if (isOpening) {

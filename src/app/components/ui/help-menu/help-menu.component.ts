@@ -1,4 +1,4 @@
-import { Component, EventEmitter, HostListener, Input, Output, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, Output, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroBookOpen, heroPlayCircle, heroQuestionMarkCircle, heroShare } from '@ng-icons/heroicons/outline';
@@ -18,7 +18,7 @@ import { heroBookOpen, heroPlayCircle, heroQuestionMarkCircle, heroShare } from 
     <div class="relative">
       <button
         type="button"
-        (click)="toggle($event)"
+        (click)="toggle()"
         [attr.aria-expanded]="open()"
         aria-haspopup="true"
         aria-controls="help-menu"
@@ -33,7 +33,6 @@ import { heroBookOpen, heroPlayCircle, heroQuestionMarkCircle, heroShare } from 
         <div
           id="help-menu"
           class="absolute right-0 z-50 mt-2 w-64 max-w-[calc(100vw-2rem)] overflow-hidden rounded-card border border-qs-line bg-qs-panel p-2 text-qs-ink shadow-pop animate-menu-in"
-          (click)="$event.stopPropagation()"
         >
           <button type="button" (click)="open.set(false); tour.emit()" class="qs-btn qs-btn-ghost w-full justify-start text-qs-ink">
             <ng-icon name="heroPlayCircle" class="text-base"></ng-icon>
@@ -66,9 +65,12 @@ export class HelpMenuComponent {
 
   open = signal(false);
 
-  @HostListener('document:click')
-  onDocumentClick(): void {
-    this.open.set(false);
+  private host = inject(ElementRef<HTMLElement>);
+
+  /** Closes on any click outside this menu, including a click on another menu's button. */
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event): void {
+    if (!this.host.nativeElement.contains(event.target as Node)) this.open.set(false);
   }
 
   @HostListener('document:keydown.escape')
@@ -76,8 +78,7 @@ export class HelpMenuComponent {
     this.open.set(false);
   }
 
-  toggle(event: Event): void {
-    event.stopPropagation();
+  toggle(): void {
     this.open.set(!this.open());
   }
 }
