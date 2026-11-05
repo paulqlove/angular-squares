@@ -338,6 +338,19 @@ html, body {
 .qs-on-navy :where(a, button, input, [tabindex]):focus-visible { outline-color: #f3efe8; }
 
 /* Toast animation */
+/* Board switch (arrow keys): the new board slides in from the side the arrow points to */
+@keyframes slide-in-from-right {
+  from { opacity: 0; transform: translateX(4rem); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes slide-in-from-left {
+  from { opacity: 0; transform: translateX(-4rem); }
+  to { opacity: 1; transform: none; }
+}
+.slide-in-from-right { animation: slide-in-from-right 0.35s ease-out both; }
+.slide-in-from-left { animation: slide-in-from-left 0.35s ease-out both; }
+body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
+
 @keyframes toast-in {
   from {
     opacity: 0;
