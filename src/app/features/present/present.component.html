@@ -8,6 +8,9 @@
           <button type="button" class="qs-tab px-3" role="tab" [attr.aria-selected]="interval() === s" (click)="setInterval(s)">{{ s }}s</button>
         }
       }
+      @if (gameId() && !rotating()) {
+        <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" (click)="copyLink()">Copy TV link</button>
+      }
       <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" (click)="showHelp.set(!showHelp())">Show on TV</button>
       <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" (click)="exit()">Exit</button>
     </div>
@@ -20,6 +23,7 @@
         <li><strong>Chrome or Edge:</strong> open the browser menu, choose <em>Cast</em>, pick your TV, then set Sources to <em>Cast tab</em>. Your computer and TV must be on the same Wi-Fi.</li>
         <li><strong>Safari on Mac:</strong> open Control Center, choose <em>Screen Mirroring</em>, then pick your Apple TV or AirPlay TV.</li>
         <li><strong>Any browser:</strong> connect your computer to the TV with an HDMI cable, or open this page in your TV's web browser.</li>
+        <li><strong>No mirroring needed:</strong> tap <em>Copy TV link</em>, then open that link in any browser on the TV or another device. It shows this board live and needs no sign-in.</li>
       </ul>
     </div>
   }

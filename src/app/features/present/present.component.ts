@@ -3,6 +3,7 @@ import { Location, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
+import { ToastService } from '../../core/services/toast.service';
 import { GameData, GameService, getBoardDimensions } from '../../core/services/game.service';
 import { boardArrowStep } from '../../core/utils/board-keys';
 import { isGameOver, quarterLabel } from '../../core/utils/quarter-label';
@@ -28,6 +29,7 @@ export class PresentComponent implements OnInit, OnDestroy {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
 
   protected readonly intervals: number[] = [10, 20, 30, 60];
   protected readonly quarters = QUARTERS;
@@ -105,6 +107,16 @@ export class PresentComponent implements OnInit, OnDestroy {
 
   protected claimed(): number {
     return Object.keys(this.game()?.selectedSquares ?? {}).length;
+  }
+
+  protected async copyLink(): Promise<void> {
+    const url = `${location.origin}/present/${this.gameId()}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      this.toast.success('TV link copied');
+    } catch {
+      this.toast.error('Could not copy. Open the board and copy the address bar.');
+    }
   }
 
   protected exit(): void {
