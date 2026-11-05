@@ -20,6 +20,27 @@ Source of truth: `src/app/core/plans.ts` (prices, lengths, limits). Research and
 - Hosts stamp `games/{id}/adFreeUntil`; rules cap it at their real pass so viewers can trust it. Ads stay off until `environment.adsEnabled`; block gambling ad categories when a network is added.
 - Not yet built: checkout, Season Pass organizer tools (email list, notifications, export). Coupons are shelved.
 
+### Proposed: Free + one $5.99 pass (not decided, Nov 4, 2026)
+
+Idea (Paul and his brother): drop the Week Pass, the $29.99 Season Pass and the stacking/upgrade-credit logic. Two plans:
+
+| | Free | Pass ($5.99, one year) |
+|---|---|---|
+| Active boards | 1 | about 10 |
+| Live scoring | Manual scores | Yes |
+| Presentation mode | No | Yes |
+| Custom quarter split | No | Yes |
+
+Sold as a one-time expiring pass (not an auto-renewing subscription). Name it "Season Pass" or "Host Pass", never "paid" in the UI. Guests always join and play for free; only hosts pay. Ad-free is not a selling point while `adsEnabled` is off. Keep the list to these four perks to avoid feature creep. Until checkout exists, everything stays free for everyone.
+
+Why $5.99: it brings back the one-party Super Bowl host as a buyer (live scoring plus TV presentation is what they want) and fits "simple and low". Operating cost is low and mostly independent of paying users: the live-score function hits ESPN once per league per minute.
+
+Input gathered earlier for a single ~$20 pass (CFO and skeptic reviewed that version, not this one):
+- **CFO:** Stripe nets $5.52 on $5.99 (7.8% fees) versus $19.11 on $19.99 (4.4%). At $5.99 you need about 3.5x the payers to match $19.99 revenue. Break-even is about 54 passes if costs are around $300/yr (assumption: confirm real Firebase and domain bills). Before launch: sales tax on digital goods (Stripe Tax or a CPA), Stripe keeps its $0.30 on refunds (short refund window), set aside income tax.
+- **Skeptic:** TEST-SMALL. Payers are hosts who hit the limits; the paid perks must feel worth it; sell the pass as "2026 Season Pass, through Mar 2027" because a 365-day year is mostly dead time. Biggest risk is that nobody pays at any price.
+- **Test before building checkout:** fake-door on the dashboard when a host hits the 1-board limit or tries live scoring or presentation: "Season Pass $5.99 · Notify me" (reuse notify-me signups). Run Nov 5, 2026 to Jan 15, 2027. Success is at least 10% click-through and at least 15 clicks; under 5% means don't build checkout.
+- **Open:** gating live scoring is the biggest bet (best hook, but free becomes manual scoring); exact board count; changing plans is a one-line edit in `plans.ts`.
+
 ### Bar/Venue Tier ($49-99/season)
 
 A separate B2B offering for sports bars and venues:
