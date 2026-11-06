@@ -211,6 +211,9 @@ export class GameService {
     if (!this.isBrowser) {
       throw new Error('Cannot check boards on server');
     }
+    // The View-as stand-in has no real account to read, so it is a host with no boards.
+    const previewRole = this.authService.previewRole();
+    if (previewRole === 'player' || previewRole === 'guest') return;
     const limit = await this.boardLimit(ownerId);
     if (limit === Number.POSITIVE_INFINITY) return;
     if ((await this.activeBoardCount(ownerId)) >= limit) {
