@@ -794,3 +794,15 @@ describe('emptyQuarterRule', () => {
     await assertFails(set(env.authenticatedContext('host'), 'games/new001', baseGame({ ownerId: 'host', emptyQuarterRule: 'refund' })));
   });
 });
+
+describe('users/usage counters', () => {
+  it('a user can bump their own counters but not someone else\'s', async () => {
+    await assertSucceeds(set(player(), 'users/alice/usage', { gamesCreated: 1, resets: 0, deletes: 0, lastGameAt: Date.now() }));
+    await assertFails(set(player(), 'users/bob/usage/resets', 1));
+  });
+
+  it('rejects unknown keys and negative counts', async () => {
+    await assertFails(set(player(), 'users/alice/usage/extra', 1));
+    await assertFails(set(player(), 'users/alice/usage/resets', -1));
+  });
+});

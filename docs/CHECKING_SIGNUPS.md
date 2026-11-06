@@ -5,6 +5,7 @@ The upgrade dialog is a fake door for the Season Pass (read on Jan 15, 2027). Tw
 | Node | What it holds |
 |---|---|
 | `notifyMe/{pushId}` | One entry per "Notify me" click: `email`, `timestamp`, `uid`, `source` (`upgrade_dialog`), and since dialog v2 `prefilled` (true if the email was the account's own, unedited) and `trigger` (`limit` = opened by the one-board limit, `pass` = opened from "See Season Pass"). Older entries have no `prefilled` or `trigger`. |
+| `users/{uid}/usage` | Lifetime `gamesCreated`, `resets`, `deletes`, `lastGameAt` per host, counted from the day it shipped. Read with `database:get /users --shallow` then per uid, or in the console. High resets or creates for a free host = reuse; use it to decide whether to change the free rules. Host-editable, so not for billing. |
 | `upgradeViews/{uid}` | One record per signed-in host who opened the dialog: `firstAt`, `lastAt`, `count` (all opens), `limitCount` (opens caused by the limit; added with v2). Guests and the preview admin are not counted. |
 
 Dialog v2 shipped on **2026-11-06 02:38 UTC** (PR #127). Read the Jan 15 bar from that moment only: at least 15 clicks AND at least 150 unique hosts shown.
