@@ -24,7 +24,6 @@ import {
   UPGRADE_NOTIFY_EVENT
 } from '../../../../core/utils/board-activity';
 
-import { PLANS } from '../../../../core/plans';
 @Component({
     selector: 'app-upgrade-pass-dialog',
     imports: [FormsModule],
@@ -59,33 +58,26 @@ import { PLANS } from '../../../../core/plans';
 
           <div class="space-y-3 p-4 sm:space-y-5 sm:p-6">
             <div id="upgrade-summary" class="space-y-2 text-base leading-6 text-default">
-              <p>You can host one active board at a time. Live scoring and the heatmap stay included.</p>
+              <p>You can host one active board at a time. TV mode and the heat map are always free. Live scores are free for now.</p>
               <p>It stays up until a linked game is final, or for 48 hours if you didn't link one.</p>
             </div>
 
             <section class="rounded-xl border border-default p-3 sm:p-4" aria-labelledby="upgrade-pass-name">
               <p class="text-sm font-semibold uppercase tracking-wide text-label">Coming soon</p>
-              <h3 id="upgrade-pass-name" class="sr-only">QuarterScore passes</h3>
-              <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                @for (pass of passes; track pass.label) {
-                  <div class="rounded-inner border border-qs-line bg-qs-panel-2 p-3">
-                    <p class="font-semibold text-qs-ink">{{ pass.label }}</p>
-                    <p class="mt-1 text-2xl font-semibold tabular-nums text-qs-ink">\${{ pass.priceUsd }} <span class="text-sm font-normal text-qs-muted">/ {{ pass.days }} days</span></p>
-                  </div>
-                }
-              </div>
+              <h3 id="upgrade-pass-name" class="mt-2 font-semibold text-qs-ink">Season Pass</h3>
+              <p class="mt-1 text-2xl font-semibold tabular-nums text-qs-ink">$5.99 <span class="text-sm font-normal text-qs-muted">one time, good through Mar 1, 2027</span></p>
               <ul class="mt-3 list-disc space-y-1 pl-5 text-base text-default">
-                <li>Up to {{ passes[0].activeBoards }} active boards with a Week Pass, {{ passes[1].activeBoards }} with a Season Pass</li>
-                <li>No ads on your boards</li>
+                <li>Live scores that update on their own</li>
+                <li>Up to 10 active boards at once</li>
                 <li>Custom quarter splits</li>
-                <li>Add time anytime; it stacks on what's left</li>
+                <li>Never renews</li>
               </ul>
               <p id="upgrade-pass-note" class="mt-3 text-sm leading-5 text-default">No payment today. Your email is only used to tell you when it's ready.</p>
             </section>
 
             @if (submitted()) {
               <p #status tabindex="-1" role="status" class="rounded-xl border border-default bg-input p-4 text-base text-default focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 dark:focus-visible:outline-white">
-                You're on the list. We'll email you when passes are available.
+                You're on the list. We'll email you when the Season Pass is available.
               </p>
             } @else {
               <form (ngSubmit)="submit()" novalidate class="space-y-3">
@@ -162,7 +154,6 @@ import { PLANS } from '../../../../core/plans';
   `]
 })
 export class UpgradePassDialogComponent implements AfterViewInit, OnDestroy {
-  readonly passes = [PLANS.week, PLANS.season];
   @Output() dismissed = new EventEmitter<void>();
   @ViewChild('closeButton') closeButton?: ElementRef<HTMLButtonElement>;
   @ViewChild('dialogRoot') dialogRoot?: ElementRef<HTMLElement>;
