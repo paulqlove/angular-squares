@@ -4,7 +4,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { boardArrowStep } from '../../core/utils/board-keys';
-import { isGameOver } from '../../core/utils/quarter-label';
+import { isGameOver, startedQuarterCount } from '../../core/utils/quarter-label';
 import { GameService, GameData, EspnLiveSnapshot, BoardSize, getBoardDimensions } from '../../core/services/game.service';
 import { environment } from '../../../environments/environment';
 import { PLAYER_COLORS, normalizePlayerColors } from './utils/player-colors';
@@ -1079,6 +1079,17 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       if (score && (score.home > 0 || score.away > 0)) lastPlayed = i;
     });
     return lastPlayed + 1;
+  }
+
+  /** Quarters that have started, for the Winners tiles (see startedQuarterCount). */
+  startedQuarterCount(): number {
+    const game = this.linkedEspnGame();
+    return startedQuarterCount({
+      espnEventId: this.espnEventId,
+      gameOver: this.isGameOver(),
+      linkedStatus: game?.status ?? null,
+      period: game?.period ?? null
+    });
   }
 
   /** Same rule as Presentation mode: see isGameOver in core/utils/quarter-label.ts. */

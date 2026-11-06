@@ -1,4 +1,4 @@
-import { isGameOver, quarterLabel } from './quarter-label';
+import { isGameOver, quarterLabel, startedQuarterCount } from './quarter-label';
 
 describe('quarterLabel', () => {
     it('labels Q1 to Q3 the same whether or not the game is over', () => {
@@ -36,5 +36,23 @@ describe('isGameOver', () => {
         expect(isGameOver({ q4: running })).toBe(true);
         expect(isGameOver({ q4: { home: 0, away: 0 } })).toBe(false);
         expect(isGameOver({})).toBe(false);
+    });
+});
+
+describe('startedQuarterCount', () => {
+    it('counts all four on manual boards, finished games and while the feed is unknown', () => {
+        expect(startedQuarterCount({ gameOver: false })).toBe(4);
+        expect(startedQuarterCount({ espnEventId: '401', gameOver: true, linkedStatus: 'post', period: 4 })).toBe(4);
+        expect(startedQuarterCount({ espnEventId: '401', gameOver: false, linkedStatus: null })).toBe(4);
+    });
+
+    it('follows the period on a live linked board', () => {
+        expect(startedQuarterCount({ espnEventId: '401', gameOver: false, linkedStatus: 'in', period: 3 })).toBe(3);
+        expect(startedQuarterCount({ espnEventId: '401', gameOver: false, linkedStatus: 'in', period: 4 })).toBe(4);
+    });
+
+    it('counts none before kickoff and all four in overtime', () => {
+        expect(startedQuarterCount({ espnEventId: '401', gameOver: false, linkedStatus: 'pre', period: 0 })).toBe(0);
+        expect(startedQuarterCount({ espnEventId: '401', gameOver: false, linkedStatus: 'in', period: 5 })).toBe(4);
     });
 });

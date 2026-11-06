@@ -19,3 +19,19 @@ export function isGameOver(board: {
   if (board.espnEventId) return !!board.espnLive?.completed || board.linkedStatus === 'post' || !!board.q4Winner;
   return !!board.q4 && (board.q4.home > 0 || board.q4.away > 0);
 }
+
+/**
+ * How many quarters have started, for the Winners tiles. Linked boards follow the feed's period because the
+ * poller writes the running total into every later quarter, so a quarter that has not started would repeat
+ * the score. Manual boards, finished games and an unknown feed (still loading) count all four as started.
+ */
+export function startedQuarterCount(board: {
+  espnEventId?: string | null;
+  gameOver: boolean;
+  linkedStatus?: string | null;
+  period?: number | null;
+}): number {
+  if (!board.espnEventId || board.gameOver || !board.linkedStatus) return 4;
+  if (board.linkedStatus === 'pre') return 0;
+  return Math.max(1, Math.min(4, board.period ?? 1));
+}
