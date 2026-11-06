@@ -62,7 +62,8 @@ export class CreateGameComponent implements OnInit, OnDestroy {
 
   onAuthClosed(): void {
     this.showAuthModal.set(false);
-    clearCreateDraft();
+    // Signed in already: the dashboard is about to use the draft.
+    if (!this.authService.canCreateGame()) clearCreateDraft();
   }
 
   onAuthenticated(): void {

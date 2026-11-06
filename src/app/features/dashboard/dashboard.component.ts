@@ -836,6 +836,7 @@ export class DashboardComponent implements OnInit {
 
   /** Open create modal directly without event (for query param trigger). Finishes a create the visitor started signed out. */
   private async openCreateModalDirect(): Promise<void> {
+    await this.authService.waitForAuthReady();
     const user = this.currentUser();
     if (!user) return;
     const draft = loadCreateDraft();
@@ -858,6 +859,11 @@ export class DashboardComponent implements OnInit {
       if (error instanceof ActiveBoardLimitError) {
         this.upgradeTrigger.set('limit');
         this.showUpgradeDialog.set(true);
+      } else {
+        // Never fail silently: say so, and open the form with the saved entries.
+        console.error('[Dashboard] Could not finish the create', (error as { code?: string })?.code ?? error);
+        this.toastService.error('We could not finish creating your board. Your entries are saved: press Create to try again.');
+        this.showCreateModal.set(true);
       }
     } finally {
       this.isCheckingBoardLimit.set(false);
