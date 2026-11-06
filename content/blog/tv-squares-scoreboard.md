@@ -17,7 +17,7 @@ QuarterScore's TV mode is free for every account. Here is what it shows, how to 
 
 ## What the TV screen shows
 
-- The 10x10 board, with each player's squares in their own color
+- The board, with each player's squares in their own color. It fits 25, 50 and 100 square boards
 - The live score and game clock, when the board is linked to a live game
 - The winner of each quarter
 - How many squares are claimed and how many are open
