@@ -1,3 +1,11 @@
+@if (tooSmall()) {
+  <div class="flex min-h-screen flex-col items-center justify-center bg-qs-bg px-8 text-center text-qs-ink">
+    <img src="assets/brand/lockup-horizontal-reversed.svg" alt="QuarterScore" width="192" height="24" class="mb-8 h-6 w-auto rounded-inner bg-qs-tile px-3 py-2 box-content">
+    <h1 class="qs-title text-3xl">Open this on a TV or computer</h1>
+    <p class="mt-4 max-w-sm text-qs-muted">This board view is built for big screens and is not made for phones.</p>
+    <a [href]="gameId() ? '/game/' + gameId() : '/dashboard'" class="qs-btn qs-btn-secondary mt-8">{{ gameId() ? 'View the board on your phone' : 'Back to my boards' }}</a>
+  </div>
+} @else {
 <div class="flex h-screen flex-col overflow-hidden bg-qs-bg px-4 pt-3 text-qs-ink lg:px-6 pb-6 lg:pb-8">
   <div class="mb-3 flex shrink-0 flex-wrap items-center justify-between gap-3">
     <div class="flex min-w-0 items-center gap-4">
@@ -103,3 +111,4 @@
     </div>
   }
 </div>
+}
