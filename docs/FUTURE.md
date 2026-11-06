@@ -26,7 +26,7 @@ Direction: Free plus one $5.99 pass (replaces the Week/Season/stacking table abo
 
 | | Free | Pass ($5.99) |
 |---|---|---|
-| Active boards | 1 at a time, no lifetime cap | about 10 |
+| Active boards | 1 at a time, no lifetime cap | Unlimited for now (tighten the terms if someone abuses it) |
 | Live scoring (ESPN auto-sync) | Manual scores | Yes |
 | Presentation / TV mode | **Yes** (QR and quarterscore.com always on screen) | Yes |
 | Probability heat map | Yes, all accounts | Yes |
