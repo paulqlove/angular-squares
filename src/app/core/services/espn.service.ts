@@ -2,7 +2,7 @@ import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { isEspnStatusFinal } from '../utils/board-activity';
 
-export type SportType = 'nfl' | 'nba' | 'ncaaf' | 'wnba' | 'afl';
+export type SportType = 'nfl' | 'nba' | 'ncaaf' | 'ufl' | 'wnba' | 'afl';
 
 export interface EspnGame {
   id: string;
@@ -25,6 +25,7 @@ export const SPORT_CONFIG: Record<SportType, { label: string; periods: number; p
   nfl: { label: 'NFL', periods: 4, periodLabel: 'Q' },
   nba: { label: 'NBA', periods: 4, periodLabel: 'Q' },
   ncaaf: { label: 'NCAA Football', periods: 4, periodLabel: 'Q' },
+  ufl: { label: 'UFL', periods: 4, periodLabel: 'Q' },
   wnba: { label: 'WNBA', periods: 4, periodLabel: 'Q' },
   afl: { label: 'AFL', periods: 4, periodLabel: 'Q' }
 };
@@ -39,6 +40,7 @@ export class EspnService {
     nfl: 'https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard',
     nba: 'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard',
     ncaaf: 'https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard',
+    ufl: 'https://site.api.espn.com/apis/site/v2/sports/football/ufl/scoreboard',
     wnba: 'https://site.api.espn.com/apis/site/v2/sports/basketball/wnba/scoreboard',
     afl: 'https://site.api.espn.com/apis/site/v2/sports/australian-football/afl/scoreboard'
   };
@@ -93,10 +95,14 @@ export class EspnService {
         }
       }
 
-      // Sort by date
-      merged.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      // Out of season ESPN keeps serving the league's last finished game. Hide ones more than two weeks old so the list can say "coming soon".
+      const staleBefore = Date.now() - 14 * 24 * 60 * 60 * 1000;
+      const current = merged.filter(game => !game.completed || new Date(game.date).getTime() >= staleBefore);
 
-      return merged;
+      // Sort by date
+      current.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+      return current;
     } catch (error) {
       console.error('Failed to fetch ESPN games:', error);
       return [];

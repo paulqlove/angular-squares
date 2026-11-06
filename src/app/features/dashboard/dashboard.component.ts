@@ -806,6 +806,7 @@ export class DashboardComponent implements OnInit {
   sportOptions: { value: SportType | 'custom'; label: string }[] = [
     { value: 'nfl', label: 'NFL' },
     { value: 'ncaaf', label: 'NCAA Football' },
+    { value: 'ufl', label: 'UFL' },
     { value: 'nba', label: 'NBA' },
     { value: 'wnba', label: 'WNBA' },
     { value: 'afl', label: 'AFL' },

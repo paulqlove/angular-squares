@@ -70,7 +70,7 @@ export interface CreateGameSubmit {
           }
         </div>
       } @else if (espnGames().length === 0) {
-        <p class="mt-3 rounded-inner border border-dashed border-qs-line-strong p-4 text-sm text-qs-muted">No games on the schedule for this sport right now.</p>
+        <p class="mt-3 rounded-inner border border-dashed border-qs-line-strong p-4 text-sm text-qs-muted">Games coming soon.</p>
       } @else if (!gameListOpen && selectedEspnGame(); as game) {
         <!-- Picked: collapse to the choice so the rest of the form is right there -->
         <div class="mt-3 flex items-center justify-between gap-3 rounded-inner border border-qs-accent bg-qs-panel p-3 outline outline-2 -outline-offset-2 outline-qs-accent">
@@ -304,6 +304,7 @@ export class CreateGameFormComponent implements OnInit {
   sportOptions: { value: SportType | 'custom'; label: string }[] = [
     { value: 'nfl', label: 'NFL' },
     { value: 'ncaaf', label: 'NCAA Football' },
+    { value: 'ufl', label: 'UFL' },
     { value: 'nba', label: 'NBA' },
     { value: 'wnba', label: 'WNBA' },
     { value: 'afl', label: 'AFL' },
