@@ -57,7 +57,7 @@ export class AppComponent implements OnDestroy {
 
   private syncRobotsMeta(url: string): void {
     const path = url.split(/[?#]/)[0];
-    if (path === '/game' || path.startsWith('/game/')) {
+    if (path === '/create' || path === '/game' || path.startsWith('/game/')) {
       this.meta.updateTag({ name: 'robots', content: 'noindex' });
       return;
     }

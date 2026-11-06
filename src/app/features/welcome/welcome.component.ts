@@ -75,9 +75,9 @@ interface Feature {
             </p>
 
             <div class="mt-8 flex flex-wrap gap-3">
-              <button type="button" (click)="showAuthModal.set(true)" class="qs-btn qs-btn-primary w-full sm:w-auto px-6">
+              <a routerLink="/create" class="qs-btn qs-btn-primary w-full sm:w-auto px-6">
                 Create game
-              </button>
+              </a>
               <button
                 type="button"
                 (click)="openJoinCode()"
