@@ -18,6 +18,7 @@ import { EmptyQuarterRuleComponent } from '../../components/ui/empty-quarter-rul
 import { HelpMenuComponent } from '../../components/ui/help-menu/help-menu.component';
 import { ProfileMenuComponent } from '../../components/ui/profile-menu/profile-menu.component';
 import { HeadroomDirective } from '../../shared/directives/headroom.directive';
+import { PREVIEW_GAME_ID } from '../../core/services/role-preview.service';
 import { UpgradePassDialogComponent } from './components/upgrade-pass-dialog/upgrade-pass-dialog.component';
 import { PlanService } from '../../core/services/plan.service';
 import { ActiveBoardLimitError } from '../../core/errors/active-board-limit.error';
@@ -1359,6 +1360,10 @@ export class DashboardComponent implements OnInit {
       );
       this.showCreateModal.set(false);
       this.resetCreateForm();
+      if (gameId === PREVIEW_GAME_ID) {
+        this.toastService.warning('Preview: board created for this preview only. Nothing was saved.');
+        return;
+      }
       this.router.navigate(['/game', gameId]);
     } catch (error) {
       if (error instanceof ActiveBoardLimitError) {
