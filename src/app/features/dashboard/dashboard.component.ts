@@ -167,7 +167,7 @@ import {
             </div>
             @if (planService.plan() !== 'season' && planService.plan() !== 'admin') {
               <button type="button" (click)="openUpgrade($event)" class="qs-btn qs-btn-secondary shrink-0">
-                {{ planService.plan() === 'week' ? 'Get Season Pass' : 'See passes' }}
+                {{ planService.plan() === 'week' ? 'Get Season Pass' : 'See Season Pass' }}
               </button>
             }
           </div>
@@ -578,7 +578,7 @@ import {
                 <h4 class="qs-eyebrow qs-eyebrow-bar">05 / Quarter split</h4>
                 @if (!planService.features().customSplits) {
                   <p class="mt-3 text-sm text-qs-muted">
-                    <span class="font-mono tabular-nums text-qs-ink">20 / 20 / 20 / 40</span> · Custom splits come with a Week or Season Pass.
+                    <span class="font-mono tabular-nums text-qs-ink">20 / 20 / 20 / 40</span> · Custom splits come with the Season Pass.
                   </p>
                 } @else {
                 <div class="mt-3 flex flex-wrap gap-1.5">

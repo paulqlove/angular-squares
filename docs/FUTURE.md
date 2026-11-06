@@ -22,7 +22,7 @@ Source of truth: `src/app/core/plans.ts` (prices, lengths, limits). Research and
 
 ### Free-tier design (board vote 4-0, Paul approved Nov 5, 2026)
 
-Direction: Free plus one $5.99 pass (replaces the Week/Season/stacking table above once checkout is built). The price stays $5.99; the pass length and wording can change after year 0 (for example 6 months instead of 12). Until checkout exists, everything stays free for everyone.
+Direction: Free plus one $5.99 pass (replaces the Week/Season/stacking table above once checkout is built). The price stays $5.99; the wording and term can change after year 0. Until checkout exists, everything stays free for everyone.
 
 | | Free | Pass ($5.99) |
 |---|---|---|
@@ -37,7 +37,15 @@ Decided Nov 5, 2026: no ads (adFree is not sold as a perk), no lifetime cap, pre
 
 Ship together, only once a pass can be bought (about 3 evenings): the live-scoring gate (plan flag, hide the ESPN link, stop the browser poller, skip free owners in `syncEspnScores`, rules for new links), undo on manual scoring, and unlinked boards counting for 7 days from creation (today 48 hours, too short for a Thursday board for a Sunday game). Boards already linked to ESPN keep working until final.
 
-Sold as a one-time expiring pass (not an auto-renewing subscription). Name it "Season Pass" or "Host Pass", never "paid" in the UI. Guests always join and play for free; only hosts pay. Ad-free is not a selling point while `adsEnabled` is off. Keep the list to these four perks to avoid feature creep. Until checkout exists, everything stays free for everyone.
+**The Season Pass (decided Nov 5, 2026):**
+- **Name and price:** "Season Pass", $5.99 one time. The price is always shown at checkout; the no-money rule is Stripe's restricted-business rule, so copy never uses prize, pot, payout or entry-fee words about squares. Avoid "paid" in the UI. Guests always join and play for free; only hosts buy.
+- **Term:** fixed date, about Sept 1 to Mar 1 each season. This first season it runs from purchase to about Mar 1, 2027. A one-time expiring pass, never auto-renewing. The Week Pass, the $29.99 tier and stacking go away when checkout is built (`plans.ts` still has them until then).
+- **Refunds:** refundable until the pass is "used", final after, stated above the buy button and on the receipt. "Used" = one `usedAt` stamp on the entitlement, written the first time a board is created under the pass AND a pass-only feature fires (ESPN link on, a custom split saved, or a second concurrent board). Store the stamp with a timestamp, board id and feature. A stricter rule (at least 10 claimed squares by at least 3 players and a score written) is the fallback if disputes appear.
+- **Where we sell:** US only at launch, and say so.
+- **Renewal:** reminder only, never an automatic charge. An unchecked checkbox: "Email me once in August before next season starts. I'll never be charged automatically." Store the consent date, email and wording; every send needs Paul's OK.
+- **Chargebacks:** Stripe's dispute fee is $15 per dispute and is not returned even if we win, on top of losing the $5.99, so one lost dispute is about -$15.47 against a $5.52 net sale. A refund costs only the $0.47 Stripe keeps. Prevent disputes: statement descriptor "QUARTERSCORE", a receipt with the end date, policy and a support email, fast answers to inquiries, refund unused passes without asking why.
+- **Still for a lawyer or CPA before launch:** is "refundable until used" enforceable in Texas and the buyers' states; exact checkout and Terms wording; state digital-goods refund disclosure; EU/UK handling if ever sold there; sales tax on a $5.99 digital pass (Stripe Tax?); revenue recognition and the tax set-aside; whether an LLC changes dispute liability; read Stripe's restricted-business list at signup.
+- **Dialog count:** `upgradeViews/{uid}` records each signed-in host's first and last view and count of the upgrade dialog, for the Jan 15 read (at least 15 clicks AND at least 150 unique hosts shown). Admins read it in the Firebase console. The rule is in `database.rules.json` and needs a database rules deploy.
 
 Why $5.99: it brings back the one-party Super Bowl host as a buyer (live scoring plus TV presentation is what they want) and fits "simple and low". Operating cost is low and mostly independent of paying users: the live-score function hits ESPN once per league per minute.
 

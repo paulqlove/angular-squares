@@ -21,6 +21,10 @@ The new client writes `activeBoardId` only after it creates a board. It removes 
 
 The client check is the limit players and hosts actually hit. The rule stops a second create that forgets to clear a still-active slot.
 
+## upgradeViews
+
+`upgradeViews/{uid}` = `{ firstAt, lastAt, count }`. A signed-in user can read and write only their own record. It counts how many hosts saw the upgrade dialog for the Jan 15 2027 fake-door read; admins read it in the console. No other keys are allowed.
+
 ## notifyMe
 
 `notifyMe/{pushId}` is write-only create for a signed-in user. Reads, updates, and deletes are denied. The node must be `email`, `timestamp`, `uid`, and `source` only. `email` matches an email shape and is at most 254 characters. `uid` must be `auth.uid`. `source` is at most 64 characters. `timestamp` is a number within a day of `now`. The push id is at most 128 characters.

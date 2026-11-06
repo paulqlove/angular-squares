@@ -456,6 +456,30 @@ describe('notifyMe', () => {
   });
 });
 
+describe('upgradeViews', () => {
+  const rec = () => ({ firstAt: Date.now(), lastAt: Date.now(), count: 1 });
+
+  it('a user can write and read their own view count', async () => {
+    await assertSucceeds(set(player(), 'upgradeViews/alice', rec()));
+    await assertSucceeds(read(player(), 'upgradeViews/alice'));
+  });
+
+  it('a user cannot write or read someone else\'s view count', async () => {
+    await assertFails(set(player(), 'upgradeViews/bob', rec()));
+    await seed({ 'upgradeViews/bob': rec() });
+    await assertFails(read(player(), 'upgradeViews/bob'));
+  });
+
+  it('rejects extra keys and a missing count', async () => {
+    await assertFails(set(player(), 'upgradeViews/alice', { ...rec(), extra: 1 }));
+    await assertFails(set(player(), 'upgradeViews/alice', { firstAt: 1, lastAt: 1 }));
+  });
+
+  it('a signed-out visitor cannot write', async () => {
+    await assertFails(set(visitor(), 'upgradeViews/alice', rec()));
+  });
+});
+
 describe('users', () => {
   it('a user can read and write their own profile data', async () => {
     await assertSucceeds(set(player(), 'users/alice/joinedGames/game01', { joinedAt: Date.now(), gameName: 'Office Pool' }));
