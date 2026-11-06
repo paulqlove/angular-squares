@@ -357,7 +357,7 @@ export class WelcomeComponent implements OnInit {
     {
       icon: 'heroCheckCircle',
       title: 'Player Check-in',
-      description: 'Host confirms who\'s in with one tap. Track payments easily.'
+      description: 'Host confirms who\'s in with one tap.'
     },
     {
       icon: 'heroShare',
