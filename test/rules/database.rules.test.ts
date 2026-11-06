@@ -821,6 +821,8 @@ describe('removing a player', () => {
 
   it('a signed-out visitor cannot remove a player', async () => {
     await assertFails(write(visitor(), removeBob));
+  });
+});
 
 describe('users/usage counters', () => {
   it('a user can bump their own counters but not someone else\'s', async () => {
