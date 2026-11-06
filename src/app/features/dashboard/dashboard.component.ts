@@ -822,7 +822,6 @@ export class DashboardComponent implements OnInit {
     const createFromQuery = this.route.snapshot.queryParamMap.get('create') === 'true';
     const createFromStorage = typeof sessionStorage !== 'undefined' && sessionStorage.getItem('qs_create_after_auth') === 'true';
     const createFromDraft = typeof localStorage !== 'undefined' && isPendingAutoSubmit(loadCreateDraft());
-    console.info('[create-flow] dashboard init', { createFromQuery, createFromStorage, createFromDraft, hasDraft: !!loadCreateDraft() });
     if (createFromQuery || createFromStorage || createFromDraft) {
       // Clear both indicators
       if (createFromQuery) {
@@ -840,7 +839,6 @@ export class DashboardComponent implements OnInit {
     await this.authService.waitForAuthReady();
     const user = this.currentUser();
     const draft = loadCreateDraft();
-    console.info('[create-flow] dashboard: finishing create', { signedIn: !!user, isGuest: user?.isGuest, hasDraft: !!draft, autoSubmit: draft?.autoSubmit });
     if (!user) return;
     this.isCheckingBoardLimit.set(true);
     try {
@@ -850,18 +848,12 @@ export class DashboardComponent implements OnInit {
         saveCreateDraft({ ...draft, autoSubmit: false });
       }
       await this.gameService.assertUnderFreeBoardLimit(user.uid);
-      console.info('[create-flow] dashboard: under the board limit');
-      if (this.showEndedBoardDialog()) {
-        console.info('[create-flow] dashboard: showing the ended-board dialog');
-        return;
-      }
+      if (this.showEndedBoardDialog()) return;
       const built = isPendingAutoSubmit(draft) ? buildCreateGameValues(draft, this.sanitizationService, this.planService.features().customSplits) : null;
-      console.info('[create-flow] dashboard: draft check', { built: built ? (built.ok ? 'ok' : built.reason) : 'none' });
       if (draft && built?.ok) {
         await this.createGame({ draft, values: built.values });
         return;
       }
-      console.info('[create-flow] dashboard: opening the blank form');
       this.showCreateModal.set(true);
     } catch (error) {
       if (error instanceof ActiveBoardLimitError) {
@@ -1051,7 +1043,6 @@ export class DashboardComponent implements OnInit {
         values.quarterSplit,
         values.emptyQuarterRule
       );
-      console.info('[create-flow] dashboard: board created', gameId);
       this.showCreateModal.set(false);
       clearCreateDraft();
       this.router.navigate(['/game', gameId]);

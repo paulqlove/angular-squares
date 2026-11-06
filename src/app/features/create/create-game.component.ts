@@ -53,7 +53,6 @@ export class CreateGameComponent implements OnInit {
     // host is signed in and the visitor had pressed Create, hand the saved entries to the dashboard.
     effect(() => {
       if (this.authService.canCreateGame() && isPendingAutoSubmit(loadCreateDraft())) {
-        console.info('[create-flow] /create: signed in with a pending create, going to /dashboard');
         void this.router.navigate(['/dashboard']);
       }
     });
@@ -68,24 +67,20 @@ export class CreateGameComponent implements OnInit {
   }
 
   onAuthClosed(): void {
-    console.info('[create-flow] /create: sign-in dialog closed', { signedIn: this.authService.canCreateGame() });
     this.showAuthModal.set(false);
     // Signed in already: the dashboard is about to use the draft.
     if (!this.authService.canCreateGame()) clearCreateDraft();
   }
 
   onAuthenticated(): void {
-    console.info('[create-flow] /create: authenticated', { canCreate: this.authService.canCreateGame(), draftSaved: !!loadCreateDraft() });
     // A guest is "authenticated" but cannot host: leave the dialog open for a real sign-in.
     if (!this.authService.canCreateGame()) return;
     this.showAuthModal.set(false);
-    console.info('[create-flow] /create: going to /dashboard');
     void this.router.navigate(['/dashboard']);
   }
 
   onSubmit(submit: CreateGameSubmit): void {
     saveCreateDraft({ ...submit.draft, autoSubmit: true });
-    console.info('[create-flow] /create: draft saved, opening sign-in', { saved: !!loadCreateDraft(), nameLength: submit.draft.name.length });
     this.showAuthModal.set(true);
   }
 }
