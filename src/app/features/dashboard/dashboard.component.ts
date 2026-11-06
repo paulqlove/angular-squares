@@ -153,14 +153,6 @@ import {
                   <span class="qs-label align-middle text-qs-muted">· {{ planService.daysLeft() }} days left</span>
                 }
               </p>
-              <ul class="mt-3 flex flex-wrap gap-2">
-                <li class="qs-badge">
-                  {{ activeBoards() ?? '–' }} of {{ planService.features().activeBoards === Infinity ? '∞' : planService.features().activeBoards }} active boards
-                </li>
-                <li class="qs-badge" [class.qs-badge-ok]="planService.features().customSplits">
-                  {{ planService.features().customSplits ? 'Custom quarter splits' : 'Splits locked 20/20/20/40' }}
-                </li>
-              </ul>
             </div>
             @if (planService.plan() !== 'season' && planService.plan() !== 'admin') {
               <button type="button" (click)="openUpgrade($event)" class="qs-btn qs-btn-secondary shrink-0">
@@ -979,7 +971,6 @@ export class DashboardComponent implements OnInit {
   canCreateGame = this.authService.canCreateGame;
   protected planService = inject(PlanService);
   protected readonly Infinity = Infinity;
-  activeBoards = signal<number | null>(null);
 
   myGames = signal<GameListItem[]>([]);
   joinedGames = signal<GameListItem[]>([]);
@@ -1129,7 +1120,6 @@ export class DashboardComponent implements OnInit {
         ]);
         this.myGames.set(owned);
         this.joinedGames.set(joined);
-        this.gameService.activeBoardCount(user.uid).then(n => this.activeBoards.set(n), () => {});
         const linked = owned.filter(game => !!game.espnEventId);
         if (linked.length > 0) {
           this.gameService.ensureLiveGameIndexes(linked.map(game => ({
