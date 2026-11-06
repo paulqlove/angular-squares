@@ -25,6 +25,10 @@ The client check is the limit players and hosts actually hit. The rule stops a s
 
 `upgradeViews/{uid}` = `{ firstAt, lastAt, count }`. A signed-in user can read and write only their own record. It counts how many hosts saw the upgrade dialog for the Jan 15 2027 fake-door read; admins read it in the console. `limitCount` is optional and counts only opens caused by the one-board limit (`count` is all opens). No other keys are allowed.
 
+## users/{uid}/usage
+
+`{ gamesCreated, resets, deletes, lastGameAt }`, lifetime counters bumped by the client on create, reset and delete (Nov 2026 onward; earlier activity is not counted). The owner can write their own, so use it to spot heavy reuse, not for billing. No other keys.
+
 ## notifyMe
 
 `notifyMe/{pushId}` is write-only create for a signed-in user. Reads, updates, and deletes are denied. The node must be `email`, `timestamp`, `uid`, and `source`, plus the optional `prefilled` (boolean) and `trigger` (`limit` or `pass`). `email` matches an email shape and is at most 254 characters. `uid` must be `auth.uid`. `source` is at most 64 characters. `timestamp` is a number within a day of `now`. The push id is at most 128 characters.

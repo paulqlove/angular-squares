@@ -10,6 +10,7 @@ import {
   update,
   push,
   get,
+  increment,
   remove
 } from 'firebase/database';
 import { Observable, BehaviorSubject } from 'rxjs';
@@ -403,6 +404,8 @@ export class GameService {
       console.warn('[GameService] Active board slot was not saved', error);
     }
 
+    await this.bumpUsage(ownerId, 'gamesCreated');
+
     return gameId;
   }
 
@@ -421,6 +424,8 @@ export class GameService {
       isLocked: false,
       paidPlayers: []
     });
+    const ownerId = this._currentGame.value?.id === gameId ? this._currentGame.value.ownerId : this.authService.currentUser()?.uid;
+    if (ownerId) await this.bumpUsage(ownerId, 'resets');
   }
 
   // Subscribe to a specific game
@@ -723,6 +728,19 @@ export class GameService {
       updates[`liveGames/${espnId}/${gameId}`] = null;
     }
     await update(ref(this.db), updates);
+    await this.bumpUsage(ownerId, 'deletes');
+  }
+
+  // Lifetime counters per host, read in the console to see who reuses or churns boards.
+  // Best effort: a failed write never blocks the create, reset or delete.
+  private async bumpUsage(uid: string, key: 'gamesCreated' | 'resets' | 'deletes'): Promise<void> {
+    try {
+      const updates: Record<string, unknown> = { [`users/${uid}/usage/${key}`]: increment(1) };
+      if (key === 'gamesCreated') updates[`users/${uid}/usage/lastGameAt`] = Date.now();
+      await update(ref(this.db), updates);
+    } catch (error) {
+      console.warn('[GameService] Usage counter not saved', error);
+    }
   }
 
   // Keep liveGames/{espnId}/{boardId} in sync so the scheduled function
