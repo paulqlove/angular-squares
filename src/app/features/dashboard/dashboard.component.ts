@@ -378,6 +378,11 @@ import {
             <button type="button" (click)="shareGame(game.id)" class="qs-btn qs-btn-ghost w-11 px-0 text-qs-muted hover:text-qs-ink" title="Share game" aria-label="Share game">
               <ng-icon name="heroShare" class="text-lg"></ng-icon>
             </button>
+            @if (joined) {
+              <button type="button" (click)="removeJoinedGame(game.id)" class="qs-btn qs-btn-ghost w-11 px-0 text-qs-muted hover:text-qs-ink" title="Remove from my list" aria-label="Remove from my list">
+                <ng-icon name="heroXMark" class="text-lg"></ng-icon>
+              </button>
+            }
             @if (!joined) {
               <button type="button" (click)="openEditModal(game)" class="qs-btn qs-btn-ghost w-11 px-0 text-qs-muted hover:text-qs-ink" title="Edit game" aria-label="Edit game">
                 <ng-icon name="heroCog6Tooth" class="text-lg"></ng-icon>
@@ -1407,6 +1412,19 @@ export class DashboardComponent implements OnInit {
 
   shareGame(gameId: string): void {
     this.shareModalGameId.set(gameId);
+  }
+
+  /** Takes a joined game off this user's list only. Their squares stay on the board. */
+  async removeJoinedGame(gameId: string): Promise<void> {
+    const user = this.currentUser();
+    if (!user) return;
+    try {
+      await this.gameService.removeJoinedGame(user.uid, gameId);
+      this.joinedGames.update(games => games.filter(g => g.id !== gameId));
+      this.toastService.success('Removed from your list. Your squares stay on the board.');
+    } catch {
+      this.toastService.error('Could not remove it. Try again.');
+    }
   }
 
   async deleteGame(gameId: string): Promise<void> {

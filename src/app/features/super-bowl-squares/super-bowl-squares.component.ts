@@ -1208,6 +1208,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       },
       winners: {},
       playerColors: {},
+      playerUserIds: {},
       pricePerSquare: 10,
       isRandomized: false,
       isLocked: false,

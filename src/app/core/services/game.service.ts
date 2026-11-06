@@ -657,6 +657,10 @@ export class GameService {
 
     for (const gameId of gameIds) {
       const game = await this.getGame(gameId);
+      if (!game && this.authService.previewRole() === 'actual') {
+        // The host deleted this game: drop the leftover entry from this user's own list.
+        void remove(ref(this.db, `users/${userId}/joinedGames/${gameId}`)).catch(() => {});
+      }
       if (game) {
         const playerNames = new Set(Object.values(game.selectedSquares));
         const squaresFilled = Object.keys(game.selectedSquares).length;
