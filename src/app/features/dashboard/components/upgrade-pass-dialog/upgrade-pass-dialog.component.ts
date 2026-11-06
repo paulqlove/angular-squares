@@ -115,16 +115,6 @@ import {
               </form>
             }
           </div>
-
-          <div class="mt-4 flex justify-end">
-            <button
-              type="button"
-              class="qs-btn qs-btn-secondary"
-              (click)="dismiss()"
-            >
-              {{ submitted() ? 'Close' : 'Not now' }}
-            </button>
-          </div>
         </div>
       </div>
     </div>
