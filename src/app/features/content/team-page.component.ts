@@ -8,6 +8,8 @@ import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.co
 import { NflTeam, getTeamBySlug, NFL_TEAMS } from './teams-data';
 import { TeamHelmetComponent } from '../../shared/team-helmet.component';
 import { EspnService, EspnGame } from '../../core/services/espn.service';
+import { SCHEDULE } from './schedule.generated';
+import { ScheduledGame, formatKickoff } from './schedule.model';
 
 @Component({
   selector: 'app-team-page',
@@ -63,6 +65,7 @@ import { EspnService, EspnGame } from '../../core/services/espn.service';
           </section>
 
           <!-- Upcoming Games -->
+          @if (loading() || games().length > 0) {
           <section class="mt-10">
             <h2 class="text-2xl font-bold text-heading">Upcoming {{ team.name }} games</h2>
             <p class="mt-2 text-muted">
@@ -96,12 +99,9 @@ import { EspnService, EspnGame } from '../../core/services/espn.service';
                   </div>
                 }
               </div>
-            } @else {
-              <p class="mt-6 rounded-xl border border-default bg-card p-4 text-muted">
-                No upcoming games scheduled. Check back during the season.
-              </p>
             }
           </section>
+          }
 
           <!-- Team-themed printable board -->
           <section class="mt-10" aria-labelledby="sheet-heading">
@@ -240,7 +240,7 @@ export class TeamPageComponent implements OnInit {
   public breadcrumbs: { name: string; path: string }[] = [];
   public divisionRivals: NflTeam[] = [];
   public games = signal<EspnGame[]>([]);
-  public loading = signal(true);
+  public loading = signal(false);
   public showAuthModal = signal(false);
   public readonly digits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
   private printGame = signal<EspnGame | null>(null);
@@ -303,6 +303,8 @@ export class TeamPageComponent implements OnInit {
       breadcrumbs: this.breadcrumbs
     });
 
+    this.games.set((SCHEDULE.teams[slug] ?? []).map(toEspnGame));
+    this.loading.set(this.games().length === 0);
     this.loadGames();
   }
 
@@ -311,9 +313,9 @@ export class TeamPageComponent implements OnInit {
 
     try {
       const teamGames = await this.espn.getTeamSchedule(this.team.espnId, 'nfl');
-      this.games.set(teamGames);
+      if (teamGames.length > 0) this.games.set(teamGames);
     } catch {
-      this.games.set([]);
+      // keep the build-time schedule
     } finally {
       this.loading.set(false);
     }
@@ -328,14 +330,7 @@ export class TeamPageComponent implements OnInit {
   }
 
   public formatDate(dateStr: string): string {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit'
-    });
+    return formatKickoff(dateStr);
   }
 
   public printSheet(game?: EspnGame): void {
@@ -378,4 +373,23 @@ export class TeamPageComponent implements OnInit {
 /** ESPN schedules use full names ("Kansas City Chiefs"); the scoreboard uses abbreviations. */
 function findTeam(name: string): NflTeam | undefined {
   return NFL_TEAMS.find(t => `${t.city} ${t.name}` === name || t.abbreviation === name);
+}
+
+function toEspnGame(game: ScheduledGame): EspnGame {
+  return {
+    id: game.id,
+    name: `${game.awayTeamFull} at ${game.homeTeamFull}`,
+    homeTeam: game.homeTeam,
+    awayTeam: game.awayTeam,
+    homeTeamFull: game.homeTeamFull,
+    awayTeamFull: game.awayTeamFull,
+    homeScore: 0,
+    awayScore: 0,
+    period: 0,
+    clock: '',
+    status: 'pre',
+    completed: false,
+    quarters: Array(4).fill({ home: 0, away: 0 }),
+    date: game.date
+  };
 }
