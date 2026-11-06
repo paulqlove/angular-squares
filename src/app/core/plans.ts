@@ -18,16 +18,18 @@ export interface PlanFeatures {
   customSplits: boolean;
   /** No ads on this host's boards. */
   adFree: boolean;
+  /** ESPN auto-sync of scores. Not enforced yet: it stays free until checkout exists. */
+  liveScoring: boolean;
 }
 
 export const DAY_MS = 86_400_000;
 
 export const PLANS: Record<PlanId, PlanFeatures> = {
-  free: { label: 'Free', priceUsd: 0, days: 0, activeBoards: 1, customSplits: false, adFree: false },
-  week: { label: 'Week Pass', priceUsd: 5.99, days: 7, activeBoards: 5, customSplits: true, adFree: true },
+  free: { label: 'Free', priceUsd: 0, days: 0, activeBoards: 1, customSplits: false, adFree: false, liveScoring: false },
+  week: { label: 'Week Pass', priceUsd: 5.99, days: 7, activeBoards: 5, customSplits: true, adFree: true, liveScoring: true },
   // College football Week 0 (late Aug) to the NFL final (mid Feb) is ~25 weeks; plus about a month.
-  season: { label: 'Season Pass', priceUsd: 29.99, days: 210, activeBoards: 25, customSplits: true, adFree: true },
-  admin: { label: 'Admin', priceUsd: 0, days: 0, activeBoards: Number.POSITIVE_INFINITY, customSplits: true, adFree: true }
+  season: { label: 'Season Pass', priceUsd: 29.99, days: 210, activeBoards: 25, customSplits: true, adFree: true, liveScoring: true },
+  admin: { label: 'Admin', priceUsd: 0, days: 0, activeBoards: Number.POSITIVE_INFINITY, customSplits: true, adFree: true, liveScoring: true }
 };
 
 export interface Entitlement {
