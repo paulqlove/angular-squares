@@ -180,6 +180,7 @@
         "firstAt": { ".validate": "newData.isNumber() && newData.val() > 0" },
         "lastAt": { ".validate": "newData.isNumber() && newData.val() > 0" },
         "count": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 100000" },
+        "limitCount": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000" },
         "$other": { ".validate": false }
       }
     },
@@ -200,6 +201,12 @@
         },
         "source": {
           ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 64"
+        },
+        "prefilled": {
+          ".validate": "newData.isBoolean()"
+        },
+        "trigger": {
+          ".validate": "newData.isString() && (newData.val() == 'limit' || newData.val() == 'pass')"
         },
         "$other": {
           ".validate": false
