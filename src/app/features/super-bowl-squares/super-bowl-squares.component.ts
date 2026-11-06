@@ -1361,6 +1361,18 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       this.linkedEspnGame.set(game);
       this.lastSyncTime.set(new Date());
 
+      // Only the host or co-host writes scores. A viewer's write is refused by the rules, but Firebase applies
+      // it locally first and then rolls it back, which made the Q4 tile flicker on joined boards. Viewers keep
+      // the live game info (period, clock) for display and read the stored scores and winners.
+      if (!this.isGameOwner() && !this.isManager()) {
+        if (game.status === 'post') {
+          this.stopPolling();
+        } else if (game.status === 'in' && !this.pollingInterval) {
+          this.startPolling();
+        }
+        return;
+      }
+
       // ESPN gives per-quarter scores; squares need cumulative scores
       let homeAccum = 0;
       let awayAccum = 0;
