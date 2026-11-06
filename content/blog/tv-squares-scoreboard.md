@@ -1,7 +1,7 @@
 ---
 title: "Football Squares on TV: Put Your Board on the Big Screen"
 description: "Show your football squares board on a TV with QuarterScore's TV mode. How to get it on the screen, let friends scan in, and a short game-day checklist."
-date: "2026-11-19"
+date: "2026-11-06"
 slug: tv-squares-scoreboard
 ogImage: /assets/og-image.png
 draft: false
@@ -22,6 +22,8 @@ QuarterScore's TV mode is free for every account. Here is what it shows, how to 
 - A QR code
 
 <img src="/assets/blog/tv-mode/tv-board.png" alt="QuarterScore TV mode showing a 10x10 squares board with sample player names in different colors, the score, the winner of each quarter and a QR code." width="1920" height="1080">
+
+The screen resizes to fill whatever it is on. We loaded it at sizes from a 13-inch laptop up to a 4K TV, including a 16-inch laptop screen and a 1080p TV, and the whole board, the score and the QR code fit without scrolling.
 
 The QR code opens the same shareable board link you get from Share. A friend who scans it sees the board on their own phone, like any other player. Nobody needs an account.
 

@@ -10,7 +10,7 @@
       <title>Football Squares on TV: Put Your Board on the Big Screen</title>
       <link>https://quarterscore.com/blog/tv-squares-scoreboard</link>
       <guid>https://quarterscore.com/blog/tv-squares-scoreboard</guid>
-      <pubDate>Thu, 19 Nov 2026 12:00:00 GMT</pubDate>
+      <pubDate>Fri, 06 Nov 2026 12:00:00 GMT</pubDate>
       <description>Show your football squares board on a TV with QuarterScore's TV mode. How to get it on the screen, let friends scan in, and a short game-day checklist.</description>
       <content:encoded><![CDATA[<p>You can put a football squares board on your TV by opening the game on a computer, pressing Present, and mirroring that browser tab to the screen.</p>
 <p>At most squares parties the board lives on one phone that gets passed around the couch while somebody asks who has the 3 and the 7. There is a TV in the room, and it is much easier to read.</p>
@@ -23,7 +23,8 @@
 <li>How many squares are claimed and how many are open</li>
 <li>A QR code</li>
 </ul>
-<img src="/assets/blog/tv-mode/tv-board.png" alt="QuarterScore TV mode showing a 10x10 squares board with sample player names in different colors, the score, the winner of each quarter and a QR code." width="1920" height="1080" /><p>The QR code opens the same shareable board link you get from Share. A friend who scans it sees the board on their own phone, like any other player. Nobody needs an account.</p>
+<img src="/assets/blog/tv-mode/tv-board.png" alt="QuarterScore TV mode showing a 10x10 squares board with sample player names in different colors, the score, the winner of each quarter and a QR code." width="1920" height="1080" /><p>The screen resizes to fill whatever it is on. We loaded it at sizes from a 13-inch laptop up to a 4K TV, including a 16-inch laptop screen and a 1080p TV, and the whole board, the score and the QR code fit without scrolling.</p>
+<p>The QR code opens the same shareable board link you get from Share. A friend who scans it sees the board on their own phone, like any other player. Nobody needs an account.</p>
 <img src="/assets/blog/tv-mode/qr-area.png" alt="Close-up of the QR code and the scan-to-join label on the TV screen." width="612" height="250" /><h2>How to get it onto the TV</h2>
 <p>On a computer or laptop, open your game and press <strong>Present</strong>. The button shows on the game page for the host and co-host.</p>
 <img src="/assets/blog/tv-mode/game-present-button.png" alt="The top of a QuarterScore game page, with the Share, Present and Your Games buttons next to the board title." width="1400" height="138" /><p>Then pick one way to get that tab onto the screen. These are the standard ways to mirror a browser tab. We have not tested them on every TV, so try yours before game day.</p>
