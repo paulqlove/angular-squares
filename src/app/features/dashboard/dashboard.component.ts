@@ -144,22 +144,23 @@ import {
 
         <!-- Hosting -->
         @if (canCreateGame()) {
-          <div class="qs-card mt-8 flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between" aria-label="Your plan">
-            <div class="min-w-0">
-              <p class="qs-label text-qs-muted">Your plan</p>
-              <p class="qs-title mt-1 text-2xl">
-                {{ planService.features().label }}
-                @if (planService.daysLeft()) {
-                  <span class="qs-label align-middle text-qs-muted">· {{ planService.daysLeft() }} days left</span>
-                }
-              </p>
-            </div>
-            @if (planService.plan() !== 'season' && planService.plan() !== 'admin') {
+          <!-- Plan card: the upgrade entry point, so only free and Week Pass hosts see it. Season and Admin see their plan in the profile menu. -->
+          @if (planService.plan() !== 'season' && planService.plan() !== 'admin') {
+            <div class="qs-card mt-8 flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between" aria-label="Your plan">
+              <div class="min-w-0">
+                <p class="qs-label text-qs-muted">Your plan</p>
+                <p class="qs-title mt-1 text-2xl">
+                  {{ planService.features().label }}
+                  @if (planService.daysLeft()) {
+                    <span class="qs-label align-middle text-qs-muted">· {{ planService.daysLeft() }} days left</span>
+                  }
+                </p>
+              </div>
               <button type="button" (click)="openUpgrade($event)" class="qs-btn qs-btn-secondary shrink-0">
                 {{ planService.plan() === 'week' ? 'Get Season Pass' : 'See Season Pass' }}
               </button>
-            }
-          </div>
+            </div>
+          }
 
           <!-- Admin Panel: Gifted Season Passes (paulqlove@gmail.com only) -->
           @if (isAdmin() && currentUser()?.email?.toLowerCase() === 'paulqlove@gmail.com') {
