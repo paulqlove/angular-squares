@@ -71,7 +71,8 @@
             <div class="flex flex-1 items-center justify-between border-b border-qs-line text-2xl last:border-0 lg:text-3xl">
               <span class="qs-label text-qs-muted">{{ label(q) }}</span>
               @if (g.winners?.[q]; as w) {
-                <span [class]="colors()[w] + ' truncate rounded-inner px-3 py-0.5 font-semibold text-slate-900'">{{ w }}</span>
+                <span class="mx-4 min-w-0 flex-1 truncate text-lg tabular-nums text-qs-muted lg:text-2xl">{{ winningScore(q) }}</span>
+                <span [class]="colors()[w] + ' max-w-[65%] shrink-0 truncate rounded-inner px-3 py-0.5 font-semibold text-slate-900'">{{ w }}</span>
               } @else {
                 <span class="text-qs-muted">—</span>
               }

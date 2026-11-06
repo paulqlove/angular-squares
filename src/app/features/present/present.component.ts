@@ -155,6 +155,14 @@ export class PresentComponent implements OnInit, OnDestroy {
     });
   }
 
+  /** The score that won a quarter, e.g. "PHI 3 – WSH 0". Shown only once the quarter has a winner. */
+  protected winningScore(quarter: string): string {
+    const g = this.game();
+    const score = g?.scores?.[quarter as 'q1'];
+    if (!g || !score) return '';
+    return `${g.awayTeam || 'Away'} ${score.away} – ${g.homeTeam || 'Home'} ${score.home}`;
+  }
+
   protected label(quarter: string): string {
     return quarterLabel(quarter, this.gameOver());
   }
