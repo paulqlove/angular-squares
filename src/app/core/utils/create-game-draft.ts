@@ -4,6 +4,7 @@ import type { SportType } from '../services/espn.service';
 
 const KEY = 'qs_create_draft';
 const MAX_AGE_MS = 2 * 60 * 60 * 1000;
+const AUTO_SUBMIT_MAX_AGE_MS = 15 * 60 * 1000;
 
 export interface CreateGameDraft {
   /** Set when the visitor pressed Create while signed out: finish the create after sign-in. */
@@ -144,4 +145,9 @@ export function clearCreateDraft(storage: Pick<Storage, 'removeItem'> = localSto
   } catch {
     // ignore
   }
+}
+
+/** True while the visitor pressed Create a moment ago and is still signing in. Stale drafts never create a board on their own. */
+export function isPendingAutoSubmit(draft: CreateGameDraft | null, now = Date.now()): draft is CreateGameDraft {
+  return !!draft && draft.autoSubmit === true && now - draft.savedAt < AUTO_SUBMIT_MAX_AGE_MS;
 }

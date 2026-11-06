@@ -1,10 +1,10 @@
-import { Component, ChangeDetectionStrategy, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, effect, inject, signal } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router, RouterLink } from '@angular/router';
 import { AppHeaderComponent } from '../../components/ui/app-header/app-header.component';
 import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.component';
 import { AuthService } from '../../core/services/auth.service';
-import { clearCreateDraft, loadCreateDraft, saveCreateDraft } from '../../core/utils/create-game-draft';
+import { clearCreateDraft, isPendingAutoSubmit, loadCreateDraft, saveCreateDraft } from '../../core/utils/create-game-draft';
 import { CreateGameFormComponent, CreateGameSubmit } from './create-game-form.component';
 
 /**
@@ -40,21 +40,27 @@ import { CreateGameFormComponent, CreateGameSubmit } from './create-game-form.co
     </app-auth-modal>
   `
 })
-export class CreateGameComponent implements OnInit, OnDestroy {
+export class CreateGameComponent implements OnInit {
   showAuthModal = signal(false);
 
   private authService = inject(AuthService);
-  private handedOff = false;
   private router = inject(Router);
   private title = inject(Title);
 
-  ngOnInit(): void {
-    this.title.setTitle('Create a football squares game | QuarterScore');
+  constructor() {
+    // Google sign-in swaps this whole page for a loading screen and brings it back as a new, blank copy,
+    // so the sign-in dialog's own "signed in" signal is lost. Watch the account instead: as soon as a
+    // host is signed in and the visitor had pressed Create, hand the saved entries to the dashboard.
+    effect(() => {
+      if (this.authService.canCreateGame() && isPendingAutoSubmit(loadCreateDraft())) {
+        console.info('[create-flow] /create: signed in with a pending create, going to /dashboard');
+        void this.router.navigate(['/dashboard']);
+      }
+    });
   }
 
-  ngOnDestroy(): void {
-    console.info('[create-flow] /create: leaving page', { handedOff: this.handedOff });
-    if (!this.handedOff) clearCreateDraft();
+  ngOnInit(): void {
+    this.title.setTitle('Create a football squares game | QuarterScore');
   }
 
   goHome(): void {
@@ -72,7 +78,6 @@ export class CreateGameComponent implements OnInit, OnDestroy {
     console.info('[create-flow] /create: authenticated', { canCreate: this.authService.canCreateGame(), draftSaved: !!loadCreateDraft() });
     // A guest is "authenticated" but cannot host: leave the dialog open for a real sign-in.
     if (!this.authService.canCreateGame()) return;
-    this.handedOff = true;
     this.showAuthModal.set(false);
     console.info('[create-flow] /create: going to /dashboard');
     void this.router.navigate(['/dashboard']);
