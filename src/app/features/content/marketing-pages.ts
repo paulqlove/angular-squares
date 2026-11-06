@@ -192,7 +192,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
           'Pick the board that matches your group. A party of 20 people might take 5 squares each on a 100-square board, or claim different squares on a smaller board. Smaller boards fill faster and give each square more chances to win.'
         ],
         bullets: [
-          '100 squares: Large parties, offices, or pools where many people join.',
+          '100 squares: Large parties and offices where many people join.',
           '50 squares: Medium groups who want a full board without needing 100 names.',
           '25 squares: Small gatherings of 10 to 25 people, or casual game-day fun.'
         ]
