@@ -891,7 +891,7 @@ import {
 
     </div>
     @if (showUpgradeDialog()) {
-      <app-upgrade-pass-dialog (dismissed)="closeUpgrade()" />
+      <app-upgrade-pass-dialog [trigger]="upgradeTrigger()" (dismissed)="closeUpgrade()" />
     }
   `,
     changeDetection: ChangeDetectionStrategy.Eager,
@@ -998,6 +998,7 @@ export class DashboardComponent implements OnInit {
   isCheckingBoardLimit = signal(false);
   showCreateModal = signal(false);
   showUpgradeDialog = signal(false);
+  upgradeTrigger = signal<'limit' | 'pass'>('limit');
   private upgradeReturnFocus: HTMLElement | null = null;
   shareModalGameId = signal<string | null>(null);
   espnGames = signal<EspnGame[]>([]);
@@ -1099,6 +1100,7 @@ export class DashboardComponent implements OnInit {
       this.fetchEspnGames().then(() => this.applyPendingEspnGame());
     } catch (error) {
       if (error instanceof ActiveBoardLimitError) {
+        this.upgradeTrigger.set('limit');
         this.showUpgradeDialog.set(true);
       }
     } finally {
@@ -1158,6 +1160,7 @@ export class DashboardComponent implements OnInit {
       this.fetchEspnGames();
     } catch (error) {
       if (error instanceof ActiveBoardLimitError) {
+        this.upgradeTrigger.set('limit');
         this.showUpgradeDialog.set(true);
       } else {
         this.toastService.error('Failed to check your boards. Try again.');
@@ -1169,6 +1172,7 @@ export class DashboardComponent implements OnInit {
 
   openUpgrade(event: Event): void {
     if (event.currentTarget instanceof HTMLElement) this.upgradeReturnFocus = event.currentTarget;
+    this.upgradeTrigger.set('pass');
     this.showUpgradeDialog.set(true);
   }
 
@@ -1364,6 +1368,7 @@ export class DashboardComponent implements OnInit {
       if (error instanceof ActiveBoardLimitError) {
         this.showCreateModal.set(false);
         this.resetCreateForm();
+        this.upgradeTrigger.set('limit');
         this.showUpgradeDialog.set(true);
       } else {
         this.toastService.error('Failed to create game');
