@@ -10,6 +10,8 @@ The upgrade dialog is a fake door for the Season Pass (read on Jan 15, 2027). Tw
 
 Dialog v2 shipped on **2026-11-06 02:38 UTC** (PR #127). Read the Jan 15 bar from that moment only: at least 15 clicks AND at least 150 unique hosts shown.
 
+The dialog's end date changed from "through Mar 1, 2027" to "through June 30, 2027" on 2026-11-06 (afternoon US time, when this change merged). No real host had clicked before that (only the owner's test accounts, which are excluded), so the Jan 15 read still counts from the v2 ship time above.
+
 ## On Paul's Mac (Firebase CLI is signed in)
 
 ```bash
