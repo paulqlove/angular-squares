@@ -58,8 +58,8 @@ Nobody picks their numbers. On a fair board, everyone claims squares first and t
 A weak pair isn't dead, either:
 
 - History describes what happened over thousands of games. It doesn't say what tonight's game will do. One safety or one missed extra point and a 2 is in play.
-- Even the best square hits at the final score less than 4% of the time.
-- A board with a winner every quarter gets four chances for a surprise.
+- Even the best square ends a game less than 4% of the time.
+- A board with a winner every quarter gets a few more chances for a surprise.
 
 ## See it on your own board
 
