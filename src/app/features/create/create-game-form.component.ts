@@ -94,7 +94,7 @@ export interface CreateGameSubmit {
             />
           </div>
         }
-        <div class="qs-canvas mt-3 max-h-80 overflow-y-auto overscroll-contain rounded-inner p-2 sm:max-h-72">
+        <div class="qs-canvas mt-3 max-h-80 overflow-y-auto rounded-inner p-2 sm:max-h-72">
           <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
             @for (game of filteredEspnGames(); track game.id) {
               <button
