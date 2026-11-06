@@ -537,3 +537,6 @@ body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
     height: 0.6in;
   }
 }
+
+/* Images inside blog posts */
+.prose-content img { max-width: 100%; height: auto; margin: 1.5rem 0; border: 1px solid var(--qs-line); border-radius: var(--qs-r-inner); }
