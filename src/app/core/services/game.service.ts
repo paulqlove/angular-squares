@@ -17,7 +17,7 @@ import { environment } from '../../../environments/environment';
 import { ActiveBoardLimitError } from '../errors/active-board-limit.error';
 import { EspnService } from './espn.service';
 import { RolePreviewService } from './role-preview.service';
-import { DEFAULT_EMPTY_QUARTER_RULE, Entitlement, EmptyQuarterRule, PLANS, QuarterSplit, isActive, isEmptyQuarterRule } from '../plans';
+import { DEFAULT_EMPTY_QUARTER_RULE, Entitlement, EmptyQuarterRule, NO_EXPIRY, PLANS, QuarterSplit, isActive, isEmptyQuarterRule } from '../plans';
 import { AuthService } from './auth.service';
 import {
   BoardActivity,
@@ -996,6 +996,16 @@ export class GameService {
     await set(ref(this.db, `giftedSeasonPass/${key}`), {
       expiresAt,
       updatedAt: now
+    });
+  }
+
+  /** Make a gifted season pass never expire. Admin only. */
+  async setSeasonPassNoExpiry(email: string): Promise<void> {
+    if (!this.isBrowser) throw new Error('Cannot update pass on server');
+    const key = this.encodeEmailKey(email);
+    await set(ref(this.db, `giftedSeasonPass/${key}`), {
+      expiresAt: NO_EXPIRY,
+      updatedAt: Date.now()
     });
   }
 

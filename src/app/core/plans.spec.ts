@@ -1,4 +1,4 @@
-import { DAY_MS, DEFAULT_SPLIT, PLANS, effectiveQuarterShares, isEmptyQuarterRule, quarterPoints, applyPurchase, daysLeft, extendExpiry, isValidSplit, seasonPriceFor, splitFractions } from './plans';
+import { DAY_MS, DEFAULT_SPLIT, PLANS, NO_EXPIRY, effectiveQuarterShares, isEmptyQuarterRule, isNoExpiry, quarterPoints, applyPurchase, daysLeft, extendExpiry, isValidSplit, seasonPriceFor, splitFractions } from './plans';
 
 const NOW = Date.UTC(2026, 10, 2);
 
@@ -141,5 +141,20 @@ describe('quarterPoints', () => {
 
   it('is all zeros for an empty board', () => {
     expect(quarterPoints(0, classic)).toEqual({ q1: 0, q2: 0, q3: 0, q4: 0 });
+  });
+});
+
+describe('passes that never expire', () => {
+  it('NO_EXPIRY is far in the future and counts as active', () => {
+    expect(NO_EXPIRY).toBeGreaterThan(NOW + 50 * 365 * DAY_MS);
+    expect(isNoExpiry(NO_EXPIRY)).toBe(true);
+    expect(isNoExpiry(NOW + 210 * DAY_MS)).toBe(false);
+    expect(isNoExpiry(undefined)).toBe(false);
+    expect(NO_EXPIRY > NOW).toBe(true);
+  });
+
+  it('shows no day count for a pass that never expires, but still counts a normal one', () => {
+    expect(daysLeft({ plan: 'season', expiresAt: NO_EXPIRY }, NOW)).toBe(0);
+    expect(daysLeft({ plan: 'season', expiresAt: NOW + 3 * DAY_MS }, NOW)).toBe(3);
   });
 });

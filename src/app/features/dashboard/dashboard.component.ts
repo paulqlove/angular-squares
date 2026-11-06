@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { NgTemplateOutlet } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
 import { GameService, GameListItem, BoardSize } from '../../core/services/game.service';
-import { QuarterSplit, SPLIT_PRESETS, DEFAULT_SPLIT, DEFAULT_EMPTY_QUARTER_RULE, EmptyQuarterRule, isValidSplit } from '../../core/plans';
+import { QuarterSplit, SPLIT_PRESETS, DEFAULT_SPLIT, DEFAULT_EMPTY_QUARTER_RULE, EmptyQuarterRule, isNoExpiry, isValidSplit } from '../../core/plans';
 import { EspnService, EspnGame, SportType, SPORT_CONFIG } from '../../core/services/espn.service';
 import { getTeamLogoByAbbreviation, getTeamColors } from '../content/teams-data';
 import { ToastService } from '../../core/services/toast.service';
@@ -233,14 +233,19 @@ import {
                             <tr class="group">
                               <td class="min-w-0 break-all px-4 py-3 text-qs-ink">{{ pass.email }}</td>
                               <td class="whitespace-nowrap px-4 py-3 text-right">
-                                <span
-                                  class="inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium"
+                                <button
+                                  type="button"
+                                  class="inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium transition-[filter] hover:brightness-110 disabled:cursor-default disabled:hover:brightness-100"
                                   [class]="isPassExpired(pass.expiresAt)
                                     ? 'bg-qs-warn-soft text-qs-warn'
                                     : 'bg-qs-ok-soft text-qs-ok'"
+                                  [disabled]="hasNoExpiry(pass.expiresAt) || updatingPassEmail() === pass.email"
+                                  [attr.title]="hasNoExpiry(pass.expiresAt) ? 'This pass never expires' : 'Click to make this pass never expire'"
+                                  [attr.aria-label]="hasNoExpiry(pass.expiresAt) ? pass.email + ': never expires' : 'Make the pass for ' + pass.email + ' never expire'"
+                                  (click)="makePassPermanent(pass.email)"
                                 >
                                   {{ formatExpiry(pass.expiresAt) }}
-                                </span>
+                                </button>
                               </td>
                               <td class="px-4 py-3 text-right">
                                 <button
@@ -1743,6 +1748,7 @@ export class DashboardComponent implements OnInit {
   newGiftEmail = '';
   newGiftDays = 210;
   isLoadingGiftedPasses = signal(false);
+  updatingPassEmail = signal<string | null>(null);
   isGrantingPass = signal(false);
 
   toggleAdminPanel(): void {
@@ -1795,7 +1801,25 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  hasNoExpiry(expiresAt: number): boolean {
+    return isNoExpiry(expiresAt);
+  }
+
+  async makePassPermanent(email: string): Promise<void> {
+    this.updatingPassEmail.set(email);
+    try {
+      await this.gameService.setSeasonPassNoExpiry(email);
+      this.toastService.success(`${email} now has a pass that never expires`);
+      await this.loadGiftedPasses();
+    } catch {
+      this.toastService.error('Failed to update pass');
+    } finally {
+      this.updatingPassEmail.set(null);
+    }
+  }
+
   formatExpiry(expiresAt: number): string {
+    if (isNoExpiry(expiresAt)) return 'Never expires';
     const days = Math.ceil((expiresAt - Date.now()) / 86_400_000);
     if (days <= 0) return 'Expired';
     if (days === 1) return '1 day left';

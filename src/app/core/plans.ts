@@ -60,8 +60,18 @@ export function seasonPriceFor(current: Entitlement | null | undefined, now = Da
   return Math.round((PLANS.season.priceUsd - credit) * 100) / 100;
 }
 
+/** A pass that never expires is stored as a date far in the future, so every expiry check keeps working. */
+export const NO_EXPIRY = Date.UTC(2100, 0, 1);
+
+export function isNoExpiry(expiresAt: number | null | undefined): boolean {
+  return typeof expiresAt === 'number' && expiresAt >= NO_EXPIRY;
+}
+
+/** Days left on a pass, or 0 when there is none to show (no pass, expired, or it never expires). */
 export function daysLeft(entitlement: Entitlement | null | undefined, now = Date.now()): number {
-  return isActive(entitlement, now) ? Math.ceil((entitlement!.expiresAt - now) / DAY_MS) : 0;
+  return isActive(entitlement, now) && !isNoExpiry(entitlement!.expiresAt)
+    ? Math.ceil((entitlement!.expiresAt - now) / DAY_MS)
+    : 0;
 }
 
 /** Per-quarter split in tenths of a percent (sums to 1000). */
