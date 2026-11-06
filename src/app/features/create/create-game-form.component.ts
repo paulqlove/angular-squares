@@ -409,11 +409,22 @@ export class CreateGameFormComponent implements OnInit {
     const draft = this.toDraft();
     const result = buildCreateGameValues(draft, this.sanitizer, this.customSplitsAllowed);
     if (!result.ok) {
-      if (result.reason === 'name') this.gameNameError.set(true);
+      if (result.reason === 'name') {
+        this.gameNameError.set(true);
+        this.showField('new-game-name');
+      }
       return;
     }
     this.gameNameError.set(false);
     this.submitted.emit({ draft, values: result.values });
+  }
+
+  /** The field with the error can be far below the Create button: bring it into view and put the cursor there. */
+  private showField(id: string): void {
+    const field = document.getElementById(id);
+    if (!field) return;
+    field.scrollIntoView({ block: 'center' });
+    field.focus({ preventScroll: true });
   }
 
   private applyDraft(draft: CreateGameDraft): void {
