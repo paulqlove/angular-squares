@@ -41,7 +41,7 @@ import {
           (click)="$event.stopPropagation()"
         >
           <div class="flex items-start justify-between gap-3">
-            <p class="qs-eyebrow qs-eyebrow-bar">Season Pass / Coming soon</p>
+            <p class="qs-eyebrow qs-eyebrow-bar">{{ trigger === 'ended' ? 'Free board' : 'Season Pass / Coming soon' }}</p>
             <button
               #closeButton
               type="button"
@@ -56,23 +56,38 @@ import {
           </div>
 
           <h2 id="upgrade-title" class="qs-title mt-3 text-3xl sm:text-4xl">
-            @if (trigger === 'limit') {
+            @if (trigger === 'ended') {
+              Your last game is <span class="text-qs-accent">over</span>.
+            } @else if (trigger === 'limit') {
               Board 1 is live. Want a <span class="text-qs-accent">second</span>?
             } @else {
               Run more boards, all <span class="text-qs-accent">season</span>.
             }
           </h2>
 
-          <p class="mt-6 font-mono text-4xl font-semibold tabular-nums">$5.99</p>
-          <p id="upgrade-summary" class="qs-label mt-3 text-qs-muted">One time · through Mar 1, 2027</p>
+          @if (trigger === 'ended') {
+            <p id="upgrade-summary" class="mt-4 text-base text-qs-muted">
+              Free accounts keep one board. Reset {{ boardName ? '"' + boardName + '"' : 'it' }} for your next game, or delete it to start fresh.
+            </p>
+            <div class="mt-5 flex flex-col gap-2 sm:flex-row">
+              <button type="button" class="qs-btn qs-btn-primary w-full sm:flex-1" (click)="resetOld.emit()">Reset old game</button>
+              <button type="button" class="qs-btn qs-btn-secondary w-full sm:flex-1" (click)="deleteOld.emit()">Delete old game</button>
+            </div>
+          } @else {
+            <p class="mt-6 font-mono text-4xl font-semibold tabular-nums">$5.99</p>
+            <p id="upgrade-summary" class="qs-label mt-3 text-qs-muted">One time · through Mar 1, 2027</p>
 
-          <ul class="mt-5 flex flex-wrap gap-2" aria-label="Included">
-            <li class="qs-badge qs-badge-ok">Live scores</li>
-            <li class="qs-badge qs-badge-ok">Unlimited boards</li>
-            <li class="qs-badge qs-badge-ok">Custom splits</li>
-          </ul>
+            <ul class="mt-5 flex flex-wrap gap-2" aria-label="Included">
+              <li class="qs-badge qs-badge-ok">Live scores</li>
+              <li class="qs-badge qs-badge-ok">Unlimited boards</li>
+              <li class="qs-badge qs-badge-ok">Custom splits</li>
+            </ul>
+          }
 
           <div class="mt-6 border-t border-qs-line pt-5">
+            @if (trigger === 'ended') {
+              <p class="mb-3 text-base text-qs-ink">Want more active boards? Leave your email.</p>
+            }
             @if (submitted()) {
               <p #status tabindex="-1" role="status" class="rounded-inner border border-qs-line bg-qs-panel-2 p-4 text-base text-qs-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-qs-accent">
                 You're on the list. We'll email you when the Season Pass is ready.
@@ -142,8 +157,12 @@ import {
 })
 export class UpgradePassDialogComponent implements AfterViewInit, OnDestroy {
   /** What opened the dialog: the one-board limit, or the 'See Season Pass' button. */
-  @Input() trigger: 'limit' | 'pass' = 'limit';
+  @Input() trigger: 'limit' | 'pass' | 'ended' = 'limit';
+  /** Name of the finished board, for the 'ended' version. */
+  @Input() boardName = '';
   @Output() dismissed = new EventEmitter<void>();
+  @Output() resetOld = new EventEmitter<void>();
+  @Output() deleteOld = new EventEmitter<void>();
   @ViewChild('closeButton') closeButton?: ElementRef<HTMLButtonElement>;
   @ViewChild('dialogRoot') dialogRoot?: ElementRef<HTMLElement>;
   @ViewChild('emailInput') emailInput?: ElementRef<HTMLInputElement>;
@@ -177,7 +196,7 @@ export class UpgradePassDialogComponent implements AfterViewInit, OnDestroy {
     document.body.style.overflow = 'hidden';
     this.closeButton?.nativeElement.focus();
     const user = this.authService.realUser();
-    if (user && !user.isGuest && !this.authService.isPreviewAdmin()) {
+    if (this.trigger !== 'ended' && user && !user.isGuest && !this.authService.isPreviewAdmin()) {
       void this.gameService.recordUpgradeView(user.uid, this.trigger);
     }
   }
@@ -224,10 +243,13 @@ export class UpgradePassDialogComponent implements AfterViewInit, OnDestroy {
     }
 
     const prefilled = this.prefilledEmail !== '' && this.email.trim().toLowerCase() === this.prefilledEmail;
-    this.analytics.track(UPGRADE_NOTIFY_EVENT, { source: NOTIFY_SOURCE, trigger: this.trigger, prefilled, dialog_version: 'v2' });
+    // The 'ended' version is a general-interest signup, not the Season Pass pitch: keep it out of the Jan 15 read.
+    const source = this.trigger === 'ended' ? 'ended_board_dialog' : NOTIFY_SOURCE;
+    const stored: 'limit' | 'pass' = this.trigger === 'pass' ? 'pass' : 'limit';
+    this.analytics.track(UPGRADE_NOTIFY_EVENT, { source, trigger: this.trigger, prefilled, dialog_version: 'v2' });
     this.isSubmitting.set(true);
     try {
-      await this.gameService.createNotifyMe(this.email, user.uid, NOTIFY_SOURCE, { prefilled, trigger: this.trigger });
+      await this.gameService.createNotifyMe(this.email, user.uid, source, { prefilled, trigger: stored });
       this.submitted.set(true);
       setTimeout(() => this.status?.nativeElement.focus());
     } catch {

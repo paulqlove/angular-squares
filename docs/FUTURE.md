@@ -33,6 +33,8 @@ Direction: Free plus one $5.99 pass (replaces the Week/Season/stacking table abo
 | Custom quarter split | No | Yes |
 | Ads | None | None |
 
+Free hosts keep one board (Paul, Nov 5, 2026): once its game has ended, New game opens a dialog to reset the old game (clears it and opens its settings to pick the next game) or delete it, with an email box for anyone who wants more active boards (saved with source `ended_board_dialog`, kept out of the Jan 15 read). Paid plans with room and admins are unaffected. This supersedes the weekly-host reading of 'active' for free accounts; the 7-day unlinked rule only matters for paid hosts.
+
 Decided Nov 5, 2026: no ads (adFree is not sold as a perk), no lifetime cap, presentation mode and the heat map moved from the pass to Free (a guest who sees a free board on a party TV is the funnel). The upgrade dialog lists only live scores, more boards and custom splits, in points and never money. Fake-door test story changed on this date: read it Jan 15, 2027 with at least 15 clicks AND at least 150 unique hosts shown (fewer shown means inconclusive, not "nobody pays").
 
 Ship together, only once a pass can be bought (about 3 evenings): the live-scoring gate (plan flag, hide the ESPN link, stop the browser poller, skip free owners in `syncEspnScores`, rules for new links), undo on manual scoring, and unlinked boards counting for 7 days from creation (today 48 hours, too short for a Thursday board for a Sunday game). Boards already linked to ESPN keep working until final.

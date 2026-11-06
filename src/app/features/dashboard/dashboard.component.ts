@@ -893,7 +893,7 @@ import {
 
     </div>
     @if (showUpgradeDialog()) {
-      <app-upgrade-pass-dialog [trigger]="upgradeTrigger()" (dismissed)="closeUpgrade()" />
+      <app-upgrade-pass-dialog [trigger]="upgradeTrigger()" [boardName]="endedBoard()?.name ?? ''" (dismissed)="closeUpgrade()" (resetOld)="resetOldBoard()" (deleteOld)="deleteOldBoard()" />
     }
   `,
     changeDetection: ChangeDetectionStrategy.Eager,
@@ -1000,7 +1000,9 @@ export class DashboardComponent implements OnInit {
   isCheckingBoardLimit = signal(false);
   showCreateModal = signal(false);
   showUpgradeDialog = signal(false);
-  upgradeTrigger = signal<'limit' | 'pass'>('limit');
+  upgradeTrigger = signal<'limit' | 'pass' | 'ended'>('limit');
+  /** The finished board shown in the 'ended' dialog. */
+  endedBoard = signal<GameListItem | null>(null);
   private upgradeReturnFocus: HTMLElement | null = null;
   shareModalGameId = signal<string | null>(null);
   espnGames = signal<EspnGame[]>([]);
@@ -1097,6 +1099,7 @@ export class DashboardComponent implements OnInit {
     this.isCheckingBoardLimit.set(true);
     try {
       await this.gameService.assertUnderFreeBoardLimit(user.uid);
+      if (this.showEndedBoardDialog()) return;
       this.gameListOpen = true;
       this.showCreateModal.set(true);
       this.fetchEspnGames().then(() => this.applyPendingEspnGame());
@@ -1157,6 +1160,7 @@ export class DashboardComponent implements OnInit {
     this.isCheckingBoardLimit.set(true);
     try {
       await this.gameService.assertUnderFreeBoardLimit(user.uid);
+      if (this.showEndedBoardDialog()) return;
       this.gameListOpen = true;
       this.showCreateModal.set(true);
       this.fetchEspnGames();
@@ -1169,6 +1173,52 @@ export class DashboardComponent implements OnInit {
       }
     } finally {
       this.isCheckingBoardLimit.set(false);
+    }
+  }
+
+  /**
+   * A free host whose only board has ended: ask them to reset or delete it before starting another.
+   * Returns true when the dialog was opened. Paid plans with room, and admins, are not affected.
+   */
+  private showEndedBoardDialog(): boolean {
+    const owned = this.myGames();
+    if (owned.length === 0 || owned.length < this.planService.features().activeBoards) return false;
+    this.endedBoard.set(owned[0]);
+    this.upgradeTrigger.set('ended');
+    this.showUpgradeDialog.set(true);
+    return true;
+  }
+
+  /** Clears the finished board, then opens its settings so the host can pick the next game. */
+  async resetOldBoard(): Promise<void> {
+    const board = this.endedBoard();
+    if (!board) return;
+    if (!confirm('Reset this game? Squares, numbers and scores are cleared. Players keep your link.')) return;
+    try {
+      await this.gameService.resetGame(board.id, board.boardSize);
+      this.myGames.update(games => games.map(g => g.id === board.id ? { ...g, squaresFilled: 0, playerCount: 0, confirmedCount: 0, isLocked: false } : g));
+      this.showUpgradeDialog.set(false);
+      this.openEditModal(board);
+    } catch {
+      this.toastService.error('Could not reset the game. Try again.');
+    }
+  }
+
+  /** Deletes the finished board, then opens the new game form. */
+  async deleteOldBoard(): Promise<void> {
+    const board = this.endedBoard();
+    const user = this.currentUser();
+    if (!board || !user) return;
+    if (!confirm('Delete this game? This cannot be undone.')) return;
+    try {
+      await this.gameService.deleteGame(board.id, user.uid);
+      this.myGames.update(games => games.filter(g => g.id !== board.id));
+      this.showUpgradeDialog.set(false);
+      this.gameListOpen = true;
+      this.showCreateModal.set(true);
+      void this.fetchEspnGames();
+    } catch {
+      this.toastService.error('Could not delete the game. Try again.');
     }
   }
 
