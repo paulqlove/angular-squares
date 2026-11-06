@@ -63,15 +63,14 @@ import {
             }
           </h2>
 
-          <p class="mt-5 font-mono text-4xl font-semibold tabular-nums">$5.99</p>
-          <p class="qs-label mt-1 text-qs-muted">One time · through Mar 1, 2027</p>
+          <p class="mt-6 font-mono text-4xl font-semibold tabular-nums">$5.99</p>
+          <p id="upgrade-summary" class="qs-label mt-3 text-qs-muted">One time · through Mar 1, 2027</p>
 
           <ul class="mt-5 flex flex-wrap gap-2" aria-label="Included">
             <li class="qs-badge qs-badge-ok">Live scores</li>
-            <li class="qs-badge qs-badge-ok">10 boards</li>
+            <li class="qs-badge qs-badge-ok">Unlimited boards</li>
             <li class="qs-badge qs-badge-ok">Custom splits</li>
           </ul>
-          <p id="upgrade-summary" class="mt-3 text-sm text-qs-muted">TV mode and the heat map stay free.</p>
 
           <div class="mt-6 border-t border-qs-line pt-5">
             @if (submitted()) {
