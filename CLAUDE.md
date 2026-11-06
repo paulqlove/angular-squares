@@ -126,6 +126,7 @@ Game owners can link a board to an ESPN game. `environment.serverScoring` defaul
 - [Enhancement Plan](@./ENHANCEMENT_PLAN.md) - Full roadmap with technical specs
 - [TODO](@./docs/TODO.md) - Current task tracking
 - [Future Features](@./docs/FUTURE.md) - Product roadmap and monetization tiers
+- [Weekly report](@./docs/REPORTS.md) - One command for the board's metrics (`node scripts/report/report.mjs`), optional Google Analytics and Search Console
 - [Checking signups](@./docs/CHECKING_SIGNUPS.md) - How to read Notify-me signups and upgrade-dialog views (fake-door test)
 
 ## Deployment
