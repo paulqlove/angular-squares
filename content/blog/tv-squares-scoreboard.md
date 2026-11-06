@@ -4,7 +4,7 @@ description: "Show your football squares board on a TV with QuarterScore's TV mo
 date: "2026-11-19"
 slug: tv-squares-scoreboard
 ogImage: /assets/og-image.png
-draft: true
+draft: false
 ---
 
 You can put a football squares board on your TV by opening the game on a computer, pressing Present, and mirroring that browser tab to the screen.
@@ -31,7 +31,7 @@ The QR code opens the same shareable board link you get from Share. A friend who
 
 Open your game and press **Present**. The button shows on the game page for the host and co-host. It is hidden on narrow windows, under 640px wide.
 
-<!-- SCREENSHOT 2 PENDING: game page header with the Present button -->
+<img src="/assets/blog/tv-mode/game-present-button.png" alt="The top of a QuarterScore game page, with the Share, Present and Your Games buttons next to the board title." width="1400" height="138">
 
 Use a computer, a laptop, or a tablet held sideways. On a phone or a portrait tablet, anything under 960px wide, the TV page says "Open this on a TV or computer" instead of showing the board.
 

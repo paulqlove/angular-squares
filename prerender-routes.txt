@@ -2,6 +2,7 @@
 /best-squares-numbers
 /printable-football-squares
 /blog
+/blog/tv-squares-scoreboard
 /teams
 /team/buffalo-bills
 /team/miami-dolphins
