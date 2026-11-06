@@ -118,6 +118,42 @@ html, body {
   --qs-p-rose: #d29aa3; --qs-p-coral: #d4a28c; --qs-p-apricot: #cfaf80; --qs-p-butter: #c9ba7c; --qs-p-tan: #b9a68e; --qs-p-sky: #93aacb; --qs-p-aqua: #91b3c1; --qs-p-periwinkle: #9ea1cc; --qs-p-lilac: #ae9cc6; --qs-p-orchid: #c49ab8;
 }
 
+/* Seasonal: Thanksgiving 2026. On for Mon Nov 23 to Sat Nov 28 (the script in index.html sets data-season by the visitor's date;
+   ?season=thanksgiving previews it any time). REMOVE this block and that script after Nov 30 2026.
+   Warm cream + pumpkin. Only tokens change, so every component follows. Player pastels stay as they are. */
+:root[data-season="thanksgiving"] {
+  --qs-bg: #f8f1e4; --qs-panel: #fffaf0; --qs-panel-2: #f6ecd9;
+  --qs-canvas: #eadfc7; --qs-canvas-dot: rgba(60,30,10,.16);
+  --qs-ink: #2a1a10; --qs-muted: #6b5a4a; --qs-line: #e6d9c0; --qs-line-strong: #8c7b64;
+  --qs-accent: #b34a12; --qs-accent-hover: #8f3a0d; --qs-accent-soft: #f8dcc3; --qs-on-accent: #ffffff;
+  --qs-live: #7a5b00; --qs-live-fill: #f2b134;
+  --qs-tile: #2b1a12; --qs-tile-ink: #f6ead7; --qs-tile-muted: #bfa88c;
+  --qs-shadow: 0 10px 28px -22px rgba(60,30,10,.45);
+  --qs-shadow-pop: 0 16px 40px -16px rgba(60,30,10,.5);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-season="thanksgiving"]:not([data-theme="light"]) {
+    --qs-bg: #1c120c; --qs-panel: #2a1b12; --qs-panel-2: #35231a;
+    --qs-canvas: #140d08; --qs-canvas-dot: rgba(246,234,215,.12);
+    --qs-ink: #f6ead7; --qs-muted: #b9a68e; --qs-line: #4a3427; --qs-line-strong: #7d6650;
+    --qs-accent: #f0a04b; --qs-accent-hover: #f7b868; --qs-accent-soft: #4a2c14; --qs-on-accent: #1c120c;
+    --qs-live: #f2b134; --qs-live-fill: #f2b134;
+    --qs-tile: #120b07; --qs-tile-ink: #f6ead7; --qs-tile-muted: #bfa88c;
+    --qs-shadow: 0 10px 28px -22px rgba(0,0,0,.8);
+    --qs-shadow-pop: 0 16px 40px -16px rgba(0,0,0,.85);
+  }
+}
+:root[data-season="thanksgiving"][data-theme="dark"] {
+  --qs-bg: #1c120c; --qs-panel: #2a1b12; --qs-panel-2: #35231a;
+  --qs-canvas: #140d08; --qs-canvas-dot: rgba(246,234,215,.12);
+  --qs-ink: #f6ead7; --qs-muted: #b9a68e; --qs-line: #4a3427; --qs-line-strong: #7d6650;
+  --qs-accent: #f0a04b; --qs-accent-hover: #f7b868; --qs-accent-soft: #4a2c14; --qs-on-accent: #1c120c;
+  --qs-live: #f2b134; --qs-live-fill: #f2b134;
+  --qs-tile: #120b07; --qs-tile-ink: #f6ead7; --qs-tile-muted: #bfa88c;
+  --qs-shadow: 0 10px 28px -22px rgba(0,0,0,.8);
+  --qs-shadow-pop: 0 16px 40px -16px rgba(0,0,0,.85);
+}
+
 /* Board canvas: the stage the grid sits on */
 .qs-canvas {
   background: var(--qs-canvas);
