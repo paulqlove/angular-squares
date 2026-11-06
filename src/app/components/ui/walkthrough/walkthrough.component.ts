@@ -96,7 +96,11 @@ export class WalkthroughComponent {
     const step = this.walkthroughService.currentStep();
     const position = step?.position || 'bottom';
     const padding = 16;
-    const tooltipWidth = 320;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    // On a phone there is no room beside a target, so the card goes above or below it, or across the bottom
+    const narrow = viewportWidth < 640;
+    const tooltipWidth = narrow ? Math.min(viewportWidth - padding * 2, 384) : 320;
     const tooltipHeight = 230;
 
     if (!rect) {
@@ -110,10 +114,7 @@ export class WalkthroughComponent {
     let left: number;
     let top: number;
 
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-
-    switch (position) {
+    switch (narrow && (position === 'left' || position === 'right') ? 'bottom' : position) {
       case 'top':
         left = rect.left + rect.width / 2 - tooltipWidth / 2;
         top = rect.top - padding - tooltipHeight;
@@ -143,7 +144,7 @@ export class WalkthroughComponent {
         break;
     }
 
-    left = Math.max(padding, Math.min(left, viewportWidth - tooltipWidth - padding));
+    left = narrow ? (viewportWidth - tooltipWidth) / 2 : Math.max(padding, Math.min(left, viewportWidth - tooltipWidth - padding));
     top = Math.max(padding, Math.min(top, viewportHeight - tooltipHeight - padding));
 
     return {

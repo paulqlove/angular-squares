@@ -102,6 +102,14 @@ export class WalkthroughService {
     if (element.closest('header')) {
       // The sticky header slides away when the page is scrolled down; going to the top brings it back
       window.scrollTo({ top: 0, behavior: 'instant' });
+    } else if (window.innerWidth < 640 && rect.height > window.innerHeight * 0.5) {
+      // Too tall for the card to sit beside it: show its top, with the card over the lower part
+      if (rect.top < 64 || rect.top > 140) {
+        element.scrollIntoView({ block: 'start', behavior: 'instant' });
+        window.scrollBy({ top: -80, behavior: 'instant' });
+      } else {
+        return;
+      }
     } else if (rect.top < 0 || rect.bottom > window.innerHeight) {
       element.scrollIntoView({ block: 'center', behavior: 'instant' });
     } else {

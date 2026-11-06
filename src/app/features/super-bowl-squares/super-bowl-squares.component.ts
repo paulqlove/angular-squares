@@ -186,7 +186,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     {
       target: 'share-present',
       title: 'Share and present',
-      description: 'Share gives you the game code, the invite link and a TV link. Present fills a TV or big screen with the live board, scores and winners.',
+      description: 'Share gives you the game code, the invite link and a TV link. On a computer, Present fills a TV with the live board, scores and winners. The grid icon takes you back to your dashboard.',
       position: 'bottom'
     },
     {

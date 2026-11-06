@@ -225,14 +225,23 @@ import {
                           <tr>
                             <th class="px-4 py-2 font-medium">Email</th>
                             <th class="px-4 py-2 font-medium text-right">Status</th>
-                            <th class="px-4 py-2 w-20"></th>
                           </tr>
                         </thead>
                         <tbody class="divide-y divide-qs-line bg-qs-panel">
                           @for (pass of giftedPasses(); track pass.email) {
                             <tr class="group">
                               <td class="min-w-0 break-all px-4 py-3 text-qs-ink">{{ pass.email }}</td>
-                              <td class="whitespace-nowrap px-4 py-3 text-right">
+                              <td class="px-4 py-3">
+                                <div class="flex items-center justify-end gap-2">
+                                <button
+                                  type="button"
+                                  (click)="revokePass(pass.email)"
+                                  class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-qs-muted transition-colors hover:text-qs-warn focus-visible:opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                                  [attr.aria-label]="'Revoke the pass for ' + pass.email"
+                                  title="Revoke pass"
+                                >
+                                  <ng-icon name="heroXMark" class="text-base"></ng-icon>
+                                </button>
                                 <button
                                   type="button"
                                   class="inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium transition-[filter] hover:brightness-110 disabled:cursor-default disabled:hover:brightness-100"
@@ -246,15 +255,7 @@ import {
                                 >
                                   {{ formatExpiry(pass.expiresAt) }}
                                 </button>
-                              </td>
-                              <td class="px-4 py-3 text-right">
-                                <button
-                                  type="button"
-                                  (click)="revokePass(pass.email)"
-                                  class="text-xs text-qs-muted hover:text-qs-warn transition-colors opacity-0 group-hover:opacity-100"
-                                >
-                                  Revoke
-                                </button>
+                                </div>
                               </td>
                             </tr>
                           }
