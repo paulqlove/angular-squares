@@ -20,16 +20,22 @@ Source of truth: `src/app/core/plans.ts` (prices, lengths, limits). Research and
 - Hosts stamp `games/{id}/adFreeUntil`; rules cap it at their real pass so viewers can trust it. Ads stay off until `environment.adsEnabled`; block gambling ad categories when a network is added.
 - Not yet built: checkout, Season Pass organizer tools (email list, notifications, export). Coupons are shelved.
 
-### Proposed: Free + one $5.99 pass (not decided, Nov 4, 2026)
+### Free-tier design (board vote 4-0, Paul approved Nov 5, 2026)
 
-Idea (Paul and his brother): drop the Week Pass, the $29.99 Season Pass and the stacking/upgrade-credit logic. Two plans:
+Direction: Free plus one $5.99 pass (replaces the Week/Season/stacking table above once checkout is built). The price stays $5.99; the pass length and wording can change after year 0 (for example 6 months instead of 12). Until checkout exists, everything stays free for everyone.
 
-| | Free | Pass ($5.99, one year) |
+| | Free | Pass ($5.99) |
 |---|---|---|
-| Active boards | 1 | about 10 |
-| Live scoring | Manual scores | Yes |
-| Presentation mode | No | Yes |
+| Active boards | 1 at a time, no lifetime cap | about 10 |
+| Live scoring (ESPN auto-sync) | Manual scores | Yes |
+| Presentation / TV mode | **Yes** (QR and quarterscore.com always on screen) | Yes |
+| Probability heat map | Yes, all accounts | Yes |
 | Custom quarter split | No | Yes |
+| Ads | None | None |
+
+Decided Nov 5, 2026: no ads (adFree is not sold as a perk), no lifetime cap, presentation mode and the heat map moved from the pass to Free (a guest who sees a free board on a party TV is the funnel). The upgrade dialog lists only live scores, more boards and custom splits, in points and never money. Fake-door test story changed on this date: read it Jan 15, 2027 with at least 15 clicks AND at least 150 unique hosts shown (fewer shown means inconclusive, not "nobody pays").
+
+Ship together, only once a pass can be bought (about 3 evenings): the live-scoring gate (plan flag, hide the ESPN link, stop the browser poller, skip free owners in `syncEspnScores`, rules for new links), undo on manual scoring, and unlinked boards counting for 7 days from creation (today 48 hours, too short for a Thursday board for a Sunday game). Boards already linked to ESPN keep working until final.
 
 Sold as a one-time expiring pass (not an auto-renewing subscription). Name it "Season Pass" or "Host Pass", never "paid" in the UI. Guests always join and play for free; only hosts pay. Ad-free is not a selling point while `adsEnabled` is off. Keep the list to these four perks to avoid feature creep. Until checkout exists, everything stays free for everyone.
 
