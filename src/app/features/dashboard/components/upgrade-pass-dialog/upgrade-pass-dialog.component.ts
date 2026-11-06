@@ -5,6 +5,7 @@ import {
   EventEmitter,
   HostListener,
   OnDestroy,
+  Input,
   Output,
   ViewChild,
   inject,
@@ -36,53 +37,51 @@ import {
           aria-modal="true"
           aria-labelledby="upgrade-title"
           aria-describedby="upgrade-summary"
-          class="upgrade-dialog-in w-full max-w-lg rounded-card border border-qs-line bg-qs-panel text-qs-ink shadow-pop"
+          class="upgrade-dialog-in w-full max-w-md rounded-card border border-qs-line bg-qs-panel p-5 text-qs-ink shadow-pop sm:p-7"
           (click)="$event.stopPropagation()"
         >
-          <div class="flex items-start justify-between gap-3 border-b border-default p-4 sm:p-6">
-            <h2 id="upgrade-title" class="text-xl font-bold text-amber-800 dark:text-amber-100 sm:text-2xl">
-              Your free board is still going
-            </h2>
+          <div class="flex items-start justify-between gap-3">
+            <p class="qs-eyebrow qs-eyebrow-bar">Season Pass / Coming soon</p>
             <button
               #closeButton
               type="button"
-              class="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg text-default hover:bg-control focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 dark:focus-visible:outline-white"
+              class="-mr-2 -mt-2 inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-btn text-qs-muted hover:bg-qs-panel-2 hover:text-qs-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-qs-accent"
               (click)="dismiss()"
               aria-label="Close"
             >
-              <svg aria-hidden="true" viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2">
+              <svg aria-hidden="true" viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"></path>
               </svg>
             </button>
           </div>
 
-          <div class="space-y-3 p-4 sm:space-y-5 sm:p-6">
-            <div id="upgrade-summary" class="space-y-2 text-base leading-6 text-default">
-              <p>You can host one active board at a time. TV mode and the heat map are always free. Live scores are free for now.</p>
-              <p>It stays up until a linked game is final, or for 48 hours if you didn't link one.</p>
-            </div>
+          <h2 id="upgrade-title" class="qs-title mt-3 text-3xl sm:text-4xl">
+            @if (trigger === 'limit') {
+              Board 1 is live. Want a <span class="text-qs-accent">second</span>?
+            } @else {
+              Run more boards, all <span class="text-qs-accent">season</span>.
+            }
+          </h2>
 
-            <section class="rounded-xl border border-default p-3 sm:p-4" aria-labelledby="upgrade-pass-name">
-              <p class="text-sm font-semibold uppercase tracking-wide text-label">Coming soon</p>
-              <h3 id="upgrade-pass-name" class="mt-2 font-semibold text-qs-ink">Season Pass</h3>
-              <p class="mt-1 text-2xl font-semibold tabular-nums text-qs-ink">$5.99 <span class="text-sm font-normal text-qs-muted">one time, good through Mar 1, 2027</span></p>
-              <ul class="mt-3 list-disc space-y-1 pl-5 text-base text-default">
-                <li>Live scores that update on their own</li>
-                <li>Up to 10 active boards at once</li>
-                <li>Custom quarter splits</li>
-                <li>Never renews</li>
-              </ul>
-              <p id="upgrade-pass-note" class="mt-3 text-sm leading-5 text-default">No payment today. Your email is only used to tell you when it's ready.</p>
-            </section>
+          <p class="mt-5 font-mono text-4xl font-semibold tabular-nums">$5.99</p>
+          <p class="qs-label mt-1 text-qs-muted">One time · through Mar 1, 2027</p>
 
+          <ul class="mt-5 flex flex-wrap gap-2" aria-label="Included">
+            <li class="qs-badge qs-badge-ok">Live scores</li>
+            <li class="qs-badge qs-badge-ok">10 boards</li>
+            <li class="qs-badge qs-badge-ok">Custom splits</li>
+          </ul>
+          <p id="upgrade-summary" class="mt-3 text-sm text-qs-muted">TV mode and the heat map stay free.</p>
+
+          <div class="mt-6 border-t border-qs-line pt-5">
             @if (submitted()) {
-              <p #status tabindex="-1" role="status" class="rounded-xl border border-default bg-input p-4 text-base text-default focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 dark:focus-visible:outline-white">
-                You're on the list. We'll email you when the Season Pass is available.
+              <p #status tabindex="-1" role="status" class="rounded-inner border border-qs-line bg-qs-panel-2 p-4 text-base text-qs-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-qs-accent">
+                You're on the list. We'll email you when the Season Pass is ready.
               </p>
             } @else {
-              <form (ngSubmit)="submit()" novalidate class="space-y-3">
-                <div>
-                  <label for="upgrade-email" class="mb-1.5 block text-sm font-semibold text-label">Email address</label>
+              <form (ngSubmit)="submit()" novalidate>
+                <label for="upgrade-email" class="qs-label text-qs-muted">Email</label>
+                <div class="mt-2 flex flex-col gap-2 sm:flex-row">
                   <input
                     #emailInput
                     id="upgrade-email"
@@ -97,35 +96,34 @@ import {
                     [disabled]="isSubmitting()"
                     [attr.aria-invalid]="emailError() ? 'true' : 'false'"
                     [attr.aria-describedby]="emailError() ? 'upgrade-email-error upgrade-pass-note' : 'upgrade-pass-note'"
-                    class="min-h-11 w-full rounded-xl border border-slate-500 bg-input px-4 py-3 text-base text-default placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:border-qs-accent focus:outline-none focus:ring-2 focus:ring-qs-accent"
+                    class="min-h-11 w-full min-w-0 rounded-btn border border-qs-line-strong bg-qs-panel-2 px-3 text-base text-qs-ink placeholder:text-qs-muted focus:border-qs-accent focus:outline-none focus:ring-2 focus:ring-qs-accent sm:flex-1"
                     placeholder="you@example.com"
                   />
-                  @if (emailError()) {
-                    <p id="upgrade-email-error" role="alert" class="mt-1.5 text-sm font-medium leading-5 text-qs-bad">
-                      {{ emailError() }}
-                    </p>
-                  }
+                  <button
+                    type="submit"
+                    class="qs-btn qs-btn-primary w-full sm:w-auto"
+                    [disabled]="isSubmitting()"
+                    [attr.aria-busy]="isSubmitting()"
+                  >
+                    {{ isSubmitting() ? 'Saving…' : 'Notify me' }}
+                  </button>
                 </div>
-                <button
-                  type="submit"
-                  class="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-qs-accent px-4 py-3 text-base font-bold text-white hover:bg-qs-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:opacity-60 dark:focus-visible:outline-white sm:w-auto"
-                  [disabled]="isSubmitting()"
-                  [attr.aria-busy]="isSubmitting()"
-                >
-                  {{ isSubmitting() ? 'Saving…' : 'Notify me' }}
-                </button>
+                @if (emailError()) {
+                  <p id="upgrade-email-error" role="alert" class="mt-2 text-sm font-medium text-qs-bad">{{ emailError() }}</p>
+                }
+                <p id="upgrade-pass-note" class="qs-label mt-3 normal-case tracking-normal text-qs-muted">One email when it's ready. Nothing else.</p>
               </form>
             }
+          </div>
 
-            <div class="flex justify-end">
-              <button
-                type="button"
-                class="inline-flex min-h-11 items-center justify-center rounded-xl px-4 py-2.5 text-base font-medium text-default hover:bg-control focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 dark:focus-visible:outline-white"
-                (click)="dismiss()"
-              >
-                {{ submitted() ? 'Close' : 'Not now' }}
-              </button>
-            </div>
+          <div class="mt-4 flex justify-end">
+            <button
+              type="button"
+              class="qs-btn qs-btn-secondary"
+              (click)="dismiss()"
+            >
+              {{ submitted() ? 'Close' : 'Not now' }}
+            </button>
           </div>
         </div>
       </div>
@@ -154,6 +152,8 @@ import {
   `]
 })
 export class UpgradePassDialogComponent implements AfterViewInit, OnDestroy {
+  /** What opened the dialog: the one-board limit, or the 'See Season Pass' button. */
+  @Input() trigger: 'limit' | 'pass' = 'limit';
   @Output() dismissed = new EventEmitter<void>();
   @ViewChild('closeButton') closeButton?: ElementRef<HTMLButtonElement>;
   @ViewChild('dialogRoot') dialogRoot?: ElementRef<HTMLElement>;
@@ -170,6 +170,15 @@ export class UpgradePassDialogComponent implements AfterViewInit, OnDestroy {
   private gameService = inject(GameService);
   private platformId = inject(PLATFORM_ID);
   private previousOverflow = '';
+  private prefilledEmail = '';
+
+  constructor() {
+    const user = this.authService.currentUser();
+    if (user && !user.isGuest && user.email) {
+      this.email = user.email;
+      this.prefilledEmail = user.email.trim().toLowerCase();
+    }
+  }
 
   ngAfterViewInit(): void {
     if (!isPlatformBrowser(this.platformId)) {
@@ -180,7 +189,7 @@ export class UpgradePassDialogComponent implements AfterViewInit, OnDestroy {
     this.closeButton?.nativeElement.focus();
     const user = this.authService.realUser();
     if (user && !user.isGuest && !this.authService.isPreviewAdmin()) {
-      void this.gameService.recordUpgradeView(user.uid);
+      void this.gameService.recordUpgradeView(user.uid, this.trigger);
     }
   }
 
@@ -225,10 +234,11 @@ export class UpgradePassDialogComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
-    this.analytics.track(UPGRADE_NOTIFY_EVENT, { source: NOTIFY_SOURCE });
+    const prefilled = this.prefilledEmail !== '' && this.email.trim().toLowerCase() === this.prefilledEmail;
+    this.analytics.track(UPGRADE_NOTIFY_EVENT, { source: NOTIFY_SOURCE, trigger: this.trigger, prefilled, dialog_version: 'v2' });
     this.isSubmitting.set(true);
     try {
-      await this.gameService.createNotifyMe(this.email, user.uid, NOTIFY_SOURCE);
+      await this.gameService.createNotifyMe(this.email, user.uid, NOTIFY_SOURCE, { prefilled, trigger: this.trigger });
       this.submitted.set(true);
       setTimeout(() => this.status?.nativeElement.focus());
     } catch {

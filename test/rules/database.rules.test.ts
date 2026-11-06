@@ -445,6 +445,16 @@ describe('notifyMe', () => {
     await assertFails(set(player(), 'notifyMe/push1', { ...entry('alice'), extra: 'x' }));
   });
 
+  it('accepts the optional prefilled and trigger fields', async () => {
+    await assertSucceeds(set(player(), 'notifyMe/push1', { ...entry('alice'), prefilled: true, trigger: 'limit' }));
+    await assertSucceeds(set(player(), 'notifyMe/push2', { ...entry('alice'), prefilled: false, trigger: 'pass' }));
+  });
+
+  it('rejects a bad prefilled or trigger value', async () => {
+    await assertFails(set(player(), 'notifyMe/push1', { ...entry('alice'), prefilled: 'yes' }));
+    await assertFails(set(player(), 'notifyMe/push1', { ...entry('alice'), trigger: 'banner' }));
+  });
+
   it('a signed-out visitor cannot leave an email', async () => {
     await assertFails(set(visitor(), 'notifyMe/push1', entry('alice')));
   });
@@ -473,6 +483,12 @@ describe('upgradeViews', () => {
   it('rejects extra keys and a missing count', async () => {
     await assertFails(set(player(), 'upgradeViews/alice', { ...rec(), extra: 1 }));
     await assertFails(set(player(), 'upgradeViews/alice', { firstAt: 1, lastAt: 1 }));
+  });
+
+  it('accepts limitCount and rejects a bad one', async () => {
+    await assertSucceeds(set(player(), 'upgradeViews/alice', { ...rec(), limitCount: 1 }));
+    await assertFails(set(player(), 'upgradeViews/alice', { ...rec(), limitCount: -1 }));
+    await assertFails(set(player(), 'upgradeViews/alice', { ...rec(), limitCount: 'x' }));
   });
 
   it('a signed-out visitor cannot write', async () => {
