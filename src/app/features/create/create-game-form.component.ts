@@ -29,7 +29,7 @@ export interface CreateGameSubmit {
   host: { class: 'contents' },
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
-  <div class="flex-1 space-y-8 overflow-y-auto overscroll-contain px-6 py-6">
+  <div class="flex-1 space-y-8 overflow-y-auto px-6 py-6">
     <!-- 01 Sport -->
     <section>
       <h4 class="qs-eyebrow qs-eyebrow-bar">01 / Sport</h4>
