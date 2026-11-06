@@ -69,6 +69,7 @@ export const routes: Routes = [
   marketingRoute('college-football-squares'),
   marketingRoute('football-squares-fundraiser'),
   marketingRoute('nba-squares'),
+  marketingRoute('football-squares-on-tv'),
   {
     path: 'blog',
     loadComponent: () =>

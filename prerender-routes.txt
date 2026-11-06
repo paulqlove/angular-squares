@@ -1,7 +1,6 @@
 /
 /best-squares-numbers
 /printable-football-squares
-/blog
 /teams
 /team/buffalo-bills
 /team/miami-dolphins
@@ -44,5 +43,6 @@
 /college-football-squares
 /football-squares-fundraiser
 /nba-squares
+/football-squares-on-tv
 /terms
 /privacy
