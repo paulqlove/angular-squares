@@ -25,7 +25,6 @@ export class RolePreviewService {
   readonly planOptions: { value: PreviewPlan; label: string }[] = [
     { value: 'actual', label: 'My plan' },
     { value: 'free', label: 'Free' },
-    { value: 'week', label: 'Week Pass' },
     { value: 'season', label: 'Season Pass' }
   ];
   readonly role = signal<PreviewRole>(this.read());
