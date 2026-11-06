@@ -1,5 +1,5 @@
 import {
-  CreateGameDraft, buildCreateGameValues, clearCreateDraft, emptyDraft, loadCreateDraft, saveCreateDraft, splitToTenths
+  CreateGameDraft, buildCreateGameValues, clearCreateDraft, emptyDraft, isPendingAutoSubmit, loadCreateDraft, saveCreateDraft, splitToTenths
 } from './create-game-draft';
 
 const sanitizer = {
@@ -81,5 +81,13 @@ describe('splitToTenths', () => {
   it('converts clean tenths and rejects finer values', () => {
     expect(splitToTenths({ q1: 20, q2: 20, q3: 20, q4: 40 })).toEqual({ q1: 200, q2: 200, q3: 200, q4: 400 });
     expect(splitToTenths({ q1: 20.05, q2: 20, q3: 20, q4: 40 })).toBeNull();
+  });
+
+  it('an auto-create is pending only while fresh', () => {
+    const fresh = { ...emptyDraft(), autoSubmit: true, savedAt: 1_000_000 };
+    expect(isPendingAutoSubmit(fresh, 1_000_000 + 60_000)).toBe(true);
+    expect(isPendingAutoSubmit(fresh, 1_000_000 + 16 * 60_000)).toBe(false);
+    expect(isPendingAutoSubmit({ ...fresh, autoSubmit: false }, 1_000_000 + 1000)).toBe(false);
+    expect(isPendingAutoSubmit(null)).toBe(false);
   });
 });

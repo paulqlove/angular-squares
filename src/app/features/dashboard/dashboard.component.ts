@@ -22,7 +22,7 @@ import { HeadroomDirective } from '../../shared/directives/headroom.directive';
 import { UpgradePassDialogComponent } from './components/upgrade-pass-dialog/upgrade-pass-dialog.component';
 import { PlanService } from '../../core/services/plan.service';
 import { ActiveBoardLimitError } from '../../core/errors/active-board-limit.error';
-import { buildCreateGameValues, clearCreateDraft, loadCreateDraft, saveCreateDraft } from '../../core/utils/create-game-draft';
+import { buildCreateGameValues, clearCreateDraft, isPendingAutoSubmit, loadCreateDraft, saveCreateDraft } from '../../core/utils/create-game-draft';
 import {
   heroPlus,
   heroArrowRightOnRectangle,
@@ -821,7 +821,7 @@ export class DashboardComponent implements OnInit {
     // Check for create intent (query param or sessionStorage from team page)
     const createFromQuery = this.route.snapshot.queryParamMap.get('create') === 'true';
     const createFromStorage = typeof sessionStorage !== 'undefined' && sessionStorage.getItem('qs_create_after_auth') === 'true';
-    const createFromDraft = typeof localStorage !== 'undefined' && loadCreateDraft()?.autoSubmit === true;
+    const createFromDraft = typeof localStorage !== 'undefined' && isPendingAutoSubmit(loadCreateDraft());
     console.info('[create-flow] dashboard init', { createFromQuery, createFromStorage, createFromDraft, hasDraft: !!loadCreateDraft() });
     if (createFromQuery || createFromStorage || createFromDraft) {
       // Clear both indicators
@@ -844,7 +844,7 @@ export class DashboardComponent implements OnInit {
     if (!user) return;
     this.isCheckingBoardLimit.set(true);
     try {
-      if (draft?.autoSubmit) {
+      if (isPendingAutoSubmit(draft)) {
         // The limit checks below need the real plan and board list, not the defaults.
         await Promise.all([this.loadMyGames(), this.planService.refresh(user.uid)]);
         saveCreateDraft({ ...draft, autoSubmit: false });
@@ -855,7 +855,7 @@ export class DashboardComponent implements OnInit {
         console.info('[create-flow] dashboard: showing the ended-board dialog');
         return;
       }
-      const built = draft?.autoSubmit ? buildCreateGameValues(draft, this.sanitizationService, this.planService.features().customSplits) : null;
+      const built = isPendingAutoSubmit(draft) ? buildCreateGameValues(draft, this.sanitizationService, this.planService.features().customSplits) : null;
       console.info('[create-flow] dashboard: draft check', { built: built ? (built.ok ? 'ok' : built.reason) : 'none' });
       if (draft && built?.ok) {
         await this.createGame({ draft, values: built.values });
