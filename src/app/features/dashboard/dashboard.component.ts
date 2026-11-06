@@ -231,10 +231,10 @@ import {
                         <tbody class="divide-y divide-qs-line bg-qs-panel">
                           @for (pass of giftedPasses(); track pass.email) {
                             <tr class="group">
-                              <td class="px-4 py-3 text-qs-ink">{{ pass.email }}</td>
-                              <td class="px-4 py-3 text-right">
+                              <td class="min-w-0 break-all px-4 py-3 text-qs-ink">{{ pass.email }}</td>
+                              <td class="whitespace-nowrap px-4 py-3 text-right">
                                 <span
-                                  class="inline-block rounded-full px-2 py-0.5 text-xs font-medium"
+                                  class="inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium"
                                   [class]="isPassExpired(pass.expiresAt)
                                     ? 'bg-qs-warn-soft text-qs-warn'
                                     : 'bg-qs-ok-soft text-qs-ok'"
