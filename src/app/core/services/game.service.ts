@@ -406,6 +406,23 @@ export class GameService {
     return gameId;
   }
 
+  /** Clears a board for reuse (same as the Clear game button in the game settings). Keeps name, owner and any linked game. */
+  async resetGame(gameId: string, boardSize: BoardSize): Promise<void> {
+    const { rows, cols } = getBoardDimensions(boardSize);
+    await this.updateGame(gameId, {
+      selectedSquares: {},
+      homeNumbers: Array(cols).fill(null),
+      awayNumbers: Array(rows).fill(null),
+      scores: { q1: { home: 0, away: 0 }, q2: { home: 0, away: 0 }, q3: { home: 0, away: 0 }, q4: { home: 0, away: 0 } },
+      winners: {},
+      playerColors: {},
+      playerUserIds: {},
+      isRandomized: false,
+      isLocked: false,
+      paidPlayers: []
+    });
+  }
+
   // Subscribe to a specific game
   subscribeToGame(gameId: string): Observable<GameData | null> {
     if (!this.isBrowser) {
