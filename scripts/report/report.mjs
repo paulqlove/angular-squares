@@ -22,7 +22,7 @@ const [games, users, admins, notifyMe, views] = ['/games', '/users', '/admins', 
 
 // Accounts left out of every count: admins plus uids listed one per line in ~/.config/quarterscore/exclude-uids.txt
 const exFile = join(CFG, 'exclude-uids.txt');
-const listed = existsSync(exFile) ? readFileSync(exFile, 'utf8').split('\n').map((s) => s.trim()).filter((s) => s && !s.startsWith('#')) : [];
+const listed = existsSync(exFile) ? readFileSync(exFile, 'utf8').split('\n').map((s) => s.split('#')[0].trim()).filter(Boolean) : [];
 const excluded = new Set([...Object.keys(admins), ...listed]);
 const out = [];
 const p = (s = '') => out.push(s);
