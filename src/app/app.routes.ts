@@ -24,6 +24,11 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   {
+    path: 'create',
+    loadComponent: () =>
+      import('./features/create/create-game.component').then(m => m.CreateGameComponent)
+  },
+  {
     path: 'game/:gameId',
     loadComponent: () =>
       import('./features/super-bowl-squares/super-bowl-squares.component').then(

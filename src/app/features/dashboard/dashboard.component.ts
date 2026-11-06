@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { NgTemplateOutlet } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
 import { GameService, GameListItem, BoardSize } from '../../core/services/game.service';
-import { QuarterSplit, SPLIT_PRESETS, DEFAULT_SPLIT, DEFAULT_EMPTY_QUARTER_RULE, EmptyQuarterRule, isNoExpiry, isValidSplit } from '../../core/plans';
+import { DEFAULT_SPLIT, DEFAULT_EMPTY_QUARTER_RULE, EmptyQuarterRule, isNoExpiry } from '../../core/plans';
 import { EspnService, EspnGame, SportType, SPORT_CONFIG } from '../../core/services/espn.service';
 import { getTeamLogoByAbbreviation, getTeamColors } from '../content/teams-data';
 import { ToastService } from '../../core/services/toast.service';
@@ -14,6 +14,7 @@ import { WalkthroughService, WalkthroughStep } from '../../core/services/walkthr
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { AppHeaderComponent } from '../../components/ui/app-header/app-header.component';
 import { ShareDialogComponent } from '../../components/ui/share-dialog/share-dialog.component';
+import { CreateGameFormComponent, CreateGameSubmit } from '../create/create-game-form.component';
 import { EmptyQuarterRuleComponent } from '../../components/ui/empty-quarter-rule/empty-quarter-rule.component';
 import { HelpMenuComponent } from '../../components/ui/help-menu/help-menu.component';
 import { ProfileMenuComponent } from '../../components/ui/profile-menu/profile-menu.component';
@@ -21,6 +22,7 @@ import { HeadroomDirective } from '../../shared/directives/headroom.directive';
 import { UpgradePassDialogComponent } from './components/upgrade-pass-dialog/upgrade-pass-dialog.component';
 import { PlanService } from '../../core/services/plan.service';
 import { ActiveBoardLimitError } from '../../core/errors/active-board-limit.error';
+import { buildCreateGameValues, clearCreateDraft, loadCreateDraft, saveCreateDraft } from '../../core/utils/create-game-draft';
 import {
   heroPlus,
   heroArrowRightOnRectangle,
@@ -47,7 +49,7 @@ import {
 
 @Component({
     selector: 'app-dashboard',
-    imports: [FormsModule, NgTemplateOutlet, NgIconComponent, AppHeaderComponent, HeadroomDirective, HelpMenuComponent, ProfileMenuComponent, ShareDialogComponent, EmptyQuarterRuleComponent, UpgradePassDialogComponent],
+    imports: [FormsModule, NgTemplateOutlet, CreateGameFormComponent, NgIconComponent, AppHeaderComponent, HeadroomDirective, HelpMenuComponent, ProfileMenuComponent, ShareDialogComponent, EmptyQuarterRuleComponent, UpgradePassDialogComponent],
     providers: [
         provideIcons({
             heroPlus,
@@ -398,7 +400,7 @@ import {
       @if (showCreateModal()) {
         <div
           class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
-          (click)="showCreateModal.set(false)"
+          (click)="closeCreateModal()"
         >
           <div
             role="dialog"
@@ -414,7 +416,7 @@ import {
               </div>
               <button
                 type="button"
-                (click)="showCreateModal.set(false)"
+                (click)="closeCreateModal()"
                 class="qs-btn qs-btn-ghost -mr-2 w-11 px-0 text-qs-muted hover:text-qs-ink"
                 aria-label="Close"
               >
@@ -422,239 +424,12 @@ import {
               </button>
             </div>
 
-            <div class="flex-1 space-y-8 overflow-y-auto overscroll-contain px-6 py-6">
-              <!-- 01 Sport -->
-              <section>
-                <h4 class="qs-eyebrow qs-eyebrow-bar">01 / Sport</h4>
-                <div class="mt-3 flex flex-wrap gap-2" role="tablist" aria-label="Sport">
-                  @for (sport of sportOptions; track sport.value) {
-                    <button
-                      type="button"
-                      role="tab"
-                      class="qs-tab"
-                      [attr.aria-selected]="selectedSport === sport.value"
-                      (click)="selectSport(sport.value)"
-                    >
-                      {{ sport.label }}
-                    </button>
-                  }
-                </div>
-              </section>
-
-              <!-- 02 Game / Teams -->
-              <section>
-                <h4 class="qs-eyebrow qs-eyebrow-bar">02 / {{ selectedSport === 'custom' ? 'Teams' : 'Game' }}</h4>
-                @if (selectedSport === 'custom') {
-                  <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div>
-                      <label for="custom-away" class="qs-label mb-1.5 block text-qs-muted">Away team</label>
-                      <input id="custom-away" type="text" [(ngModel)]="customAwayTeam" maxlength="50" placeholder="e.g. Lincoln High" class="qs-input" />
-                    </div>
-                    <div>
-                      <label for="custom-home" class="qs-label mb-1.5 block text-qs-muted">Home team</label>
-                      <input id="custom-home" type="text" [(ngModel)]="customHomeTeam" maxlength="50" placeholder="e.g. Washington High" class="qs-input" />
-                    </div>
-                  </div>
-                  <p class="mt-2 text-xs text-qs-muted">Enter scores manually from the game page after creating the board.</p>
-                } @else if (isLoadingEspnGames()) {
-                  <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2" aria-busy="true">
-                    @for (i of [0, 1, 2, 3]; track i) {
-                      <div class="h-[76px] animate-pulse rounded-inner bg-qs-panel-2"></div>
-                    }
-                  </div>
-                } @else if (espnGames().length === 0) {
-                  <p class="mt-3 rounded-inner border border-dashed border-qs-line-strong p-4 text-sm text-qs-muted">No games on the schedule for this sport right now.</p>
-                } @else if (!gameListOpen && selectedEspnGame(); as game) {
-                  <!-- Picked: collapse to the choice so the rest of the form is right there -->
-                  <div class="mt-3 flex items-center justify-between gap-3 rounded-inner border border-qs-accent bg-qs-panel p-3 outline outline-2 -outline-offset-2 outline-qs-accent">
-                    <div class="min-w-0">
-                      <span class="qs-badge" [class]="getGameStatusClass(game.status)">{{ getGameStatusText(game) }}</span>
-                      <p class="mt-2 truncate font-semibold text-qs-ink">{{ game.awayTeam }} &#64; {{ game.homeTeam }}</p>
-                      @if (game.status === 'pre' && game.date) {
-                        <p class="qs-label mt-1 text-[10px] text-qs-muted">{{ formatGameDate(game.date) }}</p>
-                      }
-                    </div>
-                    <button type="button" (click)="gameListOpen = true" class="qs-btn qs-btn-secondary shrink-0 px-3">Change</button>
-                  </div>
-                } @else {
-                  @if (espnGames().length > 10) {
-                    <div class="mt-3">
-                      <input
-                        type="text"
-                        [(ngModel)]="espnGameSearch"
-                        placeholder="Search teams..."
-                        class="qs-input w-full"
-                      />
-                    </div>
-                  }
-                  <div class="qs-canvas mt-3 max-h-80 overflow-y-auto overscroll-contain rounded-inner p-2 sm:max-h-72">
-                    <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                      @for (game of filteredEspnGames(); track game.id) {
-                        <button
-                          type="button"
-                          (click)="selectEspnGame(game.id)"
-                          [attr.aria-pressed]="selectedEspnGameId === game.id"
-                          class="rounded-inner border bg-qs-panel p-3 text-left transition-colors"
-                          [class]="selectedEspnGameId === game.id ? 'border-qs-accent outline outline-2 -outline-offset-2 outline-qs-accent' : 'border-qs-line hover:border-qs-line-strong'"
-                        >
-                          <div class="flex items-center justify-between gap-2">
-                            <span class="qs-badge" [class]="getGameStatusClass(game.status)">{{ getGameStatusText(game) }}</span>
-                            @if (selectedEspnGameId === game.id) {
-                              <ng-icon name="heroCheckCircle" class="text-lg text-qs-accent"></ng-icon>
-                            }
-                          </div>
-                          <p class="mt-2 flex items-center gap-1.5 truncate font-semibold text-qs-ink">
-                            @if (selectedSport === 'nfl' && getTeamLogo(game.awayTeam); as logo) {
-                              <img [src]="logo" [alt]="game.awayTeam" class="h-4 w-4 object-contain" />
-                            }
-                            {{ game.awayTeam }} &#64;
-                            @if (selectedSport === 'nfl' && getTeamLogo(game.homeTeam); as logo) {
-                              <img [src]="logo" [alt]="game.homeTeam" class="h-4 w-4 object-contain" />
-                            }
-                            {{ game.homeTeam }}
-                          </p>
-                          <p class="qs-label mt-1 text-[10px] text-qs-muted">
-                            @if (game.status === 'pre' && game.date) {
-                              {{ formatGameDate(game.date) }}
-                            } @else if (game.status !== 'pre') {
-                              {{ game.awayScore }} – {{ game.homeScore }}
-                            }
-                          </p>
-                        </button>
-                      }
-                    </div>
-                  </div>
-                }
-              </section>
-
-              <!-- 03 Board size -->
-              <section>
-                <h4 class="qs-eyebrow qs-eyebrow-bar">03 / Board size</h4>
-                <div class="mt-3 flex flex-wrap gap-2">
-                  @for (size of boardSizeOptions; track size.value) {
-                    <button
-                      type="button"
-                      class="qs-tab"
-                      [attr.aria-pressed]="newGameBoardSize === size.value"
-                      (click)="newGameBoardSize = size.value"
-                    >
-                      {{ size.label }}
-                    </button>
-                  }
-                </div>
-                <p class="mt-2 text-xs text-qs-muted">{{ boardSizeOptions.find(s => s.value === newGameBoardSize)?.description }}</p>
-              </section>
-
-              <!-- 04 Points -->
-              <section>
-                <h4 class="qs-eyebrow qs-eyebrow-bar">04 / Points per square</h4>
-                <div class="mt-3 flex flex-wrap gap-2">
-                  @for (price of pricePresets; track price) {
-                    <button
-                      type="button"
-                      class="qs-tab min-w-16"
-                      [attr.aria-pressed]="newGamePrice === price"
-                      (click)="selectPrice(price)"
-                    >
-                      {{ price === 0 ? 'None' : price + ' pts' }}
-                    </button>
-                  }
-                  <label class="flex min-h-11 items-center gap-1 rounded-btn border border-qs-line-strong bg-qs-panel-2 px-3 focus-within:border-qs-ink">
-                    <input
-                      type="number"
-                      [(ngModel)]="customPrice"
-                      (ngModelChange)="onCustomPriceChange()"
-                      placeholder="Custom"
-                      aria-label="Custom points per square"
-                      min="0"
-                      class="w-20 bg-transparent text-base text-qs-ink placeholder:text-qs-muted focus:outline-none"
-                    />
-                    <span class="qs-label text-qs-muted">pts</span>
-                  </label>
-                </div>
-              </section>
-
-              <!-- 05 Quarter split -->
-              <section>
-                <h4 class="qs-eyebrow qs-eyebrow-bar">05 / Quarter split</h4>
-                @if (!planService.features().customSplits) {
-                  <p class="mt-3 text-sm text-qs-muted">
-                    <span class="font-mono tabular-nums text-qs-ink">20 / 20 / 20 / 40</span> · Custom splits come with the Season Pass.
-                  </p>
-                } @else {
-                <div class="mt-3 flex flex-wrap gap-1.5">
-                  @for (preset of splitPresets; track preset.id) {
-                    <button type="button" class="qs-tab min-h-9 px-2.5 text-[10.5px]" [attr.aria-pressed]="newGameActivePreset() === preset.id" (click)="applyNewGameSplitPreset(preset.split)">{{ preset.label }}</button>
-                  }
-                  <button type="button" class="qs-tab min-h-9 px-2.5 text-[10.5px]" [attr.aria-pressed]="newGameActivePreset() === 'custom'" (click)="newGameSplitCustomOpen = true">Custom</button>
-                </div>
-                @if (newGameSplitCustomOpen || newGameActivePreset() === 'custom') {
-                  <div class="mt-3 grid grid-cols-4 gap-2">
-                    @for (q of quarters; track q.key) {
-                      <div>
-                        <label [for]="'new-split-' + q.key" class="qs-label mb-1 block text-[10px] text-qs-muted">{{ q.label }}</label>
-                        <input [id]="'new-split-' + q.key" type="number" min="0" max="100" step="0.5" [(ngModel)]="newGameSplitPct[q.key]" class="qs-input px-2 text-center tabular-nums" />
-                      </div>
-                    }
-                  </div>
-                }
-                <p class="mt-1.5 text-xs tabular-nums" [class]="newGameSplitValid() ? 'text-qs-muted' : 'text-qs-bad'">
-                  {{ newGameSplitText() }} · {{ newGameSplitValid() ? 'Totals 100%' : 'Must total 100% (' + newGameSplitRemaining() + ' left)' }}
-                </p>
-                }
-                <div class="mt-5">
-                  <app-empty-quarter-rule name="new-empty-quarter-rule" [(value)]="newGameEmptyRule"></app-empty-quarter-rule>
-                </div>
-              </section>
-
-              <!-- 06 Details -->
-              <section>
-                <h4 class="qs-eyebrow qs-eyebrow-bar">06 / Details</h4>
-                <div class="mt-3 space-y-4">
-                  <div>
-                    <label for="new-game-name" class="qs-label mb-1.5 block text-qs-muted">Game name <span class="text-qs-bad">*</span></label>
-                    <input
-                      id="new-game-name"
-                      type="text"
-                      [(ngModel)]="newGameName"
-                      placeholder="Super Bowl party"
-                      class="qs-input"
-                      [class.qs-input-error]="gameNameError()"
-                      [attr.aria-invalid]="gameNameError()"
-                    />
-                    @if (gameNameError()) {
-                      <p class="mt-1.5 text-sm text-qs-bad">Give your game a name.</p>
-                    }
-                  </div>
-                  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div>
-                      <label for="new-game-host-note" class="qs-label mb-1.5 block text-qs-muted">Note from the host <span class="normal-case tracking-normal">(optional)</span></label>
-                      <input id="new-game-host-note" type="text" [(ngModel)]="newGameHostNote" maxlength="140" placeholder="e.g. Snacks at halftime!" class="qs-input" />
-                    </div>
-                    <div>
-                      <label for="new-game-manager" class="qs-label mb-1.5 block text-qs-muted">Co-host <span class="normal-case tracking-normal">(optional)</span></label>
-                      <input id="new-game-manager" type="email" [(ngModel)]="newGamePaymentManager" placeholder="their@email.com" class="qs-input" />
-                    </div>
-                  </div>
-                  <p class="text-xs text-qs-muted">A co-host can help manage players.</p>
-                </div>
-              </section>
-            </div>
-
-            <div class="flex items-center justify-end gap-2 border-t border-qs-line bg-qs-panel-2 px-6 py-4">
-              <button type="button" (click)="showCreateModal.set(false)" class="qs-btn qs-btn-ghost text-qs-muted">Cancel</button>
-              <button type="button" (click)="createGame()" [disabled]="isCreating() || !newGameSplitValid()" [attr.aria-busy]="isCreating()" class="qs-btn qs-btn-primary min-w-40">
-                @if (isCreating()) {
-                  <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" aria-hidden="true">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                  </svg>
-                  Creating
-                } @else {
-                  Create game
-                }
-              </button>
-            </div>
+            <app-create-game-form
+              [customSplitsAllowed]="planService.features().customSplits"
+              [isCreating]="isCreating()"
+              (cancelled)="closeCreateModal()"
+              (submitted)="createGame($event)"
+            ></app-create-game-form>
           </div>
         </div>
       }
@@ -1003,9 +778,6 @@ export class DashboardComponent implements OnInit {
   endedBoard = signal<GameListItem | null>(null);
   private upgradeReturnFocus: HTMLElement | null = null;
   shareModalGameId = signal<string | null>(null);
-  espnGames = signal<EspnGame[]>([]);
-  isLoadingEspnGames = signal(false);
-  gameNameError = signal(false);
 
   // Edit modal state
   showEditModal = signal(false);
@@ -1030,36 +802,7 @@ export class DashboardComponent implements OnInit {
 
   // Profile dropdown state
 
-  newGameName = '';
-  newGameHostNote = '';
-  newGamePaymentManager = '';
   joinGameCode = '';
-  selectedSport: SportType | 'custom' = 'nfl';
-  selectedEspnGameId = '';
-  espnGameSearch = '';
-  customAwayTeam = '';
-  customHomeTeam = '';
-  /** The New game list collapses to the picked game; Change reopens it. */
-  gameListOpen = true;
-  newGamePrice = 10;
-  customPrice: number | null = null;
-  newGameBoardSize: BoardSize = 100;
-
-  // Quarter split state for game creation
-  newGameSplitPct: { [k in keyof QuarterSplit]: number } = { q1: 20, q2: 20, q3: 20, q4: 40 };
-  newGameSplitCustomOpen = false;
-  newGameEmptyRule: EmptyQuarterRule = DEFAULT_EMPTY_QUARTER_RULE;
-  readonly splitPresets = SPLIT_PRESETS;
-  readonly quarters: { key: keyof QuarterSplit; label: string }[] = [
-    { key: 'q1', label: 'Q1' }, { key: 'q2', label: 'Q2' }, { key: 'q3', label: 'Q3' }, { key: 'q4', label: 'Q4' }
-  ];
-
-  pricePresets = [0, 5, 10, 20, 50];
-  boardSizeOptions: { value: BoardSize; label: string; description: string }[] = [
-    { value: 100, label: '100 squares', description: '10×10 grid (classic)' },
-    { value: 50, label: '50 squares', description: '5×10 grid' },
-    { value: 25, label: '25 squares', description: '5×5 grid' }
-  ];
   sportOptions: { value: SportType | 'custom'; label: string }[] = [
     { value: 'nfl', label: 'NFL' },
     { value: 'ncaaf', label: 'NCAA Football' },
@@ -1078,7 +821,8 @@ export class DashboardComponent implements OnInit {
     // Check for create intent (query param or sessionStorage from team page)
     const createFromQuery = this.route.snapshot.queryParamMap.get('create') === 'true';
     const createFromStorage = typeof sessionStorage !== 'undefined' && sessionStorage.getItem('qs_create_after_auth') === 'true';
-    if (createFromQuery || createFromStorage) {
+    const createFromDraft = typeof localStorage !== 'undefined' && loadCreateDraft()?.autoSubmit === true;
+    if (createFromQuery || createFromStorage || createFromDraft) {
       // Clear both indicators
       if (createFromQuery) {
         this.router.navigate([], { queryParams: {}, replaceUrl: true });
@@ -1090,17 +834,26 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  /** Open create modal directly without event (for query param trigger) */
+  /** Open create modal directly without event (for query param trigger). Finishes a create the visitor started signed out. */
   private async openCreateModalDirect(): Promise<void> {
     const user = this.currentUser();
     if (!user) return;
+    const draft = loadCreateDraft();
     this.isCheckingBoardLimit.set(true);
     try {
+      if (draft?.autoSubmit) {
+        // The limit checks below need the real plan and board list, not the defaults.
+        await Promise.all([this.loadMyGames(), this.planService.refresh(user.uid)]);
+        saveCreateDraft({ ...draft, autoSubmit: false });
+      }
       await this.gameService.assertUnderFreeBoardLimit(user.uid);
       if (this.showEndedBoardDialog()) return;
-      this.gameListOpen = true;
+      const built = draft?.autoSubmit ? buildCreateGameValues(draft, this.sanitizationService, this.planService.features().customSplits) : null;
+      if (draft && built?.ok) {
+        await this.createGame({ draft, values: built.values });
+        return;
+      }
       this.showCreateModal.set(true);
-      this.fetchEspnGames().then(() => this.applyPendingEspnGame());
     } catch (error) {
       if (error instanceof ActiveBoardLimitError) {
         this.upgradeTrigger.set('limit');
@@ -1158,9 +911,7 @@ export class DashboardComponent implements OnInit {
     try {
       await this.gameService.assertUnderFreeBoardLimit(user.uid);
       if (this.showEndedBoardDialog()) return;
-      this.gameListOpen = true;
       this.showCreateModal.set(true);
-      this.fetchEspnGames();
     } catch (error) {
       if (error instanceof ActiveBoardLimitError) {
         this.upgradeTrigger.set('limit');
@@ -1211,9 +962,7 @@ export class DashboardComponent implements OnInit {
       await this.gameService.deleteGame(board.id, user.uid);
       this.myGames.update(games => games.filter(g => g.id !== board.id));
       this.showUpgradeDialog.set(false);
-      this.gameListOpen = true;
       this.showCreateModal.set(true);
-      void this.fetchEspnGames();
     } catch {
       this.toastService.error('Could not delete the game. Try again.');
     }
@@ -1231,65 +980,6 @@ export class DashboardComponent implements OnInit {
     setTimeout(() => trigger?.focus());
   }
 
-  async fetchEspnGames(): Promise<void> {
-    if (this.selectedSport === 'custom') {
-      this.espnGames.set([]);
-      return;
-    }
-    this.isLoadingEspnGames.set(true);
-    try {
-      const games = await this.espnService.getGames(this.selectedSport);
-      this.espnGames.set(games);
-    } finally {
-      this.isLoadingEspnGames.set(false);
-    }
-  }
-
-  selectSport(sport: SportType | 'custom'): void {
-    this.selectedSport = sport;
-    this.selectedEspnGameId = '';
-    this.espnGameSearch = '';
-    this.gameListOpen = true;
-    if (sport !== 'custom') {
-      this.fetchEspnGames();
-    }
-  }
-
-  /** A team page's "Create board" stores the game so it arrives pre-selected. */
-  private applyPendingEspnGame(): void {
-    const raw = sessionStorage.getItem('qs_create_game');
-    if (!raw) return;
-    sessionStorage.removeItem('qs_create_game');
-    try {
-      const game = JSON.parse(raw) as EspnGame;
-      if (this.selectedSport !== 'nfl') return;
-      if (!this.espnGames().some(g => g.id === game.id)) this.espnGames.update(list => [game, ...list]);
-      this.selectEspnGame(game.id);
-    } catch {
-      // Ignore a malformed entry
-    }
-  }
-
-  selectEspnGame(gameId: string): void {
-    this.selectedEspnGameId = gameId;
-    this.gameListOpen = false;
-  }
-
-  selectedEspnGame(): EspnGame | undefined {
-    return this.espnGames().find(g => g.id === this.selectedEspnGameId);
-  }
-
-  filteredEspnGames(): EspnGame[] {
-    const query = this.espnGameSearch.toLowerCase().trim();
-    if (!query) return this.espnGames();
-    return this.espnGames().filter(g =>
-      g.homeTeam.toLowerCase().includes(query) ||
-      g.awayTeam.toLowerCase().includes(query) ||
-      g.homeTeamFull.toLowerCase().includes(query) ||
-      g.awayTeamFull.toLowerCase().includes(query)
-    );
-  }
-
   filteredEditEspnGames(): EspnGame[] {
     const query = this.editEspnGameSearch.toLowerCase().trim();
     if (!query) return this.editEspnGames();
@@ -1299,48 +989,6 @@ export class DashboardComponent implements OnInit {
       g.homeTeamFull.toLowerCase().includes(query) ||
       g.awayTeamFull.toLowerCase().includes(query)
     );
-  }
-
-  selectPrice(price: number): void {
-    this.newGamePrice = price;
-    this.customPrice = null;
-  }
-
-  onCustomPriceChange(): void {
-    if (this.customPrice !== null && this.customPrice >= 0) {
-      this.newGamePrice = this.customPrice;
-    }
-  }
-
-  // Quarter split methods for game creation
-  applyNewGameSplitPreset(split: QuarterSplit): void {
-    this.newGameSplitPct = { q1: split.q1 / 10, q2: split.q2 / 10, q3: split.q3 / 10, q4: split.q4 / 10 };
-    this.newGameSplitCustomOpen = false;
-  }
-
-  newGameSplitTenths(): QuarterSplit | null {
-    const t = (v: number) => Math.round(Number(v) * 10);
-    const ok = this.quarters.every(q => Number.isFinite(Number(this.newGameSplitPct[q.key])) && Math.abs(Number(this.newGameSplitPct[q.key]) * 10 - t(this.newGameSplitPct[q.key])) < 1e-6);
-    return ok ? { q1: t(this.newGameSplitPct.q1), q2: t(this.newGameSplitPct.q2), q3: t(this.newGameSplitPct.q3), q4: t(this.newGameSplitPct.q4) } : null;
-  }
-
-  newGameSplitValid(): boolean {
-    return isValidSplit(this.newGameSplitTenths());
-  }
-
-  newGameSplitRemaining(): string {
-    const total = this.quarters.reduce((sum, q) => sum + (Number(this.newGameSplitPct[q.key]) || 0), 0);
-    return (Math.round((100 - total) * 10) / 10).toString() + '%';
-  }
-
-  newGameActivePreset(): string {
-    const t = this.newGameSplitTenths();
-    return this.splitPresets.find(p => t && p.split.q1 === t.q1 && p.split.q2 === t.q2 && p.split.q3 === t.q3 && p.split.q4 === t.q4)?.id ?? 'custom';
-  }
-
-  newGameSplitText(): string {
-    const fmt = (v: number) => (Math.round(Number(v) * 10) / 10).toString();
-    return [this.newGameSplitPct.q1, this.newGameSplitPct.q2, this.newGameSplitPct.q3, this.newGameSplitPct.q4].map(fmt).join(' / ');
   }
 
   getGameStatusClass(status: string): string {
@@ -1358,93 +1006,55 @@ export class DashboardComponent implements OnInit {
     return 'Final';
   }
 
-  async createGame(): Promise<void> {
-    const user = this.currentUser();
-    if (!user || user.isGuest) return;
+  closeCreateModal(): void {
+    this.showCreateModal.set(false);
+    clearCreateDraft();
+  }
 
-    // Validate game name is required
-    const sanitizedName = this.sanitizationService.sanitizeGameName(this.newGameName);
-    if (!sanitizedName) {
-      this.gameNameError.set(true);
+  async createGame(submit: CreateGameSubmit): Promise<void> {
+    const user = this.currentUser();
+    if (!user) return;
+    if (user.isGuest) {
+      this.toastService.error('Sign in with Google or email to create a game.');
       return;
     }
-    this.gameNameError.set(false);
 
-    const sanitizedPrice = this.sanitizationService.validatePrice(this.newGamePrice);
-
+    const { draft, values } = submit;
     this.isCreating.set(true);
     try {
-      let homeTeam: string | undefined;
-      let awayTeam: string | undefined;
-      if (this.selectedSport === 'custom') {
-        // Custom game - use manually entered team names
-        homeTeam = this.sanitizationService.sanitizeTeamName(this.customHomeTeam) || undefined;
-        awayTeam = this.sanitizationService.sanitizeTeamName(this.customAwayTeam) || undefined;
-      } else if (this.selectedEspnGameId) {
-        const espnGame = this.espnGames().find(g => g.id === this.selectedEspnGameId);
-        if (espnGame) {
-          homeTeam = espnGame.homeTeam;
-          awayTeam = espnGame.awayTeam;
-        }
-      }
-
-      const sanitizedHostNote = this.sanitizationService.sanitizeHostNote(this.newGameHostNote);
-
-      // Get quarter split - null if default, otherwise the custom split
-      const split = this.newGameSplitTenths();
-      const isDefaultSplit = split && split.q1 === 200 && split.q2 === 200 && split.q3 === 200 && split.q4 === 400;
-      const quarterSplit = isDefaultSplit || !this.planService.features().customSplits ? null : split;
-
       const gameId = await this.gameService.createGame(
         user.uid,
         user.displayName || 'Unknown',
-        sanitizedName,
-        this.selectedEspnGameId || undefined,
-        homeTeam,
-        awayTeam,
-        sanitizedPrice,
-        this.selectedEspnGameId && this.selectedSport !== 'custom' ? this.selectedSport : undefined,
-        this.newGamePaymentManager.trim() || undefined,
-        sanitizedHostNote || undefined,
-        this.newGameBoardSize,
-        quarterSplit,
-        this.newGameEmptyRule
+        values.name,
+        values.espnEventId,
+        values.homeTeam,
+        values.awayTeam,
+        values.price,
+        values.espnSport,
+        values.manager,
+        values.hostNote,
+        values.boardSize,
+        values.quarterSplit,
+        values.emptyQuarterRule
       );
       this.showCreateModal.set(false);
-      this.resetCreateForm();
+      clearCreateDraft();
       this.router.navigate(['/game', gameId]);
     } catch (error) {
+      // Keep what the host entered so a retry, or a reset of the old board, does not start over.
+      saveCreateDraft({ ...draft, autoSubmit: false });
       if (error instanceof ActiveBoardLimitError) {
         this.showCreateModal.set(false);
-        this.resetCreateForm();
         this.upgradeTrigger.set('limit');
         this.showUpgradeDialog.set(true);
       } else {
+        console.error('[Dashboard] Create game failed', (error as { code?: string })?.code ?? error);
         this.toastService.error('Failed to create game');
-        this.showCreateModal.set(false);
-        this.resetCreateForm();
+        this.showCreateModal.set(true);
       }
     } finally {
       this.isCreating.set(false);
     }
-  }
-
-  resetCreateForm(): void {
-    this.newGameName = '';
-    this.newGameHostNote = '';
-    this.newGamePaymentManager = '';
-    this.selectedSport = 'nfl';
-    this.selectedEspnGameId = '';
-    this.espnGameSearch = '';
-    this.customAwayTeam = '';
-    this.customHomeTeam = '';
-    this.newGamePrice = 10;
-    this.customPrice = null;
-    this.newGameBoardSize = 100;
-    this.newGameSplitPct = { q1: 20, q2: 20, q3: 20, q4: 40 };
-    this.newGameSplitCustomOpen = false;
-    this.newGameEmptyRule = DEFAULT_EMPTY_QUARTER_RULE;
-    this.gameNameError.set(false);
   }
 
   joinGame(): void {
@@ -1736,7 +1346,7 @@ export class DashboardComponent implements OnInit {
   @HostListener('document:keydown.escape')
   onEscape(): void {
     if (this.showCreateModal()) {
-      this.showCreateModal.set(false);
+      this.closeCreateModal();
     }
   }
 
