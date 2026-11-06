@@ -23,6 +23,8 @@ export class WinnersAndPayoutsComponent {
   @Input() awayTeam: string = '';
   /** Q4 reads "Final" only once the game is over. */
   @Input() gameOver = false;
+  /** Quarters that have started. A later tile shows a dash instead of repeating the running total. */
+  @Input() startedQuarters = 4;
 
   @Output() quarterClick = new EventEmitter<string>();
 
@@ -48,6 +50,10 @@ export class WinnersAndPayoutsComponent {
 
   hasScore(quarter: string): boolean {
     const score = this.scores[quarter];
-    return !!score && (score.home > 0 || score.away > 0);
+    return !this.notStarted(quarter) && !!score && (score.home > 0 || score.away > 0);
+  }
+
+  notStarted(quarter: string): boolean {
+    return this.quarters.indexOf(quarter) >= this.startedQuarters;
   }
 }
