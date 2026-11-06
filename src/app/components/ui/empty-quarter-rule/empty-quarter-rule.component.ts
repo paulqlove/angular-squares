@@ -4,6 +4,7 @@ import { EMPTY_QUARTER_RULES, EmptyQuarterRule } from '../../../core/plans';
 /** Host setting: what happens to a quarter's points when nobody holds the winning square. */
 @Component({
   selector: 'app-empty-quarter-rule',
+  host: { class: 'block' },
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <fieldset>
