@@ -157,7 +157,7 @@ export class EspnService {
 
       return data.events
         .filter((event: any) => new Date(event.date) >= now)
-        .slice(0, 2)
+        .slice(0, 3)
         .map((event: any) => {
           const competition = event.competitions?.[0];
           const homeCompetitor = competition?.competitors?.find((c: any) => c.homeAway === 'home');

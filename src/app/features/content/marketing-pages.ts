@@ -1,4 +1,6 @@
 import { BreadcrumbItem } from '../../core/services/seo.service';
+import { SCHEDULE } from './schedule.generated';
+import { formatKickoff } from './schedule.model';
 
 export interface PageSection {
   heading: string;
@@ -349,10 +351,16 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     lede: 'Thanksgiving Thursday, November 26, 2026, has a full slate of games and a house full of people. Football squares gives everyone a square to watch, including guests who do not follow the sport.',
     published: '2026-11-01',
     sections: [
+      ...(SCHEDULE.thanksgiving.length > 0 ? [{
+        heading: 'Thanksgiving week games',
+        paragraphs: ['Kickoff times are Eastern. Pick one game or run a board for each.'],
+        bullets: SCHEDULE.thanksgiving.map(game =>
+          `${game.awayTeamFull} at ${game.homeTeamFull}: ${formatKickoff(game.date)}${game.network ? ` on ${game.network}` : ''}`)
+      }] : []),
       {
         heading: 'One board or one per game',
         paragraphs: [
-          'Three games means you can run three boards or pick the one the table cares about. A single board is easier to explain while the turkey is being carved. Separate boards help if different relatives want different games.',
+          'More than one game means you can run several boards or pick the one the table cares about. A single board is easier to explain while the turkey is being carved. Separate boards help if different relatives want different games.',
           'Share one link in the family thread. People who are in another city claim a square on their phone. Names show up for everyone at the table.'
         ]
       },

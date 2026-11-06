@@ -58,6 +58,7 @@ interface Feature {
         }
       </app-shared-header>
 
+      <main id="main">
       <!-- Hero -->
       <section class="overflow-hidden">
         <div class="mx-auto max-w-[1600px] px-4 sm:px-8 pt-10 pb-16 md:pt-16 md:pb-24 min-[1000px]:pb-0">
@@ -240,6 +241,7 @@ interface Feature {
           </div>
         </div>
       </section>
+      </main>
 
       <app-site-footer></app-site-footer>
     </div>
