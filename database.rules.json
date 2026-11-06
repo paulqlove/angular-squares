@@ -237,7 +237,7 @@
           ".write": "auth != null && $espnId.matches(/^[A-Za-z0-9_-]{1,50}$/) && $boardId.matches(/^[A-Za-z0-9]{6}$/) && (root.child('games').child($boardId).child('ownerId').val() == auth.uid || root.child('games').child($boardId).child('managerId').val() == auth.uid)",
           ".validate": "newData.hasChildren(['sport'])",
           "sport": {
-            ".validate": "newData.isString() && (newData.val() == 'nfl' || newData.val() == 'nba' || newData.val() == 'ncaaf' || newData.val() == 'wnba' || newData.val() == 'afl')"
+            ".validate": "newData.isString() && (newData.val() == 'nfl' || newData.val() == 'nba' || newData.val() == 'ncaaf' || newData.val() == 'ufl' || newData.val() == 'wnba' || newData.val() == 'afl')"
           },
           "$other": {
             ".validate": false

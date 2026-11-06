@@ -394,6 +394,10 @@ describe('liveGames index', () => {
     await assertSucceeds(set(cohost(), entry, { sport: 'nba' }));
   });
 
+  it('the owner can index a UFL game', async () => {
+    await assertSucceeds(set(owner(), entry, { sport: 'ufl' }));
+  });
+
   it('a player cannot index someone else\'s board', async () => {
     await assertFails(set(player(), entry, { sport: 'nfl' }));
   });

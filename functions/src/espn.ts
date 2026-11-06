@@ -1,13 +1,14 @@
 import { GameStatus, ParsedEspnGame, QuarterScore } from "./scoring";
 
-export type SportType = "nfl" | "nba" | "ncaaf" | "wnba" | "afl";
+export type SportType = "nfl" | "nba" | "ncaaf" | "ufl" | "wnba" | "afl";
 
-export const SPORT_TYPES: readonly SportType[] = ["nfl", "nba", "ncaaf", "wnba", "afl"];
+export const SPORT_TYPES: readonly SportType[] = ["nfl", "nba", "ncaaf", "ufl", "wnba", "afl"];
 
 export const SPORT_PERIODS: Record<SportType, number> = {
   nfl: 4,
   nba: 4,
   ncaaf: 4,
+  ufl: 4,
   wnba: 4,
   afl: 4,
 };
@@ -17,6 +18,7 @@ export const SCOREBOARD_URLS: Record<SportType, string> = {
   nfl: "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard",
   nba: "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard",
   ncaaf: "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard",
+  ufl: "https://site.api.espn.com/apis/site/v2/sports/football/ufl/scoreboard",
   wnba: "https://site.api.espn.com/apis/site/v2/sports/basketball/wnba/scoreboard",
   afl: "https://site.api.espn.com/apis/site/v2/sports/australian-football/afl/scoreboard",
 };

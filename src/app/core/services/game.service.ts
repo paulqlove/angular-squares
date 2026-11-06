@@ -30,7 +30,7 @@ import {
   isBoardActive
 } from '../utils/board-activity';
 
-export type SportType = 'nfl' | 'nba' | 'ncaaf' | 'wnba' | 'afl';
+export type SportType = 'nfl' | 'nba' | 'ncaaf' | 'ufl' | 'wnba' | 'afl';
 
 /** Board size: 100 (10x10), 50 (5x10), or 25 (5x5) squares. */
 export type BoardSize = 100 | 50 | 25;
@@ -188,7 +188,7 @@ export class GameService {
   }
 
   private normalizeSport(value: unknown): SportType {
-    if (value === 'nfl' || value === 'nba' || value === 'ncaaf' || value === 'wnba' || value === 'afl') {
+    if (value === 'nfl' || value === 'nba' || value === 'ncaaf' || value === 'ufl' || value === 'wnba' || value === 'afl') {
       return value;
     }
     return 'nfl';

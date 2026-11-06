@@ -32,7 +32,7 @@ To turn the browser poller back on later, set `serverScoring` to `false` again a
 `syncEspnScores` runs every minute (`onSchedule`, `every 1 minutes`, `us-central1`, 256MiB, 0.167 vCPU, 30s timeout, max 1 instance).
 
 1. Read `liveGames/{espnId}/{boardId}`. If that node is empty, it returns without calling ESPN.
-2. Group the rows by sport and fetch the ESPN scoreboard **once per league** (NFL, NBA, NCAA football, WNBA, AFL). Two boards linked to the same ESPN id share that one response.
+2. Group the rows by sport and fetch the ESPN scoreboard **once per league** (NFL, NBA, NCAA football, UFL, WNBA, AFL). Two boards linked to the same ESPN id share that one response.
 3. For each linked `games/{id}`, compute cumulative quarter scores and winners with the same rules as `syncFromEspn()` / `calculateWinnersFromEspn()`:
    - Linescores are per quarter. The board stores running totals in `scores.q1`–`scores.q4`.
    - When ESPN says the game is final, `q4` is the final total (overtime and a 3-period game included).
@@ -46,7 +46,7 @@ Games that are linked but not on the current league scoreboard are left in the i
 ## Index
 
 ```
-liveGames/{espnId}/{boardId}: { sport: "nfl" | "nba" | "ncaaf" | "wnba" | "afl" }
+liveGames/{espnId}/{boardId}: { sport: "nfl" | "nba" | "ncaaf" | "ufl" | "wnba" | "afl" }
 ```
 
 The client maintains this when a board is created with an ESPN game, when the dashboard saves a new or cleared link, and when a board is deleted. Owners and managers may write only their own board id. Clients cannot read the index. The Admin SDK can.
