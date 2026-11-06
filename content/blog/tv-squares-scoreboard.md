@@ -33,7 +33,7 @@ Open your game and press **Present**. The button shows on the game page for the 
 
 <img src="/assets/blog/tv-mode/game-present-button.png" alt="The top of a QuarterScore game page, with the Share, Present and Your Games buttons next to the board title." width="1400" height="138">
 
-Use a computer, a laptop, or a tablet held sideways. On a phone or a portrait tablet, anything under 960px wide, the TV page says "Open this on a TV or computer" instead of showing the board.
+Use a computer or a laptop.
 
 Then pick one way to get that tab onto the screen. These are the standard ways to mirror a browser tab. We have not tested them on every TV, so try yours before game day.
 
