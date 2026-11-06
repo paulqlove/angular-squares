@@ -123,3 +123,4 @@ _Session notes and decisions go here_
 | Docs: Firebase Hosting | Nov 2026 | CLAUDE.md deployment section updated; GitHub Pages is retired |
 | Free-tier design and Season Pass plan | Nov 2026 | Board 4-0: Free keeps TV mode and heat map; one $5.99 Season Pass (live scoring, more boards, custom splits); fixed date; refund-until-used; US only. Upgrade dialog now shows one Season Pass. Live-scoring gate waits for checkout. |
 | Upgrade dialog view count | Nov 2026 | `upgradeViews/{uid}` for the Jan 15 fake-door read; needs a database rules deploy |
+| Thanksgiving theme (timeboxed) | Nov 2026 | On Mon Nov 23 to Sat Nov 28 by the visitor's date (script in `src/index.html`, tokens in `src/styles.scss`); self-expires. **Remove both after Nov 30 2026.** `?season=thanksgiving` previews it. Judge by boards created Nov 25-27. |
