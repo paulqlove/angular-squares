@@ -64,6 +64,14 @@ shell = shell.replace(
 
 fs.writeFileSync(path.join(browserDir, 'spa.html'), shell);
 
+const joinTitle = 'Join the squares board on QuarterScore';
+const joinDescription = "Pick your squares. Live scores decide each quarter's winner. Free, no account to join.";
+const gameShell = shell
+  .replace(/<title>[^<]*<\/title>/, `<title>${joinTitle}</title>`)
+  .replace(/(<meta (?:name="description"|property="og:description"|name="twitter:description") content=")[^"]*"/g, `$1${joinDescription}"`)
+  .replace(/(<meta (?:property="og:title"|name="twitter:title") content=")[^"]*"/g, `$1${joinTitle}"`);
+fs.writeFileSync(path.join(browserDir, 'game.html'), gameShell);
+
 const home = fs.readFileSync(indexPath, 'utf8');
 const markers = ['The Ultimate', 'Football Squares'];
 for (const marker of markers) {
