@@ -141,6 +141,21 @@ else {
   } catch (e) { p(`- Search Console failed: ${e.message}`); }
 }
 
+p('\n## 8. Where new hosts come from (first visit, saved at sign-up; accounts created after this shipped)');
+const SEARCH = /(^|\.)(google|bing|duckduckgo|yahoo|ecosia|brave|startpage)\./, SOCIAL = /(facebook|instagram|t\.co|twitter|x\.com|reddit|tiktok|youtube|linkedin|pinterest|threads)/;
+const bucket = (t) => (t.src ? `utm:${t.src}` : !t.ref ? 'direct or unknown (apps, texts, bookmarks)' : SEARCH.test(t.ref) ? 'search' : SOCIAL.test(t.ref) ? 'social' : `referral:${t.ref}`);
+const touches = Object.entries(users).filter(([uid, u]) => u?.firstTouch && !excluded.has(uid)).map(([, u]) => u.firstTouch);
+if (!touches.length) p('- Collecting: no accounts with a saved first visit yet.');
+else {
+  const tally = {};
+  touches.forEach((t) => (tally[bucket(t)] = (tally[bucket(t)] || 0) + 1));
+  p(`- n = ${touches.length} account(s)${touches.length < 30 ? ' (collecting; under 30, read as counts only)' : ''}`);
+  Object.entries(tally).sort((a, b) => b[1] - a[1]).forEach(([k, v]) => p(`  - ${k}: ${v}`));
+  const lands = {};
+  touches.forEach((t) => { const k = t.path.startsWith('/team/') ? '/team/*' : t.path; lands[k] = (lands[k] || 0) + 1; });
+  p('- First page: ' + Object.entries(lands).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([k, v]) => `${k} ${v}`).join(', '));
+}
+
 p('\n## Not in this report');
-p('- Where new hosts come from (not tracked yet), real monthly costs (pull from billing), and the Stripe numbers (no checkout yet).');
+p('- Real monthly costs (pull from billing) and the Stripe numbers (no checkout yet).');
 console.log(out.join('\n'));

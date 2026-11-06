@@ -170,6 +170,16 @@
         "activeBoardId": {
           ".validate": "newData.isString() && newData.val().length >= 4 && newData.val().length <= 16 && newData.val().matches(/^[A-Za-z0-9]+$/)"
         },
+        "firstTouch": {
+          ".validate": "newData.hasChildren(['at', 'path'])",
+          "at": { ".validate": "newData.isNumber() && newData.val() > 0" },
+          "path": { ".validate": "newData.isString() && newData.val().length <= 200" },
+          "ref": { ".validate": "newData.isString() && newData.val().length <= 100" },
+          "src": { ".validate": "newData.isString() && newData.val().length <= 40" },
+          "med": { ".validate": "newData.isString() && newData.val().length <= 40" },
+          "camp": { ".validate": "newData.isString() && newData.val().length <= 40" },
+          "$other": { ".validate": false }
+        },
         "usage": {
           "gamesCreated": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000" },
           "resets": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000" },

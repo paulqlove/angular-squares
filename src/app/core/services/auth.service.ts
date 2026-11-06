@@ -4,6 +4,7 @@ import type { Auth } from 'firebase/auth';
 import type { Database } from 'firebase/database';
 import { environment } from '../../../environments/environment';
 import { loadFirebaseSdk } from './firebase-sdk';
+import { markFirstTouchDone, readFirstTouch } from '../utils/first-touch';
 import { SanitizationService } from './sanitization.service';
 import { PREVIEW_ADMIN_EMAIL, PreviewRole, RolePreviewService } from './role-preview.service';
 import { ToastService } from './toast.service';
@@ -87,6 +88,25 @@ export class AuthService {
       throw new Error('[AuthService] Auth not available - call ensureInitialized() first');
     }
     return this._auth;
+  }
+
+  // Save where a brand-new account first came from, once. Older accounts are skipped
+  // because their first visit is unknown. Failure never affects sign-in.
+  private async saveFirstTouch(uid: string, creationTime: string | undefined): Promise<void> {
+    try {
+      const touch = readFirstTouch();
+      if (!touch) return;
+      const created = creationTime ? Date.parse(creationTime) : 0;
+      if (Date.now() - created < 864e5) {
+        const touchRef = this.sdk!.database.ref(this.db, `users/${uid}/firstTouch`);
+        if (!(await this.sdk!.database.get(touchRef)).exists()) {
+          await this.sdk!.database.set(touchRef, touch);
+        }
+      }
+      markFirstTouchDone();
+    } catch {
+      // Try again on the next sign-in.
+    }
   }
 
   private get db(): Database {
@@ -181,6 +201,7 @@ export class AuthService {
             isGuest: false
           });
           this.clearGuestCookie();
+          void this.saveFirstTouch(user.uid, user.metadata.creationTime);
         } else if (!user && guest) {
           // Returning guest with cookie but no Firebase auth — sign in anonymously
           try {

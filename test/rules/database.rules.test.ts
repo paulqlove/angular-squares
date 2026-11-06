@@ -835,3 +835,15 @@ describe('users/usage counters', () => {
     await assertFails(set(player(), 'users/alice/usage/resets', -1));
   });
 });
+
+describe('users/firstTouch', () => {
+  it('a user can save their own first touch', async () => {
+    await assertSucceeds(set(player(), 'users/alice/firstTouch', { at: Date.now(), path: '/team/chiefs', ref: 'google.com' }));
+  });
+
+  it('cannot write someone else\'s, add unknown keys, or store long text', async () => {
+    await assertFails(set(player(), 'users/bob/firstTouch', { at: 1, path: '/' }));
+    await assertFails(set(player(), 'users/alice/firstTouch', { at: 1, path: '/', email: 'x@y.com' }));
+    await assertFails(set(player(), 'users/alice/firstTouch', { at: 1, path: '/', ref: 'a'.repeat(101) }));
+  });
+});

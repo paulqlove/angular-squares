@@ -1,4 +1,5 @@
-import { Component, inject, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, OnDestroy, ChangeDetectionStrategy, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
 import { Meta } from '@angular/platform-browser';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
@@ -8,6 +9,7 @@ import { WalkthroughComponent } from './components/ui/walkthrough/walkthrough.co
 import { RolePreviewSwitcherComponent } from './components/ui/role-preview-switcher/role-preview-switcher.component';
 import { AnalyticsService } from './core/services/analytics.service';
 import { AuthService } from './core/services/auth.service';
+import { captureFirstTouch } from './core/utils/first-touch';
 
 @Component({
     selector: 'app-root',
@@ -40,6 +42,9 @@ export class AppComponent implements OnDestroy {
   private navigationSub: Subscription;
 
   constructor() {
+    if (isPlatformBrowser(inject(PLATFORM_ID))) {
+      captureFirstTouch();
+    }
     this.navigationSub = this.router.events.pipe(
       filter((event): event is NavigationEnd => event instanceof NavigationEnd)
     ).subscribe(event => this.syncRobotsMeta(event.urlAfterRedirects));

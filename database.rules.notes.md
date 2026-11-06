@@ -29,6 +29,10 @@ The client check is the limit players and hosts actually hit. The rule stops a s
 
 `{ gamesCreated, resets, deletes, lastGameAt }`, lifetime counters bumped by the client on create, reset and delete (Nov 2026 onward; earlier activity is not counted). The owner can write their own, so use it to spot heavy reuse, not for billing. No other keys.
 
+## users/{uid}/firstTouch
+
+`{ at, path, ref?, src?, med?, camp? }`, written once by the client when a brand-new (under a day old) non-guest account first signs in: the referrer host, utm_source/medium/campaign, and landing path from the visitor's first visit on that device. No full URLs, no personal data. `users/{uid}` grants the owner `.write`, so the owner could overwrite it; "write once" is a client behavior. Guests are not captured.
+
 ## notifyMe
 
 `notifyMe/{pushId}` is write-only create for a signed-in user. Reads, updates, and deletes are denied. The node must be `email`, `timestamp`, `uid`, and `source`, plus the optional `prefilled` (boolean) and `trigger` (`limit` or `pass`). `email` matches an email shape and is at most 254 characters. `uid` must be `auth.uid`. `source` is at most 64 characters. `timestamp` is a number within a day of `now`. The push id is at most 128 characters.
