@@ -6,9 +6,6 @@ export type PreviewPlan = 'actual' | 'free' | 'week' | 'season';
 /** Only this account sees the "View as" switcher. UI preview only; database rules still see the real account. */
 export const PREVIEW_ADMIN_EMAIL = 'paulqlove@gmail.com';
 
-/** Returned instead of a real board id when a preview Player "creates" a board. */
-export const PREVIEW_GAME_ID = 'preview';
-
 const STORAGE_KEY = 'qs_preview_role';
 const PLAN_KEY = 'qs_preview_plan';
 
@@ -29,12 +26,9 @@ export class RolePreviewService {
   ];
   readonly role = signal<PreviewRole>(this.read());
   readonly plan = signal<PreviewPlan>(this.readPlan());
-  /** Boards the preview Player has "created" this session. Nothing is saved; it only drives the board limit. */
-  readonly simulatedBoards = signal(0);
 
   setPlan(plan: PreviewPlan): void {
     this.plan.set(plan);
-    this.simulatedBoards.set(0);
     try {
       sessionStorage.setItem(PLAN_KEY, plan);
     } catch {}
@@ -42,7 +36,6 @@ export class RolePreviewService {
 
   setRole(role: PreviewRole): void {
     this.role.set(role);
-    this.simulatedBoards.set(0);
     try {
       sessionStorage.setItem(STORAGE_KEY, role);
     } catch {}
