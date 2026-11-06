@@ -178,6 +178,10 @@ export class UpgradePassDialogComponent implements AfterViewInit, OnDestroy {
     this.previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     this.closeButton?.nativeElement.focus();
+    const user = this.authService.realUser();
+    if (user && !user.isGuest && !this.authService.isPreviewAdmin()) {
+      void this.gameService.recordUpgradeView(user.uid);
+    }
   }
 
   ngOnDestroy(): void {

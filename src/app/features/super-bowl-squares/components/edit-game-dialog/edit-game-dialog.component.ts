@@ -75,7 +75,7 @@ export interface EditGameValues {
                   <ng-icon name="heroLockClosed" class="text-base text-qs-muted"></ng-icon>
                 </div>
                 <p class="mt-1.5 text-xs text-qs-muted">
-                  {{ !canCustomSplit ? 'Custom splits come with a Week or Season Pass.' : 'The split locks once numbers are drawn.' }}
+                  {{ !canCustomSplit ? 'Custom splits come with the Season Pass.' : 'The split locks once numbers are drawn.' }}
                 </p>
               } @else {
                 <div class="flex flex-wrap gap-1.5">

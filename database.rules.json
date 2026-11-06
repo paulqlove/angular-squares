@@ -172,6 +172,17 @@
         }
       }
     },
+    "upgradeViews": {
+      "$uid": {
+        ".read": "auth != null && auth.uid == $uid",
+        ".write": "auth != null && auth.uid == $uid",
+        ".validate": "newData.hasChildren(['firstAt', 'lastAt', 'count'])",
+        "firstAt": { ".validate": "newData.isNumber() && newData.val() > 0" },
+        "lastAt": { ".validate": "newData.isNumber() && newData.val() > 0" },
+        "count": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 100000" },
+        "$other": { ".validate": false }
+      }
+    },
     "notifyMe": {
       ".read": false,
       "$pushId": {

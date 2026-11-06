@@ -267,6 +267,19 @@ export class GameService {
     return (await this.bestEntitlement(uid))?.expiresAt ?? 0;
   }
 
+  /** Counts the host's upgrade-dialog views for the fake-door read. Own record only; failures are ignored. */
+  async recordUpgradeView(uid: string): Promise<void> {
+    if (!this.isBrowser || !uid || uid.length > 128) return;
+    try {
+      const entryRef = ref(this.db, `upgradeViews/${uid}`);
+      const now = Date.now();
+      const prev = (await get(entryRef)).val() as { firstAt?: number; count?: number } | null;
+      await set(entryRef, { firstAt: prev?.firstAt ?? now, lastAt: now, count: (prev?.count ?? 0) + 1 });
+    } catch {
+      // Counting must never get in the way of the dialog.
+    }
+  }
+
   /** Write-only notifyMe/{pushId} entry. Callers must already be signed in. */
   async createNotifyMe(email: string, uid: string, source: string): Promise<void> {
     if (!this.isBrowser) {
