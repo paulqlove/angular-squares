@@ -16,7 +16,7 @@ import { Observable, BehaviorSubject } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ActiveBoardLimitError } from '../errors/active-board-limit.error';
 import { EspnService } from './espn.service';
-import { RolePreviewService } from './role-preview.service';
+import { PREVIEW_GAME_ID, RolePreviewService } from './role-preview.service';
 import { DEFAULT_EMPTY_QUARTER_RULE, Entitlement, EmptyQuarterRule, PLANS, QuarterSplit, isActive, isEmptyQuarterRule } from '../plans';
 import { AuthService } from './auth.service';
 import {
@@ -211,9 +211,14 @@ export class GameService {
     if (!this.isBrowser) {
       throw new Error('Cannot check boards on server');
     }
-    // The View-as stand-in has no real account to read, so it is a host with no boards.
+    // The View-as stand-in has no real account to read, so it only counts the boards it "created" this session.
     const previewRole = this.authService.previewRole();
-    if (previewRole === 'player' || previewRole === 'guest') return;
+    if (previewRole === 'player' || previewRole === 'guest') {
+      const plan = this.rolePreview.plan();
+      const limit = plan === 'actual' ? FREE_ACTIVE_BOARD_LIMIT : PLANS[plan].activeBoards;
+      if (this.rolePreview.simulatedBoards() >= limit) throw new ActiveBoardLimitError();
+      return;
+    }
     const limit = await this.boardLimit(ownerId);
     if (limit === Number.POSITIVE_INFINITY) return;
     if ((await this.activeBoardCount(ownerId)) >= limit) {
@@ -329,6 +334,12 @@ export class GameService {
     emptyQuarterRule?: EmptyQuarterRule
   ): Promise<string> {
     if (!this.isBrowser) throw new Error('Cannot create game on server');
+    const previewRole = this.authService.previewRole();
+    if (previewRole === 'player' || previewRole === 'guest') {
+      await this.assertUnderFreeBoardLimit(ownerId);
+      this.rolePreview.simulatedBoards.update(n => n + 1);
+      return PREVIEW_GAME_ID;
+    }
     if (this.authService.blockPreviewWrite()) throw new Error('Preview only');
     await this.assertUnderFreeBoardLimit(ownerId);
     // Drop a stale slot only after the read-only check says nothing is active.
