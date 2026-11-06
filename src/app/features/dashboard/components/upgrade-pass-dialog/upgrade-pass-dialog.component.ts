@@ -75,7 +75,7 @@ import {
             </div>
           } @else {
             <p class="mt-6 font-mono text-4xl font-semibold tabular-nums">$5.99</p>
-            <p id="upgrade-summary" class="qs-label mt-3 text-qs-muted">One time · through Mar 1, 2027</p>
+            <p id="upgrade-summary" class="qs-label mt-3 text-qs-muted">One time · through June 30, 2027</p>
 
             <ul class="mt-5 flex flex-wrap gap-2" aria-label="Included">
               <li class="qs-badge qs-badge-ok">Live scores</li>

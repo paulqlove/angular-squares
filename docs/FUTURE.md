@@ -41,7 +41,7 @@ Ship together, only once a pass can be bought (about 3 evenings): the live-scori
 
 **The Season Pass (decided Nov 5, 2026):**
 - **Name and price:** "Season Pass", $5.99 one time. The price is always shown at checkout; the no-money rule is Stripe's restricted-business rule, so copy never uses prize, pot, payout or entry-fee words about squares. Avoid "paid" in the UI. Guests always join and play for free; only hosts buy.
-- **Term:** fixed date, about Sept 1 to Mar 1 each season. This first season it runs from purchase to about Mar 1, 2027. A one-time expiring pass, never auto-renewing. The Week Pass, the $29.99 tier and stacking go away when checkout is built (`plans.ts` still has them until then).
+- **Term:** fixed date, about Sept 1 to June 30 each season (changed from Mar 1 on Nov 6 2026: the NBA runs to June, so Mar 1 was arbitrary). This first season it runs from purchase to June 30, 2027. A one-time expiring pass, never auto-renewing. The Week Pass, the $29.99 tier and stacking go away when checkout is built (`plans.ts` still has them until then).
 - **Refunds:** refundable until the pass is "used", final after, stated above the buy button and on the receipt. "Used" = one `usedAt` stamp on the entitlement, written the first time a board is created under the pass AND a pass-only feature fires (ESPN link on, a custom split saved, or a second concurrent board). Store the stamp with a timestamp, board id and feature. A stricter rule (at least 10 claimed squares by at least 3 players and a score written) is the fallback if disputes appear.
 - **Where we sell:** US only at launch, and say so.
 - **Renewal:** reminder only, never an automatic charge. An unchecked checkbox: "Email me once in August before next season starts. I'll never be charged automatically." Store the consent date, email and wording; every send needs Paul's OK.
@@ -53,7 +53,7 @@ Why $5.99: it brings back the one-party Super Bowl host as a buyer (live scoring
 
 Input gathered earlier for a single ~$20 pass (CFO and skeptic reviewed that version, not this one):
 - **CFO:** Stripe nets $5.52 on $5.99 (7.8% fees) versus $19.11 on $19.99 (4.4%). At $5.99 you need about 3.5x the payers to match $19.99 revenue. Break-even is about 54 passes if costs are around $300/yr (assumption: confirm real Firebase and domain bills). Before launch: sales tax on digital goods (Stripe Tax or a CPA), Stripe keeps its $0.30 on refunds (short refund window), set aside income tax.
-- **Skeptic:** TEST-SMALL. Payers are hosts who hit the limits; the paid perks must feel worth it; sell the pass as "2026 Season Pass, through Mar 2027" because a 365-day year is mostly dead time. Biggest risk is that nobody pays at any price.
+- **Skeptic:** TEST-SMALL. Payers are hosts who hit the limits; the paid perks must feel worth it; sell the pass as "2026 Season Pass, through June 2027" (was Mar 2027 until Nov 6 2026) because a 365-day year is mostly dead time. Biggest risk is that nobody pays at any price.
 - **Test before building checkout:** fake-door on the dashboard when a host hits the 1-board limit or tries live scoring or presentation: "Season Pass $5.99 · Notify me" (reuse notify-me signups). Run Nov 5, 2026 to Jan 15, 2027. Success is at least 10% click-through and at least 15 clicks; under 5% means don't build checkout.
 - **Open:** gating live scoring is the biggest bet (best hook, but free becomes manual scoring); exact board count; changing plans is a one-line edit in `plans.ts`.
 
