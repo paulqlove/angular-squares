@@ -1361,6 +1361,20 @@ export class DashboardComponent implements OnInit {
       this.showCreateModal.set(false);
       this.resetCreateForm();
       if (gameId === PREVIEW_GAME_ID) {
+        this.myGames.update(games => [{
+          id: `${PREVIEW_GAME_ID}-${games.length + 1}`,
+          name: sanitizedName,
+          ownerName: user.displayName || 'Preview Player',
+          homeTeam: homeTeam || 'Home',
+          awayTeam: awayTeam || 'Away',
+          createdAt: Date.now(),
+          playerCount: 0,
+          squaresFilled: 0,
+          isLocked: false,
+          pricePerSquare: sanitizedPrice,
+          boardSize: this.newGameBoardSize,
+          confirmedCount: 0
+        }, ...games]);
         this.toastService.warning('Preview: board created for this preview only. Nothing was saved.');
         return;
       }
@@ -1405,6 +1419,10 @@ export class DashboardComponent implements OnInit {
   }
 
   openGame(gameId: string): void {
+    if (gameId.startsWith(PREVIEW_GAME_ID)) {
+      this.toastService.warning('Preview board: there is no game page to open.');
+      return;
+    }
     this.router.navigate(['/game', gameId]);
   }
 
