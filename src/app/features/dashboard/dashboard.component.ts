@@ -160,9 +160,6 @@ import {
                 <li class="qs-badge" [class.qs-badge-ok]="planService.features().customSplits">
                   {{ planService.features().customSplits ? 'Custom quarter splits' : 'Splits locked 20/20/20/40' }}
                 </li>
-                <li class="qs-badge" [class.qs-badge-ok]="planService.features().adFree">
-                  {{ planService.features().adFree ? 'Ad free' : 'Ads on your boards' }}
-                </li>
               </ul>
             </div>
             @if (planService.plan() !== 'season' && planService.plan() !== 'admin') {
