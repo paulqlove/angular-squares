@@ -12,6 +12,8 @@ import { GameBoardComponent } from '../super-bowl-squares/components/game-board/
 import { PLAYER_COLORS, normalizePlayerColors } from '../super-bowl-squares/utils/player-colors';
 
 const PIN_MS = 30000;
+/** Phones and portrait tablets: the TV layout is not built for them. Landscape phones top out near 930px. */
+const SMALL_SCREEN_QUERY = '(max-width: 959px)';
 const QUARTERS = ['q1', 'q2', 'q3', 'q4'] as const;
 
 @Component({
@@ -56,6 +58,7 @@ export class PresentComponent implements OnInit, OnDestroy {
   protected readonly qr = signal<string>('');
   protected readonly rotating = signal<boolean>(false);
   protected readonly showHelp = signal<boolean>(false);
+  protected readonly tooSmall = signal<boolean>(false);
   protected readonly slideDir = signal<'left' | 'right'>('right');
 
   private boardIds: string[] = [];
@@ -63,12 +66,17 @@ export class PresentComponent implements OnInit, OnDestroy {
   private lastScore = '';
   private pinnedUntil = 0;
   private skips = 0;
+  private screenQuery: MediaQueryList | null = null;
+  private readonly onScreenChange = (event: MediaQueryListEvent): void => this.tooSmall.set(event.matches);
   private sub: Subscription | null = null;
   private timer: ReturnType<typeof setInterval> | null = null;
   private espnTimer: ReturnType<typeof setInterval> | null = null;
 
   async ngOnInit(): Promise<void> {
     if (!isPlatformBrowser(this.platformId)) return;
+    this.screenQuery = window.matchMedia(SMALL_SCREEN_QUERY);
+    this.tooSmall.set(this.screenQuery.matches);
+    this.screenQuery.addEventListener('change', this.onScreenChange);
     this.espnTimer = setInterval(() => this.refreshEspn(), 30000);
     const id = this.route.snapshot.paramMap.get('gameId');
     if (id) this.open(id);
@@ -101,6 +109,7 @@ export class PresentComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.stopTimer();
     if (this.espnTimer) clearInterval(this.espnTimer);
+    this.screenQuery?.removeEventListener('change', this.onScreenChange);
     this.sub?.unsubscribe();
     this.gameService.unsubscribe();
   }
