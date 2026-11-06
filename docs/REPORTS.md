@@ -19,6 +19,7 @@ On Paul's Mac the Firebase CLI is already signed in. Ask Claude "generate the an
 7. **Search** - Search Console clicks, impressions, position and top queries (optional).
 
 Rules: every percentage shows its count and appears only when n is at least 30. Admins and any uid in `~/.config/quarterscore/exclude-uids.txt` (one per line, `#` for comments) are left out of every count.
+8. **Where new hosts come from** - search, social, direct or a named site, plus the first page they landed on. Saved once when a new account signs in (`users/{uid}/firstTouch`); guests and accounts made before Nov 6 are not covered.
 
 ## Setup for the Google sections (once, about 15 minutes)
 
@@ -44,7 +45,7 @@ Search Console data lags about 2 days, so the script reads up to two days ago. I
 
 ## Not in the report
 
-Where new hosts come from (not tracked yet), real monthly costs (pull from billing), Stripe (no checkout yet).
+Real monthly costs (pull from billing), Stripe (no checkout yet).
 
 ## Rules
 
