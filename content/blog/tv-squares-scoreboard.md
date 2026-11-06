@@ -11,6 +11,8 @@ You can put a football squares board on your TV by opening the game on a compute
 
 At most squares parties the board lives on one phone that gets passed around the couch while somebody asks who has the 3 and the 7. There is a TV in the room, and it is much easier to read.
 
+A bar with a spare TV is a good fit, and so is a Super Bowl party with an extra computer monitor. Any screen that nobody is using will do.
+
 QuarterScore's TV mode is free for every account. Here is what it shows, how to get it onto a TV, and a checklist for the day of the game.
 
 ## What the TV screen shows
@@ -35,7 +37,7 @@ On a computer or laptop, open your game and press **Present**. The button shows 
 
 <img src="/assets/blog/tv-mode/game-present-button.png" alt="The top of a QuarterScore game page, with the Share, Present and Your Games buttons next to the board title." width="1400" height="138">
 
-Then pick one way to get that tab onto the screen. These are the standard ways to mirror a browser tab. We have not tested them on every TV, so try yours before game day.
+A spare monitor works the same way as a TV: connect it to the computer and put the page on it. Then pick one way to get that tab onto the screen. These are the standard ways to mirror a browser tab. We have not tested them on every TV, so try yours before game day.
 
 - Chrome or Edge: open the browser menu, choose Cast, pick your TV, and set Sources to Cast tab. The computer and the TV need to be on the same Wi-Fi. Google's help page, [Cast from Chrome to your TV](https://support.google.com/chrome/answer/3228332), has the details.
 - Safari on a Mac: open Control Center, choose Screen Mirroring, and pick your Apple TV or AirPlay TV.

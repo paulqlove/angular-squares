@@ -14,6 +14,7 @@
       <description>Show your football squares board on a TV with QuarterScore's TV mode. How to get it on the screen, let friends scan in, and a short game-day checklist.</description>
       <content:encoded><![CDATA[<p>You can put a football squares board on your TV by opening the game on a computer, pressing Present, and mirroring that browser tab to the screen.</p>
 <p>At most squares parties the board lives on one phone that gets passed around the couch while somebody asks who has the 3 and the 7. There is a TV in the room, and it is much easier to read.</p>
+<p>A bar with a spare TV is a good fit, and so is a Super Bowl party with an extra computer monitor. Any screen that nobody is using will do.</p>
 <p>QuarterScore's TV mode is free for every account. Here is what it shows, how to get it onto a TV, and a checklist for the day of the game.</p>
 <h2>What the TV screen shows</h2>
 <ul>
@@ -27,7 +28,7 @@
 <p>The QR code opens the same shareable board link you get from Share. A friend who scans it sees the board on their own phone, like any other player. Nobody needs an account.</p>
 <img src="/assets/blog/tv-mode/qr-area.png" alt="Close-up of the QR code and the scan-to-join label on the TV screen." width="612" height="250" /><h2>How to get it onto the TV</h2>
 <p>On a computer or laptop, open your game and press <strong>Present</strong>. The button shows on the game page for the host and co-host.</p>
-<img src="/assets/blog/tv-mode/game-present-button.png" alt="The top of a QuarterScore game page, with the Share, Present and Your Games buttons next to the board title." width="1400" height="138" /><p>Then pick one way to get that tab onto the screen. These are the standard ways to mirror a browser tab. We have not tested them on every TV, so try yours before game day.</p>
+<img src="/assets/blog/tv-mode/game-present-button.png" alt="The top of a QuarterScore game page, with the Share, Present and Your Games buttons next to the board title." width="1400" height="138" /><p>A spare monitor works the same way as a TV: connect it to the computer and put the page on it. Then pick one way to get that tab onto the screen. These are the standard ways to mirror a browser tab. We have not tested them on every TV, so try yours before game day.</p>
 <ul>
 <li>Chrome or Edge: open the browser menu, choose Cast, pick your TV, and set Sources to Cast tab. The computer and the TV need to be on the same Wi-Fi. Google's help page, <a href="https://support.google.com/chrome/answer/3228332" rel="noopener noreferrer" target="_blank">Cast from Chrome to your TV</a>, has the details.</li>
 <li>Safari on a Mac: open Control Center, choose Screen Mirroring, and pick your Apple TV or AirPlay TV.</li>
