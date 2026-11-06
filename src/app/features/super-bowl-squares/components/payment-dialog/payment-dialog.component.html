@@ -3,14 +3,14 @@
     <div
       role="dialog"
       aria-modal="true"
-      aria-labelledby="confirm-players-title"
+      aria-labelledby="manage-players-title"
       class="flex max-h-[85vh] w-full max-w-lg flex-col overflow-hidden rounded-card border border-qs-line bg-qs-panel shadow-pop"
       (click)="$event.stopPropagation()"
     >
       <div class="flex items-start justify-between gap-4 border-b border-qs-line px-6 pb-5 pt-6">
         <div>
           <p class="qs-eyebrow">{{ confirmedCount() }} of {{ getPlayersList().length }} confirmed</p>
-          <h2 id="confirm-players-title" class="qs-title mt-2 text-3xl">Confirm <span class="text-qs-accent">players</span></h2>
+          <h2 id="manage-players-title" class="qs-title mt-2 text-3xl">Manage <span class="text-qs-accent">players</span></h2>
         </div>
         <button type="button" (click)="close()" class="qs-btn qs-btn-ghost -mr-2 w-11 px-0 text-qs-muted hover:text-qs-ink" aria-label="Close">
           <ng-icon name="heroXMark" class="text-xl"></ng-icon>
@@ -19,6 +19,17 @@
 
       <div class="flex-1 overflow-y-auto px-6 py-4">
         @for (player of getPlayersList(); track player.name) {
+          @if (removingName === player.name) {
+            <div class="my-2 rounded-inner bg-qs-bad-soft p-3" role="group" [attr.aria-label]="'Remove ' + player.name">
+              <p class="text-sm text-qs-ink">
+                Remove <strong class="font-semibold">{{ player.name }}</strong>? Their {{ player.squares }} {{ player.squares === 1 ? 'square opens' : 'squares open' }} back up.
+              </p>
+              <div class="mt-3 flex justify-end gap-2">
+                <button type="button" (click)="cancelRemove()" class="qs-btn qs-btn-ghost px-3 text-qs-muted">Cancel</button>
+                <button type="button" (click)="confirmRemove(player.name)" class="qs-btn qs-btn-danger px-3">Remove</button>
+              </div>
+            </div>
+          } @else {
           <div class="flex items-center justify-between gap-3 border-b border-qs-line py-3 last:border-b-0">
             <div class="flex min-w-0 items-center gap-3">
               <span class="h-3 w-3 shrink-0 rounded-full" [class]="player.color || 'bg-qs-line-strong'" aria-hidden="true"></span>
@@ -27,23 +38,35 @@
                 <p class="qs-label text-[10px] text-qs-muted">{{ player.squares }} {{ player.squares === 1 ? 'square' : 'squares' }} · {{ player.total | number: '1.0-2' }} pts</p>
               </div>
             </div>
-            <button
-              type="button"
-              (click)="togglePaidStatus(player.name)"
-              [attr.aria-pressed]="player.paid"
-              [attr.aria-label]="(player.paid ? 'Unconfirm ' : 'Confirm ') + player.name"
-              class="qs-btn shrink-0 px-3"
-              [class.qs-badge-ok]="player.paid"
-              [class.qs-btn-secondary]="!player.paid"
-            >
-              @if (player.paid) {
-                <ng-icon name="heroCheck" class="text-base"></ng-icon>
-                Confirmed
-              } @else {
-                Confirm
-              }
-            </button>
+            <div class="flex shrink-0 items-center gap-1">
+              <button
+                type="button"
+                (click)="togglePaidStatus(player.name)"
+                [attr.aria-pressed]="player.paid"
+                [attr.aria-label]="(player.paid ? 'Unconfirm ' : 'Confirm ') + player.name"
+                class="qs-btn shrink-0 px-3"
+                [class.qs-badge-ok]="player.paid"
+                [class.qs-btn-secondary]="!player.paid"
+              >
+                @if (player.paid) {
+                  <ng-icon name="heroCheck" class="text-base"></ng-icon>
+                  Confirmed
+                } @else {
+                  Confirm
+                }
+              </button>
+              <button
+                type="button"
+                (click)="askRemove(player.name)"
+                class="qs-btn qs-btn-ghost w-11 shrink-0 px-0 text-qs-muted hover:text-qs-bad"
+                [attr.aria-label]="'Remove ' + player.name"
+                title="Remove player"
+              >
+                <ng-icon name="heroUserMinus" class="text-xl"></ng-icon>
+              </button>
+            </div>
           </div>
+          }
         } @empty {
           <p class="py-8 text-center text-qs-muted">No players yet. Players show up here once they pick squares.</p>
         }

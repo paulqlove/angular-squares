@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { afterAll, beforeAll, beforeEach, describe, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import {
   assertFails,
   assertSucceeds,
@@ -792,5 +792,34 @@ describe('emptyQuarterRule', () => {
 
   it('a new game cannot be created with a bad rule', async () => {
     await assertFails(set(env.authenticatedContext('host'), 'games/new001', baseGame({ ownerId: 'host', emptyQuarterRule: 'refund' })));
+  });
+});
+
+describe('removing a player', () => {
+  const removeBob = {
+    [`${G}/squares/0-2`]: null,
+    [`${G}/playerColors/Bob`]: null,
+    [`${G}/paidPlayers/1`]: null,
+    [`${G}/playerUserIds/Bob`]: null,
+    [`${G}/winners/q1`]: null
+  };
+
+  it('the owner can remove a player in one write', async () => {
+    await assertSucceeds(write(owner(), removeBob));
+    const squares = (await read(owner(), `${G}/squares`)).val();
+    expect(squares).toEqual({ '0-0': 'Alice', '0-1': 'Guesty' });
+  });
+
+  it('the co-host can remove a player in one write', async () => {
+    await assertSucceeds(write(cohost(), removeBob));
+  });
+
+  it('a player cannot remove someone else', async () => {
+    await assertFails(write(player(), removeBob));
+    await assertFails(write(player(), { [`${G}/squares/0-2`]: null }));
+  });
+
+  it('a signed-out visitor cannot remove a player', async () => {
+    await assertFails(write(visitor(), removeBob));
   });
 });

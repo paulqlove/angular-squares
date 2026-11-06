@@ -636,7 +636,7 @@ import {
                       <input id="new-game-manager" type="email" [(ngModel)]="newGamePaymentManager" placeholder="their@email.com" class="qs-input" />
                     </div>
                   </div>
-                  <p class="text-xs text-qs-muted">A co-host can help confirm players.</p>
+                  <p class="text-xs text-qs-muted">A co-host can help manage players.</p>
                 </div>
               </section>
             </div>
@@ -822,7 +822,7 @@ import {
                   Co-host
                   <span class="text-muted font-normal">(optional)</span>
                 </label>
-                <p class="text-xs text-muted mb-2">Assign a player as co-host. A co-host can help confirm players.</p>
+                <p class="text-xs text-muted mb-2">Assign a player as co-host. A co-host can help manage players.</p>
                 @if (editingGame()?.managerId) {
                   <div class="flex items-center gap-2 p-3 bg-qs-ok-soft border border-qs-ok-soft rounded-xl dark:bg-qs-tile-ok/30 dark:border-qs-ok">
                     <span class="flex-1 text-qs-ok dark:text-qs-ok">{{ editingGame()?.managerName || editingGame()?.managerEmail || 'Assigned' }}</span>

@@ -35,7 +35,7 @@ import {
   heroXMark,
   heroArrowPath,
   heroSparkles,
-  heroCheckCircle
+  heroUsers
 } from '@ng-icons/heroicons/outline';
 import { GameStatusComponent } from './components/game-status/game-status.component';
 import { AppHeaderComponent } from '../../components/ui/app-header/app-header.component';
@@ -83,7 +83,7 @@ import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.co
             heroXMark,
             heroArrowPath,
             heroSparkles,
-            heroCheckCircle
+            heroUsers
         })
     ],
     templateUrl: './super-bowl-squares.component.html',
@@ -192,7 +192,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     {
       target: 'host-tools',
       title: 'Host tools',
-      description: 'Lock the board, draw the numbers, confirm players, and edit team names, points and your note.',
+      description: 'Lock the board, draw the numbers, manage players, and edit team names, points and your note.',
       position: 'top'
     },
     {
@@ -1176,6 +1176,50 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     }
     this.paymentDialog.setData(this.playerStats, this.playerColors, this.paidPlayers);
     this.paymentDialog.open();
+  }
+
+  /** Owner and co-host: take a player off the board. Frees their squares and clears everything tied to their name. */
+  async onPlayerRemoved(playerName: string): Promise<void> {
+    if (!this.isGameOwner() && !this.isManager()) return;
+
+    const previous = {
+      squares: this.selectedSquares,
+      colors: this.playerColors,
+      paid: this.paidPlayers,
+      userIds: this.playerUserIds,
+      winners: this.winners
+    };
+    const without = <T>(map: { [key: string]: T }, drop: (key: string, value: T) => boolean): { [key: string]: T } =>
+      Object.fromEntries(Object.entries(map).filter(([key, value]) => !drop(key, value)));
+
+    this.selectedSquares = without(this.selectedSquares, (_, name) => name === playerName);
+    this.playerColors = without(this.playerColors, key => key === playerName);
+    this.paidPlayers = new Set([...this.paidPlayers].filter(name => name !== playerName));
+    this.playerUserIds = without(this.playerUserIds, key => key === playerName);
+    this.winners = without(this.winners, (_, name) => name === playerName);
+    if (this.selectedPlayer === playerName) this.selectedPlayer = null;
+    this.calculatePlayerStats();
+    this.paymentDialog.setData(this.playerStats, this.playerColors, this.paidPlayers);
+
+    try {
+      await this.gameService.updateGame(this.gameId, {
+        selectedSquares: this.selectedSquares,
+        playerColors: this.playerColors,
+        paidPlayers: Array.from(this.paidPlayers),
+        playerUserIds: this.playerUserIds,
+        winners: this.winners
+      });
+      this.toastService.success(`Removed ${playerName}`);
+    } catch {
+      this.selectedSquares = previous.squares;
+      this.playerColors = previous.colors;
+      this.paidPlayers = previous.paid;
+      this.playerUserIds = previous.userIds;
+      this.winners = previous.winners;
+      this.calculatePlayerStats();
+      this.paymentDialog.setData(this.playerStats, this.playerColors, this.paidPlayers);
+      this.toastService.error(`Could not remove ${playerName}. Please try again.`);
+    }
   }
 
   onPaidPlayersChange(paidPlayers: string[]) {

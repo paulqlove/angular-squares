@@ -3,21 +3,24 @@ import { Component, Output, EventEmitter, ChangeDetectionStrategy, HostListener 
 
 import { FormsModule } from '@angular/forms';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { heroCheck, heroXMark } from '@ng-icons/heroicons/outline';
+import { heroCheck, heroUserMinus, heroXMark } from '@ng-icons/heroicons/outline';
 
 @Component({
     selector: 'app-payment-dialog',
     imports: [FormsModule, NgIconComponent, DecimalPipe],
     providers: [
-        provideIcons({ heroCheck, heroXMark })
+        provideIcons({ heroCheck, heroUserMinus, heroXMark })
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
     templateUrl: './payment-dialog.component.html'
 })
 export class PaymentDialogComponent {
   @Output() onPaidStatusChange = new EventEmitter<string[]>();
-  
+  @Output() playerRemoved = new EventEmitter<string>();
+
   isOpen = false;
+  /** The player whose row is asking "Remove?"; the confirmation stays inside that row. */
+  removingName: string | null = null;
   private playerStats: { [key: string]: { squares: number; total: number } } = {};
   private playerColors: { [key: string]: string } = {};
   private paidPlayers: Set<string> = new Set();
@@ -51,13 +54,28 @@ export class PaymentDialogComponent {
     this.onPaidStatusChange.emit(Array.from(this.paidPlayers));
   }
 
+  askRemove(playerName: string): void {
+    this.removingName = playerName;
+  }
+
+  cancelRemove(): void {
+    this.removingName = null;
+  }
+
+  confirmRemove(playerName: string): void {
+    this.removingName = null;
+    this.playerRemoved.emit(playerName);
+  }
+
   confirmedCount(): number {
     return this.getPlayersList().filter(p => p.paid).length;
   }
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
-    if (this.isOpen) this.close();
+    if (!this.isOpen) return;
+    if (this.removingName) this.cancelRemove();
+    else this.close();
   }
 
   open() {
@@ -66,5 +84,6 @@ export class PaymentDialogComponent {
 
   close() {
     this.isOpen = false;
+    this.removingName = null;
   }
 } 
