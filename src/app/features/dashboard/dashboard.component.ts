@@ -1,5 +1,6 @@
 import { Component, OnInit, signal, computed, inject, effect, HostListener, ChangeDetectionStrategy } from '@angular/core';
 
+import { DropdownComponent } from '../../components/ui/dropdown/dropdown.component';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NgTemplateOutlet } from '@angular/common';
@@ -52,7 +53,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked';
 
 @Component({
     selector: 'app-dashboard',
-    imports: [FormsModule, NgTemplateOutlet, CreateGameFormComponent, NgIconComponent, AppHeaderComponent, HeadroomDirective, HelpMenuComponent, ProfileMenuComponent, ShareDialogComponent, EmptyQuarterRuleComponent, UpgradePassDialogComponent],
+    imports: [FormsModule, NgTemplateOutlet, DropdownComponent, CreateGameFormComponent, NgIconComponent, AppHeaderComponent, HeadroomDirective, HelpMenuComponent, ProfileMenuComponent, ShareDialogComponent, EmptyQuarterRuleComponent, UpgradePassDialogComponent],
     providers: [
         provideIcons({
             heroPlus,
@@ -285,11 +286,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked';
             @if (!isLoadingGames() && myGames().length >= 5) {
               <div class="mt-4 flex flex-wrap items-center gap-2">
                 <input type="search" [value]="gameSearch()" (input)="gameSearch.set($any($event.target).value)" placeholder="Search by name or team" aria-label="Search your boards" class="qs-input min-w-0 flex-1 basis-48" />
-                <select [value]="gameSort()" (change)="gameSort.set($any($event.target).value)" aria-label="Sort boards" class="qs-input w-auto">
-                  @for (o of sortOptions; track o.value) {
-                    <option [value]="o.value">{{ o.label }}</option>
-                  }
-                </select>
+                <app-dropdown [options]="sortOptions" [value]="gameSort()" (valueChange)="gameSort.set($any($event))" ariaLabel="Sort boards"></app-dropdown>
                 <div class="flex gap-1.5" role="group" aria-label="Filter by status">
                   @for (f of statusFilters; track f.value) {
                     <button type="button" class="qs-tab min-h-9 px-3" [attr.aria-pressed]="gameStatus() === f.value" (click)="gameStatus.set(f.value)">{{ f.label }}</button>
