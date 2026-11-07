@@ -76,7 +76,10 @@
   <app-edit-game-dialog
     [isOpen]="showSettings()"
     [isLocked]="isLocked"
-    [values]="{ awayTeam: awayTeam, homeTeam: homeTeam, pricePerSquare: currentPrice, hostNote: hostNote, quarterSplit: quarterSplit, emptyQuarterRule: emptyQuarterRule }"
+    [boardSize]="boardSize"
+    [numbersDrawn]="isRandomized"
+    [squaresFilled]="squaresPicked()"
+    [values]="{ awayTeam: awayTeam, homeTeam: homeTeam, pricePerSquare: currentPrice, hostNote: hostNote, quarterSplit: quarterSplit, emptyQuarterRule: emptyQuarterRule, newBoardSize: null }"
     [canCustomSplit]="planService.features().customSplits"
     [splitLocked]="isRandomized"
     (closed)="showSettings.set(false)"

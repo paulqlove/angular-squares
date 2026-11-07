@@ -1,3 +1,11 @@
+import type { BoardSize } from '../services/game.service';
+
+/** Smaller board sizes a board can convert to: the picks must fit and the numbers must not be drawn yet. */
+export function smallerBoardSizes(boardSize: BoardSize, squaresFilled: number, numbersDrawn: boolean): BoardSize[] {
+  if (numbersDrawn) return [];
+  return ([50, 25] as BoardSize[]).filter(s => s < boardSize && squaresFilled <= s);
+}
+
 /**
  * Re-deals picked squares into a smaller grid: every cell of the new grid is equally likely
  * for every pick, so no player ends up in a line. Each player keeps the same number of squares.

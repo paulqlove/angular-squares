@@ -20,7 +20,7 @@ import { EspnService } from './espn.service';
 import { RolePreviewService } from './role-preview.service';
 import { DEFAULT_EMPTY_QUARTER_RULE, Entitlement, EmptyQuarterRule, NO_EXPIRY, PLANS, QuarterSplit, isActive, isEmptyQuarterRule } from '../plans';
 import { AuthService } from './auth.service';
-import { shuffleSquares } from '../utils/shuffle-squares';
+import { shuffleSquares, smallerBoardSizes } from '../utils/shuffle-squares';
 import {
   BoardActivity,
   FREE_ACTIVE_BOARD_LIMIT,
@@ -436,8 +436,7 @@ export class GameService {
 
   /** Smaller board sizes this board can convert to: the picks must fit and the numbers must not be drawn yet. */
   smallerSizesFor(boardSize: BoardSize, squaresFilled: number, isRandomized: boolean): BoardSize[] {
-    if (isRandomized) return [];
-    return ([50, 25] as BoardSize[]).filter(s => s < boardSize && squaresFilled <= s);
+    return smallerBoardSizes(boardSize, squaresFilled, isRandomized);
   }
 
   /** Converts a board to a smaller size. Picks are shuffled into random empty cells; each player keeps their count. */
