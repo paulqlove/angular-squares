@@ -61,12 +61,12 @@ import { BoardSize, getBoardDimensions } from '../../../../core/services/game.se
             </div>
           </div>
 
-          <div class="flex flex-wrap items-center justify-end gap-2 border-t border-qs-line bg-qs-panel-2 px-6 py-4">
-            <button type="button" (click)="lockAsIs.emit()" class="qs-btn qs-btn-ghost text-qs-muted">
+          <div class="flex flex-col-reverse gap-2 border-t border-qs-line bg-qs-panel-2 px-6 py-4 sm:flex-row sm:items-center sm:justify-end">
+            <button type="button" (click)="lockAsIs.emit()" class="qs-btn qs-btn-ghost w-full text-qs-muted sm:w-auto">
               <ng-icon name="heroLockClosed" class="text-base"></ng-icon>
               Lock as is
             </button>
-            <button type="button" (click)="converted.emit(selected)" class="qs-btn qs-btn-primary">Convert to {{ selected }} and lock</button>
+            <button type="button" (click)="converted.emit(selected)" class="qs-btn qs-btn-primary w-full sm:w-auto">Convert to {{ selected }} and lock</button>
           </div>
         </div>
       </div>
