@@ -88,7 +88,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked';
         <app-profile-menu walkthroughTarget="profile-dropdown"></app-profile-menu>
       </app-shared-header>
 
-      <main class="mx-auto max-w-[1600px] px-4 sm:px-8 pt-10 pb-20 md:pt-14">
+      <main class="mx-auto max-w-[1600px] px-4 sm:px-8 pt-6 pb-20 md:pt-8">
         <!-- Heading + actions -->
         <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between" data-walkthrough="hero-section">
           <div>
@@ -170,7 +170,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked';
 
           <!-- Admin Panel: Gifted Season Passes (paulqlove@gmail.com only) -->
           @if (isAdmin() && currentUser()?.email?.toLowerCase() === 'paulqlove@gmail.com') {
-            <section class="mt-12" aria-labelledby="admin-heading">
+            <section class="mt-8" aria-labelledby="admin-heading">
               <div class="flex items-baseline justify-between border-b border-qs-line pb-3">
                 <button
                   type="button"
@@ -275,7 +275,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked';
             </section>
           }
 
-          <section class="mt-12" data-walkthrough="my-games" aria-labelledby="hosting-heading">
+          <section class="mt-8" data-walkthrough="my-games" aria-labelledby="hosting-heading">
             <div class="flex items-baseline justify-between border-b border-qs-line pb-3">
               <h3 id="hosting-heading" class="qs-eyebrow qs-eyebrow-bar">01 / Hosting</h3>
               @if (!isLoadingGames()) {
@@ -335,7 +335,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked';
 
         <!-- Joined -->
         @if (joinedGames().length > 0) {
-          <section class="mt-12" aria-labelledby="joined-heading">
+          <section class="mt-8" aria-labelledby="joined-heading">
             <div class="flex items-baseline justify-between border-b border-qs-line pb-3">
               <h3 id="joined-heading" class="qs-eyebrow qs-eyebrow-bar">{{ canCreateGame() ? '02' : '01' }} / Joined</h3>
               <span class="qs-label text-qs-muted">{{ joinedGames().length }} {{ joinedGames().length === 1 ? 'game' : 'games' }}</span>
