@@ -184,7 +184,7 @@ export interface CreateGameSubmit {
         <div class="mt-5 flex items-start justify-between gap-4">
           <div class="min-w-0">
             <p class="qs-label mb-1.5 text-qs-muted">Show in my open boards</p>
-            <p class="text-xs text-qs-muted">When one of your other boards is full, players see this board and can join it. Off by default. Anyone with the link can still open it.</p>
+            <p class="text-xs text-qs-muted">Anyone who opens one of your boards can see this board's name, points per square and how many squares are left, and can join it. Off by default. Anyone with the link can still open it.</p>
             <p class="mt-2 truncate rounded-inner border border-qs-line bg-qs-panel-2 px-3 py-2 font-mono text-xs text-qs-ink">{{ newGameName || 'Your board' }} · Points per square: {{ newGamePrice }} · 0/{{ newGameBoardSize }} taken</p>
           </div>
           <app-toggle [checked]="newGameShowInOpenBoards" (onChange)="newGameShowInOpenBoards = $event"></app-toggle>

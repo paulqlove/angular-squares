@@ -183,9 +183,15 @@
               <button (click)="activeTab = 'board'" role="tab" [attr.aria-selected]="activeTab === 'board'" class="qs-tab px-3 sm:px-4">Board</button>
               <button (click)="activeTab = 'probabilities'" role="tab" [attr.aria-selected]="activeTab === 'probabilities'" class="qs-tab px-3 sm:px-4">Heatmap</button>
               <button (click)="activeTab = 'boxscore'" role="tab" [attr.aria-selected]="activeTab === 'boxscore'" class="qs-tab px-3 sm:px-4">Box score</button>
+              @if (openBoards().length) {
+                <button (click)="activeTab = 'more'" role="tab" [attr.aria-selected]="activeTab === 'more'" class="qs-tab px-3 sm:px-4">More</button>
+              }
             </div>
 
             <!-- Tab Content -->
+            @if (activeTab === 'more') {
+              <app-open-boards-list [rows]="openBoards()" (picked)="trackOtherBoardJoin()"></app-open-boards-list>
+            }
             @if (activeTab === 'board') {
               @if (fullBoardNotice()) {
                 <div class="qs-card mb-4 flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between" role="status">
@@ -196,12 +202,12 @@
                   </div>
                   <div class="flex flex-col gap-2 sm:shrink-0 sm:flex-row">
                     <a routerLink="/create" (click)="trackStartYourOwn()" class="qs-btn qs-btn-primary min-h-11">Start your own free board</a>
+                    @if (openBoards().length) {
+                      <button type="button" (click)="activeTab = 'more'" class="qs-btn qs-btn-secondary min-h-11">See {{ openBoards().length }} open {{ openBoards().length === 1 ? 'board' : 'boards' }} from this host</button>
+                    }
                     <a routerLink="/" class="qs-btn qs-btn-secondary min-h-11">Join with a code</a>
                   </div>
                 </div>
-                @if (openBoards().length) {
-                  <app-open-boards-list [rows]="openBoards()" (picked)="trackOtherBoardJoin()"></app-open-boards-list>
-                }
               }
               <app-game-board
                 [selectedSquares]="selectedSquares"

@@ -156,7 +156,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   highlightedSquare: string | null = null;
   hostNote = '';
   paidPlayers: Set<string> = new Set();
-  activeTab: 'board' | 'probabilities' | 'boxscore' = 'board';
+  activeTab: 'board' | 'probabilities' | 'boxscore' | 'more' = 'board';
 
   // Injected services
   private gameService = inject(GameService);
@@ -246,6 +246,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   openBoards = signal<OpenBoardRow[]>([]);
   showInOpenBoards = false;
   private openBoardsFor = '';
+  private openBoardsLoad: Promise<OpenBoardRow[]> | null = null;
   isLoading = signal(true);
   gameNotFound = signal(false);
   showShareModal = signal(false);
@@ -382,9 +383,12 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           this.isRandomized = data.isRandomized || false;
           this.isLocked = data.isLocked || false;
           this.showInOpenBoards = !!data.showInOpenBoards;
+          this.loadOpenBoards();
           if (this.fullBoardNotice()) {
             this.gameService.recordBoardStatOnce(this.gameId, 'fullBoardViews');
-            this.loadOpenBoards();
+            this.loadOpenBoards().then(rows => {
+              if (rows.length) this.gameService.recordBoardStatOnce(this.gameId, 'fullBoardViewsWithOpenBoards');
+            });
           }
           this.homeTeam = data.homeTeam || '';
           this.awayTeam = data.awayTeam || '';
@@ -1108,12 +1112,16 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     this.gameService.recordBoardStatOnce(this.gameId, 'otherBoardJoins');
   }
 
-  private async loadOpenBoards(): Promise<void> {
-    if (this.openBoardsFor === this.gameId) return;
-    this.openBoardsFor = this.gameId;
-    const rows = await this.gameService.getOpenBoards(this.gameOwnerId, this.gameId);
-    this.openBoards.set(rows);
-    if (rows.length) this.gameService.recordBoardStatOnce(this.gameId, 'fullBoardViewsWithOpenBoards');
+  /** The host's other opted-in open boards, loaded once per board. */
+  private loadOpenBoards(): Promise<OpenBoardRow[]> {
+    if (this.openBoardsFor !== this.gameId || !this.openBoardsLoad) {
+      this.openBoardsFor = this.gameId;
+      this.openBoardsLoad = this.gameService.getOpenBoards(this.gameOwnerId, this.gameId).then(rows => {
+        this.openBoards.set(rows);
+        return rows;
+      });
+    }
+    return this.openBoardsLoad;
   }
 
   trackStartYourOwn(): void {

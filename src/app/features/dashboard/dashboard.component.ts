@@ -621,7 +621,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked';
                   <div class="flex items-start justify-between gap-4">
                     <div class="min-w-0">
                       <label class="block text-sm font-semibold text-label mb-1">Show in my open boards</label>
-                      <p class="text-xs text-muted">When one of your other boards is full, players see this board and can join it. Off by default. Anyone with the link can still open it.</p>
+                      <p class="text-xs text-muted">Anyone who opens one of your boards can see this board's name, points per square and how many squares are left, and can join it. Off by default. Anyone with the link can still open it.</p>
                       <p class="mt-2 truncate rounded-xl border border-input bg-input px-3 py-2 font-mono text-xs text-default">{{ editGameName }} · Points per square: {{ editGamePrice }} · {{ og.squaresFilled }}/{{ og.boardSize }} taken</p>
                     </div>
                     <app-toggle [checked]="editShowInOpenBoards" (onChange)="editShowInOpenBoards = $event"></app-toggle>
