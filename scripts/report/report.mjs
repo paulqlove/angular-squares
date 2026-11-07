@@ -18,7 +18,7 @@ const fb = (path) => {
     { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], maxBuffer: 1 << 28 });
   return JSON.parse(out || 'null') || {};
 };
-const [games, users, admins, notifyMe, views] = ['/games', '/users', '/admins', '/notifyMe', '/upgradeViews'].map(fb);
+const [games, users, admins, notifyMe, views, tvLinks, tvOwners] = ['/games', '/users', '/admins', '/notifyMe', '/upgradeViews', '/tvLinks', '/tvTokenOwners'].map(fb);
 
 // Accounts left out of every count: admins plus uids listed one per line in ~/.config/quarterscore/exclude-uids.txt
 const exFile = join(CFG, 'exclude-uids.txt');
@@ -92,6 +92,17 @@ if (usage.length) {
   const heavy = usage.filter(([, u]) => (u.usage.gamesCreated || 0) + (u.usage.resets || 0) >= 3);
   p(`- Hosts with counters: ${usage.length}. Creates ${usage.reduce((n, [, u]) => n + (u.usage.gamesCreated || 0), 0)}, resets ${usage.reduce((n, [, u]) => n + (u.usage.resets || 0), 0)}, deletes ${usage.reduce((n, [, u]) => n + (u.usage.deletes || 0), 0)}. Hosts with 3+ creates+resets: ${heavy.length}`);
 } else p('- No counters yet.');
+
+// 5b. Office TV links: watch for junk or abuse (see docs/FUTURE.md, "Office TV link: watch for abuse")
+const links = Object.entries(tvLinks);
+const deadLinks = links.filter(([, l]) => String(l?.boards || '').split(',').every((boardId) => !games[boardId]));
+const staleLinks = links.filter(([, l]) => now - (l?.updatedAt || 0) > 180 * DAY);
+const claimsByOwner = {};
+Object.values(tvOwners).forEach((uid) => { claimsByOwner[uid] = (claimsByOwner[uid] || 0) + 1; });
+const multiClaim = Object.values(claimsByOwner).filter((n) => n > 1).length;
+p('\n## 5b. Office TV links (watch for abuse)');
+p(`- Links: ${links.length}. Dead (every board in the link is deleted): ${deadLinks.length}. Not updated in 180+ days: ${staleLinks.length}. Accounts holding more than one token: ${multiClaim}.`);
+if (links.length > 50 || multiClaim > 0) p('- CHECK: unusually many links, or an account with several tokens. The app makes one token per account, so extras mean someone wrote to the database directly.');
 
 // 6. Google (optional)
 const keyPath = process.env.GOOGLE_APPLICATION_CREDENTIALS || join(CFG, 'google-key.json');
