@@ -5,6 +5,7 @@ import { heroXMark, heroTrash, heroLockClosed } from '@ng-icons/heroicons/outlin
 import { DEFAULT_EMPTY_QUARTER_RULE, DEFAULT_SPLIT, EmptyQuarterRule, QuarterSplit, SPLIT_PRESETS, isValidSplit } from '../../../../core/plans';
 import type { BoardSize } from '../../../../core/services/game.service';
 import { smallerBoardSizes } from '../../../../core/utils/shuffle-squares';
+import { ToggleComponent } from '../../../../components/ui/toggle/toggle.component';
 import { EmptyQuarterRuleComponent } from '../../../../components/ui/empty-quarter-rule/empty-quarter-rule.component';
 
 export interface EditGameValues {
@@ -16,12 +17,14 @@ export interface EditGameValues {
   emptyQuarterRule: EmptyQuarterRule;
   /** A smaller size to convert to on save, or null to keep the board as it is. */
   newBoardSize: BoardSize | null;
+  /** Players on the host's other full boards can see and join this board. */
+  showInOpenBoards: boolean;
 }
 
 /** Owner-only "Edit game" popup. Edits a draft and saves once. */
 @Component({
   selector: 'app-edit-game-dialog',
-  imports: [FormsModule, NgIconComponent, EmptyQuarterRuleComponent],
+  imports: [FormsModule, NgIconComponent, EmptyQuarterRuleComponent, ToggleComponent],
   providers: [provideIcons({ heroXMark, heroTrash, heroLockClosed })],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
@@ -70,6 +73,17 @@ export interface EditGameValues {
               <textarea id="edit-note" rows="2" [(ngModel)]="draft.hostNote" maxlength="140" placeholder="e.g. Snacks at halftime!" class="qs-input min-h-20 py-2.5"></textarea>
               <p class="mt-1 text-right text-xs tabular-nums text-qs-muted">{{ draft.hostNote.length }}/140</p>
             </div>
+
+            @if (canShowInOpenBoards) {
+              <div class="flex items-start justify-between gap-4">
+                <div class="min-w-0">
+                  <p class="qs-label mb-1.5 text-qs-muted">Show in my open boards</p>
+                  <p class="text-xs text-qs-muted">Anyone who opens one of your boards can see this board's name, points per square and how many squares are left, and can join it. Off by default. Anyone with the link can still open it.</p>
+                  <p class="mt-2 truncate rounded-inner border border-qs-line bg-qs-panel-2 px-3 py-2 font-mono text-xs text-qs-ink">{{ boardName }} · Points per square: {{ draft.pricePerSquare }} · {{ squaresFilled }}/{{ boardSize }} taken</p>
+                </div>
+                <app-toggle [checked]="draft.showInOpenBoards" (onChange)="draft.showInOpenBoards = $event"></app-toggle>
+              </div>
+            }
 
             @if (boardSize > 25) {
               <div>
@@ -147,13 +161,15 @@ export interface EditGameValues {
 export class EditGameDialogComponent implements OnChanges {
   @Input() isOpen = false;
   @Input() isLocked = false;
+  @Input() boardName = '';
   @Input() boardSize: BoardSize = 100;
+  @Input() canShowInOpenBoards = false;
   @Input() canCustomSplit = false;
   @Input() numbersDrawn = false;
   @Input() squaresFilled = 0;
   /** Splits lock once numbers are drawn. */
   @Input() splitLocked = false;
-  @Input() values: EditGameValues = { awayTeam: '', homeTeam: '', pricePerSquare: 10, hostNote: '', quarterSplit: null, emptyQuarterRule: DEFAULT_EMPTY_QUARTER_RULE, newBoardSize: null };
+  @Input() values: EditGameValues = { awayTeam: '', homeTeam: '', pricePerSquare: 10, hostNote: '', quarterSplit: null, emptyQuarterRule: DEFAULT_EMPTY_QUARTER_RULE, newBoardSize: null, showInOpenBoards: false };
 
   @Output() closed = new EventEmitter<void>();
   @Output() saved = new EventEmitter<EditGameValues>();

@@ -90,4 +90,11 @@ describe('splitToTenths', () => {
     expect(isPendingAutoSubmit({ ...fresh, autoSubmit: false }, 1_000_000 + 1000)).toBe(false);
     expect(isPendingAutoSubmit(null)).toBe(false);
   });
+
+  it('carries the Show in my open boards choice, off by default', () => {
+    const off = buildCreateGameValues({ ...emptyDraft(), name: 'Game' }, sanitizer, true);
+    const on = buildCreateGameValues({ ...emptyDraft(), name: 'Game', showInOpenBoards: true }, sanitizer, true);
+    expect(off.ok && off.values.showInOpenBoards).toBe(false);
+    expect(on.ok && on.values.showInOpenBoards).toBe(true);
+  });
 });

@@ -20,6 +20,7 @@ export interface CreateGameDraft {
   name: string;
   price: number;
   savedAt: number;
+  showInOpenBoards: boolean;
   splitPct: QuarterSplit;
   sport: SportType | 'custom';
 }
@@ -36,6 +37,7 @@ export interface CreateGameValues {
   name: string;
   price: number;
   quarterSplit: QuarterSplit | null;
+  showInOpenBoards: boolean;
 }
 
 export type BuildResult = { ok: true; values: CreateGameValues } | { ok: false; reason: 'name' | 'split' };
@@ -61,6 +63,7 @@ export function emptyDraft(): CreateGameDraft {
     name: '',
     price: 10,
     savedAt: 0,
+    showInOpenBoards: false,
     splitPct: { q1: 20, q2: 20, q3: 20, q4: 40 },
     sport: 'nfl'
   };
@@ -110,7 +113,8 @@ export function buildCreateGameValues(draft: CreateGameDraft, sanitizer: Sanitiz
       manager: draft.manager.trim() || undefined,
       name,
       price: sanitizer.validatePrice(draft.price),
-      quarterSplit: isDefaultSplit(split) || !customSplitsAllowed ? null : split
+      quarterSplit: isDefaultSplit(split) || !customSplitsAllowed ? null : split,
+      showInOpenBoards: draft.showInOpenBoards === true
     }
   };
 }

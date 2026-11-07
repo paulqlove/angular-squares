@@ -41,6 +41,8 @@ import {
 import { GameStatusComponent } from './components/game-status/game-status.component';
 import { AppHeaderComponent } from '../../components/ui/app-header/app-header.component';
 import { EditGameDialogComponent, EditGameValues } from './components/edit-game-dialog/edit-game-dialog.component';
+import { OpenBoardsListComponent } from './components/open-boards-list/open-boards-list.component';
+import type { OpenBoardRow } from '../../core/utils/open-boards';
 import { ShrinkBoardDialogComponent } from './components/shrink-board-dialog/shrink-board-dialog.component';
 import { smallerBoardSizes } from '../../core/utils/shuffle-squares';
 import { PaymentDialogComponent } from './components/payment-dialog/payment-dialog.component';
@@ -64,6 +66,7 @@ import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.co
     AppHeaderComponent,
     EditGameDialogComponent,
     ShrinkBoardDialogComponent,
+    OpenBoardsListComponent,
     PaymentDialogComponent,
     ProbabilityHeatmapComponent,
     BoxScoreComponent,
@@ -153,7 +156,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   highlightedSquare: string | null = null;
   hostNote = '';
   paidPlayers: Set<string> = new Set();
-  activeTab: 'board' | 'probabilities' | 'boxscore' = 'board';
+  activeTab: 'board' | 'probabilities' | 'boxscore' | 'more' = 'board';
 
   // Injected services
   private gameService = inject(GameService);
@@ -240,6 +243,10 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   // UI state
   showSettings = signal(false);
   showShrinkSuggestion = signal(false);
+  openBoards = signal<OpenBoardRow[]>([]);
+  showInOpenBoards = false;
+  private openBoardsFor = '';
+  private openBoardsLoad: Promise<OpenBoardRow[]> | null = null;
   isLoading = signal(true);
   gameNotFound = signal(false);
   showShareModal = signal(false);
@@ -333,6 +340,10 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     this.gameSub = null;
     this.gameNotFound.set(false);
     this.isLoading.set(true);
+    // A board opened from the More list starts on its squares, not the list it came from
+    this.activeTab = 'board';
+    this.openBoards.set([]);
+    this.openBoardsLoad = null;
     this.liveIndexEnsuredFor = null;
     this.latestEspnLive = null;
     this.selectedPlayer = null;
@@ -375,6 +386,14 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           this.currentPrice = data.pricePerSquare || 10;
           this.isRandomized = data.isRandomized || false;
           this.isLocked = data.isLocked || false;
+          this.showInOpenBoards = !!data.showInOpenBoards;
+          this.loadOpenBoards();
+          if (this.fullBoardNotice()) {
+            this.gameService.recordBoardStatOnce(this.gameId, 'fullBoardViews');
+            this.loadOpenBoards().then(rows => {
+              if (rows.length) this.gameService.recordBoardStatOnce(this.gameId, 'fullBoardViewsWithOpenBoards');
+            });
+          }
           this.homeTeam = data.homeTeam || '';
           this.awayTeam = data.awayTeam || '';
           this.hostNote = data.hostNote || '';
@@ -1078,6 +1097,37 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   }
 
   /** Saves the Edit game popup in one write. */
+  /** A full board shows a way out to people who hold no square on it (not the host or co-host). */
+  fullBoardNotice(): boolean {
+    const { rows, cols } = getBoardDimensions(this.boardSize);
+    const me = this._currentPlayer.toLowerCase();
+    const holdsSquare = !!me && Object.values(this.selectedSquares).some(name => name.toLowerCase() === me);
+    return this.squaresPicked() >= rows * cols && !this.isGameOwner() && !this.isManager() && !holdsSquare;
+  }
+
+  /** Whether this board can be shown to players on the host's full boards. */
+  canShowInOpenBoards(): boolean {
+    const { rows, cols } = getBoardDimensions(this.boardSize);
+    const eligible = !this.isLocked && !this.isRandomized && this.squaresPicked() < rows * cols;
+    return this.isGameOwner() && this.planService.features().activeBoards > 1 && (this.showInOpenBoards || eligible);
+  }
+
+  trackOtherBoardJoin(): void {
+    this.gameService.recordBoardStatOnce(this.gameId, 'otherBoardJoins');
+  }
+
+  /** The host's other opted-in open boards, loaded once per board. */
+  private loadOpenBoards(): Promise<OpenBoardRow[]> {
+    if (this.openBoardsFor !== this.gameId || !this.openBoardsLoad) {
+      this.openBoardsFor = this.gameId;
+      this.openBoardsLoad = this.gameService.getOpenBoards(this.gameOwnerId, this.gameId).then(rows => {
+        this.openBoards.set(rows);
+        return rows;
+      });
+    }
+    return this.openBoardsLoad;
+  }
+
   squaresPicked(): number {
     return Object.keys(this.selectedSquares).length;
   }
@@ -1105,6 +1155,15 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       this.hostNote = hostNote;
       this.currentPrice = price;
       this.calculatePlayerStats();
+      if (values.showInOpenBoards !== this.showInOpenBoards) {
+        try {
+          await this.gameService.setShowInOpenBoards(this.gameId, this.gameOwnerId, values.showInOpenBoards);
+          this.showInOpenBoards = values.showInOpenBoards;
+        } catch {
+          this.toastService.warning('Saved, but Show in my open boards could not be changed. Try again in a moment.');
+          return;
+        }
+      }
       this.toastService.success('Game saved');
     } catch {
       this.toastService.error('Failed to save game. Please try again.');

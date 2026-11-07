@@ -89,7 +89,9 @@
     [boardSize]="boardSize"
     [numbersDrawn]="isRandomized"
     [squaresFilled]="squaresPicked()"
-    [values]="{ awayTeam: awayTeam, homeTeam: homeTeam, pricePerSquare: currentPrice, hostNote: hostNote, quarterSplit: quarterSplit, emptyQuarterRule: emptyQuarterRule, newBoardSize: null }"
+    [boardName]="gameName"
+    [canShowInOpenBoards]="canShowInOpenBoards()"
+    [values]="{ awayTeam: awayTeam, homeTeam: homeTeam, pricePerSquare: currentPrice, hostNote: hostNote, quarterSplit: quarterSplit, emptyQuarterRule: emptyQuarterRule, newBoardSize: null, showInOpenBoards: showInOpenBoards }"
     [canCustomSplit]="planService.features().customSplits"
     [splitLocked]="isRandomized"
     (closed)="showSettings.set(false)"
@@ -181,53 +183,66 @@
               <button (click)="activeTab = 'board'" role="tab" [attr.aria-selected]="activeTab === 'board'" class="qs-tab px-3 sm:px-4">Board</button>
               <button (click)="activeTab = 'probabilities'" role="tab" [attr.aria-selected]="activeTab === 'probabilities'" class="qs-tab px-3 sm:px-4">Heatmap</button>
               <button (click)="activeTab = 'boxscore'" role="tab" [attr.aria-selected]="activeTab === 'boxscore'" class="qs-tab px-3 sm:px-4">Box score</button>
+              @if (openBoards().length) {
+                <button (click)="activeTab = 'more'" role="tab" [attr.aria-selected]="activeTab === 'more'" class="qs-tab px-3 sm:px-4">More</button>
+              }
             </div>
 
-            <!-- Tab Content -->
-            @if (activeTab === 'board') {
-              <app-game-board
-                [selectedSquares]="selectedSquares"
-                [playerColors]="playerColors"
-                [homeNumbers]="displayHomeNumbers()"
-                [awayNumbers]="displayAwayNumbers()"
-                [homeNumbersLocked]="homeNumbersLocked()"
-                [awayNumbersLocked]="awayNumbersLocked()"
-                [homeTeam]="homeTeam"
-                [awayTeam]="awayTeam"
-                [selectedPlayer]="selectedPlayer"
-                [highlightedSquare]="highlightedSquare"
-                [currentLeaderSquare]="currentLeaderSquare"
-                [isRandomized]="isRandomized"
-                [boardSize]="boardSize"
-                (squareClick)="onSquareClick($event)">
-              </app-game-board>
-            } @else if (activeTab === 'probabilities') {
-              @if (isRandomized) {
-                <app-probability-heatmap
-                  [homeNumbers]="homeNumbers"
-                  [awayNumbers]="awayNumbers"
+            <!-- Tab Content. On desktop every tab sits in the same grid cell, and the Board stays in place (hidden while another tab shows), so the card always keeps the Board's height and nothing below it moves. -->
+            <div class="lg:grid">
+              <div class="[grid-area:1/1]" [class]="activeTab === 'board' ? '' : 'max-lg:hidden lg:invisible'" [attr.aria-hidden]="activeTab === 'board' ? null : 'true'">
+                <app-game-board
+                  [selectedSquares]="selectedSquares"
+                  [playerColors]="playerColors"
+                  [homeNumbers]="displayHomeNumbers()"
+                  [awayNumbers]="displayAwayNumbers()"
+                  [homeNumbersLocked]="homeNumbersLocked()"
+                  [awayNumbersLocked]="awayNumbersLocked()"
                   [homeTeam]="homeTeam"
                   [awayTeam]="awayTeam"
-                  [selectedSquares]="selectedSquares"
                   [selectedPlayer]="selectedPlayer"
-                  [boardSize]="boardSize">
-                </app-probability-heatmap>
-              } @else {
-                <div class="flex h-64 items-center justify-center px-4 text-center text-qs-muted">
-                  <p>The heatmap appears once the numbers are drawn.</p>
+                  [highlightedSquare]="highlightedSquare"
+                  [currentLeaderSquare]="currentLeaderSquare"
+                  [isRandomized]="isRandomized"
+                  [boardSize]="boardSize"
+                  (squareClick)="onSquareClick($event)">
+                </app-game-board>
+              </div>
+              @if (activeTab !== 'board') {
+                <div class="[grid-area:1/1]">
+                  @if (activeTab === 'more') {
+                    <app-open-boards-list [rows]="openBoards()" (picked)="trackOtherBoardJoin()"></app-open-boards-list>
+                  } @else if (activeTab === 'probabilities') {
+                  @if (isRandomized) {
+                    <app-probability-heatmap
+                      [homeNumbers]="homeNumbers"
+                      [awayNumbers]="awayNumbers"
+                      [homeTeam]="homeTeam"
+                      [awayTeam]="awayTeam"
+                      [selectedSquares]="selectedSquares"
+                      [selectedPlayer]="selectedPlayer"
+                      [boardSize]="boardSize">
+                    </app-probability-heatmap>
+                  } @else {
+                    <div class="flex h-64 items-center justify-center px-4 text-center text-qs-muted">
+                      <p>The heatmap appears once the numbers are drawn.</p>
+                    </div>
+                  }
+
+                  } @else {
+                  <app-box-score
+                    [game]="linkedEspnGame()"
+                    [espnSport]="espnSport"
+                    [scores]="{ q1: scores.q1, q2: scores.q2, q3: scores.q3, q4: scores.q4 }"
+                    [homeTeam]="homeTeam"
+                    [awayTeam]="awayTeam"
+                    [isOwner]="!espnEventId && (isGameOwner() || isManager())"
+                    (scoresChange)="onBoxScoreChange($event)">
+                  </app-box-score>
+                  }
                 </div>
               }
-            } @else {
-              <app-box-score
-                [game]="linkedEspnGame()"
-                [espnSport]="espnSport"
-                [scores]="{ q1: scores.q1, q2: scores.q2, q3: scores.q3, q4: scores.q4 }"
-                [homeTeam]="homeTeam"
-                [awayTeam]="awayTeam"
-                [isOwner]="!espnEventId && (isGameOwner() || isManager())"
-                (scoresChange)="onBoxScoreChange($event)">
-              </app-box-score>
-            }
+            </div>
           </div>
         </section>
 

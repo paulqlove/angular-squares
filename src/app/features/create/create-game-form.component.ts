@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy
 import { FormsModule } from '@angular/forms';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroCheckCircle } from '@ng-icons/heroicons/outline';
+import { ToggleComponent } from '../../components/ui/toggle/toggle.component';
 import { EmptyQuarterRuleComponent } from '../../components/ui/empty-quarter-rule/empty-quarter-rule.component';
 import { DEFAULT_EMPTY_QUARTER_RULE, EmptyQuarterRule, QuarterSplit, SPLIT_PRESETS, isValidSplit } from '../../core/plans';
 import { EspnGame, EspnService, SportType } from '../../core/services/espn.service';
@@ -24,7 +25,7 @@ export interface CreateGameSubmit {
  */
 @Component({
   selector: 'app-create-game-form',
-  imports: [FormsModule, NgIconComponent, EmptyQuarterRuleComponent],
+  imports: [FormsModule, NgIconComponent, EmptyQuarterRuleComponent, ToggleComponent],
   providers: [provideIcons({ heroCheckCircle })],
   host: { class: 'contents' },
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -179,6 +180,16 @@ export interface CreateGameSubmit {
           <span class="qs-label text-qs-muted">pts</span>
         </label>
       </div>
+      @if (openBoardsAllowed) {
+        <div class="mt-5 flex items-start justify-between gap-4">
+          <div class="min-w-0">
+            <p class="qs-label mb-1.5 text-qs-muted">Show in my open boards</p>
+            <p class="text-xs text-qs-muted">Anyone who opens one of your boards can see this board's name, points per square and how many squares are left, and can join it. Off by default. Anyone with the link can still open it.</p>
+            <p class="mt-2 truncate rounded-inner border border-qs-line bg-qs-panel-2 px-3 py-2 font-mono text-xs text-qs-ink">{{ newGameName || 'Your board' }} · Points per square: {{ newGamePrice }} · 0/{{ newGameBoardSize }} taken</p>
+          </div>
+          <app-toggle [checked]="newGameShowInOpenBoards" (onChange)="newGameShowInOpenBoards = $event"></app-toggle>
+        </div>
+      }
     </section>
 
     <!-- 05 Quarter split -->
@@ -270,6 +281,8 @@ export interface CreateGameSubmit {
 export class CreateGameFormComponent implements OnInit {
   @Input() customSplitsAllowed = false;
   @Input() isCreating = false;
+  /** Hosts who can run several boards get the Show in my open boards switch. */
+  @Input() openBoardsAllowed = false;
   @Output() cancelled = new EventEmitter<void>();
   @Output() submitted = new EventEmitter<CreateGameSubmit>();
 
@@ -289,6 +302,7 @@ export class CreateGameFormComponent implements OnInit {
   newGameBoardSize: BoardSize = 100;
   newGameEmptyRule: EmptyQuarterRule = DEFAULT_EMPTY_QUARTER_RULE;
   newGameHostNote = '';
+  newGameShowInOpenBoards = false;
   newGameName = '';
   newGamePaymentManager = '';
   newGamePrice = 10;
@@ -440,6 +454,7 @@ export class CreateGameFormComponent implements OnInit {
     this.newGameBoardSize = draft.boardSize;
     this.newGameSplitPct = { ...draft.splitPct };
     this.newGameEmptyRule = draft.emptyRule;
+    this.newGameShowInOpenBoards = draft.showInOpenBoards;
     if (draft.espnGame && draft.sport !== 'custom') {
       this.selectedEspnGameId = draft.espnGame.id;
       this.gameListOpen = false;
@@ -499,6 +514,7 @@ export class CreateGameFormComponent implements OnInit {
       manager: this.newGamePaymentManager,
       name: this.newGameName,
       price: this.newGamePrice,
+      showInOpenBoards: this.openBoardsAllowed && this.newGameShowInOpenBoards,
       splitPct: { ...this.newGameSplitPct },
       sport: this.selectedSport
     };

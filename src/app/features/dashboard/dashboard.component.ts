@@ -1,5 +1,7 @@
 import { Component, OnInit, signal, computed, inject, effect, HostListener, ChangeDetectionStrategy } from '@angular/core';
 
+import { miniGridCells, miniGridClass } from '../../core/utils/mini-grid';
+import { ToggleComponent } from '../../components/ui/toggle/toggle.component';
 import { DropdownComponent } from '../../components/ui/dropdown/dropdown.component';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -53,7 +55,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked';
 
 @Component({
     selector: 'app-dashboard',
-    imports: [FormsModule, NgTemplateOutlet, DropdownComponent, CreateGameFormComponent, NgIconComponent, AppHeaderComponent, HeadroomDirective, HelpMenuComponent, ProfileMenuComponent, ShareDialogComponent, EmptyQuarterRuleComponent, UpgradePassDialogComponent],
+    imports: [FormsModule, NgTemplateOutlet, DropdownComponent, ToggleComponent, CreateGameFormComponent, NgIconComponent, AppHeaderComponent, HeadroomDirective, HelpMenuComponent, ProfileMenuComponent, ShareDialogComponent, EmptyQuarterRuleComponent, UpgradePassDialogComponent],
     providers: [
         provideIcons({
             heroPlus,
@@ -451,6 +453,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked';
 
             <app-create-game-form
               [customSplitsAllowed]="planService.features().customSplits"
+              [openBoardsAllowed]="planService.features().activeBoards > 1"
               [isCreating]="isCreating()"
               (cancelled)="closeCreateModal()"
               (submitted)="createGame($event)"
@@ -612,6 +615,20 @@ type GameStatusFilter = 'all' | 'open' | 'locked';
                   class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-qs-accent focus:ring-2 focus:ring-qs-accent-soft outline-none text-default"
                 />
               </div>
+
+              <!-- Show in my open boards: only for hosts who can run several boards -->
+              @if (editingGame(); as og) {
+                @if (planService.features().activeBoards > 1 && (og.showInOpenBoards || (!og.isLocked && !editBoardRandomized() && og.squaresFilled < og.boardSize))) {
+                  <div class="flex items-start justify-between gap-4">
+                    <div class="min-w-0">
+                      <label class="block text-sm font-semibold text-label mb-1">Show in my open boards</label>
+                      <p class="text-xs text-muted">Anyone who opens one of your boards can see this board's name, points per square and how many squares are left, and can join it. Off by default. Anyone with the link can still open it.</p>
+                      <p class="mt-2 truncate rounded-xl border border-input bg-input px-3 py-2 font-mono text-xs text-default">{{ editGameName }} · Points per square: {{ editGamePrice }} · {{ og.squaresFilled }}/{{ og.boardSize }} taken</p>
+                    </div>
+                    <app-toggle [checked]="editShowInOpenBoards" (onChange)="editShowInOpenBoards = $event"></app-toggle>
+                  </div>
+                }
+              }
 
               <!-- Board size: only smaller, only while the picks fit and the numbers are not drawn -->
               @if (editingGame(); as eg) {
@@ -848,14 +865,12 @@ export class DashboardComponent implements OnInit {
 
   /** Get cells array for mini board preview based on board size */
   getBoardCells(size: BoardSize): number[] {
-    return Array.from({ length: size }, (_, i) => i);
+    return miniGridCells(size);
   }
 
   /** Get CSS class for mini board grid based on board size */
   getMiniGridClass(size: BoardSize): string {
-    if (size === 25) return 'grid-cols-5';
-    if (size === 50) return 'grid-cols-10';
-    return 'grid-cols-10';
+    return miniGridClass(size);
   }
   isLoadingGames = signal(true);
   isCreating = signal(false);
@@ -885,6 +900,7 @@ export class DashboardComponent implements OnInit {
   editGamePlayers = signal<{ name: string; uid: string }[]>([]);
   editBoardRandomized = signal(false);
   editNewSize = signal<BoardSize | null>(null);
+  editShowInOpenBoards = false;
   editSmallerSizes: BoardSize[] = [50, 25];
   managerSearchQuery = '';
   managerSearchResults = signal<{ name: string; uid: string }[]>([]);
@@ -1141,6 +1157,13 @@ export class DashboardComponent implements OnInit {
         values.quarterSplit,
         values.emptyQuarterRule
       );
+      if (values.showInOpenBoards) {
+        try {
+          await this.gameService.setShowInOpenBoards(gameId, user.uid, true);
+        } catch {
+          this.toastService.warning('Board created, but Show in my open boards could not be turned on. Try again in Edit.');
+        }
+      }
       this.showCreateModal.set(false);
       clearCreateDraft();
       this.router.navigate(['/game', gameId]);
@@ -1251,6 +1274,7 @@ export class DashboardComponent implements OnInit {
     this.editCustomAwayTeam = game.awayTeam || '';
     this.editNewSize.set(null);
     this.editBoardRandomized.set(false);
+    this.editShowInOpenBoards = !!game.showInOpenBoards;
     this.managerSearchQuery = '';
     this.managerSearchResults.set([]);
     this.selectedManagerIndex.set(-1);
@@ -1433,10 +1457,22 @@ export class DashboardComponent implements OnInit {
       const newSize = this.editNewSize();
       if (newSize) await this.gameService.resizeBoard(game.id, newSize);
       await this.gameService.updateGame(game.id, updates);
+      // The open-boards switch saves on its own so a failure here never loses the other edits.
+      let showApplied = !!game.showInOpenBoards;
+      const uid = this.currentUser()?.uid;
+      if (uid && this.editShowInOpenBoards !== showApplied) {
+        try {
+          await this.gameService.setShowInOpenBoards(game.id, uid, this.editShowInOpenBoards);
+          showApplied = this.editShowInOpenBoards;
+        } catch {
+          this.toastService.warning('Saved, but Show in my open boards could not be changed. Try again in a moment.');
+        }
+      }
       this.myGames.update(games =>
         games.map(g => g.id === game.id ? {
           ...g,
           ...(newSize ? { boardSize: newSize } : {}),
+          showInOpenBoards: showApplied,
           name: sanitizedName,
           pricePerSquare: sanitizedPrice,
           hostNote: sanitizedHostNote,
