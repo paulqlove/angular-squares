@@ -9,7 +9,7 @@ import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const origin = 'https://quarterscore.com';
 const blogDir = path.join(root, 'content', 'blog');
-const clientRoutes = new Set(['dashboard', 'create', 'game/:gameId', 'auth/email-link', 'present', 'present/:gameId', '**']);
+const clientRoutes = new Set(['dashboard', 'create', 'game/:gameId', 'auth/email-link', 'present', 'present/:gameId', 'tv/:token', '**']);
 const pageLastmod = '2026-11-01';
 const espnNfl = 'https://site.api.espn.com/apis/site/v2/sports/football/nfl';
 const thanksgivingDates = ['20261125', '20261126', '20261127'];

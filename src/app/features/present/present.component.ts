@@ -54,6 +54,7 @@ export class PresentComponent implements OnInit, OnDestroy {
     return colors;
   });
   protected readonly isHost = computed(() => {
+    if (this.kiosk()) return false;
     const user = this.auth.currentUser();
     return !!user && !user.isGuest;
   });
@@ -62,6 +63,10 @@ export class PresentComponent implements OnInit, OnDestroy {
   protected readonly rotating = signal<boolean>(false);
   protected readonly showHelp = signal<boolean>(false);
   protected readonly showTimer = signal<boolean>(false);
+  /** True on /tv/:token: a TV with no sign-in, rotating the boards the host chose, at the speed the host chose. */
+  protected readonly kiosk = signal<boolean>(false);
+  protected readonly kioskOff = signal<boolean>(false);
+  protected readonly hasOfficeLink = signal<boolean>(false);
   protected readonly tooSmall = signal<boolean>(false);
   /** How many boards the signed-in host has: rotation needs two or more. */
   protected readonly boardCount = signal<number>(0);
@@ -74,6 +79,7 @@ export class PresentComponent implements OnInit, OnDestroy {
   private skips = 0;
   private screenQuery: MediaQueryList | null = null;
   private readonly onScreenChange = (event: MediaQueryListEvent): void => this.tooSmall.set(event.matches);
+  private linkSub: Subscription | null = null;
   private sub: Subscription | null = null;
   private timer: ReturnType<typeof setInterval> | null = null;
   private espnTimer: ReturnType<typeof setInterval> | null = null;
@@ -84,6 +90,11 @@ export class PresentComponent implements OnInit, OnDestroy {
     this.tooSmall.set(this.screenQuery.matches);
     this.screenQuery.addEventListener('change', this.onScreenChange);
     this.espnTimer = setInterval(() => this.refreshEspn(), 30000);
+    const token = this.route.snapshot.paramMap.get('token');
+    if (token) {
+      this.startKiosk(token);
+      return;
+    }
     const id = this.route.snapshot.paramMap.get('gameId');
     if (id) this.open(id);
     await this.auth.waitForAuthReady();
@@ -94,6 +105,7 @@ export class PresentComponent implements OnInit, OnDestroy {
     }
     this.boardIds = await this.gameService.getUserGameIds(user.uid);
     this.boardCount.set(this.boardIds.length);
+    this.hasOfficeLink.set(!!(await this.gameService.getTvToken(user.uid)));
     if (id) {
       this.index = this.boardIds.indexOf(id);
       return;
@@ -117,6 +129,7 @@ export class PresentComponent implements OnInit, OnDestroy {
     this.stopTimer();
     if (this.espnTimer) clearInterval(this.espnTimer);
     this.screenQuery?.removeEventListener('change', this.onScreenChange);
+    this.linkSub?.unsubscribe();
     this.sub?.unsubscribe();
     this.gameService.unsubscribe();
   }
@@ -220,6 +233,42 @@ export class PresentComponent implements OnInit, OnDestroy {
     this.startTimer();
   }
 
+  /** Publish the boards and the chosen interval under the host's private token, and copy the address. */
+  protected async copyOfficeLink(): Promise<void> {
+    const user = this.auth.currentUser();
+    if (!user || user.isGuest) return;
+    let url: string;
+    try {
+      const token = await this.gameService.saveTvLink(user.uid, this.boardIds, this.interval());
+      this.hasOfficeLink.set(true);
+      url = this.gameService.getOfficeTvLink(token);
+    } catch (error) {
+      console.error('[Present] Could not save the office TV link', (error as { code?: string })?.code ?? error);
+      this.toast.error('Could not make the office link. Try again.');
+      return;
+    }
+    const boards = Math.min(this.boardIds.length, 20);
+    try {
+      await navigator.clipboard.writeText(url);
+      this.toast.success(`Office link copied: ${boards} boards, ${this.interval()}s each. Press it again after you change boards or the time.`);
+    } catch {
+      this.toast.error(`Could not copy. The link is ${url}`);
+    }
+  }
+
+  /** The old address stops working and the next link gets a new token. */
+  protected async turnOffOfficeLink(): Promise<void> {
+    const user = this.auth.currentUser();
+    if (!user || user.isGuest) return;
+    try {
+      await this.gameService.removeTvLink(user.uid);
+      this.hasOfficeLink.set(false);
+      this.toast.success('Office link turned off.');
+    } catch {
+      this.toast.error('Could not turn the link off. Try again.');
+    }
+  }
+
   /** The clock button: show the interval buttons, or say why rotation is not available. */
   protected toggleTimer(): void {
     if (this.boardCount() < 2) {
@@ -251,6 +300,31 @@ export class PresentComponent implements OnInit, OnDestroy {
   protected verified(): number {
     const paid = new Set(this.game()?.paidPlayers ?? []);
     return new Set(Object.values(this.game()?.selectedSquares ?? {}).filter(p => paid.has(p))).size;
+  }
+
+  private startKiosk(token: string): void {
+    this.kiosk.set(true);
+    this.linkSub = this.gameService.watchTvLink(token).subscribe(link => {
+      if (!link) {
+        this.kioskOff.set(true);
+        this.stopTimer();
+        return;
+      }
+      this.kioskOff.set(false);
+      const intervalChanged = link.interval !== this.interval();
+      this.boardIds = link.boards;
+      this.boardCount.set(link.boards.length);
+      this.interval.set(link.interval);
+      this.rotating.set(true);
+      if (!this.gameId() || !link.boards.includes(this.gameId())) {
+        this.index = 0;
+        this.skips = 0;
+        this.open(link.boards[0]);
+      } else {
+        this.index = link.boards.indexOf(this.gameId());
+      }
+      if (!this.timer || intervalChanged) this.startTimer();
+    });
   }
 
   private advance(): void {

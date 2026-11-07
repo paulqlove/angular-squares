@@ -33,6 +33,10 @@ The client check is the limit players and hosts actually hit. The rule stops a s
 
 `{ at, path, ref?, src?, med?, camp? }`, written once by the client when a brand-new (under a day old) non-guest account first signs in: the referrer host, utm_source/medium/campaign, and landing path from the visitor's first visit on that device. No full URLs, no personal data. `users/{uid}` grants the owner `.write`, so the owner could overwrite it; "write once" is a client behavior. Guests are not captured.
 
+## tvLinks and users/{uid}/tvToken (office TV link)
+
+A host presses **Copy office link** in TV mode. The client creates a random token (16 bytes, base64url) and stores it privately at `users/{uid}/tvToken`, then publishes `tvLinks/{token}` = `{ boards, interval, updatedAt }`. `boards` is a comma-separated string of up to 20 six-character board ids (a rules regex caps it; the rules language cannot count children). `interval` is 10, 20, 30 or 60. Anyone holding the token can read that one node (a TV with no sign-in); nobody can list `tvLinks`. Only the account whose `users/{uid}/tvToken` equals the token can write or delete it. The link holds board ids only, no account id or name. Turn it off by deleting `tvLinks/{token}` first, then `users/{uid}/tvToken`; the next link gets a new token. Board data itself is already public by game id. Deploy rules before the client.
+
 ## notifyMe
 
 `notifyMe/{pushId}` is write-only create for a signed-in user. Reads, updates, and deletes are denied. The node must be `email`, `timestamp`, `uid`, and `source`, plus the optional `prefilled` (boolean) and `trigger` (`limit` or `pass`). `email` matches an email shape and is at most 254 characters. `uid` must be `auth.uid`. `source` is at most 64 characters. `timestamp` is a number within a day of `now`. The push id is at most 128 characters.

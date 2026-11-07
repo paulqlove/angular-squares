@@ -170,6 +170,9 @@
         "activeBoardId": {
           ".validate": "newData.isString() && newData.val().length >= 4 && newData.val().length <= 16 && newData.val().matches(/^[A-Za-z0-9]+$/)"
         },
+        "tvToken": {
+          ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9_-]{20,64}$/)"
+        },
         "firstTouch": {
           ".validate": "newData.hasChildren(['at', 'path'])",
           "at": { ".validate": "newData.isNumber() && newData.val() > 0" },
@@ -187,6 +190,17 @@
           "lastGameAt": { ".validate": "newData.isNumber() && newData.val() > 0" },
           "$other": { ".validate": false }
         }
+      }
+    },
+    "tvLinks": {
+      "$token": {
+        ".read": true,
+        ".write": "auth != null && $token.matches(/^[A-Za-z0-9_-]{20,64}$/) && root.child('users').child(auth.uid).child('tvToken').val() == $token",
+        ".validate": "newData.hasChildren(['boards', 'interval'])",
+        "boards": { ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9]{6}(,[A-Za-z0-9]{6}){0,19}$/)" },
+        "interval": { ".validate": "newData.isNumber() && (newData.val() == 10 || newData.val() == 20 || newData.val() == 30 || newData.val() == 60)" },
+        "updatedAt": { ".validate": "newData.isNumber() && newData.val() > 0" },
+        "$other": { ".validate": false }
       }
     },
     "upgradeViews": {

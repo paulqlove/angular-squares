@@ -851,3 +851,49 @@ describe('users/firstTouch', () => {
     await assertFails(set(player(), 'users/alice/firstTouch', { at: 1, path: '/', ref: 'a'.repeat(101) }));
   });
 });
+
+describe('tvLinks (office TV link)', () => {
+  const TOKEN = 'k7x9q2mZ4bR8tY1nWc5dLg';
+  const link = (over: Record<string, unknown> = {}) => ({ boards: 'AAAAAA,BBBBBB', interval: 30, updatedAt: Date.now(), ...over });
+
+  it('the owner can claim a token then publish a link under it', async () => {
+    await assertSucceeds(set(player(), 'users/alice/tvToken', TOKEN));
+    await assertSucceeds(set(player(), `tvLinks/${TOKEN}`, link()));
+  });
+
+  it('nobody can write a link under a token they have not claimed', async () => {
+    await assertFails(set(player(), `tvLinks/${TOKEN}`, link()));
+    await seed({ 'users/alice/tvToken': TOKEN });
+    await assertFails(set(env.authenticatedContext('bob'), `tvLinks/${TOKEN}`, link()));
+    await assertFails(set(visitor(), `tvLinks/${TOKEN}`, link()));
+  });
+
+  it('anyone with the token can read the link, but nobody can list links', async () => {
+    await seed({ 'users/alice/tvToken': TOKEN, [`tvLinks/${TOKEN}`]: link() });
+    await assertSucceeds(read(visitor(), `tvLinks/${TOKEN}`));
+    await assertFails(read(visitor(), 'tvLinks'));
+    await assertFails(read(player(), 'tvLinks'));
+  });
+
+  it('only the owner of the token can turn the link off', async () => {
+    await seed({ 'users/alice/tvToken': TOKEN, [`tvLinks/${TOKEN}`]: link() });
+    await assertFails(set(env.authenticatedContext('bob'), `tvLinks/${TOKEN}`, null));
+    await assertSucceeds(set(player(), `tvLinks/${TOKEN}`, null));
+  });
+
+  it('rejects a bad interval, a bad board id, too many boards and extra keys', async () => {
+    await seed({ 'users/alice/tvToken': TOKEN });
+    await assertFails(set(player(), `tvLinks/${TOKEN}`, link({ interval: 45 })));
+    await assertFails(set(player(), `tvLinks/${TOKEN}`, link({ boards: 'bad id' })));
+    await assertFails(set(player(), `tvLinks/${TOKEN}`, link({ boards: '' })));
+    const many = Array.from({ length: 21 }, (_, i) => `B${String(i).padStart(5, '0')}`).join(',');
+    await assertFails(set(player(), `tvLinks/${TOKEN}`, link({ boards: many })));
+    await assertSucceeds(set(player(), `tvLinks/${TOKEN}`, link({ boards: many.split(',').slice(0, 20).join(',') })));
+    await assertFails(set(player(), `tvLinks/${TOKEN}`, link({ extra: 1 })));
+  });
+
+  it('rejects a short or odd token', async () => {
+    await assertFails(set(player(), 'users/alice/tvToken', 'short'));
+    await assertFails(set(player(), 'users/alice/tvToken', 'has spaces and symbols!!!'));
+  });
+});
