@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject, effect, HostListener, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, signal, computed, inject, effect, HostListener, ChangeDetectionStrategy } from '@angular/core';
 
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -46,6 +46,9 @@ import {
   heroComputerDesktop,
   heroChevronDown
 } from '@ng-icons/heroicons/outline';
+
+type GameSort = 'newest' | 'oldest' | 'name' | 'players' | 'filled' | 'size';
+type GameStatusFilter = 'all' | 'open' | 'locked';
 
 @Component({
     selector: 'app-dashboard',
@@ -275,9 +278,25 @@ import {
             <div class="flex items-baseline justify-between border-b border-qs-line pb-3">
               <h3 id="hosting-heading" class="qs-eyebrow qs-eyebrow-bar">01 / Hosting</h3>
               @if (!isLoadingGames()) {
-                <span class="qs-label text-qs-muted">{{ myGames().length }} {{ myGames().length === 1 ? 'game' : 'games' }}</span>
+                <span class="qs-label text-qs-muted">{{ visibleMyGames().length === myGames().length ? myGames().length : visibleMyGames().length + ' of ' + myGames().length }} {{ myGames().length === 1 ? 'game' : 'games' }}</span>
               }
             </div>
+
+            @if (!isLoadingGames() && myGames().length >= 5) {
+              <div class="mt-4 flex flex-wrap items-center gap-2">
+                <input type="search" [value]="gameSearch()" (input)="gameSearch.set($any($event.target).value)" placeholder="Search by name or team" aria-label="Search your boards" class="qs-input min-w-0 flex-1 basis-48" />
+                <select [value]="gameSort()" (change)="gameSort.set($any($event.target).value)" aria-label="Sort boards" class="qs-input w-auto">
+                  @for (o of sortOptions; track o.value) {
+                    <option [value]="o.value">{{ o.label }}</option>
+                  }
+                </select>
+                <div class="flex gap-1.5" role="group" aria-label="Filter by status">
+                  @for (f of statusFilters; track f.value) {
+                    <button type="button" class="qs-tab min-h-9 px-3" [attr.aria-pressed]="gameStatus() === f.value" (click)="gameStatus.set(f.value)">{{ f.label }}</button>
+                  }
+                </div>
+              </div>
+            }
 
             @if (isLoadingGames()) {
               <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3" aria-busy="true">
@@ -301,11 +320,18 @@ import {
                 </button>
               </div>
             } @else {
-              <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                @for (game of myGames(); track game.id) {
-                  <ng-container *ngTemplateOutlet="gameCard; context: { $implicit: game, joined: false }"></ng-container>
-                }
-              </div>
+              @if (visibleMyGames().length === 0) {
+                <div class="qs-card mt-5 p-8 text-center">
+                  <p class="text-qs-muted">No boards match.</p>
+                  <button type="button" class="qs-btn qs-btn-secondary mt-4" (click)="clearGameFilters()">Clear search and filters</button>
+                </div>
+              } @else {
+                <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  @for (game of visibleMyGames(); track game.id) {
+                    <ng-container *ngTemplateOutlet="gameCard; context: { $implicit: game, joined: false }"></ng-container>
+                  }
+                </div>
+              }
             }
           </section>
         }
@@ -785,6 +811,40 @@ export class DashboardComponent implements OnInit {
   protected readonly Infinity = Infinity;
 
   myGames = signal<GameListItem[]>([]);
+  gameSearch = signal('');
+  gameSort = signal<GameSort>('newest');
+  gameStatus = signal<GameStatusFilter>('all');
+  readonly sortOptions: { value: GameSort; label: string }[] = [
+    { value: 'newest', label: 'Newest first' },
+    { value: 'oldest', label: 'Oldest first' },
+    { value: 'name', label: 'Name A–Z' },
+    { value: 'players', label: 'Most players' },
+    { value: 'filled', label: 'Most full' },
+    { value: 'size', label: 'Board size' }
+  ];
+  readonly statusFilters: { value: GameStatusFilter; label: string }[] = [
+    { value: 'all', label: 'All' },
+    { value: 'open', label: 'Open' },
+    { value: 'locked', label: 'Locked' }
+  ];
+  /** Hosted boards after the search, status filter and sort. */
+  visibleMyGames = computed(() => {
+    const query = this.gameSearch().trim().toLowerCase();
+    const status = this.gameStatus();
+    const fill = (g: GameListItem): number => g.squaresFilled / (g.boardSize || 100);
+    const sorts: Record<GameSort, (a: GameListItem, b: GameListItem) => number> = {
+      newest: (a, b) => b.createdAt - a.createdAt,
+      oldest: (a, b) => a.createdAt - b.createdAt,
+      name: (a, b) => a.name.localeCompare(b.name),
+      players: (a, b) => b.playerCount - a.playerCount,
+      filled: (a, b) => fill(b) - fill(a),
+      size: (a, b) => (b.boardSize || 100) - (a.boardSize || 100)
+    };
+    return this.myGames()
+      .filter(g => status === 'all' || (status === 'locked') === g.isLocked)
+      .filter(g => !query || [g.name, g.homeTeam, g.awayTeam, g.id].some(v => (v || '').toLowerCase().includes(query)))
+      .sort(sorts[this.gameSort()]);
+  });
   joinedGames = signal<GameListItem[]>([]);
 
   /** Get cells array for mini board preview based on board size */
@@ -907,6 +967,11 @@ export class DashboardComponent implements OnInit {
   startWalkthrough(): void {
     this.walkthroughService.resetCompletion('dashboard');
     this.walkthroughService.start('dashboard', this.dashboardWalkthroughSteps);
+  }
+
+  clearGameFilters(): void {
+    this.gameSearch.set('');
+    this.gameStatus.set('all');
   }
 
   async loadMyGames(): Promise<void> {
