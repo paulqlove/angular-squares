@@ -22,6 +22,13 @@
         }
       }
       @if (isHost()) {
+        @if (rotating()) {
+          <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" (click)="stopRotation()">Stop</button>
+        } @else {
+          <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" aria-label="Rotate through your boards on a timer" [attr.aria-expanded]="showTimer()" (click)="showTimer.set(!showTimer())">
+            <ng-icon name="heroClock" class="text-lg" aria-hidden="true"></ng-icon>
+          </button>
+        }
         @if (gameId() && !rotating()) {
           <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" (click)="copyLink()">Copy TV link</button>
         }
@@ -30,6 +37,23 @@
       }
     </div>
   </div>
+
+  @if (isHost() && showTimer() && !rotating()) {
+    <div class="qs-card mb-3 shrink-0 p-4 text-sm">
+      <p class="mb-2 font-semibold">Rotate through your boards</p>
+      @if (boardCount() >= 2) {
+        <p class="mb-3 text-qs-muted">TV mode moves to your next board on a timer. It stays on a board for 30 seconds after its score changes.</p>
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="qs-label text-qs-muted">Switch every</span>
+          @for (s of intervals; track s) {
+            <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" (click)="startRotation(s)">{{ s }}s</button>
+          }
+        </div>
+      } @else {
+        <p class="text-qs-muted">Rotation needs two or more boards. Create another board and it will show up here.</p>
+      }
+    </div>
+  }
 
   @if (isHost() && showHelp()) {
     <div class="qs-card mb-3 shrink-0 p-4 text-sm">

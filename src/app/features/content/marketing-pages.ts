@@ -637,7 +637,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       {
         heading: 'More than one board',
         paragraphs: [
-          'Signed in, open quarterscore.com/present with no board code and TV mode rotates through all of your boards, switching every 10, 20, 30 or 60 seconds. The left and right arrow keys switch boards by hand. When a score changes, it stays on that board for 30 seconds, and finished games are skipped.',
+          'Signed in, press the clock button at the top right of TV mode and pick how often to switch: every 10, 20, 30 or 60 seconds. TV mode then rotates through all of your boards, and **Stop** holds the board on screen. You can also open quarterscore.com/present with no board code. The left and right arrow keys switch boards by hand. When a score changes, it stays on that board for 30 seconds, and finished games are skipped.',
           'That suits a bar or a big gathering where several groups each have a board.'
         ]
       },

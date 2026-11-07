@@ -1,6 +1,8 @@
 import { Component, HostListener, OnDestroy, OnInit, PLATFORM_ID, ViewEncapsulation, computed, inject, signal } from '@angular/core';
 import { Location, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import { heroClock } from '@ng-icons/heroicons/outline';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
@@ -18,7 +20,8 @@ const QUARTERS = ['q1', 'q2', 'q3', 'q4'] as const;
 
 @Component({
   selector: 'app-present',
-  imports: [GameBoardComponent],
+  imports: [GameBoardComponent, NgIconComponent],
+  providers: [provideIcons({ heroClock })],
   templateUrl: './present.component.html',
   styleUrl: './present.component.scss',
   encapsulation: ViewEncapsulation.None
@@ -58,7 +61,10 @@ export class PresentComponent implements OnInit, OnDestroy {
   protected readonly qr = signal<string>('');
   protected readonly rotating = signal<boolean>(false);
   protected readonly showHelp = signal<boolean>(false);
+  protected readonly showTimer = signal<boolean>(false);
   protected readonly tooSmall = signal<boolean>(false);
+  /** How many boards the signed-in host has: rotation needs two or more. */
+  protected readonly boardCount = signal<number>(0);
   protected readonly slideDir = signal<'left' | 'right'>('right');
 
   private boardIds: string[] = [];
@@ -87,6 +93,7 @@ export class PresentComponent implements OnInit, OnDestroy {
       return;
     }
     this.boardIds = await this.gameService.getUserGameIds(user.uid);
+    this.boardCount.set(this.boardIds.length);
     if (id) {
       this.index = this.boardIds.indexOf(id);
       return;
@@ -201,6 +208,22 @@ export class PresentComponent implements OnInit, OnDestroy {
   protected openSquares(): number {
     const g = this.game();
     return g ? this.total(g) - this.claimed() : 0;
+  }
+
+  /** Start rotating through the host's boards from the board on screen. */
+  protected startRotation(seconds: number): void {
+    if (this.boardIds.length < 2) return;
+    this.interval.set(seconds);
+    this.rotating.set(true);
+    this.showTimer.set(false);
+    this.skips = this.boardIds.length - 1;
+    this.startTimer();
+  }
+
+  /** Stop rotating and stay on the board that is showing. */
+  protected stopRotation(): void {
+    this.stopTimer();
+    this.rotating.set(false);
   }
 
   protected setInterval(seconds: number): void {
