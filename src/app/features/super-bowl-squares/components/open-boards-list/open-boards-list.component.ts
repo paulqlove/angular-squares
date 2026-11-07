@@ -9,7 +9,7 @@ import type { OpenBoardRow } from '../../../../core/utils/open-boards';
   imports: [RouterLink, DecimalPipe],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
-    <section class="qs-card mb-4 p-5" aria-labelledby="open-boards-title">
+    <section aria-labelledby="open-boards-title">
       <p id="open-boards-title" class="qs-label text-qs-muted">More boards from this host</p>
       <ul class="mt-3 space-y-2">
         @for (r of visible(); track r.id) {

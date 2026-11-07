@@ -340,6 +340,10 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     this.gameSub = null;
     this.gameNotFound.set(false);
     this.isLoading.set(true);
+    // A board opened from the More list starts on its squares, not the list it came from
+    this.activeTab = 'board';
+    this.openBoards.set([]);
+    this.openBoardsLoad = null;
     this.liveIndexEnsuredFor = null;
     this.latestEspnLive = null;
     this.selectedPlayer = null;
