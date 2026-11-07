@@ -73,6 +73,16 @@
     </div>
   }
 
+  <app-shrink-board-dialog
+    [isOpen]="showShrinkSuggestion()"
+    [boardSize]="boardSize"
+    [squaresFilled]="squaresPicked()"
+    [sizes]="shrinkSizes()"
+    (closed)="showShrinkSuggestion.set(false)"
+    (converted)="convertAndLock($event)"
+    (lockAsIs)="lockAsIs()"
+  ></app-shrink-board-dialog>
+
   <app-edit-game-dialog
     [isOpen]="showSettings()"
     [isLocked]="isLocked"

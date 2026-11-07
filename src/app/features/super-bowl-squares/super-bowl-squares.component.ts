@@ -41,6 +41,8 @@ import {
 import { GameStatusComponent } from './components/game-status/game-status.component';
 import { AppHeaderComponent } from '../../components/ui/app-header/app-header.component';
 import { EditGameDialogComponent, EditGameValues } from './components/edit-game-dialog/edit-game-dialog.component';
+import { ShrinkBoardDialogComponent } from './components/shrink-board-dialog/shrink-board-dialog.component';
+import { smallerBoardSizes } from '../../core/utils/shuffle-squares';
 import { PaymentDialogComponent } from './components/payment-dialog/payment-dialog.component';
 import { ProbabilityHeatmapComponent } from './components/probability-heatmap/probability-heatmap.component';
 import { BoxScoreComponent, ManualScores } from './components/box-score/box-score.component';
@@ -61,6 +63,7 @@ import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.co
     GameStatusComponent,
     AppHeaderComponent,
     EditGameDialogComponent,
+    ShrinkBoardDialogComponent,
     PaymentDialogComponent,
     ProbabilityHeatmapComponent,
     BoxScoreComponent,
@@ -236,6 +239,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
   // UI state
   showSettings = signal(false);
+  showShrinkSuggestion = signal(false);
   isLoading = signal(true);
   gameNotFound = signal(false);
   showShareModal = signal(false);
@@ -1030,11 +1034,41 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     if (!this.isGameOwner()) {
       return;
     }
-    this.isLocked = !this.isLocked;
+    if (!this.isLocked && this.shrinkSizes().length) {
+      this.showShrinkSuggestion.set(true);
+      return;
+    }
+    await this.setLocked(!this.isLocked);
+  }
+
+  /** Locking a half-empty board: convert to the chosen smaller size, then lock. */
+  async convertAndLock(size: BoardSize): Promise<void> {
+    this.showShrinkSuggestion.set(false);
     try {
-      await this.gameService.updateGame(this.gameId, { isLocked: this.isLocked });
+      await this.gameService.resizeBoard(this.gameId, size);
     } catch {
-      this.isLocked = !this.isLocked;
+      this.toastService.error('Could not convert the board. Please try again.');
+      return;
+    }
+    await this.setLocked(true);
+  }
+
+  async lockAsIs(): Promise<void> {
+    this.showShrinkSuggestion.set(false);
+    await this.setLocked(true);
+  }
+
+  /** Sizes this board could shrink to, largest first: picks fit and numbers are not drawn. */
+  shrinkSizes(): BoardSize[] {
+    return smallerBoardSizes(this.boardSize, this.squaresPicked(), this.isRandomized);
+  }
+
+  private async setLocked(locked: boolean): Promise<void> {
+    this.isLocked = locked;
+    try {
+      await this.gameService.updateGame(this.gameId, { isLocked: locked });
+    } catch {
+      this.isLocked = !locked;
     }
   }
 
