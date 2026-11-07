@@ -57,6 +57,7 @@ private get db(): Database {
 ### Routing (`app.routes.ts`)
 - `/` - WelcomeComponent (redirects authenticated users via guestGuard)
 - `/create` - CreateGameComponent (public, noindex). Set up a board signed out; Create opens the sign-in dialog, saves the entries (`qs_create_draft`, 2 h) and the dashboard finishes the create after sign-in
+- `/tv/:token` - PresentComponent in kiosk mode (public, noindex): rotates the boards a host published with **Copy office link** (`tvLinks/{token}`), at the interval the host chose; no sign-in or controls on the TV
 - `/dashboard` - DashboardComponent (requires auth via authGuard)
 - `/game/:gameId` - SuperBowlSquaresComponent (public access)
 

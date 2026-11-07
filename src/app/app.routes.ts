@@ -41,6 +41,11 @@ export const routes: Routes = [
       import('./features/present/present.component').then(m => m.PresentComponent)
   },
   {
+    path: 'tv/:token',
+    loadComponent: () =>
+      import('./features/present/present.component').then(m => m.PresentComponent)
+  },
+  {
     path: 'present/:gameId',
     loadComponent: () =>
       import('./features/present/present.component').then(m => m.PresentComponent)

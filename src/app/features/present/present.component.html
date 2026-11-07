@@ -15,7 +15,7 @@
       <h1 class="qs-title truncate text-2xl lg:text-4xl">{{ game()?.name }}</h1>
     </div>
     <div class="flex flex-wrap items-center gap-2">
-      @if (rotating() || showTimer()) {
+      @if ((rotating() || showTimer()) && !kiosk()) {
         <span class="qs-label text-qs-muted">Switch every</span>
         @for (s of intervals; track s) {
           <button type="button" class="qs-tab px-3" role="tab" [attr.aria-selected]="rotating() && interval() === s" (click)="rotating() ? setInterval(s) : startRotation(s)">{{ s }}s</button>
@@ -24,6 +24,10 @@
       @if (isHost()) {
         @if (rotating()) {
           <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" (click)="stopRotation()">Stop</button>
+          <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" (click)="copyOfficeLink()">Copy office link</button>
+          @if (hasOfficeLink()) {
+            <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" (click)="turnOffOfficeLink()">Turn off link</button>
+          }
         } @else {
           <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" aria-label="Rotate through your boards on a timer" [attr.aria-expanded]="showTimer()" (click)="toggleTimer()">
             <ng-icon name="heroClock" class="text-lg" aria-hidden="true"></ng-icon>
@@ -47,6 +51,13 @@
         <li><strong>Any browser:</strong> connect your computer to the TV with an HDMI cable, or open this page in your TV's web browser.</li>
         <li><strong>No mirroring needed:</strong> tap <em>Copy TV link</em>, then open that link in any browser on the TV or another device. It shows this board live and needs no sign-in.</li>
       </ul>
+    </div>
+  }
+
+  @if (kioskOff()) {
+    <div class="flex min-h-0 flex-1 flex-col items-center justify-center text-center">
+      <h2 class="qs-title text-3xl lg:text-5xl">This TV link is off</h2>
+      <p class="mt-4 max-w-md text-lg text-qs-muted">Ask the person who set it up for a new link.</p>
     </div>
   }
 

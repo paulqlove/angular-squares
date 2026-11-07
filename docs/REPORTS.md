@@ -15,6 +15,7 @@ On Paul's Mac the Firebase CLI is already signed in. Ask Claude "generate the an
 3. **Repeat hosts** - second board within 14 days, ESPN-linked vs custom.
 4. **Host funnel** - created, half full, locked or numbers drawn, Q4 score posted.
 5. **Reuse** - `users/{uid}/usage` counters (creates, resets, deletes).
+   - **5b. Office TV links** - how many links exist, how many are dead (every board deleted), stale, and accounts with more than one token. A watch for abuse; see FUTURE.md.
 6. **Traffic** - Google Analytics (optional, needs the key below). Cookieless, so it undercounts.
 7. **Search** - Search Console clicks, impressions, position and top queries (optional).
 

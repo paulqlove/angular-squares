@@ -185,6 +185,7 @@ Oct 31, 2026 lab pass on quarterscore.com. Mobile Lighthouse 69 / 80 / 100 / 91 
 - Swap the remaining ESPN logos for helmets: game board header, Box Score tab, dashboard game picker, landing team strip. Undecided.
 - Team pages: hide the "No upcoming games" line in the prerendered HTML so crawlers see the games.
 - Search Console: review the first data mid-November 2026 (set up Nov 2).
+- **Office TV link: watch for abuse (decided Nov 6 2026).** Any signed-in (non-guest) account can create office TV links (`tvTokenOwners/{token}` and `tvLinks/{token}`), and the rules cannot cap how many one account makes, so someone could fill the database with tiny junk records. Left as is on purpose. The weekly report (section 5b) counts links, dead links and accounts with more than one token; the app only ever makes one token per account, so extras mean someone wrote to the database directly. If it happens: delete the junk by hand and add a limit then. Cleanup job idea (not built): a scheduled Cloud Function that deletes links whose boards are ALL deleted (safe, the link is useless) and releases their tokens. Do NOT delete by age alone: a host may set a link once and leave it running on the office TVs for months, and nothing records when a TV last loaded it. Aging out would need a last-seen time first.
 
 ## Later
 

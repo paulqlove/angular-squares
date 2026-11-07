@@ -44,6 +44,11 @@ export function getBoardDimensions(size: BoardSize): { rows: number; cols: numbe
   }
 }
 
+export interface TvLink {
+  boards: string[];
+  interval: number;
+}
+
 export interface EspnLiveSnapshot {
   status: 'pre' | 'in' | 'post';
   period: number;
@@ -768,6 +773,71 @@ export class GameService {
   // Display link for TVs and other screens: live board, no sign-in needed
   getTvLink(gameId: string): string {
     return `${this.appBaseUrl()}/present/${gameId}`;
+  }
+
+  // Office TV link: a random token on the host's account plus a public record of which boards to rotate.
+  // The link shows boards only: no account id or name is in it.
+  getOfficeTvLink(token: string): string {
+    return `${this.appBaseUrl()}/tv/${token}`;
+  }
+
+  async getTvToken(userId: string): Promise<string | null> {
+    if (!this.isBrowser) return null;
+    const snapshot = await get(ref(this.db, `users/${userId}/tvToken`));
+    return snapshot.exists() ? String(snapshot.val()) : null;
+  }
+
+  /** Create the host's token if needed and publish the boards and interval under it. Pressing it again updates the TVs. */
+  async saveTvLink(userId: string, boardIds: string[], interval: number): Promise<string> {
+    if (!this.isBrowser) throw new Error('Cannot save a TV link on the server');
+    if (this.authService.blockPreviewWrite()) throw new Error('Preview only');
+    let token = await this.getTvToken(userId);
+    if (!token) {
+      token = this.newTvToken();
+      // Claim the token for this account. The claim can never be overwritten, so only its owner can write the link.
+      await update(ref(this.db), { [`users/${userId}/tvToken`]: token, [`tvTokenOwners/${token}`]: userId });
+    }
+    await set(ref(this.db, `tvLinks/${token}`), {
+      boards: boardIds.slice(0, 20).join(','),
+      interval,
+      updatedAt: Date.now()
+    });
+    return token;
+  }
+
+  /** Turn the link off: the old address stops working and the next link gets a new token. */
+  async removeTvLink(userId: string): Promise<void> {
+    if (!this.isBrowser) return;
+    if (this.authService.blockPreviewWrite()) throw new Error('Preview only');
+    const token = await this.getTvToken(userId);
+    if (!token) return;
+    await remove(ref(this.db, `tvLinks/${token}`));
+    await update(ref(this.db), { [`users/${userId}/tvToken`]: null, [`tvTokenOwners/${token}`]: null });
+  }
+
+  /** Live boards and interval for a TV link. null when the link is off or unknown. */
+  watchTvLink(token: string): Observable<TvLink | null> {
+    return new Observable<TvLink | null>(subscriber => {
+      if (!this.isBrowser) {
+        subscriber.next(null);
+        return undefined;
+      }
+      return onValue(ref(this.db, `tvLinks/${token}`), snapshot => {
+        const value = snapshot.val() as { boards?: unknown; interval?: unknown } | null;
+        const boards = typeof value?.boards === 'string' ? value.boards.split(',').filter(Boolean) : [];
+        if (!value || !boards.length) {
+          subscriber.next(null);
+          return;
+        }
+        const interval = [10, 20, 30, 60].includes(Number(value.interval)) ? Number(value.interval) : 30;
+        subscriber.next({ boards, interval });
+      }, () => subscriber.next(null));
+    });
+  }
+
+  private newTvToken(): string {
+    const bytes = crypto.getRandomValues(new Uint8Array(16));
+    return btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   }
 
   private appBaseUrl(): string {
