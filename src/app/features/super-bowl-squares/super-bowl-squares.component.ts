@@ -229,13 +229,11 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       if (previewRole !== this.lastPreviewRole) {
         // Role preview switched: play as the previewed user (or nobody when signed out)
         this.lastPreviewRole = previewRole;
-        this._currentPlayer = user?.displayName || user?.email || '';
+        this._currentPlayer = user?.displayName || '';
         return;
       }
       if (user?.displayName && !this._currentPlayer) {
         this._currentPlayer = user.displayName;
-      } else if (user?.email && !this._currentPlayer) {
-        this._currentPlayer = user.email;
       }
     });
   }
@@ -315,8 +313,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     const user = this.authService.currentUser();
     if (user?.displayName) {
       this._currentPlayer = user.displayName;
-    } else if (user?.email) {
-      this._currentPlayer = user.email;
     }
 
     if (user && !user.isGuest) {
@@ -595,6 +591,11 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     if (!this.authService.currentUser()) {
       this.pendingSquare = event;
       this.showAuthModal.set(true);
+      return;
+    }
+
+    if (!this.currentPlayer && !this.authService.currentUser()?.isGuest) {
+      this.openNameEditModal();
       return;
     }
 
@@ -1401,8 +1402,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     const user = this.authService.currentUser();
     if (user?.displayName) {
       this._currentPlayer = user.displayName;
-    } else if (user?.email) {
-      this._currentPlayer = user.email;
     }
 
     // Claim the pending square if there was one

@@ -22,10 +22,10 @@ import { AuthService } from '../../core/services/auth.service';
             <p class="mt-3 text-qs-muted">You opened the link on a different device or browser. Enter the email you used so we know it's you.</p>
             <form class="mt-6 space-y-3" (ngSubmit)="finish()">
               <label for="link-name" class="qs-label block text-qs-muted">Your name</label>
-              <input id="link-name" name="name" type="text" autocomplete="name" [(ngModel)]="name" class="qs-input w-full" placeholder="Shown on boards you join" />
+              <input id="link-name" name="name" type="text" autocomplete="name" required [(ngModel)]="name" class="qs-input w-full" placeholder="Shown on boards you join" />
               <label for="link-email" class="qs-label block text-qs-muted">Email</label>
               <input id="link-email" name="email" type="email" autocomplete="email" required [(ngModel)]="email" class="qs-input w-full" />
-              <button type="submit" class="qs-btn qs-btn-primary w-full" [disabled]="!email.trim()">Finish signing in</button>
+              <button type="submit" class="qs-btn qs-btn-primary w-full" [disabled]="!email.trim() || !name.trim()">Finish signing in</button>
             </form>
           }
           @case ('error') {
