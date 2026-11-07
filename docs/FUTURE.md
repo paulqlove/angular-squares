@@ -181,14 +181,16 @@ Oct 31, 2026 lab pass on quarterscore.com. Mobile Lighthouse 69 / 80 / 100 / 91 
 
 - AFL Grand Final squares test (Aug 2027): SEO landing page + notify-me + manual-score board; build out only if ~50 signups or ~500 AU visits. Rugby: revisit only for RWC 2027. Source: [Skeptic verdict](https://docs.google.com/document/d/1u1VswkSSvcydYiqWZ70jGgt5cVI1L90T6oUVUL04Hxs/edit)
 
-## Full boards and the host's other open boards (board vote Nov 7, 2026; built only after the data gate)
+## A host's other open boards: the More tab (built Nov 7, 2026)
 
-**Plan:** (1) Ship the full-board message first: "This board is full. Start your own free board, or ask the host to add one." with "Join with a code", plus two counters (full boards viewed, Start-your-own clicks) that count distinct visitors. (2) Hold the waitlist, "host grows a full board" and "host's other open boards" behind one data gate, read Nov 29 and Jan 15: 5+ full-board views from 3+ distinct visitors on 2+ boards, or 5+ Start-your-own clicks in one week, or a host asks (for open boards, also a host with 2+ open boards). The data picks which one to build. Auto-creating boards and auto-placing players is dropped.
+**Decision trail:** the board voted 7-0 on Nov 7 to ship a simple full-board answer first and gate the rest on data. Paul then chose the More tab instead of a banner, shown on any of the host's boards, and had the full-board banner removed. Waitlist, "host grows a full board" and auto-created boards stay parked.
 
-**Host's other open boards, user stories (opt-in, same host only):**
-- A player on a full board sees that host's other open boards and joins one in one tap. No account needed.
-- Each row: board name, teams, "{taken}/{size} taken" with a small fill bar, "Points per square: 100", and "Total points on the board: 10,000" (points per square times board size). Most open squares first. Points only, never dollars.
-- Hosts set points per square when they create or edit a board (already built); the row just shows it.
-- A host turns on "Show in my open boards" per board. Off by default, existing boards stay off, and the edit popup previews exactly what players will see. Turning it off removes the board at once.
-- Only boards with open squares that are not locked or drawn appear. Never a cross-host directory, never indexed, never in the sitemap.
-- Terms and Privacy get one line before it ships ("secrets by default"). Data: `openBoards/{ownerId}/{boardId}: true` readable per owner only, squares left computed in the browser; needs a separate database rules deploy.
+**What shipped:**
+- A fourth tab, **More**, beside Board, Heatmap and Box score. It shows only when the same host has at least one other board switched on with open squares. Opening a board from it lands on that board's squares.
+- Each card is compact: a squares thumbnail, the board name (two lines), teams, "N open", "taken/size taken · N pts per square". Two across on desktop, one on a phone. Most open squares first, six shown then See all. Points only, never dollars, no total line.
+- The host switch **Show in my open boards** (create form, dashboard Edit Game, game page Edit) is off by default, previews exactly what players see, and shows only for hosts whose plan allows more than one board while the board is open and unlocked.
+- Data: `openBoards/{ownerId}/{boardId}: true` (readable per owner only, never listable; written only by that owner), `games/{id}/showInOpenBoards`, counters at `boardStats/{boardId}` (fullBoardViews, fullBoardViewsWithOpenBoards, otherBoardJoins; increment-only, owner or admin can read). Rules deployed Nov 7.
+- Terms and Privacy say links are secret by default and say what a listed board shows.
+- Desktop: every tab keeps the Board's height so Players and Winners never move; phones are unchanged.
+
+**Read it Nov 29 and Jan 15:** `otherBoardJoins` against `fullBoardViewsWithOpenBoards`. If it never fires, the build was cheap and stays quiet.
