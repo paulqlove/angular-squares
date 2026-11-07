@@ -452,6 +452,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked';
 
             <app-create-game-form
               [customSplitsAllowed]="planService.features().customSplits"
+              [openBoardsAllowed]="planService.features().activeBoards > 1"
               [isCreating]="isCreating()"
               (cancelled)="closeCreateModal()"
               (submitted)="createGame($event)"
@@ -1157,6 +1158,13 @@ export class DashboardComponent implements OnInit {
         values.quarterSplit,
         values.emptyQuarterRule
       );
+      if (values.showInOpenBoards) {
+        try {
+          await this.gameService.setShowInOpenBoards(gameId, user.uid, true);
+        } catch {
+          this.toastService.warning('Board created, but Show in my open boards could not be turned on. Try again in Edit.');
+        }
+      }
       this.showCreateModal.set(false);
       clearCreateDraft();
       this.router.navigate(['/game', gameId]);
