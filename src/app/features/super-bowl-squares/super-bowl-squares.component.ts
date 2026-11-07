@@ -1124,10 +1124,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     return this.openBoardsLoad;
   }
 
-  trackStartYourOwn(): void {
-    this.gameService.recordBoardStatOnce(this.gameId, 'startYourOwnClicks');
-  }
-
   squaresPicked(): number {
     return Object.keys(this.selectedSquares).length;
   }
