@@ -6,15 +6,19 @@
     <a [href]="gameId() ? '/game/' + gameId() : '/dashboard'" class="qs-btn qs-btn-secondary mt-8">{{ gameId() ? 'View the board on your phone' : 'Back to my boards' }}</a>
   </div>
 } @else {
-<div class="flex h-screen flex-col overflow-hidden bg-qs-bg px-4 pt-3 text-qs-ink lg:px-6 pb-6 lg:pb-8">
-  <div class="mb-3 flex shrink-0 flex-wrap items-center justify-between gap-3">
-    <div class="flex min-w-0 items-center gap-4">
+<div class="relative flex h-screen flex-col overflow-hidden bg-qs-bg px-4 pt-3 text-qs-ink lg:px-6 pb-6 lg:pb-8">
+  <div class="mb-3 flex shrink-0 items-center gap-3">
+    <div class="flex min-w-0 flex-1 items-center gap-4">
       <span class="flex shrink-0 items-center rounded-inner bg-qs-tile px-3 py-2">
         <img src="assets/brand/lockup-horizontal-reversed.svg" alt="QuarterScore" width="192" height="24" class="h-6 w-auto lg:h-8">
       </span>
-      <h1 class="qs-title truncate text-2xl lg:text-4xl">{{ game()?.name }}</h1>
+      <span class="min-w-0 flex-1" style="container-type: inline-size"><h1 class="qs-title truncate text-2xl lg:text-4xl" [style.font-size]="titleFont()">{{ game()?.name }}</h1></span>
     </div>
-    <div class="flex flex-wrap items-center gap-2">
+  </div>
+
+  <!-- Host controls float over the header, so they never change the size of the board. They fade out after a few seconds. -->
+  <div class="absolute right-4 top-3 z-20 flex max-w-[85%] flex-wrap items-center justify-end gap-2 rounded-card bg-qs-bg/90 p-2 transition-opacity duration-300 lg:right-6"
+    [class.opacity-0]="!controlsVisible()" [class.pointer-events-none]="!controlsVisible()" [attr.inert]="controlsVisible() ? null : ''">
       @if ((rotating() || showTimer()) && !kiosk()) {
         <span class="qs-label text-qs-muted">Switch every</span>
         @for (s of intervals; track s) {
@@ -39,7 +43,6 @@
         <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" (click)="showHelp.set(!showHelp())">Show on TV</button>
         <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" (click)="exit()">Exit</button>
       }
-    </div>
   </div>
 
   @if (isHost() && showHelp()) {
@@ -91,14 +94,14 @@
           </div>
         }
 
-        <div class="qs-card flex min-h-0 flex-1 flex-col p-4">
+        <div class="qs-card flex min-h-0 flex-1 flex-col p-4" style="container-type: inline-size">
           <p class="qs-label mb-1 text-qs-muted">Winners</p>
           @for (q of quarters; track q) {
             <div class="flex flex-1 items-center justify-between border-b border-qs-line text-2xl last:border-0 lg:text-3xl">
               <span class="qs-label text-qs-muted">{{ label(q) }}</span>
               @if (g.winners?.[q]; as w) {
-                <span class="mx-4 min-w-0 flex-1 text-qs-muted" style="container-type: inline-size"><span class="block truncate text-lg leading-tight tabular-nums lg:text-2xl" [style.font-size]="scoreFont()">{{ winningScore(q) }}</span></span>
-                <span [class]="colors()[w] + ' max-w-[65%] shrink-0 truncate rounded-inner px-3 py-0.5 font-semibold text-slate-900'">{{ w }}</span>
+                <span class="mx-4 min-w-0 flex-1 truncate text-lg leading-tight tabular-nums text-qs-muted lg:text-2xl" [style.font-size]="scoreFont()">{{ winningScore(q) }}</span>
+                <span [class]="colors()[w] + ' max-w-[50%] shrink-0 truncate rounded-inner px-3 py-0.5 font-semibold text-slate-900'" [style.font-size]="badgeFont()">{{ w }}</span>
               } @else {
                 <span class="text-qs-muted">—</span>
               }

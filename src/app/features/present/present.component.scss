@@ -1,7 +1,10 @@
-/* TV sizing: cells fill the viewport height, names wrap instead of truncating */
+/* TV sizing: cells fill the board card's own height (so a taller header or a help panel never pushes the board off screen), names wrap instead of truncating */
+.present-board {
+  container-type: size;
+}
 .present-board .number-cell:not(.axis-top),
 .present-board .square-cell {
-  height: calc((100vh - 12.5rem) / var(--rows, 10)) !important;
+  height: calc((100cqh - 4.7rem) / var(--rows, 10)) !important;
 }
 
 .present-board .square-cell {
