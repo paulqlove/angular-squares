@@ -19,11 +19,19 @@
   <!-- Host controls float over the header, so they never change the size of the board. They fade out after a few seconds. -->
   <div class="absolute right-4 top-3 z-20 flex max-w-[85%] flex-wrap items-center justify-end gap-2 rounded-card bg-qs-bg/90 p-2 transition-opacity duration-300 lg:right-6"
     [class.opacity-0]="!controlsVisible()" [class.pointer-events-none]="!controlsVisible()" [attr.inert]="controlsVisible() ? null : ''">
-      @if (showTimer() && !kiosk()) {
-        <span class="qs-label text-qs-muted">Switch every</span>
-        @for (s of intervals; track s) {
-          <button type="button" class="qs-tab px-3" role="tab" [attr.aria-selected]="rotating() && interval() === s" (click)="rotating() ? setInterval(s) : startRotation(s)">{{ s }}s</button>
-        }
+      @if (!kiosk()) {
+        <!-- Always in the layout, grows from 0 width, so opening and closing slide instead of popping. The negative margin cancels the flex gap while closed. -->
+        <div class="grid transition-[grid-template-columns,opacity,margin] duration-200 ease-out motion-reduce:transition-none"
+          [style.grid-template-columns]="showTimer() ? '1fr' : '0fr'" [style.margin-right]="showTimer() ? '0' : '-0.5rem'"
+          [class.opacity-0]="!showTimer()" [class.pointer-events-none]="!showTimer()"
+          [attr.inert]="showTimer() ? null : ''" [attr.aria-hidden]="showTimer() ? null : 'true'">
+          <div class="flex min-w-0 items-center gap-2 overflow-hidden whitespace-nowrap">
+            <span class="qs-label text-qs-muted">Switch every</span>
+            @for (s of intervals; track s) {
+              <button type="button" class="qs-tab px-3" role="tab" [attr.aria-selected]="rotating() && interval() === s" (click)="rotating() ? setInterval(s) : startRotation(s)">{{ s }}s</button>
+            }
+          </div>
+        </div>
       }
       @if (isHost()) {
         <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" aria-label="Rotate through your boards on a timer" [attr.aria-expanded]="showTimer()" (click)="toggleTimer()">
