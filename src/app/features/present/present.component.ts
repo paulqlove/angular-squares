@@ -63,6 +63,8 @@ export class PresentComponent implements OnInit, OnDestroy {
   protected readonly rotating = signal<boolean>(false);
   protected readonly showHelp = signal<boolean>(false);
   protected readonly showTimer = signal<boolean>(false);
+  /** Host buttons show on any movement, then fade after a few seconds. */
+  protected readonly controlsVisible = signal<boolean>(true);
   /** True on /tv/:token: a TV with no sign-in, rotating the boards the host chose, at the speed the host chose. */
   protected readonly kiosk = signal<boolean>(false);
   protected readonly kioskOff = signal<boolean>(false);
@@ -79,6 +81,7 @@ export class PresentComponent implements OnInit, OnDestroy {
   private skips = 0;
   private screenQuery: MediaQueryList | null = null;
   private readonly onScreenChange = (event: MediaQueryListEvent): void => this.tooSmall.set(event.matches);
+  private hideControlsTimer: ReturnType<typeof setTimeout> | null = null;
   private linkSub: Subscription | null = null;
   private sub: Subscription | null = null;
   private timer: ReturnType<typeof setInterval> | null = null;
@@ -90,6 +93,7 @@ export class PresentComponent implements OnInit, OnDestroy {
     this.tooSmall.set(this.screenQuery.matches);
     this.screenQuery.addEventListener('change', this.onScreenChange);
     this.espnTimer = setInterval(() => this.refreshEspn(), 30000);
+    this.pokeControls();
     const token = this.route.snapshot.paramMap.get('token');
     if (token) {
       this.startKiosk(token);
@@ -119,8 +123,20 @@ export class PresentComponent implements OnInit, OnDestroy {
     this.startTimer();
   }
 
+  @HostListener('document:mousemove')
+  @HostListener('document:click')
+  @HostListener('document:touchstart')
+  pokeControls(): void {
+    this.controlsVisible.set(true);
+    if (this.hideControlsTimer) clearTimeout(this.hideControlsTimer);
+    this.hideControlsTimer = setTimeout(() => {
+      if (!this.showTimer() && !this.showHelp()) this.controlsVisible.set(false);
+    }, 5000);
+  }
+
   @HostListener('document:keydown', ['$event'])
   onKeydown(event: KeyboardEvent): void {
+    this.pokeControls();
     const dir = boardArrowStep(event);
     if (dir) this.step(dir);
   }
@@ -129,6 +145,7 @@ export class PresentComponent implements OnInit, OnDestroy {
     this.stopTimer();
     if (this.espnTimer) clearInterval(this.espnTimer);
     this.screenQuery?.removeEventListener('change', this.onScreenChange);
+    if (this.hideControlsTimer) clearTimeout(this.hideControlsTimer);
     this.linkSub?.unsubscribe();
     this.sub?.unsubscribe();
     this.gameService.unsubscribe();
@@ -193,13 +210,25 @@ export class PresentComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * One font size for all four score lines. It shrinks to fit the width of the line space, based on the
-   * longest line, so long team names get smaller instead of being cut off (never above the normal size).
+   * One font size for all four score lines, so long team names or long winner names make the text smaller
+   * instead of cutting it off (never above the normal size). Sizes are relative to the Winners card width:
+   * what is left after the label and the winner badge is divided by the longest line.
    */
   protected scoreFont(): string | null {
+    const g = this.game();
     const longest = Math.max(...this.quarters.map(q => this.winningScore(q).length));
-    if (!longest) return null;
-    return `min(1.5rem, max(0.7rem, ${(178 / longest).toFixed(1)}cqw))`;
+    if (!g || !longest) return null;
+    const longestName = Math.max(0, ...this.quarters.map(q => (g.winners?.[q] ?? '').length));
+    const badge = `min(50cqw, calc(min(42cqw, ${(longestName * 1.125).toFixed(2)}rem) + 1.5rem))`;
+    return `clamp(0.7rem, calc((85cqw - ${badge}) / ${(longest * 0.56).toFixed(2)}), 1.5rem)`;
+  }
+
+  /** Winner names shrink when one is long, so the badge is not cut off (never above the normal size). */
+  protected badgeFont(): string | null {
+    const g = this.game();
+    const longestName = Math.max(0, ...this.quarters.map(q => (g?.winners?.[q] ?? '').length));
+    if (!longestName) return null;
+    return `clamp(0.9rem, calc(70cqw / ${longestName}), 1.875rem)`;
   }
 
   protected label(quarter: string): string {
@@ -284,6 +313,13 @@ export class PresentComponent implements OnInit, OnDestroy {
     this.rotating.set(false);
   }
 
+  /** Long game names shrink to fit the title space (never above the normal size). */
+  protected titleFont(): string | null {
+    const length = (this.game()?.name ?? '').length;
+    if (!length) return null;
+    return `min(2.25rem, max(1.1rem, ${(182 / length).toFixed(1)}cqw))`;
+  }
+
   protected setInterval(seconds: number): void {
     this.interval.set(seconds);
     this.startTimer();
@@ -308,6 +344,12 @@ export class PresentComponent implements OnInit, OnDestroy {
       if (!link) {
         this.kioskOff.set(true);
         this.stopTimer();
+        this.sub?.unsubscribe();
+        this.boardIds = [];
+        this.boardCount.set(0);
+        this.gameId.set('');
+        this.game.set(null);
+        this.espnGame.set(null);
         return;
       }
       this.kioskOff.set(false);
