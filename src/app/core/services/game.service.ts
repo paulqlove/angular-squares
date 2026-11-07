@@ -459,6 +459,19 @@ export class GameService {
     });
   }
 
+  /** Counts one visitor's first full-board view, Start-your-own click or other-board join per board. Never throws. */
+  async recordBoardStatOnce(boardId: string, field: 'fullBoardViews' | 'startYourOwnClicks' | 'otherBoardJoins'): Promise<void> {
+    if (!this.isBrowser) return;
+    const key = `qs_stat_${field}_${boardId}`;
+    try {
+      if (localStorage.getItem(key)) return;
+      localStorage.setItem(key, '1');
+      await update(ref(this.db, `boardStats/${boardId}`), { [field]: increment(1) });
+    } catch {
+      // storage or rules not available: a missed count is fine
+    }
+  }
+
   // Subscribe to a specific game
   subscribeToGame(gameId: string): Observable<GameData | null> {
     if (!this.isBrowser) {

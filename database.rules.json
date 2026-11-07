@@ -210,6 +210,16 @@
         "$other": { ".validate": false }
       }
     },
+    "boardStats": {
+      "$boardId": {
+        ".read": "auth != null && (root.child('games').child($boardId).child('ownerId').val() == auth.uid || root.child('admins').child(auth.uid).val() == true)",
+        ".write": "root.child('games').child($boardId).exists()",
+        "fullBoardViews": { ".validate": "newData.isNumber() && newData.val() == (data.exists() ? data.val() : 0) + 1 && newData.val() <= 100000" },
+        "startYourOwnClicks": { ".validate": "newData.isNumber() && newData.val() == (data.exists() ? data.val() : 0) + 1 && newData.val() <= 100000" },
+        "otherBoardJoins": { ".validate": "newData.isNumber() && newData.val() == (data.exists() ? data.val() : 0) + 1 && newData.val() <= 100000" },
+        "$other": { ".validate": false }
+      }
+    },
     "upgradeViews": {
       "$uid": {
         ".read": "auth != null && auth.uid == $uid",

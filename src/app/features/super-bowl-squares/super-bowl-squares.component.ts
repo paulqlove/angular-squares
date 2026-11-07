@@ -375,6 +375,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           this.currentPrice = data.pricePerSquare || 10;
           this.isRandomized = data.isRandomized || false;
           this.isLocked = data.isLocked || false;
+          if (this.fullBoardNotice()) this.gameService.recordBoardStatOnce(this.gameId, 'fullBoardViews');
           this.homeTeam = data.homeTeam || '';
           this.awayTeam = data.awayTeam || '';
           this.hostNote = data.hostNote || '';
@@ -1078,6 +1079,18 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   }
 
   /** Saves the Edit game popup in one write. */
+  /** A full board shows a way out to people who hold no square on it (not the host or co-host). */
+  fullBoardNotice(): boolean {
+    const { rows, cols } = getBoardDimensions(this.boardSize);
+    const me = this._currentPlayer.toLowerCase();
+    const holdsSquare = !!me && Object.values(this.selectedSquares).some(name => name.toLowerCase() === me);
+    return this.squaresPicked() >= rows * cols && !this.isGameOwner() && !this.isManager() && !holdsSquare;
+  }
+
+  trackStartYourOwn(): void {
+    this.gameService.recordBoardStatOnce(this.gameId, 'startYourOwnClicks');
+  }
+
   squaresPicked(): number {
     return Object.keys(this.selectedSquares).length;
   }

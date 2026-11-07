@@ -185,6 +185,19 @@
 
             <!-- Tab Content -->
             @if (activeTab === 'board') {
+              @if (fullBoardNotice()) {
+                <div class="qs-card mb-4 flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between" role="status">
+                  <div class="min-w-0">
+                    <p class="qs-label text-qs-muted">Board full</p>
+                    <p class="qs-title mt-1 text-2xl">This board is <span class="text-qs-accent">full</span></p>
+                    <p class="mt-1 text-sm text-qs-muted">Start your own free board, or ask the host to add one.</p>
+                  </div>
+                  <div class="flex flex-col gap-2 sm:shrink-0 sm:flex-row">
+                    <a routerLink="/create" (click)="trackStartYourOwn()" class="qs-btn qs-btn-primary min-h-11">Start your own free board</a>
+                    <a routerLink="/" class="qs-btn qs-btn-secondary min-h-11">Join with a code</a>
+                  </div>
+                </div>
+              }
               <app-game-board
                 [selectedSquares]="selectedSquares"
                 [playerColors]="playerColors"
