@@ -285,7 +285,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked';
 
             @if (!isLoadingGames() && myGames().length >= 5) {
               <div class="mt-4 flex flex-wrap items-center gap-2">
-                <input type="search" [value]="gameSearch()" (input)="gameSearch.set($any($event.target).value)" placeholder="Search by name or team" aria-label="Search your boards" class="qs-input min-h-9 min-w-0 flex-1 basis-48 py-0" />
+                <input type="search" [value]="gameSearch()" (input)="gameSearch.set($any($event.target).value)" placeholder="Search by name or team" aria-label="Search your boards" class="qs-input min-h-9 min-w-0 flex-1 basis-full py-0 sm:basis-48" />
                 <div class="flex gap-1.5" role="group" aria-label="Filter by status">
                   @for (f of statusFilters; track f.value) {
                     <button type="button" class="qs-tab min-h-9 px-3" [attr.aria-pressed]="gameStatus() === f.value" (click)="gameStatus.set(f.value)">{{ f.label }}</button>
