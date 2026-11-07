@@ -599,7 +599,6 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     h1: 'Football squares on TV',
     eyebrow: 'TV mode',
     lede: 'TV mode puts your board on a big screen: the board, the score, the winner of each quarter and a code friends can scan to follow along. It is free for every account.',
-    notice: 'QuarterScore is not affiliated with, endorsed by, or sponsored by the NFL or any team.',
     published: '2026-11-06',
     sections: [
       {
