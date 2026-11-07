@@ -4,7 +4,7 @@ Product roadmap and monetization strategy for QuarterScore.
 
 ## Plans
 
-**Pricing (decided Nov 5, 2026): Free, or one Season Pass at $5.99 one time.** That is the only price. See "Free-tier design" and "The Season Pass" below. `src/app/core/plans.ts` still holds old scaffolding that goes away when checkout is built; do not quote its prices. Research and reasoning: Drive doc "QuarterScore Game Formats and Paid Plans Research (Nov 2, 2026)".
+**Pricing (decided Nov 5, 2026): Free, or one Season Pass at $5.99 one time.** That is the only price. See "Free-tier design" and "The Season Pass" below. `src/app/core/plans.ts` holds exactly this: Free, the one Season Pass, and Admin. Research and reasoning: Drive doc "QuarterScore Game Formats and Paid Plans Research (Nov 2, 2026)".
 
 - `entitlements/{uid} = { plan, expiresAt }`, written only by an admin for now (later a Stripe webhook). `admins/{uid}` gets everything.
 - Hosts stamp `games/{id}/adFreeUntil`; rules cap it at their real pass so viewers can trust it. Ads stay off until `environment.adsEnabled`; block gambling ad categories when a network is added.

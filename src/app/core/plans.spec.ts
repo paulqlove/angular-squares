@@ -1,42 +1,16 @@
-import { DAY_MS, DEFAULT_SPLIT, PLANS, NO_EXPIRY, effectiveQuarterShares, isEmptyQuarterRule, isNoExpiry, quarterPoints, applyPurchase, daysLeft, extendExpiry, isValidSplit, seasonPriceFor, splitFractions } from './plans';
+import { DAY_MS, DEFAULT_SPLIT, PLANS, NO_EXPIRY, effectiveQuarterShares, isEmptyQuarterRule, isNoExpiry, quarterPoints, daysLeft, isValidSplit, splitFractions } from './plans';
 
 const NOW = Date.UTC(2026, 10, 2);
 
 describe('plans', () => {
-  it('a new Week Pass lasts 7 days and a Season Pass 210 days', () => {
-    expect(extendExpiry(null, 'week', NOW)).toBe(NOW + 7 * DAY_MS);
-    expect(extendExpiry(null, 'season', NOW)).toBe(NOW + 210 * DAY_MS);
-  });
-
-  it('buying more time adds to what is left', () => {
-    const threeDaysLeft = NOW + 3 * DAY_MS;
-    expect(extendExpiry(threeDaysLeft, 'week', NOW)).toBe(NOW + 10 * DAY_MS);
-  });
-
-  it('an expired pass starts fresh from now', () => {
-    expect(extendExpiry(NOW - DAY_MS, 'week', NOW)).toBe(NOW + 7 * DAY_MS);
-  });
-
-  it('a Week Pass bought during a Season Pass keeps the Season plan and adds 7 days', () => {
-    const season = { plan: 'season' as const, expiresAt: NOW + 100 * DAY_MS };
-    expect(applyPurchase(season, 'week', NOW)).toEqual({ plan: 'season', expiresAt: NOW + 107 * DAY_MS, updatedAt: NOW });
-  });
-
-  it('upgrading from an active Week Pass becomes Season and keeps the remaining days', () => {
-    const week = { plan: 'week' as const, expiresAt: NOW + 4 * DAY_MS };
-    expect(applyPurchase(week, 'season', NOW).plan).toBe('season');
-    expect(applyPurchase(week, 'season', NOW).expiresAt).toBe(NOW + 214 * DAY_MS);
-  });
-
-  it('an active Week Pass is credited toward a Season Pass', () => {
-    expect(seasonPriceFor({ plan: 'week', expiresAt: NOW + DAY_MS }, NOW)).toBe(24);
-    expect(seasonPriceFor(null, NOW)).toBe(PLANS.season.priceUsd);
-    expect(seasonPriceFor({ plan: 'week', expiresAt: NOW - 1 }, NOW)).toBe(PLANS.season.priceUsd);
+  it('there is Free, one Season Pass at $5.99, and Admin', () => {
+    expect(Object.keys(PLANS).sort()).toEqual(['admin', 'free', 'season']);
+    expect(PLANS.season.priceUsd).toBe(5.99);
   });
 
   it('counts days left, rounding up', () => {
-    expect(daysLeft({ plan: 'week', expiresAt: NOW + DAY_MS + 1 }, NOW)).toBe(2);
-    expect(daysLeft({ plan: 'week', expiresAt: NOW - 1 }, NOW)).toBe(0);
+    expect(daysLeft({ plan: 'season', expiresAt: NOW + DAY_MS + 1 }, NOW)).toBe(2);
+    expect(daysLeft({ plan: 'season', expiresAt: NOW - 1 }, NOW)).toBe(0);
   });
 
   it('accepts only whole tenths that sum to 100%', () => {

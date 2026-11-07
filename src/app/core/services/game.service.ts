@@ -258,7 +258,7 @@ export class GameService {
       return preview === 'actual' ? PLANS.admin.activeBoards : PLANS[preview].activeBoards;
     }
     const entitlement = await this.bestEntitlement(uid);
-    return entitlement ? PLANS[entitlement.plan].activeBoards : FREE_ACTIVE_BOARD_LIMIT;
+    return entitlement ? PLANS.season.activeBoards : FREE_ACTIVE_BOARD_LIMIT;
   }
 
   /** The host's active pass, paid or gifted (whichever lasts longer), or null. */

@@ -1,17 +1,15 @@
 /**
- * Plans: what each one costs, how long it lasts and what it unlocks.
+ * Plans: Free, or one Season Pass at $5.99 one time (decided Nov 5, 2026; see docs/FUTURE.md).
  * Features check these flags, never prices, so changing a plan is a one-line edit here.
  * Entitlements live at entitlements/{uid} = { plan, expiresAt } and are written only by an admin
  * (later a payment webhook). Admins (admins/{uid}) get everything.
  */
-export type PaidPlanId = 'week' | 'season';
+export type PaidPlanId = 'season';
 export type PlanId = 'free' | PaidPlanId | 'admin';
 
 export interface PlanFeatures {
   label: string;
   priceUsd: number;
-  /** Length of one purchase, in days. */
-  days: number;
   /** Boards a host can have active at once. */
   activeBoards: number;
   /** Change the per-quarter points split (free hosts keep 20/20/20/40). */
@@ -24,13 +22,10 @@ export interface PlanFeatures {
 
 export const DAY_MS = 86_400_000;
 
-// SUPERSEDED scaffolding: the approved plan is Free, or ONE Season Pass at $5.99 one time (docs/FUTURE.md, decided Nov 5 2026). The Week Pass and these prices go away when checkout is built. Do not quote them.
 export const PLANS: Record<PlanId, PlanFeatures> = {
-  free: { label: 'Free', priceUsd: 0, days: 0, activeBoards: 1, customSplits: false, adFree: false, liveScoring: false },
-  week: { label: 'Week Pass', priceUsd: 5.99, days: 7, activeBoards: 5, customSplits: true, adFree: true, liveScoring: true },
-  // College football Week 0 (late Aug) to the NFL final (mid Feb) is ~25 weeks; plus about a month.
-  season: { label: 'Season Pass', priceUsd: 29.99, days: 210, activeBoards: 25, customSplits: true, adFree: true, liveScoring: true },
-  admin: { label: 'Admin', priceUsd: 0, days: 0, activeBoards: Number.POSITIVE_INFINITY, customSplits: true, adFree: true, liveScoring: true }
+  free: { label: 'Free', priceUsd: 0, activeBoards: 1, customSplits: false, adFree: false, liveScoring: false },
+  season: { label: 'Season Pass', priceUsd: 5.99, activeBoards: 25, customSplits: true, adFree: true, liveScoring: true },
+  admin: { label: 'Admin', priceUsd: 0, activeBoards: Number.POSITIVE_INFINITY, customSplits: true, adFree: true, liveScoring: true }
 };
 
 export interface Entitlement {
@@ -41,24 +36,6 @@ export interface Entitlement {
 
 export function isActive(entitlement: Entitlement | null | undefined, now = Date.now()): boolean {
   return !!entitlement && entitlement.expiresAt > now;
-}
-
-/** Buying more time adds to whatever is left (or starts now if the pass has ended). */
-export function extendExpiry(currentExpiresAt: number | null | undefined, plan: PaidPlanId, now = Date.now()): number {
-  return Math.max(now, currentExpiresAt ?? 0) + PLANS[plan].days * DAY_MS;
-}
-
-/** The plan after a purchase: a Season Pass outranks a Week Pass; time always stacks. */
-export function applyPurchase(current: Entitlement | null | undefined, bought: PaidPlanId, now = Date.now()): Entitlement {
-  const keep = isActive(current, now) ? current! : null;
-  const plan: PaidPlanId = keep?.plan === 'season' || bought === 'season' ? 'season' : 'week';
-  return { plan, expiresAt: extendExpiry(keep?.expiresAt, bought, now), updatedAt: now };
-}
-
-/** Upgrade credit: an active Week Pass's price counts toward a Season Pass. */
-export function seasonPriceFor(current: Entitlement | null | undefined, now = Date.now()): number {
-  const credit = isActive(current, now) && current!.plan === 'week' ? PLANS.week.priceUsd : 0;
-  return Math.round((PLANS.season.priceUsd - credit) * 100) / 100;
 }
 
 /** A pass that never expires is stored as a date far in the future, so every expiry check keeps working. */

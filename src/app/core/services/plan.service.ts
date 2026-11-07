@@ -14,18 +14,18 @@ export class PlanService {
   readonly entitlement = signal<Entitlement | null>(null);
   private admin = signal(false);
 
-  /** Free, Week Pass, Season Pass or Admin. The admin can preview any plan from the View-as switcher. */
+  /** Free, Season Pass or Admin. The admin can preview any plan from the View-as switcher. */
   readonly plan = computed<PlanId>(() => {
     if (this.authService.isPreviewAdmin() && this.rolePreview.plan() !== 'actual') {
       return this.rolePreview.plan() as PlanId;
     }
     if (this.admin()) return 'admin';
     const entitlement = this.entitlement();
-    return isActive(entitlement) ? entitlement!.plan : 'free';
+    return isActive(entitlement) ? 'season' : 'free';
   });
 
   readonly features = computed<PlanFeatures>(() => PLANS[this.plan()]);
-  readonly daysLeft = computed(() => (this.plan() === 'week' || this.plan() === 'season') && this.rolePreview.plan() === 'actual'
+  readonly daysLeft = computed(() => this.plan() === 'season' && this.rolePreview.plan() === 'actual'
     ? daysLeft(this.entitlement())
     : 0);
 
