@@ -3,6 +3,8 @@ import { FormsModule } from '@angular/forms';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroXMark, heroTrash, heroLockClosed } from '@ng-icons/heroicons/outline';
 import { DEFAULT_EMPTY_QUARTER_RULE, DEFAULT_SPLIT, EmptyQuarterRule, QuarterSplit, SPLIT_PRESETS, isValidSplit } from '../../../../core/plans';
+import type { BoardSize } from '../../../../core/services/game.service';
+import { smallerBoardSizes } from '../../../../core/utils/shuffle-squares';
 import { EmptyQuarterRuleComponent } from '../../../../components/ui/empty-quarter-rule/empty-quarter-rule.component';
 
 export interface EditGameValues {
@@ -12,6 +14,8 @@ export interface EditGameValues {
   hostNote: string;
   quarterSplit: QuarterSplit | null;
   emptyQuarterRule: EmptyQuarterRule;
+  /** A smaller size to convert to on save, or null to keep the board as it is. */
+  newBoardSize: BoardSize | null;
 }
 
 /** Owner-only "Edit game" popup. Edits a draft and saves once. */
@@ -66,6 +70,25 @@ export interface EditGameValues {
               <textarea id="edit-note" rows="2" [(ngModel)]="draft.hostNote" maxlength="140" placeholder="e.g. Snacks at halftime!" class="qs-input min-h-20 py-2.5"></textarea>
               <p class="mt-1 text-right text-xs tabular-nums text-qs-muted">{{ draft.hostNote.length }}/140</p>
             </div>
+
+            @if (boardSize > 25) {
+              <div>
+                <p class="qs-label mb-1.5 text-qs-muted">Board size</p>
+                <div class="flex flex-wrap gap-1.5">
+                  <button type="button" class="qs-tab min-h-9 px-2.5 text-[10.5px]" [attr.aria-pressed]="!draft.newBoardSize" (click)="draft.newBoardSize = null">Keep {{ boardSize }}</button>
+                  @for (s of smallerSizes; track s) {
+                    @if (s < boardSize) {
+                      <button type="button" class="qs-tab min-h-9 px-2.5 text-[10.5px] disabled:opacity-45" [disabled]="!sizeChoices().includes(s)" [attr.aria-pressed]="draft.newBoardSize === s" (click)="draft.newBoardSize = s">{{ s }} squares</button>
+                    }
+                  }
+                </div>
+                <p class="mt-1.5 text-xs text-qs-muted">
+                  @if (draft.newBoardSize) { Squares will be shuffled into the smaller board. Players keep the same number of squares, in new spots. }
+                  @else if (numbersDrawn) { The size can't change after the numbers are drawn. }
+                  @else { {{ squaresFilled }} picked. A smaller board needs that many or fewer squares picked. }
+                </p>
+              </div>
+            }
 
             <div>
               <p class="qs-label mb-1.5 text-qs-muted">Quarter split</p>
@@ -124,10 +147,13 @@ export interface EditGameValues {
 export class EditGameDialogComponent implements OnChanges {
   @Input() isOpen = false;
   @Input() isLocked = false;
+  @Input() boardSize: BoardSize = 100;
   @Input() canCustomSplit = false;
+  @Input() numbersDrawn = false;
+  @Input() squaresFilled = 0;
   /** Splits lock once numbers are drawn. */
   @Input() splitLocked = false;
-  @Input() values: EditGameValues = { awayTeam: '', homeTeam: '', pricePerSquare: 10, hostNote: '', quarterSplit: null, emptyQuarterRule: DEFAULT_EMPTY_QUARTER_RULE };
+  @Input() values: EditGameValues = { awayTeam: '', homeTeam: '', pricePerSquare: 10, hostNote: '', quarterSplit: null, emptyQuarterRule: DEFAULT_EMPTY_QUARTER_RULE, newBoardSize: null };
 
   @Output() closed = new EventEmitter<void>();
   @Output() saved = new EventEmitter<EditGameValues>();
@@ -138,6 +164,7 @@ export class EditGameDialogComponent implements OnChanges {
   /** Split being edited, in percent (20 = 20%). */
   pct: { [k in keyof QuarterSplit]: number } = { q1: 20, q2: 20, q3: 20, q4: 40 };
   readonly presets = SPLIT_PRESETS;
+  readonly smallerSizes: BoardSize[] = [50, 25];
   readonly quarters: { key: keyof QuarterSplit; label: string }[] = [
     { key: 'q1', label: 'Q1' }, { key: 'q2', label: 'Q2' }, { key: 'q3', label: 'Q3' }, { key: 'q4', label: 'Q4' }
   ];
@@ -169,6 +196,10 @@ export class EditGameDialogComponent implements OnChanges {
     }
     this.clearGame.emit();
     this.close();
+  }
+
+  sizeChoices(): BoardSize[] {
+    return smallerBoardSizes(this.boardSize, this.squaresFilled, this.numbersDrawn);
   }
 
   applyPreset(split: QuarterSplit): void {

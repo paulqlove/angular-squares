@@ -1037,6 +1037,10 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   }
 
   /** Saves the Edit game popup in one write. */
+  squaresPicked(): number {
+    return Object.keys(this.selectedSquares).length;
+  }
+
   async onEditGameSaved(values: EditGameValues): Promise<void> {
     if (!this.isGameOwner()) return;
     const homeTeam = this.sanitizationService.sanitizeTeamName(values.homeTeam);
@@ -1046,6 +1050,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     const canSplit = this.planService.features().customSplits && !this.isRandomized;
     const split = canSplit ? values.quarterSplit : this.quarterSplit;
     try {
+      if (values.newBoardSize) await this.gameService.resizeBoard(this.gameId, values.newBoardSize);
       await this.gameService.updateGame(this.gameId, {
         homeTeam, awayTeam, hostNote, pricePerSquare: price,
         emptyQuarterRule: values.emptyQuarterRule,
