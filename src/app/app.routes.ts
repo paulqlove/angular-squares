@@ -87,6 +87,7 @@ export const routes: Routes = [
   },
   marketingRoute('terms'),
   marketingRoute('privacy'),
+  marketingRoute('contact'),
   {
     path: 'teams',
     loadComponent: () =>
