@@ -172,6 +172,16 @@ export class PresentComponent implements OnInit, OnDestroy {
     return `${g.awayTeam || 'Away'} ${score.away} – ${g.homeTeam || 'Home'} ${score.home}`;
   }
 
+  /**
+   * One font size for all four score lines. It shrinks to fit the width of the line space, based on the
+   * longest line, so long team names get smaller instead of being cut off (never above the normal size).
+   */
+  protected scoreFont(): string | null {
+    const longest = Math.max(...this.quarters.map(q => this.winningScore(q).length));
+    if (!longest) return null;
+    return `min(1.5rem, max(0.7rem, ${(178 / longest).toFixed(1)}cqw))`;
+  }
+
   protected label(quarter: string): string {
     return quarterLabel(quarter, this.gameOver());
   }
