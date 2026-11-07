@@ -150,7 +150,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked';
 
         <!-- Hosting -->
         @if (canCreateGame()) {
-          <!-- Plan card: the upgrade entry point, so only free and Week Pass hosts see it. Season and Admin see their plan in the profile menu. -->
+          <!-- Plan card: the upgrade entry point, so only free hosts see it. Season and Admin see their plan in the profile menu. -->
           @if (planService.plan() !== 'season' && planService.plan() !== 'admin') {
             <div class="qs-card mt-8 flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between" aria-label="Your plan">
               <div class="min-w-0">
@@ -163,7 +163,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked';
                 </p>
               </div>
               <button type="button" (click)="openUpgrade($event)" class="qs-btn qs-btn-secondary shrink-0">
-                {{ planService.plan() === 'week' ? 'Get Season Pass' : 'See Season Pass' }}
+                See Season Pass
               </button>
             </div>
           }

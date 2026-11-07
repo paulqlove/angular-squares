@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 
 export type PreviewRole = 'actual' | 'owner' | 'cohost' | 'player' | 'guest' | 'signedOut';
-export type PreviewPlan = 'actual' | 'free' | 'week' | 'season';
+export type PreviewPlan = 'actual' | 'free' | 'season';
 
 /** Only this account sees the "View as" switcher. UI preview only; database rules still see the real account. */
 export const PREVIEW_ADMIN_EMAIL = 'paulqlove@gmail.com';

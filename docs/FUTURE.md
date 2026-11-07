@@ -4,25 +4,15 @@ Product roadmap and monetization strategy for QuarterScore.
 
 ## Plans
 
-Source of truth: `src/app/core/plans.ts` (prices, lengths, limits). Research and reasoning: Drive doc "QuarterScore Game Formats and Paid Plans Research (Nov 2, 2026)".
+**Pricing (decided Nov 5, 2026): Free, or one Season Pass at $5.99 one time.** That is the only price. See "Free-tier design" and "The Season Pass" below. `src/app/core/plans.ts` holds exactly this: Free, the one Season Pass, and Admin. Research and reasoning: Drive doc "QuarterScore Game Formats and Paid Plans Research (Nov 2, 2026)".
 
-| | Free | Week Pass | Season Pass |
-|---|---|---|---|
-| Price | $0 | $5.99 | $29.99 |
-| Length | — | 7 days | 210 days (college Week 0 to the NFL final, plus about a month) |
-| Active boards | 1 | 5 | 25 |
-| Ads on the host's boards | Yes | No | No |
-| Custom quarter split | No (20/20/20/40) | Yes | Yes |
-| 100/50/25-square boards | ✓ Available | ✓ | ✓ |
-
-- Buying more time stacks on what is left. A Season Pass outranks a Week Pass. An active Week Pass is credited toward a Season Pass (applies once checkout exists).
 - `entitlements/{uid} = { plan, expiresAt }`, written only by an admin for now (later a Stripe webhook). `admins/{uid}` gets everything.
 - Hosts stamp `games/{id}/adFreeUntil`; rules cap it at their real pass so viewers can trust it. Ads stay off until `environment.adsEnabled`; block gambling ad categories when a network is added.
 - Not yet built: checkout, Season Pass organizer tools (email list, notifications, export). Coupons are shelved.
 
 ### Free-tier design (board vote 4-0, Paul approved Nov 5, 2026)
 
-Direction: Free plus one $5.99 pass (replaces the Week/Season/stacking table above once checkout is built). The price stays $5.99; the wording and term can change after year 0. Until checkout exists, everything stays free for everyone.
+Direction: Free plus one $5.99 pass. The price stays $5.99; the wording and term can change after year 0. Until checkout exists, everything stays free for everyone.
 
 | | Free | Pass ($5.99) |
 |---|---|---|
@@ -41,7 +31,7 @@ Ship together, only once a pass can be bought (about 3 evenings): the live-scori
 
 **The Season Pass (decided Nov 5, 2026):**
 - **Name and price:** "Season Pass", $5.99 one time. The price is always shown at checkout; the no-money rule is Stripe's restricted-business rule, so copy never uses prize, pot, payout or entry-fee words about squares. Avoid "paid" in the UI. Guests always join and play for free; only hosts buy.
-- **Term:** fixed date, about Sept 1 to June 30 each season (changed from Mar 1 on Nov 6 2026: the NBA runs to June, so Mar 1 was arbitrary). This first season it runs from purchase to June 30, 2027. A one-time expiring pass, never auto-renewing. The Week Pass, the $29.99 tier and stacking go away when checkout is built (`plans.ts` still has them until then).
+- **Term:** fixed date, about Sept 1 to June 30 each season (changed from Mar 1 on Nov 6 2026: the NBA runs to June, so Mar 1 was arbitrary). This first season it runs from purchase to June 30, 2027. A one-time expiring pass, never auto-renewing.
 - **Refunds:** refundable until the pass is "used", final after, stated above the buy button and on the receipt. "Used" = one `usedAt` stamp on the entitlement, written the first time a board is created under the pass AND a pass-only feature fires (ESPN link on, a custom split saved, or a second concurrent board). Store the stamp with a timestamp, board id and feature. A stricter rule (at least 10 claimed squares by at least 3 players and a score written) is the fallback if disputes appear.
 - **Where we sell:** US only at launch, and say so.
 - **Renewal:** reminder only, never an automatic charge. An unchecked checkbox: "Email me once in August before next season starts. I'll never be charged automatically." Store the consent date, email and wording; every send needs Paul's OK.
@@ -51,9 +41,9 @@ Ship together, only once a pass can be bought (about 3 evenings): the live-scori
 
 Why $5.99: it brings back the one-party Super Bowl host as a buyer (live scoring plus TV presentation is what they want) and fits "simple and low". Operating cost is low and mostly independent of paying users: the live-score function hits ESPN once per league per minute.
 
-Input gathered earlier for a single ~$20 pass (CFO and skeptic reviewed that version, not this one):
-- **CFO:** Stripe nets $5.52 on $5.99 (7.8% fees) versus $19.11 on $19.99 (4.4%). At $5.99 you need about 3.5x the payers to match $19.99 revenue. Break-even is about 54 passes if costs are around $300/yr (assumption: confirm real Firebase and domain bills). Before launch: sales tax on digital goods (Stripe Tax or a CPA), Stripe keeps its $0.30 on refunds (short refund window), set aside income tax.
-- **Skeptic:** TEST-SMALL. Payers are hosts who hit the limits; the paid perks must feel worth it; sell the pass as "2026 Season Pass, through June 2027" (was Mar 2027 until Nov 6 2026) because a 365-day year is mostly dead time. Biggest risk is that nobody pays at any price.
+Input from the CFO and skeptic reviews:
+- **CFO:** Stripe nets $5.52 on $5.99 (7.8% fees). Break-even is about 54 passes if costs are around $300/yr (assumption: confirm real Firebase and domain bills). Before launch: sales tax on digital goods (Stripe Tax or a CPA), Stripe keeps its $0.30 on refunds (short refund window), set aside income tax.
+- **Skeptic:** TEST-SMALL. Payers are hosts who hit the limits; the paid perks must feel worth it; sell the pass as "2026 Season Pass, through June 2027" because a 365-day year is mostly dead time. Biggest risk is that nobody pays at any price.
 - **Test before building checkout:** fake-door on the dashboard when a host hits the 1-board limit or tries live scoring or presentation: "Season Pass $5.99 · Notify me" (reuse notify-me signups). Run Nov 5, 2026 to Jan 15, 2027. Success is at least 10% click-through and at least 15 clicks; under 5% means don't build checkout.
 - **Open:** gating live scoring is the biggest bet (best hook, but free becomes manual scoring); exact board count; changing plans is a one-line edit in `plans.ts`.
 
