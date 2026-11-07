@@ -136,6 +136,9 @@ function publicPaths(routePaths, posts) {
     if (clientRoutes.has(routePath)) {
       continue;
     }
+    if (routePath === 'blog' && posts.length === 0) {
+      continue;
+    }
     if (routePath === 'blog/:slug') {
       for (const post of posts) {
         paths.push(`/blog/${post.slug}`);

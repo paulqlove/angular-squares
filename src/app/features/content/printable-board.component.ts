@@ -191,9 +191,9 @@ import { ContentShellComponent } from './content-shell.component';
               </a>
             </li>
             <li>
-              <a routerLink="/blog" class="block rounded-xl border border-default bg-card p-4 hover:bg-card-hover">
-                <span class="font-semibold text-qs-accent underline decoration-qs-accent/40 underline-offset-2 text-qs-accent">Blog</span>
-                <span class="mt-1 block text-sm text-muted">Paper versus a live board, when that post is ready.</span>
+              <a routerLink="/football-squares-on-tv" class="block rounded-xl border border-default bg-card p-4 hover:bg-card-hover">
+                <span class="font-semibold text-qs-accent underline decoration-qs-accent/40 underline-offset-2 text-qs-accent">Football squares on TV</span>
+                <span class="mt-1 block text-sm text-muted">Put the live board on a big screen instead.</span>
               </a>
             </li>
           </ul>

@@ -123,8 +123,11 @@ Icon button on dashboard card to manage who has paid.
 ### Push Notifications
 Opt-in browser push when a quarter is won. Add email for the same event. The paid iOS apps are the ones advertising this.
 
-### Built-in Blog
-Static pages at /blog. AI-generated SEO content covering rules, strategy, Super Bowl history.
+### Content: pages, not a blog (decided Nov 6 2026)
+- **The blog is hidden.** The nav link is gone and `/blog` is out of the sitemap and prerender list while there are no posts (`scripts/build-content.mjs`). The code stays: `content/blog/*.md`, `src/app/features/blog/`, the `draft: true` flag. Why: most planned topics already have a page, a blog with a handful of dated posts looks abandoned, and a how-to ages badly as a dated post.
+- **The Drive Blog Plan (22 posts, Oct 31) is superseded.** A note at the top of the doc says so. Most of its topics have pages: how to play, FAQ, Super Bowl, NFL playoffs, college, NBA, fundraiser, printable, Thanksgiving, best numbers.
+- **Content ships as pages** (`src/app/features/content/marketing-pages.ts`). First one: `/football-squares-on-tv` (TV mode plus a game-day checklist). Next candidate: an office/coworkers guide as a page, only if the Dec 1 (indexed) and Dec 15 (50+ combined impressions) Search Console checks pass. Small questions go into the FAQ.
+- **The blog comes back only for original data stories from real boards.** Rules: aggregate and anonymous, never player names; wait for enough data (about 100 boards and 400 decided quarters, counts shown with every percentage, no percentage under n=30); add one sentence to the privacy page about anonymous combined statistics before the first story (today it only says boards store the names typed on squares). Do not publish claims that a name, gender or position changes who wins: numbers are assigned at random after squares are claimed, a stat like "female-sounding names win 54%" would be noise or an artifact at our volume, and guessing gender from a name is unreliable. Honest candidates: how often a quarter lands on an unclaimed square; how many days before kickoff boards are made; typical players and fill rate by board size; which digit pairs won on real boards compared with the historical table; how many boards use TV mode. Source: extend `scripts/report/report.mjs`.
 
 P1. Also ship intent pages: `/super-bowl-squares` (create a board before the teams are set), `/nfl-squares`, `/college-football-squares`, `/how-to-play`, `/best-squares-numbers` (digit frequency), `/printable-football-squares`. JSON-LD: SoftwareApplication + Offer, FAQPage, HowTo, BreadcrumbList. Super Bowl LXI pages should be indexed by December.
 

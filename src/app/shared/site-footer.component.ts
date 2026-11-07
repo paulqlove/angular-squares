@@ -54,7 +54,7 @@ export class SiteFooterComponent {
         { path: '/faq', label: 'FAQ' },
         { path: '/best-squares-numbers', label: 'Best numbers' },
         { path: '/printable-football-squares', label: 'Printable board' },
-        { path: '/blog', label: 'Blog' }
+        { path: '/football-squares-on-tv', label: 'TV mode' }
       ]
     },
     {
