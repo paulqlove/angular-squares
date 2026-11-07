@@ -19,23 +19,23 @@
   <!-- Host controls float over the header, so they never change the size of the board. They fade out after a few seconds. -->
   <div class="absolute right-4 top-3 z-20 flex max-w-[85%] flex-wrap items-center justify-end gap-2 rounded-card bg-qs-bg/90 p-2 transition-opacity duration-300 lg:right-6"
     [class.opacity-0]="!controlsVisible()" [class.pointer-events-none]="!controlsVisible()" [attr.inert]="controlsVisible() ? null : ''">
-      @if ((rotating() || showTimer()) && !kiosk()) {
+      @if (showTimer() && !kiosk()) {
         <span class="qs-label text-qs-muted">Switch every</span>
         @for (s of intervals; track s) {
           <button type="button" class="qs-tab px-3" role="tab" [attr.aria-selected]="rotating() && interval() === s" (click)="rotating() ? setInterval(s) : startRotation(s)">{{ s }}s</button>
         }
       }
       @if (isHost()) {
+        <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" aria-label="Rotate through your boards on a timer" [attr.aria-expanded]="showTimer()" (click)="toggleTimer()">
+          <ng-icon name="heroClock" class="text-lg" aria-hidden="true"></ng-icon>
+          @if (rotating()) { <span class="ml-1">{{ interval() }}s</span> }
+        </button>
         @if (rotating()) {
           <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" (click)="stopRotation()">Stop</button>
           <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" (click)="copyOfficeLink()">Copy office link</button>
           @if (hasOfficeLink()) {
             <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" (click)="turnOffOfficeLink()">Turn off link</button>
           }
-        } @else {
-          <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" aria-label="Rotate through your boards on a timer" [attr.aria-expanded]="showTimer()" (click)="toggleTimer()">
-            <ng-icon name="heroClock" class="text-lg" aria-hidden="true"></ng-icon>
-          </button>
         }
         @if (gameId() && !rotating()) {
           <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" (click)="copyLink()">Copy TV link</button>

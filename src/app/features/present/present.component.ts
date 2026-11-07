@@ -322,6 +322,7 @@ export class PresentComponent implements OnInit, OnDestroy {
 
   protected setInterval(seconds: number): void {
     this.interval.set(seconds);
+    this.showTimer.set(false);
     this.startTimer();
   }
 
