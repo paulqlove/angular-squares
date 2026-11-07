@@ -191,8 +191,7 @@
             <!-- Tab Content -->
             @if (activeTab === 'more') {
               <app-open-boards-list [rows]="openBoards()" (picked)="trackOtherBoardJoin()"></app-open-boards-list>
-            }
-            @if (activeTab === 'board') {
+            } @else if (activeTab === 'board') {
               <app-game-board
                 [selectedSquares]="selectedSquares"
                 [playerColors]="playerColors"
