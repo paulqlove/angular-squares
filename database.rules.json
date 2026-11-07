@@ -192,10 +192,17 @@
         }
       }
     },
+    "tvTokenOwners": {
+      "$token": {
+        ".read": false,
+        ".write": "auth != null && $token.matches(/^[A-Za-z0-9_-]{20,64}$/) && ((!data.exists() && newData.val() == auth.uid && auth.token.firebase.sign_in_provider != 'anonymous') || (data.val() == auth.uid && !newData.exists() && !root.child('tvLinks').child($token).exists()))",
+        ".validate": "newData.isString() && newData.val() == auth.uid"
+      }
+    },
     "tvLinks": {
       "$token": {
         ".read": true,
-        ".write": "auth != null && $token.matches(/^[A-Za-z0-9_-]{20,64}$/) && root.child('users').child(auth.uid).child('tvToken').val() == $token",
+        ".write": "auth != null && auth.token.firebase.sign_in_provider != 'anonymous' && $token.matches(/^[A-Za-z0-9_-]{20,64}$/) && root.child('tvTokenOwners').child($token).val() == auth.uid",
         ".validate": "newData.hasChildren(['boards', 'interval'])",
         "boards": { ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9]{6}(,[A-Za-z0-9]{6}){0,19}$/)" },
         "interval": { ".validate": "newData.isNumber() && (newData.val() == 10 || newData.val() == 20 || newData.val() == 30 || newData.val() == 60)" },

@@ -794,7 +794,8 @@ export class GameService {
     let token = await this.getTvToken(userId);
     if (!token) {
       token = this.newTvToken();
-      await set(ref(this.db, `users/${userId}/tvToken`), token);
+      // Claim the token for this account. The claim can never be overwritten, so only its owner can write the link.
+      await update(ref(this.db), { [`users/${userId}/tvToken`]: token, [`tvTokenOwners/${token}`]: userId });
     }
     await set(ref(this.db, `tvLinks/${token}`), {
       boards: boardIds.slice(0, 20).join(','),
@@ -811,7 +812,7 @@ export class GameService {
     const token = await this.getTvToken(userId);
     if (!token) return;
     await remove(ref(this.db, `tvLinks/${token}`));
-    await remove(ref(this.db, `users/${userId}/tvToken`));
+    await update(ref(this.db), { [`users/${userId}/tvToken`]: null, [`tvTokenOwners/${token}`]: null });
   }
 
   /** Live boards and interval for a TV link. null when the link is off or unknown. */

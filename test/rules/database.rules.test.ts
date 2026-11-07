@@ -855,34 +855,61 @@ describe('users/firstTouch', () => {
 describe('tvLinks (office TV link)', () => {
   const TOKEN = 'k7x9q2mZ4bR8tY1nWc5dLg';
   const link = (over: Record<string, unknown> = {}) => ({ boards: 'AAAAAA,BBBBBB', interval: 30, updatedAt: Date.now(), ...over });
+  const claim = { 'users/alice/tvToken': TOKEN, [`tvTokenOwners/${TOKEN}`]: 'alice' };
 
   it('the owner can claim a token then publish a link under it', async () => {
-    await assertSucceeds(set(player(), 'users/alice/tvToken', TOKEN));
+    await assertSucceeds(write(player(), claim));
     await assertSucceeds(set(player(), `tvLinks/${TOKEN}`, link()));
   });
 
-  it('nobody can write a link under a token they have not claimed', async () => {
+  it('nobody can write a link under a token nobody has claimed, or one they do not own', async () => {
     await assertFails(set(player(), `tvLinks/${TOKEN}`, link()));
-    await seed({ 'users/alice/tvToken': TOKEN });
+    await seed(claim);
     await assertFails(set(env.authenticatedContext('bob'), `tvLinks/${TOKEN}`, link()));
     await assertFails(set(visitor(), `tvLinks/${TOKEN}`, link()));
   });
 
-  it('anyone with the token can read the link, but nobody can list links', async () => {
-    await seed({ 'users/alice/tvToken': TOKEN, [`tvLinks/${TOKEN}`]: link() });
+  it('a second account cannot take over a claimed token, even by copying it into its own record', async () => {
+    await seed({ ...claim, [`tvLinks/${TOKEN}`]: link() });
+    const bob = env.authenticatedContext('bob');
+    await assertFails(set(bob, `tvTokenOwners/${TOKEN}`, 'bob'));
+    await assertSucceeds(set(bob, 'users/bob/tvToken', TOKEN));
+    await assertFails(set(bob, `tvLinks/${TOKEN}`, link({ boards: 'CCCCCC' })));
+    await assertFails(set(bob, `tvLinks/${TOKEN}`, null));
+    await assertFails(set(bob, `tvTokenOwners/${TOKEN}`, null));
+  });
+
+  it('an account cannot claim a token for someone else', async () => {
+    await assertFails(set(player(), `tvTokenOwners/${TOKEN}`, 'bob'));
+  });
+
+  it('anyone with the token can read the link, but nobody can list links or read the owner index', async () => {
+    await seed({ ...claim, [`tvLinks/${TOKEN}`]: link() });
     await assertSucceeds(read(visitor(), `tvLinks/${TOKEN}`));
     await assertFails(read(visitor(), 'tvLinks'));
     await assertFails(read(player(), 'tvLinks'));
+    await assertFails(read(player(), `tvTokenOwners/${TOKEN}`));
   });
 
-  it('only the owner of the token can turn the link off', async () => {
-    await seed({ 'users/alice/tvToken': TOKEN, [`tvLinks/${TOKEN}`]: link() });
-    await assertFails(set(env.authenticatedContext('bob'), `tvLinks/${TOKEN}`, null));
+  it('the owner can turn the link off and release the token', async () => {
+    await seed({ ...claim, [`tvLinks/${TOKEN}`]: link() });
     await assertSucceeds(set(player(), `tvLinks/${TOKEN}`, null));
+    await assertSucceeds(write(player(), { 'users/alice/tvToken': null, [`tvTokenOwners/${TOKEN}`]: null }));
+  });
+
+  it('the owner cannot release a token while its link still exists', async () => {
+    await seed({ ...claim, [`tvLinks/${TOKEN}`]: link() });
+    await assertFails(set(player(), `tvTokenOwners/${TOKEN}`, null));
+  });
+
+  it('a guest cannot claim a token or publish a link', async () => {
+    await assertFails(set(guest(), `tvTokenOwners/${TOKEN}`, 'guest'));
+    await seed({ [`tvTokenOwners/${TOKEN}`]: 'guest' });
+    await assertFails(set(guest(), `tvLinks/${TOKEN}`, link()));
   });
 
   it('rejects a bad interval, a bad board id, too many boards and extra keys', async () => {
-    await seed({ 'users/alice/tvToken': TOKEN });
+    await seed(claim);
     await assertFails(set(player(), `tvLinks/${TOKEN}`, link({ interval: 45 })));
     await assertFails(set(player(), `tvLinks/${TOKEN}`, link({ boards: 'bad id' })));
     await assertFails(set(player(), `tvLinks/${TOKEN}`, link({ boards: '' })));
@@ -895,5 +922,6 @@ describe('tvLinks (office TV link)', () => {
   it('rejects a short or odd token', async () => {
     await assertFails(set(player(), 'users/alice/tvToken', 'short'));
     await assertFails(set(player(), 'users/alice/tvToken', 'has spaces and symbols!!!'));
+    await assertFails(set(player(), 'tvTokenOwners/short', 'alice'));
   });
 });
