@@ -14,7 +14,7 @@ import { miniGridCells, miniGridClass } from '../../../../core/utils/mini-grid';
   template: `
     <section aria-labelledby="open-boards-title">
       <p id="open-boards-title" class="qs-label text-qs-muted">More boards from this host</p>
-      <ul class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3">
+      <ul class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
         @for (r of visible(); track r.id) {
           <li>
             <a [routerLink]="['/game', r.id]" (click)="picked.emit()" class="qs-card flex min-h-11 items-center gap-3 p-3 transition-colors hover:border-qs-accent">
@@ -25,11 +25,11 @@ import { miniGridCells, miniGridClass } from '../../../../core/utils/mini-grid';
               </div>
               <div class="min-w-0 flex-1">
                 <div class="flex items-start justify-between gap-2">
-                  <p class="truncate text-base font-semibold text-qs-ink">{{ r.name }}</p>
+                  <p class="line-clamp-2 text-base font-semibold leading-snug text-qs-ink">{{ r.name }}</p>
                   <span class="qs-badge qs-badge-ok shrink-0">{{ r.open }} open</span>
                 </div>
                 <p class="truncate font-mono text-xs uppercase tracking-wider text-qs-muted">{{ r.awayTeam || 'Away' }} v {{ r.homeTeam || 'Home' }}</p>
-                <p class="truncate text-xs tabular-nums text-qs-muted">{{ r.taken }}/{{ r.size }} taken · {{ r.pricePerSquare }} pts per square</p>
+                <p class="line-clamp-2 text-xs tabular-nums text-qs-muted">{{ r.taken }}/{{ r.size }} taken · {{ r.pricePerSquare }} pts per square</p>
               </div>
               <ng-icon name="heroChevronRight" class="shrink-0 text-base text-qs-muted" aria-hidden="true"></ng-icon>
             </a>
