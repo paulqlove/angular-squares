@@ -16,7 +16,7 @@ Direction: Free plus one $5.99 pass. The price stays $5.99; the wording and term
 
 | | Free | Pass ($5.99) |
 |---|---|---|
-| Active boards | 1 at a time, no lifetime cap | Unlimited for now (tighten the terms if someone abuses it) |
+| Active boards | 1 at a time, no lifetime cap | 25 at a time (decided Nov 7, 2026) |
 | Live scoring (ESPN auto-sync) | Manual scores | Yes |
 | Presentation / TV mode | **Yes** (QR and quarterscore.com always on screen) | Yes |
 | Probability heat map | Yes, all accounts | Yes |
@@ -180,3 +180,17 @@ Oct 31, 2026 lab pass on quarterscore.com. Mobile Lighthouse 69 / 80 / 100 / 91 
 ## Later
 
 - AFL Grand Final squares test (Aug 2027): SEO landing page + notify-me + manual-score board; build out only if ~50 signups or ~500 AU visits. Rugby: revisit only for RWC 2027. Source: [Skeptic verdict](https://docs.google.com/document/d/1u1VswkSSvcydYiqWZ70jGgt5cVI1L90T6oUVUL04Hxs/edit)
+
+## A host's other open boards: the More tab (built Nov 7, 2026)
+
+**Decision trail:** the board voted 7-0 on Nov 7 to ship a simple full-board answer first and gate the rest on data. Paul then chose the More tab instead of a banner, shown on any of the host's boards, and had the full-board banner removed. Waitlist, "host grows a full board" and auto-created boards stay parked.
+
+**What shipped:**
+- A fourth tab, **More**, beside Board, Heatmap and Box score. It shows only when the same host has at least one other board switched on with open squares. Opening a board from it lands on that board's squares.
+- Each card is compact: a squares thumbnail, the board name (two lines), teams, "N open", "taken/size taken · N pts per square". Two across on desktop, one on a phone. Most open squares first, six shown then See all. Points only, never dollars, no total line.
+- The host switch **Show in my open boards** (create form, dashboard Edit Game, game page Edit) is off by default, previews exactly what players see, and shows only for hosts whose plan allows more than one board while the board is open and unlocked.
+- Data: `openBoards/{ownerId}/{boardId}: true` (readable per owner only, never listable; written only by that owner), `games/{id}/showInOpenBoards`, counters at `boardStats/{boardId}` (fullBoardViews, fullBoardViewsWithOpenBoards, otherBoardJoins; increment-only, owner or admin can read). Rules deployed Nov 7.
+- Terms and Privacy say links are secret by default and say what a listed board shows.
+- Desktop: every tab keeps the Board's height so Players and Winners never move; phones are unchanged.
+
+**Read it Nov 29 and Jan 15:** `otherBoardJoins` against `fullBoardViewsWithOpenBoards`. If it never fires, the build was cheap and stays quiet.
