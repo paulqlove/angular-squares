@@ -16,7 +16,7 @@ Direction: Free plus one $5.99 pass. The price stays $5.99; the wording and term
 
 | | Free | Pass ($5.99) |
 |---|---|---|
-| Active boards | 1 at a time, no lifetime cap | Unlimited for now (tighten the terms if someone abuses it) |
+| Active boards | 1 at a time, no lifetime cap | 25 at a time (decided Nov 7, 2026) |
 | Live scoring (ESPN auto-sync) | Manual scores | Yes |
 | Presentation / TV mode | **Yes** (QR and quarterscore.com always on screen) | Yes |
 | Probability heat map | Yes, all accounts | Yes |
@@ -180,3 +180,15 @@ Oct 31, 2026 lab pass on quarterscore.com. Mobile Lighthouse 69 / 80 / 100 / 91 
 ## Later
 
 - AFL Grand Final squares test (Aug 2027): SEO landing page + notify-me + manual-score board; build out only if ~50 signups or ~500 AU visits. Rugby: revisit only for RWC 2027. Source: [Skeptic verdict](https://docs.google.com/document/d/1u1VswkSSvcydYiqWZ70jGgt5cVI1L90T6oUVUL04Hxs/edit)
+
+## Full boards and the host's other open boards (board vote Nov 7, 2026; built only after the data gate)
+
+**Plan:** (1) Ship the full-board message first: "This board is full. Start your own free board, or ask the host to add one." with "Join with a code", plus two counters (full boards viewed, Start-your-own clicks) that count distinct visitors. (2) Hold the waitlist, "host grows a full board" and "host's other open boards" behind one data gate, read Nov 29 and Jan 15: 5+ full-board views from 3+ distinct visitors on 2+ boards, or 5+ Start-your-own clicks in one week, or a host asks (for open boards, also a host with 2+ open boards). The data picks which one to build. Auto-creating boards and auto-placing players is dropped.
+
+**Host's other open boards, user stories (opt-in, same host only):**
+- A player on a full board sees that host's other open boards and joins one in one tap. No account needed.
+- Each row: board name, teams, "{taken}/{size} taken" with a small fill bar, "Points per square: 100", and "Total points on the board: 10,000" (points per square times board size). Most open squares first. Points only, never dollars.
+- Hosts set points per square when they create or edit a board (already built); the row just shows it.
+- A host turns on "Show in my open boards" per board. Off by default, existing boards stay off, and the edit popup previews exactly what players will see. Turning it off removes the board at once.
+- Only boards with open squares that are not locked or drawn appear. Never a cross-host directory, never indexed, never in the sitemap.
+- Terms and Privacy get one line before it ships ("secrets by default"). Data: `openBoards/{ownerId}/{boardId}: true` readable per owner only, squares left computed in the browser; needs a separate database rules deploy.
