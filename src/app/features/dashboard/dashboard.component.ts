@@ -588,6 +588,36 @@ import {
                 />
               </div>
 
+              <!-- Board size: only smaller, only while the picks fit and the numbers are not drawn -->
+              @if (editingGame(); as eg) {
+                @if (eg.boardSize > 25) {
+                  <div>
+                    <label class="block text-sm font-semibold text-label mb-2">Board size</label>
+                    <div class="flex flex-wrap gap-2">
+                      <button type="button" (click)="editNewSize.set(null)"
+                        [class]="!editNewSize() ? 'px-4 py-2 bg-header text-header rounded-lg font-medium text-sm' : 'px-4 py-2 bg-control text-default hover:bg-control-hover rounded-lg font-medium text-sm'">
+                        Keep {{ eg.boardSize }}
+                      </button>
+                      @for (s of editSmallerSizes; track s) {
+                        @if (s < eg.boardSize) {
+                          <button type="button" [disabled]="!editSizeChoices().includes(s)" (click)="editNewSize.set(s)"
+                            [class]="(editNewSize() === s ? 'px-4 py-2 bg-header text-header' : 'px-4 py-2 bg-control text-default hover:bg-control-hover') + ' rounded-lg font-medium text-sm disabled:opacity-40 disabled:cursor-not-allowed'">
+                            {{ s }} squares
+                          </button>
+                        }
+                      }
+                    </div>
+                    @if (editNewSize()) {
+                      <p class="text-xs text-muted mt-2">Squares will be shuffled into the smaller board. Players keep the same number of squares, in new spots.</p>
+                    } @else if (editBoardRandomized()) {
+                      <p class="text-xs text-muted mt-2">The size can't change after the numbers are drawn.</p>
+                    } @else {
+                      <p class="text-xs text-muted mt-2">{{ eg.squaresFilled }} picked. A smaller board needs that many or fewer squares picked.</p>
+                    }
+                  </div>
+                }
+              }
+
               <!-- Empty quarter rule -->
               <app-empty-quarter-rule name="dash-edit-empty-quarter-rule" [(value)]="editEmptyRule"></app-empty-quarter-rule>
 
@@ -794,6 +824,9 @@ export class DashboardComponent implements OnInit {
   editEspnGames = signal<EspnGame[]>([]);
   isLoadingEditEspnGames = signal(false);
   editGamePlayers = signal<{ name: string; uid: string }[]>([]);
+  editBoardRandomized = signal(false);
+  editNewSize = signal<BoardSize | null>(null);
+  editSmallerSizes: BoardSize[] = [50, 25];
   managerSearchQuery = '';
   managerSearchResults = signal<{ name: string; uid: string }[]>([]);
   selectedManagerIndex = signal(-1);
@@ -1152,6 +1185,8 @@ export class DashboardComponent implements OnInit {
     this.editEmptyRule = game.emptyQuarterRule ?? DEFAULT_EMPTY_QUARTER_RULE;
     this.editCustomHomeTeam = game.homeTeam || '';
     this.editCustomAwayTeam = game.awayTeam || '';
+    this.editNewSize.set(null);
+    this.editBoardRandomized.set(false);
     this.managerSearchQuery = '';
     this.managerSearchResults.set([]);
     this.selectedManagerIndex.set(-1);
@@ -1162,6 +1197,7 @@ export class DashboardComponent implements OnInit {
     }
 
     const fullGame = await this.gameService.getGame(game.id);
+    this.editBoardRandomized.set(!!fullGame?.isRandomized);
     if (fullGame?.playerUserIds) {
       const currentUid = this.currentUser()?.uid;
       const players = Object.entries(fullGame.playerUserIds)
@@ -1171,6 +1207,11 @@ export class DashboardComponent implements OnInit {
     } else {
       this.editGamePlayers.set([]);
     }
+  }
+
+  editSizeChoices(): BoardSize[] {
+    const g = this.editingGame();
+    return g ? this.gameService.smallerSizesFor(g.boardSize, g.squaresFilled, this.editBoardRandomized()) : [];
   }
 
   closeEditModal(): void {
@@ -1325,10 +1366,13 @@ export class DashboardComponent implements OnInit {
         updates['scores'] = { q1: { home: 0, away: 0 }, q2: { home: 0, away: 0 }, q3: { home: 0, away: 0 }, q4: { home: 0, away: 0 } };
         updates['winners'] = {};
       }
+      const newSize = this.editNewSize();
+      if (newSize) await this.gameService.resizeBoard(game.id, newSize);
       await this.gameService.updateGame(game.id, updates);
       this.myGames.update(games =>
         games.map(g => g.id === game.id ? {
           ...g,
+          ...(newSize ? { boardSize: newSize } : {}),
           name: sanitizedName,
           pricePerSquare: sanitizedPrice,
           hostNote: sanitizedHostNote,

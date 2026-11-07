@@ -20,6 +20,7 @@ import { EspnService } from './espn.service';
 import { RolePreviewService } from './role-preview.service';
 import { DEFAULT_EMPTY_QUARTER_RULE, Entitlement, EmptyQuarterRule, NO_EXPIRY, PLANS, QuarterSplit, isActive, isEmptyQuarterRule } from '../plans';
 import { AuthService } from './auth.service';
+import { shuffleSquares } from '../utils/shuffle-squares';
 import {
   BoardActivity,
   FREE_ACTIVE_BOARD_LIMIT,
@@ -431,6 +432,32 @@ export class GameService {
     });
     const ownerId = this._currentGame.value?.id === gameId ? this._currentGame.value.ownerId : this.authService.currentUser()?.uid;
     if (ownerId) await this.bumpUsage(ownerId, 'resets');
+  }
+
+  /** Smaller board sizes this board can convert to: the picks must fit and the numbers must not be drawn yet. */
+  smallerSizesFor(boardSize: BoardSize, squaresFilled: number, isRandomized: boolean): BoardSize[] {
+    if (isRandomized) return [];
+    return ([50, 25] as BoardSize[]).filter(s => s < boardSize && squaresFilled <= s);
+  }
+
+  /** Converts a board to a smaller size. Picks are shuffled into random empty cells; each player keeps their count. */
+  async resizeBoard(gameId: string, target: BoardSize): Promise<void> {
+    if (!this.isBrowser) return;
+    if (this.authService.blockPreviewWrite()) throw new Error('Preview only');
+    const game = await this.getGame(gameId);
+    if (!game || !this.smallerSizesFor(game.boardSize ?? 100,Object.keys(game.selectedSquares).length, game.isRandomized).includes(target)) {
+      throw new Error('This board cannot be converted');
+    }
+    const { rows, cols } = getBoardDimensions(target);
+    const squares = shuffleSquares(game.selectedSquares, rows, cols);
+    if (!squares) throw new Error('Squares do not fit');
+    const prefix = `games/${gameId}`;
+    await update(ref(this.db), {
+      [`${prefix}/boardSize`]: target,
+      [`${prefix}/squares`]: Object.keys(squares).length ? squares : null,
+      [`${prefix}/homeNumbers`]: Array(cols).fill(null),
+      [`${prefix}/awayNumbers`]: Array(rows).fill(null)
+    });
   }
 
   // Subscribe to a specific game
