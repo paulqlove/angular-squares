@@ -15,13 +15,20 @@
       <h1 class="qs-title truncate text-2xl lg:text-4xl">{{ game()?.name }}</h1>
     </div>
     <div class="flex flex-wrap items-center gap-2">
-      @if (rotating()) {
+      @if (rotating() || showTimer()) {
         <span class="qs-label text-qs-muted">Switch every</span>
         @for (s of intervals; track s) {
-          <button type="button" class="qs-tab px-3" role="tab" [attr.aria-selected]="interval() === s" (click)="setInterval(s)">{{ s }}s</button>
+          <button type="button" class="qs-tab px-3" role="tab" [attr.aria-selected]="rotating() && interval() === s" (click)="rotating() ? setInterval(s) : startRotation(s)">{{ s }}s</button>
         }
       }
       @if (isHost()) {
+        @if (rotating()) {
+          <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" (click)="stopRotation()">Stop</button>
+        } @else {
+          <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" aria-label="Rotate through your boards on a timer" [attr.aria-expanded]="showTimer()" (click)="toggleTimer()">
+            <ng-icon name="heroClock" class="text-lg" aria-hidden="true"></ng-icon>
+          </button>
+        }
         @if (gameId() && !rotating()) {
           <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" (click)="copyLink()">Copy TV link</button>
         }
