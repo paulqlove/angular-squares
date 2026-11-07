@@ -72,6 +72,7 @@ export class SiteFooterComponent {
       heading: 'About',
       links: [
         { path: '/football-squares-fundraiser', label: 'Donation squares' },
+        { path: '/contact', label: 'Contact' },
         { path: '/terms', label: 'Terms' },
         { path: '/privacy', label: 'Privacy' },
         { path: '/dashboard', label: 'Start a free game' }

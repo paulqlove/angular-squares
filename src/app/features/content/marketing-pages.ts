@@ -740,6 +740,49 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       label: 'Back to the homepage',
       note: 'Last updated November 1, 2026.'
     }
+  },
+  contact: {
+    id: 'contact',
+    path: '/contact',
+    title: 'Contact QuarterScore',
+    description: 'Email QuarterScore for help with a football squares board, a bug report, or an idea.',
+    h1: 'Contact us',
+    eyebrow: 'Help',
+    lede: 'Stuck on a board, found a bug, or have an idea? Send an email and a real person will read it.',
+    published: '2026-11-07',
+    sections: [
+      {
+        heading: 'Email us',
+        paragraphs: ['One address for everything:'],
+        html: '<a href="mailto:hello@quarterscore.com" class="inline-flex min-h-11 items-center rounded-md bg-qs-accent px-5 text-lg font-semibold text-white hover:bg-qs-accent-hover">hello@quarterscore.com</a>'
+      },
+      {
+        heading: 'What to include',
+        paragraphs: ['A few details help us fix things faster.'],
+        bullets: [
+          'The link to your board (the address in your browser). Please do not send passwords.',
+          'What you expected to happen and what happened instead.',
+          'Your device and browser, for example iPhone Safari or Chrome on a Mac.',
+          'A screenshot, if you have one.'
+        ]
+      },
+      {
+        heading: 'Good to know',
+        paragraphs: [
+          'Most questions are answered in the FAQ and the how-to-play guide, linked below. QuarterScore is a small independent project, so replies can take a day or two, and game days are the busiest.'
+        ]
+      }
+    ],
+    related: [
+      { path: '/faq', label: 'FAQ', text: 'Quick answers about boards, accounts and scoring.' },
+      { path: '/how-to-play', label: 'How to play', text: 'The rules of football squares in a minute.' },
+      { path: '/privacy', label: 'Privacy', text: 'What the site stores.' }
+    ],
+    cta: {
+      path: '/create',
+      label: 'Start a free board',
+      note: 'Free. Players do not need an account.'
+    }
   }
 };
 
