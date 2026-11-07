@@ -71,12 +71,12 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
           <section class="mt-10">
             <h2 class="text-2xl font-bold text-heading">{{ section.heading }}</h2>
             @for (paragraph of section.paragraphs; track paragraph) {
-              <p class="mt-3 leading-relaxed text-default">{{ paragraph }}</p>
+              <p class="mt-3 leading-relaxed text-default" [innerHTML]="rich(paragraph)"></p>
             }
             @if (section.bullets) {
               <ul class="mt-4 list-disc space-y-2 pl-5 text-default">
                 @for (bullet of section.bullets; track bullet) {
-                  <li>{{ bullet }}</li>
+                  <li [innerHTML]="rich(bullet)"></li>
                 }
               </ul>
             }
@@ -139,6 +139,16 @@ export class MarketingPageComponent {
   public readonly page: MarketingPage = getMarketingPage(this.route.snapshot.data['pageId']);
   public readonly breadcrumbs = pageBreadcrumbs(this.page);
   private htmlCache = new Map<string, SafeHtml>();
+
+  /** Plain page text with **bold** for button and menu names. Everything else is escaped. */
+  public rich(text: string): SafeHtml {
+    const key = `rich:${text}`;
+    if (!this.htmlCache.has(key)) {
+      const escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      this.htmlCache.set(key, this.sanitizer.bypassSecurityTrustHtml(escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')));
+    }
+    return this.htmlCache.get(key)!;
+  }
 
   public trustHtml(html: string): SafeHtml {
     if (!this.htmlCache.has(html)) {

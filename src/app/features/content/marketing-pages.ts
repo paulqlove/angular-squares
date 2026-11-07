@@ -611,7 +611,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
           'The live score and game clock, when the board is linked to a live game.',
           'The winner of each quarter.',
           'How many squares are claimed and how many are open.',
-          'A QR code that opens the same board link as Share, so friends can follow on their own phones. Nobody needs an account.'
+          'A QR code that opens the same board link as **Share**, so friends can follow on their own phones. Nobody needs an account.'
         ],
         html: `<figure class="not-prose mt-6">
           <img src="/assets/tv-mode/tv-board.png" alt="QuarterScore TV mode showing a squares board with sample player names in different colors, the score, the winner of each quarter and a QR code." width="1920" height="1080" class="w-full h-auto rounded-lg border border-slate-300 dark:border-slate-600">
@@ -620,14 +620,14 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       {
         heading: 'Get it on the TV',
         paragraphs: [
-          'On a computer or laptop, open your game and press Present. The button is on the game page for the host and co-host.',
+          'On a computer or laptop, open your game and press **Present**. The button is on the game page for the host and co-host.',
           'Then send that browser tab to the TV. These are the standard ways to do it. We have not tested every TV, so try yours before game day.'
         ],
         bullets: [
-          'Chrome or Edge: open the browser menu, choose Cast, pick your TV and set Sources to Cast tab. The computer and the TV need to be on the same Wi-Fi.',
-          'Safari on a Mac: open Control Center, choose Screen Mirroring, then pick your Apple TV or AirPlay TV.',
+          'Chrome or Edge: open the browser menu, choose **Cast**, pick your TV and set **Sources** to **Cast tab**. The computer and the TV need to be on the same Wi-Fi.',
+          'Safari on a Mac: open **Control Center**, choose **Screen Mirroring**, then pick your Apple TV or AirPlay TV.',
           'Any browser: connect the computer to the TV with an HDMI cable, or open the page in the TV\u2019s own web browser.',
-          'No mirroring: tap Copy TV link and open it on any browser or device. It shows the board live and needs no sign-in.'
+          'No mirroring: tap **Copy TV link** and open it on any browser or device. It shows the board live and needs no sign-in.'
         ],
         html: `<figure class="not-prose mt-6">
           <img src="/assets/tv-mode/game-present-button.png" alt="The top of a QuarterScore game page, with the Share, Present and Your Games buttons next to the board title." width="1400" height="138" class="w-full h-auto rounded-lg border border-slate-300 dark:border-slate-600">
@@ -645,11 +645,11 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
         heading: 'Game-day checklist',
         paragraphs: [],
         bullets: [
-          'The day before: press Present and check that the TV shows it.',
+          'The day before: press **Present** and check that the TV shows it.',
           'Link the board to the live game so the score and clock appear.',
           'Put the TV where everyone can see the QR code.',
-          'At kickoff: press Present again and point out the QR code.',
-          'After the game: the Q4 tile says Final once the game is over. Read the winners from the screen.'
+          'At kickoff: press **Present** again and point out the QR code.',
+          'After the game: the Q4 tile says **Final** once the game is over. Read the winners from the screen.'
         ]
       }
     ],
