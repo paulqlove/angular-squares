@@ -79,7 +79,7 @@ import {
 
             <ul class="mt-5 flex flex-wrap gap-2" aria-label="Included">
               <li class="qs-badge qs-badge-ok">Live scores</li>
-              <li class="qs-badge qs-badge-ok">Unlimited boards</li>
+              <li class="qs-badge qs-badge-ok">Up to 25 active boards</li>
               <li class="qs-badge qs-badge-ok">Custom splits</li>
             </ul>
           }
