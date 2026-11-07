@@ -41,6 +41,8 @@ import {
 import { GameStatusComponent } from './components/game-status/game-status.component';
 import { AppHeaderComponent } from '../../components/ui/app-header/app-header.component';
 import { EditGameDialogComponent, EditGameValues } from './components/edit-game-dialog/edit-game-dialog.component';
+import { OpenBoardsListComponent } from './components/open-boards-list/open-boards-list.component';
+import type { OpenBoardRow } from '../../core/utils/open-boards';
 import { ShrinkBoardDialogComponent } from './components/shrink-board-dialog/shrink-board-dialog.component';
 import { smallerBoardSizes } from '../../core/utils/shuffle-squares';
 import { PaymentDialogComponent } from './components/payment-dialog/payment-dialog.component';
@@ -64,6 +66,7 @@ import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.co
     AppHeaderComponent,
     EditGameDialogComponent,
     ShrinkBoardDialogComponent,
+    OpenBoardsListComponent,
     PaymentDialogComponent,
     ProbabilityHeatmapComponent,
     BoxScoreComponent,
@@ -240,6 +243,9 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   // UI state
   showSettings = signal(false);
   showShrinkSuggestion = signal(false);
+  openBoards = signal<OpenBoardRow[]>([]);
+  showInOpenBoards = false;
+  private openBoardsFor = '';
   isLoading = signal(true);
   gameNotFound = signal(false);
   showShareModal = signal(false);
@@ -375,7 +381,11 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           this.currentPrice = data.pricePerSquare || 10;
           this.isRandomized = data.isRandomized || false;
           this.isLocked = data.isLocked || false;
-          if (this.fullBoardNotice()) this.gameService.recordBoardStatOnce(this.gameId, 'fullBoardViews');
+          this.showInOpenBoards = !!data.showInOpenBoards;
+          if (this.fullBoardNotice()) {
+            this.gameService.recordBoardStatOnce(this.gameId, 'fullBoardViews');
+            this.loadOpenBoards();
+          }
           this.homeTeam = data.homeTeam || '';
           this.awayTeam = data.awayTeam || '';
           this.hostNote = data.hostNote || '';
@@ -1087,6 +1097,25 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     return this.squaresPicked() >= rows * cols && !this.isGameOwner() && !this.isManager() && !holdsSquare;
   }
 
+  /** Whether this board can be shown to players on the host's full boards. */
+  canShowInOpenBoards(): boolean {
+    const { rows, cols } = getBoardDimensions(this.boardSize);
+    const eligible = !this.isLocked && !this.isRandomized && this.squaresPicked() < rows * cols;
+    return this.isGameOwner() && this.planService.features().activeBoards > 1 && (this.showInOpenBoards || eligible);
+  }
+
+  trackOtherBoardJoin(): void {
+    this.gameService.recordBoardStatOnce(this.gameId, 'otherBoardJoins');
+  }
+
+  private async loadOpenBoards(): Promise<void> {
+    if (this.openBoardsFor === this.gameId) return;
+    this.openBoardsFor = this.gameId;
+    const rows = await this.gameService.getOpenBoards(this.gameOwnerId, this.gameId);
+    this.openBoards.set(rows);
+    if (rows.length) this.gameService.recordBoardStatOnce(this.gameId, 'fullBoardViewsWithOpenBoards');
+  }
+
   trackStartYourOwn(): void {
     this.gameService.recordBoardStatOnce(this.gameId, 'startYourOwnClicks');
   }
@@ -1105,6 +1134,10 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     const split = canSplit ? values.quarterSplit : this.quarterSplit;
     try {
       if (values.newBoardSize) await this.gameService.resizeBoard(this.gameId, values.newBoardSize);
+      if (values.showInOpenBoards !== this.showInOpenBoards) {
+        await this.gameService.setShowInOpenBoards(this.gameId, this.gameOwnerId, values.showInOpenBoards);
+        this.showInOpenBoards = values.showInOpenBoards;
+      }
       await this.gameService.updateGame(this.gameId, {
         homeTeam, awayTeam, hostNote, pricePerSquare: price,
         emptyQuarterRule: values.emptyQuarterRule,

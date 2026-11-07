@@ -1,5 +1,6 @@
 import { Component, OnInit, signal, computed, inject, effect, HostListener, ChangeDetectionStrategy } from '@angular/core';
 
+import { ToggleComponent } from '../../components/ui/toggle/toggle.component';
 import { DropdownComponent } from '../../components/ui/dropdown/dropdown.component';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -53,7 +54,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked';
 
 @Component({
     selector: 'app-dashboard',
-    imports: [FormsModule, NgTemplateOutlet, DropdownComponent, CreateGameFormComponent, NgIconComponent, AppHeaderComponent, HeadroomDirective, HelpMenuComponent, ProfileMenuComponent, ShareDialogComponent, EmptyQuarterRuleComponent, UpgradePassDialogComponent],
+    imports: [FormsModule, NgTemplateOutlet, DropdownComponent, ToggleComponent, CreateGameFormComponent, NgIconComponent, AppHeaderComponent, HeadroomDirective, HelpMenuComponent, ProfileMenuComponent, ShareDialogComponent, EmptyQuarterRuleComponent, UpgradePassDialogComponent],
     providers: [
         provideIcons({
             heroPlus,
@@ -613,6 +614,20 @@ type GameStatusFilter = 'all' | 'open' | 'locked';
                 />
               </div>
 
+              <!-- Show in my open boards: only for hosts who can run several boards -->
+              @if (editingGame(); as og) {
+                @if (planService.features().activeBoards > 1 && (og.showInOpenBoards || (!og.isLocked && !editBoardRandomized() && og.squaresFilled < og.boardSize))) {
+                  <div class="flex items-start justify-between gap-4">
+                    <div class="min-w-0">
+                      <label class="block text-sm font-semibold text-label mb-1">Show in my open boards</label>
+                      <p class="text-xs text-muted">When one of your other boards is full, players see this board and can join it. Off by default. Anyone with the link can still open it.</p>
+                      <p class="mt-2 truncate rounded-xl border border-input bg-input px-3 py-2 font-mono text-xs text-default">{{ editGameName }} · Points per square: {{ editGamePrice }} · {{ og.squaresFilled }}/{{ og.boardSize }} taken</p>
+                    </div>
+                    <app-toggle [checked]="editShowInOpenBoards" (onChange)="editShowInOpenBoards = $event"></app-toggle>
+                  </div>
+                }
+              }
+
               <!-- Board size: only smaller, only while the picks fit and the numbers are not drawn -->
               @if (editingGame(); as eg) {
                 @if (eg.boardSize > 25) {
@@ -885,6 +900,7 @@ export class DashboardComponent implements OnInit {
   editGamePlayers = signal<{ name: string; uid: string }[]>([]);
   editBoardRandomized = signal(false);
   editNewSize = signal<BoardSize | null>(null);
+  editShowInOpenBoards = false;
   editSmallerSizes: BoardSize[] = [50, 25];
   managerSearchQuery = '';
   managerSearchResults = signal<{ name: string; uid: string }[]>([]);
@@ -1251,6 +1267,7 @@ export class DashboardComponent implements OnInit {
     this.editCustomAwayTeam = game.awayTeam || '';
     this.editNewSize.set(null);
     this.editBoardRandomized.set(false);
+    this.editShowInOpenBoards = !!game.showInOpenBoards;
     this.managerSearchQuery = '';
     this.managerSearchResults.set([]);
     this.selectedManagerIndex.set(-1);
@@ -1432,11 +1449,14 @@ export class DashboardComponent implements OnInit {
       }
       const newSize = this.editNewSize();
       if (newSize) await this.gameService.resizeBoard(game.id, newSize);
+      const uid = this.currentUser()?.uid;
+      if (uid && this.editShowInOpenBoards !== !!game.showInOpenBoards) await this.gameService.setShowInOpenBoards(game.id, uid, this.editShowInOpenBoards);
       await this.gameService.updateGame(game.id, updates);
       this.myGames.update(games =>
         games.map(g => g.id === game.id ? {
           ...g,
           ...(newSize ? { boardSize: newSize } : {}),
+          showInOpenBoards: this.editShowInOpenBoards,
           name: sanitizedName,
           pricePerSquare: sanitizedPrice,
           hostNote: sanitizedHostNote,

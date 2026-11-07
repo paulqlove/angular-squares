@@ -21,6 +21,7 @@ import { RolePreviewService } from './role-preview.service';
 import { DEFAULT_EMPTY_QUARTER_RULE, Entitlement, EmptyQuarterRule, NO_EXPIRY, PLANS, QuarterSplit, isActive, isEmptyQuarterRule } from '../plans';
 import { AuthService } from './auth.service';
 import { shuffleSquares, smallerBoardSizes } from '../utils/shuffle-squares';
+import { OpenBoardRow, openBoardRows } from '../utils/open-boards';
 import {
   BoardActivity,
   FREE_ACTIVE_BOARD_LIMIT,
@@ -87,6 +88,8 @@ export interface GameData {
   winners?: { [key: string]: string };
   playerColors?: { [key: string]: string };
   hostNote?: string;
+  /** The host lets players on one of their full boards see and join this one. */
+  showInOpenBoards?: boolean;
   paidPlayers?: string[];
   espnEventId?: string | null;
   espnSport?: SportType | null;
@@ -122,6 +125,7 @@ export interface GameListItem {
   espnEventId?: string;
   espnSport?: SportType;
   hostNote?: string;
+  showInOpenBoards?: boolean;
   emptyQuarterRule?: EmptyQuarterRule;
   confirmedCount: number;
 }
@@ -459,8 +463,30 @@ export class GameService {
     });
   }
 
+  /** The host turns "Show in my open boards" on or off for one board. */
+  async setShowInOpenBoards(gameId: string, ownerId: string, on: boolean): Promise<void> {
+    if (!this.isBrowser) return;
+    if (this.authService.blockPreviewWrite()) throw new Error('Preview only');
+    await update(ref(this.db), {
+      [`games/${gameId}/showInOpenBoards`]: on ? true : null,
+      [`openBoards/${ownerId}/${gameId}`]: on ? true : null
+    });
+  }
+
+  /** The same host's other boards a player on a full board can join. Empty on any error. */
+  async getOpenBoards(ownerId: string, excludeId: string): Promise<OpenBoardRow[]> {
+    if (!this.isBrowser || !ownerId) return [];
+    try {
+      const snap = await get(ref(this.db, `openBoards/${ownerId}`));
+      const ids = Object.keys(snap.val() || {}).filter(id => id !== excludeId).slice(0, 10);
+      return openBoardRows(await Promise.all(ids.map(id => this.getGame(id))), excludeId);
+    } catch {
+      return [];
+    }
+  }
+
   /** Counts one visitor's first full-board view, Start-your-own click or other-board join per board. Never throws. */
-  async recordBoardStatOnce(boardId: string, field: 'fullBoardViews' | 'startYourOwnClicks' | 'otherBoardJoins'): Promise<void> {
+  async recordBoardStatOnce(boardId: string, field: 'fullBoardViews' | 'fullBoardViewsWithOpenBoards' | 'startYourOwnClicks' | 'otherBoardJoins'): Promise<void> {
     if (!this.isBrowser) return;
     const key = `qs_stat_${field}_${boardId}`;
     try {
@@ -519,6 +545,7 @@ export class GameService {
           homeTeam: rawData.homeTeam || '',
           awayTeam: rawData.awayTeam || '',
           hostNote: rawData.hostNote || '',
+          showInOpenBoards: !!rawData.showInOpenBoards,
           paidPlayers: rawData.paidPlayers || [],
           espnEventId: rawData.espnEventId || undefined,
           espnSport: rawData.espnSport || undefined,
@@ -674,6 +701,7 @@ export class GameService {
         homeTeam: rawData.homeTeam || '',
         awayTeam: rawData.awayTeam || '',
         hostNote: rawData.hostNote || '',
+        showInOpenBoards: !!rawData.showInOpenBoards,
         paidPlayers: rawData.paidPlayers || [],
         espnEventId: rawData.espnEventId || undefined,
         espnSport: rawData.espnSport || undefined,
@@ -749,6 +777,7 @@ export class GameService {
           espnEventId: game.espnEventId || undefined,
           espnSport: game.espnSport || undefined,
           hostNote: game.hostNote,
+          showInOpenBoards: game.showInOpenBoards,
           emptyQuarterRule: isEmptyQuarterRule(game.emptyQuarterRule) ? game.emptyQuarterRule : undefined,
           confirmedCount
         });
@@ -766,6 +795,7 @@ export class GameService {
     const updates: Record<string, unknown> = {
       [`games/${gameId}`]: null,
       [`users/${ownerId}/games/${gameId}`]: null,
+      [`openBoards/${ownerId}/${gameId}`]: null,
     };
     const espnId = espnSnap.exists() ? espnSnap.val() : null;
     if (typeof espnId === 'string' && this.isLinkableEspnId(espnId)) {

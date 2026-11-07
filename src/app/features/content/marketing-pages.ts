@@ -684,7 +684,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       {
         heading: 'Your board',
         paragraphs: [
-          'Do not use the site for anything unlawful, and do not put someone else’s personal information on a square without a reason they would expect. Game links are secrets. Anyone with the link can view that board.',
+          'Do not use the site for anything unlawful, and do not put someone else’s personal information on a square without a reason they would expect. Game links are secrets by default. Anyone with the link can view that board. If a host turns on “Show in my open boards”, that board’s name, teams, points per square and open-square count can be seen by anyone who opens another full board from the same host.',
           'We may remove a board that breaks these terms or that we are required to remove. You may stop using the site at any time.'
         ]
       }
@@ -697,7 +697,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     cta: {
       path: '/',
       label: 'Back to the homepage',
-      note: 'Last updated November 1, 2026.'
+      note: 'Last updated November 7, 2026.'
     }
   },
   privacy: {
@@ -714,7 +714,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
         heading: 'What is stored',
         paragraphs: [
           'If you sign in, the account provider gives us an identifier and, when you allow it, your name, email, and photo. A guest can save a display name in a cookie on that device so the board can show it. You can clear that cookie in your browser.',
-          'Boards store the game name, team names, the names typed onto squares, scores, and settings such as whether the board is locked. That information is visible to anyone with the game link.'
+          'Boards store the game name, team names, the names typed onto squares, scores, and settings such as whether the board is locked. That information is visible to anyone with the game link. A host can also choose to show a board in their open boards, which shows its name, teams, points per square and open-square count to people on that host’s other full boards.'
         ]
       },
       {
@@ -738,7 +738,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     cta: {
       path: '/',
       label: 'Back to the homepage',
-      note: 'Last updated November 1, 2026.'
+      note: 'Last updated November 7, 2026.'
     }
   },
   contact: {
