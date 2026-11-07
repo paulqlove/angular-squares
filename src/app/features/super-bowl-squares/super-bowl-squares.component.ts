@@ -802,6 +802,11 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   async randomizeNumbers(): Promise<void> {
     const { rows, cols } = getBoardDimensions(this.boardSize);
 
+    if (!this.isRandomized && !this.isLocked) {
+      this.toastService.warning('Lock the board before drawing numbers.');
+      return;
+    }
+
     if (this.isRandomized) {
       // Stop any running animation first
       this.stopAnimation();

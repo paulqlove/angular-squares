@@ -53,7 +53,7 @@
             <ng-icon [name]="isLocked ? 'heroLockClosed' : 'heroLockOpen'" class="text-base"></ng-icon>
             <span class="sm:hidden">{{ isLocked ? 'Unlock' : 'Lock' }}</span><span class="hidden sm:inline">{{ isLocked ? 'Unlock' : 'Lock board' }}</span>
           </button>
-          <button type="button" (click)="randomizeNumbers()" [disabled]="isLocked && isRandomized" class="qs-btn host-btn" [class.qs-btn-primary]="isLocked && !isRandomized" [class.qs-btn-secondary]="!(isLocked && !isRandomized)" [title]="isLocked && isRandomized ? 'Unlock the board to clear numbers' : ''">
+          <button type="button" (click)="randomizeNumbers()" [disabled]="isLocked === isRandomized" class="qs-btn host-btn" [class.qs-btn-primary]="isLocked && !isRandomized" [class.qs-btn-secondary]="!(isLocked && !isRandomized)" [title]="isLocked && isRandomized ? 'Unlock the board to clear numbers' : !isLocked && !isRandomized ? 'Lock the board before drawing numbers' : ''">
             <ng-icon [name]="isRandomized ? 'heroArrowPath' : 'heroSparkles'" class="text-base"></ng-icon>
             <span class="sm:hidden">{{ isRandomized ? 'Clear' : 'Draw' }}</span><span class="hidden sm:inline">{{ isRandomized ? 'Clear numbers' : 'Draw numbers' }}</span>
           </button>
