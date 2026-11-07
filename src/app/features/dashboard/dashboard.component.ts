@@ -285,13 +285,13 @@ type GameStatusFilter = 'all' | 'open' | 'locked';
 
             @if (!isLoadingGames() && myGames().length >= 5) {
               <div class="mt-4 flex flex-wrap items-center gap-2">
-                <input type="search" [value]="gameSearch()" (input)="gameSearch.set($any($event.target).value)" placeholder="Search by name or team" aria-label="Search your boards" class="qs-input min-w-0 flex-1 basis-48" />
-                <app-dropdown [options]="sortOptions" [value]="gameSort()" (valueChange)="gameSort.set($any($event))" ariaLabel="Sort boards"></app-dropdown>
+                <input type="search" [value]="gameSearch()" (input)="gameSearch.set($any($event.target).value)" placeholder="Search by name or team" aria-label="Search your boards" class="qs-input min-h-9 min-w-0 flex-1 basis-48 py-0" />
                 <div class="flex gap-1.5" role="group" aria-label="Filter by status">
                   @for (f of statusFilters; track f.value) {
                     <button type="button" class="qs-tab min-h-9 px-3" [attr.aria-pressed]="gameStatus() === f.value" (click)="gameStatus.set(f.value)">{{ f.label }}</button>
                   }
                 </div>
+                <app-dropdown class="ml-auto" [options]="sortOptions" [value]="gameSort()" (valueChange)="gameSort.set($any($event))" prefix="Sort: " ariaLabel="Sort boards"></app-dropdown>
               </div>
             }
 
@@ -323,7 +323,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked';
                   <button type="button" class="qs-btn qs-btn-secondary mt-4" (click)="clearGameFilters()">Clear search and filters</button>
                 </div>
               } @else {
-                <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                <div class="mt-5 grid grid-cols-1 gap-x-4 gap-y-0 md:grid-cols-2 xl:grid-cols-3">
                   @for (game of visibleMyGames(); track game.id) {
                     <ng-container *ngTemplateOutlet="gameCard; context: { $implicit: game, joined: false }"></ng-container>
                   }
@@ -340,7 +340,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked';
               <h3 id="joined-heading" class="qs-eyebrow qs-eyebrow-bar">{{ canCreateGame() ? '02' : '01' }} / Joined</h3>
               <span class="qs-label text-qs-muted">{{ joinedGames().length }} {{ joinedGames().length === 1 ? 'game' : 'games' }}</span>
             </div>
-            <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div class="mt-5 grid grid-cols-1 gap-x-4 gap-y-0 md:grid-cols-2 xl:grid-cols-3">
               @for (game of joinedGames(); track game.id) {
                 <ng-container *ngTemplateOutlet="gameCard; context: { $implicit: game, joined: true }"></ng-container>
               }
@@ -350,7 +350,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked';
       </main>
 
       <ng-template #gameCard let-game let-joined="joined">
-        <article class="qs-card flex flex-col p-5 transition-colors hover:border-qs-line-strong">
+        <article class="qs-card row-span-4 mb-4 grid p-5 transition-colors [grid-template-rows:subgrid] [row-gap:0] hover:border-qs-line-strong">
           <div class="flex items-center justify-between gap-3">
             <span class="qs-badge qs-badge-code font-mono">{{ game.id }}</span>
             @if (joined) {
@@ -365,15 +365,17 @@ type GameStatusFilter = 'all' | 'open' | 'locked';
             }
           </div>
 
-          <h4 class="mt-4 truncate text-xl font-semibold tracking-tight text-qs-ink">{{ game.name }}</h4>
-          <p class="mt-1 truncate text-sm text-qs-muted">
-            @if (game.homeTeam && game.awayTeam) {
-              {{ game.awayTeam }} vs {{ game.homeTeam }}
-            } @else {
-              Teams not set
-            }
-            · Created {{ formatDate(game.createdAt) }}
-          </p>
+          <div class="mt-4 min-w-0">
+            <h4 class="truncate text-xl font-semibold tracking-tight text-qs-ink">{{ game.name }}</h4>
+            <p class="mt-1 truncate text-sm text-qs-muted">
+              @if (game.homeTeam && game.awayTeam) {
+                {{ game.awayTeam }} vs {{ game.homeTeam }}
+              } @else {
+                Teams not set
+              }
+              · Created {{ formatDate(game.createdAt) }}
+            </p>
+          </div>
 
           <div class="mt-5 flex items-center gap-5">
             <div [class]="'grid w-[68px] shrink-0 gap-px rounded-[3px] bg-qs-line p-px ' + getMiniGridClass(game.boardSize)" aria-hidden="true">
