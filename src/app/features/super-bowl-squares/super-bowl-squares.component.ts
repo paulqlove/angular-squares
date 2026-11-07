@@ -1134,10 +1134,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     const split = canSplit ? values.quarterSplit : this.quarterSplit;
     try {
       if (values.newBoardSize) await this.gameService.resizeBoard(this.gameId, values.newBoardSize);
-      if (values.showInOpenBoards !== this.showInOpenBoards) {
-        await this.gameService.setShowInOpenBoards(this.gameId, this.gameOwnerId, values.showInOpenBoards);
-        this.showInOpenBoards = values.showInOpenBoards;
-      }
       await this.gameService.updateGame(this.gameId, {
         homeTeam, awayTeam, hostNote, pricePerSquare: price,
         emptyQuarterRule: values.emptyQuarterRule,
@@ -1151,6 +1147,15 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       this.hostNote = hostNote;
       this.currentPrice = price;
       this.calculatePlayerStats();
+      if (values.showInOpenBoards !== this.showInOpenBoards) {
+        try {
+          await this.gameService.setShowInOpenBoards(this.gameId, this.gameOwnerId, values.showInOpenBoards);
+          this.showInOpenBoards = values.showInOpenBoards;
+        } catch {
+          this.toastService.warning('Saved, but Show in my open boards could not be changed. Try again in a moment.');
+          return;
+        }
+      }
       this.toastService.success('Game saved');
     } catch {
       this.toastService.error('Failed to save game. Please try again.');

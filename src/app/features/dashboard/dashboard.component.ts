@@ -1457,14 +1457,23 @@ export class DashboardComponent implements OnInit {
       }
       const newSize = this.editNewSize();
       if (newSize) await this.gameService.resizeBoard(game.id, newSize);
-      const uid = this.currentUser()?.uid;
-      if (uid && this.editShowInOpenBoards !== !!game.showInOpenBoards) await this.gameService.setShowInOpenBoards(game.id, uid, this.editShowInOpenBoards);
       await this.gameService.updateGame(game.id, updates);
+      // The open-boards switch saves on its own so a failure here never loses the other edits.
+      let showApplied = !!game.showInOpenBoards;
+      const uid = this.currentUser()?.uid;
+      if (uid && this.editShowInOpenBoards !== showApplied) {
+        try {
+          await this.gameService.setShowInOpenBoards(game.id, uid, this.editShowInOpenBoards);
+          showApplied = this.editShowInOpenBoards;
+        } catch {
+          this.toastService.warning('Saved, but Show in my open boards could not be changed. Try again in a moment.');
+        }
+      }
       this.myGames.update(games =>
         games.map(g => g.id === game.id ? {
           ...g,
           ...(newSize ? { boardSize: newSize } : {}),
-          showInOpenBoards: this.editShowInOpenBoards,
+          showInOpenBoards: showApplied,
           name: sanitizedName,
           pricePerSquare: sanitizedPrice,
           hostNote: sanitizedHostNote,
