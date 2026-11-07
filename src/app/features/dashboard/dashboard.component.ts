@@ -1,5 +1,6 @@
 import { Component, OnInit, signal, computed, inject, effect, HostListener, ChangeDetectionStrategy } from '@angular/core';
 
+import { miniGridCells, miniGridClass } from '../../core/utils/mini-grid';
 import { ToggleComponent } from '../../components/ui/toggle/toggle.component';
 import { DropdownComponent } from '../../components/ui/dropdown/dropdown.component';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -864,14 +865,12 @@ export class DashboardComponent implements OnInit {
 
   /** Get cells array for mini board preview based on board size */
   getBoardCells(size: BoardSize): number[] {
-    return Array.from({ length: size }, (_, i) => i);
+    return miniGridCells(size);
   }
 
   /** Get CSS class for mini board grid based on board size */
   getMiniGridClass(size: BoardSize): string {
-    if (size === 25) return 'grid-cols-5';
-    if (size === 50) return 'grid-cols-10';
-    return 'grid-cols-10';
+    return miniGridClass(size);
   }
   isLoadingGames = signal(true);
   isCreating = signal(false);
