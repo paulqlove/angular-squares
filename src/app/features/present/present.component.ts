@@ -220,6 +220,15 @@ export class PresentComponent implements OnInit, OnDestroy {
     this.startTimer();
   }
 
+  /** The clock button: show the interval buttons, or say why rotation is not available. */
+  protected toggleTimer(): void {
+    if (this.boardCount() < 2) {
+      this.toast.warning('Rotation needs two or more boards.');
+      return;
+    }
+    this.showTimer.set(!this.showTimer());
+  }
+
   /** Stop rotating and stay on the board that is showing. */
   protected stopRotation(): void {
     this.stopTimer();
