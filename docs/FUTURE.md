@@ -4,7 +4,9 @@ Product roadmap and monetization strategy for QuarterScore.
 
 ## Plans
 
-Source of truth: `src/app/core/plans.ts` (prices, lengths, limits). Research and reasoning: Drive doc "QuarterScore Game Formats and Paid Plans Research (Nov 2, 2026)".
+**Current pricing (decided Nov 5, 2026): Free plus one Season Pass at $5.99 one time.** There is no Week Pass and no $29.99 tier. See "Free-tier design" and "The Season Pass" below. The table in this paragraph and `src/app/core/plans.ts` are old scaffolding that stays only until checkout is built; do not quote their prices. Research and reasoning: Drive doc "QuarterScore Game Formats and Paid Plans Research (Nov 2, 2026)".
+
+Old scaffolding (superseded, ignore for pricing):
 
 | | Free | Week Pass | Season Pass |
 |---|---|---|---|

@@ -24,6 +24,7 @@ export interface PlanFeatures {
 
 export const DAY_MS = 86_400_000;
 
+// SUPERSEDED scaffolding: the approved plan is Free plus ONE Season Pass at $5.99 one time (docs/FUTURE.md, decided Nov 5 2026). The Week Pass and the $29.99 price below go away when checkout is built. Do not quote these prices.
 export const PLANS: Record<PlanId, PlanFeatures> = {
   free: { label: 'Free', priceUsd: 0, days: 0, activeBoards: 1, customSplits: false, adFree: false, liveScoring: false },
   week: { label: 'Week Pass', priceUsd: 5.99, days: 7, activeBoards: 5, customSplits: true, adFree: true, liveScoring: true },
