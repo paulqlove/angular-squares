@@ -84,7 +84,7 @@
   box-shadow: inset 0 0 0 5px #fff;
 }
 
-/* A live game: the whole cell takes a soft emerald wash that fades in and out for about 20 seconds (7 cycles), then rests.
+/* A live game: the whole cell takes a soft emerald wash that fades in and out slowly for about 22 seconds (5 cycles of 4.5s), then rests.
    The wash sits behind the player's name (negative z-index inside the cell's own stacking context), so the text never
    changes, and only its opacity animates. Reduced motion collapses it to the still ring. */
 .square-live::before {
@@ -95,10 +95,10 @@
   pointer-events: none;
   background: var(--qs-accent);
   opacity: 0;
-  animation: qs-live-wash 2.8s ease-in-out 7 both;
+  animation: qs-live-wash 4.5s ease-in-out 5 both;
 }
 
 @keyframes qs-live-wash {
   0%, 100% { opacity: 0; }
-  50% { opacity: 0.32; }
+  50% { opacity: 0.2; }
 }
