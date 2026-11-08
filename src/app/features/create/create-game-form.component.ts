@@ -44,10 +44,10 @@ export interface CreateGameSubmit {
     <p class="sr-only" aria-live="polite">Step {{ step() }} of {{ stepTitles.length }}: {{ stepTitles[step() - 1] }}</p>
   </div>
 
-  <div class="min-h-0 flex-1 overflow-y-auto px-6 py-4 [scrollbar-gutter:stable] sm:py-5">
+  <div class="min-h-0 flex-1 overflow-y-auto px-6 pb-4 pt-3 [scrollbar-gutter:stable] sm:pb-5 sm:pt-4">
     @switch (step()) {
       @case (1) {
-        <div class="space-y-4 sm:space-y-6" animate.enter="qs-tab-in">
+        <div class="flex flex-col gap-4 sm:gap-5" animate.enter="qs-tab-in">
           <h3 id="create-step-heading" tabindex="-1" class="sr-only">Your game</h3>
           <section>
   <h4 class="qs-label text-qs-ink">Sport</h4>
@@ -152,7 +152,7 @@ export interface CreateGameSubmit {
         </div>
       }
       @case (2) {
-        <div class="space-y-4 sm:space-y-6" animate.enter="qs-tab-in">
+        <div class="flex flex-col gap-4 sm:gap-5" animate.enter="qs-tab-in">
           <h3 id="create-step-heading" tabindex="-1" class="sr-only">Board</h3>
           <section>
   <h4 class="qs-label text-qs-ink">Board size</h4>
@@ -207,7 +207,7 @@ export interface CreateGameSubmit {
         </div>
       }
       @case (3) {
-        <div class="space-y-4 sm:space-y-6" animate.enter="qs-tab-in">
+        <div class="flex flex-col gap-4 sm:gap-5" animate.enter="qs-tab-in">
           <h3 id="create-step-heading" tabindex="-1" class="sr-only">Scoring</h3>
           <p class="qs-label text-qs-muted">{{ summaryLine() }}</p>
           <section>
@@ -244,7 +244,7 @@ export interface CreateGameSubmit {
         </div>
       }
       @case (4) {
-        <div class="space-y-4 sm:space-y-6" animate.enter="qs-tab-in">
+        <div class="flex flex-col gap-4 sm:gap-5" animate.enter="qs-tab-in">
           <h3 id="create-step-heading" tabindex="-1" class="sr-only">Details</h3>
           <p class="qs-label text-qs-muted">{{ summaryLine() }}</p>
           <section>
