@@ -22,6 +22,7 @@ Direction: Free plus one $5.99 pass. The price stays $5.99; the wording and term
 | Probability heat map | Yes, all accounts | Yes |
 | Custom quarter split | No | Yes |
 | Auto-lock and draw (5 min after kickoff, shrinks a half-empty board) | No | Yes (added Nov 8, 2026) |
+| Open boards list (More tab: a host's other open boards) | No | Yes (added Nov 8, 2026) |
 | Ads | None | None |
 
 Free hosts keep one board (Paul, Nov 5, 2026): once its game has ended, New game opens a dialog to reset the old game (clears it and opens its settings to pick the next game) or delete it, with an email box for anyone who wants more active boards (saved with source `ended_board_dialog`, kept out of the Jan 15 read). Paid plans with room and admins are unaffected. This supersedes the weekly-host reading of 'active' for free accounts; the 7-day unlinked rule only matters for paid hosts.
