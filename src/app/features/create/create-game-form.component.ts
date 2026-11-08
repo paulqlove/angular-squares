@@ -475,11 +475,9 @@ export class CreateGameFormComponent implements OnInit {
     return this.espnGames().find(g => g.id === this.selectedEspnGameId);
   }
 
-  /** Picking a game moves on to the next step after a beat, so the choice is seen first. A pre-selected game (team page, saved entries) stays put. */
-  selectEspnGame(gameId: string, advance = true): void {
+  selectEspnGame(gameId: string): void {
     this.selectedEspnGameId = gameId;
     this.gameListOpen = false;
-    if (advance) setTimeout(() => { if (this.step() === 1 && this.selectedEspnGameId === gameId) this.goTo(2); }, 220);
   }
 
   selectPrice(price: number): void {
@@ -569,7 +567,7 @@ export class CreateGameFormComponent implements OnInit {
       const game = JSON.parse(raw) as EspnGame;
       if (this.selectedSport !== 'nfl') return;
       if (!this.espnGames().some(g => g.id === game.id)) this.espnGames.update(list => [game, ...list]);
-      this.selectEspnGame(game.id, false);
+      this.selectEspnGame(game.id);
     } catch {
       // Ignore a malformed entry
     }
