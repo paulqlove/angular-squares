@@ -148,25 +148,6 @@ export interface CreateGameSubmit {
       </div>
     </div>
   }
-  @if (selectedSport !== 'custom' && selectedEspnGame()) {
-    @if (autoManageAllowed) {
-      <div class="mt-5">
-        <div class="flex items-start justify-between gap-4">
-          <div class="min-w-0">
-            <p class="qs-label mb-1.5 text-qs-muted">Auto-lock and draw</p>
-            <p class="text-xs text-qs-muted">5 minutes after kickoff, we lock the board and draw the numbers for you.</p>
-            @if (newGameAutoManage && autoRunText()) {
-              <p class="mt-2 truncate rounded-inner border border-qs-line bg-qs-panel-2 px-3 py-2 font-mono text-xs text-qs-ink">Locks {{ autoRunText() }}</p>
-            }
-              <details class="mt-1 text-xs text-qs-muted"><summary class="inline-flex min-h-9 cursor-pointer items-center underline underline-offset-4">How it works</summary><p class="pb-1">If the board is not full it first moves to 50 or 25 squares (squares are shuffled, each player keeps their count). Players can pick until then. Cancel any time before it runs.</p></details>
-          </div>
-          <app-toggle [checked]="newGameAutoManage" (onChange)="newGameAutoManage = $event"></app-toggle>
-        </div>
-      </div>
-    } @else {
-      <p class="mt-5 text-sm text-qs-muted"><span class="qs-label mr-2 text-qs-ink">Auto-lock and draw</span>Comes with the Season Pass.</p>
-    }
-  }
 </section>
         </div>
       }
@@ -307,6 +288,27 @@ export interface CreateGameSubmit {
         </div>
       }
 
+          <section>
+  @if (selectedSport !== 'custom' && selectedEspnGame()) {
+    @if (autoManageAllowed) {
+      <div class="mt-5">
+        <div class="flex items-start justify-between gap-4">
+          <div class="min-w-0">
+            <p class="qs-label mb-1.5 text-qs-muted">Auto-lock and draw</p>
+            <p class="text-xs text-qs-muted">5 minutes after kickoff, we lock the board and draw the numbers for you.</p>
+            @if (newGameAutoManage && autoRunText()) {
+              <p class="mt-2 truncate rounded-inner border border-qs-line bg-qs-panel-2 px-3 py-2 font-mono text-xs text-qs-ink">Locks {{ autoRunText() }}</p>
+            }
+              <details class="mt-1 text-xs text-qs-muted"><summary class="inline-flex min-h-9 cursor-pointer items-center underline underline-offset-4">How it works</summary><p class="pb-1">If the board is not full it first moves to 50 or 25 squares (squares are shuffled, each player keeps their count). Players can pick until then. Cancel any time before it runs.</p></details>
+          </div>
+          <app-toggle [checked]="newGameAutoManage" (onChange)="newGameAutoManage = $event"></app-toggle>
+        </div>
+      </div>
+    } @else {
+      <p class="mt-5 text-sm text-qs-muted"><span class="qs-label mr-2 text-qs-ink">Auto-lock and draw</span>Comes with the Season Pass.</p>
+    }
+  }
+          </section>
         </div>
       }
     }
@@ -473,9 +475,11 @@ export class CreateGameFormComponent implements OnInit {
     return this.espnGames().find(g => g.id === this.selectedEspnGameId);
   }
 
-  selectEspnGame(gameId: string): void {
+  /** Picking a game moves on to the next step after a beat, so the choice is seen first. A pre-selected game (team page, saved entries) stays put. */
+  selectEspnGame(gameId: string, advance = true): void {
     this.selectedEspnGameId = gameId;
     this.gameListOpen = false;
+    if (advance) setTimeout(() => { if (this.step() === 1 && this.selectedEspnGameId === gameId) this.goTo(2); }, 220);
   }
 
   selectPrice(price: number): void {
@@ -565,7 +569,7 @@ export class CreateGameFormComponent implements OnInit {
       const game = JSON.parse(raw) as EspnGame;
       if (this.selectedSport !== 'nfl') return;
       if (!this.espnGames().some(g => g.id === game.id)) this.espnGames.update(list => [game, ...list]);
-      this.selectEspnGame(game.id);
+      this.selectEspnGame(game.id, false);
     } catch {
       // Ignore a malformed entry
     }
