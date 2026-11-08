@@ -1219,7 +1219,8 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       }
       if (this.canAutoManage() && values.autoManage !== !!this.autoManage) {
         try {
-          await this.gameService.setAutoManage(this.gameId, values.autoManage ? { enabled: true, resize: true } : null);
+          const date = this.linkedEspnGame()?.date;
+          await this.gameService.setAutoManage(this.gameId, values.autoManage ? { enabled: true, resize: true } : null, date ? Date.parse(date) : undefined);
           this.autoManage = values.autoManage ? { enabled: true, resize: true } : undefined;
           this.autoManageResult = undefined;
         } catch {

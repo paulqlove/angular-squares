@@ -1169,7 +1169,7 @@ export class DashboardComponent implements OnInit {
       }
       if (values.autoManage && this.planService.features().autoManage) {
         try {
-          await this.gameService.setAutoManage(gameId, { enabled: true, resize: true });
+          await this.gameService.setAutoManage(gameId, { enabled: true, resize: true }, values.kickoffAt);
         } catch {
           this.toastService.warning('Board created, but Auto-manage could not be turned on. Try again in Edit.');
         }
@@ -1481,10 +1481,11 @@ export class DashboardComponent implements OnInit {
       }
       let autoApplied = game.autoManage;
       const wantAuto = this.planService.features().autoManage && !!this.editEspnGameId && this.editAutoManage;
-      if (!!wantAuto !== !!game.autoManage) {
+      if (!!wantAuto !== !!game.autoManage || (wantAuto && espnChanged)) {
         try {
           autoApplied = wantAuto ? { enabled: true, resize: true } : undefined;
-          await this.gameService.setAutoManage(game.id, autoApplied ?? null);
+          const picked = this.editEspnGames().find(g => g.id === this.editEspnGameId)?.date;
+          await this.gameService.setAutoManage(game.id, autoApplied ?? null, picked ? Date.parse(picked) : undefined);
         } catch {
           autoApplied = game.autoManage;
           this.toastService.warning('Saved, but auto-manage could not be changed. Try again in a moment.');

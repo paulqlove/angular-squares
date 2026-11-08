@@ -16,7 +16,7 @@ export interface CreateGameDraft {
   customHome: string;
   customPrice: number | null;
   emptyRule: EmptyQuarterRule;
-  espnGame: { awayTeam: string; homeTeam: string; id: string } | null;
+  espnGame: { awayTeam: string; homeTeam: string; id: string; kickoffAt?: number } | null;
   hostNote: string;
   manager: string;
   name: string;
@@ -34,6 +34,8 @@ export interface CreateGameValues {
   emptyQuarterRule: EmptyQuarterRule;
   espnEventId?: string;
   espnSport?: SportType;
+  /** Kickoff of the linked game, in ms; Auto-manage runs 15 minutes before it. */
+  kickoffAt?: number;
   homeTeam?: string;
   hostNote?: string;
   manager?: string;
@@ -113,6 +115,7 @@ export function buildCreateGameValues(draft: CreateGameDraft, sanitizer: Sanitiz
       emptyQuarterRule: draft.emptyRule,
       espnEventId: linked,
       espnSport: linked && draft.sport !== 'custom' ? draft.sport : undefined,
+      kickoffAt: linked ? draft.espnGame?.kickoffAt : undefined,
       homeTeam,
       hostNote: hostNote || undefined,
       manager: draft.manager.trim() || undefined,

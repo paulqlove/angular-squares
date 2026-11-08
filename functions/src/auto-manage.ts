@@ -1,7 +1,7 @@
-import { ParsedEspnGame } from "./scoring";
-
-/** The board locks and draws this long before kickoff. */
+/** The board locks and draws this long before kickoff. The app saves kickoff minus this as runAt. */
 export const AUTO_MANAGE_LEAD_MS = 15 * 60 * 1000;
+/** Past runAt by this much (a long outage), the run is skipped instead of locking a game in progress. */
+export const AUTO_MANAGE_GRACE_MS = 25 * 60 * 1000;
 
 export type BoardSize = 25 | 50 | 100;
 
@@ -9,6 +9,8 @@ export interface AutoManageSettings {
   enabled: boolean;
   /** Also shrink a half-empty board (100 to 50 or 25, 50 to 25) before drawing. */
   resize: boolean;
+  /** When to run, in ms: kickoff minus the lead, saved by the app from the game the host picked. */
+  runAt: number;
 }
 
 export interface AutoManageResult {
@@ -71,8 +73,9 @@ export function readSettings(raw: Record<string, unknown>): AutoManageSettings |
   const value = raw["autoManage"];
   if (!value || typeof value !== "object") return null;
   const settings = value as Record<string, unknown>;
-  if (settings["enabled"] !== true) return null;
-  return { enabled: true, resize: settings["resize"] === true };
+  const runAt = settings["runAt"];
+  if (settings["enabled"] !== true || typeof runAt !== "number" || !Number.isFinite(runAt)) return null;
+  return { enabled: true, resize: settings["resize"] === true, runAt };
 }
 
 function squaresOf(raw: Record<string, unknown>): Record<string, string> {
@@ -85,22 +88,20 @@ function squaresOf(raw: Record<string, unknown>): Record<string, string> {
 
 /**
  * Database updates for one board, or null when it is not time (or nothing to do).
+ * The time comes from the board itself (autoManage.runAt), so no sports feed is needed.
  * Runs once: it always ends by writing autoManageResult, and a board that already
  * has one is left alone. The host cancels by switching autoManage off.
  */
 export function planAutoManage(
   boardId: string,
   raw: Record<string, unknown>,
-  game: ParsedEspnGame,
   now: number,
   rng: () => number = Math.random
 ): Record<string, unknown> | null {
   const settings = readSettings(raw);
   if (!settings || raw["autoManageResult"]) return null;
 
-  const start = Date.parse(game.date);
-  if (!Number.isFinite(start)) return null;
-  if (game.status === "pre" && now < start - AUTO_MANAGE_LEAD_MS) return null;
+  if (now < settings.runAt) return null;
 
   const prefix = `games/${boardId}`;
   const finish = (result: AutoManageResult, extra: Record<string, unknown> = {}): Record<string, unknown> => ({
@@ -108,7 +109,7 @@ export function planAutoManage(
     [`${prefix}/autoManageResult`]: result,
   });
 
-  if (game.status !== "pre") {
+  if (now > settings.runAt + AUTO_MANAGE_GRACE_MS) {
     return finish({ state: "missed", at: now, note: "The game had already started, so nothing was changed." });
   }
 

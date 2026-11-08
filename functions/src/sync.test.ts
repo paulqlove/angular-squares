@@ -223,39 +223,3 @@ describe("syncLiveScores", () => {
     }), []);
   });
 });
-
-describe("auto-manage through the sync job", () => {
-  it("locks and draws a linked board shortly before kickoff, once", async () => {
-    const kickoff = Date.parse("2026-11-08T18:00:00Z");
-    let board: Record<string, unknown> = {
-      espnEventId: "555",
-      boardSize: 100,
-      squares: { "0-0": "Ann", "3-4": "Bo" },
-      isLocked: false,
-      isRandomized: false,
-      autoManage: { enabled: true, resize: true },
-    };
-    const writes: Record<string, unknown>[] = [];
-    const deps = {
-      readLiveGames: async () => ({ "555": { ABC123: { sport: "nfl" } } }),
-      readGame: async () => board,
-      update: async (updates: Record<string, unknown>) => {
-        writes.push(updates);
-        board = { ...board, autoManageResult: updates["games/ABC123/autoManageResult"] };
-      },
-      fetchScoreboard: async () => [{
-        id: "555", name: "SF at KC", homeTeam: "KC", awayTeam: "SF", homeScore: 0, awayScore: 0,
-        period: 0, clock: "", status: "pre" as const, completed: false, quarters: [], date: new Date(kickoff).toISOString(),
-      }],
-      now: () => kickoff - 10 * 60 * 1000,
-    };
-
-    const first = await syncLiveScores(deps);
-    assert.equal(first.autoManaged, 1);
-    assert.equal(writes[0]["games/ABC123/isLocked"], true);
-    assert.equal(writes[0]["games/ABC123/boardSize"], 25);
-
-    const second = await syncLiveScores(deps);
-    assert.equal(second.autoManaged, 0);
-  });
-});

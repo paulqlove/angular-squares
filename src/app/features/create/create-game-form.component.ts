@@ -529,7 +529,7 @@ export class CreateGameFormComponent implements OnInit {
       customHome: this.customHomeTeam,
       customPrice: this.customPrice,
       emptyRule: this.newGameEmptyRule,
-      espnGame: game ? { id: game.id, homeTeam: game.homeTeam, awayTeam: game.awayTeam } : null,
+      espnGame: game ? { id: game.id, homeTeam: game.homeTeam, awayTeam: game.awayTeam, kickoffAt: Number.isFinite(Date.parse(game.date)) ? Date.parse(game.date) : undefined } : null,
       hostNote: this.newGameHostNote,
       manager: this.newGamePaymentManager,
       name: this.newGameName,

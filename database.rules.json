@@ -124,6 +124,7 @@
           ".validate": "newData.hasChildren(['enabled']) && newData.child('enabled').val() == true && (!newData.child('resize').exists() || newData.child('resize').isBoolean()) && (root.child('admins').child(auth.uid).val() == true || (root.child('entitlements').child(auth.uid).child('expiresAt').isNumber() && root.child('entitlements').child(auth.uid).child('expiresAt').val() > now) || (auth.token.email_verified == true && root.child('giftedSeasonPass').child(auth.token.email.toLowerCase().replace('.', ',')).child('expiresAt').isNumber() && root.child('giftedSeasonPass').child(auth.token.email.toLowerCase().replace('.', ',')).child('expiresAt').val() > now))",
           "enabled": { ".validate": "newData.isBoolean()" },
           "resize": { ".validate": "newData.isBoolean()" },
+          "runAt": { ".validate": "newData.isNumber() && newData.val() > 0" },
           "$other": { ".validate": false }
         },
         "emptyQuarterRule": {
@@ -275,6 +276,14 @@
         "$other": {
           ".validate": false
         }
+      }
+    },
+    "autoManageQueue": {
+      ".read": false,
+      ".indexOn": [".value"],
+      "$boardId": {
+        ".write": "auth != null && $boardId.matches(/^[A-Za-z0-9]{6}$/) && (root.child('games').child($boardId).child('ownerId').val() == auth.uid || root.child('games').child($boardId).child('managerId').val() == auth.uid)",
+        ".validate": "newData.isNumber() && newData.val() > 0"
       }
     },
     "liveGames": {

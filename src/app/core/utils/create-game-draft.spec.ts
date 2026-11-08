@@ -102,6 +102,8 @@ describe('splitToTenths', () => {
     const game = { id: '401', homeTeam: 'KC', awayTeam: 'SF' };
     const linked = buildCreateGameValues({ ...emptyDraft(), name: 'Game', espnGame: game, autoManage: true }, sanitizer, true);
     expect(linked.ok && linked.values.autoManage).toBe(true);
+    const timed = buildCreateGameValues({ ...emptyDraft(), name: 'Game', espnGame: { ...game, kickoffAt: 123 }, autoManage: true }, sanitizer, true);
+    expect(timed.ok && timed.values.kickoffAt).toBe(123);
     const custom = buildCreateGameValues({ ...emptyDraft(), name: 'Game', sport: 'custom', autoManage: true }, sanitizer, true);
     expect(custom.ok && custom.values.autoManage).toBe(false);
   });

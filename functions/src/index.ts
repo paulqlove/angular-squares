@@ -9,6 +9,7 @@ import { createHash } from "node:crypto";
 import { continueUrl, directLink, isValidEmail, renderEmail } from "./signin-email";
 import { fetchScoreboard } from "./espn";
 import { syncLiveScores } from "./sync";
+import { runDueAutoManage } from "./auto-manage-run";
 
 const DEFAULT_DATABASE_URL = "https://squares-4e4f7-default-rtdb.firebaseio.com";
 
@@ -56,6 +57,36 @@ export const syncEspnScores = onSchedule(
       fetchScoreboard,
       log: (message, details) => logger.info(message, details ?? {}),
     });
+  }
+);
+
+/**
+ * Locks, shrinks and draws boards whose host switched on Auto-manage. The run time is
+ * saved on the board by the app (kickoff minus 15 minutes), so this never asks a sports feed.
+ * Deploy by hand: firebase deploy --only functions:runAutoManage
+ */
+export const runAutoManage = onSchedule(
+  {
+    schedule: "every 1 minutes",
+    region: "us-central1",
+    timeZone: "Etc/UTC",
+    timeoutSeconds: 30,
+    memory: "256MiB",
+    cpu: 0.167,
+    maxInstances: 1,
+  },
+  async () => {
+    const db = getDatabase();
+    const result = await runDueAutoManage({
+      readDue: async (now) =>
+        (await db.ref("autoManageQueue").orderByValue().endAt(now).limitToFirst(50).get()).val(),
+      readGame: async (boardId: string) => (await db.ref(`games/${boardId}`).get()).val(),
+      update: async (updates) => {
+        await db.ref().update(updates);
+      },
+      log: (message, details) => logger.info(message, details ?? {}),
+    });
+    if (result.due > 0) logger.info("auto-manage run", { ...result });
   }
 );
 
