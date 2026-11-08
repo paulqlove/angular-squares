@@ -75,30 +75,30 @@
   position: relative;
 }
 
-/* Current leader: 3px emerald ring with a thin white inner ring so it reads on every player colour. No scaling. */
+/* Current leader: no border. A light emerald wash sits behind the player's name (negative z-index inside the cell's own
+   stacking context), so the text never changes. The row and column headers already point at it. */
 .square-leader {
   z-index: 2;
   position: relative;
-  outline: 3px solid var(--qs-accent) !important;
-  outline-offset: -3px !important;
-  box-shadow: inset 0 0 0 5px #fff;
 }
 
-/* A live game: the whole cell takes a soft emerald wash that fades in and out slowly for about 22 seconds (5 cycles of 4.5s), then rests.
-   The wash sits behind the player's name (negative z-index inside the cell's own stacking context), so the text never
-   changes, and only its opacity animates. Reduced motion collapses it to the still ring. */
-.square-live::before {
+.square-leader::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   pointer-events: none;
   background: var(--qs-accent);
-  opacity: 0;
+  opacity: 0.1;
+}
+
+/* A live game: that wash breathes slowly for about 22 seconds (5 cycles of 4.5s), then rests. Only its opacity animates.
+   Reduced motion collapses it to the still wash. */
+.square-live::before {
   animation: qs-live-wash 4.5s ease-in-out 5 both;
 }
 
 @keyframes qs-live-wash {
-  0%, 100% { opacity: 0; }
+  0%, 100% { opacity: 0.1; }
   50% { opacity: 0.2; }
 }
