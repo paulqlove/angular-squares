@@ -1,7 +1,7 @@
-/** The board locks and draws this long before kickoff. The app saves kickoff minus this as runAt. */
-export const AUTO_MANAGE_LEAD_MS = 15 * 60 * 1000;
-/** Past runAt by this much (a long outage), the run is skipped instead of locking a game in progress. */
-export const AUTO_MANAGE_GRACE_MS = 25 * 60 * 1000;
+/** The board locks and draws this long after kickoff, so late joiners can still fill squares. The app saves kickoff plus this as runAt. */
+export const AUTO_MANAGE_DELAY_MS = 5 * 60 * 1000;
+/** Past runAt by this much (a long outage), the run is skipped: the game is over or nearly so. */
+export const AUTO_MANAGE_GRACE_MS = 90 * 60 * 1000;
 
 export type BoardSize = 25 | 50 | 100;
 
@@ -9,7 +9,7 @@ export interface AutoManageSettings {
   enabled: boolean;
   /** Also shrink a half-empty board (100 to 50 or 25, 50 to 25) before drawing. */
   resize: boolean;
-  /** When to run, in ms: kickoff minus the lead, saved by the app from the game the host picked. */
+  /** When to run, in ms: kickoff plus the delay, saved by the app from the game the host picked. */
   runAt: number;
 }
 
@@ -110,7 +110,7 @@ export function planAutoManage(
   });
 
   if (now > settings.runAt + AUTO_MANAGE_GRACE_MS) {
-    return finish({ state: "missed", at: now, note: "The game had already started, so nothing was changed." });
+    return finish({ state: "missed", at: now, note: "The scheduled time passed by more than 90 minutes (a service outage), so nothing was changed." });
   }
 
   const locked = raw["isLocked"] === true;

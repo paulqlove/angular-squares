@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { AUTO_MANAGE_GRACE_MS, AUTO_MANAGE_LEAD_MS, drawLine, planAutoManage, reshuffleSquares, smallestFit } from "./auto-manage";
+import { AUTO_MANAGE_GRACE_MS, AUTO_MANAGE_DELAY_MS, drawLine, planAutoManage, reshuffleSquares, smallestFit } from "./auto-manage";
 import { runDueAutoManage } from "./auto-manage-run";
 
 const KICKOFF = Date.parse("2026-11-08T18:00:00Z");
-const RUN_AT = KICKOFF - AUTO_MANAGE_LEAD_MS;
+const RUN_AT = KICKOFF + AUTO_MANAGE_DELAY_MS;
 const AT = RUN_AT + 1000;
 
 function settings(resize = false, enabled = true): Record<string, unknown> {
@@ -85,7 +85,7 @@ describe("planAutoManage", () => {
     assert.equal(Object.keys(u).length, 1);
   });
 
-  it("changes nothing after a long outage (game already started)", () => {
+  it("changes nothing after a long outage (the game is long over)", () => {
     const u = planAutoManage("ABC123", board(40), RUN_AT + AUTO_MANAGE_GRACE_MS + 1)!;
     assert.equal((u["games/ABC123/autoManageResult"] as { state: string }).state, "missed");
     assert.equal(u["games/ABC123/isLocked"], undefined);

@@ -644,7 +644,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
                     <div class="flex items-start justify-between gap-4">
                       <div class="min-w-0">
                         <label class="block text-sm font-semibold text-label mb-1">Auto-manage</label>
-                        <p class="text-xs text-muted">About 15 minutes before kickoff we lock this board, move it to 50 or 25 squares if the picks fit, and draw the numbers for you. Squares are shuffled at random and each player keeps their count. You can cancel any time before then, and players see when it will happen.</p>
+                        <p class="text-xs text-muted">Five minutes after kickoff we lock this board, move it to 50 or 25 squares if the picks fit, and draw the numbers for you. Squares are shuffled at random and each player keeps their count. Players can still pick squares until then, and they see when it will happen. You can cancel any time before it runs.</p>
                       </div>
                       <app-toggle [checked]="editAutoManage" (onChange)="editAutoManage = $event"></app-toggle>
                     </div>

@@ -92,7 +92,7 @@ export interface EditGameValues {
                 <div class="flex items-start justify-between gap-4">
                   <div class="min-w-0">
                     <p class="qs-label mb-1.5 text-qs-muted">Auto-manage</p>
-                    <p class="text-xs text-qs-muted">About 15 minutes before kickoff we lock this board, move it to 50 or 25 squares if the picks fit, and draw the numbers for you. Squares are shuffled at random and each player keeps their count. You can cancel any time before then, and players see when it will happen.</p>
+                    <p class="text-xs text-qs-muted">Five minutes after kickoff we lock this board, move it to 50 or 25 squares if the picks fit, and draw the numbers for you. Squares are shuffled at random and each player keeps their count. Players can still pick squares until then, and they see when it will happen. You can cancel any time before it runs.</p>
                   </div>
                   <app-toggle [checked]="draft.autoManage" (onChange)="draft.autoManage = $event"></app-toggle>
                 </div>

@@ -22,7 +22,7 @@ import { DEFAULT_EMPTY_QUARTER_RULE, Entitlement, EmptyQuarterRule, NO_EXPIRY, P
 import { AuthService } from './auth.service';
 import { shuffleSquares, smallerBoardSizes } from '../utils/shuffle-squares';
 import { OpenBoardRow, openBoardRows } from '../utils/open-boards';
-import { AUTO_MANAGE_LEAD_MS, AutoManageResult, AutoManageSettings, readAutoManage, readAutoManageResult } from '../utils/auto-manage';
+import { AUTO_MANAGE_DELAY_MS, AutoManageResult, AutoManageSettings, readAutoManage, readAutoManageResult } from '../utils/auto-manage';
 import {
   BoardActivity,
   FREE_ACTIVE_BOARD_LIMIT,
@@ -470,7 +470,7 @@ export class GameService {
 
   /**
    * The host turns auto-manage on or off. On needs the game's kickoff time (the picker already has it);
-   * the server runs the board 15 minutes before it, from autoManageQueue. Off clears everything.
+   * the server runs the board 5 minutes after it, from autoManageQueue. Off clears everything.
    */
   async setAutoManage(gameId: string, settings: AutoManageSettings | null, kickoffAt?: number): Promise<void> {
     if (!this.isBrowser) return;
@@ -489,9 +489,9 @@ export class GameService {
       const linked = game?.espnEventId ? await this.espnService.getGame(game.espnEventId, this.normalizeSport(game.espnSport)) : null;
       kickoff = linked?.date ? Date.parse(linked.date) : NaN;
     }
-    const runAt = (kickoff as number) - AUTO_MANAGE_LEAD_MS;
+    const runAt = (kickoff as number) + AUTO_MANAGE_DELAY_MS;
     if (!Number.isFinite(runAt)) throw new Error('No kickoff time for this game');
-    if (runAt < Date.now() - 60_000 && (kickoff as number) < Date.now()) throw new Error('This game has already started');
+    if ((kickoff as number) + 4 * 3_600_000 < Date.now()) throw new Error('This game is already over');
     await update(ref(this.db), {
       [`games/${gameId}/autoManage`]: { enabled: true, resize: !!settings.resize, runAt },
       [`games/${gameId}/autoManageResult`]: null,

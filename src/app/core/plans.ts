@@ -18,7 +18,7 @@ export interface PlanFeatures {
   adFree: boolean;
   /** ESPN auto-sync of scores. Not enforced yet: it stays free until checkout exists. */
   liveScoring: boolean;
-  /** Lock the board, shrink it if half empty and draw the numbers before kickoff. */
+  /** Lock the board, shrink it if half empty and draw the numbers just after kickoff. */
   autoManage: boolean;
 }
 

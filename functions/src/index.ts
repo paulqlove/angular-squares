@@ -62,7 +62,7 @@ export const syncEspnScores = onSchedule(
 
 /**
  * Locks, shrinks and draws boards whose host switched on Auto-manage. The run time is
- * saved on the board by the app (kickoff minus 15 minutes), so this never asks a sports feed.
+ * saved on the board by the app (kickoff plus 5 minutes), so this never asks a sports feed.
  * Deploy by hand: firebase deploy --only functions:runAutoManage
  */
 export const runAutoManage = onSchedule(

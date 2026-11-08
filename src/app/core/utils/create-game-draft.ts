@@ -34,7 +34,7 @@ export interface CreateGameValues {
   emptyQuarterRule: EmptyQuarterRule;
   espnEventId?: string;
   espnSport?: SportType;
-  /** Kickoff of the linked game, in ms; Auto-manage runs 15 minutes before it. */
+  /** Kickoff of the linked game, in ms; Auto-manage runs 5 minutes after it. */
   kickoffAt?: number;
   homeTeam?: string;
   hostNote?: string;

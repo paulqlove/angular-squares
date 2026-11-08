@@ -1,11 +1,11 @@
-/** The server runs a board this long before kickoff. */
-export const AUTO_MANAGE_LEAD_MS = 15 * 60 * 1000;
+/** The server runs a board this long after kickoff, so late joiners can still fill squares. */
+export const AUTO_MANAGE_DELAY_MS = 5 * 60 * 1000;
 
 export interface AutoManageSettings {
   enabled: boolean;
   /** Also shrink a half-empty board before drawing the numbers. */
   resize: boolean;
-  /** When the server runs it, in ms: kickoff minus 15 minutes. Saved from the game the host picked. */
+  /** When the server runs it, in ms: kickoff plus 5 minutes. Saved from the game the host picked. */
   runAt?: number;
 }
 
