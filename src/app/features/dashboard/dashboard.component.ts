@@ -665,7 +665,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
 
               <!-- Limit squares per player: Season Pass -->
               @if (planService.features().squareLimit && editingGame(); as lg) {
-                <app-max-squares-field [value]="editMaxSquares" [boardSize]="lg.boardSize" (valueChange)="editMaxSquares = $event"></app-max-squares-field>
+                <app-max-squares-field [value]="editMaxSquares" (valueChange)="editMaxSquares = $event"></app-max-squares-field>
               }
 
               <!-- Auto-manage: Season Pass, a linked game, board not locked yet -->

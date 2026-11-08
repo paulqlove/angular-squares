@@ -212,7 +212,7 @@ export interface CreateGameSubmit {
         </div>
       }
       @if (squareLimitAllowed) {
-        <div class="mt-5"><app-max-squares-field [value]="newGameMaxSquares" [boardSize]="newGameBoardSize" (valueChange)="newGameMaxSquares = $event"></app-max-squares-field></div>
+        <div class="mt-5"><app-max-squares-field [value]="newGameMaxSquares" (valueChange)="newGameMaxSquares = $event"></app-max-squares-field></div>
       } @else {
         <p class="mt-5 text-sm text-qs-muted"><span class="qs-label mr-2 text-qs-ink">Limit squares per player</span>Comes with the Season Pass.</p>
       }
