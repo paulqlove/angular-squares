@@ -288,12 +288,16 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
             @if (!isLoadingGames() && myGames().length >= 5) {
               <div class="mt-4 flex flex-wrap items-center gap-2">
                 <input type="search" [value]="gameSearch()" (input)="gameSearch.set($any($event.target).value)" placeholder="Search by name or team" aria-label="Search your boards" class="qs-input min-h-9 min-w-0 flex-1 basis-full py-0 sm:basis-48" />
-                <div class="flex flex-wrap gap-1.5" role="group" aria-label="Filter boards">
+                <div class="hidden flex-wrap gap-1.5 sm:flex" role="group" aria-label="Filter boards">
                   @for (f of statusFilters; track f.value) {
                     <button type="button" class="qs-tab min-h-9 px-3" [attr.aria-pressed]="gameStatus() === f.value" (click)="gameStatus.set(f.value)">{{ f.label }}</button>
                   }
                 </div>
-                <div class="ml-auto flex items-center">
+                <div class="grid basis-full grid-cols-2 gap-2 sm:hidden">
+                  <app-dropdown [fill]="true" [options]="statusFilters" [value]="gameStatus()" (valueChange)="gameStatus.set($any($event))" prefix="Show: " ariaLabel="Filter boards"></app-dropdown>
+                  <app-dropdown [fill]="true" [options]="sortOptions" [value]="gameSort()" (valueChange)="gameSort.set($any($event))" prefix="Sort: " ariaLabel="Sort boards"></app-dropdown>
+                </div>
+                <div class="ml-auto hidden items-center sm:flex">
                   <app-dropdown [options]="sortOptions" [value]="gameSort()" (valueChange)="gameSort.set($any($event))" prefix="Sort: " ariaLabel="Sort boards"></app-dropdown>
                 </div>
               </div>
