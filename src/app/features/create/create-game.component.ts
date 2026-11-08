@@ -21,11 +21,11 @@ import { CreateGameFormComponent, CreateGameSubmit } from './create-game-form.co
         <a routerLink="/" class="qs-btn qs-btn-ghost">Home</a>
       </app-shared-header>
 
-      <main class="mx-auto w-full max-w-2xl px-4 py-8 sm:py-12">
-        <div class="flex flex-col overflow-hidden rounded-card border border-qs-line bg-qs-panel shadow-pop">
-          <div class="border-b border-qs-line px-6 pb-5 pt-6">
-            <p class="qs-eyebrow">New game</p>
-            <h1 class="qs-title mt-2 text-3xl">Set up your <span class="text-qs-accent">board</span></h1>
+      <main class="mx-auto w-full max-w-2xl px-4 py-8 max-sm:px-0 max-sm:py-0 sm:py-12">
+        <div class="flex h-[min(44rem,calc(100dvh-9rem))] min-h-[28rem] flex-col overflow-hidden rounded-card border border-qs-line bg-qs-panel shadow-pop max-sm:h-[calc(100dvh-4rem)] max-sm:rounded-none max-sm:border-x-0">
+          <div class="border-b border-qs-line px-6 pb-4 pt-5 max-sm:pb-3 max-sm:pt-4">
+            <p class="qs-eyebrow max-sm:hidden">New game</p>
+            <h1 class="qs-title mt-2 text-3xl max-sm:mt-0 max-sm:text-2xl">Set up your <span class="text-qs-accent">board</span></h1>
           </div>
           <app-create-game-form (cancelled)="goHome()" (submitted)="onSubmit($event)"></app-create-game-form>
         </div>

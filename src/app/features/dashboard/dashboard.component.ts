@@ -456,20 +456,20 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
       <!-- Create Game Modal -->
       @if (showCreateModal()) {
         <div
-          animate.enter="qs-modal-enter" animate.leave="qs-modal-leave" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+          animate.enter="qs-modal-enter" animate.leave="qs-modal-leave" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm max-sm:p-0"
           (click)="closeCreateModal()"
         >
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="create-game-title"
-            class="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-card border border-qs-line bg-qs-panel shadow-pop animate-modal-in"
+            class="flex h-[min(44rem,calc(100dvh-2rem))] w-full max-w-2xl flex-col overflow-hidden rounded-card border border-qs-line bg-qs-panel shadow-pop animate-modal-in max-sm:h-dvh max-sm:rounded-none max-sm:border-0"
             (click)="$event.stopPropagation()"
           >
-            <div class="flex items-start justify-between gap-4 border-b border-qs-line px-6 pb-5 pt-6">
+            <div class="flex items-start justify-between gap-4 border-b border-qs-line px-6 pb-4 pt-5 max-sm:pb-3 max-sm:pt-4">
               <div>
-                <p class="qs-eyebrow">New game</p>
-                <h3 id="create-game-title" class="qs-title mt-2 text-3xl">Set up your <span class="text-qs-accent">board</span></h3>
+                <p class="qs-eyebrow max-sm:hidden">New game</p>
+                <h3 id="create-game-title" class="qs-title mt-2 text-3xl max-sm:mt-0 max-sm:text-2xl">Set up your <span class="text-qs-accent">board</span></h3>
               </div>
               <button
                 type="button"
