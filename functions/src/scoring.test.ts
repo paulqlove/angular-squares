@@ -141,6 +141,18 @@ describe("winnersForCompletedQuarters", () => {
     assert.equal(winnerForScore(11, 2, squares, HOME, AWAY), null);
   });
 
+  it("on 25 and 50 square boards each stored number is a pair of digits", () => {
+    // Away rows hold pairs 6,7 / 2,3 / 8,9 / 0,1 / 4,5 and home columns hold 8,9 / 2,3 / 0,1 / 6,7 / 4,5.
+    const away5 = [3, 1, 4, 0, 2];
+    const home5 = [4, 1, 0, 3, 2];
+    const squares5 = { "0-2": "Paul", "1-2": "Vantaherd", "3-1": "Zed" };
+    assert.equal(winnerForScore(0, 3, squares5, home5, away5), "Vantaherd");
+    assert.equal(winnerForScore(1, 2, squares5, home5, away5), "Vantaherd");
+    assert.equal(winnerForScore(2, 1, squares5, home5, away5), "Zed");
+    assert.equal(winnerForScore(10, 7, squares5, home5, away5), "Paul");
+    assert.equal(winnerForScore(4, 0, squares5, home5, away5), null);
+  });
+
   it("uses the first claimed square when two squares share the winning digits", () => {
     const claimed = { "1-1": "First", "8-8": "Second" };
     const numbers = [9, 1, 2, 3, 4, 5, 6, 7, 8, 0];
