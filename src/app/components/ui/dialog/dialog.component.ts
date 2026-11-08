@@ -14,7 +14,7 @@ export interface DialogPart {
     template: `
     @if (isOpen) {
       <div
-        class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+        animate.enter="qs-modal-enter" animate.leave="qs-modal-leave" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
         (click)="onBackdropClick($event)"
         >
         <div class="bg-card rounded-lg shadow-lg max-w-md w-full p-6 space-y-4">

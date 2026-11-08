@@ -29,7 +29,7 @@ import {
     selector: 'app-upgrade-pass-dialog',
     imports: [FormsModule],
     template: `
-    <div class="fixed inset-0 z-[400] overflow-y-auto bg-slate-950/75" (click)="dismiss()">
+    <div animate.enter="qs-modal-enter" animate.leave="qs-modal-leave" class="fixed inset-0 z-[400] overflow-y-auto bg-slate-950/75" (click)="dismiss()">
       <div class="flex min-h-full items-center justify-center p-3 sm:p-6">
         <div
           #dialogRoot

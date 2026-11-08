@@ -29,7 +29,7 @@ export interface DropdownOption<T extends string = string> {
         <ng-icon name="heroChevronDown" class="text-xs transition-transform duration-150" [class.rotate-180]="open()" aria-hidden="true"></ng-icon>
       </button>
       @if (open()) {
-        <div role="menu" class="animate-modal-in absolute right-0 z-30 mt-1.5 min-w-full w-max overflow-hidden rounded-inner border border-qs-line-strong bg-qs-panel p-1 shadow-pop">
+        <div role="menu" class="animate-menu-in absolute right-0 z-30 mt-1.5 min-w-full w-max overflow-hidden rounded-inner border border-qs-line-strong bg-qs-panel p-1 shadow-pop">
           @for (o of options(); track o.value) {
             <button
               type="button"
