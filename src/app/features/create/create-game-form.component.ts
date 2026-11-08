@@ -34,7 +34,7 @@ export interface CreateGameSubmit {
   template: `
   <div class="border-b border-qs-line px-6 py-3">
     <div class="flex items-center justify-between gap-3">
-      <p class="qs-eyebrow qs-eyebrow-bar">Step {{ step() }} of {{ stepTitles.length }} · {{ stepTitles[step() - 1] }}@if (step() > 1) { · Optional }</p>
+      <p class="qs-eyebrow qs-eyebrow-bar">Step {{ step() }} of {{ stepTitles.length }} · {{ stepTitles[step() - 1] }}@if (step() === 2 || step() === 3) { · Optional }</p>
     </div>
     <div class="mt-2 flex gap-1.5" role="progressbar" aria-label="Create game progress" aria-valuemin="1" [attr.aria-valuemax]="stepTitles.length" [attr.aria-valuenow]="step()" [attr.aria-valuetext]="'Step ' + step() + ' of ' + stepTitles.length + ': ' + stepTitles[step() - 1]">
       @for (title of stepTitles; track title; let i = $index) {
@@ -168,25 +168,6 @@ export interface CreateGameSubmit {
     }
   }
 </section>
-          <section>
-            <div class="space-y-4">
-        <div>
-          <label for="new-game-name" class="qs-label mb-1.5 block text-qs-muted">Game name <span class="text-qs-bad">*</span></label>
-          <input
-            id="new-game-name"
-            type="text"
-            [(ngModel)]="newGameName"
-            placeholder="Super Bowl party"
-            class="qs-input"
-            [class.qs-input-error]="gameNameError()"
-            [attr.aria-invalid]="gameNameError()"
-          />
-          @if (gameNameError()) {
-            <p class="mt-1.5 text-sm text-qs-bad">Give your game a name.</p>
-          }
-        </div>
-            </div>
-          </section>
         </div>
       }
       @case (2) {
@@ -283,10 +264,25 @@ export interface CreateGameSubmit {
       }
       @case (4) {
         <div class="space-y-4 sm:space-y-6" animate.enter="qs-tab-in">
-          <h3 id="create-step-heading" tabindex="-1" class="sr-only">Extras</h3>
+          <h3 id="create-step-heading" tabindex="-1" class="sr-only">Details</h3>
           <p class="qs-label text-qs-muted">{{ summaryLine() }}</p>
           <section>
             <div class="space-y-4">
+        <div>
+          <label for="new-game-name" class="qs-label mb-1.5 block text-qs-muted">Game name <span class="text-qs-bad">*</span></label>
+          <input
+            id="new-game-name"
+            type="text"
+            [(ngModel)]="newGameName"
+            placeholder="Super Bowl party"
+            class="qs-input"
+            [class.qs-input-error]="gameNameError()"
+            [attr.aria-invalid]="gameNameError()"
+          />
+          @if (gameNameError()) {
+            <p class="mt-1.5 text-sm text-qs-bad">Give your game a name.</p>
+          }
+        </div>
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label for="new-game-host-note" class="qs-label mb-1.5 block text-qs-muted">Note from the host <span class="normal-case tracking-normal">(optional)</span></label>
@@ -319,14 +315,13 @@ export interface CreateGameSubmit {
   <div class="flex items-center gap-2 border-t border-qs-line bg-qs-panel-2 px-4 py-3 sm:px-6">
     @if (step() === 1) {
       <button type="button" (click)="cancelled.emit()" class="qs-btn qs-btn-ghost px-3 text-qs-muted">Cancel</button>
-      <button type="button" (click)="goTo(2)" class="qs-btn qs-btn-ghost px-3">Customize</button>
     } @else {
       <button type="button" (click)="goTo(step() - 1)" class="qs-btn qs-btn-ghost px-3 text-qs-muted">Back</button>
-      @if (step() < stepTitles.length) {
-        <button type="button" (click)="goTo(step() + 1)" class="qs-btn qs-btn-secondary px-3">Next</button>
-      }
     }
-    <button type="button" (click)="submit()" [disabled]="isCreating" [attr.aria-busy]="isCreating" class="qs-btn qs-btn-primary ml-auto min-w-28 sm:min-w-40">
+    @if (step() < stepTitles.length) {
+      <button type="button" (click)="goTo(step() + 1)" class="qs-btn qs-btn-primary px-4">Next</button>
+    }
+    <button type="button" (click)="submit()" [disabled]="isCreating || !newGameName.trim()" [attr.aria-busy]="isCreating" class="qs-btn ml-auto min-w-28 disabled:opacity-45 sm:min-w-40" [class.qs-btn-primary]="step() === stepTitles.length" [class.qs-btn-secondary]="step() !== stepTitles.length">
       @if (isCreating) {
         <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" aria-hidden="true">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
@@ -360,7 +355,7 @@ export class CreateGameFormComponent implements OnInit {
     { value: 25, label: '25 squares', description: '5×5 grid' }
   ];
   /** The steps of the form; Create works from any of them. */
-  readonly stepTitles = ['Your game', 'Board', 'Scoring', 'Extras'];
+  readonly stepTitles = ['Your game', 'Board', 'Scoring', 'Details'];
   step = signal(1);
   customAwayTeam = '';
   customHomeTeam = '';
@@ -520,7 +515,7 @@ export class CreateGameFormComponent implements OnInit {
     if (!result.ok) {
       if (result.reason === 'name') {
         this.gameNameError.set(true);
-        this.goTo(1);
+        this.goTo(this.stepTitles.length);
         setTimeout(() => this.showField('new-game-name'));
       } else {
         // The quarter split is wrong: show it, with its red line, on the Scoring step.
