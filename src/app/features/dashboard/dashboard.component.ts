@@ -287,7 +287,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
               }
             </div>
 
-            @if (!isLoadingGames() && myGames().length >= 5) {
+            @if (!isLoadingGames() && myGames().length >= 6) {
               <div class="mt-4 flex flex-wrap items-center gap-2">
                 <input type="search" [value]="gameSearch()" (input)="gameSearch.set($any($event.target).value)" placeholder="Search by name or team" aria-label="Search your boards" class="qs-input min-h-9 min-w-0 flex-1 basis-full py-0 sm:basis-48" />
                 <div class="hidden flex-wrap gap-1.5 sm:flex" role="group" aria-label="Filter boards">
