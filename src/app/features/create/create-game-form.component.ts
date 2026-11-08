@@ -44,19 +44,19 @@ export interface CreateGameSubmit {
     <p class="sr-only" aria-live="polite">Step {{ step() }} of {{ stepTitles.length }}: {{ stepTitles[step() - 1] }}</p>
   </div>
 
-  <div class="min-h-0 flex-1 overflow-y-auto px-6 pb-4 pt-3 [scrollbar-gutter:stable] sm:pb-5 sm:pt-4">
+  <div class="flex min-h-0 flex-1 flex-col overflow-y-auto px-6 pb-4 pt-3 [scrollbar-gutter:stable] sm:pb-5 sm:pt-4">
     @switch (step()) {
       @case (1) {
-        <div class="flex flex-col gap-4 sm:gap-5" animate.enter="qs-tab-in">
+        <div class="flex min-h-0 flex-1 flex-col gap-4 sm:gap-5" animate.enter="qs-tab-in">
           <h3 id="create-step-heading" tabindex="-1" class="sr-only">Your game</h3>
           <section>
   <h4 class="qs-label text-qs-ink">Sport</h4>
-  <div class="-mx-1 mt-3 flex flex-nowrap gap-2 overflow-x-auto px-1 pb-1" role="tablist" aria-label="Sport">
+  <div class="mt-3 flex flex-wrap gap-2" role="tablist" aria-label="Sport">
     @for (sport of sportOptions; track sport.value) {
       <button
         type="button"
         role="tab"
-        class="qs-tab shrink-0"
+        class="qs-tab"
         [attr.aria-selected]="selectedSport === sport.value"
         (click)="selectSport(sport.value)"
       >
@@ -65,7 +65,7 @@ export interface CreateGameSubmit {
     }
   </div>
 </section>
-          <section>
+          <section class="flex min-h-0 flex-1 flex-col">
   <h4 class="qs-label text-qs-ink">{{ selectedSport === 'custom' ? 'Teams' : 'Game' }}</h4>
   @if (selectedSport === 'custom') {
     <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -110,7 +110,7 @@ export interface CreateGameSubmit {
         />
       </div>
     }
-    <div class="qs-canvas mt-3 max-h-80 overflow-y-auto rounded-inner p-2 sm:max-h-72">
+    <div class="qs-canvas mt-3 min-h-40 flex-1 overflow-y-auto rounded-inner p-2">
       <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
         @for (game of filteredEspnGames(); track game.id) {
           <button
