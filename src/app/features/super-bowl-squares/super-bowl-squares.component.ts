@@ -1217,10 +1217,10 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           return;
         }
       }
-      if (this.canAutoManage() && (values.autoManage !== !!this.autoManage || (values.autoManage && values.autoManageResize !== this.autoManage?.resize))) {
+      if (this.canAutoManage() && values.autoManage !== !!this.autoManage) {
         try {
-          await this.gameService.setAutoManage(this.gameId, values.autoManage ? { enabled: true, resize: values.autoManageResize } : null);
-          this.autoManage = values.autoManage ? { enabled: true, resize: values.autoManageResize } : undefined;
+          await this.gameService.setAutoManage(this.gameId, values.autoManage ? { enabled: true, resize: true } : null);
+          this.autoManage = values.autoManage ? { enabled: true, resize: true } : undefined;
           this.autoManageResult = undefined;
         } catch {
           this.toastService.warning('Saved, but auto-manage could not be changed. Try again in a moment.');

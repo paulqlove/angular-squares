@@ -21,8 +21,6 @@ export interface EditGameValues {
   showInOpenBoards: boolean;
   /** Lock and draw before kickoff (Season Pass, linked game). */
   autoManage: boolean;
-  /** With auto-manage: also shrink a half-empty board before drawing. */
-  autoManageResize: boolean;
 }
 
 /** Owner-only "Edit game" popup. Edits a draft and saves once. */
@@ -94,16 +92,10 @@ export interface EditGameValues {
                 <div class="flex items-start justify-between gap-4">
                   <div class="min-w-0">
                     <p class="qs-label mb-1.5 text-qs-muted">Auto-manage</p>
-                    <p class="text-xs text-qs-muted">About 15 minutes before kickoff we lock this board and draw the numbers for you. You can cancel any time before then, and players see when it will happen.</p>
+                    <p class="text-xs text-qs-muted">About 15 minutes before kickoff we lock this board, move it to 50 or 25 squares if the picks fit, and draw the numbers for you. Squares are shuffled at random and each player keeps their count. You can cancel any time before then, and players see when it will happen.</p>
                   </div>
                   <app-toggle [checked]="draft.autoManage" (onChange)="draft.autoManage = $event"></app-toggle>
                 </div>
-                @if (draft.autoManage && boardSize > 25) {
-                  <label class="mt-3 flex min-h-11 cursor-pointer items-start gap-3 text-sm text-qs-ink">
-                    <input type="checkbox" class="mt-1 h-4 w-4 accent-[var(--qs-accent)]" [checked]="draft.autoManageResize" (change)="draft.autoManageResize = $any($event.target).checked" />
-                    <span>Also shrink the board if it is not full <span class="block text-xs text-qs-muted">Moves to 50 or 25 squares when the picks fit. Squares are shuffled at random, each player keeps their count, and the board shows what changed.</span></span>
-                  </label>
-                }
               </div>
             }
 
@@ -192,7 +184,7 @@ export class EditGameDialogComponent implements OnChanges {
   @Input() squaresFilled = 0;
   /** Splits lock once numbers are drawn. */
   @Input() splitLocked = false;
-  @Input() values: EditGameValues = { awayTeam: '', homeTeam: '', pricePerSquare: 10, hostNote: '', quarterSplit: null, emptyQuarterRule: DEFAULT_EMPTY_QUARTER_RULE, newBoardSize: null, showInOpenBoards: false, autoManage: false, autoManageResize: false };
+  @Input() values: EditGameValues = { awayTeam: '', homeTeam: '', pricePerSquare: 10, hostNote: '', quarterSplit: null, emptyQuarterRule: DEFAULT_EMPTY_QUARTER_RULE, newBoardSize: null, showInOpenBoards: false, autoManage: false };
 
   @Output() closed = new EventEmitter<void>();
   @Output() saved = new EventEmitter<EditGameValues>();

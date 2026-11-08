@@ -139,16 +139,10 @@ export interface CreateGameSubmit {
             <div class="flex items-start justify-between gap-4">
               <div class="min-w-0">
                 <p class="qs-label mb-1.5 text-qs-muted">Auto-manage</p>
-                <p class="text-xs text-qs-muted">About 15 minutes before kickoff we lock this board and draw the numbers for you. You can cancel any time before then, and players see when it will happen.</p>
+                <p class="text-xs text-qs-muted">About 15 minutes before kickoff we lock this board, move it to 50 or 25 squares if the picks fit, and draw the numbers for you. Squares are shuffled at random and each player keeps their count. You can cancel any time before then, and players see when it will happen.</p>
               </div>
               <app-toggle [checked]="newGameAutoManage" (onChange)="newGameAutoManage = $event"></app-toggle>
             </div>
-            @if (newGameAutoManage && newGameBoardSize > 25) {
-              <label class="mt-3 flex min-h-11 cursor-pointer items-start gap-3 text-sm text-qs-ink">
-                <input type="checkbox" class="mt-1 h-4 w-4 accent-[var(--qs-accent)]" [checked]="newGameAutoManageResize" (change)="newGameAutoManageResize = $any($event.target).checked" />
-                <span>Also shrink the board if it is not full <span class="block text-xs text-qs-muted">Moves to 50 or 25 squares when the picks fit. Squares are shuffled at random, each player keeps their count, and the board shows what changed.</span></span>
-              </label>
-            }
           </div>
         } @else {
           <p class="mt-5 text-sm text-qs-muted"><span class="qs-label mr-2 text-qs-ink">Auto-manage</span>Locks and draws the numbers for you before kickoff. Comes with the Season Pass.</p>
@@ -327,7 +321,6 @@ export class CreateGameFormComponent implements OnInit {
   newGameHostNote = '';
   newGameShowInOpenBoards = false;
   newGameAutoManage = false;
-  newGameAutoManageResize = false;
   newGameName = '';
   newGamePaymentManager = '';
   newGamePrice = 10;
@@ -481,7 +474,6 @@ export class CreateGameFormComponent implements OnInit {
     this.newGameEmptyRule = draft.emptyRule;
     this.newGameShowInOpenBoards = draft.showInOpenBoards;
     this.newGameAutoManage = draft.autoManage;
-    this.newGameAutoManageResize = draft.autoManageResize;
     if (draft.espnGame && draft.sport !== 'custom') {
       this.selectedEspnGameId = draft.espnGame.id;
       this.gameListOpen = false;
@@ -532,7 +524,6 @@ export class CreateGameFormComponent implements OnInit {
     return {
       ...emptyDraft(),
       autoManage: this.autoManageAllowed && this.newGameAutoManage,
-      autoManageResize: this.autoManageAllowed && this.newGameAutoManage && this.newGameAutoManageResize,
       boardSize: this.newGameBoardSize,
       customAway: this.customAwayTeam,
       customHome: this.customHomeTeam,

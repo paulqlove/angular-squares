@@ -644,16 +644,10 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
                     <div class="flex items-start justify-between gap-4">
                       <div class="min-w-0">
                         <label class="block text-sm font-semibold text-label mb-1">Auto-manage</label>
-                        <p class="text-xs text-muted">About 15 minutes before kickoff we lock this board and draw the numbers for you. You can cancel any time before then, and players see when it will happen.</p>
+                        <p class="text-xs text-muted">About 15 minutes before kickoff we lock this board, move it to 50 or 25 squares if the picks fit, and draw the numbers for you. Squares are shuffled at random and each player keeps their count. You can cancel any time before then, and players see when it will happen.</p>
                       </div>
                       <app-toggle [checked]="editAutoManage" (onChange)="editAutoManage = $event"></app-toggle>
                     </div>
-                    @if (editAutoManage && ag.boardSize > 25) {
-                      <label class="mt-3 flex min-h-11 cursor-pointer items-start gap-3 text-sm text-default">
-                        <input type="checkbox" class="mt-1 h-4 w-4" [checked]="editAutoManageResize" (change)="editAutoManageResize = $any($event.target).checked" />
-                        <span>Also shrink the board if it is not full <span class="block text-xs text-muted">Moves to 50 or 25 squares when the picks fit. Squares are shuffled at random, each player keeps their count, and the board shows what changed.</span></span>
-                      </label>
-                    }
                   </div>
                 }
               }
@@ -910,7 +904,6 @@ export class DashboardComponent implements OnInit {
   editNewSize = signal<BoardSize | null>(null);
   editShowInOpenBoards = false;
   editAutoManage = false;
-  editAutoManageResize = false;
   editSmallerSizes: BoardSize[] = [50, 25];
   managerSearchQuery = '';
   managerSearchResults = signal<{ name: string; uid: string }[]>([]);
@@ -1176,7 +1169,7 @@ export class DashboardComponent implements OnInit {
       }
       if (values.autoManage && this.planService.features().autoManage) {
         try {
-          await this.gameService.setAutoManage(gameId, { enabled: true, resize: values.autoManageResize });
+          await this.gameService.setAutoManage(gameId, { enabled: true, resize: true });
         } catch {
           this.toastService.warning('Board created, but Auto-manage could not be turned on. Try again in Edit.');
         }
@@ -1293,7 +1286,6 @@ export class DashboardComponent implements OnInit {
     this.editBoardRandomized.set(false);
     this.editShowInOpenBoards = !!game.showInOpenBoards;
     this.editAutoManage = !!game.autoManage;
-    this.editAutoManageResize = !!game.autoManage?.resize;
     this.managerSearchQuery = '';
     this.managerSearchResults.set([]);
     this.selectedManagerIndex.set(-1);
@@ -1489,9 +1481,9 @@ export class DashboardComponent implements OnInit {
       }
       let autoApplied = game.autoManage;
       const wantAuto = this.planService.features().autoManage && !!this.editEspnGameId && this.editAutoManage;
-      if (!!wantAuto !== !!game.autoManage || (wantAuto && this.editAutoManageResize !== !!game.autoManage?.resize)) {
+      if (!!wantAuto !== !!game.autoManage) {
         try {
-          autoApplied = wantAuto ? { enabled: true, resize: this.editAutoManageResize } : undefined;
+          autoApplied = wantAuto ? { enabled: true, resize: true } : undefined;
           await this.gameService.setAutoManage(game.id, autoApplied ?? null);
         } catch {
           autoApplied = game.autoManage;

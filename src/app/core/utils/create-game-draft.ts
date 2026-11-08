@@ -9,8 +9,6 @@ const AUTO_SUBMIT_MAX_AGE_MS = 15 * 60 * 1000;
 export interface CreateGameDraft {
   /** Season Pass: lock and draw before kickoff (needs a linked game). */
   autoManage: boolean;
-  /** With auto-manage: also shrink a half-empty board first. */
-  autoManageResize: boolean;
   /** Set when the visitor pressed Create while signed out: finish the create after sign-in. */
   autoSubmit: boolean;
   boardSize: BoardSize;
@@ -31,7 +29,6 @@ export interface CreateGameDraft {
 
 export interface CreateGameValues {
   autoManage: boolean;
-  autoManageResize: boolean;
   awayTeam?: string;
   boardSize: BoardSize;
   emptyQuarterRule: EmptyQuarterRule;
@@ -58,7 +55,6 @@ export interface Sanitizer {
 export function emptyDraft(): CreateGameDraft {
   return {
     autoManage: false,
-    autoManageResize: false,
     autoSubmit: false,
     boardSize: 100,
     customAway: '',
@@ -112,7 +108,6 @@ export function buildCreateGameValues(draft: CreateGameDraft, sanitizer: Sanitiz
     ok: true,
     values: {
       autoManage: !!linked && draft.autoManage === true,
-      autoManageResize: !!linked && draft.autoManage === true && draft.autoManageResize === true,
       awayTeam,
       boardSize: draft.boardSize,
       emptyQuarterRule: draft.emptyRule,

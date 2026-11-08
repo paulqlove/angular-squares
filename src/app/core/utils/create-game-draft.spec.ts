@@ -98,15 +98,11 @@ describe('splitToTenths', () => {
     expect(on.ok && on.values.showInOpenBoards).toBe(true);
   });
 
-  it('carries Auto-manage only for a linked game, with resize only when auto-manage is on', () => {
+  it('carries Auto-manage only for a linked game', () => {
     const game = { id: '401', homeTeam: 'KC', awayTeam: 'SF' };
-    const linked = buildCreateGameValues({ ...emptyDraft(), name: 'Game', espnGame: game, autoManage: true, autoManageResize: true }, sanitizer, true);
+    const linked = buildCreateGameValues({ ...emptyDraft(), name: 'Game', espnGame: game, autoManage: true }, sanitizer, true);
     expect(linked.ok && linked.values.autoManage).toBe(true);
-    expect(linked.ok && linked.values.autoManageResize).toBe(true);
-    const custom = buildCreateGameValues({ ...emptyDraft(), name: 'Game', sport: 'custom', autoManage: true, autoManageResize: true }, sanitizer, true);
+    const custom = buildCreateGameValues({ ...emptyDraft(), name: 'Game', sport: 'custom', autoManage: true }, sanitizer, true);
     expect(custom.ok && custom.values.autoManage).toBe(false);
-    expect(custom.ok && custom.values.autoManageResize).toBe(false);
-    const resizeOnly = buildCreateGameValues({ ...emptyDraft(), name: 'Game', espnGame: game, autoManageResize: true }, sanitizer, true);
-    expect(resizeOnly.ok && resizeOnly.values.autoManageResize).toBe(false);
   });
 });
