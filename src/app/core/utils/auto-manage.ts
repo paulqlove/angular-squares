@@ -37,3 +37,11 @@ export function readAutoManageResult(value: unknown): AutoManageResult | undefin
     ...(typeof v['resizedTo'] === 'number' ? { resizedTo: v['resizedTo'] } : {})
   };
 }
+
+/** "Sun, Nov 8 at 7:25 PM": when a board for a game with this kickoff (ms or ISO date) gets locked and drawn. */
+export function autoRunLabel(kickoff: number | string | null | undefined): string {
+  const ms = typeof kickoff === 'string' ? Date.parse(kickoff) : kickoff;
+  if (typeof ms !== 'number' || !Number.isFinite(ms)) return '';
+  const d = new Date(ms + AUTO_MANAGE_DELAY_MS);
+  return `${d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })} at ${d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
+}

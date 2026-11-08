@@ -101,8 +101,8 @@ import { ToggleComponent } from '../toggle/toggle.component';
           @if (planService.features().autoManage && !currentUser()?.isGuest) {
             <div class="flex items-start justify-between gap-4">
               <div class="min-w-0">
-                <p class="qs-label mb-1.5 text-qs-muted">Auto-manage new boards</p>
-                <p class="text-xs text-qs-muted">New boards linked to a game lock and draw their numbers for you 5 minutes after kickoff. Turn this off to do it yourself. You can still change any board in Edit game.</p>
+                <p class="qs-label mb-1.5 text-qs-muted">Auto-lock and draw new boards</p>
+                <p class="text-xs text-qs-muted">New boards lock and draw numbers 5 minutes after kickoff.</p>
               </div>
               <app-toggle [checked]="autoManageOn()" (onChange)="setAutoManageDefault($event)"></app-toggle>
             </div>

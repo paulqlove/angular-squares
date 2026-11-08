@@ -80,7 +80,7 @@ export interface EditGameValues {
               <div class="flex items-start justify-between gap-4">
                 <div class="min-w-0">
                   <p class="qs-label mb-1.5 text-qs-muted">Show in my open boards</p>
-                  <p class="text-xs text-qs-muted">Anyone who opens one of your boards can see this board's name, points per square and how many squares are left, and can join it. Off by default. Anyone with the link can still open it.</p>
+                  <p class="text-xs text-qs-muted">Players on your other boards can see and join this board. Off means link only.</p>
                   <p class="mt-2 truncate rounded-inner border border-qs-line bg-qs-panel-2 px-3 py-2 font-mono text-xs text-qs-ink">{{ boardName }} · Points per square: {{ draft.pricePerSquare }} · {{ squaresFilled }}/{{ boardSize }} taken</p>
                 </div>
                 <app-toggle [checked]="draft.showInOpenBoards" (onChange)="draft.showInOpenBoards = $event"></app-toggle>
@@ -91,8 +91,12 @@ export interface EditGameValues {
               <div>
                 <div class="flex items-start justify-between gap-4">
                   <div class="min-w-0">
-                    <p class="qs-label mb-1.5 text-qs-muted">Auto-manage</p>
-                    <p class="text-xs text-qs-muted">Five minutes after kickoff we lock this board, move it to 50 or 25 squares if the picks fit, and draw the numbers for you. Squares are shuffled at random and each player keeps their count. Players can still pick squares until then, and they see when it will happen. You can cancel any time before it runs.</p>
+                    <p class="qs-label mb-1.5 text-qs-muted">Auto-lock and draw</p>
+                    <p class="text-xs text-qs-muted">5 minutes after kickoff, we lock the board and draw the numbers for you.</p>
+                    @if (draft.autoManage && autoRunText) {
+                      <p class="mt-2 truncate rounded-inner border border-qs-line bg-qs-panel-2 px-3 py-2 font-mono text-xs text-qs-ink">Locks {{ autoRunText }}</p>
+                    }
+                  <details class="mt-1 text-xs text-qs-muted"><summary class="inline-flex min-h-9 cursor-pointer items-center underline underline-offset-4">How it works</summary><p class="pb-1">If the board is not full it first moves to 50 or 25 squares (squares are shuffled, each player keeps their count). Players can pick until then. Cancel any time before it runs.</p></details>
                   </div>
                   <app-toggle [checked]="draft.autoManage" (onChange)="draft.autoManage = $event"></app-toggle>
                 </div>
@@ -179,6 +183,8 @@ export class EditGameDialogComponent implements OnChanges {
   @Input() boardSize: BoardSize = 100;
   @Input() canShowInOpenBoards = false;
   @Input() canAutoManage = false;
+  /** "Sun, Nov 8 at 7:25 PM": when auto-lock-and-draw would run. */
+  @Input() autoRunText = '';
   @Input() canCustomSplit = false;
   @Input() numbersDrawn = false;
   @Input() squaresFilled = 0;
