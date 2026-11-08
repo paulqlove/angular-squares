@@ -1,7 +1,12 @@
+/** The server runs a board this long after kickoff, so late joiners can still fill squares. */
+export const AUTO_MANAGE_DELAY_MS = 5 * 60 * 1000;
+
 export interface AutoManageSettings {
   enabled: boolean;
   /** Also shrink a half-empty board before drawing the numbers. */
   resize: boolean;
+  /** When the server runs it, in ms: kickoff plus 5 minutes. Saved from the game the host picked. */
+  runAt?: number;
 }
 
 /** What the server did (or chose not to do) when the board's turn came. */
@@ -16,7 +21,7 @@ export interface AutoManageResult {
 export function readAutoManage(value: unknown): AutoManageSettings | undefined {
   if (!value || typeof value !== 'object') return undefined;
   const v = value as Record<string, unknown>;
-  return v['enabled'] === true ? { enabled: true, resize: v['resize'] === true } : undefined;
+  return v['enabled'] === true ? { enabled: true, resize: v['resize'] === true, ...(typeof v['runAt'] === 'number' ? { runAt: v['runAt'] } : {}) } : undefined;
 }
 
 export function readAutoManageResult(value: unknown): AutoManageResult | undefined {

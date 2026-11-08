@@ -1138,8 +1138,8 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     const kickoff = this.linkedEspnGame()?.date ? Date.parse(this.linkedEspnGame()!.date) : NaN;
     const when = Number.isFinite(kickoff) ? ` (kickoff ${at(kickoff)})` : '';
     return this.isGameOwner()
-      ? { text: `Auto-manage is on. This board locks and draws its numbers about 15 minutes before kickoff${when}.`, host: true }
-      : { text: `The host locks this board about 15 minutes before kickoff${when}.`, host: false };
+      ? { text: `Auto-manage is on. This board locks and draws its numbers 5 minutes after kickoff${when}.`, host: true }
+      : { text: `The host locks this board 5 minutes after kickoff${when}. You can pick squares until then.`, host: false };
   }
 
   async cancelAutoManage(): Promise<void> {
@@ -1217,10 +1217,11 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           return;
         }
       }
-      if (this.canAutoManage() && (values.autoManage !== !!this.autoManage || (values.autoManage && values.autoManageResize !== this.autoManage?.resize))) {
+      if (this.canAutoManage() && values.autoManage !== !!this.autoManage) {
         try {
-          await this.gameService.setAutoManage(this.gameId, values.autoManage ? { enabled: true, resize: values.autoManageResize } : null);
-          this.autoManage = values.autoManage ? { enabled: true, resize: values.autoManageResize } : undefined;
+          const date = this.linkedEspnGame()?.date;
+          await this.gameService.setAutoManage(this.gameId, values.autoManage ? { enabled: true, resize: true } : null, date ? Date.parse(date) : undefined);
+          this.autoManage = values.autoManage ? { enabled: true, resize: true } : undefined;
           this.autoManageResult = undefined;
         } catch {
           this.toastService.warning('Saved, but auto-manage could not be changed. Try again in a moment.');

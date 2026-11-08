@@ -133,6 +133,21 @@ export interface CreateGameSubmit {
           </div>
         </div>
       }
+      @if (selectedSport !== 'custom' && selectedEspnGame()) {
+        @if (autoManageAllowed) {
+          <div class="mt-5">
+            <div class="flex items-start justify-between gap-4">
+              <div class="min-w-0">
+                <p class="qs-label mb-1.5 text-qs-muted">Auto-manage</p>
+                <p class="text-xs text-qs-muted">Five minutes after kickoff we lock this board, move it to 50 or 25 squares if the picks fit, and draw the numbers for you. Squares are shuffled at random and each player keeps their count. Players can still pick squares until then, and they see when it will happen. You can cancel any time before it runs.</p>
+              </div>
+              <app-toggle [checked]="newGameAutoManage" (onChange)="newGameAutoManage = $event"></app-toggle>
+            </div>
+          </div>
+        } @else {
+          <p class="mt-5 text-sm text-qs-muted"><span class="qs-label mr-2 text-qs-ink">Auto-manage</span>Locks and draws the numbers for you at kickoff. Comes with the Season Pass.</p>
+        }
+      }
     </section>
 
     <!-- 03 Board size -->
@@ -283,6 +298,8 @@ export class CreateGameFormComponent implements OnInit {
   @Input() isCreating = false;
   /** Hosts who can run several boards get the Show in my open boards switch. */
   @Input() openBoardsAllowed = false;
+  /** Season Pass hosts get the Auto-manage switch. */
+  @Input() autoManageAllowed = false;
   @Output() cancelled = new EventEmitter<void>();
   @Output() submitted = new EventEmitter<CreateGameSubmit>();
 
@@ -303,6 +320,7 @@ export class CreateGameFormComponent implements OnInit {
   newGameEmptyRule: EmptyQuarterRule = DEFAULT_EMPTY_QUARTER_RULE;
   newGameHostNote = '';
   newGameShowInOpenBoards = false;
+  newGameAutoManage = false;
   newGameName = '';
   newGamePaymentManager = '';
   newGamePrice = 10;
@@ -455,6 +473,7 @@ export class CreateGameFormComponent implements OnInit {
     this.newGameSplitPct = { ...draft.splitPct };
     this.newGameEmptyRule = draft.emptyRule;
     this.newGameShowInOpenBoards = draft.showInOpenBoards;
+    this.newGameAutoManage = draft.autoManage;
     if (draft.espnGame && draft.sport !== 'custom') {
       this.selectedEspnGameId = draft.espnGame.id;
       this.gameListOpen = false;
@@ -504,12 +523,13 @@ export class CreateGameFormComponent implements OnInit {
     const game = this.selectedSport === 'custom' ? undefined : this.selectedEspnGame();
     return {
       ...emptyDraft(),
+      autoManage: this.autoManageAllowed && this.newGameAutoManage,
       boardSize: this.newGameBoardSize,
       customAway: this.customAwayTeam,
       customHome: this.customHomeTeam,
       customPrice: this.customPrice,
       emptyRule: this.newGameEmptyRule,
-      espnGame: game ? { id: game.id, homeTeam: game.homeTeam, awayTeam: game.awayTeam } : null,
+      espnGame: game ? { id: game.id, homeTeam: game.homeTeam, awayTeam: game.awayTeam, kickoffAt: Number.isFinite(Date.parse(game.date)) ? Date.parse(game.date) : undefined } : null,
       hostNote: this.newGameHostNote,
       manager: this.newGamePaymentManager,
       name: this.newGameName,
