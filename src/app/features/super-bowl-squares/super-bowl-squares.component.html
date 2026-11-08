@@ -95,6 +95,7 @@
     [boardName]="gameName"
     [canShowInOpenBoards]="canShowInOpenBoards()"
     [canAutoManage]="canAutoManage()"
+    [autoRunText]="autoRunLabel(linkedEspnGame()?.date)"
     [values]="{ awayTeam: awayTeam, homeTeam: homeTeam, pricePerSquare: currentPrice, hostNote: hostNote, quarterSplit: quarterSplit, emptyQuarterRule: emptyQuarterRule, newBoardSize: null, showInOpenBoards: showInOpenBoards, autoManage: !!autoManage }"
     [canCustomSplit]="planService.features().customSplits"
     [splitLocked]="isRandomized"
@@ -135,7 +136,7 @@
             }
             @if (autoManageNote(); as note) {
               <p class="mt-1.5 flex max-w-prose flex-wrap items-center gap-x-3 gap-y-1 text-sm text-qs-muted">
-                <span><span class="qs-label mr-2 text-qs-ink">Auto-manage</span>{{ note.text }}</span>
+                <span><span class="qs-label mr-2 text-qs-ink">Auto-lock and draw</span>{{ note.text }}</span>
                 @if (note.host) {
                   <button type="button" class="qs-label min-h-9 text-qs-accent underline underline-offset-4" (click)="cancelAutoManage()">Cancel</button>
                 }

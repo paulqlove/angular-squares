@@ -1,3 +1,4 @@
+import { autoRunLabel } from '../../core/utils/auto-manage';
 import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
@@ -138,14 +139,18 @@ export interface CreateGameSubmit {
           <div class="mt-5">
             <div class="flex items-start justify-between gap-4">
               <div class="min-w-0">
-                <p class="qs-label mb-1.5 text-qs-muted">Auto-manage</p>
-                <p class="text-xs text-qs-muted">Five minutes after kickoff we lock this board, move it to 50 or 25 squares if the picks fit, and draw the numbers for you. Squares are shuffled at random and each player keeps their count. Players can still pick squares until then, and they see when it will happen. You can cancel any time before it runs.</p>
+                <p class="qs-label mb-1.5 text-qs-muted">Auto-lock and draw</p>
+                <p class="text-xs text-qs-muted">5 minutes after kickoff, we lock the board and draw the numbers for you.</p>
+                @if (newGameAutoManage && autoRunText()) {
+                  <p class="mt-2 truncate rounded-inner border border-qs-line bg-qs-panel-2 px-3 py-2 font-mono text-xs text-qs-ink">Locks {{ autoRunText() }}</p>
+                }
+                  <details class="mt-1 text-xs text-qs-muted"><summary class="inline-flex min-h-9 cursor-pointer items-center underline underline-offset-4">How it works</summary><p class="pb-1">If the board is not full it first moves to 50 or 25 squares (squares are shuffled, each player keeps their count). Players can pick until then. Cancel any time before it runs.</p></details>
               </div>
               <app-toggle [checked]="newGameAutoManage" (onChange)="newGameAutoManage = $event"></app-toggle>
             </div>
           </div>
         } @else {
-          <p class="mt-5 text-sm text-qs-muted"><span class="qs-label mr-2 text-qs-ink">Auto-manage</span>Locks and draws the numbers for you at kickoff. Comes with the Season Pass.</p>
+          <p class="mt-5 text-sm text-qs-muted"><span class="qs-label mr-2 text-qs-ink">Auto-lock and draw</span>Comes with the Season Pass.</p>
         }
       }
     </section>
@@ -199,7 +204,7 @@ export interface CreateGameSubmit {
         <div class="mt-5 flex items-start justify-between gap-4">
           <div class="min-w-0">
             <p class="qs-label mb-1.5 text-qs-muted">Show in my open boards</p>
-            <p class="text-xs text-qs-muted">Anyone who opens one of your boards can see this board's name, points per square and how many squares are left, and can join it. Off by default. Anyone with the link can still open it.</p>
+            <p class="text-xs text-qs-muted">Players on your other boards can see and join this board. Off means link only.</p>
             <p class="mt-2 truncate rounded-inner border border-qs-line bg-qs-panel-2 px-3 py-2 font-mono text-xs text-qs-ink">{{ newGameName || 'Your board' }} · Points per square: {{ newGamePrice }} · 0/{{ newGameBoardSize }} taken</p>
           </div>
           <app-toggle [checked]="newGameShowInOpenBoards" (onChange)="newGameShowInOpenBoards = $event"></app-toggle>
@@ -415,6 +420,10 @@ export class CreateGameFormComponent implements OnInit {
     if (this.customPrice !== null && this.customPrice >= 0) {
       this.newGamePrice = this.customPrice;
     }
+  }
+
+  autoRunText(): string {
+    return autoRunLabel(this.selectedEspnGame()?.date);
   }
 
   selectedEspnGame(): EspnGame | undefined {

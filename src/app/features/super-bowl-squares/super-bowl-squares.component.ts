@@ -11,7 +11,7 @@ import { PLAYER_COLORS, normalizePlayerColors } from './utils/player-colors';
 import { PreviewRole } from '../../core/services/role-preview.service';
 import { PlanService } from '../../core/services/plan.service';
 import { DEFAULT_EMPTY_QUARTER_RULE, EmptyQuarterRule, QuarterSplit, splitFractions } from '../../core/plans';
-import { AutoManageResult, AutoManageSettings } from '../../core/utils/auto-manage';
+import { AutoManageResult, AutoManageSettings, autoRunLabel } from '../../core/utils/auto-manage';
 import { AdSlotComponent } from '../../components/ui/ad-slot/ad-slot.component';
 import { AuthService } from '../../core/services/auth.service';
 import { EspnService, EspnGame, SportType } from '../../core/services/espn.service';
@@ -244,6 +244,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   showShrinkSuggestion = signal(false);
   openBoards = signal<OpenBoardRow[]>([]);
   showInOpenBoards = false;
+  readonly autoRunLabel = autoRunLabel;
   autoManage: AutoManageSettings | undefined;
   autoManageResult: AutoManageResult | undefined;
   private openBoardsFor = '';
@@ -1132,13 +1133,13 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     const result = this.autoManageResult;
     if (result) {
       if (result.state === 'done') return { text: `Locked and drawn at ${at(result.at)}. ${result.resizedTo ? `The board was shrunk from ${result.resizedFrom} to ${result.resizedTo} squares.` : ''}`.trim(), host: false };
-      return this.isGameOwner() ? { text: `Auto-manage: ${result.note}`, host: false } : null;
+      return this.isGameOwner() ? { text: result.note, host: false } : null;
     }
     if (!this.autoManage || this.isLocked) return null;
     const kickoff = this.linkedEspnGame()?.date ? Date.parse(this.linkedEspnGame()!.date) : NaN;
     const when = Number.isFinite(kickoff) ? ` (kickoff ${at(kickoff)})` : '';
     return this.isGameOwner()
-      ? { text: `Auto-manage is on. This board locks and draws its numbers 5 minutes after kickoff${when}.`, host: true }
+      ? { text: `On. Locks and draws the numbers 5 minutes after kickoff${when}.`, host: true }
       : null;
   }
 
@@ -1146,7 +1147,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     try {
       await this.gameService.setAutoManage(this.gameId, null);
       this.autoManage = undefined;
-      this.toastService.success('Auto-manage is off');
+      this.toastService.success('Auto-lock and draw is off');
     } catch {
       this.toastService.error('Could not turn it off. Try again.');
     }
@@ -1224,7 +1225,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           this.autoManage = values.autoManage ? { enabled: true, resize: true } : undefined;
           this.autoManageResult = undefined;
         } catch {
-          this.toastService.warning('Saved, but auto-manage could not be changed. Try again in a moment.');
+          this.toastService.warning('Saved, but Auto-lock and draw could not be changed. Try again in a moment.');
           return;
         }
       }
