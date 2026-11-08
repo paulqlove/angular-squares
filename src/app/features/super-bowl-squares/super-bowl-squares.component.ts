@@ -1139,7 +1139,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     const when = Number.isFinite(kickoff) ? ` (kickoff ${at(kickoff)})` : '';
     return this.isGameOwner()
       ? { text: `Auto-manage is on. This board locks and draws its numbers 5 minutes after kickoff${when}.`, host: true }
-      : { text: `The host locks this board 5 minutes after kickoff${when}. You can pick squares until then.`, host: false };
+      : null;
   }
 
   async cancelAutoManage(): Promise<void> {

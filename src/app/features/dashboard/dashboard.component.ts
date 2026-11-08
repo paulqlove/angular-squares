@@ -461,6 +461,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
               [customSplitsAllowed]="planService.features().customSplits"
               [openBoardsAllowed]="planService.features().activeBoards > 1"
               [autoManageAllowed]="planService.features().autoManage"
+              [autoManageDefault]="autoManageDefault()"
               [isCreating]="isCreating()"
               (cancelled)="closeCreateModal()"
               (submitted)="createGame($event)"
@@ -903,6 +904,7 @@ export class DashboardComponent implements OnInit {
   editBoardRandomized = signal(false);
   editNewSize = signal<BoardSize | null>(null);
   editShowInOpenBoards = false;
+  autoManageDefault = signal(true);
   editAutoManage = false;
   editSmallerSizes: BoardSize[] = [50, 25];
   managerSearchQuery = '';
@@ -926,6 +928,10 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadMyGames();
+    this.authService.waitForAuthReady().then(() => {
+      const uid = this.currentUser()?.uid;
+      if (uid) this.gameService.getAutoManageDefault(uid).then(on => this.autoManageDefault.set(on));
+    });
     // Preload gifted passes count for admins
     if (this.isAdmin() && this.currentUser()?.email?.toLowerCase() === 'paulqlove@gmail.com') {
       this.loadGiftedPasses();

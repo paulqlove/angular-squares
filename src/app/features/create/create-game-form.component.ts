@@ -300,6 +300,8 @@ export class CreateGameFormComponent implements OnInit {
   @Input() openBoardsAllowed = false;
   /** Season Pass hosts get the Auto-manage switch. */
   @Input() autoManageAllowed = false;
+  /** Auto-manage starts switched on for a new board unless the host turned it off in the profile menu. */
+  @Input() autoManageDefault = true;
   @Output() cancelled = new EventEmitter<void>();
   @Output() submitted = new EventEmitter<CreateGameSubmit>();
 
@@ -347,6 +349,7 @@ export class CreateGameFormComponent implements OnInit {
   private sanitizer = inject(SanitizationService);
 
   async ngOnInit(): Promise<void> {
+    this.newGameAutoManage = this.autoManageAllowed && this.autoManageDefault;
     const draft = loadCreateDraft();
     if (draft) this.applyDraft(draft);
     await this.fetchEspnGames();

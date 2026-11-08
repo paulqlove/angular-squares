@@ -8,11 +8,12 @@ import { GameService } from '../../../core/services/game.service';
 import { SanitizationService } from '../../../core/services/sanitization.service';
 import { ThemeMode, ThemeService } from '../../../core/services/theme.service';
 import { PlanService } from '../../../core/services/plan.service';
+import { ToggleComponent } from '../toggle/toggle.component';
 
 /** Header avatar chip with the profile menu: display name, theme, sign out. Shared by the dashboard and game page. */
 @Component({
   selector: 'app-profile-menu',
-  imports: [FormsModule, RouterLink, NgIconComponent],
+  imports: [FormsModule, RouterLink, NgIconComponent, ToggleComponent],
   providers: [provideIcons({ heroChevronDown, heroArrowRightOnRectangle, heroComputerDesktop, heroSun, heroMoon, heroSquares2x2, heroQuestionMarkCircle })],
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
@@ -97,6 +98,16 @@ import { PlanService } from '../../../core/services/plan.service';
             </div>
           }
 
+          @if (planService.features().autoManage && !currentUser()?.isGuest) {
+            <div class="flex items-start justify-between gap-4">
+              <div class="min-w-0">
+                <p class="qs-label mb-1.5 text-qs-muted">Auto-manage new boards</p>
+                <p class="text-xs text-qs-muted">New boards linked to a game lock and draw their numbers for you 5 minutes after kickoff. Turn this off to do it yourself. You can still change any board in Edit game.</p>
+              </div>
+              <app-toggle [checked]="autoManageOn()" (onChange)="setAutoManageDefault($event)"></app-toggle>
+            </div>
+          }
+
           <div>
               <p id="theme-label" class="qs-label mb-1.5 text-qs-muted">Theme</p>
               <div class="grid grid-cols-3 gap-1 rounded-btn border border-qs-line bg-qs-panel-2 p-1" role="radiogroup" aria-labelledby="theme-label">
@@ -164,6 +175,7 @@ export class ProfileMenuComponent {
   isSavingProfile = signal(false);
   profileName = '';
   showProfileDropdown = signal(false);
+  autoManageOn = signal(true);
   readonly themeOptions: { value: ThemeMode; label: string; icon: string }[] = [
     { value: 'system', label: 'Auto', icon: 'heroComputerDesktop' },
     { value: 'light', label: 'Light', icon: 'heroSun' },
@@ -188,6 +200,20 @@ export class ProfileMenuComponent {
     this.showProfileDropdown.set(isOpening);
     if (isOpening) {
       this.profileName = this.currentUser()?.displayName || '';
+      const uid = this.currentUser()?.uid;
+      if (uid && this.planService.features().autoManage) this.gameService.getAutoManageDefault(uid).then(on => this.autoManageOn.set(on));
+    }
+  }
+
+  async setAutoManageDefault(on: boolean): Promise<void> {
+    const uid = this.currentUser()?.uid;
+    if (!uid) return;
+    const before = this.autoManageOn();
+    this.autoManageOn.set(on);
+    try {
+      await this.gameService.setAutoManageDefault(uid, on);
+    } catch {
+      this.autoManageOn.set(before);
     }
   }
 
