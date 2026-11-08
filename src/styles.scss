@@ -410,6 +410,28 @@ body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
   animation: toast-in 0.3s var(--qs-ease);
 }
 
+/* Loading skeletons: a quiet sweep over the panel colour. Reduced motion collapses it to one still frame. */
+@keyframes qs-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+.qs-skel-delay {
+  /* Waits a beat before showing, so a load that takes a few milliseconds shows nothing at all. */
+  animation: qs-skel-in 180ms ease-out 140ms both;
+}
+
+@keyframes qs-skel-in {
+  from { opacity: 0; }
+}
+
+.qs-skel {
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--qs-panel-2) 30%, var(--qs-line) 50%, var(--qs-panel-2) 70%);
+  background-size: 200% 100%;
+  animation: qs-shimmer 1.6s linear infinite;
+}
+
 /* Walkthrough animations */
 @keyframes pulse-subtle {
   0%, 100% { opacity: 0.75; }
