@@ -193,9 +193,9 @@
               }
             </div>
 
-            <!-- Tab Content. On desktop every tab sits in the same grid cell, and the Board stays in place (hidden while another tab shows), so the card always keeps the Board's height and nothing below it moves. -->
-            <div class="lg:grid">
-              <div class="[grid-area:1/1]" [class]="activeTab === 'board' ? (tabTouched ? 'qs-tab-in' : '') : 'max-lg:hidden lg:invisible'" [attr.aria-hidden]="activeTab === 'board' ? null : 'true'">
+            <!-- Tab Content. At every width the Board stays in place (hidden while another tab shows) and sets the card's height. The other tabs sit on top of it and scroll inside if they are taller, so switching tabs never moves anything below. -->
+            <div class="relative">
+              <div [class]="activeTab === 'board' ? (tabTouched ? 'qs-tab-in' : '') : 'invisible'" [attr.aria-hidden]="activeTab === 'board' ? null : 'true'">
                 <app-game-board
                   [selectedSquares]="selectedSquares"
                   [playerColors]="playerColors"
@@ -215,7 +215,7 @@
                 </app-game-board>
               </div>
               @if (activeTab !== 'board') {
-                <div class="[grid-area:1/1]" animate.enter="qs-tab-in">
+                <div class="absolute inset-0 overflow-y-auto" animate.enter="qs-tab-in">
                   @if (activeTab === 'more') {
                     <app-open-boards-list [rows]="openBoards()" (picked)="trackOtherBoardJoin()"></app-open-boards-list>
                   } @else if (activeTab === 'probabilities') {
