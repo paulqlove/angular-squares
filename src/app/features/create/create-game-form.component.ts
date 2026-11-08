@@ -70,11 +70,11 @@ export interface CreateGameSubmit {
   @if (selectedSport === 'custom') {
     <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
       <div>
-        <label for="custom-away" class="qs-label mb-1.5 block text-qs-muted">Away team</label>
+        <label for="custom-away" class="qs-label mb-1.5 block text-qs-ink">Away team</label>
         <input id="custom-away" type="text" [(ngModel)]="customAwayTeam" maxlength="50" placeholder="e.g. Lincoln High" class="qs-input" />
       </div>
       <div>
-        <label for="custom-home" class="qs-label mb-1.5 block text-qs-muted">Home team</label>
+        <label for="custom-home" class="qs-label mb-1.5 block text-qs-ink">Home team</label>
         <input id="custom-home" type="text" [(ngModel)]="customHomeTeam" maxlength="50" placeholder="e.g. Washington High" class="qs-input" />
       </div>
     </div>
@@ -250,7 +250,7 @@ export interface CreateGameSubmit {
           <section>
             <div class="space-y-4">
         <div>
-          <label for="new-game-name" class="qs-label mb-1.5 block text-qs-muted">Game name <span class="text-qs-bad">*</span></label>
+          <label for="new-game-name" class="qs-label mb-1.5 block text-qs-ink">Game name <span class="text-qs-bad">*</span></label>
           <input
             id="new-game-name"
             type="text"
@@ -266,11 +266,11 @@ export interface CreateGameSubmit {
         </div>
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label for="new-game-host-note" class="qs-label mb-1.5 block text-qs-muted">Note from the host <span class="normal-case tracking-normal">(optional)</span></label>
+            <label for="new-game-host-note" class="qs-label mb-1.5 block text-qs-ink">Note from the host <span class="normal-case tracking-normal">(optional)</span></label>
             <input id="new-game-host-note" type="text" [(ngModel)]="newGameHostNote" maxlength="140" placeholder="e.g. Snacks at halftime!" class="qs-input" />
           </div>
           <div>
-            <label for="new-game-manager" class="qs-label mb-1.5 block text-qs-muted">Co-host <span class="normal-case tracking-normal">(optional)</span></label>
+            <label for="new-game-manager" class="qs-label mb-1.5 block text-qs-ink">Co-host <span class="normal-case tracking-normal">(optional)</span></label>
             <input id="new-game-manager" type="email" [(ngModel)]="newGamePaymentManager" placeholder="their@email.com" class="qs-input" />
           </div>
         </div>
@@ -280,7 +280,7 @@ export interface CreateGameSubmit {
       @if (openBoardsAllowed) {
         <div class="mt-5 flex items-start justify-between gap-4">
           <div class="min-w-0">
-            <p class="qs-label mb-1.5 text-qs-muted">Show in my open boards</p>
+            <p class="qs-label mb-1.5 text-qs-ink">Show in my open boards</p>
             <p class="text-xs text-qs-muted">Players on your other boards can see and join this board. Off means link only.</p>
             <p class="mt-2 truncate rounded-inner border border-qs-line bg-qs-panel-2 px-3 py-2 font-mono text-xs text-qs-ink">{{ newGameName || 'Your board' }} · Points per square: {{ newGamePrice }} · 0/{{ newGameBoardSize }} taken</p>
           </div>
@@ -294,7 +294,7 @@ export interface CreateGameSubmit {
       <div class="mt-5">
         <div class="flex items-start justify-between gap-4">
           <div class="min-w-0">
-            <p class="qs-label mb-1.5 text-qs-muted">Auto-lock and draw</p>
+            <p class="qs-label mb-1.5 text-qs-ink">Auto-lock and draw</p>
             <p class="text-xs text-qs-muted">5 minutes after kickoff, we lock the board and draw the numbers for you.</p>
             @if (newGameAutoManage && autoRunText()) {
               <p class="mt-2 truncate rounded-inner border border-qs-line bg-qs-panel-2 px-3 py-2 font-mono text-xs text-qs-ink">Locks {{ autoRunText() }}</p>

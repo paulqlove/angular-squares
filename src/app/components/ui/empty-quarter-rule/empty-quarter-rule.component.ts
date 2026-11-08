@@ -8,7 +8,7 @@ import { EMPTY_QUARTER_RULES, EmptyQuarterRule } from '../../../core/plans';
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <fieldset>
-      <legend class="qs-label mb-1.5 text-qs-muted">If a quarter has no winner</legend>
+      <legend class="qs-label mb-1.5 text-qs-ink">If a quarter has no winner</legend>
       <div class="space-y-2">
         @for (rule of rules; track rule.id) {
           <label

@@ -11,7 +11,7 @@ import { DEFAULT_SQUARE_LIMIT, MAX_SQUARE_LIMIT, clampSquareLimit } from '../../
     <div>
       <div class="flex items-start justify-between gap-4">
         <div class="min-w-0">
-          <p class="qs-label mb-1.5 text-qs-muted">Limit squares per player</p>
+          <p class="qs-label mb-1.5 text-qs-ink">Limit squares per player</p>
           <p class="text-xs text-qs-muted">Each name can claim up to this many squares.</p>
         </div>
         <app-toggle [checked]="value !== null" (onChange)="toggle($event)"></app-toggle>
