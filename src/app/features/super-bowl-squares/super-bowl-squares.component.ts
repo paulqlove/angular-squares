@@ -834,6 +834,8 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       this.homeNumbers = Array(cols).fill(null);
       this.awayNumbers = Array(rows).fill(null);
       this.isRandomized = false;
+      // Winners belong to the numbers that were drawn, so they go with them
+      this.winners = {};
 
       // Clear animation state - set locked to true since empty cells are "done"
       this.displayHomeNumbers.set([...this.homeNumbers]);
@@ -847,7 +849,8 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       await this.gameService.updateGame(this.gameId, {
         homeNumbers: this.homeNumbers,
         awayNumbers: this.awayNumbers,
-        isRandomized: this.isRandomized
+        isRandomized: this.isRandomized,
+        winners: {}
       });
       return;
     }
@@ -1493,6 +1496,21 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     else if (final) this.linkedFinalEventId.set(eventId);
   }
 
+  /**
+   * ESPN's scoreboard only lists the current week, so a finished game can stop being found there.
+   * Its final scores are already saved on the board: the host's browser works the winners out from those.
+   */
+  private async recomputeWinnersIfFinal(): Promise<boolean> {
+    const id = this.espnEventId;
+    if (!id || !(this.isGameOwner() || this.isManager())) return false;
+    const final = this.linkedFinalEventId() === id || (await this.espnService.isEventFinal(id, this.espnSport)) === true;
+    if (!final || this.espnEventId !== id) return false;
+    this.linkedFinalEventId.set(id);
+    this.espnSyncError.set(null);
+    this.calculateWinnersFromEspn(4, true);
+    return true;
+  }
+
   async syncFromEspn(): Promise<void> {
     if (environment.serverScoring || !this.espnEventId) return;
 
@@ -1502,6 +1520,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     try {
       const game = await this.espnService.getGame(this.espnEventId, this.espnSport);
       if (!game) {
+        if (await this.recomputeWinnersIfFinal()) return;
         this.espnSyncError.set('Could not fetch game data from ESPN');
         return;
       }
