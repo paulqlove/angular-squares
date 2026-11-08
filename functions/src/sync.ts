@@ -1,3 +1,4 @@
+import { planAutoManage } from "./auto-manage";
 import { isSportType, SportType } from "./espn";
 import {
   boardFromRaw,
@@ -19,6 +20,7 @@ export interface SyncDeps {
   update: (updates: Record<string, unknown>) => Promise<void>;
   fetchScoreboard: (sport: SportType) => Promise<ParsedEspnGame[]>;
   log?: (message: string, details?: Record<string, unknown>) => void;
+  now?: () => number;
 }
 
 export interface SyncResult {
@@ -27,6 +29,7 @@ export interface SyncResult {
   boardsConsidered: number;
   boardsWritten: number;
   finalized: number;
+  autoManaged: number;
 }
 
 const ESPN_ID = /^[A-Za-z0-9_-]{1,50}$/;
@@ -62,6 +65,7 @@ export async function syncLiveScores(deps: SyncDeps): Promise<SyncResult> {
     boardsConsidered: boards.length,
     boardsWritten: 0,
     finalized: 0,
+    autoManaged: 0,
   };
   if (boards.length === 0) {
     deps.log?.("no live boards");
@@ -106,6 +110,13 @@ export async function syncLiveScores(deps: SyncDeps): Promise<SyncResult> {
 
         const plan = planBoardSync(game, snapshot);
         applyPlan(updates, espnId, board.boardId, plan, result);
+
+        const auto = planAutoManage(board.boardId, (raw ?? {}) as Record<string, unknown>, game, (deps.now ?? Date.now)());
+        if (auto) {
+          Object.assign(updates, auto);
+          result.autoManaged += 1;
+          deps.log?.("auto-manage ran", { boardId: board.boardId });
+        }
       }
     }
   }

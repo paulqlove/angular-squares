@@ -22,6 +22,7 @@ import { DEFAULT_EMPTY_QUARTER_RULE, Entitlement, EmptyQuarterRule, NO_EXPIRY, P
 import { AuthService } from './auth.service';
 import { shuffleSquares, smallerBoardSizes } from '../utils/shuffle-squares';
 import { OpenBoardRow, openBoardRows } from '../utils/open-boards';
+import { AutoManageResult, AutoManageSettings, readAutoManage, readAutoManageResult } from '../utils/auto-manage';
 import {
   BoardActivity,
   FREE_ACTIVE_BOARD_LIMIT,
@@ -90,6 +91,9 @@ export interface GameData {
   hostNote?: string;
   /** The host lets players on one of their full boards see and join this one. */
   showInOpenBoards?: boolean;
+  /** Lock and draw before kickoff (Season Pass). The server does the work. */
+  autoManage?: AutoManageSettings;
+  autoManageResult?: AutoManageResult;
   paidPlayers?: string[];
   espnEventId?: string | null;
   espnSport?: SportType | null;
@@ -126,6 +130,7 @@ export interface GameListItem {
   espnSport?: SportType;
   hostNote?: string;
   showInOpenBoards?: boolean;
+  autoManage?: AutoManageSettings;
   emptyQuarterRule?: EmptyQuarterRule;
   confirmedCount: number;
 }
@@ -463,6 +468,16 @@ export class GameService {
     });
   }
 
+  /** The host turns auto-manage on or off. Off clears the settings and cancels a pending run. */
+  async setAutoManage(gameId: string, settings: AutoManageSettings | null): Promise<void> {
+    if (!this.isBrowser) return;
+    if (this.authService.blockPreviewWrite()) throw new Error('Preview only');
+    await update(ref(this.db), {
+      [`games/${gameId}/autoManage`]: settings && settings.enabled ? { enabled: true, resize: !!settings.resize } : null,
+      [`games/${gameId}/autoManageResult`]: null
+    });
+  }
+
   /** The host turns "Show in my open boards" on or off for one board. */
   async setShowInOpenBoards(gameId: string, ownerId: string, on: boolean): Promise<void> {
     if (!this.isBrowser) return;
@@ -546,6 +561,8 @@ export class GameService {
           awayTeam: rawData.awayTeam || '',
           hostNote: rawData.hostNote || '',
           showInOpenBoards: !!rawData.showInOpenBoards,
+          autoManage: readAutoManage(rawData.autoManage),
+          autoManageResult: readAutoManageResult(rawData.autoManageResult),
           paidPlayers: rawData.paidPlayers || [],
           espnEventId: rawData.espnEventId || undefined,
           espnSport: rawData.espnSport || undefined,
@@ -702,6 +719,8 @@ export class GameService {
         awayTeam: rawData.awayTeam || '',
         hostNote: rawData.hostNote || '',
         showInOpenBoards: !!rawData.showInOpenBoards,
+        autoManage: readAutoManage(rawData.autoManage),
+        autoManageResult: readAutoManageResult(rawData.autoManageResult),
         paidPlayers: rawData.paidPlayers || [],
         espnEventId: rawData.espnEventId || undefined,
         espnSport: rawData.espnSport || undefined,
@@ -778,6 +797,7 @@ export class GameService {
           espnSport: game.espnSport || undefined,
           hostNote: game.hostNote,
           showInOpenBoards: game.showInOpenBoards,
+          autoManage: game.autoManage,
           emptyQuarterRule: isEmptyQuarterRule(game.emptyQuarterRule) ? game.emptyQuarterRule : undefined,
           confirmedCount
         });
