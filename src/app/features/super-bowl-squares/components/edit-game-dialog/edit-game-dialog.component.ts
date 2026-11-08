@@ -91,7 +91,7 @@ export interface EditGameValues {
             }
 
             @if (canLimitSquares) {
-              <app-max-squares-field [value]="draft.maxSquaresPerPlayer" [boardSize]="boardSize" (valueChange)="draft.maxSquaresPerPlayer = $event"></app-max-squares-field>
+              <app-max-squares-field [value]="draft.maxSquaresPerPlayer" (valueChange)="draft.maxSquaresPerPlayer = $event"></app-max-squares-field>
             }
 
             @if (canAutoManage) {

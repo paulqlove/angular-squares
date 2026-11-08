@@ -26,8 +26,3 @@ export function clampSquareLimit(value: number): number {
 export function atSquareLimit(squares: Record<string, string> | null | undefined, name: string, limit: number | undefined): boolean {
   return limit !== undefined && squaresHeldBy(squares, name) >= limit;
 }
-
-/** "5 each fills the board with 20 players or more." A cap too tight for the room would stall the board. */
-export function squareLimitPreview(limit: number, boardSize: number): string {
-  return `${limit} each fills the board with ${Math.ceil(boardSize / limit)} players or more.`;
-}
