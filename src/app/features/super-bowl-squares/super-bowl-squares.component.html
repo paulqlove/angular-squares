@@ -114,8 +114,9 @@
     [boardName]="gameName"
     [canShowInOpenBoards]="canShowInOpenBoards()"
     [canAutoManage]="canAutoManage()"
+    [canLimitSquares]="isGameOwner() && planService.features().squareLimit"
     [autoRunText]="autoRunLabel(linkedEspnGame()?.date)"
-    [values]="{ awayTeam: awayTeam, homeTeam: homeTeam, pricePerSquare: currentPrice, hostNote: hostNote, quarterSplit: quarterSplit, emptyQuarterRule: emptyQuarterRule, newBoardSize: null, showInOpenBoards: showInOpenBoards, autoManage: !!autoManage }"
+    [values]="{ awayTeam: awayTeam, homeTeam: homeTeam, pricePerSquare: currentPrice, hostNote: hostNote, quarterSplit: quarterSplit, emptyQuarterRule: emptyQuarterRule, newBoardSize: null, showInOpenBoards: showInOpenBoards, autoManage: !!autoManage, maxSquaresPerPlayer: maxSquaresPerPlayer ?? null }"
     [canCustomSplit]="planService.features().customSplits"
     [splitLocked]="isRandomized"
     (closed)="showSettings.set(false)"
@@ -166,6 +167,9 @@
 
         <!-- Player Display / Input -->
         <div class="w-full sm:w-auto" data-walkthrough="player-name">
+          @if (squareCounter(); as counter) {
+            <p class="mb-1.5 text-center sm:text-right"><span class="qs-badge" [class.qs-badge-warn]="counter.full" [class.qs-badge-ok]="!counter.full">{{ counter.held }} of {{ counter.max }} squares</span></p>
+          }
           @if (currentUser()?.isGuest && currentUser()?.displayName) {
             <div class="flex items-center justify-center sm:justify-end gap-1.5">
               <span class="text-sm text-muted">Playing as:</span>

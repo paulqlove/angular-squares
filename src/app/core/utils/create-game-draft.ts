@@ -1,4 +1,5 @@
 import { DEFAULT_EMPTY_QUARTER_RULE, EmptyQuarterRule, QuarterSplit, isValidSplit } from '../plans';
+import { clampSquareLimit } from './square-limit';
 import type { BoardSize } from '../services/game.service';
 import type { SportType } from '../services/espn.service';
 
@@ -7,6 +8,8 @@ const MAX_AGE_MS = 2 * 60 * 60 * 1000;
 const AUTO_SUBMIT_MAX_AGE_MS = 15 * 60 * 1000;
 
 export interface CreateGameDraft {
+  /** Season Pass: most squares one name can claim, or null for no limit. */
+  maxSquaresPerPlayer: number | null;
   /** Season Pass: lock and draw before kickoff (needs a linked game). */
   autoManage: boolean;
   /** Set when the visitor pressed Create while signed out: finish the create after sign-in. */
@@ -28,6 +31,7 @@ export interface CreateGameDraft {
 }
 
 export interface CreateGameValues {
+  maxSquaresPerPlayer: number | null;
   autoManage: boolean;
   awayTeam?: string;
   boardSize: BoardSize;
@@ -57,6 +61,7 @@ export interface Sanitizer {
 export function emptyDraft(): CreateGameDraft {
   return {
     autoManage: false,
+    maxSquaresPerPlayer: null,
     autoSubmit: false,
     boardSize: 100,
     customAway: '',
@@ -88,7 +93,7 @@ export function isDefaultSplit(split: QuarterSplit | null): boolean {
 }
 
 /** Validates and cleans the form entries into what GameService.createGame needs. */
-export function buildCreateGameValues(draft: CreateGameDraft, sanitizer: Sanitizer, customSplitsAllowed: boolean): BuildResult {
+export function buildCreateGameValues(draft: CreateGameDraft, sanitizer: Sanitizer, customSplitsAllowed: boolean, customLimitAllowed = true): BuildResult {
   const name = sanitizer.sanitizeGameName(draft.name);
   if (!name) return { ok: false, reason: 'name' };
   const split = splitToTenths(draft.splitPct);
@@ -109,6 +114,7 @@ export function buildCreateGameValues(draft: CreateGameDraft, sanitizer: Sanitiz
   return {
     ok: true,
     values: {
+      maxSquaresPerPlayer: customLimitAllowed ? clampLimit(draft.maxSquaresPerPlayer) : null,
       autoManage: !!linked && draft.autoManage === true,
       awayTeam,
       boardSize: draft.boardSize,
@@ -162,4 +168,8 @@ export function clearCreateDraft(storage: Pick<Storage, 'removeItem'> = localSto
 /** True while the visitor pressed Create a moment ago and is still signing in. Stale drafts never create a board on their own. */
 export function isPendingAutoSubmit(draft: CreateGameDraft | null, now = Date.now()): draft is CreateGameDraft {
   return !!draft && draft.autoSubmit === true && now - draft.savedAt < AUTO_SUBMIT_MAX_AGE_MS;
+}
+
+function clampLimit(value: number | null | undefined): number | null {
+  return typeof value === 'number' && Number.isFinite(value) ? clampSquareLimit(value) : null;
 }

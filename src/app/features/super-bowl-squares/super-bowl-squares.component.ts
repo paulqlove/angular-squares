@@ -12,6 +12,7 @@ import { PreviewRole } from '../../core/services/role-preview.service';
 import { PlanService } from '../../core/services/plan.service';
 import { DEFAULT_EMPTY_QUARTER_RULE, EmptyQuarterRule, QuarterSplit, splitFractions } from '../../core/plans';
 import { AutoManageResult, AutoManageSettings, autoRunLabel } from '../../core/utils/auto-manage';
+import { atSquareLimit, squaresHeldBy } from '../../core/utils/square-limit';
 import { AdSlotComponent } from '../../components/ui/ad-slot/ad-slot.component';
 import { AuthService } from '../../core/services/auth.service';
 import { EspnService, EspnGame, SportType } from '../../core/services/espn.service';
@@ -245,6 +246,8 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   openBoards = signal<OpenBoardRow[]>([]);
   showInOpenBoards = false;
   readonly autoRunLabel = autoRunLabel;
+  /** Season Pass: most squares one name can claim here (undefined = no limit). */
+  maxSquaresPerPlayer: number | undefined;
   autoManage: AutoManageSettings | undefined;
   autoManageResult: AutoManageResult | undefined;
   private openBoardsFor = '';
@@ -390,6 +393,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           this.isLocked = data.isLocked || false;
           this.showInOpenBoards = !!data.showInOpenBoards;
           this.autoManage = data.autoManage;
+          this.maxSquaresPerPlayer = data.maxSquaresPerPlayer;
           this.autoManageResult = data.autoManageResult;
           this.loadOpenBoards();
           if (this.fullBoardNotice()) {
@@ -655,6 +659,11 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           this.showAlert = false;
         }, 3000);
       }
+      return;
+    }
+
+    if (this.limitAppliesToMe() && atSquareLimit(this.selectedSquares, sanitizedPlayer, this.maxSquaresPerPlayer)) {
+      this.toastService.warning(`You have ${this.maxSquaresPerPlayer} of ${this.maxSquaresPerPlayer} squares. Tap one of yours to give it back.`);
       return;
     }
 
@@ -1124,6 +1133,20 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     return this.isGameOwner() && this.planService.features().activeBoards > 1 && (this.showInOpenBoards || eligible);
   }
 
+  /** The host and co-host are never held to their own limit. */
+  limitAppliesToMe(): boolean {
+    return !!this.maxSquaresPerPlayer && !this.isGameOwner() && !this.isManager();
+  }
+
+  /** "3 of 5 squares" for the player's own name, or null when there is no limit. */
+  squareCounter(): { held: number; max: number; full: boolean } | null {
+    const max = this.maxSquaresPerPlayer;
+    const name = this.sanitizePlayerName(this.currentPlayer || '');
+    if (!max || !name || !this.limitAppliesToMe()) return null;
+    const held = squaresHeldBy(this.selectedSquares, name);
+    return { held, max, full: held >= max };
+  }
+
   /** The host can switch on lock-and-draw before kickoff: Season Pass, a linked game, numbers not drawn yet. */
   canAutoManage(): boolean {
     return this.isGameOwner() && this.planService.features().autoManage && !!this.espnEventId && !(this.isLocked && this.isRandomized);
@@ -1217,6 +1240,15 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           this.showInOpenBoards = values.showInOpenBoards;
         } catch {
           this.toastService.warning('Saved, but Show in my open boards could not be changed. Try again in a moment.');
+          return;
+        }
+      }
+      if (this.isGameOwner() && this.planService.features().squareLimit && (values.maxSquaresPerPlayer ?? undefined) !== this.maxSquaresPerPlayer) {
+        try {
+          await this.gameService.setSquareLimit(this.gameId, values.maxSquaresPerPlayer);
+          this.maxSquaresPerPlayer = values.maxSquaresPerPlayer ?? undefined;
+        } catch {
+          this.toastService.warning('Saved, but the squares limit could not be changed. Try again in a moment.');
           return;
         }
       }

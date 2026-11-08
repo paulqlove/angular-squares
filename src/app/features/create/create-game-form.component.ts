@@ -1,3 +1,4 @@
+import { MaxSquaresFieldComponent } from '../../components/ui/max-squares-field/max-squares-field.component';
 import { autoRunLabel } from '../../core/utils/auto-manage';
 import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -26,7 +27,7 @@ export interface CreateGameSubmit {
  */
 @Component({
   selector: 'app-create-game-form',
-  imports: [FormsModule, NgIconComponent, EmptyQuarterRuleComponent, ToggleComponent],
+  imports: [MaxSquaresFieldComponent, FormsModule, NgIconComponent, EmptyQuarterRuleComponent, ToggleComponent],
   providers: [provideIcons({ heroCheckCircle })],
   host: { class: 'contents' },
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -210,6 +211,11 @@ export interface CreateGameSubmit {
           <app-toggle [checked]="newGameShowInOpenBoards" (onChange)="newGameShowInOpenBoards = $event"></app-toggle>
         </div>
       }
+      @if (squareLimitAllowed) {
+        <div class="mt-5"><app-max-squares-field [value]="newGameMaxSquares" [boardSize]="newGameBoardSize" (valueChange)="newGameMaxSquares = $event"></app-max-squares-field></div>
+      } @else {
+        <p class="mt-5 text-sm text-qs-muted"><span class="qs-label mr-2 text-qs-ink">Limit squares per player</span>Comes with the Season Pass.</p>
+      }
     </section>
 
     <!-- 05 Quarter split -->
@@ -307,6 +313,8 @@ export class CreateGameFormComponent implements OnInit {
   @Input() autoManageAllowed = false;
   /** Auto-manage starts switched on for a new board unless the host turned it off in the profile menu. */
   @Input() autoManageDefault = true;
+  /** Season Pass hosts can limit squares per player. */
+  @Input() squareLimitAllowed = false;
   @Output() cancelled = new EventEmitter<void>();
   @Output() submitted = new EventEmitter<CreateGameSubmit>();
 
@@ -328,6 +336,7 @@ export class CreateGameFormComponent implements OnInit {
   newGameHostNote = '';
   newGameShowInOpenBoards = false;
   newGameAutoManage = false;
+  newGameMaxSquares: number | null = null;
   newGameName = '';
   newGamePaymentManager = '';
   newGamePrice = 10;
@@ -452,7 +461,7 @@ export class CreateGameFormComponent implements OnInit {
 
   submit(): void {
     const draft = this.toDraft();
-    const result = buildCreateGameValues(draft, this.sanitizer, this.customSplitsAllowed);
+    const result = buildCreateGameValues(draft, this.sanitizer, this.customSplitsAllowed, this.squareLimitAllowed);
     if (!result.ok) {
       if (result.reason === 'name') {
         this.gameNameError.set(true);
@@ -486,6 +495,7 @@ export class CreateGameFormComponent implements OnInit {
     this.newGameEmptyRule = draft.emptyRule;
     this.newGameShowInOpenBoards = draft.showInOpenBoards;
     this.newGameAutoManage = draft.autoManage;
+    this.newGameMaxSquares = draft.maxSquaresPerPlayer ?? null;
     if (draft.espnGame && draft.sport !== 'custom') {
       this.selectedEspnGameId = draft.espnGame.id;
       this.gameListOpen = false;
@@ -536,6 +546,7 @@ export class CreateGameFormComponent implements OnInit {
     return {
       ...emptyDraft(),
       autoManage: this.autoManageAllowed && this.newGameAutoManage,
+      maxSquaresPerPlayer: this.squareLimitAllowed ? this.newGameMaxSquares : null,
       boardSize: this.newGameBoardSize,
       customAway: this.customAwayTeam,
       customHome: this.customHomeTeam,

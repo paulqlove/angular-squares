@@ -1,3 +1,4 @@
+import { MaxSquaresFieldComponent } from '../../../../components/ui/max-squares-field/max-squares-field.component';
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, HostListener, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
@@ -21,12 +22,14 @@ export interface EditGameValues {
   showInOpenBoards: boolean;
   /** Lock and draw before kickoff (Season Pass, linked game). */
   autoManage: boolean;
+  /** Season Pass: most squares one name can claim, or null for no limit. */
+  maxSquaresPerPlayer: number | null;
 }
 
 /** Owner-only "Edit game" popup. Edits a draft and saves once. */
 @Component({
   selector: 'app-edit-game-dialog',
-  imports: [FormsModule, NgIconComponent, EmptyQuarterRuleComponent, ToggleComponent],
+  imports: [MaxSquaresFieldComponent, FormsModule, NgIconComponent, EmptyQuarterRuleComponent, ToggleComponent],
   providers: [provideIcons({ heroXMark, heroTrash, heroLockClosed })],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
@@ -85,6 +88,10 @@ export interface EditGameValues {
                 </div>
                 <app-toggle [checked]="draft.showInOpenBoards" (onChange)="draft.showInOpenBoards = $event"></app-toggle>
               </div>
+            }
+
+            @if (canLimitSquares) {
+              <app-max-squares-field [value]="draft.maxSquaresPerPlayer" [boardSize]="boardSize" (valueChange)="draft.maxSquaresPerPlayer = $event"></app-max-squares-field>
             }
 
             @if (canAutoManage) {
@@ -183,6 +190,7 @@ export class EditGameDialogComponent implements OnChanges {
   @Input() boardSize: BoardSize = 100;
   @Input() canShowInOpenBoards = false;
   @Input() canAutoManage = false;
+  @Input() canLimitSquares = false;
   /** "Sun, Nov 8 at 7:25 PM": when auto-lock-and-draw would run. */
   @Input() autoRunText = '';
   @Input() canCustomSplit = false;
@@ -190,7 +198,7 @@ export class EditGameDialogComponent implements OnChanges {
   @Input() squaresFilled = 0;
   /** Splits lock once numbers are drawn. */
   @Input() splitLocked = false;
-  @Input() values: EditGameValues = { awayTeam: '', homeTeam: '', pricePerSquare: 10, hostNote: '', quarterSplit: null, emptyQuarterRule: DEFAULT_EMPTY_QUARTER_RULE, newBoardSize: null, showInOpenBoards: false, autoManage: false };
+  @Input() values: EditGameValues = { awayTeam: '', homeTeam: '', pricePerSquare: 10, hostNote: '', quarterSplit: null, emptyQuarterRule: DEFAULT_EMPTY_QUARTER_RULE, newBoardSize: null, showInOpenBoards: false, autoManage: false, maxSquaresPerPlayer: null };
 
   @Output() closed = new EventEmitter<void>();
   @Output() saved = new EventEmitter<EditGameValues>();
