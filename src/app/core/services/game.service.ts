@@ -499,6 +499,21 @@ export class GameService {
     });
   }
 
+  /** Auto-manage is on by default for new boards. A host can switch that off in the profile menu (users/{uid}/autoManageOff). */
+  async getAutoManageDefault(uid: string): Promise<boolean> {
+    if (!this.isBrowser || !uid) return true;
+    try {
+      return (await get(ref(this.db, `users/${uid}/autoManageOff`))).val() !== true;
+    } catch {
+      return true;
+    }
+  }
+
+  async setAutoManageDefault(uid: string, on: boolean): Promise<void> {
+    if (!this.isBrowser) return;
+    await update(ref(this.db), { [`users/${uid}/autoManageOff`]: on ? null : true });
+  }
+
   /** The host turns "Show in my open boards" on or off for one board. */
   async setShowInOpenBoards(gameId: string, ownerId: string, on: boolean): Promise<void> {
     if (!this.isBrowser) return;
