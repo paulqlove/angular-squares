@@ -52,6 +52,7 @@ import {
 
 type GameSort = 'newest' | 'oldest' | 'name' | 'players' | 'filled' | 'size';
 type GameStatusFilter = 'all' | 'open' | 'locked';
+type GameListingFilter = 'all' | 'public' | 'private';
 
 @Component({
     selector: 'app-dashboard',
@@ -293,7 +294,10 @@ type GameStatusFilter = 'all' | 'open' | 'locked';
                     <button type="button" class="qs-tab min-h-9 px-3" [attr.aria-pressed]="gameStatus() === f.value" (click)="gameStatus.set(f.value)">{{ f.label }}</button>
                   }
                 </div>
-                <app-dropdown class="ml-auto" [options]="sortOptions" [value]="gameSort()" (valueChange)="gameSort.set($any($event))" prefix="Sort: " ariaLabel="Sort boards"></app-dropdown>
+                <div class="ml-auto flex items-center">
+                  <app-dropdown [options]="listingOptions" [value]="gameListing()" (valueChange)="gameListing.set($any($event))" prefix="Listing: " ariaLabel="Filter by public or private"></app-dropdown>
+                  <app-dropdown [options]="sortOptions" [value]="gameSort()" (valueChange)="gameSort.set($any($event))" prefix="Sort: " ariaLabel="Sort boards"></app-dropdown>
+                </div>
               </div>
             }
 
@@ -808,6 +812,12 @@ export class DashboardComponent implements OnInit {
   gameSearch = signal('');
   gameSort = signal<GameSort>('newest');
   gameStatus = signal<GameStatusFilter>('all');
+  gameListing = signal<GameListingFilter>('all');
+  readonly listingOptions: { value: GameListingFilter; label: string }[] = [
+    { value: 'all', label: 'All boards' },
+    { value: 'public', label: 'Public (in More)' },
+    { value: 'private', label: 'Private' }
+  ];
   readonly sortOptions: { value: GameSort; label: string }[] = [
     { value: 'newest', label: 'Newest first' },
     { value: 'oldest', label: 'Oldest first' },
@@ -825,6 +835,7 @@ export class DashboardComponent implements OnInit {
   visibleMyGames = computed(() => {
     const query = this.gameSearch().trim().toLowerCase();
     const status = this.gameStatus();
+    const listing = this.gameListing();
     const fill = (g: GameListItem): number => g.squaresFilled / (g.boardSize || 100);
     const sorts: Record<GameSort, (a: GameListItem, b: GameListItem) => number> = {
       newest: (a, b) => b.createdAt - a.createdAt,
@@ -836,6 +847,7 @@ export class DashboardComponent implements OnInit {
     };
     return this.myGames()
       .filter(g => status === 'all' || (status === 'locked') === g.isLocked)
+      .filter(g => listing === 'all' || (listing === 'public') === !!g.showInOpenBoards)
       .filter(g => !query || [g.name, g.homeTeam, g.awayTeam, g.id].some(v => (v || '').toLowerCase().includes(query)))
       .sort(sorts[this.gameSort()]);
   });
@@ -965,6 +977,7 @@ export class DashboardComponent implements OnInit {
   clearGameFilters(): void {
     this.gameSearch.set('');
     this.gameStatus.set('all');
+    this.gameListing.set('all');
   }
 
   async loadMyGames(): Promise<void> {
