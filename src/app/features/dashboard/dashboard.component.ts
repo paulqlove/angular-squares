@@ -460,6 +460,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
             <app-create-game-form
               [customSplitsAllowed]="planService.features().customSplits"
               [openBoardsAllowed]="planService.features().activeBoards > 1"
+              [autoManageAllowed]="planService.features().autoManage"
               [isCreating]="isCreating()"
               (cancelled)="closeCreateModal()"
               (submitted)="createGame($event)"
@@ -1171,6 +1172,13 @@ export class DashboardComponent implements OnInit {
           await this.gameService.setShowInOpenBoards(gameId, user.uid, true);
         } catch {
           this.toastService.warning('Board created, but Show in my open boards could not be turned on. Try again in Edit.');
+        }
+      }
+      if (values.autoManage && this.planService.features().autoManage) {
+        try {
+          await this.gameService.setAutoManage(gameId, { enabled: true, resize: values.autoManageResize });
+        } catch {
+          this.toastService.warning('Board created, but Auto-manage could not be turned on. Try again in Edit.');
         }
       }
       this.showCreateModal.set(false);
