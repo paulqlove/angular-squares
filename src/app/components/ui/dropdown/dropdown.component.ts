@@ -14,12 +14,13 @@ export interface DropdownOption<T extends string = string> {
   providers: [provideIcons({ heroCheck, heroChevronDown })],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
-    <div class="relative inline-block">
+    <div class="relative" [class.inline-block]="!fill()">
       <button
         type="button"
-        class="qs-label inline-flex min-h-9 items-center gap-1.5 rounded-[4px] px-3 text-qs-muted decoration-qs-accent underline-offset-4 transition-colors hover:text-qs-ink hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-qs-accent"
+        class="qs-label inline-flex min-h-9 items-center gap-1.5 rounded-[4px] px-3 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-qs-accent"
+        [class]="fill() ? 'w-full justify-between border border-qs-line-strong bg-qs-panel-2 text-qs-ink' : 'text-qs-muted decoration-qs-accent underline-offset-4 hover:text-qs-ink hover:underline'"
         [class.text-qs-ink]="open()"
-        [class.underline]="open()"
+        [class.underline]="open() && !fill()"
         aria-haspopup="menu"
         [attr.aria-expanded]="open()"
         [attr.aria-label]="ariaLabel()"
@@ -29,7 +30,7 @@ export interface DropdownOption<T extends string = string> {
         <ng-icon name="heroChevronDown" class="text-xs transition-transform duration-150" [class.rotate-180]="open()" aria-hidden="true"></ng-icon>
       </button>
       @if (open()) {
-        <div role="menu" class="animate-menu-in absolute right-0 z-30 mt-1.5 min-w-full w-max overflow-hidden rounded-inner border border-qs-line-strong bg-qs-panel p-1 shadow-pop">
+        <div role="menu" class="animate-menu-in absolute z-30 mt-1.5 min-w-full w-max overflow-hidden rounded-inner border border-qs-line-strong bg-qs-panel p-1 shadow-pop" [class.left-0]="fill()" [class.right-0]="!fill()">
           @for (o of options(); track o.value) {
             <button
               type="button"
@@ -51,6 +52,7 @@ export interface DropdownOption<T extends string = string> {
   `
 })
 export class DropdownComponent {
+  fill = input(false);
   ariaLabel = input<string>('');
   options = input<DropdownOption[]>([]);
   prefix = input<string>('');
