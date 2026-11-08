@@ -172,7 +172,7 @@
         <section class="lg:col-span-7" data-walkthrough="game-board" aria-labelledby="board-heading">
           <div class="mb-3 flex items-baseline justify-between border-b border-qs-line pb-3">
             <h3 id="board-heading" class="qs-eyebrow qs-eyebrow-bar">01 / Board</h3>
-            <span class="qs-label text-qs-muted">{{ filledCount() }}/100 picked</span>
+            <span class="qs-label text-qs-muted">{{ filledCount() }}/{{ boardSize }} picked</span>
           </div>
           <div class="qs-card p-3 sm:p-5">
             <!-- Tabs -->
@@ -260,6 +260,7 @@
           </div>
           <div class="qs-card flex min-h-0 flex-1 flex-col overflow-hidden">
             <app-game-status class="shrink-0"
+              [boardSize]="boardSize"
               [selectedSquares]="selectedSquares"
               [playerStats]="playerStats"
               [paidPlayers]="paidPlayers">

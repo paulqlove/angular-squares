@@ -12,17 +12,19 @@ export class GameStatusComponent {
   @Input() selectedSquares!: Record<string, string>;
   @Input() playerStats!: Record<string, PlayerStats>;
   @Input() paidPlayers!: Set<string>;
+  /** Squares on the board: 25, 50 or 100. */
+  @Input() boardSize = 100;
 
   get filledSquares(): number {
     return Object.keys(this.selectedSquares).length;
   }
 
   get remainingSquares(): number {
-    return 100 - this.filledSquares;
+    return this.boardSize - this.filledSquares;
   }
 
   get percentComplete(): number {
-    return Math.round((this.filledSquares / 100) * 100);
+    return Math.round((this.filledSquares / this.boardSize) * 100);
   }
 
   get totalPlayers(): number {
