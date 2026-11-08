@@ -618,7 +618,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked';
 
               <!-- Show in my open boards: only for hosts who can run several boards -->
               @if (editingGame(); as og) {
-                @if (planService.features().activeBoards > 1 && (og.showInOpenBoards || (!og.isLocked && !editBoardRandomized() && og.squaresFilled < og.boardSize))) {
+                @if (planService.features().activeBoards > 1 && (og.showInOpenBoards || (!og.isLocked && og.squaresFilled < og.boardSize))) {
                   <div class="flex items-start justify-between gap-4">
                     <div class="min-w-0">
                       <label class="block text-sm font-semibold text-label mb-1">Show in my open boards</label>

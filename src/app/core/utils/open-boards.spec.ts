@@ -16,12 +16,16 @@ describe('openBoardRows', () => {
     expect(rows[0]).toMatchObject({ taken: 10, size: 100, open: 90, pricePerSquare: 100, totalPoints: 10000 });
   });
 
-  it('skips the current board, boards not opted in, locked, drawn, full or missing', () => {
+  it('skips the current board, boards not opted in, locked, full or missing', () => {
     const rows = openBoardRows([
       game('here'), game('off', { showInOpenBoards: false }), game('locked', { isLocked: true }),
-      game('drawn', { isRandomized: true }), game('full', {}, 100), null, game('ok')
+      game('full', {}, 100), null, game('ok')
     ], 'here');
     expect(rows.map(r => r.id)).toEqual(['ok']);
+  });
+
+  it('keeps an unlocked board with open squares even when its numbers are drawn', () => {
+    expect(openBoardRows([game('drawn', { isRandomized: true })], 'x').map(r => r.id)).toEqual(['drawn']);
   });
 
   it('uses the board size for 25 and 50 square boards', () => {
