@@ -75,30 +75,20 @@
   position: relative;
 }
 
-/* Current leader: no border. A light emerald wash sits behind the player's name (negative z-index inside the cell's own
-   stacking context), so the text never changes. The row and column headers already point at it. */
+/* Current leader: no border and no overlay. The cell's own colour sits a touch deeper than its neighbours. */
 .square-leader {
   z-index: 2;
   position: relative;
+  filter: brightness(0.92);
 }
 
-.square-leader::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: var(--qs-accent);
-  opacity: 0.1;
+/* A live game: that colour breathes slowly deeper and back for about 22 seconds (5 cycles of 4.5s), then rests.
+   Only brightness animates, so nothing moves. Reduced motion collapses it to the still, slightly deeper colour. */
+.square-live {
+  animation: qs-live-breathe 4.5s ease-in-out 5 both;
 }
 
-/* A live game: that wash breathes slowly for about 22 seconds (5 cycles of 4.5s), then rests. Only its opacity animates.
-   Reduced motion collapses it to the still wash. */
-.square-live::before {
-  animation: qs-live-wash 4.5s ease-in-out 5 both;
-}
-
-@keyframes qs-live-wash {
-  0%, 100% { opacity: 0.1; }
-  50% { opacity: 0.2; }
+@keyframes qs-live-breathe {
+  0%, 100% { filter: brightness(0.92); }
+  50% { filter: brightness(0.8); }
 }
