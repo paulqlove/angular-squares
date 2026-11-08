@@ -75,10 +75,20 @@
   position: relative;
 }
 
-/* Current leader: 3px emerald ring, no scaling or glow */
+/* Current leader: no border and no overlay. The cell's own colour sits a touch deeper than its neighbours. */
 .square-leader {
   z-index: 2;
   position: relative;
-  outline: 3px solid var(--qs-accent) !important;
-  outline-offset: -3px !important;
+  filter: brightness(0.92);
+}
+
+/* A live game: that colour breathes slowly deeper and back for about 22 seconds (5 cycles of 4.5s), then rests.
+   Only brightness animates, so nothing moves. Reduced motion collapses it to the still, slightly deeper colour. */
+.square-live {
+  animation: qs-live-breathe 4.5s ease-in-out 5 both;
+}
+
+@keyframes qs-live-breathe {
+  0%, 100% { filter: brightness(0.92); }
+  50% { filter: brightness(0.8); }
 }

@@ -20,6 +20,8 @@ export class GameBoardComponent {
   @Input() selectedPlayer: string | null = null;
   @Input() highlightedSquare: string | null = null;
   @Input() currentLeaderSquare: string | null = null;
+  /** The game is in progress: the leader square breathes for a while. */
+  @Input() liveScore = false;
   @Input() winnerSquares: string[] = [];
   @Input() isRandomized: boolean = false;
   @Input() boardSize: BoardSize = 100;
@@ -98,7 +100,7 @@ export class GameBoardComponent {
       return `${baseColor} opacity-25`;
     }
 
-    const leader = !this.highlightedSquare && key === this.currentLeaderSquare ? ' square-leader' : '';
+    const leader = !this.highlightedSquare && key === this.currentLeaderSquare ? ' square-leader' + (this.liveScore ? ' square-live' : '') : '';
     return baseColor + leader;
   }
 
