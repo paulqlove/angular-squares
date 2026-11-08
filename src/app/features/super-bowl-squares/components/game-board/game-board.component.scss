@@ -75,10 +75,28 @@
   position: relative;
 }
 
-/* Current leader: 3px emerald ring, no scaling or glow */
+/* Current leader: 3px emerald ring with a thin white inner ring so it reads on every player colour. No scaling. */
 .square-leader {
   z-index: 2;
   position: relative;
   outline: 3px solid var(--qs-accent) !important;
   outline-offset: -3px !important;
+  box-shadow: inset 0 0 0 5px #fff;
+}
+
+/* A live game: a soft emerald band just inside the ring breathes for about 20 seconds (7 cycles), then rests.
+   Only this overlay animates; the ring and the name never move. Reduced motion collapses it to the still ring. */
+.square-live::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 6px var(--qs-accent);
+  opacity: 0;
+  animation: qs-live-breathe 2.8s ease-in-out 7 both;
+}
+
+@keyframes qs-live-breathe {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 0.32; }
 }

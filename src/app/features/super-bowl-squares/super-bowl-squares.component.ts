@@ -1113,6 +1113,11 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     return this.isGameOwner() && this.planService.features().activeBoards > 1 && (this.showInOpenBoards || eligible);
   }
 
+  /** The linked ESPN game is being played right now. */
+  isLiveGame(): boolean {
+    return this.linkedEspnGame()?.status === 'in';
+  }
+
   trackOtherBoardJoin(): void {
     this.gameService.recordBoardStatOnce(this.gameId, 'otherBoardJoins');
   }

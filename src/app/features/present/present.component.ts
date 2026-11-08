@@ -235,6 +235,11 @@ export class PresentComponent implements OnInit, OnDestroy {
     return quarterLabel(quarter, this.gameOver());
   }
 
+  protected isLive(): boolean {
+    const g = this.game();
+    return (g?.espnLive ?? this.espnGame())?.status === 'in';
+  }
+
   protected live(): { home: number; away: number; status: string } | null {
     const g = this.game();
     if (!g) return null;
