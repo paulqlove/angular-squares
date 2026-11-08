@@ -100,7 +100,7 @@ export class GameBoardComponent {
       return `${baseColor} opacity-25`;
     }
 
-    const leader = !this.highlightedSquare && key === this.currentLeaderSquare ? ' square-leader' + (this.liveScore ? ' square-live' : '') : '';
+    const leader = !this.highlightedSquare && key === this.currentLeaderSquare ? ' square-leader' + (player ? '' : ' square-leader-empty') + (this.liveScore ? ' square-live' : '') : '';
     return baseColor + leader;
   }
 
