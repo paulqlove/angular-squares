@@ -1112,7 +1112,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   /** Whether this board can be shown to players on the host's full boards. */
   canShowInOpenBoards(): boolean {
     const { rows, cols } = getBoardDimensions(this.boardSize);
-    const eligible = !this.isLocked && !this.isRandomized && this.squaresPicked() < rows * cols;
+    const eligible = !this.isLocked && this.squaresPicked() < rows * cols;
     return this.isGameOwner() && this.planService.features().activeBoards > 1 && (this.showInOpenBoards || eligible);
   }
 
