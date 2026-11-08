@@ -823,7 +823,7 @@ export class DashboardComponent implements OnInit {
     { value: 'open', label: 'Open' },
     { value: 'locked', label: 'Locked' },
     { value: 'private', label: 'Private' },
-    { value: 'public', label: 'Public (in More)' }
+    { value: 'public', label: 'Public' }
   ];
   /** Hosted boards after the search, status filter and sort. */
   visibleMyGames = computed(() => {
