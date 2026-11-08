@@ -185,17 +185,17 @@
           <div class="qs-card p-3 sm:p-5">
             <!-- Tabs -->
             <div class="mb-4 flex flex-wrap gap-2" role="tablist">
-              <button (click)="activeTab = 'board'" role="tab" [attr.aria-selected]="activeTab === 'board'" class="qs-tab px-3 sm:px-4">Board</button>
-              <button (click)="activeTab = 'probabilities'" role="tab" [attr.aria-selected]="activeTab === 'probabilities'" class="qs-tab px-3 sm:px-4">Heatmap</button>
-              <button (click)="activeTab = 'boxscore'" role="tab" [attr.aria-selected]="activeTab === 'boxscore'" class="qs-tab px-3 sm:px-4">Box score</button>
+              <button (click)="selectTab('board')" role="tab" [attr.aria-selected]="activeTab === 'board'" class="qs-tab px-3 sm:px-4">Board</button>
+              <button (click)="selectTab('probabilities')" role="tab" [attr.aria-selected]="activeTab === 'probabilities'" class="qs-tab px-3 sm:px-4">Heatmap</button>
+              <button (click)="selectTab('boxscore')" role="tab" [attr.aria-selected]="activeTab === 'boxscore'" class="qs-tab px-3 sm:px-4">Box score</button>
               @if (openBoards().length) {
-                <button (click)="activeTab = 'more'" role="tab" [attr.aria-selected]="activeTab === 'more'" class="qs-tab px-3 sm:px-4">More</button>
+                <button (click)="selectTab('more')" role="tab" [attr.aria-selected]="activeTab === 'more'" class="qs-tab px-3 sm:px-4">More</button>
               }
             </div>
 
             <!-- Tab Content. On desktop every tab sits in the same grid cell, and the Board stays in place (hidden while another tab shows), so the card always keeps the Board's height and nothing below it moves. -->
             <div class="lg:grid">
-              <div class="[grid-area:1/1]" [class]="activeTab === 'board' ? '' : 'max-lg:hidden lg:invisible'" [attr.aria-hidden]="activeTab === 'board' ? null : 'true'">
+              <div class="[grid-area:1/1]" [class]="activeTab === 'board' ? (tabTouched ? 'qs-tab-in' : '') : 'max-lg:hidden lg:invisible'" [attr.aria-hidden]="activeTab === 'board' ? null : 'true'">
                 <app-game-board
                   [selectedSquares]="selectedSquares"
                   [playerColors]="playerColors"
@@ -215,7 +215,7 @@
                 </app-game-board>
               </div>
               @if (activeTab !== 'board') {
-                <div class="[grid-area:1/1]">
+                <div class="[grid-area:1/1]" animate.enter="qs-tab-in">
                   @if (activeTab === 'more') {
                     <app-open-boards-list [rows]="openBoards()" (picked)="trackOtherBoardJoin()"></app-open-boards-list>
                   } @else if (activeTab === 'probabilities') {
