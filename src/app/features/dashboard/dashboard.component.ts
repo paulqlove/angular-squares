@@ -1,3 +1,4 @@
+import { MaxSquaresFieldComponent } from '../../components/ui/max-squares-field/max-squares-field.component';
 import { autoRunLabel } from '../../core/utils/auto-manage';
 import { Component, OnInit, signal, computed, inject, effect, HostListener, ChangeDetectionStrategy } from '@angular/core';
 
@@ -56,7 +57,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
 
 @Component({
     selector: 'app-dashboard',
-    imports: [FormsModule, NgTemplateOutlet, DropdownComponent, ToggleComponent, CreateGameFormComponent, NgIconComponent, AppHeaderComponent, HeadroomDirective, HelpMenuComponent, ProfileMenuComponent, ShareDialogComponent, EmptyQuarterRuleComponent, UpgradePassDialogComponent],
+    imports: [MaxSquaresFieldComponent, FormsModule, NgTemplateOutlet, DropdownComponent, ToggleComponent, CreateGameFormComponent, NgIconComponent, AppHeaderComponent, HeadroomDirective, HelpMenuComponent, ProfileMenuComponent, ShareDialogComponent, EmptyQuarterRuleComponent, UpgradePassDialogComponent],
     providers: [
         provideIcons({
             heroPlus,
@@ -485,6 +486,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
               [openBoardsAllowed]="planService.features().activeBoards > 1"
               [autoManageAllowed]="planService.features().autoManage"
               [autoManageDefault]="autoManageDefault()"
+              [squareLimitAllowed]="planService.features().squareLimit"
               [isCreating]="isCreating()"
               (cancelled)="closeCreateModal()"
               (submitted)="createGame($event)"
@@ -659,6 +661,11 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
                     <app-toggle [checked]="editShowInOpenBoards" (onChange)="editShowInOpenBoards = $event"></app-toggle>
                   </div>
                 }
+              }
+
+              <!-- Limit squares per player: Season Pass -->
+              @if (planService.features().squareLimit && editingGame(); as lg) {
+                <app-max-squares-field [value]="editMaxSquares" [boardSize]="lg.boardSize" (valueChange)="editMaxSquares = $event"></app-max-squares-field>
               }
 
               <!-- Auto-manage: Season Pass, a linked game, board not locked yet -->
@@ -933,6 +940,7 @@ export class DashboardComponent implements OnInit {
   editShowInOpenBoards = false;
   autoManageDefault = signal(true);
   editAutoManage = false;
+  editMaxSquares: number | null = null;
   editAutoRunText(): string {
     return autoRunLabel(this.editEspnGames().find(g => g.id === this.editEspnGameId)?.date);
   }
@@ -1203,6 +1211,13 @@ export class DashboardComponent implements OnInit {
           this.toastService.warning('Board created, but Show in my open boards could not be turned on. Try again in Edit.');
         }
       }
+      if (values.maxSquaresPerPlayer && this.planService.features().squareLimit) {
+        try {
+          await this.gameService.setSquareLimit(gameId, values.maxSquaresPerPlayer);
+        } catch {
+          this.toastService.warning('Board created, but the squares limit could not be set. Try again in Edit.');
+        }
+      }
       if (values.autoManage && this.planService.features().autoManage) {
         try {
           await this.gameService.setAutoManage(gameId, { enabled: true, resize: true }, values.kickoffAt);
@@ -1322,6 +1337,7 @@ export class DashboardComponent implements OnInit {
     this.editBoardRandomized.set(false);
     this.editShowInOpenBoards = !!game.showInOpenBoards;
     this.editAutoManage = !!game.autoManage;
+    this.editMaxSquares = game.maxSquaresPerPlayer ?? null;
     this.managerSearchQuery = '';
     this.managerSearchResults.set([]);
     this.selectedManagerIndex.set(-1);
@@ -1515,6 +1531,15 @@ export class DashboardComponent implements OnInit {
           this.toastService.warning('Saved, but Show in my open boards could not be changed. Try again in a moment.');
         }
       }
+      let limitApplied = game.maxSquaresPerPlayer;
+      if (this.planService.features().squareLimit && (this.editMaxSquares ?? undefined) !== game.maxSquaresPerPlayer) {
+        try {
+          await this.gameService.setSquareLimit(game.id, this.editMaxSquares);
+          limitApplied = this.editMaxSquares ?? undefined;
+        } catch {
+          this.toastService.warning('Saved, but the squares limit could not be changed. Try again in a moment.');
+        }
+      }
       let autoApplied = game.autoManage;
       const wantAuto = this.planService.features().autoManage && !!this.editEspnGameId && this.editAutoManage;
       if (!!wantAuto !== !!game.autoManage || (wantAuto && espnChanged)) {
@@ -1533,6 +1558,7 @@ export class DashboardComponent implements OnInit {
           ...(newSize ? { boardSize: newSize } : {}),
           showInOpenBoards: showApplied,
           autoManage: autoApplied,
+          maxSquaresPerPlayer: limitApplied,
           name: sanitizedName,
           pricePerSquare: sanitizedPrice,
           hostNote: sanitizedHostNote,

@@ -107,4 +107,15 @@ describe('splitToTenths', () => {
     const custom = buildCreateGameValues({ ...emptyDraft(), name: 'Game', sport: 'custom', autoManage: true }, sanitizer, true);
     expect(custom.ok && custom.values.autoManage).toBe(false);
   });
+
+  it('carries the squares limit only when allowed, clamped to 1 to 25', () => {
+    const on = buildCreateGameValues({ ...emptyDraft(), name: 'Game', maxSquaresPerPlayer: 5 }, sanitizer, true, true);
+    expect(on.ok && on.values.maxSquaresPerPlayer).toBe(5);
+    const high = buildCreateGameValues({ ...emptyDraft(), name: 'Game', maxSquaresPerPlayer: 99 }, sanitizer, true, true);
+    expect(high.ok && high.values.maxSquaresPerPlayer).toBe(25);
+    const none = buildCreateGameValues({ ...emptyDraft(), name: 'Game' }, sanitizer, true, true);
+    expect(none.ok && none.values.maxSquaresPerPlayer).toBeNull();
+    const free = buildCreateGameValues({ ...emptyDraft(), name: 'Game', maxSquaresPerPlayer: 5 }, sanitizer, true, false);
+    expect(free.ok && free.values.maxSquaresPerPlayer).toBeNull();
+  });
 });

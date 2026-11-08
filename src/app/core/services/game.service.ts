@@ -22,6 +22,7 @@ import { DEFAULT_EMPTY_QUARTER_RULE, Entitlement, EmptyQuarterRule, NO_EXPIRY, P
 import { AuthService } from './auth.service';
 import { shuffleSquares, smallerBoardSizes } from '../utils/shuffle-squares';
 import { OpenBoardRow, openBoardRows } from '../utils/open-boards';
+import { readSquareLimit } from '../utils/square-limit';
 import { AUTO_MANAGE_DELAY_MS, AutoManageResult, AutoManageSettings, readAutoManage, readAutoManageResult } from '../utils/auto-manage';
 import {
   BoardActivity,
@@ -94,6 +95,8 @@ export interface GameData {
   /** Lock and draw before kickoff (Season Pass). The server does the work. */
   autoManage?: AutoManageSettings;
   autoManageResult?: AutoManageResult;
+  /** Season Pass: most squares one name can claim on this board. */
+  maxSquaresPerPlayer?: number;
   paidPlayers?: string[];
   espnEventId?: string | null;
   espnSport?: SportType | null;
@@ -131,6 +134,7 @@ export interface GameListItem {
   hostNote?: string;
   showInOpenBoards?: boolean;
   autoManage?: AutoManageSettings;
+  maxSquaresPerPlayer?: number;
   emptyQuarterRule?: EmptyQuarterRule;
   confirmedCount: number;
 }
@@ -499,6 +503,13 @@ export class GameService {
     });
   }
 
+  /** Sets or clears the most squares one name can claim on a board (Season Pass; the database rule checks the pass). */
+  async setSquareLimit(gameId: string, limit: number | null): Promise<void> {
+    if (!this.isBrowser) return;
+    if (this.authService.blockPreviewWrite()) throw new Error('Preview only');
+    await update(ref(this.db), { [`games/${gameId}/maxSquaresPerPlayer`]: limit === null ? null : limit });
+  }
+
   /** Auto-manage is on by default for new boards. A host can switch that off in the profile menu (users/{uid}/autoManageOff). */
   async getAutoManageDefault(uid: string): Promise<boolean> {
     if (!this.isBrowser || !uid) return true;
@@ -599,6 +610,7 @@ export class GameService {
           showInOpenBoards: !!rawData.showInOpenBoards,
           autoManage: readAutoManage(rawData.autoManage),
           autoManageResult: readAutoManageResult(rawData.autoManageResult),
+          maxSquaresPerPlayer: readSquareLimit(rawData.maxSquaresPerPlayer),
           paidPlayers: rawData.paidPlayers || [],
           espnEventId: rawData.espnEventId || undefined,
           espnSport: rawData.espnSport || undefined,
@@ -757,6 +769,7 @@ export class GameService {
         showInOpenBoards: !!rawData.showInOpenBoards,
         autoManage: readAutoManage(rawData.autoManage),
         autoManageResult: readAutoManageResult(rawData.autoManageResult),
+        maxSquaresPerPlayer: readSquareLimit(rawData.maxSquaresPerPlayer),
         paidPlayers: rawData.paidPlayers || [],
         espnEventId: rawData.espnEventId || undefined,
         espnSport: rawData.espnSport || undefined,
@@ -834,6 +847,7 @@ export class GameService {
           hostNote: game.hostNote,
           showInOpenBoards: game.showInOpenBoards,
           autoManage: game.autoManage,
+          maxSquaresPerPlayer: game.maxSquaresPerPlayer,
           emptyQuarterRule: isEmptyQuarterRule(game.emptyQuarterRule) ? game.emptyQuarterRule : undefined,
           confirmedCount
         });
