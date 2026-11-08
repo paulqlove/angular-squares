@@ -46,3 +46,4 @@
 /football-squares-on-tv
 /terms
 /privacy
+/contact
