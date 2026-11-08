@@ -250,6 +250,8 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   private openBoardsFor = '';
   private openBoardsLoad: Promise<OpenBoardRow[]> | null = null;
   isLoading = signal(true);
+  /** Placeholder cells for the loading skeleton: an 11 by 11 board. */
+  readonly skeletonCells = Array.from({ length: 121 }, (_, i) => i);
   gameNotFound = signal(false);
   showShareModal = signal(false);
   showNameEditModal = signal(false);

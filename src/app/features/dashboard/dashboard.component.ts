@@ -305,9 +305,31 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
             }
 
             @if (isLoadingGames()) {
-              <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3" aria-busy="true">
+              <div class="qs-skel-delay mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3" aria-busy="true">
                 @for (i of [0, 1, 2]; track i) {
-                  <div class="qs-card h-64 animate-pulse bg-qs-panel-2"></div>
+                  <article class="qs-card p-5" aria-hidden="true">
+                    <div class="flex items-center justify-between gap-3">
+                      <div class="qs-skel h-5 w-16"></div>
+                      <div class="qs-skel h-5 w-12"></div>
+                    </div>
+                    <div class="qs-skel mt-4 h-6 w-2/5"></div>
+                    <div class="qs-skel mt-2 h-4 w-3/5"></div>
+                    <div class="mt-5 flex items-center gap-5">
+                      <div class="qs-skel h-20 w-20 shrink-0"></div>
+                      @for (j of [0, 1, 2]; track j) {
+                        <div class="space-y-2">
+                          <div class="qs-skel h-3 w-14"></div>
+                          <div class="qs-skel h-6 w-10"></div>
+                        </div>
+                      }
+                    </div>
+                    <div class="mt-5 flex items-center gap-3 border-t border-qs-line pt-5">
+                      <div class="qs-skel h-12 flex-1"></div>
+                      <div class="qs-skel h-9 w-9 rounded-full"></div>
+                      <div class="qs-skel h-9 w-9 rounded-full"></div>
+                      <div class="qs-skel h-9 w-9 rounded-full"></div>
+                    </div>
+                  </article>
                 }
               </div>
             } @else if (myGames().length === 0) {
