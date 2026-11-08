@@ -75,20 +75,35 @@
   position: relative;
 }
 
-/* Current leader: no border and no overlay. The cell's own colour sits a touch deeper than its neighbours. */
+/* Current leader: no border and no overlay. The cell's own colour sits a touch off from its neighbours: deeper in the
+   light theme, lighter in the dark theme (see --qs-pulse-* in styles.scss). Empty cells get their own, stronger values
+   because an empty dark cell barely changes with small steps. */
 .square-leader {
   z-index: 2;
   position: relative;
-  filter: brightness(0.92);
+  filter: brightness(var(--qs-pulse-rest));
 }
 
-/* A live game: that colour breathes slowly deeper and back for about 22 seconds (5 cycles of 4.5s), then rests.
-   Only brightness animates, so nothing moves. Reduced motion collapses it to the still, slightly deeper colour. */
+.square-leader-empty {
+  filter: brightness(var(--qs-pulse-empty-rest));
+}
+
+/* A live game: that colour breathes slowly for about 22 seconds (5 cycles of 4.5s), then rests.
+   Only brightness animates, so nothing moves. Reduced motion collapses it to the still, off-tone colour. */
 .square-live {
   animation: qs-live-breathe 4.5s ease-in-out 5 both;
 }
 
+.square-live.square-leader-empty {
+  animation-name: qs-live-breathe-empty;
+}
+
 @keyframes qs-live-breathe {
-  0%, 100% { filter: brightness(0.92); }
-  50% { filter: brightness(0.8); }
+  0%, 100% { filter: brightness(var(--qs-pulse-rest)); }
+  50% { filter: brightness(var(--qs-pulse-peak)); }
+}
+
+@keyframes qs-live-breathe-empty {
+  0%, 100% { filter: brightness(var(--qs-pulse-empty-rest)); }
+  50% { filter: brightness(var(--qs-pulse-empty-peak)); }
 }

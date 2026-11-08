@@ -16,6 +16,10 @@ html, body {
  */
 
 :root {
+  /* live score cell: brightness at rest and at the deepest point of the breath (light theme dims the cell) */
+  --qs-pulse-rest: 0.92; --qs-pulse-peak: 0.8;
+  --qs-pulse-empty-rest: 0.92; --qs-pulse-empty-peak: 0.8;
+
   /* type */
   --qs-font-sans: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
   --qs-font-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
@@ -93,6 +97,7 @@ html, body {
 /* Dark mode = navy. Same as the TV view and the reversed logo. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
+    --qs-pulse-rest: 1.1; --qs-pulse-peak: 1.35; --qs-pulse-empty-rest: 1.5; --qs-pulse-empty-peak: 2.4; /* dark theme lightens the cell: dimming a dark cell is invisible */
     --qs-bg: #0f172a; --qs-panel: #1e293b; --qs-panel-2: #263244;
     --qs-canvas: #0b1220; --qs-canvas-dot: rgba(243,239,232,.12);
     --qs-ink: #f3efe8; --qs-muted: #94a3b8; --qs-line: #334155; --qs-line-strong: #64748b;
@@ -106,6 +111,7 @@ html, body {
   }
 }
 :root[data-theme="dark"] {
+  --qs-pulse-rest: 1.1; --qs-pulse-peak: 1.35; --qs-pulse-empty-rest: 1.5; --qs-pulse-empty-peak: 2.4; /* dark theme lightens the cell: dimming a dark cell is invisible */
   --qs-bg: #0f172a; --qs-panel: #1e293b; --qs-panel-2: #263244;
   --qs-canvas: #0b1220; --qs-canvas-dot: rgba(243,239,232,.12);
   --qs-ink: #f3efe8; --qs-muted: #94a3b8; --qs-line: #334155; --qs-line-strong: #64748b;
