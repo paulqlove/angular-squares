@@ -35,7 +35,7 @@ import { GameService } from '../../../core/services/game.service';
               <div class="flex items-stretch gap-2">
                 <code class="flex flex-1 items-center justify-center rounded-btn border border-qs-line bg-qs-panel-2 py-3 font-mono text-2xl font-semibold tracking-[0.3em] text-qs-ink">{{ gameId }}</code>
                 <button type="button" (click)="copy(gameId, 'code')" class="qs-btn qs-btn-primary min-w-28" aria-label="Copy game code">
-                  <ng-icon [name]="copied() === 'code' ? 'heroCheck' : 'heroClipboard'" class="text-base"></ng-icon>
+                  <ng-icon [name]="copied() === 'code' ? 'heroCheck' : 'heroClipboard'" [class.icon-pop]="copied() === 'code'" class="text-base"></ng-icon>
                   {{ copied() === 'code' ? 'Copied' : 'Copy' }}
                 </button>
               </div>
@@ -47,7 +47,7 @@ import { GameService } from '../../../core/services/game.service';
               <div class="flex items-stretch gap-2">
                 <input id="share-link" type="text" [value]="link" readonly class="qs-input min-w-0 flex-1 truncate text-sm text-qs-muted" (focus)="$any($event.target).select()" />
                 <button type="button" (click)="copy(link, 'link')" class="qs-btn qs-btn-primary min-w-28" aria-label="Copy share link">
-                  <ng-icon [name]="copied() === 'link' ? 'heroCheck' : 'heroClipboard'" class="text-base"></ng-icon>
+                  <ng-icon [name]="copied() === 'link' ? 'heroCheck' : 'heroClipboard'" [class.icon-pop]="copied() === 'link'" class="text-base"></ng-icon>
                   {{ copied() === 'link' ? 'Copied' : 'Copy' }}
                 </button>
               </div>
@@ -57,7 +57,7 @@ import { GameService } from '../../../core/services/game.service';
                 <div class="flex items-stretch gap-2">
                   <input id="share-tv-link" type="text" [value]="tvLink" readonly class="qs-input min-w-0 flex-1 truncate text-sm text-qs-muted" (focus)="$any($event.target).select()" />
                   <button type="button" (click)="copy(tvLink, 'tv')" class="qs-btn qs-btn-primary min-w-28" aria-label="Copy TV link">
-                    <ng-icon [name]="copied() === 'tv' ? 'heroCheck' : 'heroClipboard'" class="text-base"></ng-icon>
+                    <ng-icon [name]="copied() === 'tv' ? 'heroCheck' : 'heroClipboard'" [class.icon-pop]="copied() === 'tv'" class="text-base"></ng-icon>
                     {{ copied() === 'tv' ? 'Copied' : 'Copy' }}
                   </button>
                 </div>

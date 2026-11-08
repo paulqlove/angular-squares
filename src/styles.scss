@@ -456,6 +456,12 @@ body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
 .animate-modal-in { animation: qs-pop-in 200ms var(--qs-ease) both; }
 .animate-menu-in { animation: menu-in 120ms var(--qs-ease); }
 
+@keyframes qs-rise-in { from { opacity: 0; transform: translateY(6px); } }
+@keyframes qs-icon-pop { from { opacity: .4; transform: scale(.6); } }
+.qs-fade-rise { animation: qs-rise-in 180ms var(--qs-ease) both; }
+.qs-tab-in { animation: qs-rise-in 160ms var(--qs-ease) both; }
+.icon-pop { animation: qs-icon-pop 280ms var(--qs-ease-spring) both; }
+
 /* Buttons: a quick press */
 .qs-btn { transition-property: background-color, color, border-color, transform; }
 .qs-btn:active:not(:disabled) { transform: scale(.97); transition-duration: 80ms; transition-timing-function: var(--qs-ease-in); }

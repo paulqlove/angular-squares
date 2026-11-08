@@ -352,7 +352,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked';
       </main>
 
       <ng-template #gameCard let-game let-joined="joined">
-        <article class="qs-card row-span-4 mb-4 grid p-5 transition-colors [grid-template-rows:subgrid] [row-gap:0] hover:border-qs-line-strong">
+        <article animate.enter="qs-fade-rise" class="qs-card row-span-4 mb-4 grid p-5 transition-[transform,box-shadow,border-color] duration-200 ease-out [grid-template-rows:subgrid] [row-gap:0] hover:-translate-y-0.5 hover:border-qs-line-strong hover:shadow-card">
           <div class="flex items-center justify-between gap-3">
             <span class="qs-badge qs-badge-code font-mono">{{ game.id }}</span>
             @if (joined) {

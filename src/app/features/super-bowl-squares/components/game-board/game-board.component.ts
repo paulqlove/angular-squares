@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, computed } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, ChangeDetectorRef, OnChanges, OnDestroy, SimpleChanges, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BoardSize, getBoardDimensions } from '../../../../core/services/game.service';
 import { getTeamLogoByAbbreviation } from '../../../content/teams-data';
@@ -10,7 +10,12 @@ import { getTeamLogoByAbbreviation } from '../../../content/teams-data';
     changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./game-board.component.scss']
 })
-export class GameBoardComponent {
+export class GameBoardComponent implements OnChanges, OnDestroy {
+  private cdr = inject(ChangeDetectorRef);
+  private claimed = new Set<string>();
+  private claimTimer: ReturnType<typeof setTimeout> | null = null;
+  private previousSquares: { [key: string]: string } | null = null;
+
   @Input() homeTeam!: string;
   @Input() awayTeam!: string;
   @Input() homeNumbers!: (number | null)[];
@@ -82,6 +87,27 @@ export class GameBoardComponent {
     return this.awayNumbersLocked[index] ?? true;
   }
 
+  /** A square that was just picked flashes for a moment. Loads, refreshes and conversions (many at once) do not. */
+  ngOnChanges(changes: SimpleChanges): void {
+    if (!changes['selectedSquares']) return;
+    const next = this.selectedSquares ?? {};
+    const previous = this.previousSquares;
+    this.previousSquares = next;
+    if (!previous) return;
+    const changed = Object.keys(next).filter(key => previous[key] !== next[key]);
+    if (!changed.length || changed.length > 3) return;
+    this.claimed = new Set(changed);
+    if (this.claimTimer) clearTimeout(this.claimTimer);
+    this.claimTimer = setTimeout(() => {
+      this.claimed = new Set();
+      this.cdr.markForCheck();
+    }, 500);
+  }
+
+  ngOnDestroy(): void {
+    if (this.claimTimer) clearTimeout(this.claimTimer);
+  }
+
   @Output() squareClick = new EventEmitter<{ row: number; col: number }>();
 
   getSquareClass(row: number, col: number): string {
@@ -101,7 +127,7 @@ export class GameBoardComponent {
     }
 
     const leader = !this.highlightedSquare && key === this.currentLeaderSquare ? ' square-leader' + (player ? '' : ' square-leader-empty') + (this.liveScore ? ' square-live' : '') : '';
-    return baseColor + leader;
+    return baseColor + leader + (this.claimed.has(key) ? ' square-claimed' : '');
   }
 
   get leaderRow(): number | null {

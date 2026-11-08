@@ -107,3 +107,13 @@
   0%, 100% { filter: brightness(var(--qs-pulse-empty-rest)); }
   50% { filter: brightness(var(--qs-pulse-empty-peak)); }
 }
+
+/* A square that was just picked: a short, lighter flash that settles (brightness only, nothing moves) */
+.square-claimed {
+  animation: qs-claim 450ms var(--qs-ease) both;
+}
+
+@keyframes qs-claim {
+  0% { filter: brightness(1.4); }
+  100% { filter: brightness(1); }
+}

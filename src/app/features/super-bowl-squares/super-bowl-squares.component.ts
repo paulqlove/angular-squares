@@ -1116,6 +1116,14 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     return this.isGameOwner() && this.planService.features().activeBoards > 1 && (this.showInOpenBoards || eligible);
   }
 
+  /** True once the viewer has picked a tab, so switching fades the content in but the first paint does not. */
+  tabTouched = false;
+
+  selectTab(tab: 'board' | 'probabilities' | 'boxscore' | 'more'): void {
+    this.activeTab = tab;
+    this.tabTouched = true;
+  }
+
   /** The linked ESPN game is being played right now. */
   isLiveGame(): boolean {
     return this.linkedEspnGame()?.status === 'in';
