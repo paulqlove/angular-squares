@@ -51,8 +51,7 @@ import {
 } from '@ng-icons/heroicons/outline';
 
 type GameSort = 'newest' | 'oldest' | 'name' | 'players' | 'filled' | 'size';
-type GameStatusFilter = 'all' | 'open' | 'locked';
-type GameListingFilter = 'all' | 'public' | 'private';
+type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
 
 @Component({
     selector: 'app-dashboard',
@@ -289,13 +288,12 @@ type GameListingFilter = 'all' | 'public' | 'private';
             @if (!isLoadingGames() && myGames().length >= 5) {
               <div class="mt-4 flex flex-wrap items-center gap-2">
                 <input type="search" [value]="gameSearch()" (input)="gameSearch.set($any($event.target).value)" placeholder="Search by name or team" aria-label="Search your boards" class="qs-input min-h-9 min-w-0 flex-1 basis-full py-0 sm:basis-48" />
-                <div class="flex gap-1.5" role="group" aria-label="Filter by status">
+                <div class="flex flex-wrap gap-1.5" role="group" aria-label="Filter boards">
                   @for (f of statusFilters; track f.value) {
                     <button type="button" class="qs-tab min-h-9 px-3" [attr.aria-pressed]="gameStatus() === f.value" (click)="gameStatus.set(f.value)">{{ f.label }}</button>
                   }
                 </div>
                 <div class="ml-auto flex items-center">
-                  <app-dropdown [options]="listingOptions" [value]="gameListing()" (valueChange)="gameListing.set($any($event))" prefix="Listing: " ariaLabel="Filter by public or private"></app-dropdown>
                   <app-dropdown [options]="sortOptions" [value]="gameSort()" (valueChange)="gameSort.set($any($event))" prefix="Sort: " ariaLabel="Sort boards"></app-dropdown>
                 </div>
               </div>
@@ -812,12 +810,6 @@ export class DashboardComponent implements OnInit {
   gameSearch = signal('');
   gameSort = signal<GameSort>('newest');
   gameStatus = signal<GameStatusFilter>('all');
-  gameListing = signal<GameListingFilter>('all');
-  readonly listingOptions: { value: GameListingFilter; label: string }[] = [
-    { value: 'all', label: 'All boards' },
-    { value: 'public', label: 'Public (in More)' },
-    { value: 'private', label: 'Private' }
-  ];
   readonly sortOptions: { value: GameSort; label: string }[] = [
     { value: 'newest', label: 'Newest first' },
     { value: 'oldest', label: 'Oldest first' },
@@ -829,13 +821,14 @@ export class DashboardComponent implements OnInit {
   readonly statusFilters: { value: GameStatusFilter; label: string }[] = [
     { value: 'all', label: 'All' },
     { value: 'open', label: 'Open' },
-    { value: 'locked', label: 'Locked' }
+    { value: 'locked', label: 'Locked' },
+    { value: 'private', label: 'Private' },
+    { value: 'public', label: 'Public (in More)' }
   ];
   /** Hosted boards after the search, status filter and sort. */
   visibleMyGames = computed(() => {
     const query = this.gameSearch().trim().toLowerCase();
     const status = this.gameStatus();
-    const listing = this.gameListing();
     const fill = (g: GameListItem): number => g.squaresFilled / (g.boardSize || 100);
     const sorts: Record<GameSort, (a: GameListItem, b: GameListItem) => number> = {
       newest: (a, b) => b.createdAt - a.createdAt,
@@ -846,8 +839,7 @@ export class DashboardComponent implements OnInit {
       size: (a, b) => (b.boardSize || 100) - (a.boardSize || 100)
     };
     return this.myGames()
-      .filter(g => status === 'all' || (status === 'locked') === g.isLocked)
-      .filter(g => listing === 'all' || (listing === 'public') === !!g.showInOpenBoards)
+      .filter(g => status === 'all' || (status === 'public' ? !!g.showInOpenBoards : status === 'private' ? !g.showInOpenBoards : (status === 'locked') === g.isLocked))
       .filter(g => !query || [g.name, g.homeTeam, g.awayTeam, g.id].some(v => (v || '').toLowerCase().includes(query)))
       .sort(sorts[this.gameSort()]);
   });
@@ -977,7 +969,6 @@ export class DashboardComponent implements OnInit {
   clearGameFilters(): void {
     this.gameSearch.set('');
     this.gameStatus.set('all');
-    this.gameListing.set('all');
   }
 
   async loadMyGames(): Promise<void> {
