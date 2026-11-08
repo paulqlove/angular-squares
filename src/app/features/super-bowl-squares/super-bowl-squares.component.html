@@ -94,7 +94,8 @@
     [squaresFilled]="squaresPicked()"
     [boardName]="gameName"
     [canShowInOpenBoards]="canShowInOpenBoards()"
-    [values]="{ awayTeam: awayTeam, homeTeam: homeTeam, pricePerSquare: currentPrice, hostNote: hostNote, quarterSplit: quarterSplit, emptyQuarterRule: emptyQuarterRule, newBoardSize: null, showInOpenBoards: showInOpenBoards }"
+    [canAutoManage]="canAutoManage()"
+    [values]="{ awayTeam: awayTeam, homeTeam: homeTeam, pricePerSquare: currentPrice, hostNote: hostNote, quarterSplit: quarterSplit, emptyQuarterRule: emptyQuarterRule, newBoardSize: null, showInOpenBoards: showInOpenBoards, autoManage: !!autoManage, autoManageResize: !!autoManage?.resize }"
     [canCustomSplit]="planService.features().customSplits"
     [splitLocked]="isRandomized"
     (closed)="showSettings.set(false)"
@@ -131,6 +132,14 @@
             </div>
             @if (hostNote) {
               <p class="mt-1.5 max-w-prose break-words text-sm text-qs-muted"><span class="qs-label mr-2 text-qs-ink">Host note</span>{{ hostNote }}</p>
+            }
+            @if (autoManageNote(); as note) {
+              <p class="mt-1.5 flex max-w-prose flex-wrap items-center gap-x-3 gap-y-1 text-sm text-qs-muted">
+                <span><span class="qs-label mr-2 text-qs-ink">Auto-manage</span>{{ note.text }}</span>
+                @if (note.host) {
+                  <button type="button" class="qs-label min-h-9 text-qs-accent underline underline-offset-4" (click)="cancelAutoManage()">Cancel</button>
+                }
+              </p>
             }
           </div>
         </div>

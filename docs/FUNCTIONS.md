@@ -90,3 +90,11 @@ Expected bill for this app: **$0/month**.
 ESPN egress is the only line that can leave the free tier, and only if a board stays linked all month. One league scoreboard (~150KB) every minute is about 6GB, just over the 5GiB outbound allowance, on the order of **$0.20**. Five leagues linked every minute of the month would be a few dollars. A normal NFL Sunday is tens of megabytes. Off-season minutes do not call ESPN.
 
 Prices checked against [Cloud Run request-based billing](https://cloud.google.com/run/pricing), [Cloud Scheduler](https://cloud.google.com/scheduler/pricing), and the [Cloud Run functions free tier](https://cloud.google.com/functions). Region is `us-central1`.
+
+## Auto-manage (Season Pass)
+
+The same `syncEspnScores` job also runs auto-manage (`functions/src/auto-manage.ts`), so there is no second scheduled job. A host switches it on per board (game page Edit game, dashboard Edit game; linked ESPN game required). `games/{id}/autoManage = { enabled, resize }`.
+
+About 15 minutes before ESPN's kickoff time, while ESPN still says the game has not started, the job writes once: `isLocked`, then (only if `resize` is on, the numbers are not drawn and the picks fit) a smaller `boardSize` with the squares reshuffled at random, then `homeNumbers`/`awayNumbers`/`isRandomized`. It always ends by writing `games/{id}/autoManageResult` (`done`, `skipped` or `missed` with a note), and a board with a result is never touched again. The host cancels by switching it off, which clears both fields. An empty board is left open, and a game that already started is left alone (`missed`). Players see "Locked and drawn at {time}" from the result.
+
+It only runs once `syncEspnScores` is deployed. The Season Pass check is in the app (`plans.ts` `autoManage`), not in the job.

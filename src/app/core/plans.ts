@@ -18,14 +18,16 @@ export interface PlanFeatures {
   adFree: boolean;
   /** ESPN auto-sync of scores. Not enforced yet: it stays free until checkout exists. */
   liveScoring: boolean;
+  /** Lock the board, shrink it if half empty and draw the numbers before kickoff. */
+  autoManage: boolean;
 }
 
 export const DAY_MS = 86_400_000;
 
 export const PLANS: Record<PlanId, PlanFeatures> = {
-  free: { label: 'Free', priceUsd: 0, activeBoards: 1, customSplits: false, adFree: false, liveScoring: false },
-  season: { label: 'Season Pass', priceUsd: 5.99, activeBoards: 25, customSplits: true, adFree: true, liveScoring: true },
-  admin: { label: 'Admin', priceUsd: 0, activeBoards: Number.POSITIVE_INFINITY, customSplits: true, adFree: true, liveScoring: true }
+  free: { label: 'Free', priceUsd: 0, activeBoards: 1, customSplits: false, adFree: false, liveScoring: false, autoManage: false },
+  season: { label: 'Season Pass', priceUsd: 5.99, activeBoards: 25, customSplits: true, adFree: true, liveScoring: true, autoManage: true },
+  admin: { label: 'Admin', priceUsd: 0, activeBoards: Number.POSITIVE_INFINITY, customSplits: true, adFree: true, liveScoring: true, autoManage: true }
 };
 
 export interface Entitlement {
