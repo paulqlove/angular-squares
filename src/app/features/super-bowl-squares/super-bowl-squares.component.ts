@@ -1266,8 +1266,8 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     const homeLastDigit = score.home % 10;
     const awayLastDigit = score.away % 10;
 
-    const row = this.awayNumbers.findIndex(n => n === awayLastDigit);
-    const col = this.homeNumbers.findIndex(n => n === homeLastDigit);
+    const row = this.awayNumbers.findIndex(n => this.digitMatchesNumber(awayLastDigit, n, this.awayNumbersPaired));
+    const col = this.homeNumbers.findIndex(n => this.digitMatchesNumber(homeLastDigit, n, this.homeNumbersPaired));
     if (row === -1 || col === -1) return;
 
     const key = `${row}-${col}`;

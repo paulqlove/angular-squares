@@ -100,6 +100,12 @@ export function cumulativeQuarterScores(
   return scores;
 }
 
+/** On 25 and 50 square boards each of the 5 stored numbers is a pair of digits: 0 is 0 and 1, 1 is 2 and 3, and so on. */
+function digitMatches(digit: number, stored: number | null | undefined, paired: boolean): boolean {
+  if (stored === null || stored === undefined) return false;
+  return paired ? Math.floor(digit / 2) === stored : stored === digit;
+}
+
 export function winnerForScore(
   homeScore: number,
   awayScore: number,
@@ -111,7 +117,8 @@ export function winnerForScore(
   const awayLastDigit = awayScore % 10;
   const winningSquare = Object.entries(squares).find(([key]) => {
     const [row, col] = key.split("-").map(Number);
-    return awayNumbers[row] === awayLastDigit && homeNumbers[col] === homeLastDigit;
+    return digitMatches(awayLastDigit, awayNumbers[row], awayNumbers.length === 5) &&
+      digitMatches(homeLastDigit, homeNumbers[col], homeNumbers.length === 5);
   });
   return winningSquare ? winningSquare[1] : null;
 }
