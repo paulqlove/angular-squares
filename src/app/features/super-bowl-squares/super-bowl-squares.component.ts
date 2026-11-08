@@ -843,6 +843,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       this.toastService.warning('Lock the board before drawing numbers.');
       return;
     }
+    void this.stopAutoManage();
 
     if (this.isRandomized) {
       // Stop any running animation first
@@ -1108,7 +1109,22 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     return smallerBoardSizes(this.boardSize, this.squaresPicked(), this.isRandomized);
   }
 
+  /** A host who locks, unlocks, draws or clears by hand takes over: Auto-lock and draw switches itself off for this board. */
+  private async stopAutoManage(): Promise<void> {
+    if (!this.autoManage) return;
+    const before = this.autoManage;
+    this.autoManage = undefined;
+    try {
+      await this.gameService.setAutoManage(this.gameId, null);
+      this.toastService.success('Auto-lock and draw is off for this board');
+    } catch {
+      this.autoManage = before;
+      this.toastService.warning('Could not turn off Auto-lock and draw. Turn it off in Edit game.');
+    }
+  }
+
   private async setLocked(locked: boolean): Promise<void> {
+    void this.stopAutoManage();
     this.isLocked = locked;
     try {
       await this.gameService.updateGame(this.gameId, { isLocked: locked });
