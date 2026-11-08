@@ -426,7 +426,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked';
       <!-- Create Game Modal -->
       @if (showCreateModal()) {
         <div
-          class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+          animate.enter="qs-modal-enter" animate.leave="qs-modal-leave" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
           (click)="closeCreateModal()"
         >
           <div
@@ -467,7 +467,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked';
 
       <!-- Edit Game Modal -->
       @if (showEditModal()) {
-        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" (click)="closeEditModal()">
+        <div animate.enter="qs-modal-enter" animate.leave="qs-modal-leave" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" (click)="closeEditModal()">
           <div class="bg-dialog rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto overscroll-contain animate-modal-in" (click)="$event.stopPropagation()">
             <div class="flex items-center justify-between p-6 border-b border-default">
               <div>
@@ -744,28 +744,6 @@ type GameStatusFilter = 'all' | 'open' | 'locked';
   `,
     changeDetection: ChangeDetectionStrategy.Eager,
     styles: [`
-    @keyframes modal-in {
-      from {
-        opacity: 0;
-        transform: scale(0.95) translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-      }
-    }
-    .animate-modal-in {
-      animation: modal-in 0.2s ease-out;
-    }
-    @keyframes menu-in {
-      from { opacity: 0; transform: translateY(-4px); }
-    }
-    .animate-menu-in {
-      animation: menu-in 120ms cubic-bezier(.2,.7,.2,1);
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .animate-menu-in { animation: none; }
-    }
   `]
 })
 export class DashboardComponent implements OnInit {

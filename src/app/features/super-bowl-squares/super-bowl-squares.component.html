@@ -50,11 +50,14 @@
         @if (isGameOwner()) {
           <!-- The next game-day step is the primary button: lock, then draw -->
           <button type="button" (click)="toggleLock()" class="qs-btn host-btn" [class.qs-btn-primary]="!isLocked" [class.qs-btn-secondary]="isLocked" [attr.aria-pressed]="isLocked">
-            <ng-icon [name]="isLocked ? 'heroLockClosed' : 'heroLockOpen'" class="text-base"></ng-icon>
+            <span class="lock-icon" [class.is-locked]="isLocked" aria-hidden="true">
+              <ng-icon name="heroLockClosed" class="lock-closed"></ng-icon>
+              <ng-icon name="heroLockOpen" class="lock-open"></ng-icon>
+            </span>
             <span class="sm:hidden">{{ isLocked ? 'Unlock' : 'Lock' }}</span><span class="hidden sm:inline">{{ isLocked ? 'Unlock' : 'Lock board' }}</span>
           </button>
           <button type="button" (click)="randomizeNumbers()" [disabled]="isLocked === isRandomized" class="qs-btn host-btn" [class.qs-btn-primary]="isLocked && !isRandomized" [class.qs-btn-secondary]="!(isLocked && !isRandomized)" [title]="isLocked && isRandomized ? 'Unlock the board to clear numbers' : !isLocked && !isRandomized ? 'Lock the board before drawing numbers' : ''">
-            <ng-icon [name]="isRandomized ? 'heroArrowPath' : 'heroSparkles'" class="text-base"></ng-icon>
+            <span class="turn-icon" aria-hidden="true"><ng-icon [name]="isRandomized ? 'heroArrowPath' : 'heroSparkles'" class="text-base"></ng-icon></span>
             <span class="sm:hidden">{{ isRandomized ? 'Clear' : 'Draw' }}</span><span class="hidden sm:inline">{{ isRandomized ? 'Clear numbers' : 'Draw numbers' }}</span>
           </button>
         }
@@ -344,7 +347,7 @@
 
   <!-- Name Edit Modal -->
   @if (showNameEditModal()) {
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" (click)="showNameEditModal.set(false)">
+    <div animate.enter="qs-modal-enter" animate.leave="qs-modal-leave" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" (click)="showNameEditModal.set(false)">
       <div class="w-full max-w-sm bg-dialog shadow-2xl rounded-2xl" (click)="$event.stopPropagation()">
         <div class="flex items-center justify-between p-5 border-b border-default">
           <h3 class="text-lg font-bold text-heading">Edit Name</h3>
@@ -401,7 +404,7 @@
 
   <!-- Forced Name Change Modal (non-dismissable) -->
   @if (showForceNameChangeModal()) {
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div animate.enter="qs-modal-enter" animate.leave="qs-modal-leave" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div class="w-full max-w-sm bg-dialog shadow-2xl rounded-2xl">
         <div class="p-5 border-b border-default">
           <h3 class="text-lg font-bold text-heading">Name Already Taken</h3>

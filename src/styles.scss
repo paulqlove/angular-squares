@@ -66,6 +66,8 @@ html, body {
 
   /* motion */
   --qs-ease: cubic-bezier(.2,.7,.2,1);
+  --qs-ease-in: cubic-bezier(.4,0,1,1); /* exits: gentle start, quick end */
+  --qs-ease-spring: cubic-bezier(.34,1.56,.64,1); /* small overshoot for state flips */
   --qs-t-fast: 120ms; --qs-t-state: 200ms; --qs-t-reveal: 450ms;
 
   /* Legacy aliases (remove after migration) */
@@ -432,6 +434,43 @@ body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
 .animate-tooltip-in {
   animation: tooltip-in 0.2s var(--qs-ease);
 }
+
+/* ---- Motion ------------------------------------------------------------------------------------------------
+   Rules: feedback and state changes only, never decorative; nothing waits on an animation (leaving elements stop taking
+   clicks at once); only transform and opacity; enters ease out (200ms), exits ease in (120ms); reduced motion collapses
+   every duration below to near zero (rule at the end of this file), which leaves the final state with no movement. */
+@keyframes qs-fade-in { from { opacity: 0; } }
+@keyframes qs-fade-out { to { opacity: 0; } }
+@keyframes qs-pop-in { from { opacity: 0; transform: translateY(8px) scale(.97); } }
+@keyframes qs-pop-out { to { opacity: 0; transform: translateY(4px) scale(.98); } }
+@keyframes menu-in { from { opacity: 0; transform: translateY(-4px); } }
+
+/* Modals: put animate.enter="qs-modal-enter" animate.leave="qs-modal-leave" on the dimmed backdrop element.
+   The backdrop fades and its first child (the panel) pops. */
+.qs-modal-enter { animation: qs-fade-in 150ms var(--qs-ease) both; }
+.qs-modal-enter > * { animation: qs-pop-in 200ms var(--qs-ease) both; }
+.qs-modal-leave { animation: qs-fade-out 120ms var(--qs-ease-in) both; pointer-events: none; }
+.qs-modal-leave > * { animation: qs-pop-out 120ms var(--qs-ease-in) both; }
+
+/* Panels that carry the class themselves (dashboard modals, shrink dialog) and small menus */
+.animate-modal-in { animation: qs-pop-in 200ms var(--qs-ease) both; }
+.animate-menu-in { animation: menu-in 120ms var(--qs-ease); }
+
+/* Buttons: a quick press */
+.qs-btn { transition-property: background-color, color, border-color, transform; }
+.qs-btn:active:not(:disabled) { transform: scale(.97); transition-duration: 80ms; transition-timing-function: var(--qs-ease-in); }
+
+/* Host bar: the lock turns as it opens or closes, and the clear icon turns when it becomes available */
+.lock-icon { position: relative; display: inline-flex; width: 1em; height: 1em; font-size: 1rem; }
+.lock-icon > ng-icon { position: absolute; inset: 0; font-size: inherit;
+  transition: opacity 160ms var(--qs-ease), transform 260ms var(--qs-ease-spring); }
+.lock-icon .lock-closed { opacity: 0; transform: scale(.6) rotate(-18deg); }
+.lock-icon .lock-open { opacity: 1; transform: none; }
+.lock-icon.is-locked .lock-closed { opacity: 1; transform: none; }
+.lock-icon.is-locked .lock-open { opacity: 0; transform: scale(.6) rotate(18deg); }
+.turn-icon { display: inline-flex; transition: transform 320ms var(--qs-ease); }
+button:disabled .turn-icon { transform: rotate(-90deg); }
+button:active:not(:disabled) .turn-icon { transform: rotate(120deg); transition-duration: 160ms; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
