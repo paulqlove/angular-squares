@@ -81,6 +81,7 @@ import {
               <li class="qs-badge qs-badge-ok">Live scores</li>
               <li class="qs-badge qs-badge-ok">Up to 25 active boards</li>
               <li class="qs-badge qs-badge-ok">Custom splits</li>
+              <li class="qs-badge qs-badge-ok">Auto-lock and draw</li>
             </ul>
           }
 
