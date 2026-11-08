@@ -55,16 +55,16 @@ export interface EditGameValues {
           <div class="flex-1 space-y-5 overflow-y-auto px-6 py-6">
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label for="edit-away" class="qs-label mb-1.5 block text-qs-muted">Away team</label>
+                <label for="edit-away" class="qs-label mb-1.5 block text-qs-ink">Away team</label>
                 <input id="edit-away" type="text" [(ngModel)]="draft.awayTeam" maxlength="50" placeholder="Away" class="qs-input" />
               </div>
               <div>
-                <label for="edit-home" class="qs-label mb-1.5 block text-qs-muted">Home team</label>
+                <label for="edit-home" class="qs-label mb-1.5 block text-qs-ink">Home team</label>
                 <input id="edit-home" type="text" [(ngModel)]="draft.homeTeam" maxlength="50" placeholder="Home" class="qs-input" />
               </div>
             </div>
             <div>
-              <label for="edit-points" class="qs-label mb-1.5 block text-qs-muted">Points per square</label>
+              <label for="edit-points" class="qs-label mb-1.5 block text-qs-ink">Points per square</label>
               <div class="flex items-center gap-2">
                 <input id="edit-points" type="number" min="0" [(ngModel)]="draft.pricePerSquare" [disabled]="isLocked" class="qs-input max-w-40 disabled:opacity-45" />
                 <span class="qs-label text-qs-muted">pts</span>
@@ -74,7 +74,7 @@ export interface EditGameValues {
               }
             </div>
             <div>
-              <label for="edit-note" class="qs-label mb-1.5 block text-qs-muted">Note from the host <span class="normal-case tracking-normal">(optional)</span></label>
+              <label for="edit-note" class="qs-label mb-1.5 block text-qs-ink">Note from the host <span class="normal-case tracking-normal">(optional)</span></label>
               <textarea id="edit-note" rows="2" [(ngModel)]="draft.hostNote" maxlength="140" placeholder="e.g. Snacks at halftime!" class="qs-input min-h-20 py-2.5"></textarea>
               <p class="mt-1 text-right text-xs tabular-nums text-qs-muted">{{ draft.hostNote.length }}/140</p>
             </div>
@@ -82,7 +82,7 @@ export interface EditGameValues {
             @if (canShowInOpenBoards) {
               <div class="flex items-start justify-between gap-4">
                 <div class="min-w-0">
-                  <p class="qs-label mb-1.5 text-qs-muted">Show in my open boards</p>
+                  <p class="qs-label mb-1.5 text-qs-ink">Show in my open boards</p>
                   <p class="text-xs text-qs-muted">Players on your other boards can see and join this board. Off means link only.</p>
                   <p class="mt-2 truncate rounded-inner border border-qs-line bg-qs-panel-2 px-3 py-2 font-mono text-xs text-qs-ink">{{ boardName }} · Points per square: {{ draft.pricePerSquare }} · {{ squaresFilled }}/{{ boardSize }} taken</p>
                 </div>
@@ -98,7 +98,7 @@ export interface EditGameValues {
               <div>
                 <div class="flex items-start justify-between gap-4">
                   <div class="min-w-0">
-                    <p class="qs-label mb-1.5 text-qs-muted">Auto-lock and draw</p>
+                    <p class="qs-label mb-1.5 text-qs-ink">Auto-lock and draw</p>
                     <p class="text-xs text-qs-muted">5 minutes after kickoff, we lock the board and draw the numbers for you.</p>
                     @if (draft.autoManage && autoRunText) {
                       <p class="mt-2 truncate rounded-inner border border-qs-line bg-qs-panel-2 px-3 py-2 font-mono text-xs text-qs-ink">Locks {{ autoRunText }}</p>
@@ -112,7 +112,7 @@ export interface EditGameValues {
 
             @if (boardSize > 25) {
               <div>
-                <p class="qs-label mb-1.5 text-qs-muted">Board size</p>
+                <p class="qs-label mb-1.5 text-qs-ink">Board size</p>
                 <div class="flex flex-wrap gap-1.5">
                   <button type="button" class="qs-tab min-h-9 px-2.5 text-[10.5px]" [attr.aria-pressed]="!draft.newBoardSize" (click)="draft.newBoardSize = null">Keep {{ boardSize }}</button>
                   @for (s of smallerSizes; track s) {
@@ -130,7 +130,7 @@ export interface EditGameValues {
             }
 
             <div>
-              <p class="qs-label mb-1.5 text-qs-muted">Quarter split</p>
+              <p class="qs-label mb-1.5 text-qs-ink">Quarter split</p>
               @if (!canCustomSplit || splitLocked) {
                 <div class="flex items-center justify-between gap-3 rounded-inner border border-qs-line bg-qs-panel-2 px-3 py-2.5">
                   <span class="font-mono text-sm tabular-nums text-qs-ink">{{ splitText() }}</span>
