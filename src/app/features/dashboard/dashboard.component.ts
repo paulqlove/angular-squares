@@ -453,7 +453,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
       <!-- Create Game Modal -->
       @if (showCreateModal()) {
         <div
-          animate.enter="qs-modal-enter" animate.leave="qs-modal-leave" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm max-sm:p-0"
+          animate.enter="qs-modal-enter" animate.leave="qs-modal-leave" class="fixed inset-0 z-[150] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm max-sm:p-0"
         >
           <div
             role="dialog"
