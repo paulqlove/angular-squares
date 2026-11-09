@@ -10,6 +10,7 @@ import { GameService, GameListItem, BoardSize } from '../../core/services/game.s
 import { DEFAULT_SPLIT, DEFAULT_EMPTY_QUARTER_RULE, isNoExpiry } from '../../core/plans';
 import { EspnService, EspnGame, SportType, SPORT_CONFIG } from '../../core/services/espn.service';
 import { getTeamColors } from '../content/teams-data';
+import { CardMenuComponent, CardMenuItem } from '../../components/ui/card-menu/card-menu.component';
 import { ConfirmService } from '../../core/services/confirm.service';
 import { ToastService } from '../../core/services/toast.service';
 import { SanitizationService } from '../../core/services/sanitization.service';
@@ -55,7 +56,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
 
 @Component({
     selector: 'app-dashboard',
-    imports: [FormsModule, NgTemplateOutlet, DropdownComponent, CreateGameFormComponent, NgIconComponent, AppHeaderComponent, HeadroomDirective, HelpMenuComponent, ProfileMenuComponent, ShareDialogComponent, EditGameDialogComponent, UpgradePassDialogComponent],
+    imports: [FormsModule, NgTemplateOutlet, DropdownComponent, CardMenuComponent, CreateGameFormComponent, NgIconComponent, AppHeaderComponent, HeadroomDirective, HelpMenuComponent, ProfileMenuComponent, ShareDialogComponent, EditGameDialogComponent, UpgradePassDialogComponent],
     providers: [
         provideIcons({
             heroPlus,
@@ -144,7 +145,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
           <div class="mt-8 flex flex-col gap-4 rounded-card border border-qs-line bg-qs-warn-soft p-5 sm:flex-row sm:items-center sm:justify-between">
             <p class="text-qs-warn">
               <span class="font-semibold">You're playing as a guest.</span>
-              Sign in with Google to host your own games.
+              Sign in to host your own games.
             </p>
             <button type="button" (click)="signOut()" class="qs-btn qs-btn-ink shrink-0">Sign in</button>
           </div>
@@ -383,9 +384,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
         <article animate.enter="qs-fade-rise" class="qs-card row-span-4 mb-4 grid p-5 transition-[transform,box-shadow,border-color] duration-200 ease-out [grid-template-rows:subgrid] [row-gap:0] hover:-translate-y-0.5 hover:border-qs-line-strong hover:shadow-card">
           <div class="flex items-center justify-between gap-3">
             <span class="qs-badge qs-badge-code font-mono">{{ game.id }}</span>
-            @if (joined) {
-              <span class="qs-label truncate text-qs-muted">Host · {{ game.ownerName }}</span>
-            } @else if (game.isLocked) {
+            @if (game.isLocked) {
               <span class="qs-badge">
                 <ng-icon name="heroLockClosed" class="text-xs"></ng-icon>
                 Locked
@@ -403,6 +402,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
               } @else {
                 Teams not set
               }
+              @if (joined) { · Host {{ game.ownerName }} }
               · Created {{ formatDate(game.createdAt) }}
             </p>
           </div>
@@ -422,10 +422,12 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
                 <dt class="qs-label text-xs text-qs-muted">Players</dt>
                 <dd class="mt-1 text-lg font-semibold tabular-nums text-qs-ink">{{ game.playerCount }}</dd>
               </div>
-              <div>
-                <dt class="qs-label text-xs text-qs-muted">Confirmed</dt>
-                <dd class="mt-1 text-lg font-semibold tabular-nums text-qs-ink">{{ game.confirmedCount }}<span class="text-sm font-normal text-qs-muted">/{{ game.playerCount }}</span></dd>
-              </div>
+              @if (!joined && game.confirmedCount < game.playerCount) {
+                <div>
+                  <dt class="qs-label text-xs text-qs-muted">Needs confirm</dt>
+                  <dd class="mt-1 text-lg font-semibold tabular-nums text-qs-ink">{{ game.playerCount - game.confirmedCount }}</dd>
+                </div>
+              }
             </dl>
           </div>
 
@@ -434,19 +436,10 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
             <button type="button" (click)="shareGame(game.id)" class="qs-btn qs-btn-ghost w-11 px-0 text-qs-muted hover:text-qs-ink" title="Share game" aria-label="Share game">
               <ng-icon name="heroShare" class="text-lg"></ng-icon>
             </button>
-            @if (joined) {
-              <button type="button" (click)="removeJoinedGame(game.id)" class="qs-btn qs-btn-ghost w-11 px-0 text-qs-muted hover:text-qs-ink" title="Remove from my list" aria-label="Remove from my list">
-                <ng-icon name="heroXMark" class="text-lg"></ng-icon>
-              </button>
-            }
-            @if (!joined) {
-              <button type="button" (click)="openEditModal(game)" class="qs-btn qs-btn-ghost w-11 px-0 text-qs-muted hover:text-qs-ink" title="Edit game" aria-label="Edit game">
-                <ng-icon name="heroCog6Tooth" class="text-lg"></ng-icon>
-              </button>
-              <button type="button" (click)="deleteGame(game.id)" class="qs-btn qs-btn-ghost w-11 px-0 text-qs-muted hover:!bg-qs-bad-soft hover:text-qs-bad" title="Delete game" aria-label="Delete game">
-                <ng-icon name="heroTrash" class="text-lg"></ng-icon>
-              </button>
-            }
+            <app-card-menu
+              [items]="joined ? joinedMenu : hostMenu"
+              label="More actions for this game"
+              (picked)="onCardMenu(game, $event)"></app-card-menu>
           </div>
         </article>
       </ng-template>
@@ -941,6 +934,15 @@ export class DashboardComponent implements OnInit {
     } catch {
       this.toastService.error('Could not remove it. Try again.');
     }
+  }
+
+  hostMenu: CardMenuItem[] = [{ id: 'edit', label: 'Edit game' }, { id: 'delete', label: 'Delete game', danger: true }];
+  joinedMenu: CardMenuItem[] = [{ id: 'remove', label: 'Remove from my list' }];
+
+  onCardMenu(game: GameListItem, action: string): void {
+    if (action === 'edit') this.openEditModal(game);
+    else if (action === 'delete') void this.deleteGame(game.id);
+    else if (action === 'remove') void this.removeJoinedGame(game.id);
   }
 
   async deleteGame(gameId: string): Promise<void> {
