@@ -14,11 +14,12 @@ import { AuthService } from '../../../core/services/auth.service';
           role="dialog"
           aria-modal="true"
           aria-labelledby="auth-modal-title"
-          class="relative w-full max-w-md bg-dialog shadow-2xl rounded-2xl p-8"
+          class="relative w-full max-w-md rounded-card border border-qs-line bg-qs-panel p-8 shadow-pop"
+          (keydown.tab)="trapTab($event, false)"
+          (keydown.shift.tab)="trapTab($event, true)"
           (click)="$event.stopPropagation()"
         >
           <button
-            #closeButton
             type="button"
             aria-label="Close"
             (click)="close()"
@@ -29,25 +30,28 @@ import { AuthService } from '../../../core/services/auth.service';
             </svg>
           </button>
           @if (mode === 'host') {
-            <h2 id="auth-modal-title" class="text-2xl font-bold text-heading text-center">Sign in to host a game</h2>
+            <h2 id="auth-modal-title" class="qs-title text-center text-2xl">Sign in to host a game</h2>
             <p class="mt-3 mb-6 text-center text-qs-muted">
               Hosting needs an account so your boards are saved and only you can run them.
               Your players don't need one. They join with just a name.
             </p>
           } @else {
-            <h2 id="auth-modal-title" class="text-2xl font-bold text-heading text-center mb-6">Join This Game</h2>
+            <h2 id="auth-modal-title" class="qs-title mb-6 text-center text-2xl">Join this game</h2>
           }
 
           <div class="space-y-4">
             @if (mode !== 'host') {
             <!-- Guest Mode (top) -->
             <div class="space-y-3">
+              <label for="auth-guest-name" class="qs-label block text-qs-muted">Your name</label>
               <input
+                #guestInput
+                id="auth-guest-name"
                 type="text"
-                aria-label="Your name"
+                autocomplete="name"
                 [(ngModel)]="guestName"
-                placeholder="Enter your name"
-                class="w-full px-4 py-3 border-2 border-qs-line-strong rounded-btn outline-none transition-all bg-qs-panel-2 text-qs-ink"
+                placeholder="Shown on the squares you pick"
+                class="qs-input w-full"
                 (keyup.enter)="continueAsGuest()"
               />
               <button
@@ -57,7 +61,7 @@ import { AuthService } from '../../../core/services/auth.service';
               >
                 Join as Guest
               </button>
-              <p class="text-xs text-muted text-center">
+              <p class="text-center text-xs text-qs-muted">
                 Guest users can join games but cannot create new ones
               </p>
             </div>
@@ -65,16 +69,17 @@ import { AuthService } from '../../../core/services/auth.service';
             <!-- Divider -->
             <div class="relative my-6">
               <div class="absolute inset-0 flex items-center">
-                <div class="w-full border-t border-default"></div>
+                <div class="w-full border-t border-qs-line"></div>
               </div>
               <div class="relative flex justify-center text-sm">
-                <span class="px-4 bg-dialog text-muted">or</span>
+                <span class="bg-qs-panel px-4 text-qs-muted">or</span>
               </div>
             </div>
             }
 
             <!-- Google Sign In (bottom) -->
             <button
+              #googleButton
               (click)="signInWithGoogle()"
               [disabled]="authService.isLoading()"
               class="qs-btn qs-btn-secondary w-full gap-3"
@@ -113,7 +118,7 @@ import { AuthService } from '../../../core/services/auth.service';
               </form>
             }
             @if (mode === 'host') {
-              <p class="text-xs text-muted text-center">We never see or store your password.</p>
+              <p class="text-center text-xs text-qs-muted">We never see or store your password.</p>
             }
           </div>
         </div>
@@ -128,12 +133,17 @@ export class AuthModalComponent implements OnChanges {
   @Output() authenticated = new EventEmitter<void>();
   @Output() closed = new EventEmitter<void>();
 
-  /** Focuses the close button once the dialog renders (after the auth check). */
-  @ViewChild('closeButton') set closeButtonRef(ref: ElementRef<HTMLButtonElement> | undefined) {
+  /** Focus lands on the first thing to fill in once the dialog renders (after the auth check). */
+  @ViewChild('guestInput') set guestInputRef(ref: ElementRef<HTMLInputElement> | undefined) {
     ref?.nativeElement.focus();
   }
 
+  @ViewChild('googleButton') set googleButtonRef(ref: ElementRef<HTMLButtonElement> | undefined) {
+    if (this.mode === 'host') ref?.nativeElement.focus();
+  }
+
   authService = inject(AuthService);
+  private host = inject<ElementRef<HTMLElement>>(ElementRef);
   checkingAuth = signal(false);
 
   guestName = '';
@@ -181,11 +191,25 @@ export class AuthModalComponent implements OnChanges {
     setTimeout(() => target?.focus());
   }
 
+  trapTab(event: Event, back: boolean): void {
+    const items = this.focusables();
+    if (!items.length) return;
+    const first = items[0];
+    const last = items[items.length - 1];
+    const active = document.activeElement;
+    if (back && active === first) { event.preventDefault(); last.focus(); }
+    else if (!back && active === last) { event.preventDefault(); first.focus(); }
+  }
+
   @HostListener('document:keydown.escape', ['$event'])
   onEscape(event: Event): void {
     if (!this.isOpen || this.checkingAuth()) return;
     event.preventDefault();
     this.close();
+  }
+
+  private focusables(): HTMLElement[] {
+    return Array.from(this.host.nativeElement.querySelectorAll<HTMLElement>('button, input')).filter(e => e.offsetParent !== null && !(e as HTMLButtonElement).disabled);
   }
 
   private async prepareAuth(): Promise<void> {

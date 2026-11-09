@@ -16,7 +16,10 @@ import { AuthService } from '../../core/services/auth.service';
         <p class="qs-eyebrow">Sign in</p>
         @switch (state()) {
           @case ('working') {
-            <h1 class="qs-title mt-3 text-3xl">Signing you in…</h1>
+            <div role="status" aria-live="polite" aria-busy="true">
+              <h1 class="qs-title mt-3 text-3xl">Signing you in…</h1>
+              <span class="mt-6 block h-6 w-6 animate-spin rounded-full border-2 border-qs-accent border-t-transparent" aria-hidden="true"></span>
+            </div>
           }
           @case ('ask') {
             <h1 class="qs-title mt-3 text-3xl">Confirm your email</h1>
@@ -32,7 +35,7 @@ import { AuthService } from '../../core/services/auth.service';
           @case ('error') {
             <h1 class="qs-title mt-3 text-3xl">That link didn't work</h1>
             <p class="mt-3 text-qs-muted">{{ error() }}</p>
-            <a routerLink="/" class="qs-btn qs-btn-primary mt-6 w-full">Send a new link</a>
+            <a routerLink="/create" class="qs-btn qs-btn-primary mt-6 w-full">Start over</a>
           }
         }
       </div>
