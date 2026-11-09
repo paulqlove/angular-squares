@@ -24,13 +24,21 @@ interface NavLink {
     <div class="flex min-h-screen flex-col bg-page overflow-x-hidden">
       <header appHeadroom class="no-print qs-on-navy bg-qs-tile text-qs-tile-ink">
         <div class="mx-auto flex max-w-[1600px] flex-wrap items-center gap-3 px-4 sm:px-8 py-2">
-          <a routerLink="/" class="flex min-h-11 items-center gap-2 rounded-md">
-            <img src="assets/brand/lockup-horizontal-reversed.svg" alt="QuarterScore" width="192" height="24" class="h-6 w-auto">
+          <a routerLink="/" aria-label="QuarterScore home" class="flex min-h-11 items-center gap-2 rounded-md">
+            <img src="assets/brand/lockup-horizontal-reversed.svg" alt="" width="192" height="24" class="hidden h-6 w-auto sm:block">
+            <img src="assets/brand/mark-reversed.svg" alt="" width="32" height="32" class="h-8 w-8 sm:hidden">
+          </a>
+
+          <a
+            [routerLink]="signedIn() ? '/dashboard' : '/create'"
+            class="ml-auto qs-btn qs-btn-primary md:hidden"
+          >
+            {{ signedIn() ? 'Dashboard' : 'Start a free game' }}
           </a>
 
           <button
             type="button"
-            class="ml-auto qs-btn qs-btn-ghost border-white/20 md:hidden"
+            class="qs-btn qs-btn-ghost border-white/20 md:hidden"
             [attr.aria-expanded]="menuOpen()"
             aria-controls="site-nav"
             (click)="toggleMenu()"
@@ -56,7 +64,7 @@ interface NavLink {
                   </a>
                 </li>
               }
-              <li class="md:ml-2">
+              <li class="hidden md:ml-2 md:block">
                 <a
                   [routerLink]="signedIn() ? '/dashboard' : '/create'"
                   class="qs-btn qs-btn-primary w-full md:w-auto"

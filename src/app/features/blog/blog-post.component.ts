@@ -34,6 +34,11 @@ import { BLOG_POSTS } from './blog-posts.generated';
             </a>
           </p>
         </article>
+
+      <section class="mt-10 rounded-2xl bg-qs-accent px-5 py-6 text-qs-on-accent">
+        <a routerLink="/create" class="qs-btn qs-btn-ink">Start a free game</a>
+        <p class="mt-3 text-sm leading-relaxed text-qs-on-accent">Free for everyone. QuarterScore never collects, holds, or pays out money.</p>
+      </section>
       } @else {
         <article>
           <h1 class="qs-title text-3xl">Post not found</h1>
