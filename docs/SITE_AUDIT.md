@@ -250,7 +250,7 @@ Update this list as each chunk ships (change, Paul tests locally, push, merge).
 | P2 Dashboard: styled confirm dialog (5 places) replaces browser confirm; error toasts say "Could not X. Try again." | Done | this batch |
 | P2 Sign-in: dialog restyled, visible name label, focus on first field and trapped, email-link spinner and Start over link | Done | this batch |
 | P2 Public pages: phone header CTA beside Menu, blog CTA band, welcome step wording, 404 second link, game title as h1 | Done | this batch |
-| P2 Phones still open: Players list collapsed by default | Not started | |
+| P2 Phones: Players list starts folded below 1024px with the count on the Show button | Done | this batch |
 | P2 Dashboard cards: labelled More menu (Edit, Delete, Remove), status on joined cards, "Needs confirm" only above zero, guest banner wording | Done (TV link stays in the Share dialog) | this batch |
 | Everything else in Priority 2 and 3 | Not started | |
 
