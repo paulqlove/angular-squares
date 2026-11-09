@@ -5,6 +5,7 @@ import { DEFAULT_SQUARE_LIMIT, MAX_SQUARE_LIMIT, clampSquareLimit } from '../../
 /** "Limit squares per player": one row used by the create form and both Edit game screens. null means no limit. */
 @Component({
   selector: 'app-max-squares-field',
+  host: { class: 'block' },
   imports: [ToggleComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `

@@ -8,6 +8,7 @@ export interface SummaryRow {
 /** The bottom of a settings form: what the choices above add up to, in one quiet block. Shows nothing when there are no rows. */
 @Component({
   selector: 'app-form-summary',
+  host: { class: 'block' },
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @if (rows.length) {
