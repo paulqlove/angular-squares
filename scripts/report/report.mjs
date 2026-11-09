@@ -120,7 +120,7 @@ async function token(key, scope) {
 }
 const post = async (url, tok, body) => { const r = await fetch(url, { method: 'POST', headers: { authorization: `Bearer ${tok}`, 'content-type': 'application/json' }, body: JSON.stringify(body) }); const j = await r.json(); if (j.error) throw new Error(j.error.message); return j; };
 
-p('\n## 6. Traffic (Google Analytics, cookieless so it undercounts; last 2 days lag)');
+p('\n## 6. Traffic (Google Analytics; last 2 days lag; counts only since Nov 9, 2026)');
 if (!existsSync(keyPath) || !GA) p(`- Not connected. Needs ${keyPath} and a property ID in ${join(CFG, 'ga-property-id.txt')}. See docs/REPORTS.md.`);
 else {
   try {
