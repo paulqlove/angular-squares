@@ -94,7 +94,7 @@ export interface CreateGameSubmit {
         <span class="qs-badge" [class]="gameStatusClass(game.status)">{{ gameStatusText(game) }}</span>
         <p class="mt-2 truncate font-semibold text-qs-ink">{{ game.awayTeam }} &#64; {{ game.homeTeam }}</p>
         @if (game.status === 'pre' && game.date) {
-          <p class="qs-label mt-1 text-[10px] text-qs-muted">{{ formatGameDate(game.date) }}</p>
+          <p class="qs-label mt-1 text-xs text-qs-muted">{{ formatGameDate(game.date) }}</p>
         }
       </div>
       <button type="button" (click)="gameListOpen = true" class="qs-btn qs-btn-secondary shrink-0 px-3">Change</button>
@@ -138,7 +138,7 @@ export interface CreateGameSubmit {
               }
               {{ game.homeTeam }}
             </p>
-            <p class="qs-label mt-1 text-[10px] text-qs-muted">
+            <p class="qs-label mt-1 text-xs text-qs-muted">
               @if (game.status === 'pre' && game.date) {
                 {{ formatGameDate(game.date) }}
               } @else if (game.status !== 'pre') {

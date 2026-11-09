@@ -104,7 +104,7 @@ export interface EditGameValues {
                           @if (selectedEspnGame(); as sel) {
                             <p class="truncate text-sm font-semibold text-qs-ink">{{ sel.awayTeam }} &#64; {{ sel.homeTeam }}</p>
                             @if (sel.status === 'pre' && sel.date) {
-                              <p class="qs-label text-[10px] text-qs-muted">{{ formatGameDate(sel.date) }}</p>
+                              <p class="qs-label text-xs text-qs-muted">{{ formatGameDate(sel.date) }}</p>
                             }
                           } @else {
                             <p class="truncate text-sm font-semibold text-qs-ink">Linked game</p>
@@ -137,9 +137,9 @@ export interface EditGameValues {
                                   {{ game.homeTeam }}
                                 </p>
                                 @if (game.status === 'pre' && game.date) {
-                                  <p class="qs-label mt-1 text-[10px] text-qs-muted">{{ formatGameDate(game.date) }}</p>
+                                  <p class="qs-label mt-1 text-xs text-qs-muted">{{ formatGameDate(game.date) }}</p>
                                 } @else if (game.status !== 'pre') {
-                                  <p class="qs-label mt-1 text-[10px] text-qs-muted">{{ game.awayScore }} - {{ game.homeScore }}</p>
+                                  <p class="qs-label mt-1 text-xs text-qs-muted">{{ game.awayScore }} - {{ game.homeScore }}</p>
                                 }
                               </div>
                               <span class="shrink-0 rounded-full px-2 py-0.5 text-xs font-medium" [class]="getGameStatusClass(game.status)">{{ getGameStatusText(game) }}</span>
@@ -217,7 +217,7 @@ export interface EditGameValues {
                         <div class="mt-1.5 grid grid-cols-4 gap-2">
                           @for (q of quarters; track q.key) {
                             <div class="flex flex-col gap-2">
-                              <label [for]="'split-' + q.key" class="qs-label text-[10px] text-qs-muted">{{ q.label }}</label>
+                              <label [for]="'split-' + q.key" class="qs-label text-xs text-qs-muted">{{ q.label }}</label>
                               <input [id]="'split-' + q.key" type="number" min="0" max="100" step="0.5" [(ngModel)]="pct[q.key]" class="qs-input px-2 text-center tabular-nums" />
                             </div>
                           }
@@ -237,7 +237,7 @@ export interface EditGameValues {
                 <summary class="qs-eyebrow qs-eyebrow-bar !flex min-h-11 cursor-pointer list-none items-center border-b border-qs-line pb-2.5 text-[13px] font-semibold text-qs-ink [&::-webkit-details-marker]:hidden">
                   <span>More options</span>
                   <span class="ml-auto flex items-center gap-2">
-                    @if (draft.autoManage) { <span class="text-[11.5px] font-medium text-qs-accent">Auto-lock on</span> }
+                    @if (draft.autoManage) { <span class="text-xs font-medium text-qs-accent">Auto-lock on</span> }
                     <svg class="h-4 w-4 transition-transform group-open:rotate-180 motion-reduce:transition-none" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m5 8 5 5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                   </span>
                 </summary>

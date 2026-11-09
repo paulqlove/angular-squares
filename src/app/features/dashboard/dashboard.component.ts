@@ -414,15 +414,15 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
             </div>
             <dl class="grid flex-1 grid-cols-3 gap-3">
               <div>
-                <dt class="qs-label text-[10px] text-qs-muted">Squares</dt>
+                <dt class="qs-label text-xs text-qs-muted">Squares</dt>
                 <dd class="mt-1 text-lg font-semibold tabular-nums text-qs-ink">{{ game.squaresFilled }}<span class="text-sm font-normal text-qs-muted">/{{ game.boardSize }}</span></dd>
               </div>
               <div>
-                <dt class="qs-label text-[10px] text-qs-muted">Players</dt>
+                <dt class="qs-label text-xs text-qs-muted">Players</dt>
                 <dd class="mt-1 text-lg font-semibold tabular-nums text-qs-ink">{{ game.playerCount }}</dd>
               </div>
               <div>
-                <dt class="qs-label text-[10px] text-qs-muted">Confirmed</dt>
+                <dt class="qs-label text-xs text-qs-muted">Confirmed</dt>
                 <dd class="mt-1 text-lg font-semibold tabular-nums text-qs-ink">{{ game.confirmedCount }}<span class="text-sm font-normal text-qs-muted">/{{ game.playerCount }}</span></dd>
               </div>
             </dl>
