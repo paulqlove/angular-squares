@@ -249,6 +249,6 @@ Update this list as each chunk ships (change, Paul tests locally, push, merge).
 | P2 Text: 12px minimum for .qs-label, .qs-badge and one-off captions; host bar labels 11px on phones | Done | this batch |
 | P2 Dashboard: styled confirm dialog (5 places) replaces browser confirm; error toasts say "Could not X. Try again." | Done | this batch |
 | P2 Phones still open: Players list collapsed by default | Not started | |
-| P2 Dashboard still open: card footer More menu, card information hierarchy, guest banner label | Not started | |
+| P2 Dashboard cards: labelled More menu (Edit, Delete, Remove), status on joined cards, "Needs confirm" only above zero, guest banner wording | Done (TV link stays in the Share dialog) | this batch |
 | Everything else in Priority 2 and 3 | Not started | |
 
