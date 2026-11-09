@@ -520,7 +520,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
             <div class="p-6 space-y-5">
               <!-- Sport Tabs -->
               <div>
-                <label class="block text-sm font-semibold text-label mb-2">Sport</label>
+                <label class="qs-label mb-1.5 block text-qs-ink">Sport</label>
                 <div class="flex gap-2 overflow-x-auto">
                   @for (sport of sportOptions; track sport.value) {
                     <button
@@ -538,14 +538,14 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
               <!-- Custom Team Names or ESPN Game Selection -->
               @if (editSport === 'custom') {
                 <div>
-                  <label class="block text-sm font-semibold text-label mb-2">Teams</label>
+                  <label class="qs-label mb-1.5 block text-qs-ink">Teams</label>
                   <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
-                      <label for="edit-custom-away" class="qs-label mb-1.5 block text-qs-muted">Away team</label>
+                      <label for="edit-custom-away" class="qs-label mb-1.5 block text-qs-ink">Away team</label>
                       <input id="edit-custom-away" type="text" [(ngModel)]="editCustomAwayTeam" maxlength="50" placeholder="e.g. Lincoln High" class="qs-input" />
                     </div>
                     <div>
-                      <label for="edit-custom-home" class="qs-label mb-1.5 block text-qs-muted">Home team</label>
+                      <label for="edit-custom-home" class="qs-label mb-1.5 block text-qs-ink">Home team</label>
                       <input id="edit-custom-home" type="text" [(ngModel)]="editCustomHomeTeam" maxlength="50" placeholder="e.g. Washington High" class="qs-input" />
                     </div>
                   </div>
@@ -553,7 +553,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
                 </div>
               } @else {
                 <div>
-                  <label class="block text-sm font-semibold text-label mb-2">ESPN Game</label>
+                  <label class="qs-label mb-1.5 block text-qs-ink">ESPN Game</label>
                   @if (isLoadingEditEspnGames()) {
                     <div class="flex items-center justify-center py-6">
                       <svg class="animate-spin h-6 w-6 text-qs-accent" viewBox="0 0 24 24">
@@ -616,7 +616,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
 
               <!-- Game Name -->
               <div>
-                <label class="block text-sm font-semibold text-label mb-2">Game Name</label>
+                <label class="qs-label mb-1.5 block text-qs-ink">Game Name</label>
                 <input
                   type="text"
                   [(ngModel)]="editGameName"
@@ -627,7 +627,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
 
               <!-- Points Per Square -->
               <div>
-                <label class="block text-sm font-semibold text-label mb-2">Points per square</label>
+                <label class="qs-label mb-1.5 block text-qs-ink">Points per square</label>
                 <div class="flex items-center gap-2">
                   <input
                     type="number"
@@ -641,7 +641,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
 
               <!-- Host Note -->
               <div>
-                <label class="block text-sm font-semibold text-label mb-2">Note from the host <span class="text-muted font-normal">(optional)</span></label>
+                <label class="qs-label mb-1.5 block text-qs-ink">Note from the host <span class="normal-case tracking-normal">(optional)</span></label>
                 <input
                   type="text"
                   [(ngModel)]="editGameHostNote"
@@ -656,7 +656,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
                 @if (planService.features().activeBoards > 1 && (og.showInOpenBoards || (!og.isLocked && og.squaresFilled < og.boardSize))) {
                   <div class="flex items-start justify-between gap-4">
                     <div class="min-w-0">
-                      <label class="block text-sm font-semibold text-label mb-1">Show in my open boards</label>
+                      <label class="qs-label mb-1.5 block text-qs-ink">Show in my open boards</label>
                       <p class="text-xs text-muted">Players on your other boards can see and join this board. Off means link only.</p>
                     </div>
                     <app-toggle [checked]="editShowInOpenBoards" (onChange)="editShowInOpenBoards = $event"></app-toggle>
@@ -675,7 +675,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
                   <div>
                     <div class="flex items-start justify-between gap-4">
                       <div class="min-w-0">
-                        <label class="block text-sm font-semibold text-label mb-1">Auto-lock and draw</label>
+                        <label class="qs-label mb-1.5 block text-qs-ink">Auto-lock and draw</label>
                         <p class="text-xs text-muted">5 minutes after kickoff, we lock the board and draw the numbers for you.</p>
                       @if (editAutoManage && editAutoRunText()) {
                       }
@@ -691,7 +691,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
               @if (editingGame(); as eg) {
                 @if (eg.boardSize > 25) {
                   <div>
-                    <label class="block text-sm font-semibold text-label mb-2">Board size</label>
+                    <label class="qs-label mb-1.5 block text-qs-ink">Board size</label>
                     <div class="flex flex-wrap gap-2">
                       <button type="button" (click)="editNewSize.set(null)"
                         [class]="!editNewSize() ? 'px-4 py-2 bg-header text-header rounded-lg font-medium text-sm' : 'px-4 py-2 bg-control text-default hover:bg-control-hover rounded-lg font-medium text-sm'">
@@ -722,9 +722,9 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
 
               <!-- Co-host Assignment -->
               <div>
-                <label class="block text-sm font-semibold text-label mb-2">
+                <label class="qs-label mb-1.5 block text-qs-ink">
                   Co-host
-                  <span class="text-muted font-normal">(optional)</span>
+                  <span class="normal-case tracking-normal">(optional)</span>
                 </label>
                 <p class="text-xs text-muted mb-2">Assign a player as co-host. A co-host can help manage players.</p>
                 @if (editingGame()?.managerId) {
