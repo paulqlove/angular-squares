@@ -247,6 +247,8 @@ Update this list as each chunk ships (change, Paul tests locally, push, merge).
 | P1 #6 Layering: modals above header and host bar, upgrade dialog above modals, toasts above both | Done (targeted, not a full renumber) | this batch |
 | P2 Phones: initials in board squares, 44px tap targets (game page, dashboard chips, profile theme buttons), 16px guest name input | Done | this batch |
 | P2 Text: 12px minimum for .qs-label, .qs-badge and one-off captions; host bar labels 11px on phones | Done | this batch |
+| P2 Dashboard: styled confirm dialog (5 places) replaces browser confirm; error toasts say "Could not X. Try again." | Done | this batch |
 | P2 Phones still open: Players list collapsed by default | Not started | |
+| P2 Dashboard still open: card footer More menu, card information hierarchy, guest banner label | Not started | |
 | Everything else in Priority 2 and 3 | Not started | |
 
