@@ -1,3 +1,4 @@
+import { LinkUsedUpError } from '../../core/utils/link-guest';
 import { Component, ChangeDetectionStrategy, OnInit, PLATFORM_ID, inject, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -74,9 +75,11 @@ export class EmailLinkComponent implements OnInit {
       await this.router.navigateByUrl(this.next);
     } catch (e: any) {
       this.fail(
-        e?.code === 'auth/invalid-email'
-          ? "That email doesn't match the one the link was sent to."
-          : 'Sign-in links work once and expire after a while. Send yourself a new one.'
+        e instanceof LinkUsedUpError
+          ? e.message
+          : e?.code === 'auth/invalid-email'
+            ? "That email doesn't match the one the link was sent to."
+            : 'Sign-in links work once and expire after a while. Send yourself a new one.'
       );
     }
   }

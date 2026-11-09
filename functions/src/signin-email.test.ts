@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { continueUrl, directLink, isValidEmail, renderEmail } from "./signin-email";
+import { continueUrl, directLink, isValidEmail, renderEmail, withAccountHint } from "./signin-email";
 
 test("accepts real emails and rejects junk", () => {
   assert.equal(isValidEmail("fan@example.com"), true);
@@ -30,4 +30,24 @@ test("escapes the email address in the HTML", () => {
   assert.equal(subject, "Your QuarterScore sign-in link");
   assert.ok(html.includes("&lt;b&gt;@x.com"));
   assert.ok(html.includes("x=1&amp;y=2"));
+});
+
+test("marks the landing page with whether the address already has an account", () => {
+  const landing = "https://quarterscore.com/auth/email-link";
+  assert.equal(withAccountHint(landing, false), `${landing}?acct=0`);
+  assert.equal(withAccountHint(landing, true), `${landing}?acct=1`);
+  assert.equal(withAccountHint(`${landing}?x=1`, true), `${landing}?x=1&acct=1`);
+});
+
+test("the direct link keeps the account hint and still carries the sign-in parameters", () => {
+  const generated = "https://squares-4e4f7.firebaseapp.com/__/auth/links?apiKey=KEY&oobCode=CODE&mode=signIn&lang=en&continueUrl=x";
+  const url = new URL(directLink(generated, withAccountHint("https://quarterscore.com/auth/email-link", true)));
+  assert.equal(url.origin + url.pathname, "https://quarterscore.com/auth/email-link");
+  assert.equal(url.searchParams.get("acct"), "1");
+  assert.equal(url.searchParams.get("oobCode"), "CODE");
+  assert.equal(url.searchParams.get("apiKey"), "KEY");
+  assert.equal(url.searchParams.get("mode"), "signIn");
+  const fresh = new URL(directLink(generated, withAccountHint("https://quarterscore.com/auth/email-link", false)));
+  assert.equal(fresh.searchParams.get("acct"), "0");
+  assert.equal(fresh.searchParams.get("oobCode"), "CODE");
 });

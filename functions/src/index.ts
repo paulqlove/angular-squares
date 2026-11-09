@@ -6,7 +6,7 @@ import { HttpsError, onCall } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
 import { getAuth } from "firebase-admin/auth";
 import { createHash } from "node:crypto";
-import { continueUrl, directLink, isValidEmail, renderEmail } from "./signin-email";
+import { continueUrl, directLink, isValidEmail, renderEmail, withAccountHint } from "./signin-email";
 import { fetchScoreboard } from "./espn";
 import { syncLiveScores } from "./sync";
 import { runDueAutoManage } from "./auto-manage-run";
@@ -112,7 +112,11 @@ export const sendSignInLink = onCall(
 
     const landing = continueUrl(request.rawRequest.headers.origin);
     const generated = await getAuth().generateSignInWithEmailLink(email, { url: landing, handleCodeInApp: true });
-    const { subject, html, text } = renderEmail(directLink(generated, landing), email);
+    const accountExists = await getAuth().getUserByEmail(email).then(() => true, (error: { code?: string }) => {
+      if (error?.code !== "auth/user-not-found") logger.warn("account lookup failed", { code: error?.code });
+      return false;
+    });
+    const { subject, html, text } = renderEmail(directLink(generated, withAccountHint(landing, accountExists)), email);
 
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",

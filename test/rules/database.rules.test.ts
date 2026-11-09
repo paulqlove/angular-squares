@@ -925,3 +925,27 @@ describe('tvLinks (office TV link)', () => {
     await assertFails(set(player(), 'tvTokenOwners/short', 'alice'));
   });
 });
+
+describe('a guest who signs in', () => {
+  // Guesty's square 0-1 was picked by the anonymous uid "guest". Signing in is meant to keep that uid
+  // (the Firebase account is linked, not replaced), so the same uid now has a real sign-in provider.
+  const linkedGuest = () => env.authenticatedContext('guest', { firebase: { sign_in_provider: 'google.com' }, email: 'guesty@example.com' });
+  const replacedGuest = () => env.authenticatedContext('brand-new-uid', { firebase: { sign_in_provider: 'google.com' }, email: 'guesty@example.com' });
+
+  it('keeps the uid after linking, so they can still give their square back', async () => {
+    await assertSucceeds(write(linkedGuest(), { [`${G}/squares/0-1`]: null }));
+  });
+
+  it('keeps the uid after linking, so they can still pick another square under the same name', async () => {
+    await assertSucceeds(write(linkedGuest(), { [`${G}/squares/5-5`]: 'Guesty' }));
+  });
+
+  it('with a brand-new uid (the old behaviour) they could not release the square', async () => {
+    await assertFails(write(replacedGuest(), { [`${G}/squares/0-1`]: null }));
+  });
+
+  it('with a brand-new uid they could not take over the old name either', async () => {
+    await assertFails(write(replacedGuest(), { [`${G}/playerUserIds/Guesty`]: 'brand-new-uid' }));
+    await assertFails(write(replacedGuest(), { [`${G}/squares/5-5`]: 'Guesty' }));
+  });
+});

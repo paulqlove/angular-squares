@@ -15,6 +15,17 @@ export function continueUrl(origin: unknown): string {
 }
 
 /**
+ * Marks the landing URL acct=1 (the address already has an account) or acct=0 (it does not). The app links a
+ * guest's account to the new sign-in only when the link says acct=0, because a failed attempt uses up the
+ * one-time link. Only the owner of the address receives this link, so the hint reveals nothing to whoever asked.
+ */
+export function withAccountHint(landing: string, accountExists: boolean): string {
+  const url = new URL(landing);
+  url.searchParams.set("acct", accountExists ? "1" : "0");
+  return url.toString();
+}
+
+/**
  * Firebase's generated link goes through firebaseapp.com first. Point it straight at our page instead:
  * the client SDK only needs mode, oobCode and apiKey in the URL to finish sign-in.
  */

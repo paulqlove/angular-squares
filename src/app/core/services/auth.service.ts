@@ -1,10 +1,12 @@
 import { Injectable, signal, computed, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import type { Auth } from 'firebase/auth';
+import type { Auth, User } from 'firebase/auth';
 import type { Database } from 'firebase/database';
 import { environment } from '../../../environments/environment';
 import { loadFirebaseSdk } from './firebase-sdk';
 import { markFirstTouchDone, readFirstTouch } from '../utils/first-touch';
+import { connectEmailLink, connectGoogle } from '../utils/auth-link';
+import { newAddressFromLink } from '../utils/link-guest';
 import { SanitizationService } from './sanitization.service';
 import { PREVIEW_ADMIN_EMAIL, PreviewRole, RolePreviewService } from './role-preview.service';
 import { ToastService } from './toast.service';
@@ -240,9 +242,15 @@ export class AuthService {
     try {
       await this.ensureInitialized();
       this._isLoading.set(true);
-      const provider = new this.sdk!.auth.GoogleAuthProvider();
-      const result = await this.sdk!.auth.signInWithPopup(this.auth, provider);
-      const user = result.user;
+      const sdkAuth = this.sdk!.auth;
+      const provider = new sdkAuth.GoogleAuthProvider();
+      // A guest keeps their account (and so their squares): Google is attached to it instead of replacing it.
+      const outcome = await connectGoogle(sdkAuth, this.auth, {
+        link: guest => sdkAuth.linkWithPopup(guest, provider),
+        signIn: () => sdkAuth.signInWithPopup(this.auth, provider)
+      });
+      const user = outcome.result.user;
+      if (outcome.linked) await this.adoptProviderProfile(user);
 
       const authUser: AuthUser = {
         uid: user.uid,
@@ -303,7 +311,9 @@ export class AuthService {
   /** Finishes sign-in from the emailed link. Sets the display name if the account has none. */
   async completeEmailLink(email: string, name: string, url: string): Promise<AuthUser> {
     await this.ensureInitialized();
-    const { user } = await this.sdk!.auth.signInWithEmailLink(this.auth, email, url);
+    // A guest keeps their account when the address is new; an address that already has an account just signs in.
+    const { result } = await connectEmailLink(this.sdk!.auth, this.auth, email, url, !newAddressFromLink(url));
+    const user = result.user;
     const displayName = user.displayName || this.sanitizationService.sanitizeDisplayName(name) || null;
     if (!user.displayName && displayName) {
       await this.sdk!.auth.updateProfile(user, { displayName });
@@ -314,6 +324,21 @@ export class AuthService {
     localStorage.removeItem(EMAIL_LINK_KEY);
     if (user.email) this.indexUserEmail(user.email, user.uid);
     return authUser;
+  }
+
+  /** After Google is attached to a guest account, copy the Google name and photo onto the account itself. */
+  private async adoptProviderProfile(user: User): Promise<void> {
+    try {
+      await user.reload();
+      const google = user.providerData.find(p => p.providerId === 'google.com');
+      const displayName = user.displayName || google?.displayName || null;
+      const photoURL = user.photoURL || google?.photoURL || null;
+      if (displayName !== user.displayName || photoURL !== user.photoURL) {
+        await this.sdk!.auth.updateProfile(user, { displayName, photoURL });
+      }
+    } catch {
+      // The account is linked either way; the name and photo fill in on the next sign-in.
+    }
   }
 
   // Guest Sign In (cookie + Firebase Anonymous Auth)
