@@ -34,30 +34,29 @@ export interface CreateGameSubmit {
   template: `
   <div class="border-b border-qs-line px-6 py-3">
     <div class="flex items-center justify-between gap-3">
-      <p class="qs-eyebrow qs-eyebrow-bar">Step {{ step() }} of {{ stepTitles.length }} · {{ stepTitles[step() - 1] }}@if (step() === 2 || step() === 3) { · Optional }</p>
+      <p class="qs-eyebrow qs-eyebrow-bar">Step {{ step() }} of {{ stepTitles.length }} · <span class="text-qs-ink">{{ stepTitles[step() - 1] }}</span>@if (step() === 3) { · Optional }</p>
     </div>
     <div class="mt-2 flex gap-1.5" role="progressbar" aria-label="Create game progress" aria-valuemin="1" [attr.aria-valuemax]="stepTitles.length" [attr.aria-valuenow]="step()" [attr.aria-valuetext]="'Step ' + step() + ' of ' + stepTitles.length + ': ' + stepTitles[step() - 1]">
       @for (title of stepTitles; track title; let i = $index) {
         <span class="h-1 flex-1 rounded-full transition-colors duration-200" [class]="i < step() ? 'bg-qs-accent' : 'bg-qs-line'"></span>
       }
     </div>
-    <p class="sr-only" aria-live="polite">Step {{ step() }} of {{ stepTitles.length }}: {{ stepTitles[step() - 1] }}</p>
   </div>
 
+  <form ngNoForm novalidate class="flex min-h-0 flex-1 flex-col" (submit)="onSubmit($event)">
   <div class="flex min-h-0 flex-1 flex-col overflow-y-auto px-6 pb-4 pt-3 [scrollbar-gutter:stable] sm:pb-5 sm:pt-4">
     @switch (step()) {
       @case (1) {
-        <div class="flex min-h-0 flex-1 flex-col gap-4 sm:gap-5" animate.enter="qs-tab-in">
+        <div class="flex min-h-0 flex-1 flex-col gap-6" animate.enter="qs-tab-in">
           <h3 id="create-step-heading" tabindex="-1" class="sr-only">Your game</h3>
           <section>
-  <h4 class="qs-label text-qs-ink">Sport</h4>
-  <div class="mt-3 flex flex-wrap gap-2" role="tablist" aria-label="Sport">
+  <h4 class="qs-label text-qs-muted">Sport</h4>
+  <div class="mt-2 flex flex-wrap gap-2" role="group" aria-label="Sport">
     @for (sport of sportOptions; track sport.value) {
       <button
         type="button"
-        role="tab"
         class="qs-tab"
-        [attr.aria-selected]="selectedSport === sport.value"
+        [attr.aria-pressed]="selectedSport === sport.value"
         (click)="selectSport(sport.value)"
       >
         {{ sport.label }}
@@ -66,30 +65,31 @@ export interface CreateGameSubmit {
   </div>
 </section>
           <section class="flex min-h-0 flex-1 flex-col">
-  <h4 class="qs-label text-qs-ink">{{ selectedSport === 'custom' ? 'Teams' : 'Game' }}</h4>
+  <h4 class="qs-label text-qs-muted">{{ selectedSport === 'custom' ? 'Teams' : 'Game' }}</h4>
   @if (selectedSport === 'custom') {
-    <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <div class="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
       <div>
-        <label for="custom-away" class="qs-label mb-1.5 block text-qs-ink">Away team</label>
+        <label for="custom-away" class="qs-label mb-2 block text-qs-muted">Away team</label>
         <input id="custom-away" type="text" [(ngModel)]="customAwayTeam" maxlength="50" placeholder="e.g. Lincoln High" class="qs-input" />
       </div>
       <div>
-        <label for="custom-home" class="qs-label mb-1.5 block text-qs-ink">Home team</label>
+        <label for="custom-home" class="qs-label mb-2 block text-qs-muted">Home team</label>
         <input id="custom-home" type="text" [(ngModel)]="customHomeTeam" maxlength="50" placeholder="e.g. Washington High" class="qs-input" />
       </div>
     </div>
     <p class="mt-2 text-xs text-qs-muted">Enter scores manually from the game page after creating the board.</p>
   } @else if (isLoadingEspnGames()) {
-    <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2" aria-busy="true">
+    <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2" aria-busy="true">
       @for (i of [0, 1, 2, 3]; track i) {
         <div class="h-[76px] animate-pulse rounded-inner bg-qs-panel-2"></div>
       }
     </div>
   } @else if (espnGames().length === 0) {
-    <p class="mt-3 rounded-inner border border-dashed border-qs-line-strong p-4 text-sm text-qs-muted">Games coming soon.</p>
+    <p class="mt-2 rounded-inner border border-dashed border-qs-line-strong p-4 text-sm text-qs-muted">Games coming soon.</p>
+    <button type="button" class="qs-btn qs-btn-secondary mt-3" (click)="selectSport('custom')">Use custom teams</button>
   } @else if (!gameListOpen && selectedEspnGame(); as game) {
     <!-- Picked: collapse to the choice so the rest of the form is right there -->
-    <div class="mt-3 flex items-center justify-between gap-3 rounded-inner border border-qs-accent bg-qs-panel p-3 outline outline-2 -outline-offset-2 outline-qs-accent">
+    <div class="mt-2 flex items-center justify-between gap-3 rounded-inner border border-qs-accent bg-qs-panel p-3 outline outline-2 -outline-offset-2 outline-qs-accent">
       <div class="min-w-0">
         <span class="qs-badge" [class]="gameStatusClass(game.status)">{{ gameStatusText(game) }}</span>
         <p class="mt-2 truncate font-semibold text-qs-ink">{{ game.awayTeam }} &#64; {{ game.homeTeam }}</p>
@@ -101,16 +101,18 @@ export interface CreateGameSubmit {
     </div>
   } @else {
     @if (espnGames().length > 10) {
-      <div class="mt-3">
+      <div class="mt-2">
         <input
-          type="text"
+          type="search"
+          aria-label="Search games"
           [(ngModel)]="espnGameSearch"
+          (keydown.enter)="$event.preventDefault()"
           placeholder="Search teams..."
           class="qs-input w-full"
         />
       </div>
     }
-    <div class="qs-canvas mt-3 min-h-40 flex-1 overflow-y-auto rounded-inner p-2">
+    <div class="qs-canvas mt-3 min-h-40 flex-1 overflow-y-auto rounded-inner p-2 max-sm:flex-none max-sm:overflow-visible">
       <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
         @for (game of filteredEspnGames(); track game.id) {
           <button
@@ -152,11 +154,11 @@ export interface CreateGameSubmit {
         </div>
       }
       @case (2) {
-        <div class="flex flex-col gap-4 sm:gap-5" animate.enter="qs-tab-in">
+        <div class="flex flex-col gap-6" animate.enter="qs-tab-in">
           <h3 id="create-step-heading" tabindex="-1" class="sr-only">Board</h3>
           <section>
-  <h4 class="qs-label text-qs-ink">Board size</h4>
-  <div class="mt-3 flex flex-wrap gap-2">
+  <h4 class="qs-label text-qs-muted">Board size</h4>
+  <div class="mt-2 flex flex-wrap gap-2">
     @for (size of boardSizeOptions; track size.value) {
       <button
         type="button"
@@ -171,86 +173,82 @@ export interface CreateGameSubmit {
   <p class="mt-2 text-xs text-qs-muted">{{ boardSizeOptions.find(s => s.value === newGameBoardSize)?.description }}</p>
 </section>
           <section>
-  <h4 class="qs-label text-qs-ink">Points per square</h4>
-  <div class="mt-3 flex flex-wrap gap-2">
+  <h4 class="qs-label text-qs-muted">Points per square</h4>
+  <div class="mt-2 grid grid-cols-5 gap-2">
     @for (price of pricePresets; track price) {
       <button
         type="button"
-        class="qs-tab min-w-16"
+        class="qs-tab px-0"
         [attr.aria-pressed]="newGamePrice === price"
         (click)="selectPrice(price)"
       >
-        {{ price === 0 ? 'None' : price + ' pts' }}
+        {{ price === 0 ? '0' : price + ' pts' }}
       </button>
     }
-    <label class="flex min-h-11 items-center gap-1 rounded-btn border border-qs-line-strong bg-qs-panel-2 px-3 focus-within:border-qs-ink">
-      <input
-        type="number"
-        [(ngModel)]="customPrice"
-        (ngModelChange)="onCustomPriceChange()"
-        placeholder="Custom"
-        aria-label="Custom points per square"
-        min="0"
-        class="w-20 bg-transparent text-base text-qs-ink placeholder:text-qs-muted focus:outline-none"
-      />
-      <span class="qs-label text-qs-muted">pts</span>
-    </label>
   </div>
+  <input
+    type="number"
+    [(ngModel)]="customPrice"
+    (ngModelChange)="onCustomPriceChange()"
+    placeholder="Custom points"
+    aria-label="Custom points per square"
+    min="0"
+    class="qs-input mt-2"
+  />
 </section>
-          <section>
       @if (squareLimitAllowed) {
-        <div class="mt-5"><app-max-squares-field [value]="newGameMaxSquares" (valueChange)="newGameMaxSquares = $event"></app-max-squares-field></div>
+        <app-max-squares-field [value]="newGameMaxSquares" (valueChange)="newGameMaxSquares = $event"></app-max-squares-field>
       } @else {
-        <p class="mt-5 text-sm text-qs-muted"><span class="qs-label mr-2 text-qs-ink">Limit squares per player</span>Comes with the Season Pass.</p>
+        <p class="text-sm text-qs-muted"><span class="qs-label mr-2 text-qs-ink">Limit squares per player</span>Comes with the Season Pass.</p>
       }
-              </section>
+      <p class="truncate rounded-inner border border-qs-line bg-qs-panel-2 px-3 py-2 font-mono text-xs text-qs-ink">{{ summaryLine() }}</p>
         </div>
       }
       @case (3) {
-        <div class="flex flex-col gap-4 sm:gap-5" animate.enter="qs-tab-in">
+        <div class="flex flex-col gap-6" animate.enter="qs-tab-in">
           <h3 id="create-step-heading" tabindex="-1" class="sr-only">Scoring</h3>
-          <p class="qs-label text-qs-muted">{{ summaryLine() }}</p>
-          <section>
-  <h4 class="qs-label text-qs-ink">Quarter split</h4>
+          <p class="qs-label truncate text-qs-muted">{{ summaryLine() }}</p>
+          <section class="flex flex-col gap-6">
+  <div>
+  <h4 class="qs-label text-qs-muted">Quarter split</h4>
   @if (!customSplitsAllowed) {
-    <p class="mt-3 text-sm text-qs-muted">
+    <p class="mt-2 text-sm text-qs-muted">
       <span class="font-mono tabular-nums text-qs-ink">20 / 20 / 20 / 40</span> · Custom splits come with the Season Pass.
     </p>
   } @else {
-  <div class="mt-3 flex flex-wrap gap-1.5">
+  <div class="mt-2 flex flex-wrap gap-2">
     @for (preset of splitPresets; track preset.id) {
-      <button type="button" class="qs-tab min-h-9 px-2.5 text-[10.5px]" [attr.aria-pressed]="newGameActivePreset() === preset.id" (click)="applyNewGameSplitPreset(preset.split)">{{ preset.label }}</button>
+      <button type="button" class="qs-tab px-3" [attr.aria-pressed]="newGameActivePreset() === preset.id" (click)="applyNewGameSplitPreset(preset.split)">{{ preset.label }}</button>
     }
-    <button type="button" class="qs-tab min-h-9 px-2.5 text-[10.5px]" [attr.aria-pressed]="newGameActivePreset() === 'custom'" (click)="newGameSplitCustomOpen = true">Custom</button>
+    <button type="button" class="qs-tab px-3" [attr.aria-pressed]="newGameActivePreset() === 'custom'" (click)="newGameSplitCustomOpen = true">Custom</button>
   </div>
   @if (newGameSplitCustomOpen || newGameActivePreset() === 'custom') {
-    <div class="mt-3 grid grid-cols-4 gap-2">
+    <div class="mt-2 grid grid-cols-4 gap-2">
       @for (q of quarters; track q.key) {
         <div>
-          <label [for]="'new-split-' + q.key" class="qs-label mb-1 block text-[10px] text-qs-muted">{{ q.label }}</label>
+          <label [for]="'new-split-' + q.key" class="qs-label mb-2 block text-qs-muted">{{ q.label }}</label>
           <input [id]="'new-split-' + q.key" type="number" min="0" max="100" step="0.5" [(ngModel)]="newGameSplitPct[q.key]" class="qs-input px-2 text-center tabular-nums" />
         </div>
       }
     </div>
   }
-  <p class="mt-1.5 text-xs tabular-nums" [class]="newGameSplitValid() ? 'text-qs-muted' : 'text-qs-bad'">
-    {{ newGameSplitText() }} · {{ newGameSplitValid() ? 'Totals 100%' : 'Must total 100% (' + newGameSplitRemaining() + ' left)' }}
-  </p>
+  @if (!newGameSplitValid()) {
+    <p class="mt-2 text-xs tabular-nums text-qs-bad">{{ newGameSplitText() }} · Must total 100% ({{ newGameSplitRemaining() }} left)</p>
   }
-  <div class="mt-5">
-    <app-empty-quarter-rule name="new-empty-quarter-rule" [(value)]="newGameEmptyRule"></app-empty-quarter-rule>
+  }
   </div>
+  <app-empty-quarter-rule class="[&_.qs-label]:text-qs-muted" name="new-empty-quarter-rule" [(value)]="newGameEmptyRule"></app-empty-quarter-rule>
 </section>
         </div>
       }
       @case (4) {
-        <div class="flex flex-col gap-4 sm:gap-5" animate.enter="qs-tab-in">
+        <div class="flex flex-col gap-8" animate.enter="qs-tab-in">
           <h3 id="create-step-heading" tabindex="-1" class="sr-only">Details</h3>
-          <p class="qs-label text-qs-muted">{{ summaryLine() }}</p>
+          <p class="qs-label truncate text-qs-muted">{{ summaryLine() }}</p>
           <section>
-            <div class="space-y-4">
+            <div class="space-y-5">
         <div>
-          <label for="new-game-name" class="qs-label mb-1.5 block text-qs-ink">Game name <span class="text-qs-bad">*</span></label>
+          <label for="new-game-name" class="qs-label mb-2 block text-qs-muted">Game name <span class="normal-case tracking-normal">· Required</span></label>
           <input
             id="new-game-name"
             type="text"
@@ -261,54 +259,58 @@ export interface CreateGameSubmit {
             [attr.aria-invalid]="gameNameError()"
           />
           @if (gameNameError()) {
-            <p class="mt-1.5 text-sm text-qs-bad">Give your game a name.</p>
+            <p class="mt-2 text-sm text-qs-bad">Give your game a name.</p>
+          } @else if (!newGameName.trim()) {
+            <p class="mt-2 text-xs text-qs-muted">Name your game to create it.</p>
           }
         </div>
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
           <div>
-            <label for="new-game-host-note" class="qs-label mb-1.5 block text-qs-ink">Note from the host <span class="normal-case tracking-normal">(optional)</span></label>
+            <label for="new-game-host-note" class="qs-label mb-2 block text-qs-muted">Note from the host <span class="normal-case tracking-normal">(optional)</span></label>
             <input id="new-game-host-note" type="text" [(ngModel)]="newGameHostNote" maxlength="140" placeholder="e.g. Snacks at halftime!" class="qs-input" />
           </div>
-          <div>
-            <label for="new-game-manager" class="qs-label mb-1.5 block text-qs-ink">Co-host <span class="normal-case tracking-normal">(optional)</span></label>
+          <div class="mt-5">
+            <label for="new-game-manager" class="qs-label mb-2 block text-qs-muted">Co-host <span class="normal-case tracking-normal">(optional)</span></label>
             <input id="new-game-manager" type="email" [(ngModel)]="newGamePaymentManager" placeholder="their@email.com" class="qs-input" />
+            <p class="mt-2 text-xs text-qs-muted">A co-host can help manage players.</p>
           </div>
         </div>
-        <p class="text-xs text-qs-muted">A co-host can help manage players.</p>
             </div>
           </section>
+      @if (openBoardsAllowed || (selectedSport !== 'custom' && selectedEspnGame())) {
+      <div class="divide-y divide-qs-line border-t border-qs-line">
       @if (openBoardsAllowed) {
-        <div class="mt-5 flex items-start justify-between gap-4">
+        <div class="flex items-start justify-between gap-4 py-5 first:pt-5">
           <div class="min-w-0">
-            <p class="qs-label mb-1.5 text-qs-ink">Show in my open boards</p>
-            <p class="text-xs text-qs-muted">Players on your other boards can see and join this board. Off means link only.</p>
+            <p class="qs-label mb-2 text-qs-ink">Show in my open boards</p>
+            <p class="text-xs text-qs-muted">Players on your other boards can join this one.</p>
             <p class="mt-2 truncate rounded-inner border border-qs-line bg-qs-panel-2 px-3 py-2 font-mono text-xs text-qs-ink">{{ newGameName || 'Your board' }} · Points per square: {{ newGamePrice }} · 0/{{ newGameBoardSize }} taken</p>
           </div>
           <app-toggle [checked]="newGameShowInOpenBoards" (onChange)="newGameShowInOpenBoards = $event"></app-toggle>
         </div>
       }
 
-          <section>
   @if (selectedSport !== 'custom' && selectedEspnGame()) {
     @if (autoManageAllowed) {
-      <div class="mt-5">
+      <div class="py-5">
         <div class="flex items-start justify-between gap-4">
           <div class="min-w-0">
-            <p class="qs-label mb-1.5 text-qs-ink">Auto-lock and draw</p>
+            <p class="qs-label mb-2 text-qs-ink">Auto-lock and draw</p>
             <p class="text-xs text-qs-muted">5 minutes after kickoff, we lock the board and draw the numbers for you.</p>
             @if (newGameAutoManage && autoRunText()) {
               <p class="mt-2 truncate rounded-inner border border-qs-line bg-qs-panel-2 px-3 py-2 font-mono text-xs text-qs-ink">Locks {{ autoRunText() }}</p>
             }
-              <details class="mt-1 text-xs text-qs-muted"><summary class="inline-flex min-h-9 cursor-pointer items-center underline underline-offset-4">How it works</summary><p class="pb-1">If the board is not full it first moves to 50 or 25 squares (squares are shuffled, each player keeps their count). Players can pick until then. Cancel any time before it runs.</p></details>
+              <details class="mt-1 text-xs text-qs-muted"><summary class="inline-flex min-h-11 cursor-pointer items-center underline underline-offset-4">How it works</summary><p class="pb-1">If the board is not full it first moves to 50 or 25 squares (squares are shuffled, each player keeps their count). Players can pick until then. Cancel any time before it runs.</p></details>
           </div>
           <app-toggle [checked]="newGameAutoManage" (onChange)="newGameAutoManage = $event"></app-toggle>
         </div>
       </div>
     } @else {
-      <p class="mt-5 text-sm text-qs-muted"><span class="qs-label mr-2 text-qs-ink">Auto-lock and draw</span>Comes with the Season Pass.</p>
+      <p class="py-5 text-sm text-qs-muted"><span class="qs-label mr-2 text-qs-ink">Auto-lock and draw</span>Comes with the Season Pass.</p>
     }
   }
-          </section>
+      </div>
+      }
         </div>
       }
     }
@@ -320,21 +322,28 @@ export interface CreateGameSubmit {
     } @else {
       <button type="button" (click)="goTo(step() - 1)" class="qs-btn qs-btn-ghost px-3 text-qs-muted">Back</button>
     }
-    @if (step() < stepTitles.length) {
-      <button type="button" (click)="goTo(step() + 1)" class="qs-btn qs-btn-primary px-4">Next</button>
-    }
-    <button type="button" (click)="submit()" [disabled]="isCreating || !newGameName.trim()" [attr.aria-busy]="isCreating" class="qs-btn ml-auto min-w-28 disabled:opacity-45 sm:min-w-40" [class.qs-btn-primary]="step() === stepTitles.length" [class.qs-btn-secondary]="step() !== stepTitles.length">
-      @if (isCreating) {
-        <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" aria-hidden="true">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-        </svg>
-        Creating
+    <div class="ml-auto flex items-center gap-2">
+      @if (step() < stepTitles.length) {
+        @if (canCreate()) {
+          <button type="button" (click)="submit()" [disabled]="isCreating" class="qs-btn qs-btn-secondary px-4 disabled:opacity-45">Create</button>
+        }
+        <button type="submit" [disabled]="step() === 3 && customSplitsAllowed && !newGameSplitValid()" class="qs-btn qs-btn-primary px-4 disabled:opacity-45">Next</button>
       } @else {
-        Create game
+        <button type="submit" [disabled]="isCreating || !newGameName.trim()" [attr.aria-busy]="isCreating" class="qs-btn qs-btn-primary min-w-28 disabled:opacity-45 sm:min-w-40">
+          @if (isCreating) {
+            <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" aria-hidden="true">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+            </svg>
+            Creating
+          } @else {
+            Create
+          }
+        </button>
       }
-    </button>
+    </div>
   </div>
+  </form>
 `
 })
 export class CreateGameFormComponent implements OnInit {
@@ -387,7 +396,7 @@ export class CreateGameFormComponent implements OnInit {
   readonly splitPresets = SPLIT_PRESETS;
   sportOptions: { value: SportType | 'custom'; label: string }[] = [
     { value: 'nfl', label: 'NFL' },
-    { value: 'ncaaf', label: 'NCAA Football' },
+    { value: 'ncaaf', label: 'NCAA' },
     { value: 'ufl', label: 'UFL' },
     { value: 'nba', label: 'NBA' },
     { value: 'wnba', label: 'WNBA' },
@@ -395,6 +404,7 @@ export class CreateGameFormComponent implements OnInit {
     { value: 'custom', label: 'Custom' }
   ];
 
+  private autoName = '';
   private espnService = inject(EspnService);
   private sanitizer = inject(SanitizationService);
 
@@ -442,6 +452,10 @@ export class CreateGameFormComponent implements OnInit {
     return getTeamLogoByAbbreviation(abbrev, 100);
   }
 
+  canCreate(): boolean {
+    return !!this.newGameName.trim() && this.newGameSplitValid();
+  }
+
   newGameActivePreset(): string {
     const t = splitToTenths(this.newGameSplitPct);
     return this.splitPresets.find(p => t && p.split.q1 === t.q1 && p.split.q2 === t.q2 && p.split.q3 === t.q3 && p.split.q4 === t.q4)?.id ?? 'custom';
@@ -461,6 +475,15 @@ export class CreateGameFormComponent implements OnInit {
     return isValidSplit(splitToTenths(this.newGameSplitPct));
   }
 
+  onSubmit(event: Event): void {
+    event.preventDefault();
+    if (this.step() === this.stepTitles.length) {
+      if (!this.isCreating && this.newGameName.trim()) this.submit();
+    } else if (!(this.step() === 3 && this.customSplitsAllowed && !this.newGameSplitValid())) {
+      this.goTo(this.step() + 1);
+    }
+  }
+
   onCustomPriceChange(): void {
     if (this.customPrice !== null && this.customPrice >= 0) {
       this.newGamePrice = this.customPrice;
@@ -478,6 +501,11 @@ export class CreateGameFormComponent implements OnInit {
   selectEspnGame(gameId: string): void {
     this.selectedEspnGameId = gameId;
     this.gameListOpen = false;
+    const game = this.selectedEspnGame();
+    if (game && this.selectedSport !== 'custom' && (!this.newGameName.trim() || this.newGameName === this.autoName)) {
+      this.autoName = `${game.awayTeam} @ ${game.homeTeam} squares`;
+      this.newGameName = this.autoName;
+    }
   }
 
   selectPrice(price: number): void {
@@ -500,7 +528,10 @@ export class CreateGameFormComponent implements OnInit {
     const target = Math.min(this.stepTitles.length, Math.max(1, next));
     if (target === this.step()) return;
     this.step.set(target);
-    setTimeout(() => document.getElementById('create-step-heading')?.focus({ preventScroll: true }));
+    setTimeout(() => {
+      const name = document.getElementById('new-game-name');
+      (target === this.stepTitles.length && name && !this.newGameName.trim() ? name : document.getElementById('create-step-heading'))?.focus({ preventScroll: true });
+    });
   }
 
   /** One line of context above the optional steps, for example "SF @ KC · 100 squares · 10 pts". */
