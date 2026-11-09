@@ -116,6 +116,7 @@
     [canLimitSquares]="isGameOwner() && planService.features().squareLimit"
     [autoRunText]="autoRunLabel(linkedEspnGame()?.date)"
     [values]="{ awayTeam: awayTeam, homeTeam: homeTeam, pricePerSquare: currentPrice, hostNote: hostNote, quarterSplit: quarterSplit, emptyQuarterRule: emptyQuarterRule, newBoardSize: null, showInOpenBoards: showInOpenBoards, autoManage: !!autoManage, maxSquaresPerPlayer: maxSquaresPerPlayer ?? null }"
+    [linkedGameName]="espnEventId ? awayTeam + ' @ ' + homeTeam : ''"
     [showSplit]="true"
     [showClear]="true"
     [canCustomSplit]="planService.features().customSplits"
