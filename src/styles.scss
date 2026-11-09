@@ -501,6 +501,8 @@ button:disabled .turn-icon { transform: rotate(-90deg); }
 button:active:not(:disabled) .turn-icon { transform: rotate(120deg); transition-duration: 160ms; }
 
 @media (prefers-reduced-motion: reduce) {
+  .qs-skel { animation: none; background: var(--qs-panel-2); }
+  .qs-skel-delay { animation: none; }
   *, *::before, *::after {
     transition-duration: .01ms !important;
     animation-duration: .01ms !important;

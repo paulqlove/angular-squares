@@ -2,31 +2,8 @@
 @if (isLoading()) {
   <!-- Loading: the page's own shape, so moving between boards does not flash a spinner -->
   <app-shared-header variant="fixed"></app-shared-header>
-  <div class="qs-skel-delay mx-auto max-w-[1600px] px-1 pb-16 pt-2 sm:px-5" role="status" aria-busy="true" aria-label="Loading game">
-    <div class="space-y-6">
-      <div class="flex flex-wrap items-center justify-between gap-3 px-3 py-2">
-        <div class="space-y-2">
-          <div class="qs-skel h-8 w-56 sm:h-9 sm:w-72"></div>
-          <div class="qs-skel h-4 w-40"></div>
-        </div>
-        <div class="flex gap-2">
-          <div class="qs-skel h-11 w-11 sm:h-9 sm:w-24"></div>
-          <div class="qs-skel h-11 w-11 sm:h-9 sm:w-24"></div>
-        </div>
-      </div>
-      <div class="qs-card mx-auto p-3 sm:p-5" aria-hidden="true">
-        <div class="mx-auto grid max-w-[900px] grid-cols-[repeat(11,minmax(0,1fr))] gap-1 sm:gap-1.5">
-          @for (i of skeletonCells; track i) {
-            <div class="qs-skel aspect-square" [class.opacity-60]="i > 11 && i % 11 !== 0"></div>
-          }
-        </div>
-      </div>
-      <div class="flex gap-2 px-3" aria-hidden="true">
-        <div class="qs-skel h-9 w-20"></div>
-        <div class="qs-skel h-9 w-24"></div>
-        <div class="qs-skel h-9 w-24"></div>
-      </div>
-    </div>
+  <div class="qs-skel-delay mx-auto max-w-[1600px] px-1 pb-16 pt-2 sm:px-5">
+    <app-game-skeleton [size]="skeletonSize()" [fade]="skeletonFade()"></app-game-skeleton>
   </div>
 } @else if (gameNotFound()) {
   <!-- Game Not Found State -->
