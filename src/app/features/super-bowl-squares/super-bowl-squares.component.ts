@@ -1375,6 +1375,11 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     this.router.navigate(['/game', ids[(index + dir + ids.length) % ids.length]]);
   }
 
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.showNameEditModal()) this.showNameEditModal.set(false);
+  }
+
   @HostListener('document:click')
   onDocumentClick(): void {
     this.highlightedSquare = null;

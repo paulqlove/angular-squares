@@ -87,6 +87,9 @@ import { AuthService } from '../../../core/services/auth.service';
               </svg>
               Sign in with Google
             </button>
+            @if (googleError()) {
+              <p class="text-center text-sm text-qs-bad" role="alert">Sign-in didn't finish. Try again or use email.</p>
+            }
 
             @if (emailSentTo()) {
               <div class="rounded-inner bg-qs-ok-soft p-4 text-sm text-qs-ok" role="status">
@@ -140,6 +143,7 @@ export class AuthModalComponent implements OnChanges {
   sending = signal(false);
   emailSentTo = signal<string | null>(null);
   emailError = signal<string | null>(null);
+  googleError = signal(false);
 
   validEmail(): boolean {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.linkEmail.trim());
@@ -197,6 +201,7 @@ export class AuthModalComponent implements OnChanges {
   }
 
   async signInWithGoogle(): Promise<void> {
+    this.googleError.set(false);
     try {
       await this.authService.signInWithGoogle();
       // Check for pending create redirect from team page
@@ -213,7 +218,9 @@ export class AuthModalComponent implements OnChanges {
           return;
         }
         this.authenticated.emit();
+        return;
       }
+      this.googleError.set(true);
     }
   }
 
