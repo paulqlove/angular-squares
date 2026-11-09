@@ -2,7 +2,7 @@ import { Component, ElementRef, Input, Output, EventEmitter, HostListener, Chang
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { heroChevronDown, heroArrowRightOnRectangle, heroComputerDesktop, heroSun, heroMoon, heroSquares2x2, heroQuestionMarkCircle } from '@ng-icons/heroicons/outline';
+import { heroChevronDown, heroArrowRightOnRectangle, heroComputerDesktop, heroSun, heroMoon, heroQuestionMarkCircle, heroTv, heroPlayCircle, heroBookOpen } from '@ng-icons/heroicons/outline';
 import { AuthService } from '../../../core/services/auth.service';
 import { GameService } from '../../../core/services/game.service';
 import { SanitizationService } from '../../../core/services/sanitization.service';
@@ -14,7 +14,7 @@ import { ToggleComponent } from '../toggle/toggle.component';
 @Component({
   selector: 'app-profile-menu',
   imports: [FormsModule, RouterLink, NgIconComponent, ToggleComponent],
-  providers: [provideIcons({ heroChevronDown, heroArrowRightOnRectangle, heroComputerDesktop, heroSun, heroMoon, heroSquares2x2, heroQuestionMarkCircle })],
+  providers: [provideIcons({ heroChevronDown, heroArrowRightOnRectangle, heroComputerDesktop, heroSun, heroMoon, heroQuestionMarkCircle, heroTv, heroPlayCircle, heroBookOpen })],
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
     @keyframes menu-in { from { opacity: 0; transform: translateY(-4px); } }
@@ -71,6 +71,24 @@ import { ToggleComponent } from '../toggle/toggle.component';
               </span>
             }
           </div>
+
+          @if (!currentUser()?.isGuest) {
+            <div class="border-b border-qs-line p-2">
+              <p class="qs-label px-3 pb-1 pt-1 text-qs-muted">Help</p>
+              <button type="button" (click)="showProfileDropdown.set(false); tour.emit()" class="qs-btn qs-btn-ghost w-full justify-start text-qs-ink">
+                <ng-icon name="heroPlayCircle" class="text-base"></ng-icon>
+                Take the tour
+              </button>
+              <a routerLink="/how-to-play" class="qs-btn qs-btn-ghost w-full justify-start text-qs-ink">
+                <ng-icon name="heroBookOpen" class="text-base"></ng-icon>
+                How to play
+              </a>
+              <a routerLink="/faq" class="qs-btn qs-btn-ghost w-full justify-start text-qs-ink">
+                <ng-icon name="heroQuestionMarkCircle" class="text-base"></ng-icon>
+                FAQ
+              </a>
+            </div>
+          }
 
           <div class="space-y-5 p-4">
             @if (allowNameEdit) {
@@ -135,10 +153,10 @@ import { ToggleComponent } from '../toggle/toggle.component';
                 How it works
               </button>
             }
-            @if (showDashboardLink && !currentUser()?.isGuest) {
-              <a routerLink="/dashboard" class="qs-btn qs-btn-ghost w-full justify-start text-qs-ink">
-                <ng-icon name="heroSquares2x2" class="text-base"></ng-icon>
-                Your games
+            @if (presentGameId) {
+              <a [routerLink]="['/present', presentGameId]" class="qs-btn qs-btn-ghost hidden w-full justify-start text-qs-ink sm:inline-flex">
+                <ng-icon name="heroTv" class="text-base"></ng-icon>
+                Present on a TV
               </a>
             }
             <button
@@ -158,7 +176,8 @@ import { ToggleComponent } from '../toggle/toggle.component';
 export class ProfileMenuComponent {
   /** The game page has its own name editor, so it hides this one. */
   @Input() allowNameEdit = true;
-  @Input() showDashboardLink = false;
+  /** Game page, owner and co-host only: adds "Present on a TV" (hidden on phones). */
+  @Input() presentGameId: string | null = null;
   @Input() walkthroughTarget: string | null = null;
   /** Adds a "How it works" item (phones only); the header shows a help icon on larger screens. */
   @Input() showTourLink = false;

@@ -2,7 +2,7 @@ import { computed, Component, OnInit, OnDestroy, ViewChild, HostListener, signal
 import { isPlatformBrowser } from '@angular/common';
 
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { boardArrowStep } from '../../core/utils/board-keys';
 import { isGameOver, startedQuarterCount } from '../../core/utils/quarter-label';
 import { GameService, GameData, EspnLiveSnapshot, BoardSize, getBoardDimensions } from '../../core/services/game.service';
@@ -32,7 +32,6 @@ import {
   heroChevronRight,
   heroTrash,
   heroShare,
-  heroTv,
   heroSquares2x2,
   heroClipboard,
   heroPencilSquare,
@@ -60,7 +59,6 @@ import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.co
     selector: 'app-super-bowl-squares',
     imports: [
     FormsModule,
-    RouterLink,
     NgIconComponent,
     GameBoardComponent,
     GameSkeletonComponent,
@@ -88,7 +86,6 @@ import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.co
             heroChevronRight,
             heroTrash,
             heroShare,
-            heroTv,
             heroSquares2x2,
             heroClipboard,
             heroPencilSquare,
@@ -196,9 +193,9 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       position: 'left'
     },
     {
-      target: 'share-present',
-      title: 'Share and present',
-      description: 'Share gives you the game code, the invite link and a TV link. On a computer, Present fills a TV with the live board, scores and winners. The grid icon takes you back to your dashboard.',
+      target: 'share',
+      title: 'Share',
+      description: 'Share gives you the game code, the invite link and a TV link.',
       position: 'bottom'
     },
     {
@@ -1363,7 +1360,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   /** Tour steps; the host-only steps only for owner and co-host. */
   private walkthroughSteps(): WalkthroughStep[] {
     const host = this.isGameOwner() || this.isManager();
-    return this.gameboardWalkthroughSteps.filter(step => host || (step.target !== 'host-tools' && step.target !== 'share-present'));
+    return this.gameboardWalkthroughSteps.filter(step => host || step.target !== 'host-tools');
   }
 
 
