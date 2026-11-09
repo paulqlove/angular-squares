@@ -135,7 +135,7 @@ import { ToggleComponent } from '../toggle/toggle.component';
                     role="radio"
                     [attr.aria-checked]="themeService.theme() === opt.value"
                     (click)="setTheme(opt.value)"
-                    class="qs-label flex min-h-9 items-center justify-center gap-1.5 rounded-[4px] transition-colors"
+                    class="qs-label flex min-h-11 items-center justify-center gap-1.5 rounded-[4px] transition-colors"
                     [class]="themeService.theme() === opt.value ? 'bg-qs-ink text-qs-bg' : 'text-qs-muted hover:text-qs-ink'"
                   >
                     <ng-icon [name]="opt.icon" class="text-sm"></ng-icon>

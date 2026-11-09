@@ -143,6 +143,13 @@ export class GameBoardComponent implements OnChanges, OnDestroy {
     return this.selectedSquares[key] || '';
   }
 
+  getSquareInitials(row: number, col: number): string {
+    const words = this.getSquarePlayer(row, col).trim().split(/\s+/).filter(Boolean);
+    if (words.length === 0) return '';
+    const letters = words.length > 1 ? words[0][0] + words[1][0] : words[0].slice(0, 2);
+    return letters.toUpperCase();
+  }
+
   getSquareAriaLabel(row: number, col: number): string {
     const player = this.getSquarePlayer(row, col);
     const awayNum = this.awayNumbers[row];
