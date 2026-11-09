@@ -29,9 +29,19 @@
 } @else {
   <!-- Main Game View -->
   <app-shared-header variant="fixed">
-    <app-help-menu [showShare]="true" (tour)="startWalkthrough()" (share)="openShareModal()"></app-help-menu>
+    <button type="button" (click)="openShareModal()" data-walkthrough="share" class="flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-btn p-2.5 text-qs-tile-muted transition-colors hover:bg-white/10 hover:text-qs-tile-ink sm:px-3" aria-label="Share">
+      <ng-icon name="heroShare" class="text-xl"></ng-icon>
+      <span class="qs-label hidden sm:inline">Share</span>
+    </button>
+    @if (currentUser() && !currentUser()?.isGuest) {
+      <button type="button" (click)="goBack()" class="flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-btn p-2.5 text-qs-tile-muted transition-colors hover:bg-white/10 hover:text-qs-tile-ink sm:px-3" aria-label="Your games">
+        <ng-icon name="heroSquares2x2" class="text-xl"></ng-icon>
+        <span class="qs-label hidden sm:inline">Your games</span>
+      </button>
+    }
+    <app-help-menu (tour)="startWalkthrough()"></app-help-menu>
     @if (currentUser()) {
-      <app-profile-menu [allowNameEdit]="false" [showDashboardLink]="true"></app-profile-menu>
+      <app-profile-menu [allowNameEdit]="false" [presentGameId]="isGameOwner() || isManager() ? gameId : null" (tour)="startWalkthrough()"></app-profile-menu>
     } @else {
       <button type="button" (click)="showAuthModal.set(true)" class="qs-btn qs-btn-primary">Sign in</button>
     }
@@ -111,24 +121,6 @@
           <div class="min-w-0">
             <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
               <h2 class="qs-title text-2xl sm:text-3xl">{{ gameName }}</h2>
-              <div class="flex items-center gap-2" data-walkthrough="share-present">
-                <button type="button" (click)="openShareModal()" class="qs-btn qs-btn-secondary min-h-11 w-11 px-0 sm:min-h-9 sm:w-auto sm:px-3" title="Share" aria-label="Share">
-                  <ng-icon name="heroShare" class="text-base"></ng-icon>
-                  <span class="hidden sm:inline">Share</span>
-                </button>
-                @if (isGameOwner() || isManager()) {
-                  <a [routerLink]="['/present', gameId]" class="qs-btn qs-btn-secondary hidden min-h-9 px-3 sm:inline-flex" title="Present on a TV" aria-label="Present on a TV">
-                    <ng-icon name="heroTv" class="text-base"></ng-icon>
-                    <span>Present</span>
-                  </a>
-                }
-                @if (currentUser() && !currentUser()?.isGuest) {
-                  <button type="button" (click)="goBack()" class="qs-btn qs-btn-secondary min-h-11 w-11 px-0 sm:min-h-9 sm:w-auto sm:px-3" title="Your games" aria-label="Your games">
-                    <ng-icon name="heroSquares2x2" class="text-base"></ng-icon>
-                    <span class="hidden sm:inline">Your games</span>
-                  </button>
-                }
-              </div>
             </div>
             @if (hostNote) {
               <p class="mt-1.5 max-w-prose break-words text-sm text-qs-muted"><span class="qs-label mr-2 text-qs-ink">Host note</span>{{ hostNote }}</p>

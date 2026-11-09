@@ -86,7 +86,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
       <app-shared-header variant="solid" appHeadroom>
         <app-help-menu (tour)="startWalkthrough()"></app-help-menu>
 
-        <app-profile-menu walkthroughTarget="profile-dropdown"></app-profile-menu>
+        <app-profile-menu walkthroughTarget="profile-dropdown" (tour)="startWalkthrough()"></app-profile-menu>
       </app-shared-header>
 
       <main class="mx-auto max-w-[1600px] px-4 sm:px-8 pt-6 pb-20 md:pt-8">

@@ -1,13 +1,14 @@
-import { Component, ElementRef, EventEmitter, HostListener, Input, Output, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Output, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { AuthService } from '../../../core/services/auth.service';
 import { RouterLink } from '@angular/router';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { heroBookOpen, heroPlayCircle, heroQuestionMarkCircle, heroShare } from '@ng-icons/heroicons/outline';
+import { heroBookOpen, heroPlayCircle, heroQuestionMarkCircle } from '@ng-icons/heroicons/outline';
 
-/** Header "?" button. Opens a small menu; the guided tour only starts from its "Take the tour" item. */
+/** Header "?" button, for guests and signed-out visitors; signed-in users get the same items in the profile menu. Opens a small menu; the guided tour only starts from its "Take the tour" item. */
 @Component({
   selector: 'app-help-menu',
   imports: [RouterLink, NgIconComponent],
-  providers: [provideIcons({ heroBookOpen, heroPlayCircle, heroQuestionMarkCircle, heroShare })],
+  providers: [provideIcons({ heroBookOpen, heroPlayCircle, heroQuestionMarkCircle })],
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
     @keyframes menu-in { from { opacity: 0; transform: translateY(-4px); } }
@@ -15,6 +16,7 @@ import { heroBookOpen, heroPlayCircle, heroQuestionMarkCircle, heroShare } from 
     @media (prefers-reduced-motion: reduce) { .animate-menu-in { animation: none; } }
   `],
   template: `
+    @if (!authService.currentUser() || authService.currentUser()?.isGuest) {
     <div class="relative">
       <button
         type="button"
@@ -38,12 +40,6 @@ import { heroBookOpen, heroPlayCircle, heroQuestionMarkCircle, heroShare } from 
             <ng-icon name="heroPlayCircle" class="text-base"></ng-icon>
             Take the tour
           </button>
-          @if (showShare) {
-            <button type="button" (click)="open.set(false); share.emit()" class="qs-btn qs-btn-ghost w-full justify-start text-qs-ink">
-              <ng-icon name="heroShare" class="text-base"></ng-icon>
-              Share this game
-            </button>
-          }
           <a routerLink="/how-to-play" class="qs-btn qs-btn-ghost w-full justify-start text-qs-ink">
             <ng-icon name="heroBookOpen" class="text-base"></ng-icon>
             How to play
@@ -55,14 +51,13 @@ import { heroBookOpen, heroPlayCircle, heroQuestionMarkCircle, heroShare } from 
         </div>
       }
     </div>
+    }
   `
 })
 export class HelpMenuComponent {
-  /** Only the game page has something to share. */
-  @Input() showShare = false;
-  @Output() share = new EventEmitter<void>();
   @Output() tour = new EventEmitter<void>();
 
+  protected authService = inject(AuthService);
   open = signal(false);
 
   private host = inject(ElementRef<HTMLElement>);
