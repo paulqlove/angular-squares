@@ -12,7 +12,7 @@ import { PreviewRole } from '../../core/services/role-preview.service';
 import { PlanService } from '../../core/services/plan.service';
 import { DEFAULT_EMPTY_QUARTER_RULE, EmptyQuarterRule, QuarterSplit, splitFractions } from '../../core/plans';
 import { AutoManageResult, AutoManageSettings, autoRunLabel } from '../../core/utils/auto-manage';
-import { atSquareLimit, squaresHeldBy } from '../../core/utils/square-limit';
+import { squareLimitMessage, squareLimitState } from '../../core/utils/square-limit';
 import { AdSlotComponent } from '../../components/ui/ad-slot/ad-slot.component';
 import { AuthService } from '../../core/services/auth.service';
 import { EspnService, EspnGame, SportType } from '../../core/services/espn.service';
@@ -662,8 +662,9 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (this.limitAppliesToMe() && atSquareLimit(this.selectedSquares, sanitizedPlayer, this.maxSquaresPerPlayer)) {
-      this.toastService.warning(`You have ${this.maxSquaresPerPlayer} of ${this.maxSquaresPerPlayer} squares. Tap one of yours to give it back.`);
+    const limit = squareLimitState(this.selectedSquares, sanitizedPlayer, this.maxSquaresPerPlayer);
+    if (limit?.full) {
+      this.toastService.warning(squareLimitMessage(limit.held, limit.max));
       return;
     }
 
@@ -1149,18 +1150,9 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     return this.isGameOwner() && this.planService.features().activeBoards > 1 && (this.showInOpenBoards || eligible);
   }
 
-  /** The host and co-host are never held to their own limit. */
-  limitAppliesToMe(): boolean {
-    return !!this.maxSquaresPerPlayer && !this.isGameOwner() && !this.isManager();
-  }
-
-  /** "3 of 5 squares" for the player's own name, or null when there is no limit. */
+  /** "3 of 5 squares" for the player's own name (the host and co-host included), or null when there is no limit. */
   squareCounter(): { held: number; max: number; full: boolean } | null {
-    const max = this.maxSquaresPerPlayer;
-    const name = this.sanitizePlayerName(this.currentPlayer || '');
-    if (!max || !name || !this.limitAppliesToMe()) return null;
-    const held = squaresHeldBy(this.selectedSquares, name);
-    return { held, max, full: held >= max };
+    return squareLimitState(this.selectedSquares, this.sanitizePlayerName(this.currentPlayer || ''), this.maxSquaresPerPlayer);
   }
 
   /** The host can switch on lock-and-draw before kickoff: Season Pass, a linked game, numbers not drawn yet. */
