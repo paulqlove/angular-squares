@@ -12,7 +12,10 @@
     "test": "ng test",
     "serve:ssr:angular-squares": "node dist/angular-squares/server/server.mjs",
     "test:rules": "PATH=\"$(brew --prefix openjdk@21 2>/dev/null)/bin:$PATH\" npx -y firebase-tools@latest emulators:exec --only database --project demo-squares \"vitest run --config test/rules/vitest.config.mts\"",
-    "test:auth": "npx -y firebase-tools@latest emulators:exec --only auth --project demo-link \"vitest run --config test/auth/vitest.config.mts\""
+    "test:auth": "npx -y firebase-tools@latest emulators:exec --only auth --project demo-link \"vitest run --config test/auth/vitest.config.mts\"",
+    "start:emulators": "ng serve --configuration emulators --port 4201",
+    "emulators:start": "PATH=\"$(brew --prefix openjdk@21 2>/dev/null)/bin:$PATH\" npx -y firebase-tools@latest emulators:start --only auth,database --project squares-4e4f7",
+    "emulators:seed": "node scripts/emulators/seed.mjs"
   },
   "private": true,
   "dependencies": {

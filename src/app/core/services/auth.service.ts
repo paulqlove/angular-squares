@@ -7,6 +7,7 @@ import { loadFirebaseSdk } from './firebase-sdk';
 import { markFirstTouchDone, readFirstTouch } from '../utils/first-touch';
 import { connectEmailLink, connectGoogle } from '../utils/auth-link';
 import { newAddressFromLink } from '../utils/link-guest';
+import { connectAuthOnce, connectDatabaseOnce, fakeGoogleToken } from '../utils/emulators';
 import { SanitizationService } from './sanitization.service';
 import { PREVIEW_ADMIN_EMAIL, PreviewRole, RolePreviewService } from './role-preview.service';
 import { ToastService } from './toast.service';
@@ -72,6 +73,19 @@ export class AuthService {
   });
   isLoading = this._isLoading.asReadonly();
   authError = this._authError.asReadonly();
+
+  constructor() {
+    if (environment.useEmulators && isPlatformBrowser(this.platformId)) {
+      // Dev only (npm run start:emulators): in the browser console, `await qsDevSignIn()` signs in as a made-up person on the local emulator.
+      (globalThis as { qsDevSignIn?: unknown }).qsDevSignIn = async (email = 'owner@example.test', name = 'Olive Owner') => {
+        await this.ensureInitialized();
+        const { auth } = this.sdk!;
+        const result = await auth.signInWithCredential(this.auth, auth.GoogleAuthProvider.credential(fakeGoogleToken(email, name)));
+        this._currentUser.set({ uid: result.user.uid, email: result.user.email, displayName: result.user.displayName, photoURL: result.user.photoURL, isGuest: false });
+        return result.user.uid;
+      };
+    }
+  }
 
   // Computed values
   isAuthenticated = computed(() => this.currentUser() !== null);
@@ -155,9 +169,13 @@ export class AuthService {
     }
     const firebaseApp = app.getApps()[0];
     this._auth = auth.getAuth();
+    if (environment.useEmulators) connectAuthOnce(this._auth, auth.connectAuthEmulator);
     // Local persistence so auth survives a refresh. Fire-and-forget, as before.
     void auth.setPersistence(this._auth, auth.browserLocalPersistence);
     this._db = database.getDatabase(firebaseApp, environment.firebase.databaseURL);
+    if (environment.useEmulators) {
+      connectDatabaseOnce(this._db, database.connectDatabaseEmulator);
+    }
 
     // Check for guest user in cookie first (show name immediately while Firebase loads)
     const guestUser = this.getGuestFromCookie();

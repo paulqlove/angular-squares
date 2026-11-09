@@ -3,6 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { initializeApp, getApps } from 'firebase/app';
 import {
   Database,
+  connectDatabaseEmulator,
   getDatabase,
   ref,
   onValue,
@@ -23,6 +24,7 @@ import { AuthService } from './auth.service';
 import { shuffleSquares, smallerBoardSizes } from '../utils/shuffle-squares';
 import { OpenBoardRow, openBoardRows } from '../utils/open-boards';
 import { readSquareLimit } from '../utils/square-limit';
+import { connectDatabaseOnce } from '../utils/emulators';
 import { AUTO_MANAGE_DELAY_MS, AutoManageResult, AutoManageSettings, readAutoManage, readAutoManageResult } from '../utils/auto-manage';
 import {
   BoardActivity,
@@ -168,6 +170,7 @@ export class GameService {
         app = getApps()[0];
       }
       this._db = getDatabase(app, environment.firebase.databaseURL);
+      if (environment.useEmulators) connectDatabaseOnce(this._db, connectDatabaseEmulator);
     }
     if (!this._db) {
       throw new Error('[GameService] Database not available - not in browser context');

@@ -139,6 +139,17 @@
                 "zone.js",
                 "zone.js/testing"
               ]
+            },
+            "emulators": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.emulators.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -151,6 +162,9 @@
             },
             "development": {
               "buildTarget": "angular-squares:build:development"
+            },
+            "emulators": {
+              "buildTarget": "angular-squares:build:emulators"
             }
           },
           "defaultConfiguration": "development"
