@@ -1,3 +1,4 @@
+import { buildInitials } from '../../utils/initials.utils';
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, ChangeDetectorRef, OnChanges, OnDestroy, SimpleChanges, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BoardSize, getBoardDimensions } from '../../../../core/services/game.service';
@@ -87,6 +88,9 @@ export class GameBoardComponent implements OnChanges, OnDestroy {
     return this.awayNumbersLocked[index] ?? true;
   }
 
+  private initials = new Map<string, string>();
+  private initialsSource: { [key: string]: string } | null = null;
+
   /** A square that was just picked flashes for a moment. Loads, refreshes and conversions (many at once) do not. */
   ngOnChanges(changes: SimpleChanges): void {
     if (!changes['selectedSquares']) return;
@@ -141,6 +145,14 @@ export class GameBoardComponent implements OnChanges, OnDestroy {
   getSquarePlayer(row: number, col: number): string {
     const key = `${row}-${col}`;
     return this.selectedSquares[key] || '';
+  }
+
+  getSquareInitials(row: number, col: number): string {
+    if (this.initialsSource !== this.selectedSquares) {
+      this.initialsSource = this.selectedSquares;
+      this.initials = buildInitials(Object.values(this.selectedSquares));
+    }
+    return this.initials.get(this.getSquarePlayer(row, col).trim()) ?? '';
   }
 
   getSquareAriaLabel(row: number, col: number): string {

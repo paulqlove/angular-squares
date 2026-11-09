@@ -128,7 +128,7 @@
               <p class="mt-1.5 flex max-w-prose flex-wrap items-center gap-x-3 gap-y-1 text-sm text-qs-muted">
                 <span><span class="qs-label mr-2 text-qs-ink">Auto-lock and draw</span>{{ note.text }}</span>
                 @if (note.host) {
-                  <button type="button" class="qs-label min-h-9 text-qs-accent underline underline-offset-4" (click)="cancelAutoManage()">Cancel</button>
+                  <button type="button" class="qs-label min-h-11 text-qs-accent underline underline-offset-4" (click)="cancelAutoManage()">Cancel</button>
                 }
               </p>
             }
@@ -146,7 +146,7 @@
               <span class="font-medium text-default">{{ currentUser()?.displayName }}</span>
               <button
                 (click)="openNameEditModal()"
-                class="p-1.5 text-muted hover:text-heading hover:bg-control rounded transition-colors"
+                class="inline-flex min-h-11 min-w-11 items-center justify-center text-muted hover:text-heading hover:bg-control rounded transition-colors"
                 title="Edit name"
                 aria-label="Edit your name"
                 >
@@ -155,7 +155,7 @@
             </div>
           } @else if (currentUser() && !currentUser()?.isGuest) {
             @if (!currentUser()?.displayName) {
-              <button type="button" (click)="openNameEditModal()" class="qs-btn qs-btn-secondary min-h-9 px-3">Add your name</button>
+              <button type="button" (click)="openNameEditModal()" class="qs-btn qs-btn-secondary px-3">Add your name</button>
             }
           } @else {
             <div class="flex flex-col gap-1">
@@ -163,7 +163,7 @@
                 placeholder="Enter your name"
                 [disabled]="isLocked"
                 [class.border-qs-bad]="duplicateNameWarning()"
-                class="w-full px-3 py-1.5 text-sm border rounded-lg bg-input text-default text-center sm:text-left focus:outline-none focus:ring-2 focus:ring-qs-accent disabled:opacity-50 disabled:cursor-not-allowed">
+                class="w-full min-h-11 px-3 text-base border rounded-lg bg-input text-default text-center sm:text-left focus:outline-none focus:ring-2 focus:ring-qs-accent disabled:opacity-50 disabled:cursor-not-allowed">
               @if (duplicateNameWarning()) {
                 <span class="text-xs text-qs-bad text-center">{{ duplicateNameWarning() }}</span>
               }
@@ -266,7 +266,7 @@
               type="button"
               (click)="isPlayersListVisible = !isPlayersListVisible"
               [attr.aria-expanded]="isPlayersListVisible"
-              class="qs-label flex items-center gap-1 text-qs-muted hover:text-qs-ink lg:hidden">
+              class="qs-label flex min-h-11 items-center gap-1 px-1 text-qs-muted hover:text-qs-ink lg:hidden">
               {{ isPlayersListVisible ? 'Hide' : 'Show' }}
               <ng-icon name="heroChevronDown" [class.rotate-180]="isPlayersListVisible" class="text-base transition-transform"></ng-icon>
             </button>

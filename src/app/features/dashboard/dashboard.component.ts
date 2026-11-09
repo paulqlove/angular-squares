@@ -289,7 +289,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
                 <input type="search" [value]="gameSearch()" (input)="gameSearch.set($any($event.target).value)" placeholder="Search by name or team" aria-label="Search your boards" class="qs-input min-h-9 min-w-0 flex-1 basis-full py-0 sm:basis-48" />
                 <div class="hidden flex-wrap gap-1.5 sm:flex" role="group" aria-label="Filter boards">
                   @for (f of statusFilters; track f.value) {
-                    <button type="button" class="qs-tab min-h-9 px-3" [attr.aria-pressed]="gameStatus() === f.value" (click)="gameStatus.set(f.value)">{{ f.label }}</button>
+                    <button type="button" class="qs-tab min-h-11 px-3" [attr.aria-pressed]="gameStatus() === f.value" (click)="gameStatus.set(f.value)">{{ f.label }}</button>
                   }
                 </div>
                 <div class="grid basis-full grid-cols-2 gap-2 sm:hidden">

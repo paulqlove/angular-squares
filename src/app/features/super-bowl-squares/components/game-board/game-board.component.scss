@@ -53,7 +53,7 @@
 
 .square-cell {
   @extend .number-cell;
-  @apply text-[8px] sm:text-xs cursor-pointer p-1 text-center truncate overflow-hidden whitespace-nowrap;
+  @apply text-[11px] sm:text-xs cursor-pointer p-1 text-center truncate overflow-hidden whitespace-nowrap;
   font-family: var(--qs-font-sans);
   font-weight: 600;
   // Player names should always be dark since player colors are pastel
