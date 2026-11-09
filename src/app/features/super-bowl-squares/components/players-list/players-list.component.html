@@ -17,8 +17,8 @@
             }
             @if (paidPlayers.has(entry.player)) {
               <span class="qs-badge qs-badge-ok">Confirmed</span>
-            } @else if (shouldShowShame(entry.player)) {
-              <span class="qs-badge qs-badge-warn">{{ getShameLabel(entry.player) }}</span>
+            } @else if (shouldShowUnconfirmed(entry.player)) {
+              <span class="qs-badge qs-badge-warn">Not confirmed</span>
             }
           </div>
           <div class="shrink-0 text-right">

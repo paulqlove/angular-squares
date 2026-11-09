@@ -33,11 +33,6 @@ export class PlayersListComponent {
   
   selectedPlayer: string | null = null;
 
-  private shameEmojis = ['🤢', '🤮', '💩', '🙈', '😱', '🤦', '😤', '🫣', '🤑', '🗑️'];
-  private shameLabels = ['Slowpoke', 'Shame!', 'Check In', 'Unconfirmed'];
-  private playerEmojis: Map<string, string> = new Map();
-  private playerShameLabels: Map<string, string> = new Map();
-
   onPlayerClick(player: string): void {
     if (this.selectedPlayer === player) {
       this.selectedPlayer = null;
@@ -85,23 +80,7 @@ export class PlayersListComponent {
       [];
   }
 
-  shouldShowShame(player: string): boolean {
+  shouldShowUnconfirmed(player: string): boolean {
     return this.lastUnpaidPlayers.includes(player);
   }
-
-  getShameEmoji(player: string): string {
-    if (!this.playerEmojis.has(player)) {
-      const randomIndex = Math.floor(Math.random() * this.shameEmojis.length);
-      this.playerEmojis.set(player, this.shameEmojis[randomIndex]);
-    }
-    return this.playerEmojis.get(player) || '🤢';
-  }
-
-  getShameLabel(player: string): string {
-    if (!this.playerShameLabels.has(player)) {
-      const randomIndex = Math.floor(Math.random() * this.shameLabels.length);
-      this.playerShameLabels.set(player, this.shameLabels[randomIndex]);
-    }
-    return this.playerShameLabels.get(player) || 'Check In';
-  }
-} 
+}

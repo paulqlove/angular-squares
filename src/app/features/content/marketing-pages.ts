@@ -526,9 +526,9 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
           'Pick one of these and write it at the top of the board. Do not mix them.'
         ],
         bullets: [
-          'Free to claim, with a separate optional donation. Anyone can take a square without donating. Donors and non-donors have the same chance at a donated thank-you gift, such as a sponsor’s gift card to the school store or a team lunch. The donation link lives somewhere else. QuarterScore does not process it.',
-          'A donation board with nothing to win. Supporters give per square and get a thank-you on the board. Nobody receives anything of value for the square.',
-          'The winning square picks the charity. Donors name a charity, and the funds go to the charity named on the winning square. The person who claimed it does not receive the money.'
+          'Free to claim, with a separate optional donation. Anyone can take a square without donating, and everyone has the same chance at a thank-you gift from a sponsor. The donation link lives somewhere else.',
+          'A board with nothing to win. Supporters take a square to back the cause and get a thank-you on the board.',
+          'The winning square picks the charity. Supporters name a charity, and each quarter’s winning square decides which one gets the shout-out.'
         ]
       },
       {
