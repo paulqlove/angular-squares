@@ -429,7 +429,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
           </div>
 
           <div class="mt-5 flex items-center gap-1 border-t border-qs-line pt-4">
-            <button type="button" (click)="openGame(game.id)" class="qs-btn qs-btn-secondary mr-auto flex-1 hover:!border-qs-ink">Open game</button>
+            <button type="button" (click)="openGame(game.id, game.boardSize)" class="qs-btn qs-btn-secondary mr-auto flex-1 hover:!border-qs-ink">Open game</button>
             <button type="button" (click)="shareGame(game.id)" class="qs-btn qs-btn-ghost w-11 px-0 text-qs-muted hover:text-qs-ink" title="Share game" aria-label="Share game">
               <ng-icon name="heroShare" class="text-lg"></ng-icon>
             </button>
@@ -921,8 +921,8 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  openGame(gameId: string): void {
-    this.router.navigate(['/game', gameId]);
+  openGame(gameId: string, boardSize: number): void {
+    this.router.navigate(['/game', gameId], { state: { boardSize } });
   }
 
   shareGame(gameId: string): void {

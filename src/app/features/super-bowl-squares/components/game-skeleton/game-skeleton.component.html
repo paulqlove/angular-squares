@@ -1,0 +1,96 @@
+<div class="space-y-6" role="status" aria-busy="true" aria-label="Loading game">
+  <div class="space-y-6" aria-hidden="true">
+    <div class="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
+      <div class="qs-skel h-8 w-56 sm:h-9 sm:w-72"></div>
+      <div class="flex gap-2">
+        <div class="qs-skel h-11 w-11 sm:h-9 sm:w-24"></div>
+        <div class="qs-skel h-11 w-11 sm:h-9 sm:w-32"></div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-8 px-3 lg:grid-cols-12">
+      <section class="lg:col-span-7">
+        <div class="mb-3 flex items-baseline justify-between border-b border-qs-line pb-3">
+          <h3 class="qs-eyebrow qs-eyebrow-bar">01 / Board</h3>
+          <div class="qs-skel h-3 w-20"></div>
+        </div>
+        <div class="qs-card p-3 sm:p-5">
+          <div class="mb-4 flex gap-2">
+            @for (t of quarters.slice(0, 3); track t) {
+              <div class="qs-skel h-9 w-16 sm:w-20"></div>
+            }
+          </div>
+          <div class="mb-2 flex h-5 items-center gap-2">
+            <div class="qs-skel h-4 w-20"></div>
+            <span class="text-qs-line-strong">/</span>
+            <div class="qs-skel h-4 w-20"></div>
+            @if (size() !== 100) {
+              <div class="qs-skel ml-auto h-5 w-20"></div>
+            }
+          </div>
+          <div [class]="'flex flex-col gap-px overflow-hidden rounded-inner bg-qs-line p-px ' + boardClass()">
+            <div [class]="gridCols() + ' grid gap-px'">
+              <div class="h-6 bg-qs-panel-2 sm:h-9"></div>
+              @for (c of colRange(); track c) {
+                <div class="h-6 bg-qs-panel-2 sm:h-9"></div>
+              }
+            </div>
+            @for (r of rowRange(); track r) {
+              <div [class]="gridCols() + ' qs-skel grid gap-px'">
+                <div class="h-[calc((100vw-5rem)/10)] bg-qs-panel-2 sm:h-12"></div>
+                @for (c of colRange(); track c) {
+                  <div data-cell class="h-[calc((100vw-5rem)/10)] bg-qs-panel opacity-70 sm:h-12"></div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+
+      <section class="lg:relative lg:col-span-5">
+        <div class="flex flex-col lg:absolute lg:inset-0">
+          <div class="mb-3 flex items-baseline justify-between border-b border-qs-line pb-3">
+            <h3 class="qs-eyebrow qs-eyebrow-bar">02 / Players</h3>
+            <div class="qs-skel h-3 w-10 lg:hidden"></div>
+          </div>
+          <div class="qs-card flex min-h-0 flex-1 flex-col overflow-hidden">
+            <div class="grid grid-cols-4 gap-2 p-3">
+              @for (q of quarters; track q) {
+                <div>
+                  <div class="qs-skel h-3 w-10"></div>
+                  <div class="qs-skel mt-2 h-6 w-8"></div>
+                </div>
+              }
+            </div>
+            <div class="qs-skel mx-3 mb-3 h-2"></div>
+            <div class="min-h-0 flex-1 overflow-hidden border-t border-qs-line">
+              @for (w of playerNameWidths; track $index) {
+                <div class="flex items-center gap-3 px-3 py-2.5">
+                  <div class="qs-skel h-6 w-6 rounded-full"></div>
+                  <div [class]="'qs-skel h-4 ' + w"></div>
+                  <div class="qs-skel ml-auto h-4 w-10"></div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="px-3">
+      <div class="mb-3 flex items-baseline justify-between border-b border-qs-line pb-3">
+        <h3 class="qs-eyebrow qs-eyebrow-bar">03 / Winners</h3>
+        <div class="qs-skel h-3 w-24"></div>
+      </div>
+      <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        @for (q of quarters; track q) {
+          <div class="qs-card min-h-36 p-4">
+            <div class="qs-skel h-3 w-8"></div>
+            <div class="qs-skel mt-3 h-6 w-16"></div>
+            <div class="qs-skel mt-2 h-3 w-24"></div>
+          </div>
+        }
+      </div>
+    </section>
+  </div>
+</div>

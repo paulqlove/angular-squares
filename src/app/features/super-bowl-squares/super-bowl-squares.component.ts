@@ -20,6 +20,7 @@ import { ToastService } from '../../core/services/toast.service';
 import { SanitizationService } from '../../core/services/sanitization.service';
 import { WalkthroughService, WalkthroughStep } from '../../core/services/walkthrough.service';
 import { Subscription } from 'rxjs';
+import { GameSkeletonComponent } from './components/game-skeleton/game-skeleton.component';
 import { GameBoardComponent } from './components/game-board/game-board.component';
 import { PlayersListComponent } from './components/players-list/players-list.component';
 import { WinnersAndPayoutsComponent } from './components/winners-and-payouts/winners-and-payouts.component';
@@ -62,6 +63,7 @@ import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.co
     RouterLink,
     NgIconComponent,
     GameBoardComponent,
+    GameSkeletonComponent,
     PlayersListComponent,
     WinnersAndPayoutsComponent,
     GameStatusComponent,
@@ -218,6 +220,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   pendingSquare: { row: number; col: number } | null = null;
 
   constructor() {
+    this.pickSkeletonSize(this.route.snapshot.params['gameId'] ?? '');
     // Reactively update currentPlayer when auth state changes (e.g., Google sign-in after page load)
     // Lift toasts and the preview switcher above the floating host bar
     effect(() => {
@@ -253,8 +256,8 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   private openBoardsFor = '';
   private openBoardsLoad: Promise<OpenBoardRow[]> | null = null;
   isLoading = signal(true);
-  /** Placeholder cells for the loading skeleton: an 11 by 11 board. */
-  readonly skeletonCells = Array.from({ length: 121 }, (_, i) => i);
+  skeletonFade = signal(false);
+  skeletonSize = signal<BoardSize>(100);
   gameNotFound = signal(false);
   showShareModal = signal(false);
   showNameEditModal = signal(false);
@@ -339,12 +342,28 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     );
   }
 
+  private pickSkeletonSize(gameId: string): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    const valid = (v: unknown): v is BoardSize => v === 25 || v === 50 || v === 100;
+    let size: unknown = history.state?.boardSize;
+    if (!valid(size)) {
+      try {
+        size = Number(localStorage.getItem(`qs_size_${gameId}`));
+      } catch {
+        size = null;
+      }
+    }
+    this.skeletonFade.set(!valid(size));
+    this.skeletonSize.set(valid(size) ? size : 100);
+  }
+
   private async loadGame(gameId: string): Promise<void> {
     // Switching boards reuses this component: drop the previous board's listener and state
     this.gameSub?.unsubscribe();
     this.gameSub = null;
     this.gameNotFound.set(false);
     this.isLoading.set(true);
+    this.pickSkeletonSize(gameId);
     // A board opened from the More list starts on its squares, not the list it came from
     this.activeTab = 'board';
     this.openBoards.set([]);
@@ -383,6 +402,9 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           this.gameName = data.name || 'Football Squares';
           this.gameOwnerId = data.ownerId || '';
           this.boardSize = data.boardSize || 100;
+          try {
+            localStorage.setItem(`qs_size_${this.gameId}`, String(this.boardSize));
+          } catch {}
           const { rows, cols } = getBoardDimensions(this.boardSize);
           this.selectedSquares = data.selectedSquares || {};
           this.homeNumbers = data.homeNumbers || Array(cols).fill(null);
