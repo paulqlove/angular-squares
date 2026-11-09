@@ -150,7 +150,8 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   duplicateNameWarning = signal<string | null>(null);
   isRandomized: boolean = false;
   isLocked: boolean = false;
-  isPlayersListVisible: boolean = true;
+  /** Below the lg breakpoint the list starts folded so Winners is not pushed far down the page. */
+  isPlayersListVisible: boolean = !(typeof window !== 'undefined' && window.matchMedia?.('(max-width: 1023px)').matches);
   showAlert: boolean = false;
   alertMessage: string = '';
   takenByPlayer: string = '';
@@ -1501,6 +1502,10 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     };
 
     await this.gameService.updateGame(this.gameId, defaultGameState);
+  }
+
+  get playerCount(): number {
+    return Object.keys(this.playerStats).length;
   }
 
   togglePlayersList(): void {
