@@ -1,3 +1,5 @@
+import { summaryRows } from '../../../../components/ui/form-summary/summary-rows';
+import { FormSummaryComponent, SummaryRow } from '../../../../components/ui/form-summary/form-summary.component';
 import { MaxSquaresFieldComponent } from '../../../../components/ui/max-squares-field/max-squares-field.component';
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, HostListener, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -29,7 +31,7 @@ export interface EditGameValues {
 /** Owner-only "Edit game" popup. Edits a draft and saves once. */
 @Component({
   selector: 'app-edit-game-dialog',
-  imports: [MaxSquaresFieldComponent, FormsModule, NgIconComponent, EmptyQuarterRuleComponent, ToggleComponent],
+  imports: [FormSummaryComponent, MaxSquaresFieldComponent, FormsModule, NgIconComponent, EmptyQuarterRuleComponent, ToggleComponent],
   providers: [provideIcons({ heroXMark, heroTrash, heroLockClosed })],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
@@ -84,7 +86,6 @@ export interface EditGameValues {
                 <div class="min-w-0">
                   <p class="qs-label mb-1.5 text-qs-ink">Show in my open boards</p>
                   <p class="text-xs text-qs-muted">Players on your other boards can see and join this board. Off means link only.</p>
-                  <p class="mt-2 truncate rounded-inner border border-qs-line bg-qs-panel-2 px-3 py-2 font-mono text-xs text-qs-ink">{{ boardName }} · Points per square: {{ draft.pricePerSquare }} · {{ squaresFilled }}/{{ boardSize }} taken</p>
                 </div>
                 <app-toggle [checked]="draft.showInOpenBoards" (onChange)="draft.showInOpenBoards = $event"></app-toggle>
               </div>
@@ -101,7 +102,6 @@ export interface EditGameValues {
                     <p class="qs-label mb-1.5 text-qs-ink">Auto-lock and draw</p>
                     <p class="text-xs text-qs-muted">5 minutes after kickoff, we lock the board and draw the numbers for you.</p>
                     @if (draft.autoManage && autoRunText) {
-                      <p class="mt-2 truncate rounded-inner border border-qs-line bg-qs-panel-2 px-3 py-2 font-mono text-xs text-qs-ink">Locks {{ autoRunText }}</p>
                     }
                   <details class="mt-1 text-xs text-qs-muted"><summary class="inline-flex min-h-9 cursor-pointer items-center underline underline-offset-4">How it works</summary><p class="pb-1">If the board is not full it first moves to 50 or 25 squares (squares are shuffled, each player keeps their count). Players can pick until then. Cancel any time before it runs.</p></details>
                   </div>
@@ -164,6 +164,8 @@ export interface EditGameValues {
 
             <app-empty-quarter-rule name="edit-empty-quarter-rule" [(value)]="draft.emptyQuarterRule"></app-empty-quarter-rule>
 
+            <app-form-summary [rows]="summaryRows()"></app-form-summary>
+
             <div class="rounded-inner border border-qs-line p-4">
               <p class="qs-label text-qs-bad">Danger zone</p>
               <p class="mt-1 text-sm text-qs-muted">Clears squares, numbers, scores and settings. This can't be undone.</p>
@@ -214,6 +216,19 @@ export class EditGameDialogComponent implements OnChanges {
     { key: 'q1', label: 'Q1' }, { key: 'q2', label: 'Q2' }, { key: 'q3', label: 'Q3' }, { key: 'q4', label: 'Q4' }
   ];
   draft: EditGameValues = { ...this.values };
+
+  /** What the choices above add up to, shown at the bottom. */
+  summaryRows(): SummaryRow[] {
+    return summaryRows({
+      showInOpenBoards: this.canShowInOpenBoards && this.draft.showInOpenBoards,
+      boardName: this.boardName,
+      pointsPerSquare: this.draft.pricePerSquare,
+      squaresFilled: this.squaresFilled,
+      boardSize: this.boardSize,
+      autoLock: this.canAutoManage && this.draft.autoManage,
+      autoRunText: this.autoRunText
+    });
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['isOpen']?.currentValue) {

@@ -1,3 +1,5 @@
+import { summaryRows } from '../../components/ui/form-summary/summary-rows';
+import { FormSummaryComponent, SummaryRow } from '../../components/ui/form-summary/form-summary.component';
 import { MaxSquaresFieldComponent } from '../../components/ui/max-squares-field/max-squares-field.component';
 import { autoRunLabel } from '../../core/utils/auto-manage';
 import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy, inject, signal } from '@angular/core';
@@ -27,7 +29,7 @@ export interface CreateGameSubmit {
  */
 @Component({
   selector: 'app-create-game-form',
-  imports: [MaxSquaresFieldComponent, FormsModule, NgIconComponent, EmptyQuarterRuleComponent, ToggleComponent],
+  imports: [FormSummaryComponent, MaxSquaresFieldComponent, FormsModule, NgIconComponent, EmptyQuarterRuleComponent, ToggleComponent],
   providers: [provideIcons({ heroCheckCircle })],
   host: { class: 'contents' },
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -282,7 +284,6 @@ export interface CreateGameSubmit {
           <div class="min-w-0">
             <p class="qs-label mb-1.5 text-qs-ink">Show in my open boards</p>
             <p class="text-xs text-qs-muted">Players on your other boards can see and join this board. Off means link only.</p>
-            <p class="mt-2 truncate rounded-inner border border-qs-line bg-qs-panel-2 px-3 py-2 font-mono text-xs text-qs-ink">{{ newGameName || 'Your board' }} · Points per square: {{ newGamePrice }} · 0/{{ newGameBoardSize }} taken</p>
           </div>
           <app-toggle [checked]="newGameShowInOpenBoards" (onChange)="newGameShowInOpenBoards = $event"></app-toggle>
         </div>
@@ -297,7 +298,6 @@ export interface CreateGameSubmit {
             <p class="qs-label mb-1.5 text-qs-ink">Auto-lock and draw</p>
             <p class="text-xs text-qs-muted">5 minutes after kickoff, we lock the board and draw the numbers for you.</p>
             @if (newGameAutoManage && autoRunText()) {
-              <p class="mt-2 truncate rounded-inner border border-qs-line bg-qs-panel-2 px-3 py-2 font-mono text-xs text-qs-ink">Locks {{ autoRunText() }}</p>
             }
               <details class="mt-1 text-xs text-qs-muted"><summary class="inline-flex min-h-9 cursor-pointer items-center underline underline-offset-4">How it works</summary><p class="pb-1">If the board is not full it first moves to 50 or 25 squares (squares are shuffled, each player keeps their count). Players can pick until then. Cancel any time before it runs.</p></details>
           </div>
@@ -309,6 +309,7 @@ export interface CreateGameSubmit {
     }
   }
           </section>
+          <app-form-summary [rows]="summaryRows()"></app-form-summary>
         </div>
       }
     }
@@ -501,6 +502,19 @@ export class CreateGameFormComponent implements OnInit {
     if (target === this.step()) return;
     this.step.set(target);
     setTimeout(() => document.getElementById('create-step-heading')?.focus({ preventScroll: true }));
+  }
+
+  /** What the choices on the Details step add up to, shown at the bottom of it. */
+  summaryRows(): SummaryRow[] {
+    return summaryRows({
+      showInOpenBoards: this.openBoardsAllowed && this.newGameShowInOpenBoards,
+      boardName: this.newGameName,
+      pointsPerSquare: this.newGamePrice,
+      squaresFilled: 0,
+      boardSize: this.newGameBoardSize,
+      autoLock: this.autoManageAllowed && this.newGameAutoManage && this.selectedSport !== 'custom' && !!this.selectedEspnGame(),
+      autoRunText: this.autoRunText()
+    });
   }
 
   /** One line of context above the optional steps, for example "SF @ KC · 100 squares · 10 pts". */

@@ -1,3 +1,5 @@
+import { summaryRows } from '../../components/ui/form-summary/summary-rows';
+import { FormSummaryComponent, SummaryRow } from '../../components/ui/form-summary/form-summary.component';
 import { MaxSquaresFieldComponent } from '../../components/ui/max-squares-field/max-squares-field.component';
 import { autoRunLabel } from '../../core/utils/auto-manage';
 import { Component, OnInit, signal, computed, inject, effect, HostListener, ChangeDetectionStrategy } from '@angular/core';
@@ -57,7 +59,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
 
 @Component({
     selector: 'app-dashboard',
-    imports: [MaxSquaresFieldComponent, FormsModule, NgTemplateOutlet, DropdownComponent, ToggleComponent, CreateGameFormComponent, NgIconComponent, AppHeaderComponent, HeadroomDirective, HelpMenuComponent, ProfileMenuComponent, ShareDialogComponent, EmptyQuarterRuleComponent, UpgradePassDialogComponent],
+    imports: [FormSummaryComponent, MaxSquaresFieldComponent, FormsModule, NgTemplateOutlet, DropdownComponent, ToggleComponent, CreateGameFormComponent, NgIconComponent, AppHeaderComponent, HeadroomDirective, HelpMenuComponent, ProfileMenuComponent, ShareDialogComponent, EmptyQuarterRuleComponent, UpgradePassDialogComponent],
     providers: [
         provideIcons({
             heroPlus,
@@ -656,7 +658,6 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
                     <div class="min-w-0">
                       <label class="block text-sm font-semibold text-label mb-1">Show in my open boards</label>
                       <p class="text-xs text-muted">Players on your other boards can see and join this board. Off means link only.</p>
-                      <p class="mt-2 truncate rounded-xl border border-input bg-input px-3 py-2 font-mono text-xs text-default">{{ editGameName }} · Points per square: {{ editGamePrice }} · {{ og.squaresFilled }}/{{ og.boardSize }} taken</p>
                     </div>
                     <app-toggle [checked]="editShowInOpenBoards" (onChange)="editShowInOpenBoards = $event"></app-toggle>
                   </div>
@@ -677,7 +678,6 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
                         <label class="block text-sm font-semibold text-label mb-1">Auto-lock and draw</label>
                         <p class="text-xs text-muted">5 minutes after kickoff, we lock the board and draw the numbers for you.</p>
                       @if (editAutoManage && editAutoRunText()) {
-                        <p class="mt-2 truncate rounded-xl border border-input bg-input px-3 py-2 font-mono text-xs text-default">Locks {{ editAutoRunText() }}</p>
                       }
                   <details class="mt-1 text-xs text-muted"><summary class="inline-flex min-h-9 cursor-pointer items-center underline underline-offset-4">How it works</summary><p class="pb-1">If the board is not full it first moves to 50 or 25 squares (squares are shuffled, each player keeps their count). Players can pick until then. Cancel any time before it runs.</p></details>
                       </div>
@@ -769,6 +769,8 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
                   <p class="text-sm text-muted italic">No players have joined yet</p>
                 }
               </div>
+
+              <app-form-summary [rows]="editSummaryRows()"></app-form-summary>
             </div>
 
             <div class="flex items-center justify-end gap-3 p-6 border-t border-default bg-input rounded-b-2xl">
@@ -941,6 +943,20 @@ export class DashboardComponent implements OnInit {
   autoManageDefault = signal(true);
   editAutoManage = false;
   editMaxSquares: number | null = null;
+  /** What the choices in the Edit game form add up to, shown at the bottom. */
+  editSummaryRows(): SummaryRow[] {
+    const game = this.editingGame();
+    return summaryRows({
+      showInOpenBoards: !!game && this.editShowInOpenBoards,
+      boardName: this.editGameName,
+      pointsPerSquare: this.editGamePrice,
+      squaresFilled: game?.squaresFilled ?? 0,
+      boardSize: game?.boardSize ?? 100,
+      autoLock: this.editAutoManage,
+      autoRunText: this.editAutoRunText()
+    });
+  }
+
   editAutoRunText(): string {
     return autoRunLabel(this.editEspnGames().find(g => g.id === this.editEspnGameId)?.date);
   }
