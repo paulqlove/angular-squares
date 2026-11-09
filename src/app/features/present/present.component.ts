@@ -68,7 +68,7 @@ export class PresentComponent implements OnInit, OnDestroy {
   /** True on /tv/:token: a TV with no sign-in, rotating the boards the host chose, at the speed the host chose. */
   protected readonly kiosk = signal<boolean>(false);
   protected readonly kioskOff = signal<boolean>(false);
-  protected readonly hasOfficeLink = signal<boolean>(false);
+  protected readonly hasRotationLink = signal<boolean>(false);
   protected readonly tooSmall = signal<boolean>(false);
   /** How many boards the signed-in host has: rotation needs two or more. */
   protected readonly boardCount = signal<number>(0);
@@ -109,7 +109,7 @@ export class PresentComponent implements OnInit, OnDestroy {
     }
     this.boardIds = await this.gameService.getUserGameIds(user.uid);
     this.boardCount.set(this.boardIds.length);
-    this.hasOfficeLink.set(!!(await this.gameService.getTvToken(user.uid)));
+    this.hasRotationLink.set(!!(await this.gameService.getTvToken(user.uid)));
     if (id) {
       this.index = this.boardIds.indexOf(id);
       return;
@@ -268,36 +268,36 @@ export class PresentComponent implements OnInit, OnDestroy {
   }
 
   /** Publish the boards and the chosen interval under the host's private token, and copy the address. */
-  protected async copyOfficeLink(): Promise<void> {
+  protected async copyRotationLink(): Promise<void> {
     const user = this.auth.currentUser();
     if (!user || user.isGuest) return;
     let url: string;
     try {
       const token = await this.gameService.saveTvLink(user.uid, this.boardIds, this.interval());
-      this.hasOfficeLink.set(true);
-      url = this.gameService.getOfficeTvLink(token);
+      this.hasRotationLink.set(true);
+      url = this.gameService.getRotationTvLink(token);
     } catch (error) {
-      console.error('[Present] Could not save the office TV link', (error as { code?: string })?.code ?? error);
-      this.toast.error('Could not make the office link. Try again.');
+      console.error('[Present] Could not save the rotating TV link', (error as { code?: string })?.code ?? error);
+      this.toast.error('Could not make the TV link. Try again.');
       return;
     }
     const boards = Math.min(this.boardIds.length, 20);
     try {
       await navigator.clipboard.writeText(url);
-      this.toast.success(`Office link copied: ${boards} boards, ${this.interval()}s each. Press it again after you change boards or the time.`);
+      this.toast.success(`TV link copied: ${boards} boards, ${this.interval()}s each. Press it again after you change boards or the time.`);
     } catch {
       this.toast.error(`Could not copy. The link is ${url}`);
     }
   }
 
   /** The old address stops working and the next link gets a new token. */
-  protected async turnOffOfficeLink(): Promise<void> {
+  protected async turnOffRotationLink(): Promise<void> {
     const user = this.auth.currentUser();
     if (!user || user.isGuest) return;
     try {
       await this.gameService.removeTvLink(user.uid);
-      this.hasOfficeLink.set(false);
-      this.toast.success('Office link turned off.');
+      this.hasRotationLink.set(false);
+      this.toast.success('TV link turned off.');
     } catch {
       this.toast.error('Could not turn the link off. Try again.');
     }

@@ -40,9 +40,9 @@
         </button>
         @if (rotating()) {
           <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" (click)="stopRotation()">Stop</button>
-          <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" (click)="copyOfficeLink()">Copy office link</button>
-          @if (hasOfficeLink()) {
-            <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" (click)="turnOffOfficeLink()">Turn off link</button>
+          <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" (click)="copyRotationLink()">Copy TV link</button>
+          @if (hasRotationLink()) {
+            <button type="button" class="qs-btn qs-btn-secondary min-h-9 px-3" (click)="turnOffRotationLink()">Turn off TV link</button>
           }
         }
         @if (gameId() && !rotating()) {

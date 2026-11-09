@@ -916,7 +916,7 @@ export class GameService {
 
   // Office TV link: a random token on the host's account plus a public record of which boards to rotate.
   // The link shows boards only: no account id or name is in it.
-  getOfficeTvLink(token: string): string {
+  getRotationTvLink(token: string): string {
     return `${this.appBaseUrl()}/tv/${token}`;
   }
 

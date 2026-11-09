@@ -42,9 +42,11 @@
   }
 </div>
 <p class="mt-3 text-sm text-qs-muted">The last tile uses the final score, including overtime.</p>
-<p class="mt-1 text-sm text-qs-muted">
-  If nobody holds a quarter's winning square,
-  {{ emptyQuarterRule === 'redistribute'
-    ? "its points are split across the other quarters."
-    : "its points roll into Q4. If Q4 has no winner either, Q4's points are split among the other quarters." }}
-</p>
+<details class="mt-1 text-sm text-qs-muted">
+  <summary class="inline-flex min-h-9 cursor-pointer items-center underline underline-offset-4">If a quarter has no winner</summary>
+  <p class="pb-1">
+    {{ emptyQuarterRule === 'redistribute'
+      ? "Its points are split across the other quarters."
+      : "Its points roll into Q4. If Q4 has no winner either, Q4's points are split among the other quarters." }}
+  </p>
+</details>
