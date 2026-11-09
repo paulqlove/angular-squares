@@ -53,8 +53,9 @@ import { ScheduledGame, formatKickoff } from './schedule.model';
               <button
                 type="button"
                 (click)="createBoard()"
-                class="inline-flex min-h-11 items-center justify-center rounded-md px-6 font-semibold text-white"
+                class="inline-flex min-h-11 items-center justify-center rounded-md px-6 font-semibold"
                 [style.background]="team.primaryColor"
+                [style.color]="getContrastColor(team.primaryColor)"
               >
                 Create a free board
               </button>
@@ -189,8 +190,9 @@ import { ScheduledGame, formatKickoff } from './schedule.model';
                   class="flex items-center gap-3 rounded-xl border border-default bg-card p-3 hover:bg-card-hover"
                 >
                   <span
-                    class="flex h-10 w-10 items-center justify-center rounded-lg text-xs font-bold text-white"
+                    class="flex h-10 w-10 items-center justify-center rounded-lg text-xs font-bold"
                     [style.background]="rival.primaryColor"
+                    [style.color]="getContrastColor(rival.primaryColor)"
                   >
                     {{ rival.abbreviation }}
                   </span>
@@ -201,8 +203,8 @@ import { ScheduledGame, formatKickoff } from './schedule.model';
           </section>
 
           <!-- All Teams Link -->
-          <section class="mt-10 rounded-2xl bg-qs-accent px-5 py-6 text-white">
-            <a routerLink="/teams" class="inline-flex min-h-11 items-center rounded-md bg-white px-4 font-semibold text-qs-accent hover:bg-qs-accent-soft">
+          <section class="mt-10 rounded-2xl bg-qs-accent px-5 py-6 text-qs-on-accent">
+            <a routerLink="/teams" class="qs-btn qs-btn-ink">
               View all NFL teams
             </a>
             <p class="mt-3 text-sm leading-relaxed text-qs-on-accent">

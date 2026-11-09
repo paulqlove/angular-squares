@@ -66,8 +66,8 @@ interface Conference {
         }
 
         <!-- CTA -->
-        <section class="mt-10 rounded-2xl bg-qs-accent px-5 py-6 text-white">
-          <a routerLink="/dashboard" class="inline-flex min-h-11 items-center rounded-md bg-white px-4 font-semibold text-qs-accent hover:bg-qs-accent-soft">
+        <section class="mt-10 rounded-2xl bg-qs-accent px-5 py-6 text-qs-on-accent">
+          <a routerLink="/create" class="qs-btn qs-btn-ink">
             Create your board now
           </a>
           <p class="mt-3 text-sm leading-relaxed text-qs-on-accent">
