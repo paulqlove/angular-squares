@@ -22,7 +22,18 @@ export function clampSquareLimit(value: number): number {
   return Math.min(MAX_SQUARE_LIMIT, Math.max(1, Math.round(Number.isFinite(value) ? value : DEFAULT_SQUARE_LIMIT)));
 }
 
-/** True when this name already holds the most squares the board allows. */
-export function atSquareLimit(squares: Record<string, string> | null | undefined, name: string, limit: number | undefined): boolean {
-  return limit !== undefined && squaresHeldBy(squares, name) >= limit;
+/** How many squares this name holds against the board's limit, or null when the board has no limit or no name is given. Everyone is held to it, the host included. */
+export function squareLimitState(
+  squares: Record<string, string> | null | undefined,
+  name: string,
+  limit: number | undefined
+): { held: number; max: number; full: boolean } | null {
+  if (limit === undefined || !normalizePlayerKey(name)) return null;
+  const held = squaresHeldBy(squares, name);
+  return { held, max: limit, full: held >= limit };
+}
+
+/** The line shown when someone taps another empty square at their limit. */
+export function squareLimitMessage(held: number, max: number): string {
+  return `You have ${held} of ${max} squares. Tap one of yours to give it back.`;
 }
