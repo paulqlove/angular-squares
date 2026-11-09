@@ -16,7 +16,7 @@ On Paul's Mac the Firebase CLI is already signed in. Ask Claude "generate the an
 4. **Host funnel** - created, half full, locked or numbers drawn, Q4 score posted.
 5. **Reuse** - `users/{uid}/usage` counters (creates, resets, deletes).
    - **5b. Office TV links** - how many links exist, how many are dead (every board deleted), stale, and accounts with more than one token. A watch for abuse; see FUTURE.md.
-6. **Traffic** - Google Analytics (optional, needs the key below). Cookieless, so it undercounts.
+6. **Traffic** - Google Analytics (optional, needs the key below). Ads and personalization are off; analytics storage is on.
 7. **Search** - Search Console clicks, impressions, position and top queries (optional).
 
 Rules: every percentage shows its count and appears only when n is at least 30. Admins and any uid in `~/.config/quarterscore/exclude-uids.txt` (one per line, `#` for comments) are left out of every count.

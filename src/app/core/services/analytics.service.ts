@@ -6,7 +6,7 @@ import { filter, Subscription } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 /**
- * Cookieless GA4 via Firebase Analytics.
+ * GA4 via Firebase Analytics (no ads or personalization).
  * The SDK is imported only after first paint, and only in production builds
  * that have a measurementId. It is not part of the initial bundle.
  */
@@ -70,12 +70,13 @@ export class AnalyticsService {
       }
 
       // Consent defaults must be set before Analytics initializes.
-      // analytics_storage denied keeps GA4 on cookieless pings.
+      // analytics_storage is granted so GA4 reports the visits (denied pings are never reported);
+      // ads and personalization stay denied.
       analyticsMod.setConsent({
         ad_storage: 'denied',
         ad_user_data: 'denied',
         ad_personalization: 'denied',
-        analytics_storage: 'denied'
+        analytics_storage: 'granted'
       });
 
       const app = getApps().length > 0

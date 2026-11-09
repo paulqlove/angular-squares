@@ -720,7 +720,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       {
         heading: 'What we do not do',
         paragraphs: [
-          'We do not sell personal information. We do not ask for payment card numbers. Analytics, when it is turned on, is cookieless and is not used to build an advertising profile. If a measurement id is not configured, analytics does not load.',
+          'We do not sell personal information. We do not ask for payment card numbers. Analytics, when it is turned on, uses a first-party analytics identifier to count visits and is not used to build an advertising profile or for ads. If a measurement id is not configured, analytics does not load.',
           'Hosting, sign-in, and the database are provided by Google. Their systems process the data required to deliver those services.'
         ]
       },
