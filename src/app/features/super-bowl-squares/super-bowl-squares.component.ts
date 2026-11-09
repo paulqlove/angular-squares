@@ -16,6 +16,7 @@ import { squareLimitMessage, squareLimitState } from '../../core/utils/square-li
 import { AdSlotComponent } from '../../components/ui/ad-slot/ad-slot.component';
 import { AuthService } from '../../core/services/auth.service';
 import { EspnService, EspnGame, SportType } from '../../core/services/espn.service';
+import { ConfirmService } from '../../core/services/confirm.service';
 import { ToastService } from '../../core/services/toast.service';
 import { SanitizationService } from '../../core/services/sanitization.service';
 import { WalkthroughService, WalkthroughStep } from '../../core/services/walkthrough.service';
@@ -164,6 +165,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   protected planService = inject(PlanService);
   private espnService = inject(EspnService);
+  private confirmService = inject(ConfirmService);
   private toastService = inject(ToastService);
   private walkthroughService = inject(WalkthroughService);
   private sanitizationService = inject(SanitizationService);
@@ -668,7 +670,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           // Rollback on failure
           this.selectedSquares = previousSquares;
           this.calculatePlayerStats();
-          this.toastService.error('Failed to update square. Please try again.');
+          this.toastService.error('Could not update the square. Try again.');
         }
       } else {
         this.takenByPlayer = this.selectedSquares[key];
@@ -711,7 +713,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       // Rollback on failure
       this.selectedSquares = previousSquares;
       this.calculatePlayerStats();
-      this.toastService.error('Failed to claim square. Please try again.');
+      this.toastService.error('Could not claim the square. Try again.');
       return;
     }
 
@@ -1113,7 +1115,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     try {
       await this.gameService.resizeBoard(this.gameId, size);
     } catch {
-      this.toastService.error('Could not convert the board. Please try again.');
+      this.toastService.error('Could not convert the board. Try again.');
       return;
     }
     await this.setLocked(true);
@@ -1292,7 +1294,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       }
       this.toastService.success('Game saved');
     } catch {
-      this.toastService.error('Failed to save game. Please try again.');
+      this.toastService.error('Could not save the game. Try again.');
     }
   }
 
@@ -1454,7 +1456,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       this.winners = previous.winners;
       this.calculatePlayerStats();
       this.paymentDialog.setData(this.playerStats, this.playerColors, this.paidPlayers);
-      this.toastService.error(`Could not remove ${playerName}. Please try again.`);
+      this.toastService.error(`Could not remove ${playerName}. Try again.`);
     }
   }
 
@@ -1471,7 +1473,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (!confirmed && !confirm('Are you sure you want to clear all game data? This cannot be undone.')) {
+    if (!confirmed && !await this.confirmService.ask({ title: 'Clear all game data?', message: 'Squares, numbers and scores are removed. This cannot be undone.', confirmLabel: 'Clear game data' })) {
       return;
     }
 
@@ -1787,7 +1789,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       this._currentPlayer = this.editingName.trim();
       this.showNameEditModal.set(false);
     } catch (error) {
-      this.toastService.error('Failed to save name');
+      this.toastService.error('Could not save your name. Try again.');
     } finally {
       this.isSavingName.set(false);
     }
@@ -1824,7 +1826,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       this.showForceNameChangeModal.set(false);
       this.duplicateNameWarning.set(null);
     } catch (error) {
-      this.toastService.error('Failed to save name');
+      this.toastService.error('Could not save your name. Try again.');
     } finally {
       this.isSavingForceName.set(false);
     }

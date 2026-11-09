@@ -4,6 +4,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { Meta } from '@angular/platform-browser';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
+import { ConfirmDialogComponent } from './components/ui/confirm-dialog/confirm-dialog.component';
 import { ToastComponent } from './components/ui/toast/toast.component';
 import { WalkthroughComponent } from './components/ui/walkthrough/walkthrough.component';
 import { RolePreviewSwitcherComponent } from './components/ui/role-preview-switcher/role-preview-switcher.component';
@@ -16,6 +17,7 @@ import { captureFirstTouch } from './core/utils/first-touch';
     imports: [
     RouterOutlet,
     ToastComponent,
+    ConfirmDialogComponent,
     WalkthroughComponent,
     RolePreviewSwitcherComponent
 ],
@@ -29,6 +31,7 @@ import { captureFirstTouch } from './core/utils/first-touch';
       <router-outlet></router-outlet>
     }
     <app-toast></app-toast>
+    <app-confirm-dialog></app-confirm-dialog>
     <app-walkthrough></app-walkthrough>
     <app-role-preview-switcher></app-role-preview-switcher>
   `
