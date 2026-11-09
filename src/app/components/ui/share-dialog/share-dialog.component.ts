@@ -1,22 +1,24 @@
-import { Component, Input, Output, EventEmitter, HostListener, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, ElementRef, Input, Output, EventEmitter, HostListener, ChangeDetectionStrategy, OnChanges, SimpleChanges, inject, signal } from '@angular/core';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { heroXMark, heroClipboard, heroCheck } from '@ng-icons/heroicons/outline';
+import { heroXMark, heroClipboard, heroCheck, heroShare } from '@ng-icons/heroicons/outline';
 import { GameService } from '../../../core/services/game.service';
 
 /** Share popup: game code and link, each with a copy button. Used by the dashboard and game page. */
 @Component({
   selector: 'app-share-dialog',
   imports: [NgIconComponent],
-  providers: [provideIcons({ heroXMark, heroClipboard, heroCheck })],
+  providers: [provideIcons({ heroXMark, heroClipboard, heroCheck, heroShare })],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @if (isOpen) {
-      <div animate.enter="qs-modal-enter" animate.leave="qs-modal-leave" class="fixed inset-0 z-[150] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" (click)="close()">
+      <div animate.enter="qs-modal-enter" animate.leave="qs-modal-leave" class="fixed inset-0 z-[150] flex items-end justify-center bg-black/60 p-4 sm:items-center backdrop-blur-sm" (click)="close()">
         <div
           role="dialog"
           aria-modal="true"
           aria-labelledby="share-title"
-          class="w-full max-w-md overflow-hidden rounded-card border border-qs-line bg-qs-panel shadow-pop"
+          class="w-full max-w-md overflow-hidden rounded-t-card border border-qs-line bg-qs-panel pb-[env(safe-area-inset-bottom)] shadow-pop sm:rounded-card"
+          (keydown.tab)="trapTab($event, false)"
+          (keydown.shift.tab)="trapTab($event, true)"
           (click)="$event.stopPropagation()"
         >
           <div class="flex items-start justify-between gap-4 border-b border-qs-line px-6 pb-5 pt-6">
@@ -30,17 +32,12 @@ import { GameService } from '../../../core/services/game.service';
           </div>
 
           <div class="space-y-5 px-6 py-6">
-            <div>
-              <p class="qs-label mb-1.5 text-qs-muted">Game code</p>
-              <div class="flex items-stretch gap-2">
-                <code class="flex flex-1 items-center justify-center rounded-btn border border-qs-line bg-qs-panel-2 py-3 font-mono text-2xl font-semibold tracking-[0.3em] text-qs-ink">{{ gameId }}</code>
-                <button type="button" (click)="copy(gameId, 'code')" class="qs-btn qs-btn-primary min-w-28" aria-label="Copy game code">
-                  <ng-icon [name]="copied() === 'code' ? 'heroCheck' : 'heroClipboard'" [class.icon-pop]="copied() === 'code'" class="text-base"></ng-icon>
-                  {{ copied() === 'code' ? 'Copied' : 'Copy' }}
-                </button>
-              </div>
-              <p class="mt-1.5 text-xs text-qs-muted">Players enter this on the dashboard to join.</p>
-            </div>
+            @if (canShare) {
+              <button type="button" (click)="share()" class="qs-btn qs-btn-primary w-full">
+                <ng-icon name="heroShare" class="text-base"></ng-icon>
+                Share link
+              </button>
+            }
 
             <div>
               <label for="share-link" class="qs-label mb-1.5 block text-qs-muted">Link</label>
@@ -52,17 +49,32 @@ import { GameService } from '../../../core/services/game.service';
                 </button>
               </div>
             </div>
+
             <div>
-                <label for="share-tv-link" class="qs-label mb-1.5 block text-qs-muted">TV link</label>
+              <p class="qs-label mb-1.5 text-qs-muted">Game code</p>
+              <div class="flex items-stretch gap-2">
+                <code id="share-code" class="flex flex-1 items-center justify-center rounded-btn border border-qs-line bg-qs-panel-2 py-3 font-mono text-2xl font-semibold tracking-[0.3em] text-qs-ink">{{ gameId }}</code>
+                <button type="button" (click)="copy(gameId, 'code')" class="qs-btn qs-btn-primary min-w-28" aria-label="Copy game code">
+                  <ng-icon [name]="copied() === 'code' ? 'heroCheck' : 'heroClipboard'" [class.icon-pop]="copied() === 'code'" class="text-base"></ng-icon>
+                  {{ copied() === 'code' ? 'Copied' : 'Copy' }}
+                </button>
+              </div>
+              <p class="mt-1.5 text-xs text-qs-muted">Players enter this on the dashboard to join.</p>
+            </div>
+
+            <details class="rounded-inner border border-qs-line">
+              <summary class="qs-label flex min-h-11 cursor-pointer items-center px-4 text-qs-ink">TV link</summary>
+              <div class="border-t border-qs-line p-4">
                 <div class="flex items-stretch gap-2">
-                  <input id="share-tv-link" type="text" [value]="tvLink" readonly class="qs-input min-w-0 flex-1 truncate text-sm text-qs-muted" (focus)="$any($event.target).select()" />
+                  <input id="share-tv-link" type="text" [value]="tvLink" readonly aria-label="TV link" class="qs-input min-w-0 flex-1 truncate text-sm text-qs-muted" (focus)="$any($event.target).select()" />
                   <button type="button" (click)="copy(tvLink, 'tv')" class="qs-btn qs-btn-primary min-w-28" aria-label="Copy TV link">
                     <ng-icon [name]="copied() === 'tv' ? 'heroCheck' : 'heroClipboard'" [class.icon-pop]="copied() === 'tv'" class="text-base"></ng-icon>
                     {{ copied() === 'tv' ? 'Copied' : 'Copy' }}
                   </button>
                 </div>
-                <p class="mt-1.5 text-xs text-qs-muted">Open on a TV or any screen to show the live board. No sign-in needed.</p>
+                <p class="mt-1.5 text-xs text-qs-muted">Show the live board on any screen. No sign-in.</p>
               </div>
+            </details>
             <p class="sr-only" aria-live="polite">{{ copied() ? 'Copied to clipboard' : '' }}</p>
           </div>
 
@@ -74,14 +86,20 @@ import { GameService } from '../../../core/services/game.service';
     }
   `
 })
-export class ShareDialogComponent {
+export class ShareDialogComponent implements OnChanges {
   @Input() isOpen = false;
   @Input() gameId = '';
   @Output() closed = new EventEmitter<void>();
 
   private readonly gameService = inject(GameService);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private returnFocus: HTMLElement | null = null;
 
   copied = signal<'code' | 'link' | 'tv' | null>(null);
+
+  get canShare(): boolean {
+    return typeof navigator !== 'undefined' && 'share' in navigator;
+  }
 
   get link(): string {
     return this.gameService.getShareableLink(this.gameId);
@@ -96,9 +114,34 @@ export class ShareDialogComponent {
     if (this.isOpen) this.close();
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['isOpen']?.currentValue !== true || typeof document === 'undefined') return;
+    this.returnFocus = document.activeElement as HTMLElement | null;
+    setTimeout(() => this.focusables()[0]?.focus());
+  }
+
   close(): void {
     this.copied.set(null);
     this.closed.emit();
+    const target = this.returnFocus;
+    this.returnFocus = null;
+    setTimeout(() => target?.isConnected && target.focus());
+  }
+
+  trapTab(event: Event, back: boolean): void {
+    const items = this.focusables();
+    if (!items.length) return;
+    const first = items[0];
+    const last = items[items.length - 1];
+    const active = document.activeElement;
+    if (back && active === first) { event.preventDefault(); last.focus(); }
+    else if (!back && active === last) { event.preventDefault(); first.focus(); }
+  }
+
+  async share(): Promise<void> {
+    try {
+      await navigator.share({ title: 'QuarterScore squares', text: 'Pick your squares', url: this.link });
+    } catch {}
   }
 
   async copy(text: string, which: 'code' | 'link' | 'tv'): Promise<void> {
@@ -106,6 +149,19 @@ export class ShareDialogComponent {
       await navigator.clipboard.writeText(text);
       this.copied.set(which);
       setTimeout(() => this.copied.set(null), 2000);
-    } catch {}
+    } catch {
+      const el = this.host.nativeElement.querySelector<HTMLElement>(which === 'code' ? '#share-code' : which === 'link' ? '#share-link' : '#share-tv-link');
+      if (el instanceof HTMLInputElement) el.select();
+      else if (el) {
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        window.getSelection()?.removeAllRanges();
+        window.getSelection()?.addRange(range);
+      }
+    }
+  }
+
+  private focusables(): HTMLElement[] {
+    return Array.from(this.host.nativeElement.querySelectorAll<HTMLElement>('button, input, summary, [href]')).filter(e => e.offsetParent !== null);
   }
 }
