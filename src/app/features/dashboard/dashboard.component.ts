@@ -541,11 +541,11 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
                   <label class="qs-label mb-1.5 block text-qs-ink">Teams</label>
                   <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
-                      <label for="edit-custom-away" class="qs-label mb-1.5 block text-qs-ink">Away team</label>
+                      <label for="edit-custom-away" class="qs-label mb-1.5 block text-qs-muted">Away team</label>
                       <input id="edit-custom-away" type="text" [(ngModel)]="editCustomAwayTeam" maxlength="50" placeholder="e.g. Lincoln High" class="qs-input" />
                     </div>
                     <div>
-                      <label for="edit-custom-home" class="qs-label mb-1.5 block text-qs-ink">Home team</label>
+                      <label for="edit-custom-home" class="qs-label mb-1.5 block text-qs-muted">Home team</label>
                       <input id="edit-custom-home" type="text" [(ngModel)]="editCustomHomeTeam" maxlength="50" placeholder="e.g. Washington High" class="qs-input" />
                     </div>
                   </div>
