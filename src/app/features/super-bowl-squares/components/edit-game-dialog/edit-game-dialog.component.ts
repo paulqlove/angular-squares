@@ -75,7 +75,12 @@ export interface EditGameValues {
                   </div>
                 }
 
-                @if (!showGameFields || draft.sport === 'custom') {
+                @if (!showGameFields && linkedGameName) {
+                  <div class="flex flex-col gap-1.5">
+                    <span class="qs-label text-qs-ink">Game</span>
+                    <p class="truncate text-sm font-semibold text-qs-ink">{{ linkedGameName }}</p>
+                  </div>
+                } @else if (!showGameFields || draft.sport === 'custom') {
                   <div class="flex flex-col gap-1.5">
                     <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
                       <div class="flex flex-col gap-1.5">
@@ -352,6 +357,8 @@ export class EditGameDialogComponent implements OnChanges {
   @Input() splitLocked = false;
   /** Dashboard: name, sport, ESPN game and co-host. */
   @Input() showGameFields = false;
+  /** Game page, linked to ESPN: the teams come from the game, so show them read-only. */
+  @Input() linkedGameName = '';
   @Input() showSplit = false;
   @Input() showClear = false;
   /** False keeps the dialog open until the host closes it (the dashboard closes after a good save). */
