@@ -24,7 +24,7 @@
         }
       </p>
       @if (hasScore(quarter) || winners[quarter]) {
-        <p class="qs-label mt-1.5 truncate text-[10px] text-qs-tile-muted">{{ awayTeam || 'Away' }} · {{ homeTeam || 'Home' }}</p>
+        <p class="qs-label mt-1.5 truncate text-xs text-qs-tile-muted">{{ awayTeam || 'Away' }} · {{ homeTeam || 'Home' }}</p>
       }
       <p class="mt-auto flex items-center gap-2 pt-3 font-medium text-qs-tile-ink">
         @if (winners[quarter]) {
