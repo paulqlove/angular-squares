@@ -9,7 +9,7 @@ import { AuthService } from '../../../core/services/auth.service';
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
     @if (isOpen && !checkingAuth()) {
-      <div animate.enter="qs-modal-enter" animate.leave="qs-modal-leave" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" (click)="close()">
+      <div animate.enter="qs-modal-enter" animate.leave="qs-modal-leave" class="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" (click)="close()">
         <div
           role="dialog"
           aria-modal="true"

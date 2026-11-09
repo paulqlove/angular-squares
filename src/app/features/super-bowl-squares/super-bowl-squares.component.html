@@ -351,7 +351,7 @@
 
   <!-- Name Edit Modal -->
   @if (showNameEditModal()) {
-    <div animate.enter="qs-modal-enter" animate.leave="qs-modal-leave" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" (click)="showNameEditModal.set(false)">
+    <div animate.enter="qs-modal-enter" animate.leave="qs-modal-leave" class="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" (click)="showNameEditModal.set(false)">
       <div role="dialog" aria-modal="true" aria-labelledby="edit-name-title" class="w-full max-w-sm bg-dialog shadow-2xl rounded-2xl" (click)="$event.stopPropagation()">
         <div class="flex items-center justify-between p-5 border-b border-default">
           <h3 id="edit-name-title" class="text-lg font-bold text-heading">Edit name</h3>
@@ -410,7 +410,7 @@
 
   <!-- Forced Name Change Modal (non-dismissable) -->
   @if (showForceNameChangeModal()) {
-    <div animate.enter="qs-modal-enter" animate.leave="qs-modal-leave" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div animate.enter="qs-modal-enter" animate.leave="qs-modal-leave" class="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div role="dialog" aria-modal="true" aria-labelledby="force-name-title" class="w-full max-w-sm bg-dialog shadow-2xl rounded-2xl">
         <div class="p-5 border-b border-default">
           <h3 id="force-name-title" class="text-lg font-bold text-heading">Name already taken</h3>

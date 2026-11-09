@@ -244,6 +244,6 @@ Update this list as each chunk ships (change, Paul tests locally, push, merge).
 | P1 #5 Board status chip (Open / Locked / Drawn) for everyone | Done (no Final state yet) | this batch |
 | P1 #7 Google sign-in shows an error when it does not finish | Done | this batch |
 | P1 #8 Name-edit and forced-name modals: dialog roles, labelled close, Esc | Done | this batch |
-| P1 #6 Z-index scale | Next (own chunk) | |
+| P1 #6 Layering: modals above header and host bar, upgrade dialog above modals, toasts above both | Done (targeted, not a full renumber) | this batch |
 | Everything else in Priority 2 and 3 | Not started | |
 
