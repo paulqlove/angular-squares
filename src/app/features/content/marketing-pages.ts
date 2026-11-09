@@ -219,7 +219,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       { path: '/', fragment: 'how-it-works', label: 'How it works on the homepage', text: 'The three-step version of creating and sharing a board.' }
     ],
     cta: {
-      path: '/dashboard',
+      path: '/create',
       label: 'Create your board',
       note: MONEY_LINE
     }
@@ -286,7 +286,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       { path: '/football-squares-fundraiser', label: 'Donation squares', text: 'Fundraiser formats where the cause is the point.' }
     ],
     cta: {
-      path: '/dashboard',
+      path: '/create',
       label: 'Start a free game',
       note: MONEY_LINE
     }
@@ -336,7 +336,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       { path: '/football-squares-on-tv', label: 'Football squares on TV', text: 'Put the board on a big screen.' }
     ],
     cta: {
-      path: '/dashboard',
+      path: '/create',
       label: 'Create your Super Bowl board',
       note: MONEY_LINE
     }
@@ -386,10 +386,10 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       { path: '/how-to-play', label: 'How to play', text: 'Explain the grid in two minutes.' },
       { path: '/printable-football-squares', label: 'Printable board', text: 'Tape a paper grid to the fridge.' },
       { path: '/nfl-squares', label: 'NFL squares', text: 'The same board for any Sunday game.' },
-      { path: '/dashboard', label: 'Start a free game', text: 'Create the Thanksgiving board and share the link.' }
+      { path: '/create', label: 'Start a free game', text: 'Create the Thanksgiving board and share the link.' }
     ],
     cta: {
-      path: '/dashboard',
+      path: '/create',
       label: 'Set up the Thanksgiving board',
       note: 'Free for the whole table. Players do not need an account.'
     }
@@ -430,7 +430,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       { path: '/best-squares-numbers', label: 'Best numbers', text: 'Why 0, 7, 3, and 4 show up so often.' }
     ],
     cta: {
-      path: '/dashboard',
+      path: '/create',
       label: 'Create an NFL board',
       note: MONEY_LINE
     }
@@ -467,7 +467,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       { path: '/how-to-play', label: 'How to play', text: 'Send this with the link so new people can follow.' }
     ],
     cta: {
-      path: '/dashboard',
+      path: '/create',
       label: 'Create your playoff boards',
       note: MONEY_LINE
     }
@@ -504,7 +504,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       { path: '/nfl-playoff-squares', label: 'NFL playoff squares', text: 'The January games after the college title.' }
     ],
     cta: {
-      path: '/dashboard',
+      path: '/create',
       label: 'Create a college board',
       note: 'Choose NCAA Football when you create the game. ' + MONEY_LINE
     }
@@ -586,7 +586,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       { path: '/nfl-squares', label: 'NFL squares', text: 'The football version of this page.' }
     ],
     cta: {
-      path: '/dashboard',
+      path: '/create',
       label: 'Create an NBA board',
       note: 'Choose NBA as the sport. ' + MONEY_LINE
     }
@@ -754,7 +754,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       {
         heading: 'Email us',
         paragraphs: ['One address for everything:'],
-        html: '<a href="mailto:hello@quarterscore.com" class="inline-flex min-h-11 items-center rounded-md bg-qs-accent px-5 text-lg font-semibold text-white hover:bg-qs-accent-hover">hello@quarterscore.com</a>'
+        html: '<a href="mailto:hello@quarterscore.com" class="inline-flex min-h-11 items-center rounded-md bg-qs-accent px-5 text-lg font-semibold text-qs-on-accent hover:bg-qs-accent-hover">hello@quarterscore.com</a>'
       },
       {
         heading: 'What to include',

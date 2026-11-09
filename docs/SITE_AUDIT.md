@@ -237,5 +237,8 @@ Update this list as each chunk ships (change, Paul tests locally, push, merge).
 | Random "shame" labels and emojis replaced with Confirmed / Not confirmed | Done | this batch |
 | Sign-in name optional? | Decided: stays required, no change | n/a |
 | Em dash rule | Decided: allowed, used sparingly, none in messages to people | n/a |
+| P1 #1 Dead-end CTAs now go to /create | Done | this batch |
+| P1 #2 Dark-mode CTA band and button contrast | Done | this batch |
+| P1 #3 Team page CTA contrast | Done | this batch |
 | Everything else in Priority 1 to 3 | Not started | |
 

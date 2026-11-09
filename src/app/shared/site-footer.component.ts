@@ -75,7 +75,7 @@ export class SiteFooterComponent {
         { path: '/contact', label: 'Contact' },
         { path: '/terms', label: 'Terms' },
         { path: '/privacy', label: 'Privacy' },
-        { path: '/dashboard', label: 'Start a free game' }
+        { path: '/create', label: 'Start a free game' }
       ]
     }
   ];

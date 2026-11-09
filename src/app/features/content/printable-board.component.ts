@@ -85,7 +85,7 @@ import { ContentShellComponent } from './content-shell.component';
             <a
               href="assets/printable-football-squares.pdf"
               download="printable-football-squares.pdf"
-              class="inline-flex min-h-11 items-center justify-center rounded-md bg-qs-accent px-4 font-semibold text-white hover:bg-qs-accent-hover"
+              class="inline-flex min-h-11 items-center justify-center rounded-md bg-qs-accent px-4 font-semibold text-qs-on-accent hover:bg-qs-accent-hover"
             >
               Download PDF
             </a>
@@ -199,8 +199,8 @@ import { ContentShellComponent } from './content-shell.component';
           </ul>
         </section>
 
-        <section class="no-print mt-10 rounded-2xl bg-qs-accent px-5 py-6 text-white">
-          <a routerLink="/dashboard" class="inline-flex min-h-11 items-center rounded-md bg-white px-4 font-semibold text-qs-accent hover:bg-qs-accent-soft">
+        <section class="no-print mt-10 rounded-2xl bg-qs-accent px-5 py-6 text-qs-on-accent">
+          <a routerLink="/create" class="qs-btn qs-btn-ink">
             Skip the paper and run it live
           </a>
           <p class="mt-3 text-sm leading-relaxed text-qs-on-accent">

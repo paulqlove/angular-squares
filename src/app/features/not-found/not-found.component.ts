@@ -20,7 +20,7 @@ import { RouterLink } from '@angular/router';
         <p class="mb-6 text-muted">That address isn't part of QuarterScore.</p>
         <a
           routerLink="/"
-          class="inline-block px-6 py-3 text-white transition-colors rounded-lg bg-qs-accent hover:bg-qs-accent-hover"
+          class="qs-btn qs-btn-primary"
         >
           Back to home
         </a>

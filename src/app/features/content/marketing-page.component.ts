@@ -41,7 +41,7 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
           <ol class="mt-10 space-y-6">
             @for (step of page.steps; track step.name; let index = $index) {
               <li class="flex gap-4">
-                <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-qs-accent text-base font-bold text-white" aria-hidden="true">
+                <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-qs-accent text-base font-bold text-qs-on-accent" aria-hidden="true">
                   {{ index + 1 }}
                 </span>
                 <div>
@@ -106,12 +106,12 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
           </ul>
         </section>
 
-        <section class="mt-10 rounded-2xl bg-qs-accent px-5 py-6 text-white">
+        <section class="mt-10 rounded-2xl bg-qs-accent px-5 py-6 text-qs-on-accent">
           <a
-            [routerLink]="page.cta.path"
-            class="inline-flex min-h-11 items-center rounded-md bg-white px-4 font-semibold text-qs-accent hover:bg-qs-accent-soft"
+            [routerLink]="signedIn() ? '/dashboard' : page.cta.path"
+            class="qs-btn qs-btn-ink"
           >
-            {{ signedIn() && page.cta.path === '/dashboard' ? 'Dashboard' : page.cta.label }}
+            {{ signedIn() && page.cta.path === '/create' ? 'Dashboard' : page.cta.label }}
           </a>
           <p class="mt-3 text-sm leading-relaxed text-qs-on-accent">{{ page.cta.note }}</p>
         </section>

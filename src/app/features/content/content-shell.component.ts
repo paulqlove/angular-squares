@@ -58,7 +58,7 @@ interface NavLink {
               }
               <li class="md:ml-2">
                 <a
-                  routerLink="/dashboard"
+                  [routerLink]="signedIn() ? '/dashboard' : '/create'"
                   class="qs-btn qs-btn-primary w-full md:w-auto"
                 >
                   {{ signedIn() ? 'Dashboard' : 'Start a free game' }}
