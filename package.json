@@ -11,7 +11,8 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:angular-squares": "node dist/angular-squares/server/server.mjs",
-    "test:rules": "PATH=\"$(brew --prefix openjdk@21 2>/dev/null)/bin:$PATH\" npx -y firebase-tools@latest emulators:exec --only database --project demo-squares \"vitest run --config test/rules/vitest.config.mts\""
+    "test:rules": "PATH=\"$(brew --prefix openjdk@21 2>/dev/null)/bin:$PATH\" npx -y firebase-tools@latest emulators:exec --only database --project demo-squares \"vitest run --config test/rules/vitest.config.mts\"",
+    "test:auth": "npx -y firebase-tools@latest emulators:exec --only auth --project demo-link \"vitest run --config test/auth/vitest.config.mts\""
   },
   "private": true,
   "dependencies": {
