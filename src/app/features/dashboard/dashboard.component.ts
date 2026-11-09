@@ -454,7 +454,6 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
       @if (showCreateModal()) {
         <div
           animate.enter="qs-modal-enter" animate.leave="qs-modal-leave" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm max-sm:p-0"
-          (click)="closeCreateModal()"
         >
           <div
             role="dialog"
@@ -1173,7 +1172,7 @@ export class DashboardComponent implements OnInit {
   @HostListener('document:keydown.escape')
   onEscape(): void {
     if (this.showCreateModal()) {
-      this.closeCreateModal();
+      this.showCreateModal.set(false);
     }
   }
 

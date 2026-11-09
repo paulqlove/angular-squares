@@ -240,5 +240,7 @@ Update this list as each chunk ships (change, Paul tests locally, push, merge).
 | P1 #1 Dead-end CTAs now go to /create | Done | this batch |
 | P1 #2 Dark-mode CTA band and button contrast | Done | this batch |
 | P1 #3 Team page CTA contrast | Done | this batch |
+| P1 #4 Create draft survives backdrop tap and Esc | Done | this batch |
+| P1 #5 Board status chip (Open / Locked / Drawn) for everyone | Done (no Final state yet) | this batch |
 | Everything else in Priority 1 to 3 | Not started | |
 
