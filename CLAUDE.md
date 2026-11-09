@@ -12,6 +12,7 @@ Football Squares (Super Bowl Squares) - A real-time multiplayer game for managin
 npm start          # Dev server at localhost:4200
 npm run build      # Production build to dist/angular-squares/
 npm test           # Run Karma + Jasmine tests
+npm run start:emulators   # App on :4201 against local Firebase emulators with fake data (docs/EMULATORS.md)
 ```
 
 ## Architecture
