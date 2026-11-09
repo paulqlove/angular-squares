@@ -54,19 +54,19 @@ export interface EditGameValues {
           </div>
 
           <div class="min-h-0 flex-1 overflow-y-auto px-6 py-5 [scrollbar-gutter:stable]">
-            <div class="flex flex-col gap-8">
+            <div class="flex flex-col gap-10">
 
               <section class="flex flex-col gap-5">
-                <h4 class="qs-label border-b border-qs-line pb-2 text-qs-ink">Game</h4>
+                <h4 class="qs-eyebrow qs-eyebrow-bar !flex border-b border-qs-line pb-2.5 text-[13px] font-semibold text-qs-ink">Game</h4>
 
                 @if (showGameFields) {
-                  <div class="flex flex-col gap-1.5">
-                    <label for="edit-game-name" class="qs-label text-qs-ink">Game name</label>
+                  <div class="flex flex-col gap-2">
+                    <label for="edit-game-name" class="qs-label text-qs-muted">Game name</label>
                     <input id="edit-game-name" type="text" [(ngModel)]="draft.name" placeholder="e.g. Super Bowl Party" class="qs-input" />
                   </div>
 
-                  <div class="flex flex-col gap-1.5">
-                    <span class="qs-label text-qs-ink">Sport</span>
+                  <div class="flex flex-col gap-2">
+                    <span class="qs-label text-qs-muted">Sport</span>
                     <div class="flex flex-wrap gap-2" role="group" aria-label="Sport">
                       @for (sport of sportOptions; track sport.value) {
                         <button type="button" class="qs-tab" [attr.aria-pressed]="draft.sport === sport.value" (click)="selectSport(sport.value)">{{ sport.label }}</button>
@@ -76,19 +76,16 @@ export interface EditGameValues {
                 }
 
                 @if (!showGameFields && linkedGameName) {
-                  <div class="flex flex-col gap-1.5">
-                    <span class="qs-label text-qs-ink">Game</span>
-                    <p class="truncate text-sm font-semibold text-qs-ink">{{ linkedGameName }}</p>
-                  </div>
+                  <p class="truncate text-base font-semibold text-qs-ink">{{ linkedGameName }}</p>
                 } @else if (!showGameFields || draft.sport === 'custom') {
-                  <div class="flex flex-col gap-1.5">
+                  <div class="flex flex-col gap-2">
                     <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                      <div class="flex flex-col gap-1.5">
-                        <label for="edit-away" class="qs-label text-qs-ink">Away team</label>
+                      <div class="flex flex-col gap-2">
+                        <label for="edit-away" class="qs-label text-qs-muted">Away team</label>
                         <input id="edit-away" type="text" [(ngModel)]="draft.awayTeam" maxlength="50" [placeholder]="showGameFields ? 'e.g. Lincoln High' : 'Away'" class="qs-input" />
                       </div>
-                      <div class="flex flex-col gap-1.5">
-                        <label for="edit-home" class="qs-label text-qs-ink">Home team</label>
+                      <div class="flex flex-col gap-2">
+                        <label for="edit-home" class="qs-label text-qs-muted">Home team</label>
                         <input id="edit-home" type="text" [(ngModel)]="draft.homeTeam" maxlength="50" [placeholder]="showGameFields ? 'e.g. Washington High' : 'Home'" class="qs-input" />
                       </div>
                     </div>
@@ -97,8 +94,8 @@ export interface EditGameValues {
                     }
                   </div>
                 } @else {
-                  <div class="flex flex-col gap-1.5">
-                    <span class="qs-label text-qs-ink">ESPN game</span>
+                  <div class="flex flex-col gap-2">
+                    <span class="qs-label text-qs-muted">ESPN game</span>
                     @if (loadingEspnGames) {
                       <div class="h-[60px] animate-pulse rounded-inner bg-qs-panel-2"></div>
                     } @else if (draft.espnGameId && !changingGame) {
@@ -156,10 +153,10 @@ export interface EditGameValues {
               </section>
 
               <section class="flex flex-col gap-5">
-                <h4 class="qs-label border-b border-qs-line pb-2 text-qs-ink">Board</h4>
+                <h4 class="qs-eyebrow qs-eyebrow-bar !flex border-b border-qs-line pb-2.5 text-[13px] font-semibold text-qs-ink">Board</h4>
 
-                <div class="flex flex-col gap-1.5">
-                  <label for="edit-points" class="qs-label text-qs-ink">Points per square</label>
+                <div class="flex flex-col gap-2">
+                  <label for="edit-points" class="qs-label text-qs-muted">Points per square</label>
                   <div class="flex items-center gap-2">
                     <input id="edit-points" type="number" inputmode="numeric" min="0" [(ngModel)]="draft.pricePerSquare" [disabled]="isLocked" class="qs-input flex-1 disabled:opacity-45" />
                     <span class="qs-label text-qs-muted">pts</span>
@@ -170,8 +167,8 @@ export interface EditGameValues {
                 </div>
 
                 @if (boardSize > 25) {
-                  <div class="flex flex-col gap-1.5">
-                    <span class="qs-label text-qs-ink">Board size</span>
+                  <div class="flex flex-col gap-2">
+                    <span class="qs-label text-qs-muted">Board size</span>
                     <div class="flex flex-wrap gap-2" role="group" aria-label="Board size">
                       <button type="button" class="qs-tab" [attr.aria-pressed]="!draft.newBoardSize" (click)="draft.newBoardSize = null">Keep {{ boardSize }}</button>
                       @for (s of smallerSizes; track s) {
@@ -196,11 +193,11 @@ export interface EditGameValues {
               </section>
 
               <section class="flex flex-col gap-5">
-                <h4 class="qs-label border-b border-qs-line pb-2 text-qs-ink">Scoring</h4>
+                <h4 class="qs-eyebrow qs-eyebrow-bar !flex border-b border-qs-line pb-2.5 text-[13px] font-semibold text-qs-ink">Scoring</h4>
 
                 @if (showSplit) {
-                  <div class="flex flex-col gap-1.5">
-                    <span class="qs-label text-qs-ink">Quarter split</span>
+                  <div class="flex flex-col gap-2">
+                    <span class="qs-label text-qs-muted">Quarter split</span>
                     @if (!canCustomSplit || splitLocked) {
                       <div class="flex items-center justify-between gap-3 rounded-inner border border-qs-line bg-qs-panel-2 px-3 py-2.5">
                         <span class="font-mono text-sm tabular-nums text-qs-ink">{{ splitText() }}</span>
@@ -219,7 +216,7 @@ export interface EditGameValues {
                       @if (customOpen || activePreset() === 'custom') {
                         <div class="mt-1.5 grid grid-cols-4 gap-2">
                           @for (q of quarters; track q.key) {
-                            <div class="flex flex-col gap-1.5">
+                            <div class="flex flex-col gap-2">
                               <label [for]="'split-' + q.key" class="qs-label text-[10px] text-qs-muted">{{ q.label }}</label>
                               <input [id]="'split-' + q.key" type="number" min="0" max="100" step="0.5" [(ngModel)]="pct[q.key]" class="qs-input px-2 text-center tabular-nums" />
                             </div>
@@ -233,15 +230,18 @@ export interface EditGameValues {
                   </div>
                 }
 
-                <app-empty-quarter-rule class="block" name="edit-empty-quarter-rule" [(value)]="draft.emptyQuarterRule"></app-empty-quarter-rule>
+                <app-empty-quarter-rule class="block [&_.qs-label]:text-qs-muted" name="edit-empty-quarter-rule" [(value)]="draft.emptyQuarterRule"></app-empty-quarter-rule>
               </section>
 
-              <details class="rounded-inner border border-qs-line">
-                <summary class="qs-label flex min-h-11 cursor-pointer items-center justify-between gap-3 px-4 text-qs-ink">
+              <details class="group">
+                <summary class="qs-eyebrow qs-eyebrow-bar !flex min-h-11 cursor-pointer list-none items-center border-b border-qs-line pb-2.5 text-[13px] font-semibold text-qs-ink [&::-webkit-details-marker]:hidden">
                   <span>More options</span>
-                  @if (draft.autoManage) { <span class="text-qs-accent">Auto-lock on</span> }
+                  <span class="ml-auto flex items-center gap-2">
+                    @if (draft.autoManage) { <span class="text-[11.5px] font-medium text-qs-accent">Auto-lock on</span> }
+                    <svg class="h-4 w-4 transition-transform group-open:rotate-180 motion-reduce:transition-none" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m5 8 5 5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </span>
                 </summary>
-                <div class="flex flex-col gap-5 border-t border-qs-line p-4">
+                <div class="flex flex-col gap-5 pt-5">
 
                   @if (autoAvailable()) {
                     <div class="flex min-h-11 items-start justify-between gap-4">
@@ -267,14 +267,14 @@ export interface EditGameValues {
                     </div>
                   }
 
-                  <div class="flex flex-col gap-1.5">
-                    <label for="edit-game-note" class="qs-label text-qs-ink">Note from the host <span class="text-qs-muted">· Optional</span></label>
+                  <div class="flex flex-col gap-2">
+                    <label for="edit-game-note" class="qs-label text-qs-muted">Note from the host <span class="text-qs-muted">· Optional</span></label>
                     <input id="edit-game-note" type="text" [(ngModel)]="draft.hostNote" maxlength="140" placeholder="e.g. Snacks at halftime!" class="qs-input" />
                   </div>
 
                   @if (showGameFields) {
-                    <div class="flex flex-col gap-1.5">
-                      <label for="edit-game-cohost" class="qs-label text-qs-ink">Co-host <span class="text-qs-muted">· Optional</span></label>
+                    <div class="flex flex-col gap-2">
+                      <label for="edit-game-cohost" class="qs-label text-qs-muted">Co-host <span class="text-qs-muted">· Optional</span></label>
                       @if (coHostName) {
                         <div class="flex items-center gap-2 rounded-inner border border-qs-accent bg-qs-panel p-3">
                           <span class="flex-1 truncate font-semibold text-qs-ink">{{ coHostName }}</span>
