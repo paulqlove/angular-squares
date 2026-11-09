@@ -1,18 +1,15 @@
-import { MaxSquaresFieldComponent } from '../../components/ui/max-squares-field/max-squares-field.component';
-import { autoRunLabel } from '../../core/utils/auto-manage';
 import { Component, OnInit, signal, computed, inject, effect, HostListener, ChangeDetectionStrategy } from '@angular/core';
 
 import { miniGridCells, miniGridClass } from '../../core/utils/mini-grid';
-import { ToggleComponent } from '../../components/ui/toggle/toggle.component';
 import { DropdownComponent } from '../../components/ui/dropdown/dropdown.component';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NgTemplateOutlet } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
 import { GameService, GameListItem, BoardSize } from '../../core/services/game.service';
-import { DEFAULT_SPLIT, DEFAULT_EMPTY_QUARTER_RULE, EmptyQuarterRule, isNoExpiry } from '../../core/plans';
+import { DEFAULT_SPLIT, DEFAULT_EMPTY_QUARTER_RULE, isNoExpiry } from '../../core/plans';
 import { EspnService, EspnGame, SportType, SPORT_CONFIG } from '../../core/services/espn.service';
-import { getTeamLogoByAbbreviation, getTeamColors } from '../content/teams-data';
+import { getTeamColors } from '../content/teams-data';
 import { ToastService } from '../../core/services/toast.service';
 import { SanitizationService } from '../../core/services/sanitization.service';
 import { WalkthroughService, WalkthroughStep } from '../../core/services/walkthrough.service';
@@ -20,7 +17,7 @@ import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { AppHeaderComponent } from '../../components/ui/app-header/app-header.component';
 import { ShareDialogComponent } from '../../components/ui/share-dialog/share-dialog.component';
 import { CreateGameFormComponent, CreateGameSubmit } from '../create/create-game-form.component';
-import { EmptyQuarterRuleComponent } from '../../components/ui/empty-quarter-rule/empty-quarter-rule.component';
+import { EditGameDialogComponent, EditGameValues } from '../super-bowl-squares/components/edit-game-dialog/edit-game-dialog.component';
 import { HelpMenuComponent } from '../../components/ui/help-menu/help-menu.component';
 import { ProfileMenuComponent } from '../../components/ui/profile-menu/profile-menu.component';
 import { HeadroomDirective } from '../../shared/directives/headroom.directive';
@@ -57,7 +54,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
 
 @Component({
     selector: 'app-dashboard',
-    imports: [MaxSquaresFieldComponent, FormsModule, NgTemplateOutlet, DropdownComponent, ToggleComponent, CreateGameFormComponent, NgIconComponent, AppHeaderComponent, HeadroomDirective, HelpMenuComponent, ProfileMenuComponent, ShareDialogComponent, EmptyQuarterRuleComponent, UpgradePassDialogComponent],
+    imports: [FormsModule, NgTemplateOutlet, DropdownComponent, CreateGameFormComponent, NgIconComponent, AppHeaderComponent, HeadroomDirective, HelpMenuComponent, ProfileMenuComponent, ShareDialogComponent, EditGameDialogComponent, UpgradePassDialogComponent],
     providers: [
         provideIcons({
             heroPlus,
@@ -499,300 +496,28 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
       <app-share-dialog [isOpen]="!!shareModalGameId()" [gameId]="shareModalGameId() || ''" (closed)="shareModalGameId.set(null)"></app-share-dialog>
 
       <!-- Edit Game Modal -->
-      @if (showEditModal()) {
-        <div animate.enter="qs-modal-enter" animate.leave="qs-modal-leave" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" (click)="closeEditModal()">
-          <div class="bg-dialog rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto overscroll-contain animate-modal-in" (click)="$event.stopPropagation()">
-            <div class="flex items-center justify-between p-6 border-b border-default">
-              <div>
-                <h3 class="text-xl font-bold text-heading">Edit Game</h3>
-                <p class="text-sm text-muted">{{ editingGame()?.id }}</p>
-              </div>
-              <button
-                (click)="closeEditModal()"
-                class="p-2 text-muted hover:text-default hover:bg-control rounded-lg transition-colors"
-              >
-                <ng-icon name="heroXMark" class="text-2xl"></ng-icon>
-              </button>
-            </div>
-
-            <div class="p-6 space-y-5">
-              <!-- Sport Tabs -->
-              <div>
-                <label class="block text-sm font-semibold text-label mb-2">Sport</label>
-                <div class="flex gap-2 overflow-x-auto">
-                  @for (sport of sportOptions; track sport.value) {
-                    <button
-                      (click)="selectEditSport(sport.value)"
-                      [class]="editSport === sport.value
-                        ? 'px-4 py-2 bg-header text-header rounded-lg font-medium transition-colors whitespace-nowrap text-sm'
-                        : 'px-4 py-2 bg-control text-default hover:bg-control-hover rounded-lg font-medium transition-colors whitespace-nowrap text-sm'"
-                    >
-                      {{ sport.label }}
-                    </button>
-                  }
-                </div>
-              </div>
-
-              <!-- Custom Team Names or ESPN Game Selection -->
-              @if (editSport === 'custom') {
-                <div>
-                  <label class="block text-sm font-semibold text-label mb-2">Teams</label>
-                  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div>
-                      <label for="edit-custom-away" class="qs-label mb-1.5 block text-qs-muted">Away team</label>
-                      <input id="edit-custom-away" type="text" [(ngModel)]="editCustomAwayTeam" maxlength="50" placeholder="e.g. Lincoln High" class="qs-input" />
-                    </div>
-                    <div>
-                      <label for="edit-custom-home" class="qs-label mb-1.5 block text-qs-muted">Home team</label>
-                      <input id="edit-custom-home" type="text" [(ngModel)]="editCustomHomeTeam" maxlength="50" placeholder="e.g. Washington High" class="qs-input" />
-                    </div>
-                  </div>
-                  <p class="mt-2 text-xs text-qs-muted">Enter scores manually from the game page.</p>
-                </div>
-              } @else {
-                <div>
-                  <label class="block text-sm font-semibold text-label mb-2">ESPN Game</label>
-                  @if (isLoadingEditEspnGames()) {
-                    <div class="flex items-center justify-center py-6">
-                      <svg class="animate-spin h-6 w-6 text-qs-accent" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-                      </svg>
-                    </div>
-                  } @else {
-                    @if (editEspnGames().length > 10) {
-                      <div class="mb-2">
-                        <input
-                          type="text"
-                          [(ngModel)]="editEspnGameSearch"
-                          placeholder="Search teams..."
-                          class="qs-input w-full"
-                        />
-                      </div>
-                    }
-                    <div class="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto">
-                      @for (game of filteredEditEspnGames(); track game.id) {
-                        <button
-                          (click)="selectEditEspnGame(game.id)"
-                          [class]="editEspnGameId === game.id
-                            ? 'p-3 border-2 border-qs-accent bg-qs-accent-soft rounded-xl text-left transition-all'
-                            : 'p-3 border-2 border-default hover:border-hover rounded-xl text-left transition-all'"
-                        >
-                          <div class="flex items-center justify-between">
-                            <div>
-                              <p class="flex items-center gap-1.5 font-semibold text-sm"
-                                [class]="editEspnGameId === game.id ? 'text-qs-ink' : 'text-heading'">
-                                @if (editSport === 'nfl' && getTeamLogo(game.awayTeam); as logo) {
-                                  <img [src]="logo" [alt]="game.awayTeam" class="h-4 w-4 object-contain" />
-                                }
-                                {{ game.awayTeam }} &#64;
-                                @if (editSport === 'nfl' && getTeamLogo(game.homeTeam); as logo) {
-                                  <img [src]="logo" [alt]="game.homeTeam" class="h-4 w-4 object-contain" />
-                                }
-                                {{ game.homeTeam }}
-                              </p>
-                              @if (game.status === 'pre' && game.date) {
-                                <p class="text-xs"
-                                  [class]="editEspnGameId === game.id ? 'text-qs-accent' : 'text-muted'">{{ formatGameDate(game.date) }}</p>
-                              }
-                              @if (game.status !== 'pre') {
-                                <p class="text-xs"
-                                  [class]="editEspnGameId === game.id ? 'text-qs-accent' : 'text-muted'">{{ game.awayScore }} - {{ game.homeScore }}</p>
-                              }
-                            </div>
-                            <span class="text-xs font-medium px-2 py-0.5 rounded-full"
-                              [class]="getGameStatusClass(game.status)">
-                              {{ getGameStatusText(game) }}
-                            </span>
-                          </div>
-                        </button>
-                      }
-                    </div>
-                  }
-                </div>
-              }
-
-              <!-- Game Name -->
-              <div>
-                <label class="block text-sm font-semibold text-label mb-2">Game Name</label>
-                <input
-                  type="text"
-                  [(ngModel)]="editGameName"
-                  placeholder="e.g., Super Bowl Party 2024"
-                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-qs-accent focus:ring-2 focus:ring-qs-accent-soft outline-none text-default"
-                />
-              </div>
-
-              <!-- Points Per Square -->
-              <div>
-                <label class="block text-sm font-semibold text-label mb-2">Points per square</label>
-                <div class="flex items-center gap-2">
-                  <input
-                    type="number"
-                    [(ngModel)]="editGamePrice"
-                    min="0"
-                    class="flex-1 px-4 py-3 bg-input border border-input rounded-xl focus:border-qs-accent focus:ring-2 focus:ring-qs-accent-soft outline-none text-default"
-                  />
-                  <span class="text-muted">pts</span>
-                </div>
-              </div>
-
-              <!-- Host Note -->
-              <div>
-                <label class="block text-sm font-semibold text-label mb-2">Note from the host <span class="text-muted font-normal">(optional)</span></label>
-                <input
-                  type="text"
-                  [(ngModel)]="editGameHostNote"
-                  maxlength="140"
-                  placeholder="e.g. Snacks at halftime!"
-                  class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-qs-accent focus:ring-2 focus:ring-qs-accent-soft outline-none text-default"
-                />
-              </div>
-
-              <!-- Show in my open boards: only for hosts who can run several boards -->
-              @if (editingGame(); as og) {
-                @if (planService.features().activeBoards > 1 && (og.showInOpenBoards || (!og.isLocked && og.squaresFilled < og.boardSize))) {
-                  <div class="flex items-start justify-between gap-4">
-                    <div class="min-w-0">
-                      <label class="block text-sm font-semibold text-label mb-1">Show in my open boards</label>
-                      <p class="text-xs text-muted">Players on your other boards can see and join this board. Off means link only.</p>
-                      <p class="mt-2 truncate rounded-xl border border-input bg-input px-3 py-2 font-mono text-xs text-default">{{ editGameName }} · Points per square: {{ editGamePrice }} · {{ og.squaresFilled }}/{{ og.boardSize }} taken</p>
-                    </div>
-                    <app-toggle [checked]="editShowInOpenBoards" (onChange)="editShowInOpenBoards = $event"></app-toggle>
-                  </div>
-                }
-              }
-
-              <!-- Limit squares per player: Season Pass -->
-              @if (planService.features().squareLimit && editingGame(); as lg) {
-                <app-max-squares-field [value]="editMaxSquares" (valueChange)="editMaxSquares = $event"></app-max-squares-field>
-              }
-
-              <!-- Auto-manage: Season Pass, a linked game, board not locked yet -->
-              @if (editingGame(); as ag) {
-                @if (planService.features().autoManage && editEspnGameId && !ag.isLocked) {
-                  <div>
-                    <div class="flex items-start justify-between gap-4">
-                      <div class="min-w-0">
-                        <label class="block text-sm font-semibold text-label mb-1">Auto-lock and draw</label>
-                        <p class="text-xs text-muted">5 minutes after kickoff, we lock the board and draw the numbers for you.</p>
-                      @if (editAutoManage && editAutoRunText()) {
-                        <p class="mt-2 truncate rounded-xl border border-input bg-input px-3 py-2 font-mono text-xs text-default">Locks {{ editAutoRunText() }}</p>
-                      }
-                  <details class="mt-1 text-xs text-muted"><summary class="inline-flex min-h-9 cursor-pointer items-center underline underline-offset-4">How it works</summary><p class="pb-1">If the board is not full it first moves to 50 or 25 squares (squares are shuffled, each player keeps their count). Players can pick until then. Cancel any time before it runs.</p></details>
-                      </div>
-                      <app-toggle [checked]="editAutoManage" (onChange)="editAutoManage = $event"></app-toggle>
-                    </div>
-                  </div>
-                }
-              }
-
-              <!-- Board size: only smaller, only while the picks fit and the numbers are not drawn -->
-              @if (editingGame(); as eg) {
-                @if (eg.boardSize > 25) {
-                  <div>
-                    <label class="block text-sm font-semibold text-label mb-2">Board size</label>
-                    <div class="flex flex-wrap gap-2">
-                      <button type="button" (click)="editNewSize.set(null)"
-                        [class]="!editNewSize() ? 'px-4 py-2 bg-header text-header rounded-lg font-medium text-sm' : 'px-4 py-2 bg-control text-default hover:bg-control-hover rounded-lg font-medium text-sm'">
-                        Keep {{ eg.boardSize }}
-                      </button>
-                      @for (s of editSmallerSizes; track s) {
-                        @if (s < eg.boardSize) {
-                          <button type="button" [disabled]="!editSizeChoices().includes(s)" (click)="editNewSize.set(s)"
-                            [class]="(editNewSize() === s ? 'px-4 py-2 bg-header text-header' : 'px-4 py-2 bg-control text-default hover:bg-control-hover') + ' rounded-lg font-medium text-sm disabled:opacity-40 disabled:cursor-not-allowed'">
-                            {{ s }} squares
-                          </button>
-                        }
-                      }
-                    </div>
-                    @if (editNewSize()) {
-                      <p class="text-xs text-muted mt-2">Squares will be shuffled into the smaller board. Players keep the same number of squares, in new spots.</p>
-                    } @else if (editBoardRandomized()) {
-                      <p class="text-xs text-muted mt-2">The size can't change after the numbers are drawn.</p>
-                    } @else {
-                      <p class="text-xs text-muted mt-2">{{ eg.squaresFilled }} picked. A smaller board needs that many or fewer squares picked.</p>
-                    }
-                  </div>
-                }
-              }
-
-              <!-- Empty quarter rule -->
-              <app-empty-quarter-rule name="dash-edit-empty-quarter-rule" [(value)]="editEmptyRule"></app-empty-quarter-rule>
-
-              <!-- Co-host Assignment -->
-              <div>
-                <label class="block text-sm font-semibold text-label mb-2">
-                  Co-host
-                  <span class="text-muted font-normal">(optional)</span>
-                </label>
-                <p class="text-xs text-muted mb-2">Assign a player as co-host. A co-host can help manage players.</p>
-                @if (editingGame()?.managerId) {
-                  <div class="flex items-center gap-2 p-3 bg-qs-ok-soft border border-qs-ok-soft rounded-xl dark:bg-qs-tile-ok/30 dark:border-qs-ok">
-                    <span class="flex-1 text-qs-ok dark:text-qs-ok">{{ editingGame()?.managerName || editingGame()?.managerEmail || 'Assigned' }}</span>
-                    <button
-                      (click)="removeManager()"
-                      class="qs-btn qs-btn-danger"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                } @else if (editGamePlayers().length > 0) {
-                  <div class="relative">
-                    <input
-                      type="text"
-                      [(ngModel)]="managerSearchQuery"
-                      (input)="onManagerSearchInput()"
-                      (focus)="onManagerSearchFocus()"
-                      (keydown)="onManagerSearchKeydown($event)"
-                      placeholder="Search players..."
-                      class="w-full px-4 py-3 bg-input border border-input rounded-xl focus:border-qs-accent focus:ring-2 focus:ring-qs-accent-soft outline-none text-default"
-                      autocomplete="off"
-                    />
-                    @if (showManagerDropdown() && managerSearchResults().length > 0) {
-                      <div class="absolute z-10 mt-1 w-full bg-dialog border border-default rounded-xl shadow-lg max-h-48 overflow-y-auto">
-                        @for (player of managerSearchResults(); track player.uid; let i = $index) {
-                          <button
-                            (mousedown)="assignManagerFromPlayer(player)"
-                            (mouseenter)="selectedManagerIndex.set(i)"
-                            [class]="i === selectedManagerIndex()
-                              ? 'w-full px-4 py-3 text-left text-default bg-qs-accent-soft dark:bg-qs-accent/30 transition-colors'
-                              : 'w-full px-4 py-3 text-left text-default hover:bg-control transition-colors'"
-                          >
-                            {{ player.name }}
-                          </button>
-                        }
-                      </div>
-                    }
-                  </div>
-                } @else {
-                  <p class="text-sm text-muted italic">No players have joined yet</p>
-                }
-              </div>
-            </div>
-
-            <div class="flex items-center justify-end gap-3 p-6 border-t border-default bg-input rounded-b-2xl">
-              <button
-                (click)="closeEditModal()"
-                class="qs-btn qs-btn-ghost text-qs-muted"
-              >
-                Cancel
-              </button>
-              <button
-                (click)="saveGameEdits()"
-                [disabled]="isSavingGame()"
-                class="qs-btn qs-btn-primary px-8"
-              >
-                @if (isSavingGame()) {
-                  Saving...
-                } @else {
-                  Save Changes
-                }
-              </button>
-            </div>
-          </div>
-        </div>
-      }
+      <app-edit-game-dialog
+        [isOpen]="showEditModal()"
+        [showGameFields]="true"
+        [closeOnSave]="false"
+        [saving]="isSavingGame()"
+        [values]="editValues()"
+        [boardSize]="editingGame()?.boardSize ?? 100"
+        [squaresFilled]="editingGame()?.squaresFilled ?? 0"
+        [numbersDrawn]="editBoardRandomized()"
+        [espnGames]="editEspnGames()"
+        [loadingEspnGames]="isLoadingEditEspnGames()"
+        [canAutoManage]="planService.features().autoManage && !editingGame()?.isLocked"
+        [canShowInOpenBoards]="canEditShowInOpenBoards()"
+        [canLimitSquares]="planService.features().squareLimit && !!editingGame()"
+        [players]="editGamePlayers()"
+        [coHostName]="editingGame()?.managerId ? (editingGame()?.managerName || editingGame()?.managerEmail || 'Assigned') : ''"
+        (closed)="closeEditModal()"
+        (saved)="saveGameEdits($event)"
+        (sportChange)="fetchEditEspnGames($event)"
+        (coHostAssign)="assignManagerFromPlayer($event)"
+        (coHostRemove)="removeManager()"
+      ></app-edit-game-dialog>
 
     </div>
     @if (showUpgradeDialog()) {
@@ -923,46 +648,17 @@ export class DashboardComponent implements OnInit {
   // Edit modal state
   showEditModal = signal(false);
   editingGame = signal<GameListItem | null>(null);
-  editGameName = '';
-  editGameHostNote = '';
-  editGamePrice = 10;
-  editSport: SportType | 'custom' = 'nfl';
-  editEspnGameId = '';
-  editEmptyRule: EmptyQuarterRule = DEFAULT_EMPTY_QUARTER_RULE;
-  editEspnGameSearch = '';
-  editCustomHomeTeam = '';
-  editCustomAwayTeam = '';
+  editValues = signal<EditGameValues>({ awayTeam: '', homeTeam: '', pricePerSquare: 10, hostNote: '', quarterSplit: null, emptyQuarterRule: DEFAULT_EMPTY_QUARTER_RULE, newBoardSize: null, showInOpenBoards: false, autoManage: false, maxSquaresPerPlayer: null });
   editEspnGames = signal<EspnGame[]>([]);
   isLoadingEditEspnGames = signal(false);
   editGamePlayers = signal<{ name: string; uid: string }[]>([]);
   editBoardRandomized = signal(false);
-  editNewSize = signal<BoardSize | null>(null);
-  editShowInOpenBoards = false;
   autoManageDefault = signal(true);
-  editAutoManage = false;
-  editMaxSquares: number | null = null;
-  editAutoRunText(): string {
-    return autoRunLabel(this.editEspnGames().find(g => g.id === this.editEspnGameId)?.date);
-  }
-  editSmallerSizes: BoardSize[] = [50, 25];
-  managerSearchQuery = '';
-  managerSearchResults = signal<{ name: string; uid: string }[]>([]);
-  selectedManagerIndex = signal(-1);
-  showManagerDropdown = signal(false);
   isSavingGame = signal(false);
 
   // Profile dropdown state
 
   joinGameCode = '';
-  sportOptions: { value: SportType | 'custom'; label: string }[] = [
-    { value: 'nfl', label: 'NFL' },
-    { value: 'ncaaf', label: 'NCAA Football' },
-    { value: 'ufl', label: 'UFL' },
-    { value: 'nba', label: 'NBA' },
-    { value: 'wnba', label: 'WNBA' },
-    { value: 'afl', label: 'AFL' },
-    { value: 'custom', label: 'Custom' }
-  ];
 
   ngOnInit(): void {
     this.loadMyGames();
@@ -1147,32 +843,6 @@ export class DashboardComponent implements OnInit {
     setTimeout(() => trigger?.focus());
   }
 
-  filteredEditEspnGames(): EspnGame[] {
-    const query = this.editEspnGameSearch.toLowerCase().trim();
-    if (!query) return this.editEspnGames();
-    return this.editEspnGames().filter(g =>
-      g.homeTeam.toLowerCase().includes(query) ||
-      g.awayTeam.toLowerCase().includes(query) ||
-      g.homeTeamFull.toLowerCase().includes(query) ||
-      g.awayTeamFull.toLowerCase().includes(query)
-    );
-  }
-
-  getGameStatusClass(status: string): string {
-    switch (status) {
-      case 'pre': return 'bg-qs-panel-2 text-qs-muted';
-      case 'in': return 'bg-qs-live-fill text-qs-tile';
-      case 'post': return 'bg-qs-ok-soft text-qs-ok';
-      default: return 'bg-qs-panel-2 text-qs-muted';
-    }
-  }
-
-  getGameStatusText(game: EspnGame): string {
-    if (game.status === 'pre') return 'Upcoming';
-    if (game.status === 'in') return `LIVE - Q${game.period} ${game.clock}`;
-    return 'Final';
-  }
-
   closeCreateModal(): void {
     this.showCreateModal.set(false);
     clearCreateDraft();
@@ -1291,21 +961,6 @@ export class DashboardComponent implements OnInit {
     return new Date(timestamp).toLocaleDateString();
   }
 
-  formatGameDate(isoDate: string): string {
-    const date = new Date(isoDate);
-    return date.toLocaleDateString(undefined, {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit'
-    });
-  }
-
-  getTeamLogo(abbrev: string): string | null {
-    return getTeamLogoByAbbreviation(abbrev, 100);
-  }
-
   getGameGradient(game: EspnGame): string {
     const awayColors = getTeamColors(game.awayTeam);
     const homeColors = getTeamColors(game.homeTeam);
@@ -1322,29 +977,27 @@ export class DashboardComponent implements OnInit {
 
   // Edit modal methods
   async openEditModal(game: GameListItem): Promise<void> {
-    this.editingGame.set(game);
-    this.editGameName = game.name;
-    this.editGameHostNote = game.hostNote || '';
-    this.editGamePrice = game.pricePerSquare;
-    // Detect custom games: no ESPN event means custom
     const isCustomGame = !game.espnEventId;
-    this.editSport = isCustomGame ? 'custom' : (game.espnSport || 'nfl');
-    this.editEspnGameId = game.espnEventId || '';
-    this.editEmptyRule = game.emptyQuarterRule ?? DEFAULT_EMPTY_QUARTER_RULE;
-    this.editCustomHomeTeam = game.homeTeam || '';
-    this.editCustomAwayTeam = game.awayTeam || '';
-    this.editNewSize.set(null);
+    this.editingGame.set(game);
+    this.editValues.set({
+      name: game.name,
+      sport: isCustomGame ? 'custom' : (game.espnSport || 'nfl'),
+      espnGameId: game.espnEventId || '',
+      awayTeam: game.awayTeam || '',
+      homeTeam: game.homeTeam || '',
+      pricePerSquare: game.pricePerSquare,
+      hostNote: game.hostNote || '',
+      quarterSplit: null,
+      emptyQuarterRule: game.emptyQuarterRule ?? DEFAULT_EMPTY_QUARTER_RULE,
+      newBoardSize: null,
+      showInOpenBoards: !!game.showInOpenBoards,
+      autoManage: !!game.autoManage,
+      maxSquaresPerPlayer: game.maxSquaresPerPlayer ?? null
+    });
     this.editBoardRandomized.set(false);
-    this.editShowInOpenBoards = !!game.showInOpenBoards;
-    this.editAutoManage = !!game.autoManage;
-    this.editMaxSquares = game.maxSquaresPerPlayer ?? null;
-    this.managerSearchQuery = '';
-    this.managerSearchResults.set([]);
-    this.selectedManagerIndex.set(-1);
-    this.showManagerDropdown.set(false);
     this.showEditModal.set(true);
     if (!isCustomGame) {
-      this.fetchEditEspnGames();
+      this.fetchEditEspnGames(game.espnSport || 'nfl');
     }
 
     const fullGame = await this.gameService.getGame(game.id);
@@ -1360,90 +1013,29 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  editSizeChoices(): BoardSize[] {
+  canEditShowInOpenBoards(): boolean {
     const g = this.editingGame();
-    return g ? this.gameService.smallerSizesFor(g.boardSize, g.squaresFilled, this.editBoardRandomized()) : [];
+    return !!g && this.planService.features().activeBoards > 1 && (!!g.showInOpenBoards || (!g.isLocked && g.squaresFilled < g.boardSize));
   }
 
   closeEditModal(): void {
     this.showEditModal.set(false);
     this.editingGame.set(null);
-    this.managerSearchQuery = '';
-    this.managerSearchResults.set([]);
     this.editGamePlayers.set([]);
-    this.showManagerDropdown.set(false);
     this.editEspnGames.set([]);
-    this.editEspnGameSearch = '';
   }
 
-  async fetchEditEspnGames(): Promise<void> {
-    if (this.editSport === 'custom') {
+  async fetchEditEspnGames(sport: SportType | 'custom'): Promise<void> {
+    if (sport === 'custom') {
       this.editEspnGames.set([]);
       return;
     }
     this.isLoadingEditEspnGames.set(true);
     try {
-      const games = await this.espnService.getGames(this.editSport);
+      const games = await this.espnService.getGames(sport);
       this.editEspnGames.set(games);
     } finally {
       this.isLoadingEditEspnGames.set(false);
-    }
-  }
-
-  selectEditSport(sport: SportType | 'custom'): void {
-    this.editSport = sport;
-    this.editEspnGameId = '';
-    this.editEspnGameSearch = '';
-    if (sport === 'custom') {
-      this.editEspnGames.set([]);
-    } else {
-      this.fetchEditEspnGames();
-    }
-  }
-
-  selectEditEspnGame(gameId: string): void {
-    this.editEspnGameId = gameId;
-  }
-
-  onManagerSearchInput(): void {
-    const query = this.managerSearchQuery.toLowerCase().trim();
-    if (!query) {
-      this.managerSearchResults.set(this.editGamePlayers());
-    } else {
-      this.managerSearchResults.set(
-        this.editGamePlayers().filter(p => p.name.toLowerCase().includes(query))
-      );
-    }
-    this.selectedManagerIndex.set(-1);
-    this.showManagerDropdown.set(true);
-  }
-
-  onManagerSearchFocus(): void {
-    const query = this.managerSearchQuery.toLowerCase().trim();
-    if (!query) {
-      this.managerSearchResults.set(this.editGamePlayers());
-    }
-    this.showManagerDropdown.set(true);
-  }
-
-  onManagerSearchKeydown(event: KeyboardEvent): void {
-    const results = this.managerSearchResults();
-    if (!results.length) return;
-
-    if (event.key === 'ArrowDown') {
-      event.preventDefault();
-      this.selectedManagerIndex.update(i => Math.min(i + 1, results.length - 1));
-    } else if (event.key === 'ArrowUp') {
-      event.preventDefault();
-      this.selectedManagerIndex.update(i => Math.max(i - 1, 0));
-    } else if (event.key === 'Enter') {
-      event.preventDefault();
-      const idx = this.selectedManagerIndex();
-      if (idx >= 0 && idx < results.length) {
-        this.assignManagerFromPlayer(results[idx]);
-      }
-    } else if (event.key === 'Escape') {
-      this.showManagerDropdown.set(false);
     }
   }
 
@@ -1457,8 +1049,6 @@ export class DashboardComponent implements OnInit {
       this.myGames.update(games =>
         games.map(g => g.id === game.id ? { ...g, managerId: player.uid, managerName: player.name, managerEmail: undefined } : g)
       );
-      this.managerSearchQuery = '';
-      this.showManagerDropdown.set(false);
     } catch (error) {
       this.toastService.error('Failed to assign co-host');
     }
@@ -1479,25 +1069,25 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  async saveGameEdits(): Promise<void> {
+  async saveGameEdits(v: EditGameValues): Promise<void> {
     const game = this.editingGame();
     if (!game) return;
 
-    const sanitizedName = this.sanitizationService.sanitizeGameName(this.editGameName);
-    const sanitizedPrice = this.sanitizationService.validatePrice(this.editGamePrice);
-    const sanitizedHostNote = this.sanitizationService.sanitizeHostNote(this.editGameHostNote);
+    const sanitizedName = this.sanitizationService.sanitizeGameName(v.name ?? '');
+    const sanitizedPrice = this.sanitizationService.validatePrice(v.pricePerSquare);
+    const sanitizedHostNote = this.sanitizationService.sanitizeHostNote(v.hostNote);
 
     this.isSavingGame.set(true);
     try {
-      const selectedEspnGame = this.editEspnGames().find(g => g.id === this.editEspnGameId);
-      const espnChanged = (this.editEspnGameId || undefined) !== game.espnEventId;
+      const selectedEspnGame = this.editEspnGames().find(g => g.id === v.espnGameId);
+      const espnChanged = (v.espnGameId || undefined) !== game.espnEventId;
 
       // Determine team names: custom game uses edited fields, ESPN game uses selected game
       let homeTeam: string;
       let awayTeam: string;
-      if (this.editSport === 'custom') {
-        homeTeam = this.sanitizationService.sanitizeTeamName(this.editCustomHomeTeam) || game.homeTeam || '';
-        awayTeam = this.sanitizationService.sanitizeTeamName(this.editCustomAwayTeam) || game.awayTeam || '';
+      if (v.sport === 'custom') {
+        homeTeam = this.sanitizationService.sanitizeTeamName(v.homeTeam) || game.homeTeam || '';
+        awayTeam = this.sanitizationService.sanitizeTeamName(v.awayTeam) || game.awayTeam || '';
       } else {
         homeTeam = selectedEspnGame?.homeTeam || game.homeTeam || '';
         awayTeam = selectedEspnGame?.awayTeam || game.awayTeam || '';
@@ -1507,9 +1097,9 @@ export class DashboardComponent implements OnInit {
         name: sanitizedName,
         pricePerSquare: sanitizedPrice,
         hostNote: sanitizedHostNote,
-        emptyQuarterRule: this.editEmptyRule,
-        espnEventId: this.editEspnGameId || null,
-        espnSport: this.editEspnGameId && this.editSport !== 'custom' ? this.editSport : null,
+        emptyQuarterRule: v.emptyQuarterRule,
+        espnEventId: v.espnGameId || null,
+        espnSport: v.espnGameId && v.sport !== 'custom' ? v.sport : null,
         homeTeam,
         awayTeam
       };
@@ -1517,35 +1107,35 @@ export class DashboardComponent implements OnInit {
         updates['scores'] = { q1: { home: 0, away: 0 }, q2: { home: 0, away: 0 }, q3: { home: 0, away: 0 }, q4: { home: 0, away: 0 } };
         updates['winners'] = {};
       }
-      const newSize = this.editNewSize();
+      const newSize = v.newBoardSize;
       if (newSize) await this.gameService.resizeBoard(game.id, newSize);
       await this.gameService.updateGame(game.id, updates);
       // The open-boards switch saves on its own so a failure here never loses the other edits.
       let showApplied = !!game.showInOpenBoards;
       const uid = this.currentUser()?.uid;
-      if (uid && this.editShowInOpenBoards !== showApplied) {
+      if (uid && v.showInOpenBoards !== showApplied) {
         try {
-          await this.gameService.setShowInOpenBoards(game.id, uid, this.editShowInOpenBoards);
-          showApplied = this.editShowInOpenBoards;
+          await this.gameService.setShowInOpenBoards(game.id, uid, v.showInOpenBoards);
+          showApplied = v.showInOpenBoards;
         } catch {
           this.toastService.warning('Saved, but Show in my open boards could not be changed. Try again in a moment.');
         }
       }
       let limitApplied = game.maxSquaresPerPlayer;
-      if (this.planService.features().squareLimit && (this.editMaxSquares ?? undefined) !== game.maxSquaresPerPlayer) {
+      if (this.planService.features().squareLimit && (v.maxSquaresPerPlayer ?? undefined) !== game.maxSquaresPerPlayer) {
         try {
-          await this.gameService.setSquareLimit(game.id, this.editMaxSquares);
-          limitApplied = this.editMaxSquares ?? undefined;
+          await this.gameService.setSquareLimit(game.id, v.maxSquaresPerPlayer);
+          limitApplied = v.maxSquaresPerPlayer ?? undefined;
         } catch {
           this.toastService.warning('Saved, but the squares limit could not be changed. Try again in a moment.');
         }
       }
       let autoApplied = game.autoManage;
-      const wantAuto = this.planService.features().autoManage && !!this.editEspnGameId && this.editAutoManage;
+      const wantAuto = this.planService.features().autoManage && !!v.espnGameId && v.autoManage;
       if (!!wantAuto !== !!game.autoManage || (wantAuto && espnChanged)) {
         try {
           autoApplied = wantAuto ? { enabled: true, resize: true } : undefined;
-          const picked = this.editEspnGames().find(g => g.id === this.editEspnGameId)?.date;
+          const picked = this.editEspnGames().find(g => g.id === v.espnGameId)?.date;
           await this.gameService.setAutoManage(game.id, autoApplied ?? null, picked ? Date.parse(picked) : undefined);
         } catch {
           autoApplied = game.autoManage;
@@ -1562,9 +1152,9 @@ export class DashboardComponent implements OnInit {
           name: sanitizedName,
           pricePerSquare: sanitizedPrice,
           hostNote: sanitizedHostNote,
-          emptyQuarterRule: this.editEmptyRule,
-          espnEventId: this.editEspnGameId || undefined,
-          espnSport: this.editEspnGameId && this.editSport !== 'custom' ? this.editSport : undefined,
+          emptyQuarterRule: v.emptyQuarterRule,
+          espnEventId: v.espnGameId || undefined,
+          espnSport: v.espnGameId && v.sport !== 'custom' ? v.sport : undefined,
           homeTeam,
           awayTeam,
           ...(espnChanged ? { scores: { q1: { home: 0, away: 0 }, q2: { home: 0, away: 0 }, q3: { home: 0, away: 0 }, q4: { home: 0, away: 0 } }, winners: {} } : {})
