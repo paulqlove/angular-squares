@@ -233,7 +233,7 @@ export interface EditGameValues {
                 <app-empty-quarter-rule class="block [&_.qs-label]:text-qs-muted" name="edit-empty-quarter-rule" [(value)]="draft.emptyQuarterRule"></app-empty-quarter-rule>
               </section>
 
-              <details class="group">
+              <details class="group" (toggle)="onMoreToggle($event)">
                 <summary class="qs-eyebrow qs-eyebrow-bar !flex min-h-11 cursor-pointer list-none items-center border-b border-qs-line pb-2.5 text-[13px] font-semibold text-qs-ink [&::-webkit-details-marker]:hidden">
                   <span>More options</span>
                   <span class="ml-auto flex items-center gap-2">
@@ -446,6 +446,14 @@ export class EditGameDialogComponent implements OnChanges {
 
   autoRun(): string {
     return this.showGameFields ? autoRunLabel(this.selectedEspnGame()?.date) : this.autoRunText;
+  }
+
+  /** Opening More options brings it to the top of the dialog, so the new fields are not left below the fold. */
+  onMoreToggle(event: Event): void {
+    const details = event.target as HTMLDetailsElement;
+    if (!details.open) return;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    requestAnimationFrame(() => details.scrollIntoView({ block: 'start', behavior: reduceMotion ? 'auto' : 'smooth' }));
   }
 
   close(): void {
