@@ -10,6 +10,7 @@ import { GameService, GameListItem, BoardSize } from '../../core/services/game.s
 import { DEFAULT_SPLIT, DEFAULT_EMPTY_QUARTER_RULE, isNoExpiry } from '../../core/plans';
 import { EspnService, EspnGame, SportType, SPORT_CONFIG } from '../../core/services/espn.service';
 import { getTeamColors } from '../content/teams-data';
+import { ConfirmService } from '../../core/services/confirm.service';
 import { ToastService } from '../../core/services/toast.service';
 import { SanitizationService } from '../../core/services/sanitization.service';
 import { WalkthroughService, WalkthroughStep } from '../../core/services/walkthrough.service';
@@ -533,6 +534,7 @@ export class DashboardComponent implements OnInit {
   private espnService = inject(EspnService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private confirmService = inject(ConfirmService);
   private toastService = inject(ToastService);
   private walkthroughService = inject(WalkthroughService);
   private sanitizationService = inject(SanitizationService);
@@ -751,7 +753,7 @@ export class DashboardComponent implements OnInit {
           }))).catch(() => {});
         }
       } catch (error) {
-        this.toastService.error('Failed to load games');
+        this.toastService.error('Could not load your games. Try again.');
       } finally {
         this.isLoadingGames.set(false);
       }
@@ -779,7 +781,7 @@ export class DashboardComponent implements OnInit {
         this.upgradeTrigger.set('limit');
         this.showUpgradeDialog.set(true);
       } else {
-        this.toastService.error('Failed to check your boards. Try again.');
+        this.toastService.error('Could not check your boards. Try again.');
       }
     } finally {
       this.isCheckingBoardLimit.set(false);
@@ -803,7 +805,7 @@ export class DashboardComponent implements OnInit {
   async resetOldBoard(): Promise<void> {
     const board = this.endedBoard();
     if (!board) return;
-    if (!confirm('Reset this game? Squares, numbers and scores are cleared. Players keep your link.')) return;
+    if (!await this.confirmService.ask({ title: 'Reset this game?', message: 'Squares, numbers and scores are cleared. Players keep your link.', confirmLabel: 'Reset game' })) return;
     try {
       await this.gameService.resetGame(board.id, board.boardSize);
       this.myGames.update(games => games.map(g => g.id === board.id ? { ...g, squaresFilled: 0, playerCount: 0, confirmedCount: 0, isLocked: false } : g));
@@ -819,7 +821,7 @@ export class DashboardComponent implements OnInit {
     const board = this.endedBoard();
     const user = this.currentUser();
     if (!board || !user) return;
-    if (!confirm('Delete this game? This cannot be undone.')) return;
+    if (!await this.confirmService.ask({ title: 'Delete this game?', message: `${board.name} will be removed for everyone. This cannot be undone.`, confirmLabel: 'Delete game' })) return;
     try {
       await this.gameService.deleteGame(board.id, user.uid);
       this.myGames.update(games => games.filter(g => g.id !== board.id));
@@ -906,7 +908,7 @@ export class DashboardComponent implements OnInit {
         this.showUpgradeDialog.set(true);
       } else {
         console.error('[Dashboard] Create game failed', (error as { code?: string })?.code ?? error);
-        this.toastService.error('Failed to create game');
+        this.toastService.error('Could not create the game. Try again.');
         this.showCreateModal.set(true);
       }
     } finally {
@@ -945,12 +947,13 @@ export class DashboardComponent implements OnInit {
     const user = this.currentUser();
     if (!user) return;
 
-    if (confirm('Are you sure you want to delete this game? This cannot be undone.')) {
+    const name = this.myGames().find(g => g.id === gameId)?.name ?? 'This game';
+    if (await this.confirmService.ask({ title: 'Delete this game?', message: `${name} will be removed for everyone. This cannot be undone.`, confirmLabel: 'Delete game' })) {
       try {
         await this.gameService.deleteGame(gameId, user.uid);
         this.myGames.update(games => games.filter(g => g.id !== gameId));
       } catch (error) {
-        this.toastService.error('Failed to delete game');
+        this.toastService.error('Could not delete the game. Try again.');
       }
     }
   }
@@ -1049,7 +1052,7 @@ export class DashboardComponent implements OnInit {
         games.map(g => g.id === game.id ? { ...g, managerId: player.uid, managerName: player.name, managerEmail: undefined } : g)
       );
     } catch (error) {
-      this.toastService.error('Failed to assign co-host');
+      this.toastService.error('Could not assign the co-host. Try again.');
     }
   }
 
@@ -1064,7 +1067,7 @@ export class DashboardComponent implements OnInit {
         games.map(g => g.id === game.id ? { ...g, managerId: undefined, managerEmail: undefined, managerName: undefined } : g)
       );
     } catch (error) {
-      this.toastService.error('Failed to remove co-host');
+      this.toastService.error('Could not remove the co-host. Try again.');
     }
   }
 
@@ -1161,7 +1164,7 @@ export class DashboardComponent implements OnInit {
       );
       this.closeEditModal();
     } catch (error) {
-      this.toastService.error('Failed to save changes');
+      this.toastService.error('Could not save changes. Try again.');
     } finally {
       this.isSavingGame.set(false);
     }
@@ -1203,7 +1206,7 @@ export class DashboardComponent implements OnInit {
       const passes = await this.gameService.listGiftedSeasonPasses();
       this.giftedPasses.set(passes);
     } catch {
-      this.toastService.error('Failed to load gifted passes');
+      this.toastService.error('Could not load gifted passes. Try again.');
     } finally {
       this.isLoadingGiftedPasses.set(false);
     }
@@ -1222,20 +1225,20 @@ export class DashboardComponent implements OnInit {
       this.toastService.success(`Season pass granted to ${email}`);
       await this.loadGiftedPasses();
     } catch {
-      this.toastService.error('Failed to grant season pass');
+      this.toastService.error('Could not grant the season pass. Try again.');
     } finally {
       this.isGrantingPass.set(false);
     }
   }
 
   async revokePass(email: string): Promise<void> {
-    if (!confirm(`Revoke season pass for ${email}?`)) return;
+    if (!await this.confirmService.ask({ title: 'Revoke season pass?', message: email, confirmLabel: 'Revoke pass' })) return;
     try {
       await this.gameService.revokeSeasonPass(email);
       this.toastService.success(`Pass revoked for ${email}`);
       await this.loadGiftedPasses();
     } catch {
-      this.toastService.error('Failed to revoke pass');
+      this.toastService.error('Could not revoke the pass. Try again.');
     }
   }
 
@@ -1250,7 +1253,7 @@ export class DashboardComponent implements OnInit {
       this.toastService.success(`${email} now has a pass that never expires`);
       await this.loadGiftedPasses();
     } catch {
-      this.toastService.error('Failed to update pass');
+      this.toastService.error('Could not update the pass. Try again.');
     } finally {
       this.updatingPassEmail.set(null);
     }
