@@ -252,5 +252,8 @@ Update this list as each chunk ships (change, Paul tests locally, push, merge).
 | P2 Public pages: phone header CTA beside Menu, blog CTA band, welcome step wording, 404 second link, game title as h1 | Done | this batch |
 | P2 Phones: Players list starts folded below 1024px with the count on the Show button | Done | this batch |
 | P2 Dashboard cards: labelled More menu (Edit, Delete, Remove), status on joined cards, "Needs confirm" only above zero, guest banner wording | Done (TV link stays in the Share dialog) | this batch |
-| Everything else in Priority 2 and 3 | Not started | |
+| P2 Copy: one noun (TV link) everywhere with matching code names; Winners explainer is one line with the rule behind a disclosure | Done | this batch |
+| P2 Decided: footer "sports ball" stays; blog intro left alone; tab arrow keys not added (arrow keys switch boards); $5.99 dialog wording unchanged | Decided | n/a |
+| P2 Open: live score strip, one shared modal shell, tab panel markup | Not started | |
+| Everything else in Priority 3 | Not started | |
 
