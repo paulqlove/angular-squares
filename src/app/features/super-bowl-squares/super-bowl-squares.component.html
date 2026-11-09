@@ -267,7 +267,7 @@
               (click)="isPlayersListVisible = !isPlayersListVisible"
               [attr.aria-expanded]="isPlayersListVisible"
               class="qs-label flex min-h-11 items-center gap-1 px-1 text-qs-muted hover:text-qs-ink lg:hidden">
-              {{ isPlayersListVisible ? 'Hide' : 'Show' }}
+              {{ isPlayersListVisible ? 'Hide' : 'Show ' + playerCount + (playerCount === 1 ? ' player' : ' players') }}
               <ng-icon name="heroChevronDown" [class.rotate-180]="isPlayersListVisible" class="text-base transition-transform"></ng-icon>
             </button>
           </div>
