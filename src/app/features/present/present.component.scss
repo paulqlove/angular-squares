@@ -1,10 +1,14 @@
 /* TV sizing: cells fill the board card's own height (so a taller header or a help panel never pushes the board off screen), names wrap instead of truncating */
 .present-board {
   container-type: size;
+  /* Caption and axis font sizes grow with the screen, and so do the rows they sit in. The cell height reads the same values, so the board always fits. */
+  --cap-font: clamp(1rem, 1.4vw, 1.75rem);
+  --axis-font: clamp(1rem, 1.6vw, 2rem);
+  --board-chrome: calc(57px + 0.65 * (var(--cap-font) + var(--axis-font)));
 }
 .present-board .number-cell:not(.axis-top),
 .present-board .square-cell {
-  height: calc((100cqh - 4.7rem) / var(--rows, 10)) !important;
+  height: calc((100cqh - var(--board-chrome)) / var(--rows, 10)) !important;
 }
 
 .present-board .square-cell {
@@ -16,12 +20,12 @@
 }
 
 .present-board .axis-cell {
-  font-size: clamp(1rem, 1.6vw, 2rem);
+  font-size: var(--axis-font);
 }
 
 /* Caption above the board: bigger for a TV */
 .present-board app-game-board p {
-  font-size: clamp(1rem, 1.4vw, 1.75rem) !important;
+  font-size: var(--cap-font) !important;
 }
 .present-board app-game-board p img {
   height: 1.4em;
