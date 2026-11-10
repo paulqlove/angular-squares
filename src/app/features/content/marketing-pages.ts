@@ -1,4 +1,5 @@
 import { BreadcrumbItem } from '../../core/services/seo.service';
+import { boardDiagram, DIGITS, PAIRS } from './board-diagram';
 import { SCHEDULE } from './schedule.generated';
 import { formatKickoff } from './schedule.model';
 
@@ -42,6 +43,8 @@ export interface MarketingPage {
   lede: string;
   /** Short note shown above the title. */
   notice?: string;
+  /** Shown beside the title on wide screens (how-to-play: the board example). */
+  heroHtml?: string;
   published: string;
   sections: PageSection[];
   steps?: HowToStep[];
@@ -62,6 +65,18 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     h1: 'How to play football squares',
     eyebrow: 'Rules',
     lede: 'Football squares is a free board for friends and fans. Choose 100, 50, or 25 squares, add two teams, and pick a winner at the end of each quarter. You do not need to know the sport.',
+    heroHtml: boardDiagram({
+      rows: DIGITS, cols: DIGITS, win: [4, 7], large: true,
+      caption: 'Score 24 to 17: row 4 meets column 7, and Jo wins the quarter.',
+      names: {
+        '0-2': ['Sam', 'qs-p-sky'], '0-6': ['Lee', 'qs-p-orchid'], '1-4': ['Max', 'qs-p-rose'], '1-9': ['Sam', 'qs-p-sky'],
+        '2-1': ['Tom', 'qs-p-apricot'], '2-7': ['Lee', 'qs-p-orchid'], '3-3': ['Kim', 'qs-p-lilac'], '3-5': ['Max', 'qs-p-rose'],
+        '4-0': ['Sam', 'qs-p-sky'], '4-7': ['Jo', 'qs-p-butter'], '4-8': ['Tom', 'qs-p-apricot'], '5-2': ['Kim', 'qs-p-lilac'],
+        '5-6': ['Max', 'qs-p-rose'], '6-1': ['Lee', 'qs-p-orchid'], '6-4': ['Sam', 'qs-p-sky'], '6-9': ['Kim', 'qs-p-lilac'],
+        '7-3': ['Tom', 'qs-p-apricot'], '7-7': ['Max', 'qs-p-rose'], '8-0': ['Kim', 'qs-p-lilac'], '8-5': ['Sam', 'qs-p-sky'],
+        '9-2': ['Lee', 'qs-p-orchid'], '9-8': ['Max', 'qs-p-rose']
+      }
+    }),
     published: '2026-11-01',
     steps: [
       {
@@ -113,22 +128,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
           'Home team (columns): 0, 1, 2, 3, 4, 5, 6, 7, 8, 9',
           'Each square = 1 score combination'
         ],
-        html: `<figure class="not-prose mt-6 max-w-xs">
-          <div class="overflow-hidden rounded-lg border border-slate-400 dark:border-slate-500">
-            <table class="w-full text-center text-[11px]" style="border-spacing:0">
-              <thead>
-                <tr class="bg-slate-100 dark:bg-slate-700">
-                  <th class="w-6 p-1 text-[9px] text-slate-500 dark:text-slate-400 border-b border-r border-slate-300 dark:border-slate-500"><span class="block">↓</span><span class="block">→</span></th>
-                  ${[0,1,2,3,4,5,6,7,8,9].map(i => `<th class="p-1 font-semibold text-slate-600 dark:text-slate-300 border-b border-r border-slate-300 dark:border-slate-500 last:border-r-0">${i}</th>`).join('')}
-                </tr>
-              </thead>
-              <tbody>
-                ${[0,1,2,3,4,5,6,7,8,9].map(row => `<tr>${`<td class="bg-slate-100 dark:bg-slate-700 p-1 font-semibold text-slate-600 dark:text-slate-300 border-b border-r border-slate-300 dark:border-slate-500">${row}</td>`}${[0,1,2,3,4,5,6,7,8,9].map(col => row === 4 && col === 7 ? '<td class="bg-green-500 p-1 font-bold text-white border-b border-r border-slate-300 dark:border-slate-500">WIN</td>' : '<td class="bg-white dark:bg-slate-800 p-1 border-b border-r border-slate-300 dark:border-slate-500"></td>').join('')}</tr>`).join('')}
-              </tbody>
-            </table>
-          </div>
-          <figcaption class="mt-2 text-xs text-qs-muted">Score 24–17 → row 4, column 7 wins</figcaption>
-        </figure>`
+        html: boardDiagram({ rows: DIGITS, cols: DIGITS, win: [4, 7], caption: 'Score 24 to 17: row 4 meets column 7.' })
       },
       {
         heading: '50 squares (5 × 10) — Half board',
@@ -142,22 +142,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
           'Home team (columns): 0, 1, 2, 3, 4, 5, 6, 7, 8, 9',
           'Each square = 2 score combinations'
         ],
-        html: `<figure class="not-prose mt-6 max-w-sm">
-          <div class="overflow-hidden rounded-lg border border-slate-400 dark:border-slate-500">
-            <table class="w-full text-center text-[11px]" style="border-spacing:0">
-              <thead>
-                <tr class="bg-slate-100 dark:bg-slate-700">
-                  <th class="w-8 p-1 text-[9px] text-slate-500 dark:text-slate-400 border-b border-r border-slate-300 dark:border-slate-500"><span class="block">↓</span><span class="block">→</span></th>
-                  ${[0,1,2,3,4,5,6,7,8,9].map(i => `<th class="p-1 font-semibold text-slate-600 dark:text-slate-300 border-b border-r border-slate-300 dark:border-slate-500">${i}</th>`).join('')}
-                </tr>
-              </thead>
-              <tbody>
-                ${['0,1','2,3','4,5','6,7','8,9'].map((pair, row) => `<tr>${`<td class="bg-slate-100 dark:bg-slate-700 p-1 text-[10px] font-semibold text-slate-600 dark:text-slate-300 border-b border-r border-slate-300 dark:border-slate-500">${pair}</td>`}${[0,1,2,3,4,5,6,7,8,9].map(col => row === 2 && col === 7 ? '<td class="bg-green-500 p-1.5 font-bold text-white border-b border-r border-slate-300 dark:border-slate-500">WIN</td>' : '<td class="bg-white dark:bg-slate-800 p-1.5 border-b border-r border-slate-300 dark:border-slate-500"></td>').join('')}</tr>`).join('')}
-              </tbody>
-            </table>
-          </div>
-          <figcaption class="mt-2 text-xs text-qs-muted">Score 24–17 → "4,5" row, column 7 wins</figcaption>
-        </figure>`
+        html: boardDiagram({ rows: PAIRS, cols: DIGITS, win: [2, 7], caption: 'Score 24 to 17: the "4,5" row meets column 7.' })
       },
       {
         heading: '25 squares (5 × 5) — Quarter board',
@@ -171,22 +156,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
           'Home team (columns): 0,1 / 2,3 / 4,5 / 6,7 / 8,9',
           'Each square = 4 score combinations'
         ],
-        html: `<figure class="not-prose mt-6 max-w-[220px]">
-          <div class="overflow-hidden rounded-lg border border-slate-400 dark:border-slate-500">
-            <table class="w-full text-center text-[11px]" style="border-spacing:0">
-              <thead>
-                <tr class="bg-slate-100 dark:bg-slate-700">
-                  <th class="w-9 p-1 text-[9px] text-slate-500 dark:text-slate-400 border-b border-r border-slate-300 dark:border-slate-500"><span class="block">↓</span><span class="block">→</span></th>
-                  ${['0,1','2,3','4,5','6,7','8,9'].map(p => `<th class="p-1.5 text-[10px] font-semibold text-slate-600 dark:text-slate-300 border-b border-r border-slate-300 dark:border-slate-500">${p}</th>`).join('')}
-                </tr>
-              </thead>
-              <tbody>
-                ${['0,1','2,3','4,5','6,7','8,9'].map((pair, row) => `<tr>${`<td class="bg-slate-100 dark:bg-slate-700 p-1 text-[10px] font-semibold text-slate-600 dark:text-slate-300 border-b border-r border-slate-300 dark:border-slate-500">${pair}</td>`}${['0,1','2,3','4,5','6,7','8,9'].map((_, col) => row === 2 && col === 3 ? '<td class="bg-green-500 p-2 font-bold text-white border-b border-r border-slate-300 dark:border-slate-500">WIN</td>' : '<td class="bg-white dark:bg-slate-800 p-2 border-b border-r border-slate-300 dark:border-slate-500"></td>').join('')}</tr>`).join('')}
-              </tbody>
-            </table>
-          </div>
-          <figcaption class="mt-2 text-xs text-qs-muted">Score 24–17 → "4,5" row, "6,7" column wins</figcaption>
-        </figure>`
+        html: boardDiagram({ rows: PAIRS, cols: PAIRS, win: [2, 3], caption: 'Score 24 to 17: the "4,5" row meets the "6,7" column.' })
       },
       {
         heading: 'Which size to choose',

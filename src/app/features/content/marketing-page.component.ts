@@ -13,115 +13,101 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
     <app-content-shell>
-      <app-breadcrumbs [items]="breadcrumbs" [column]="true"></app-breadcrumbs>
-      <article class="qs-column">
-        @if (page.notice) {
-          <p class="mb-6 rounded-xl border border-qs-line bg-qs-panel p-4 text-sm leading-relaxed text-qs-ink" role="note">
-            {{ page.notice }}
-          </p>
-        }
-        <header>
-          <p class="qs-eyebrow">
-            {{ page.eyebrow }}
-          </p>
-          <h1 class="qs-title mt-3 text-4xl sm:text-5xl">
-            {{ page.h1 }}
-          </h1>
-          <p class="mt-5 text-xl leading-snug text-qs-muted">{{ page.lede }}</p>
-        </header>
-
-        @if (page.disclaimer) {
-          <aside class="mt-8 rounded-xl border border-qs-line bg-qs-panel p-4 text-sm leading-relaxed text-qs-ink" role="note">
-            <p class="font-semibold text-qs-ink">Before you start</p>
-            <p class="mt-2">{{ page.disclaimer }}</p>
-          </aside>
-        }
-
-        @if (page.steps) {
-          <ol class="mt-12 space-y-6 sm:mt-16">
-            @for (step of page.steps; track step.name; let index = $index) {
-              <li class="flex gap-4">
-                <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-qs-accent text-base font-bold text-qs-on-accent" aria-hidden="true">
-                  {{ index + 1 }}
-                </span>
-                <div>
-                  <h2 class="text-lg font-semibold text-qs-ink">{{ step.name }}</h2>
-                  <p class="mt-2 text-[1.0625rem] leading-[1.7] text-qs-ink">{{ step.text }}</p>
-                </div>
-              </li>
+      <div class="mx-auto max-w-[64rem]">
+        <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
+        <article>
+          <header class="grid gap-12" [class]="page.heroHtml ? 'lg:grid-cols-[minmax(0,1fr)_25rem] lg:items-center lg:gap-16' : ''">
+            <div>
+              <p class="qs-eyebrow">{{ page.eyebrow }}</p>
+              <h1 class="qs-title mt-5 text-[clamp(2.5rem,5.6vw,4.25rem)] leading-[1.02] tracking-[-0.04em]">{{ page.h1 }}</h1>
+              <p class="mt-6 max-w-[34rem] text-xl leading-[1.5] text-qs-muted">{{ page.lede }}</p>
+            </div>
+            @if (page.heroHtml) {
+              <div [innerHTML]="trustHtml(page.heroHtml)"></div>
             }
-          </ol>
-        }
+          </header>
 
-        @if (page.faqs) {
-          <section class="mt-12 sm:mt-16" aria-labelledby="faq-heading">
-            <h2 id="faq-heading" class="text-2xl font-semibold leading-tight tracking-tight sm:text-[1.75rem]">Questions people ask</h2>
-            <div class="mt-6 divide-y divide-qs-line border-t border-qs-line">
-              @for (entry of page.faqs; track entry.question) {
-                <div class="py-6">
-                  <h3 class="text-lg font-semibold text-qs-ink">{{ entry.question }}</h3>
-                  <p class="mt-2 text-[1.0625rem] leading-[1.7] text-qs-ink">{{ entry.answer }}</p>
-                </div>
+          @if (page.steps) {
+            <ol class="mt-20 grid gap-10 border-t border-qs-line pt-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-0">
+              @for (step of page.steps; track step.name; let index = $index) {
+                <li class="lg:border-l lg:border-qs-line lg:px-6 lg:first:border-l-0 lg:first:pl-0 lg:last:pr-0">
+                  <p class="qs-label text-qs-accent">0{{ index + 1 }}</p>
+                  <h2 class="mt-3 text-lg font-semibold leading-snug text-qs-ink">{{ step.name }}</h2>
+                  <p class="qs-body mt-2 text-[0.9375rem] leading-[1.65]">{{ step.text }}</p>
+                </li>
               }
+            </ol>
+          }
+
+          @if (page.disclaimer) {
+            <aside class="mt-16 grid gap-x-16 lg:grid-cols-[14rem_minmax(0,1fr)]" role="note">
+              <p class="qs-body max-w-[40rem] border-l-2 border-qs-accent pl-4 text-[0.9375rem] leading-[1.65] lg:col-start-2">{{ page.disclaimer }}</p>
+            </aside>
+          }
+
+          @if (page.faqs) {
+            <section class="mt-20 grid gap-x-16 gap-y-6 border-t border-qs-line pt-8 lg:grid-cols-[14rem_minmax(0,1fr)]" aria-labelledby="faq-heading">
+              <h2 id="faq-heading" class="text-[1.375rem] font-semibold leading-tight tracking-tight text-qs-ink">Questions people ask</h2>
+              <div class="max-w-[40rem] divide-y divide-qs-line">
+                @for (entry of page.faqs; track entry.question) {
+                  <div class="py-6 first:pt-0">
+                    <h3 class="text-lg font-semibold leading-snug text-qs-ink">{{ entry.question }}</h3>
+                    <p class="qs-body mt-2 text-[1.0625rem] leading-[1.7]">{{ entry.answer }}</p>
+                  </div>
+                }
+              </div>
+            </section>
+          }
+
+          @for (section of page.sections; track section.heading) {
+            <section class="mt-20 grid gap-x-16 gap-y-6 border-t border-qs-line pt-8 lg:grid-cols-[14rem_minmax(0,1fr)]">
+              <h2 class="text-[1.375rem] font-semibold leading-tight tracking-tight text-qs-ink">{{ section.heading }}</h2>
+              <div class="qs-body max-w-[40rem] space-y-4 text-[1.0625rem] leading-[1.7]">
+                @for (paragraph of section.paragraphs; track paragraph) {
+                  <p [innerHTML]="rich(paragraph)"></p>
+                }
+                @if (section.bullets) {
+                  <ul class="list-disc space-y-2 pl-5">
+                    @for (bullet of section.bullets; track bullet) {
+                      <li [innerHTML]="rich(bullet)"></li>
+                    }
+                  </ul>
+                }
+                @if (section.html) {
+                  <div class="pt-2" [innerHTML]="trustHtml(section.html)"></div>
+                }
+              </div>
+            </section>
+          }
+
+          <section class="mt-20 grid gap-x-16 gap-y-6 border-t border-qs-line pt-8 lg:grid-cols-[14rem_minmax(0,1fr)]" aria-labelledby="related-heading">
+            <h2 id="related-heading" class="text-[1.375rem] font-semibold leading-tight tracking-tight text-qs-ink">Keep going</h2>
+            <ul class="max-w-[40rem] divide-y divide-qs-line">
+              @for (link of page.related; track link.path) {
+                <li>
+                  <a [routerLink]="link.path" [fragment]="link.fragment" class="group block min-h-11 py-4 first:pt-0">
+                    <span class="font-semibold text-qs-ink underline decoration-qs-line-strong underline-offset-4 group-hover:decoration-qs-accent">{{ link.label }}</span>
+                    <span class="mt-1 block text-[0.9375rem] leading-[1.6] text-qs-muted">{{ link.text }}</span>
+                  </a>
+                </li>
+              }
+            </ul>
+          </section>
+
+          <section class="mt-20 grid gap-x-16 gap-y-6 border-t border-qs-line pt-8 lg:grid-cols-[14rem_minmax(0,1fr)]">
+            <div class="max-w-[40rem] lg:col-start-2">
+              <p class="qs-body text-[1.0625rem] leading-[1.7]">{{ page.cta.note }}</p>
+              <a [routerLink]="signedIn() ? '/dashboard' : page.cta.path" class="qs-btn qs-btn-primary mt-6">
+                {{ signedIn() && page.cta.path === '/create' ? 'Dashboard' : page.cta.label }}
+              </a>
             </div>
           </section>
-        }
 
-        @for (section of page.sections; track section.heading) {
-          <section class="mt-12 sm:mt-16">
-            <h2 class="text-2xl font-semibold leading-tight tracking-tight text-qs-ink sm:text-[1.75rem]">{{ section.heading }}</h2>
-            @for (paragraph of section.paragraphs; track paragraph) {
-              <p class="mt-4 text-[1.0625rem] leading-[1.7] text-qs-ink" [innerHTML]="rich(paragraph)"></p>
-            }
-            @if (section.bullets) {
-              <ul class="mt-4 list-disc space-y-2 pl-5 text-[1.0625rem] leading-[1.7] text-qs-ink">
-                @for (bullet of section.bullets; track bullet) {
-                  <li [innerHTML]="rich(bullet)"></li>
-                }
-              </ul>
-            }
-            @if (section.html) {
-              <div class="mt-4" [innerHTML]="trustHtml(section.html)"></div>
-            }
-          </section>
-        }
-
-        <section class="mt-12 sm:mt-16" aria-labelledby="related-heading">
-          <h2 id="related-heading" class="text-2xl font-semibold leading-tight tracking-tight text-qs-ink sm:text-[1.75rem]">Keep going</h2>
-          <ul class="mt-4 grid gap-3 sm:grid-cols-2">
-            @for (link of page.related; track link.path) {
-              <li>
-                <a
-                  [routerLink]="link.path"
-                  [fragment]="link.fragment"
-                  class="block min-h-11 rounded-xl border border-qs-line bg-qs-panel p-4 hover:bg-qs-panel-2"
-                >
-                  <span class="font-semibold text-qs-accent underline decoration-qs-accent/40 underline-offset-2 text-qs-accent dark:decoration-qs-accent/40">
-                    {{ link.label }}
-                  </span>
-                  <span class="mt-1 block text-sm text-qs-muted">{{ link.text }}</span>
-                </a>
-              </li>
-            }
-          </ul>
-        </section>
-
-        <section class="mt-10 rounded-2xl bg-qs-accent px-5 py-6 text-qs-on-accent">
-          <a
-            [routerLink]="signedIn() ? '/dashboard' : page.cta.path"
-            class="qs-btn qs-btn-ink"
-          >
-            {{ signedIn() && page.cta.path === '/create' ? 'Dashboard' : page.cta.label }}
-          </a>
-          <p class="mt-3 text-sm leading-relaxed text-qs-on-accent">{{ page.cta.note }}</p>
-        </section>
-
-        @if (page.disclaimer) {
-          <aside class="mt-8 rounded-xl border border-qs-line bg-qs-panel p-4 text-sm leading-relaxed text-qs-ink" role="note">
-            <p>{{ page.disclaimer }}</p>
-          </aside>
-        }
-      </article>
+          @if (page.notice) {
+            <p class="mt-12 max-w-[40rem] text-sm leading-relaxed text-qs-muted lg:ml-[17rem]" role="note">{{ page.notice }}</p>
+          }
+        </article>
+      </div>
     </app-content-shell>
   `
 })
