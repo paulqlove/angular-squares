@@ -681,9 +681,12 @@ export class DashboardComponent implements OnInit {
       }
       await this.gameService.assertUnderFreeBoardLimit(user.uid);
       if (this.showEndedBoardDialog()) return;
-      const built = isPendingAutoSubmit(draft) ? buildCreateGameValues(draft, this.sanitizationService, this.planService.features().customSplits) : null;
-      if (draft && built?.ok) {
-        await this.createGame({ draft, values: built.values });
+      // The signed-out form cannot see the plan or the profile switch, so it saved Auto-lock and draw as off. Apply the real default here.
+      const wantAuto = isPendingAutoSubmit(draft) && this.planService.features().autoManage && await this.gameService.getAutoManageDefault(user.uid);
+      const readyDraft = draft && wantAuto ? { ...draft, autoManage: true } : draft;
+      const built = readyDraft && isPendingAutoSubmit(draft) ? buildCreateGameValues(readyDraft, this.sanitizationService, this.planService.features().customSplits) : null;
+      if (readyDraft && built?.ok) {
+        await this.createGame({ draft: readyDraft, values: built.values });
         return;
       }
       this.showCreateModal.set(true);
