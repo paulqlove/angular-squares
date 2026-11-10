@@ -33,14 +33,14 @@ export interface ManualScores {
               @else { Final }
             </span>
           } @else if (isOwner && !editing) {
-            <button type="button" (click)="startEditing()" class="px-2 py-1 rounded text-xs font-medium bg-qs-accent text-qs-on-accent hover:bg-qs-accent-hover transition-colors">
+            <button type="button" (click)="startEditing()" class="qs-btn qs-btn-primary">
               Update scores
             </button>
           } @else if (isOwner && editing) {
-            <button type="button" (click)="saveScores()" class="px-2 py-1 rounded text-xs font-medium bg-qs-accent text-qs-on-accent hover:bg-qs-accent-hover transition-colors">
+            <button type="button" (click)="saveScores()" class="qs-btn qs-btn-primary">
               Save
             </button>
-            <button type="button" (click)="cancelEditing()" class="px-2 py-1 rounded text-xs font-medium border border-white/30 hover:bg-white/10 transition-colors">
+            <button type="button" (click)="cancelEditing()" class="qs-btn qs-btn-ghost border-white/30">
               Cancel
             </button>
           }
@@ -58,54 +58,28 @@ export interface ManualScores {
           </tr>
         </thead>
         <tbody>
-          <!-- Away team row -->
-          <tr class="border-b border-white/10">
-            <td class="py-1 font-semibold">
-              <span class="flex items-center gap-1.5">
-                @if (espnSport === 'nfl' && getTeamLogo(displayAwayTeam); as logo) {
-                  <img [src]="logo" [alt]="displayAwayTeam" class="h-4 w-4 object-contain" />
-                }
-                {{ displayAwayTeam }}
-              </span>
-            </td>
-            @if (editing) {
-              <td class="text-center py-1"><input type="number" min="0" [(ngModel)]="editScores.q1.away" class="w-8 bg-white/10 rounded px-1 text-center text-qs-tile-ink" /></td>
-              <td class="text-center py-1"><input type="number" min="0" [(ngModel)]="editScores.q2.away" class="w-8 bg-white/10 rounded px-1 text-center text-qs-tile-ink" /></td>
-              <td class="text-center py-1"><input type="number" min="0" [(ngModel)]="editScores.q3.away" class="w-8 bg-white/10 rounded px-1 text-center text-qs-tile-ink" /></td>
-              <td class="text-center py-1"><input type="number" min="0" [(ngModel)]="editScores.q4.away" class="w-8 bg-white/10 rounded px-1 text-center text-qs-tile-ink" /></td>
-              <td class="text-center py-1 font-bold text-white">{{ editScores.q4.away }}</td>
-            } @else {
-              <td class="text-center py-1 text-qs-tile-ink">{{ getScore(0, 'away') }}</td>
-              <td class="text-center py-1 text-qs-tile-ink">{{ getScore(1, 'away') }}</td>
-              <td class="text-center py-1 text-qs-tile-ink">{{ getScore(2, 'away') }}</td>
-              <td class="text-center py-1 text-qs-tile-ink">{{ getScore(3, 'away') }}</td>
-              <td class="text-center py-1 font-bold text-white">{{ getTotalScore('away') }}</td>
-            }
-          </tr>
-          <!-- Home team row -->
-          <tr>
-            <td class="py-1 font-semibold">
-              <span class="flex items-center gap-1.5">
-                @if (espnSport === 'nfl' && getTeamLogo(displayHomeTeam); as logo) {
-                  <img [src]="logo" [alt]="displayHomeTeam" class="h-4 w-4 object-contain" />
-                }
-                {{ displayHomeTeam }}
-              </span>
-            </td>
-            @if (editing) {
-              <td class="text-center py-1"><input type="number" min="0" [(ngModel)]="editScores.q1.home" class="w-8 bg-white/10 rounded px-1 text-center text-qs-tile-ink" /></td>
-              <td class="text-center py-1"><input type="number" min="0" [(ngModel)]="editScores.q2.home" class="w-8 bg-white/10 rounded px-1 text-center text-qs-tile-ink" /></td>
-              <td class="text-center py-1"><input type="number" min="0" [(ngModel)]="editScores.q3.home" class="w-8 bg-white/10 rounded px-1 text-center text-qs-tile-ink" /></td>
-              <td class="text-center py-1"><input type="number" min="0" [(ngModel)]="editScores.q4.home" class="w-8 bg-white/10 rounded px-1 text-center text-qs-tile-ink" /></td>
-              <td class="text-center py-1 font-bold text-white">{{ editScores.q4.home }}</td>
-            } @else {
-              <td class="text-center py-1 text-qs-tile-ink">{{ getScore(0, 'home') }}</td>
-              <td class="text-center py-1 text-qs-tile-ink">{{ getScore(1, 'home') }}</td>
-              <td class="text-center py-1 text-qs-tile-ink">{{ getScore(2, 'home') }}</td>
-              <td class="text-center py-1 text-qs-tile-ink">{{ getScore(3, 'home') }}</td>
-              <td class="text-center py-1 font-bold text-white">{{ getTotalScore('home') }}</td>
-            }
-          </tr>
+          @for (row of rows; track row.side) {
+            <tr class="border-white/10" [class.border-b]="$first">
+              <td class="py-1 font-semibold">
+                <span class="flex items-center gap-1.5">
+                  @if (espnSport === 'nfl' && getTeamLogo(row.name); as logo) {
+                    <img [src]="logo" [alt]="row.name" class="h-4 w-4 object-contain" />
+                  }
+                  {{ row.name }}
+                </span>
+              </td>
+              @for (q of quarterKeys; track q; let i = $index) {
+                <td class="py-1 text-center text-qs-tile-ink">
+                  @if (editing) {
+                    <input type="number" min="0" inputmode="numeric" [attr.aria-label]="row.name + ' ' + q.toUpperCase()" [(ngModel)]="editScores[q][row.side]" class="qs-input w-11 px-1 text-center" />
+                  } @else {
+                    {{ getScore(i, row.side) }}
+                  }
+                </td>
+              }
+              <td class="py-1 text-center font-bold text-qs-tile-ink">{{ editing ? editScores.q4[row.side] : getTotalScore(row.side) }}</td>
+            </tr>
+          }
         </tbody>
       </table>
     </div>
@@ -127,6 +101,12 @@ export class BoxScoreComponent {
     q3: { home: 0, away: 0 },
     q4: { home: 0, away: 0 }
   };
+
+  readonly quarterKeys = ['q1', 'q2', 'q3', 'q4'] as const;
+
+  get rows(): { side: 'away' | 'home'; name: string }[] {
+    return [{ side: 'away', name: this.displayAwayTeam }, { side: 'home', name: this.displayHomeTeam }];
+  }
 
   get displayHomeTeam(): string {
     return this.game?.homeTeam || this.homeTeam || 'Home';
@@ -174,12 +154,8 @@ export class BoxScoreComponent {
   }
 
   saveScores(): void {
-    this.scoresChange.emit({
-      q1: { home: this.editScores.q1.home || 0, away: this.editScores.q1.away || 0 },
-      q2: { home: this.editScores.q2.home || 0, away: this.editScores.q2.away || 0 },
-      q3: { home: this.editScores.q3.home || 0, away: this.editScores.q3.away || 0 },
-      q4: { home: this.editScores.q4.home || 0, away: this.editScores.q4.away || 0 }
-    });
+    const clean = (q: { home: number; away: number }) => ({ home: q.home || 0, away: q.away || 0 });
+    this.scoresChange.emit({ q1: clean(this.editScores.q1), q2: clean(this.editScores.q2), q3: clean(this.editScores.q3), q4: clean(this.editScores.q4) });
     this.editing = false;
   }
 }
