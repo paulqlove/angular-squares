@@ -7,20 +7,20 @@ import { BreadcrumbItem } from '../core/services/seo.service';
     imports: [RouterLink],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
-    <nav aria-label="Breadcrumb" class="mb-6 text-sm">
+    <nav aria-label="Breadcrumb" class="mb-8 text-sm">
       <ol class="flex flex-wrap items-center gap-x-2 gap-y-1">
         @for (item of items; track item.path; let last = $last) {
           <li class="flex items-center gap-2">
             @if (!last) {
               <a
                 [routerLink]="item.path"
-                class="inline-block py-3 -my-3 text-qs-accent underline decoration-qs-accent/40 underline-offset-2 hover:decoration-qs-accent text-qs-accent dark:decoration-qs-accent/40"
+                class="inline-block py-3 -my-3 text-qs-muted decoration-qs-accent underline-offset-4 hover:text-qs-ink hover:underline"
               >
                 {{ item.name }}
               </a>
               <span aria-hidden="true" class="text-qs-muted">/</span>
             } @else {
-              <span aria-current="page" class="text-qs-ink">{{ item.name }}</span>
+              <span aria-current="page" class="text-qs-muted">{{ item.name }}</span>
             }
           </li>
         }
