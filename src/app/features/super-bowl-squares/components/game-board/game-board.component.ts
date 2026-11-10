@@ -163,7 +163,8 @@ export class GameBoardComponent implements OnChanges, OnDestroy {
     const homeLabel = this.homeTeam || 'Home';
 
     if (player) {
-      return `Square ${awayLabel} ${awayNum ?? '?'}, ${homeLabel} ${homeNum ?? '?'}, taken by ${player}`;
+      const won = this.winnerSquares.includes(`${row}-${col}`) ? ', winning square' : '';
+      return `Square ${awayLabel} ${awayNum ?? '?'}, ${homeLabel} ${homeNum ?? '?'}, taken by ${player}${won}`;
     }
     return `Square ${awayLabel} ${awayNum ?? '?'}, ${homeLabel} ${homeNum ?? '?'}, available`;
   }

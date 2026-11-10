@@ -826,6 +826,19 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     this.gameService.updateGame(this.gameId, { winners: newWinners });
   }
 
+  /** The squares that won a quarter: the square the quarter's score points to, when it belongs to that quarter's winner. */
+  get winnerSquares(): string[] {
+    if (!this.isRandomized) return [];
+    return (['q1', 'q2', 'q3', 'q4'] as const).flatMap(q => {
+      const winner = this.winners[q], score = this.scores[q];
+      if (!winner || !score) return [];
+      const row = this.awayNumbers.findIndex(n => this.digitMatchesNumber(score.away % 10, n, this.awayNumbersPaired));
+      const col = this.homeNumbers.findIndex(n => this.digitMatchesNumber(score.home % 10, n, this.homeNumbersPaired));
+      const key = `${row}-${col}`;
+      return row !== -1 && col !== -1 && this.selectedSquares[key] === winner ? [key] : [];
+    });
+  }
+
   get currentLeaderSquare(): string | null {
     if (!this.isRandomized) return null;
 

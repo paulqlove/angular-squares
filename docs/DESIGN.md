@@ -223,7 +223,7 @@ Pill, mono 10.5px caps, soft fill with matching dark text.
 - Grid: 11 by 11, 1px `--qs-line` gaps, corner cell `--qs-panel-2`, axis cells in the team `strong` color with white mono digits, empty squares `--qs-panel`, claimed squares in the player pastel with navy initials.
 - Hover on an empty square: `--qs-accent-soft`. Selected while claiming: 2px `--qs-accent` inset.
 - Current leader: 3px `--qs-accent` ring (outline, offset -3px), `Q2` mono label top right at 640px and up, legend line under the grid, `aria-live="polite"` announcement.
-- Final quarter winners: ring stays, tile in the score panel turns `--qs-tile-ok`.
+- Quarter winners: the square fills `--qs-win` (#34d399) with navy text in both themes, replacing the player pastel (Paul, Nov 10, 2026). Its label adds "winning square" for screen readers. The tile in the score panel turns `--qs-tile-ok`.
 - Heatmap mode: squares tint on a sequential emerald ramp from `--qs-accent-soft` to `--qs-accent`, never team colors, never amber. Copy says "hit rate", never odds.
 - 375px: board fits 343px with 30px squares, sticky axis labels, initials only, legend below. No pinch zoom needed.
 

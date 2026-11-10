@@ -108,6 +108,12 @@
   50% { filter: brightness(var(--qs-pulse-empty-peak)); }
 }
 
+/* A square that won a quarter: emerald fill with navy text (about 9:1), in both themes, over the player's colour */
+.square-cell.square-winner {
+  background-color: var(--qs-win);
+  color: var(--qs-win-ink) !important;
+}
+
 /* A square that was just picked: a short, lighter flash that settles (brightness only, nothing moves) */
 .square-claimed {
   animation: qs-claim 450ms var(--qs-ease) both;
