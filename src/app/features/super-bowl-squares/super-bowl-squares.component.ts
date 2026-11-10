@@ -42,6 +42,7 @@ import {
   heroUsers
 } from '@ng-icons/heroicons/outline';
 import { GameStatusComponent } from './components/game-status/game-status.component';
+import { ModalComponent } from '../../components/ui/modal/modal.component';
 import { AppHeaderComponent } from '../../components/ui/app-header/app-header.component';
 import { EditGameDialogComponent, EditGameValues } from './components/edit-game-dialog/edit-game-dialog.component';
 import { OpenBoardsListComponent } from './components/open-boards-list/open-boards-list.component';
@@ -67,6 +68,7 @@ import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.co
     WinnersAndPayoutsComponent,
     GameStatusComponent,
     AppHeaderComponent,
+    ModalComponent,
     EditGameDialogComponent,
     ShrinkBoardDialogComponent,
     OpenBoardsListComponent,
@@ -1347,11 +1349,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     if (!dir || ids.length < 2 || index < 0) return;
     this.slideDir.set(dir > 0 ? 'right' : 'left');
     this.router.navigate(['/game', ids[(index + dir + ids.length) % ids.length]]);
-  }
-
-  @HostListener('document:keydown.escape')
-  onEscape(): void {
-    if (this.showNameEditModal()) this.showNameEditModal.set(false);
   }
 
   @HostListener('document:click')

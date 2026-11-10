@@ -333,56 +333,27 @@
   <app-share-dialog [isOpen]="showShareModal()" [gameId]="gameId" (closed)="closeShareModal()"></app-share-dialog>
 
   <!-- Name Edit Modal -->
-  @if (showNameEditModal()) {
-    <div animate.enter="qs-modal-enter" animate.leave="qs-modal-leave" class="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" (click)="showNameEditModal.set(false)">
-      <div role="dialog" aria-modal="true" aria-labelledby="edit-name-title" class="w-full max-w-sm bg-dialog shadow-2xl rounded-2xl" (click)="$event.stopPropagation()">
-        <div class="flex items-center justify-between p-5 border-b border-default">
-          <h3 id="edit-name-title" class="text-lg font-bold text-heading">Edit name</h3>
-          <button
-            type="button"
-            aria-label="Close"
-            (click)="showNameEditModal.set(false)"
-            class="p-2 text-muted transition-colors rounded-lg hover:text-default hover:bg-control"
-            >
-            <ng-icon name="heroXMark" class="text-xl"></ng-icon>
-          </button>
-        </div>
-
-        <div class="p-5">
-          <input
-            type="text"
-            [(ngModel)]="editingName"
-            placeholder="Enter your name"
-            class="w-full min-h-11 px-4 bg-qs-panel-2 border border-qs-line-strong rounded-btn text-base text-qs-ink"
-            (keyup.enter)="saveNameEdit()"
-            />
-          @if (isEditingNameTaken()) {
-            <p class="mt-2 text-sm text-qs-bad">This name is already in use. Please choose a different name.</p>
-          }
-        </div>
-
-        <div class="flex items-center justify-end gap-3 p-5 border-t border-default bg-input rounded-b-2xl">
-          <button
-            (click)="showNameEditModal.set(false)"
-            class="px-5 py-2 font-medium text-muted transition-colors rounded-lg hover:bg-control"
-            >
-            Cancel
-          </button>
-          <button
-            (click)="saveNameEdit()"
-            [disabled]="isSavingName() || !editingName.trim()"
-            class="qs-btn qs-btn-primary"
-            >
-            @if (isSavingName()) {
-              Saving...
-            } @else {
-              Save
-            }
-          </button>
-        </div>
+  <app-modal [open]="showNameEditModal()" labelledBy="edit-name-title" size="sm" (dismissed)="showNameEditModal.set(false)">
+    <div class="p-6">
+      <div class="flex items-start justify-between gap-4">
+        <h3 id="edit-name-title" class="qs-title text-2xl">Edit name</h3>
+        <button type="button" (click)="showNameEditModal.set(false)" class="qs-btn qs-btn-ghost -mr-2 -mt-1 w-11 px-0 text-qs-muted hover:text-qs-ink" aria-label="Close">
+          <ng-icon name="heroXMark" class="text-xl"></ng-icon>
+        </button>
+      </div>
+      <label for="edit-name-input" class="qs-label mt-4 block text-qs-muted">Your name</label>
+      <input id="edit-name-input" type="text" data-autofocus autocomplete="name" [(ngModel)]="editingName" class="qs-input mt-1.5 w-full" placeholder="Shown on your squares" (keyup.enter)="saveNameEdit()" />
+      @if (isEditingNameTaken()) {
+        <p class="mt-2 text-sm text-qs-bad">This name is already in use. Please choose a different name.</p>
+      }
+      <div class="mt-6 flex justify-end gap-3">
+        <button type="button" (click)="showNameEditModal.set(false)" class="qs-btn qs-btn-ghost text-qs-muted">Cancel</button>
+        <button type="button" (click)="saveNameEdit()" [disabled]="isSavingName() || !editingName.trim()" class="qs-btn qs-btn-primary">
+          {{ isSavingName() ? 'Saving…' : 'Save' }}
+        </button>
       </div>
     </div>
-  }
+  </app-modal>
 
   <!-- Auth Modal (for unauthenticated square clicks) -->
   <app-auth-modal
@@ -392,43 +363,20 @@
   </app-auth-modal>
 
   <!-- Forced Name Change Modal (non-dismissable) -->
-  @if (showForceNameChangeModal()) {
-    <div animate.enter="qs-modal-enter" animate.leave="qs-modal-leave" class="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div role="dialog" aria-modal="true" aria-labelledby="force-name-title" class="w-full max-w-sm bg-dialog shadow-2xl rounded-2xl">
-        <div class="p-5 border-b border-default">
-          <h3 id="force-name-title" class="text-lg font-bold text-heading">Name already taken</h3>
-        </div>
-
-        <div class="p-5">
-          <p class="mb-4 text-sm text-muted">
-            Another player named "{{ currentUser()?.displayName }}" is already in this game. Please choose a different name.
-          </p>
-          <input
-            type="text"
-            [(ngModel)]="forceNameValue"
-            placeholder="Enter a new name"
-            class="w-full min-h-11 px-4 bg-qs-panel-2 border border-qs-line-strong rounded-btn text-base text-qs-ink"
-            (keyup.enter)="saveForceNameChange()"
-            />
-          @if (isForceNameTaken()) {
-            <p class="mt-2 text-sm text-qs-bad">This name is already in use. Please choose a different name.</p>
-          }
-        </div>
-
-        <div class="flex items-center justify-end p-5 border-t border-default bg-input rounded-b-2xl">
-          <button
-            (click)="saveForceNameChange()"
-            [disabled]="isSavingForceName() || !forceNameValue.trim() || isForceNameTaken()"
-            class="qs-btn qs-btn-primary"
-            >
-            @if (isSavingForceName()) {
-              Saving...
-            } @else {
-              Save
-            }
-          </button>
-        </div>
+  <app-modal [open]="showForceNameChangeModal()" labelledBy="force-name-title" size="sm" [escapeCloses]="false" [backdropCloses]="false">
+    <div class="p-6">
+      <h3 id="force-name-title" class="qs-title text-2xl">Name already taken</h3>
+      <p class="mt-3 text-qs-muted">Another player named "{{ currentUser()?.displayName }}" is already in this game. Please choose a different name.</p>
+      <label for="force-name-input" class="qs-label mt-4 block text-qs-muted">New name</label>
+      <input id="force-name-input" type="text" data-autofocus autocomplete="name" [(ngModel)]="forceNameValue" class="qs-input mt-1.5 w-full" placeholder="Shown on your squares" (keyup.enter)="saveForceNameChange()" />
+      @if (isForceNameTaken()) {
+        <p class="mt-2 text-sm text-qs-bad">This name is already in use. Please choose a different name.</p>
+      }
+      <div class="mt-6 flex justify-end">
+        <button type="button" (click)="saveForceNameChange()" [disabled]="isSavingForceName() || !forceNameValue.trim() || isForceNameTaken()" class="qs-btn qs-btn-primary">
+          {{ isSavingForceName() ? 'Saving…' : 'Save' }}
+        </button>
       </div>
     </div>
-  }
+  </app-modal>
 }
