@@ -224,7 +224,7 @@ Pill, mono 10.5px caps, soft fill with matching dark text.
 - Hover on an empty square: `--qs-accent-soft`. Selected while claiming: 2px `--qs-accent` inset.
 - Current leader: 3px `--qs-accent` ring (outline, offset -3px), `Q2` mono label top right at 640px and up, legend line under the grid, `aria-live="polite"` announcement.
 - Final quarter winners: ring stays, tile in the score panel turns `--qs-tile-ok`.
-- Heatmap mode: squares tint on a sequential emerald ramp from `--qs-accent-soft` to `--qs-accent`, never team colors, never amber. Copy says "hot squares", never odds.
+- Heatmap mode: squares tint on a sequential emerald ramp from `--qs-accent-soft` to `--qs-accent`, never team colors, never amber. Copy says "hit rate", never odds.
 - 375px: board fits 343px with 30px squares, sticky axis labels, initials only, legend below. No pinch zoom needed.
 
 ### Score tiles
@@ -346,7 +346,7 @@ Wordmark in text: one word, camel case, QuarterScore.
 
 ## 9. Voice and microcopy
 
-The Brand Brief owns this. In short: the friend who's great at hosting; announcer energy only for score updates and quarter winners; "game day" as two words; "lucky" for celebration, never chance; "hot squares" for the heatmap. Never: pool, prize, payout, bet, odds, cash, wager, gamble, stake, pot, winnings, jackpot, entry fee, buy in, sportsbook, betting lines. No "Super Bowl" in product names or marks. Sample board teams in marketing are invented (Harbor, Riverside), never real teams.
+The Brand Brief owns this. In short: the friend who's great at hosting; announcer energy only for score updates and quarter winners; "game day" as two words; "lucky" for celebration, never chance; "Hit rate" for the heatmap tab. Never: pool, prize, payout, bet, odds, cash, wager, gamble, stake, pot, winnings, jackpot, entry fee, buy in, sportsbook, betting lines. No "Super Bowl" in product names or marks. Sample board teams in marketing are invented (Harbor, Riverside), never real teams.
 
 Mono labels are lowercase fragments in data (`64 / 100 claimed`) and caps in UI (`GAME CODE`).
 

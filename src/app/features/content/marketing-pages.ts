@@ -203,7 +203,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       },
       {
         question: 'Can I see which squares show up most often?',
-        answer: 'Yes. Open Best numbers for the historical table, or use the heatmap on a live board after the digits are drawn. The table is about how often digit pairs have appeared. It is not a promise about your game.'
+        answer: 'Yes. Open Best numbers for the historical table, or use the Hit rate tab on a live board after the digits are drawn. The table is about how often digit pairs have appeared. It is not a promise about your game.'
       },
       {
         question: 'Does QuarterScore handle money?',
@@ -356,7 +356,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
         bullets: [
           'No account for the people claiming squares.',
           'A code for anyone standing in the room.',
-          'A heatmap after the draw, from the same table as the best-numbers page.'
+          'A Hit rate tab after the draw, from the same table as the best-numbers page.'
         ]
       }
     ],
@@ -428,7 +428,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       {
         heading: 'The number table is from NFL history',
         paragraphs: [
-          'The heatmap is built from professional football scores. College totals run higher, so treat it as a curiosity. The board itself does not care: last digit of each score, one square, one name.'
+          'The Hit rate tab is built from professional football scores. College totals run higher, so treat it as a curiosity. The board itself does not care: last digit of each score, one square, one name.'
         ]
       }
     ],
@@ -505,7 +505,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
         heading: 'What changes and what does not',
         paragraphs: [
           'You still have 100 squares and digits 0 through 9 on the rows and columns. A score of 28 counts as 8, the same way a football score of 17 counts as 7.',
-          'Choose NBA when you create the board so it is labeled for basketball. The football heatmap does not describe basketball scoring.'
+          'Choose NBA when you create the board so it is labeled for basketball. The football hit rates do not describe basketball scoring.'
         ]
       },
       {

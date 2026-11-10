@@ -173,7 +173,7 @@
             <!-- Tabs -->
             <div class="mb-4 flex flex-wrap gap-2" role="tablist">
               <button id="tab-board" (click)="selectTab('board')" role="tab" aria-controls="board-tabpanel" [attr.aria-selected]="activeTab === 'board'" class="qs-tab px-3 sm:px-4">Board</button>
-              <button id="tab-probabilities" (click)="selectTab('probabilities')" role="tab" aria-controls="board-tabpanel" [attr.aria-selected]="activeTab === 'probabilities'" class="qs-tab px-3 sm:px-4">Heatmap</button>
+              <button id="tab-probabilities" (click)="selectTab('probabilities')" role="tab" aria-controls="board-tabpanel" [attr.aria-selected]="activeTab === 'probabilities'" class="qs-tab px-3 sm:px-4">Hit rate</button>
               <button id="tab-boxscore" (click)="selectTab('boxscore')" role="tab" aria-controls="board-tabpanel" [attr.aria-selected]="activeTab === 'boxscore'" class="qs-tab px-3 sm:px-4">Box score</button>
               @if (openBoards().length) {
                 <button id="tab-more" (click)="selectTab('more')" role="tab" aria-controls="board-tabpanel" [attr.aria-selected]="activeTab === 'more'" class="qs-tab px-3 sm:px-4">More</button>
@@ -218,7 +218,7 @@
                     </app-probability-heatmap>
                   } @else {
                     <div class="flex h-64 items-center justify-center px-4 text-center text-qs-muted">
-                      <p>The heatmap appears once the numbers are drawn.</p>
+                      <p>Hit rates appear once the numbers are drawn.</p>
                     </div>
                   }
 

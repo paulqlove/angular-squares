@@ -13,7 +13,7 @@ import { ReadingEndComponent, ReadingHeaderComponent, ReadingPageComponent, Read
       <app-reading-header
         eyebrow="Historical frequencies"
         title="Best squares numbers"
-        lede="Some last digits show up more often than others in professional football scores. This is the table QuarterScore uses for its heatmap. It describes the past and does not predict your game."
+        lede="Some last digits show up more often than others in professional football scores. This is the table behind the Hit rate tab on every board. It describes the past and does not predict your game."
       ></app-reading-header>
 
       <app-reading-section heading="Why 0, 7, 3, and 4 lead" headingId="why-heading">
@@ -103,7 +103,7 @@ export class BestNumbersComponent {
   public readonly related: RelatedLink[] = [
     { path: '/how-to-play', label: 'How to play', text: 'How the draw and the quarter winner work.' },
     { path: '/super-bowl-squares', label: 'Super Bowl squares', text: 'The February 14, 2027 board.' },
-    { path: '/', fragment: 'probability-heatmap', label: 'Homepage heatmap', text: 'Where the in-game chart is introduced.' }
+    { path: '/', fragment: 'probability-heatmap', label: 'Hit rates on the homepage', text: 'Where the in-game tab is introduced.' }
   ];
   public readonly cta: PageCta = {
     path: '/create',
@@ -124,7 +124,7 @@ export class BestNumbersComponent {
 
     this.seo.apply({
       title: 'Best Squares Numbers from Scoring History — QuarterScore',
-      description: 'Best Super Bowl squares numbers, from the same historical digit table as the QuarterScore heatmap. See how often each last-digit pair has shown up.',
+      description: 'Best Super Bowl squares numbers, from the same historical digit table as the QuarterScore Hit rate tab. See how often each last-digit pair has shown up.',
       path: '/best-squares-numbers',
       headline: 'Best squares numbers',
       published: '2026-11-01',

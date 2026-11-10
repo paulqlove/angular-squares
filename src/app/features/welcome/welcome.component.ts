@@ -368,7 +368,7 @@ export class WelcomeComponent implements OnInit {
     },
     {
       icon: 'heroChartBar',
-      title: 'Probability Heatmap',
+      title: 'Square hit rates',
       description: 'See which squares win most often based on NFL history',
       id: 'probability-heatmap',
       link: { path: '/best-squares-numbers', label: 'See the full number table' }

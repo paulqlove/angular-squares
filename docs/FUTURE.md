@@ -189,7 +189,7 @@ Oct 31, 2026 lab pass on quarterscore.com. Mobile Lighthouse 69 / 80 / 100 / 91 
 **Decision trail:** the board voted 7-0 on Nov 7 to ship a simple full-board answer first and gate the rest on data. Paul then chose the More tab instead of a banner, shown on any of the host's boards, and had the full-board banner removed. Waitlist, "host grows a full board" and auto-created boards stay parked.
 
 **What shipped:**
-- A fourth tab, **More**, beside Board, Heatmap and Box score. It shows only when the same host has at least one other board switched on with open squares. Opening a board from it lands on that board's squares.
+- A fourth tab, **More**, beside Board, Hit rate and Box score. It shows only when the same host has at least one other board switched on with open squares. Opening a board from it lands on that board's squares.
 - Each card is compact: a squares thumbnail, the board name (two lines), teams, "N open", "taken/size taken · N pts per square". Two across on desktop, one on a phone. Most open squares first, six shown then See all. Points only, never dollars, no total line.
 - The host switch **Show in my open boards** (create form, dashboard Edit Game, game page Edit) is off by default, previews exactly what players see, and shows only for hosts whose plan allows more than one board while the board is open and unlocked.
 - Data: `openBoards/{ownerId}/{boardId}: true` (readable per owner only, never listable; written only by that owner), `games/{id}/showInOpenBoards`, counters at `boardStats/{boardId}` (fullBoardViews, fullBoardViewsWithOpenBoards, otherBoardJoins; increment-only, owner or admin can read). Rules deployed Nov 7.
