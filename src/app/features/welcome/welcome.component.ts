@@ -76,7 +76,7 @@ interface Feature {
 
             <div class="mt-8 flex flex-wrap gap-3">
               <a routerLink="/create" class="qs-btn qs-btn-primary w-full sm:w-auto px-6">
-                Create game
+                Create a board
               </a>
               <button
                 type="button"
@@ -264,7 +264,7 @@ export class WelcomeComponent implements OnInit {
   isAuthenticated = this.authService.isAuthenticated;
 
   readonly steps = [
-    { title: 'Create a game', description: 'Pick your teams and create a board in seconds. No sign-in to start' },
+    { title: 'Create a board', description: 'Pick your teams and create a board in seconds. No sign-in to start' },
     { title: 'Share the link', description: 'Send the unique game code or link to your friends and family' },
     { title: 'Play and win', description: 'Claim your squares, watch the game, and see who wins each quarter' }
   ];

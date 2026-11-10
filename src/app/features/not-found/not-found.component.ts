@@ -24,7 +24,7 @@ import { RouterLink } from '@angular/router';
         >
           Back to home
         </a>
-        <p class="mt-4"><a routerLink="/create" class="text-qs-accent underline underline-offset-4">Start a free game</a></p>
+        <p class="mt-4"><a routerLink="/create" class="text-qs-accent underline underline-offset-4">Create a board</a></p>
       </div>
     </div>
   `

@@ -68,7 +68,7 @@ interface Conference {
         <!-- CTA -->
         <section class="mt-10 rounded-2xl bg-qs-accent px-5 py-6 text-qs-on-accent">
           <a routerLink="/create" class="qs-btn qs-btn-ink">
-            Create your board now
+            Create a board
           </a>
           <p class="mt-3 text-sm leading-relaxed text-qs-on-accent">
             Pick any team when you set up the game. Free for everyone.

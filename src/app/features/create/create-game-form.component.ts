@@ -36,7 +36,7 @@ export interface CreateGameSubmit {
     <div class="flex items-center justify-between gap-3">
       <p class="qs-eyebrow qs-eyebrow-bar">Step {{ step() }} of {{ stepTitles.length }} · <span class="text-qs-ink">{{ stepTitles[step() - 1] }}</span>@if (step() === 3) { · Optional }</p>
     </div>
-    <div class="mt-2 flex gap-1.5" role="progressbar" aria-label="Create game progress" aria-valuemin="1" [attr.aria-valuemax]="stepTitles.length" [attr.aria-valuenow]="step()" [attr.aria-valuetext]="'Step ' + step() + ' of ' + stepTitles.length + ': ' + stepTitles[step() - 1]">
+    <div class="mt-2 flex gap-1.5" role="progressbar" aria-label="Create board progress" aria-valuemin="1" [attr.aria-valuemax]="stepTitles.length" [attr.aria-valuenow]="step()" [attr.aria-valuetext]="'Step ' + step() + ' of ' + stepTitles.length + ': ' + stepTitles[step() - 1]">
       @for (title of stepTitles; track title; let i = $index) {
         <span class="h-1 flex-1 rounded-full transition-colors duration-200" [class]="i < step() ? 'bg-qs-accent' : 'bg-qs-line'"></span>
       }

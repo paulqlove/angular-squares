@@ -146,7 +146,7 @@ import { ContentShellComponent } from './content-shell.component';
 
         <section class="mt-10 rounded-2xl bg-qs-accent px-5 py-6 text-qs-on-accent">
           <a routerLink="/create" class="qs-btn qs-btn-ink">
-            Start a free game
+            Create a board
           </a>
           <p class="mt-3 text-sm leading-relaxed text-qs-on-accent">
             See the same colors on your own board after the numbers are drawn.

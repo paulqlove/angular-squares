@@ -44,7 +44,7 @@ import { ScheduledGame, formatKickoff } from './schedule.model';
 
           <!-- CTA -->
           <section class="rounded-2xl border border-qs-line bg-qs-panel p-6 sm:p-8">
-            <h2 class="text-2xl font-bold text-qs-ink">Create a squares contest for any {{ team.name }} game</h2>
+            <h2 class="text-2xl font-bold text-qs-ink">Create a squares board for any {{ team.name }} game</h2>
             <p class="mt-2 text-qs-ink">
               Set up a football squares game for the next {{ team.city }} {{ team.name }} game.
               Share the link with friends and watch the board fill up.
@@ -57,7 +57,7 @@ import { ScheduledGame, formatKickoff } from './schedule.model';
                 [style.background]="team.primaryColor"
                 [style.color]="getContrastColor(team.primaryColor)"
               >
-                Create a free board
+                Create a board
               </button>
               <a routerLink="/how-to-play" class="qs-btn qs-btn-secondary">
                 How to play
@@ -94,7 +94,7 @@ import { ScheduledGame, formatKickoff } from './schedule.model';
                         Print board
                       </button>
                       <button type="button" (click)="createForGame(game)" class="qs-btn qs-btn-primary">
-                        Create board
+                        Create a board
                       </button>
                     </div>
                   </div>
