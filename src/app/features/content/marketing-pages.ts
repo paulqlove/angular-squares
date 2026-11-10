@@ -66,8 +66,8 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     eyebrow: 'Rules',
     lede: 'Football squares is a free board for friends and fans. Choose 100, 50, or 25 squares, add two teams, and pick a winner at the end of each quarter. You do not need to know the sport.',
     heroHtml: boardDiagram({
-      rows: DIGITS, cols: DIGITS, win: [4, 7], large: true,
-      caption: 'Score 24 to 17: row 4 meets column 7, and Jo wins the quarter.',
+      rows: DIGITS, cols: DIGITS, win: [4, 7], showCaption: false,
+      caption: 'A 10 by 10 board. Score 24 to 17: row 4 meets column 7, and Jo wins the quarter.',
       names: {
         '0-2': ['Sam', 'qs-p-sky'], '0-6': ['Lee', 'qs-p-orchid'], '1-4': ['Max', 'qs-p-rose'], '1-9': ['Sam', 'qs-p-sky'],
         '2-1': ['Tom', 'qs-p-apricot'], '2-7': ['Lee', 'qs-p-orchid'], '3-3': ['Kim', 'qs-p-lilac'], '3-5': ['Max', 'qs-p-rose'],
