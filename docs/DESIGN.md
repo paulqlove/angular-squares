@@ -274,7 +274,7 @@ Navy frame (`--qs-tile`), scores in 96 to 160px tabular sans, the board filling 
 
 ### Reading pages (guides, FAQ, rules, legal, board landing pages)
 
-These are pages people read, not tools they operate. They need their own rules. Added Nov 9, 2026 after the footer pages kept coming out "technically tidy but flat". Components: `app-marketing-page` (the shared template), `boardDiagram()` in `features/content/board-diagram.ts`, `.qs-canvas`, `.qs-body`.
+These are pages people read, not tools they operate. They need their own rules. Added Nov 9, 2026 after the footer pages kept coming out "technically tidy but flat". Components (all in `features/content/`): `reading-layout.components.ts` (`app-reading-page`, `app-reading-header`, `app-reading-section` with a `wide` slot, `app-reading-end`), `app-marketing-page` (data-driven pages built from those), `boardDiagram()` in `board-diagram.ts`, `pageFacts()` in `page-facts.ts`; styles `.qs-canvas`, `.qs-body`. New reading pages use these building blocks, never their own copies of the layout.
 
 **Process rule: study first, then build, then compare.** Before redesigning any page, capture 4 to 6 pages that look good, measure what they do (font sizes, widths, spacing, colors) and look at them next to your result. Matching a spec of numbers (line length, sizes) is not enough. The pages we studied were Tailwind's blog posts, Anthropic's news pages, Linear Method, Basecamp's Getting Real, Salesforce's what-is-CRM explainer, Josh Comeau's guides and chess.com's how-to-play.
 
@@ -289,11 +289,12 @@ These are pages people read, not tools they operate. They need their own rules. 
 **The layout we use (desktop)**
 
 - Page width 64rem, left-aligned inside a centered page. Breadcrumb, headline and footer all share the same left edge. The footer container is `max-w-[68rem]` with `px-8` so its columns line up with the article.
-- Hero: headline, one line of intro (20px, muted, max 34rem) on the left; on the right a 25rem visual that shows the thing being explained. For How to play it is the real board with made-up players and the winning square lit. No caption under it; the page says it.
+- Hero: headline, one line of intro (20px, muted, max 34rem) on the left; on the right a 25rem visual that shows the thing being explained, or a facts panel (`pageFacts`: date, kickoff, venue) where there is nothing to picture. Do not repeat a fact in both the eyebrow and the panel. For How to play it is the real board with made-up players and the winning square lit. No caption under it; the page says it.
 - Steps: a 4-column row under the hero, mono counters `01` to `04` in accent, 18px titles, 15px text, 1px vertical hairlines between columns. Number only true sequences.
 - Sections: a two-column grid, `14rem` margin column for the heading (22px, weight 600), `40rem` max for text (17px, line-height 1.7). Headings are not sticky (the shell clips overflow, so sticky never works).
 - Phones: everything stacks, 16px gutters, no horizontal scroll.
 - End of page: "Keep going" as a plain divided list (no cards, no orphan cells), then one sentence and the primary button. No full-width colored slab.
+- Cut copy before adding structure. One sentence per idea; a diagram or a facts panel replaces a worked example. People do not read long explanations (Paul, Nov 9).
 - Legal and affiliation notices go below the content, small and muted. Substantive legal cautions (for example the fundraiser page) stay near the top as a quiet note with an accent bar.
 
 **Board diagrams**

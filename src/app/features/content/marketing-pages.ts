@@ -1,5 +1,6 @@
 import { BreadcrumbItem } from '../../core/services/seo.service';
 import { boardDiagram, DIGITS, PAIRS } from './board-diagram';
+import { pageFacts } from './page-facts';
 import { SCHEDULE } from './schedule.generated';
 import { formatKickoff } from './schedule.model';
 
@@ -236,8 +237,9 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     description: 'Super Bowl squares for Super Bowl LXI on February 14, 2027. Make a free board before the teams are set and share one link with friends.',
     h1: 'Super Bowl squares',
     notice: 'QuarterScore is not affiliated with, endorsed by, or sponsored by the NFL, NBA, or NCAA. Team and event names are used only to describe the games.',
-    eyebrow: 'February 14, 2027',
-    lede: 'Super Bowl LXI is Sunday, February 14, 2027, at SoFi Stadium in Inglewood, with a 6:30 p.m. ET kickoff. You can make the board before either team is known.',
+    eyebrow: 'Super Bowl LXI',
+    lede: 'Make the board before either team is known. Add the team names when the matchup is announced and keep the same link.',
+    heroHtml: pageFacts([['Date', 'Sunday, February 14, 2027'], ['Kickoff', '6:30 p.m. ET'], ['Venue', 'SoFi Stadium, Inglewood']]),
     published: '2026-11-01',
     sections: [
       {
@@ -285,21 +287,21 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     title: 'Thanksgiving Football Squares — QuarterScore',
     description: 'Football squares for Thanksgiving: a free board for the table, one game or three, with a link guests can open between dinner and dessert.',
     h1: 'Thanksgiving football squares',
-    eyebrow: 'November 26, 2026',
-    lede: 'Thanksgiving Thursday, November 26, 2026, has a full slate of games and a house full of people. Football squares gives everyone a square to watch, including guests who do not follow the sport.',
+    eyebrow: 'Game day',
+    lede: 'A full slate of games and a house full of people. Squares gives everyone a reason to watch, including guests who do not follow the sport.',
+    heroHtml: pageFacts([['Date', 'Thursday, November 26, 2026'], ['Games', `${SCHEDULE.thanksgiving.length} this week`]]),
     published: '2026-11-01',
     sections: [
       ...(SCHEDULE.thanksgiving.length > 0 ? [{
         heading: 'Thanksgiving week games',
-        paragraphs: ['Kickoff times are Eastern. Pick one game or run a board for each.'],
+        paragraphs: ['Pick one game or run a board for each.'],
         bullets: SCHEDULE.thanksgiving.map(game =>
           `${game.awayTeamFull} at ${game.homeTeamFull}: ${formatKickoff(game.date)}${game.network ? ` on ${game.network}` : ''}`)
       }] : []),
       {
         heading: 'One board or one per game',
         paragraphs: [
-          'More than one game means you can run several boards or pick the one the table cares about. A single board is easier to explain while the turkey is being carved. Separate boards help if different relatives want different games.',
-          'Share one link in the family thread. People who are in another city claim a square on their phone. Names show up for everyone at the table.'
+          'A single board is easier to explain while the turkey is being carved. Separate boards help if different relatives want different games. Share one link in the family thread, and people in another city can claim a square on their phone.'
         ]
       },
       {
@@ -309,14 +311,13 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
         ],
         bullets: [
           'Create the board the weekend before, not during dinner.',
-          'Draw numbers after the last guest has claimed a square.',
-          'Leave the board open on a laptop where people can check the quarter.'
+          'Draw numbers after the last guest has claimed a square.'
         ]
       },
       {
         heading: 'Kids and non-fans',
         paragraphs: [
-          'The rule is only “your digits match the end of the score.” A child can claim a square under their own name and check the board at the end of the quarter. No playbook required.'
+          'The rule is only \u201cyour digits match the end of the score.\u201d A child can claim a square under their own name and check the board at the end of the quarter.'
         ]
       }
     ],
@@ -324,7 +325,6 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       { path: '/how-to-play', label: 'How to play', text: 'Explain the grid in two minutes.' },
       { path: '/printable-football-squares', label: 'Printable board', text: 'Tape a paper grid to the fridge.' },
       { path: '/nfl-squares', label: 'NFL squares', text: 'The same board for any Sunday game.' },
-      { path: '/create', label: 'Create a board', text: 'Create the Thanksgiving board and share the link.' }
     ],
     cta: {
       path: '/create',
@@ -345,19 +345,18 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       {
         heading: 'What you set up',
         paragraphs: [
-          'Create a board and choose NFL as the sport. Add the two team names in plain text. Send the link. Friends type their names on open squares. When you are ready, lock the board and draw the numbers.',
-          'Each quarter, the last digit of each score points at one square. The person who claimed it wins that quarter’s bragging rights.'
+          'Create a board and choose NFL. Add the two teams and send the link. Friends type their names on open squares. When you are ready, lock the board and draw the numbers. Each quarter, the last digit of each score points at one square.'
         ]
       },
       {
         heading: 'A board you can run every week',
         paragraphs: [
-          'Some groups play one game a week all season. Each game gets its own board and its own link, so old scores stay put. The rules do not change from week to week, which is the point: people already know how to play.'
+          'Some groups play one game a week all season. Each game gets its own board and link, so old scores stay put.'
         ],
         bullets: [
           'No account for the people claiming squares.',
           'A code for anyone standing in the room.',
-          'A heatmap after the draw, using the same historical table as the best-numbers page.'
+          'A heatmap after the draw, from the same table as the best-numbers page.'
         ]
       }
     ],
@@ -379,22 +378,21 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     title: 'NFL Playoff Squares — QuarterScore',
     description: 'NFL playoff squares for wild card weekend, the divisional round, and the conference championships. One free board per game, same link style all January.',
     h1: 'NFL playoff squares',
-    eyebrow: 'January 2027',
-    lede: 'Playoff games are an easy reason to run another board. Wild card weekend is January 16–18, 2027, the divisional round is January 23–24, and the conference championships are January 31.',
+    eyebrow: 'Postseason',
+    lede: 'Playoff games are an easy reason to run another board. Give each game its own.',
+    heroHtml: pageFacts([['Wild card', 'January 16–18, 2027'], ['Divisional', 'January 23–24, 2027'], ['Conference', 'January 31, 2027']]),
     published: '2026-11-01',
     sections: [
       {
         heading: 'One board per game',
         paragraphs: [
-          'A single weekend can have several games. Give each game its own board so the quarter winners stay attached to the right score. Share the links in one message, labeled by the kickoff.',
-          'The rules match any other football board: 100 squares, digits drawn after names are in, and the last digit of each score at the end of the quarter.'
+          'A weekend can have several games. Give each its own board so the quarter winners stay attached to the right score, and share the links in one message labeled by kickoff.'
         ]
       },
       {
         heading: 'Use January as a practice run',
         paragraphs: [
-          'Groups who will also play the February 14 game can use a playoff board to settle the house rules. Decide overtime and empty squares once, then copy that note onto the big-game board.',
-          'Live score entry is still the host’s job if you type the score yourself. The fun part for everyone else is watching their square.'
+          'If you will also play on February 14, use a playoff board to settle the house rules. Decide overtime and empty squares once, then copy that note onto the big-game board.'
         ]
       }
     ],
@@ -417,21 +415,20 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     description: 'College football squares for bowl games and the playoff. Create a free NCAA board, share one link, and score each quarter from the last digits.',
     h1: 'College football squares',
     eyebrow: 'Bowls and the playoff',
-    lede: 'College games use the same squares rules as every other football board. When you create the game, choose NCAA Football, name the two teams, and send the link.',
+    lede: 'The same squares rules as every other football board. Choose NCAA Football, name the two teams, and send the link.',
+    heroHtml: pageFacts([['Playoff, first round', 'December 18–19, 2026'], ['Quarterfinals', 'December 30 and January 1'], ['Title game', 'Monday, January 25, 2027']]),
     published: '2026-11-01',
     sections: [
       {
-        heading: 'Which games people actually host',
+        heading: 'Which games people host',
         paragraphs: [
-          'Bowl season stacks games close together. The first round of the College Football Playoff is December 18–19, 2026. Quarterfinals are December 30 and January 1. The title game is Monday, January 25, 2027.',
-          'One board per game keeps the winners clear. A New Year’s party can have two or three boards on the same TV if you label the links with the kickoff time.'
+          'Bowl season stacks games close together. One board per game keeps the winners clear, and a New Year\u2019s party can have two or three boards on the same TV if you label the links with the kickoff time.'
         ]
       },
       {
         heading: 'The number table is from NFL history',
         paragraphs: [
-          'The public heatmap is built from professional football scoring history. College scores are not the same sport in miniature: totals run higher, and a digit pair can show up on a different schedule. Use the table as a curiosity, not as a description of a college game.',
-          'The board itself does not care. Last digit of each score, one square, one name. That part is identical.'
+          'The heatmap is built from professional football scores. College totals run higher, so treat it as a curiosity. The board itself does not care: last digit of each score, one square, one name.'
         ]
       }
     ],
@@ -479,7 +476,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       {
         heading: 'How the board helps',
         paragraphs: [
-          'Use QuarterScore for names, the number draw, and the quarter-by-quarter result. Put the thank-you and the rule in the game name or in the message where you share the link. Collect any donation through the tool your organization already uses.'
+          'Use QuarterScore for names, the draw and the results. Put the thank-you and the rule in the game name or the message where you share the link, and collect any donation through the tool your organization already uses.'
         ]
       }
     ],
@@ -501,20 +498,20 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     description: 'NBA squares uses the same last-digit board as football. Create a free basketball game, share the link, and follow each quarter.',
     h1: 'NBA squares',
     eyebrow: 'After the football season',
-    lede: 'Basketball squares use the same grid and the same last-digit rule. Scores are higher, quarters are shorter, and the group you already have can keep playing without learning a new game.',
+    lede: 'The same grid and the same last-digit rule. Scores are higher and quarters are shorter, but your group does not need to learn a new game.',
     published: '2026-11-01',
     sections: [
       {
         heading: 'What changes and what does not',
         paragraphs: [
-          'You still have 100 squares, a name on each one, and digits 0 through 9 on the rows and columns. At the end of a quarter, the last digit of each score marks the square. A score of 28 counts as 8, the same way a football score of 17 counts as 7.',
-          'Choose NBA when you create the board so it is labeled for basketball. The historical football heatmap does not describe basketball scoring. Treat it as a football chart if you open it.'
+          'You still have 100 squares and digits 0 through 9 on the rows and columns. A score of 28 counts as 8, the same way a football score of 17 counts as 7.',
+          'Choose NBA when you create the board so it is labeled for basketball. The football heatmap does not describe basketball scoring.'
         ]
       },
       {
         heading: 'Which games to pick',
         paragraphs: [
-          'One marquee game is enough for a group text. A playoff series can be a board per game, not one board for the whole series, so each final score has a clear winner. Share the new link the morning of the game.'
+          'One marquee game is enough for a group text. For a playoff series, make a board per game so each final score has a clear winner.'
         ]
       }
     ],
