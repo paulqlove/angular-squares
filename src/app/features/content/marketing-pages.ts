@@ -65,16 +65,16 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     published: '2026-11-01',
     steps: [
       {
-        name: 'Open a board',
-        text: 'The host signs in and creates a game. Name the two teams, pick the sport, and share the link or the six-character code.'
+        name: 'Create a board',
+        text: 'The host names the two teams, picks the sport and signs in to save the board. Then share the link or the six-character code.'
       },
       {
         name: 'Claim squares by name',
         text: 'Friends open the link and type a name on empty squares. Players do not need an account.'
       },
       {
-        name: 'Draw the numbers',
-        text: 'After the squares are claimed, the host randomizes the digits 0 through 9 down the side and across the top, then locks the board.'
+        name: 'Lock and draw the numbers',
+        text: 'After the squares are claimed, the host locks the board, then draws the digits 0 through 9 down the side and across the top.'
       },
       {
         name: 'Match the score each quarter',
@@ -206,8 +206,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
           'If a winning square was never claimed, there is no name on it and that quarter has no winner. QuarterScore moves the quarter\'s points using the rule the host picked: roll them into Q4, or split them across the other quarters. If a quarter ends on the same digits as the quarter before, the same square wins again.'
         ],
         bullets: [
-          'Draw numbers only after the board is as full as you want it.',
-          'Lock the board so names and digits stop changing.',
+          'Lock the board when it is as full as you want it, so names stop changing. Then draw the numbers.',
           'Read the last digit of each score, not the whole score.'
         ]
       }
@@ -240,11 +239,11 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       },
       {
         question: 'Do players need an account?',
-        answer: 'No. Anyone with the link can claim a square by typing a name. The host signs in to create the game, lock it, and change settings.'
+        answer: 'No. Anyone with the link can claim a square by typing a name. The host signs in to save the board, lock it, and change settings.'
       },
       {
         question: 'How are the numbers randomized?',
-        answer: 'The host runs a shuffle that assigns the digits 0 through 9 once down the rows and once across the columns. Do this after squares are claimed, so the draw is the same for everyone and nobody chooses a digit.'
+        answer: 'The host locks the board, then draws the numbers. A shuffle assigns the digits 0 through 9 once down the rows and once across the columns. Do this after squares are claimed, so the draw is the same for everyone and nobody chooses a digit.'
       },
       {
         question: 'Are games private?',
@@ -312,7 +311,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       {
         heading: 'What the host does',
         paragraphs: [
-          'Create the game, share the link, and ask people to claim squares in the weeks before the game. On game day, randomize the numbers where everyone can see the draw, lock the board, and leave it on a TV.'
+          'Create the board, share the link, and ask people to claim squares in the weeks before the game. On game day, lock the board, draw the numbers where everyone can see the draw, and leave it on a TV.'
         ],
         bullets: [
           'One link for the group chat, the office, or the party.',
@@ -407,7 +406,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       {
         heading: 'What you set up',
         paragraphs: [
-          'Create a board and choose NFL as the sport. Add the two team names in plain text. Send the link. Friends type their names on open squares. When you are ready, randomize the digits and lock the board.',
+          'Create a board and choose NFL as the sport. Add the two team names in plain text. Send the link. Friends type their names on open squares. When you are ready, lock the board and draw the numbers.',
           'Each quarter, the last digit of each score points at one square. The person who claimed it wins that quarter’s bragging rights.'
         ]
       },
@@ -570,7 +569,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
         heading: 'What changes and what does not',
         paragraphs: [
           'You still have 100 squares, a name on each one, and digits 0 through 9 on the rows and columns. At the end of a quarter, the last digit of each score marks the square. A score of 28 counts as 8, the same way a football score of 17 counts as 7.',
-          'Choose NBA when you create the game so the board is labeled for basketball. The historical football heatmap does not describe basketball scoring. Treat it as a football chart if you open it.'
+          'Choose NBA when you create the board so it is labeled for basketball. The historical football heatmap does not describe basketball scoring. Treat it as a football chart if you open it.'
         ]
       },
       {
@@ -620,7 +619,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       {
         heading: 'Get it on the TV',
         paragraphs: [
-          'On a computer or laptop, open your game and press **Present**. The button is on the game page for the host and co-host.',
+          'On a computer or laptop, open your game, open your profile menu at the top right and choose **Present on a TV**. It is there for the host and co-host.',
           'Then send that browser tab to the TV. These are the standard ways to do it. We have not tested every TV, so try yours before game day.'
         ],
         bullets: [
@@ -630,7 +629,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
           'No mirroring: tap **Copy TV link** and open it on any browser or device. It shows the board live and needs no sign-in.'
         ],
         html: `<figure class="not-prose mt-6">
-          <img src="/assets/tv-mode/game-present-button.png" alt="The top of a QuarterScore game page, with the Share, Present and Your Games buttons next to the board title." width="1400" height="138" class="w-full h-auto rounded-lg border border-slate-300 dark:border-slate-600">
+          <img src="/assets/tv-mode/present-on-a-tv-menu.png" alt="The top right of a QuarterScore game page with the profile menu open, showing the Present on a TV option." width="760" height="620" class="w-full max-w-[760px] h-auto rounded-lg border border-slate-300 dark:border-slate-600">
         </figure>
         <p class="mt-4">Google explains casting in <a href="https://support.google.com/chrome/answer/3228332" rel="noopener noreferrer" target="_blank" class="underline">Cast from Chrome to your TV</a>.</p>`
       },
@@ -645,10 +644,10 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
         heading: 'Game-day checklist',
         paragraphs: [],
         bullets: [
-          'The day before: press **Present** and check that the TV shows it.',
+          'The day before: choose **Present on a TV** and check that the TV shows it.',
           'Link the board to the live game so the score and clock appear.',
           'Put the TV where everyone can see the QR code.',
-          'At kickoff: press **Present** again and point out the QR code.',
+          'At kickoff: choose **Present on a TV** again and point out the QR code.',
           'After the game: the Q4 tile says **Final** once the game is over. Read the winners from the screen.'
         ]
       }

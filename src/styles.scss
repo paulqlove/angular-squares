@@ -587,3 +587,10 @@ button:active:not(:disabled) .turn-icon { transform: rotate(120deg); transition-
     height: 0.6in;
   }
 }
+
+/* Reading pages: one centered column for the text (44rem, about 68 characters at 17px). Wide blocks such as
+   tables and the paper board opt out with .qs-wide and break out to the page width, centered on the column. */
+@media screen {
+  .qs-column > * { max-width: 44rem; margin-inline: auto; }
+  .qs-column .qs-wide { position: relative; left: 50%; width: min(64rem, calc(100vw - 2rem)); max-width: none; transform: translateX(-50%); }
+}

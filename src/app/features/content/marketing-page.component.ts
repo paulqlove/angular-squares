@@ -13,8 +13,8 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
     <app-content-shell>
-      <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
-      <article>
+      <app-breadcrumbs [items]="breadcrumbs" [column]="true"></app-breadcrumbs>
+      <article class="qs-column">
         @if (page.notice) {
           <p class="mb-6 rounded-xl border border-qs-line bg-qs-panel p-4 text-sm leading-relaxed text-qs-ink" role="note">
             {{ page.notice }}
@@ -24,10 +24,10 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
           <p class="qs-eyebrow">
             {{ page.eyebrow }}
           </p>
-          <h1 class="qs-title mt-3 text-3xl sm:text-5xl">
+          <h1 class="qs-title mt-3 text-4xl sm:text-5xl">
             {{ page.h1 }}
           </h1>
-          <p class="mt-4 text-lg leading-relaxed text-qs-muted">{{ page.lede }}</p>
+          <p class="mt-5 text-xl leading-snug text-qs-muted">{{ page.lede }}</p>
         </header>
 
         @if (page.disclaimer) {
@@ -38,15 +38,15 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
         }
 
         @if (page.steps) {
-          <ol class="mt-10 space-y-6">
+          <ol class="mt-12 space-y-6 sm:mt-16">
             @for (step of page.steps; track step.name; let index = $index) {
               <li class="flex gap-4">
                 <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-qs-accent text-base font-bold text-qs-on-accent" aria-hidden="true">
                   {{ index + 1 }}
                 </span>
                 <div>
-                  <h2 class="text-xl font-bold text-qs-ink">{{ step.name }}</h2>
-                  <p class="mt-2 leading-relaxed text-qs-ink">{{ step.text }}</p>
+                  <h2 class="text-lg font-semibold text-qs-ink">{{ step.name }}</h2>
+                  <p class="mt-2 text-[1.0625rem] leading-[1.7] text-qs-ink">{{ step.text }}</p>
                 </div>
               </li>
             }
@@ -54,13 +54,13 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
         }
 
         @if (page.faqs) {
-          <section class="mt-10" aria-labelledby="faq-heading">
-            <h2 id="faq-heading" class="text-2xl font-bold text-qs-ink">Questions people ask</h2>
-            <div class="mt-4 divide-y divide-default rounded-xl border border-qs-line bg-qs-panel">
+          <section class="mt-12 sm:mt-16" aria-labelledby="faq-heading">
+            <h2 id="faq-heading" class="text-2xl font-semibold leading-tight tracking-tight sm:text-[1.75rem]">Questions people ask</h2>
+            <div class="mt-6 divide-y divide-qs-line border-t border-qs-line">
               @for (entry of page.faqs; track entry.question) {
-                <div class="p-4">
+                <div class="py-6">
                   <h3 class="text-lg font-semibold text-qs-ink">{{ entry.question }}</h3>
-                  <p class="mt-2 leading-relaxed text-qs-ink">{{ entry.answer }}</p>
+                  <p class="mt-2 text-[1.0625rem] leading-[1.7] text-qs-ink">{{ entry.answer }}</p>
                 </div>
               }
             </div>
@@ -68,13 +68,13 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
         }
 
         @for (section of page.sections; track section.heading) {
-          <section class="mt-10">
-            <h2 class="text-2xl font-bold text-qs-ink">{{ section.heading }}</h2>
+          <section class="mt-12 sm:mt-16">
+            <h2 class="text-2xl font-semibold leading-tight tracking-tight text-qs-ink sm:text-[1.75rem]">{{ section.heading }}</h2>
             @for (paragraph of section.paragraphs; track paragraph) {
-              <p class="mt-3 leading-relaxed text-qs-ink" [innerHTML]="rich(paragraph)"></p>
+              <p class="mt-4 text-[1.0625rem] leading-[1.7] text-qs-ink" [innerHTML]="rich(paragraph)"></p>
             }
             @if (section.bullets) {
-              <ul class="mt-4 list-disc space-y-2 pl-5 text-qs-ink">
+              <ul class="mt-4 list-disc space-y-2 pl-5 text-[1.0625rem] leading-[1.7] text-qs-ink">
                 @for (bullet of section.bullets; track bullet) {
                   <li [innerHTML]="rich(bullet)"></li>
                 }
@@ -86,8 +86,8 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
           </section>
         }
 
-        <section class="mt-10" aria-labelledby="related-heading">
-          <h2 id="related-heading" class="text-2xl font-bold text-qs-ink">Keep going</h2>
+        <section class="mt-12 sm:mt-16" aria-labelledby="related-heading">
+          <h2 id="related-heading" class="text-2xl font-semibold leading-tight tracking-tight text-qs-ink sm:text-[1.75rem]">Keep going</h2>
           <ul class="mt-4 grid gap-3 sm:grid-cols-2">
             @for (link of page.related; track link.path) {
               <li>

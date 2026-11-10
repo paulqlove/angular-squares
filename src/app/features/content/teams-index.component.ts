@@ -25,15 +25,15 @@ interface Conference {
       <article>
         <header>
           <p class="qs-eyebrow">NFL Teams</p>
-          <h1 class="qs-title mt-3 text-3xl sm:text-5xl">Football squares by team</h1>
-          <p class="mt-4 text-lg leading-relaxed text-qs-muted">
+          <h1 class="qs-title mt-3 text-4xl sm:text-5xl">Football squares by team</h1>
+          <p class="mt-5 max-w-[60ch] text-xl leading-snug text-qs-muted">
             Create a squares board for any NFL team. Pick your team, share the link, and play.
           </p>
         </header>
 
         @for (conf of conferences; track conf.name) {
-          <section class="mt-10">
-            <h2 class="text-2xl font-bold text-qs-ink">{{ conf.name }}</h2>
+          <section class="mt-12 sm:mt-16">
+            <h2 class="text-2xl font-semibold leading-tight tracking-tight text-qs-ink sm:text-[1.75rem]">{{ conf.name }}</h2>
             <div class="mt-4 grid gap-6 sm:grid-cols-2">
               @for (div of conf.divisions; track div.name) {
                 <div>
@@ -66,7 +66,7 @@ interface Conference {
         }
 
         <!-- CTA -->
-        <section class="mt-10 rounded-2xl bg-qs-accent px-5 py-6 text-qs-on-accent">
+        <section class="mt-12 sm:mt-16 rounded-2xl bg-qs-accent px-5 py-6 text-qs-on-accent">
           <a routerLink="/create" class="qs-btn qs-btn-ink">
             Create a board
           </a>
@@ -76,8 +76,8 @@ interface Conference {
         </section>
 
         <!-- Related -->
-        <section class="mt-10">
-          <h2 class="text-2xl font-bold text-qs-ink">More ways to play</h2>
+        <section class="mt-12 sm:mt-16">
+          <h2 class="text-2xl font-semibold leading-tight tracking-tight text-qs-ink sm:text-[1.75rem]">More ways to play</h2>
           <ul class="mt-4 grid gap-3 sm:grid-cols-2">
             <li>
               <a routerLink="/how-to-play" class="block rounded-xl border border-qs-line bg-qs-panel p-4 hover:bg-qs-panel-2">
