@@ -34,7 +34,7 @@ export interface ManualScores {
             </span>
           } @else if (isOwner && !editing) {
             <button type="button" (click)="startEditing()" class="px-2 py-1 rounded text-xs font-medium bg-qs-accent text-qs-on-accent hover:bg-qs-accent-hover transition-colors">
-              Update Scores
+              Update scores
             </button>
           } @else if (isOwner && editing) {
             <button type="button" (click)="saveScores()" class="px-2 py-1 rounded text-xs font-medium bg-qs-accent text-qs-on-accent hover:bg-qs-accent-hover transition-colors">

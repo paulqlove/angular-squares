@@ -187,14 +187,14 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     },
     {
       target: 'game-board',
-      title: 'The Game Board',
-      description: 'Click any empty square to claim it. Check the Heatmap tab to see how often each square\'s digit pair has come up.',
+      title: 'The game board',
+      description: 'Tap any empty square to claim it. Check the Heatmap tab to see how often each square\'s digit pair has come up.',
       position: 'right'
     },
     {
       target: 'players-list',
-      title: 'Players List',
-      description: 'See all players and their squares. Click a name to highlight their squares on the board.',
+      title: 'Players list',
+      description: 'See all players and their squares. Tap a name to highlight their squares on the board.',
       position: 'left'
     },
     {
