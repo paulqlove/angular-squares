@@ -77,7 +77,7 @@ import { ContentShellComponent } from './content-shell.component';
           <h1 class="qs-title mt-3 text-3xl sm:text-5xl">
             Printable football squares
           </h1>
-          <p class="mt-4 text-lg leading-relaxed text-muted">
+          <p class="mt-4 text-lg leading-relaxed text-qs-muted">
             A blank 10 by 10 grid with no logos. Print it for the wall, or download the PDF.
             Write names first. Write the digits only after the draw.
           </p>
@@ -93,14 +93,14 @@ import { ContentShellComponent } from './content-shell.component';
         </header>
 
         <section class="no-print mt-10" aria-labelledby="paper-heading">
-          <h2 id="paper-heading" class="text-2xl font-bold text-heading">How to fill a paper board</h2>
-          <ol class="mt-4 list-decimal space-y-3 pl-5 leading-relaxed text-default">
+          <h2 id="paper-heading" class="text-2xl font-bold text-qs-ink">How to fill a paper board</h2>
+          <ol class="mt-4 list-decimal space-y-3 pl-5 leading-relaxed text-qs-ink">
             <li>Write the home team over the columns and the away team beside the rows. Plain names are enough.</li>
             <li>Pass the sheet around. Each person writes their name in empty squares until you stop.</li>
             <li>Put the digits 0 through 9 in a hat, twice. Draw one set for the columns and one set for the rows. Write them in the blank header boxes in the order you draw them.</li>
             <li>At the end of each quarter, take the last digit of each score and find that row and column.</li>
           </ol>
-          <p class="mt-4 leading-relaxed text-default">
+          <p class="mt-4 leading-relaxed text-qs-ink">
             Paper gets lost, the math gets argued, and a friend in another city cannot see it.
             The online board keeps the names, the draw, and the quarter winners in one link.
             Many parties do both: the live board on the TV, and this sheet on the wall.
@@ -108,7 +108,7 @@ import { ContentShellComponent } from './content-shell.component';
         </section>
 
         <section class="print-sheet mt-10" aria-labelledby="grid-heading">
-          <h2 id="grid-heading" class="text-2xl font-bold text-heading no-print">Blank board</h2>
+          <h2 id="grid-heading" class="text-2xl font-bold text-qs-ink no-print">Blank board</h2>
 
           <!-- Print header with branding -->
           <div class="hidden print:flex items-center justify-between mb-4">
@@ -160,40 +160,40 @@ import { ContentShellComponent } from './content-shell.component';
             }
           </div>
 
-          <p class="mt-4 text-sm leading-relaxed text-default">
+          <p class="mt-4 text-sm leading-relaxed text-qs-ink">
             <strong>How to read:</strong> Columns are the home team's last digit. Rows are the away team's last digit.
             Find the square where the row and column meet to see the winner.
           </p>
-          <p class="mt-2 text-xs text-muted">
+          <p class="mt-2 text-xs text-qs-muted">
             QuarterScore never collects, holds, or pays out money. quarterscore.com
           </p>
         </section>
 
         <section class="no-print mt-10" aria-labelledby="related-heading">
-          <h2 id="related-heading" class="text-2xl font-bold text-heading">Keep going</h2>
+          <h2 id="related-heading" class="text-2xl font-bold text-qs-ink">Keep going</h2>
           <ul class="mt-4 grid gap-3 sm:grid-cols-2">
             <li>
-              <a routerLink="/how-to-play" class="block rounded-xl border border-default bg-card p-4 hover:bg-card-hover">
+              <a routerLink="/how-to-play" class="block rounded-xl border border-qs-line bg-qs-panel p-4 hover:bg-qs-panel-2">
                 <span class="font-semibold text-qs-accent underline decoration-qs-accent/40 underline-offset-2 text-qs-accent">How to play</span>
-                <span class="mt-1 block text-sm text-muted">The same rules, on a live board.</span>
+                <span class="mt-1 block text-sm text-qs-muted">The same rules, on a live board.</span>
               </a>
             </li>
             <li>
-              <a routerLink="/" class="block rounded-xl border border-default bg-card p-4 hover:bg-card-hover">
+              <a routerLink="/" class="block rounded-xl border border-qs-line bg-qs-panel p-4 hover:bg-qs-panel-2">
                 <span class="font-semibold text-qs-accent underline decoration-qs-accent/40 underline-offset-2 text-qs-accent">Homepage</span>
-                <span class="mt-1 block text-sm text-muted">See a sample board and start a game.</span>
+                <span class="mt-1 block text-sm text-qs-muted">See a sample board and start a game.</span>
               </a>
             </li>
             <li>
-              <a routerLink="/super-bowl-squares" class="block rounded-xl border border-default bg-card p-4 hover:bg-card-hover">
+              <a routerLink="/super-bowl-squares" class="block rounded-xl border border-qs-line bg-qs-panel p-4 hover:bg-qs-panel-2">
                 <span class="font-semibold text-qs-accent underline decoration-qs-accent/40 underline-offset-2 text-qs-accent">Super Bowl squares</span>
-                <span class="mt-1 block text-sm text-muted">The February 14, 2027 party board.</span>
+                <span class="mt-1 block text-sm text-qs-muted">The February 14, 2027 party board.</span>
               </a>
             </li>
             <li>
-              <a routerLink="/football-squares-on-tv" class="block rounded-xl border border-default bg-card p-4 hover:bg-card-hover">
+              <a routerLink="/football-squares-on-tv" class="block rounded-xl border border-qs-line bg-qs-panel p-4 hover:bg-qs-panel-2">
                 <span class="font-semibold text-qs-accent underline decoration-qs-accent/40 underline-offset-2 text-qs-accent">Football squares on TV</span>
-                <span class="mt-1 block text-sm text-muted">Put the live board on a big screen instead.</span>
+                <span class="mt-1 block text-sm text-qs-muted">Put the live board on a big screen instead.</span>
               </a>
             </li>
           </ul>

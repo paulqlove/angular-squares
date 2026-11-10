@@ -69,31 +69,6 @@ html, body {
   --qs-ease-in: cubic-bezier(.4,0,1,1); /* exits: gentle start, quick end */
   --qs-ease-spring: cubic-bezier(.34,1.56,.64,1); /* small overshoot for state flips */
   --qs-t-fast: 120ms; --qs-t-state: 200ms; --qs-t-reveal: 450ms;
-
-  /* Legacy aliases (remove after migration) */
-  --color-bg-page: var(--qs-bg);
-  --color-bg-card: var(--qs-panel);
-  --color-bg-card-hover: var(--qs-panel-2);
-  --color-bg-input: var(--qs-panel-2);
-  --color-bg-input-hover: var(--qs-panel-2);
-  --color-bg-control: var(--qs-panel-2);
-  --color-bg-control-hover: var(--qs-line);
-  --color-bg-dialog: var(--qs-panel);
-  --color-bg-square: var(--qs-panel);
-  --color-bg-square-hover: var(--qs-accent-soft);
-  --color-bg-header: var(--qs-tile);
-  --color-bg-header-accent: var(--qs-tile);
-  --color-grid-line: var(--qs-line);
-  --color-text-default: var(--qs-ink);
-  --color-text-muted: var(--qs-muted);
-  --color-text-heading: var(--qs-ink);
-  --color-text-label: var(--qs-ink);
-  --color-text-header: var(--qs-tile-ink);
-  --color-text-header-muted: var(--qs-tile-muted);
-  --color-border-default: var(--qs-line);
-  --color-border-hover: var(--qs-line-strong);
-  --color-border-input: var(--qs-line-strong);
-  --color-border-card: var(--qs-line);
 }
 
 /* Dark mode = navy. Same as the TV view and the reversed logo. */

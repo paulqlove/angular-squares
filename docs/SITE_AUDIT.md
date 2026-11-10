@@ -259,6 +259,7 @@ Update this list as each chunk ships (change, Paul tests locally, push, merge).
 | P2 Shared modal shell (app-modal): confirm, Share and sign-in dialogs moved onto it; unused app-dialog deleted | Done | this batch |
 | P2 Shared modal shell: Edit game, Create, Manage players and shrink prompt moved | Done | this batch |
 | P2 Shared modal shell complete: upgrade dialog and both game-page name dialogs moved; page scroll lock on <html> while any dialog is open | Done | this batch |
-| P2 Open: tab panel markup (no arrow keys: they switch boards) | Not started | |
+| P2 Board tabs: ids, aria-controls and a labelled tabpanel (no arrow keys: they switch boards) | Done | this batch |
+| P3 Old color names moved to current tokens (178 uses, 25 files); legacy aliases and Tailwind keys removed | Done | this batch |
 | Everything else in Priority 3 | Not started | |
 

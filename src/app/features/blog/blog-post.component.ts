@@ -16,16 +16,16 @@ import { BLOG_POSTS } from './blog-posts.generated';
       @if (post) {
         <article>
           <header>
-            <p class="text-sm text-muted">
+            <p class="text-sm text-qs-muted">
               <time [attr.datetime]="post.date">{{ formatDate(post.date) }}</time>
             </p>
             <h1 class="qs-title mt-3 text-3xl sm:text-5xl">
               {{ post.title }}
             </h1>
-            <p class="mt-4 text-lg leading-relaxed text-muted">{{ post.description }}</p>
+            <p class="mt-4 text-lg leading-relaxed text-qs-muted">{{ post.description }}</p>
           </header>
           <div class="prose-content mt-8" [innerHTML]="post.html"></div>
-          <p class="mt-10 text-sm text-muted">
+          <p class="mt-10 text-sm text-qs-muted">
             QuarterScore never collects, holds, or pays out money.
           </p>
           <p class="mt-6">
@@ -42,7 +42,7 @@ import { BLOG_POSTS } from './blog-posts.generated';
       } @else {
         <article>
           <h1 class="qs-title text-3xl">Post not found</h1>
-          <p class="mt-4 text-default">That post is not on the blog.</p>
+          <p class="mt-4 text-qs-ink">That post is not on the blog.</p>
           <p class="mt-6">
             <a routerLink="/blog" class="font-semibold text-qs-accent underline underline-offset-2 text-qs-accent">
               Back to the blog

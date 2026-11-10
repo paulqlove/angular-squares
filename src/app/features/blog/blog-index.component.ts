@@ -14,7 +14,7 @@ import { BLOG_POSTS } from './blog-posts.generated';
       <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
       <header>
         <h1 class="qs-title text-3xl sm:text-5xl">Blog</h1>
-        <p class="mt-4 text-lg leading-relaxed text-muted">
+        <p class="mt-4 text-lg leading-relaxed text-qs-muted">
           Notes on football squares for friends, fans, and game-day parties.
           Posts stay free of logos, and the game never handles money.
         </p>
@@ -26,15 +26,15 @@ import { BLOG_POSTS } from './blog-posts.generated';
       </header>
 
       @if (posts.length === 0) {
-        <p class="mt-10 text-default" role="status">No posts yet.</p>
+        <p class="mt-10 text-qs-ink" role="status">No posts yet.</p>
       } @else {
         <ul class="mt-10 space-y-6">
           @for (post of posts; track post.slug) {
-            <li class="rounded-xl border border-default bg-card p-5">
-              <p class="text-sm text-muted">
+            <li class="rounded-xl border border-qs-line bg-qs-panel p-5">
+              <p class="text-sm text-qs-muted">
                 <time [attr.datetime]="post.date">{{ formatDate(post.date) }}</time>
               </p>
-              <h2 class="mt-2 text-2xl font-bold text-heading">
+              <h2 class="mt-2 text-2xl font-bold text-qs-ink">
                 <a
                   [routerLink]="['/blog', post.slug]"
                   class="text-qs-accent underline decoration-qs-accent/30 underline-offset-2 hover:decoration-qs-accent text-qs-accent"
@@ -42,7 +42,7 @@ import { BLOG_POSTS } from './blog-posts.generated';
                   {{ post.title }}
                 </a>
               </h2>
-              <p class="mt-3 leading-relaxed text-default">{{ post.description }}</p>
+              <p class="mt-3 leading-relaxed text-qs-ink">{{ post.description }}</p>
             </li>
           }
         </ul>

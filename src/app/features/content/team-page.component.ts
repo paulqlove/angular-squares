@@ -43,9 +43,9 @@ import { ScheduledGame, formatKickoff } from './schedule.model';
           </header>
 
           <!-- CTA -->
-          <section class="rounded-2xl border border-default bg-card p-6 sm:p-8">
-            <h2 class="text-2xl font-bold text-heading">Create a squares contest for any {{ team.name }} game</h2>
-            <p class="mt-2 text-default">
+          <section class="rounded-2xl border border-qs-line bg-qs-panel p-6 sm:p-8">
+            <h2 class="text-2xl font-bold text-qs-ink">Create a squares contest for any {{ team.name }} game</h2>
+            <p class="mt-2 text-qs-ink">
               Set up a football squares game for the next {{ team.city }} {{ team.name }} game.
               Share the link with friends and watch the board fill up.
             </p>
@@ -68,8 +68,8 @@ import { ScheduledGame, formatKickoff } from './schedule.model';
           <!-- Upcoming Games -->
           @if (loading() || games().length > 0) {
           <section class="mt-10">
-            <h2 class="text-2xl font-bold text-heading">Upcoming {{ team.name }} games</h2>
-            <p class="mt-2 text-muted">
+            <h2 class="text-2xl font-bold text-qs-ink">Upcoming {{ team.name }} games</h2>
+            <p class="mt-2 text-qs-muted">
               Pick any game to run a squares board. Share the link before kickoff.
             </p>
 
@@ -82,12 +82,12 @@ import { ScheduledGame, formatKickoff } from './schedule.model';
             } @else if (games().length > 0) {
               <div class="mt-6 space-y-3">
                 @for (game of games(); track game.id) {
-                  <div class="flex items-center justify-between gap-4 rounded-xl border border-default bg-card p-4">
+                  <div class="flex items-center justify-between gap-4 rounded-xl border border-qs-line bg-qs-panel p-4">
                     <div>
-                      <p class="font-semibold text-heading">
+                      <p class="font-semibold text-qs-ink">
                         {{ game.awayTeam }} @ {{ game.homeTeam }}
                       </p>
-                      <p class="text-sm text-muted">{{ formatDate(game.date) }}</p>
+                      <p class="text-sm text-qs-muted">{{ formatDate(game.date) }}</p>
                     </div>
                     <div class="flex shrink-0 flex-wrap justify-end gap-2">
                       <button type="button" (click)="printSheet(game)" class="qs-btn qs-btn-secondary">
@@ -106,11 +106,11 @@ import { ScheduledGame, formatKickoff } from './schedule.model';
 
           <!-- Team-themed printable board -->
           <section class="mt-10" aria-labelledby="sheet-heading">
-            <h2 id="sheet-heading" class="text-2xl font-bold text-heading">{{ team.name }} squares board</h2>
-            <p class="mt-2 text-muted">
+            <h2 id="sheet-heading" class="text-2xl font-bold text-qs-ink">{{ team.name }} squares board</h2>
+            <p class="mt-2 text-qs-muted">
               Print it for the wall, or choose "Save as PDF" in the print window. Write names first, then draw the digits.
             </p>
-            <div class="team-sheet mt-4 rounded-[10px] border border-default bg-white p-4 text-slate-900 sm:p-6">
+            <div class="team-sheet mt-4 rounded-[10px] border border-qs-line bg-white p-4 text-slate-900 sm:p-6">
               <div class="flex items-center justify-between gap-3">
                 <img src="assets/brand/lockup-horizontal.svg" alt="QuarterScore" class="h-6">
                 <span class="text-xs text-slate-600">{{ sheet().date }}</span>
@@ -159,8 +159,8 @@ import { ScheduledGame, formatKickoff } from './schedule.model';
 
           <!-- How It Works -->
           <section class="mt-10">
-            <h2 class="text-2xl font-bold text-heading">How {{ team.name }} squares work</h2>
-            <div class="mt-4 space-y-4 text-default">
+            <h2 class="text-2xl font-bold text-qs-ink">How {{ team.name }} squares work</h2>
+            <div class="mt-4 space-y-4 text-qs-ink">
               <p>
                 Football squares is a simple game that makes every {{ team.name }} game more exciting.
                 You don't need to know football - just claim a square and watch the score.
@@ -182,12 +182,12 @@ import { ScheduledGame, formatKickoff } from './schedule.model';
 
           <!-- Other Teams -->
           <section class="mt-10">
-            <h2 class="text-2xl font-bold text-heading">Other {{ team.conference }} {{ team.division }} teams</h2>
+            <h2 class="text-2xl font-bold text-qs-ink">Other {{ team.conference }} {{ team.division }} teams</h2>
             <div class="mt-4 grid gap-3 sm:grid-cols-3">
               @for (rival of divisionRivals; track rival.slug) {
                 <a
                   [routerLink]="'/team/' + rival.slug"
-                  class="flex items-center gap-3 rounded-xl border border-default bg-card p-3 hover:bg-card-hover"
+                  class="flex items-center gap-3 rounded-xl border border-qs-line bg-qs-panel p-3 hover:bg-qs-panel-2"
                 >
                   <span
                     class="flex h-10 w-10 items-center justify-center rounded-lg text-xs font-bold"
@@ -196,7 +196,7 @@ import { ScheduledGame, formatKickoff } from './schedule.model';
                   >
                     {{ rival.abbreviation }}
                   </span>
-                  <span class="font-medium text-heading">{{ rival.city }} {{ rival.name }}</span>
+                  <span class="font-medium text-qs-ink">{{ rival.city }} {{ rival.name }}</span>
                 </a>
               }
             </div>
@@ -214,8 +214,8 @@ import { ScheduledGame, formatKickoff } from './schedule.model';
         </article>
       } @else {
         <div class="py-12 text-center">
-          <h1 class="text-2xl font-bold text-heading">Team not found</h1>
-          <p class="mt-2 text-muted">We couldn't find that team.</p>
+          <h1 class="text-2xl font-bold text-qs-ink">Team not found</h1>
+          <p class="mt-2 text-qs-muted">We couldn't find that team.</p>
           <a routerLink="/teams" class="mt-4 inline-flex items-center font-medium text-qs-accent underline underline-offset-2">
             View all teams
           </a>

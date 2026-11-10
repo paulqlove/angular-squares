@@ -7,7 +7,7 @@ import { RouterLink } from '@angular/router';
     imports: [RouterLink],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
-    <div class="flex items-center justify-center min-h-screen p-4 bg-page">
+    <div class="flex items-center justify-center min-h-screen p-4 bg-qs-bg">
       <div class="max-w-md text-center">
         <img
           src="assets/logo.webp"
@@ -17,7 +17,7 @@ import { RouterLink } from '@angular/router';
           class="h-16 w-auto mx-auto mb-6"
         >
         <h1 class="qs-title mb-2 text-3xl">Page not found</h1>
-        <p class="mb-6 text-muted">That address isn't part of QuarterScore.</p>
+        <p class="mb-6 text-qs-muted">That address isn't part of QuarterScore.</p>
         <a
           routerLink="/"
           class="qs-btn qs-btn-primary"

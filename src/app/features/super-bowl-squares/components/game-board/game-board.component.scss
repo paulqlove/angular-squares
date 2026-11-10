@@ -1,7 +1,7 @@
 @import 'breakpoints';
 
 .number-cell {
-  @apply flex items-center justify-center text-default text-sm sm:text-base;
+  @apply flex items-center justify-center text-qs-ink text-sm sm:text-base;
   font-family: var(--qs-font-mono);
   font-weight: 500;
   height: calc((100vw - 5rem) / 10);

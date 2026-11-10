@@ -7,7 +7,7 @@
   </div>
 } @else if (gameNotFound()) {
   <!-- Game Not Found State -->
-  <div class="flex items-center justify-center min-h-screen p-4 bg-page">
+  <div class="flex items-center justify-center min-h-screen p-4 bg-qs-bg">
     <div class="max-w-md text-center">
       <div class="flex items-center justify-center w-20 h-20 mx-auto mb-6 bg-qs-bad-soft rounded-full">
         <svg class="w-10 h-10 text-qs-bad" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -15,8 +15,8 @@
         </svg>
       </div>
       <h1 class="qs-title mb-2 text-3xl">Game Not Found</h1>
-      <p class="mb-6 text-muted">
-        The game code <code class="px-2 py-1 font-mono bg-control rounded">{{ gameId }}</code> doesn't exist or has been deleted.
+      <p class="mb-6 text-qs-muted">
+        The game code <code class="px-2 py-1 font-mono bg-qs-panel-2 rounded">{{ gameId }}</code> doesn't exist or has been deleted.
       </p>
       <button
         (click)="goBack()"
@@ -144,7 +144,7 @@
                 placeholder="Enter your name"
                 [disabled]="isLocked"
                 [class.border-qs-bad]="duplicateNameWarning()"
-                class="w-full min-h-11 px-3 text-base border rounded-lg bg-input text-default text-center sm:text-left focus:outline-none focus:ring-2 focus:ring-qs-accent disabled:opacity-50 disabled:cursor-not-allowed">
+                class="w-full min-h-11 px-3 text-base border rounded-lg bg-qs-panel-2 text-qs-ink text-center sm:text-left focus:outline-none focus:ring-2 focus:ring-qs-accent disabled:opacity-50 disabled:cursor-not-allowed">
               @if (duplicateNameWarning()) {
                 <span class="text-xs text-qs-bad text-center">{{ duplicateNameWarning() }}</span>
               }
@@ -172,16 +172,16 @@
           <div class="qs-card p-3 sm:p-5">
             <!-- Tabs -->
             <div class="mb-4 flex flex-wrap gap-2" role="tablist">
-              <button (click)="selectTab('board')" role="tab" [attr.aria-selected]="activeTab === 'board'" class="qs-tab px-3 sm:px-4">Board</button>
-              <button (click)="selectTab('probabilities')" role="tab" [attr.aria-selected]="activeTab === 'probabilities'" class="qs-tab px-3 sm:px-4">Heatmap</button>
-              <button (click)="selectTab('boxscore')" role="tab" [attr.aria-selected]="activeTab === 'boxscore'" class="qs-tab px-3 sm:px-4">Box score</button>
+              <button id="tab-board" (click)="selectTab('board')" role="tab" aria-controls="board-tabpanel" [attr.aria-selected]="activeTab === 'board'" class="qs-tab px-3 sm:px-4">Board</button>
+              <button id="tab-probabilities" (click)="selectTab('probabilities')" role="tab" aria-controls="board-tabpanel" [attr.aria-selected]="activeTab === 'probabilities'" class="qs-tab px-3 sm:px-4">Heatmap</button>
+              <button id="tab-boxscore" (click)="selectTab('boxscore')" role="tab" aria-controls="board-tabpanel" [attr.aria-selected]="activeTab === 'boxscore'" class="qs-tab px-3 sm:px-4">Box score</button>
               @if (openBoards().length) {
-                <button (click)="selectTab('more')" role="tab" [attr.aria-selected]="activeTab === 'more'" class="qs-tab px-3 sm:px-4">More</button>
+                <button id="tab-more" (click)="selectTab('more')" role="tab" aria-controls="board-tabpanel" [attr.aria-selected]="activeTab === 'more'" class="qs-tab px-3 sm:px-4">More</button>
               }
             </div>
 
             <!-- Tab Content. At every width the Board stays in place (hidden while another tab shows) and sets the card's height. The other tabs sit on top of it and scroll inside if they are taller, so switching tabs never moves anything below. -->
-            <div class="relative">
+            <div id="board-tabpanel" role="tabpanel" [attr.aria-labelledby]="'tab-' + activeTab" class="relative">
               <div [class]="activeTab === 'board' ? (tabTouched ? 'qs-tab-in' : '') : 'invisible'" [attr.aria-hidden]="activeTab === 'board' ? null : 'true'">
                 <app-game-board
                   [selectedSquares]="selectedSquares"

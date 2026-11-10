@@ -23,14 +23,14 @@ import { WalkthroughService } from '../../../core/services/walkthrough.service';
 
         <!-- Tooltip -->
         <div
-          class="pointer-events-auto absolute bg-dialog rounded-xl shadow-2xl border border-default p-5 max-w-sm animate-tooltip-in"
+          class="pointer-events-auto absolute bg-qs-panel rounded-xl shadow-2xl border border-qs-line p-5 max-w-sm animate-tooltip-in"
           [style]="tooltipStyle()"
           (click)="$event.stopPropagation()"
         >
-          <h3 class="text-lg font-bold text-heading mb-2">
+          <h3 class="text-lg font-bold text-qs-ink mb-2">
             {{ walkthroughService.currentStep()!.title }}
           </h3>
-          <p class="text-sm text-muted mb-4">
+          <p class="text-sm text-qs-muted mb-4">
             {{ walkthroughService.currentStep()!.description }}
           </p>
 
@@ -40,7 +40,7 @@ import { WalkthroughService } from '../../../core/services/walkthrough.service';
               <div
                 class="w-2 h-2 rounded-full transition-colors"
                 [class.bg-qs-accent]="$index === walkthroughService.currentStepIndex()"
-                [class.bg-control]="$index !== walkthroughService.currentStepIndex()"
+                [class.bg-qs-panel-2]="$index !== walkthroughService.currentStepIndex()"
               ></div>
             }
           </div>
@@ -49,7 +49,7 @@ import { WalkthroughService } from '../../../core/services/walkthrough.service';
           <div class="flex items-center gap-2">
             <button
               (click)="skip()"
-              class="px-3 py-2 text-sm text-muted hover:text-default transition-colors"
+              class="px-3 py-2 text-sm text-qs-muted hover:text-qs-ink transition-colors"
             >
               Skip
             </button>

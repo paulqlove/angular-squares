@@ -16,7 +16,7 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
       <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
       <article>
         @if (page.notice) {
-          <p class="mb-6 rounded-xl border border-default bg-card p-4 text-sm leading-relaxed text-default" role="note">
+          <p class="mb-6 rounded-xl border border-qs-line bg-qs-panel p-4 text-sm leading-relaxed text-qs-ink" role="note">
             {{ page.notice }}
           </p>
         }
@@ -27,12 +27,12 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
           <h1 class="qs-title mt-3 text-3xl sm:text-5xl">
             {{ page.h1 }}
           </h1>
-          <p class="mt-4 text-lg leading-relaxed text-muted">{{ page.lede }}</p>
+          <p class="mt-4 text-lg leading-relaxed text-qs-muted">{{ page.lede }}</p>
         </header>
 
         @if (page.disclaimer) {
-          <aside class="mt-8 rounded-xl border border-default bg-card p-4 text-sm leading-relaxed text-default" role="note">
-            <p class="font-semibold text-heading">Before you start</p>
+          <aside class="mt-8 rounded-xl border border-qs-line bg-qs-panel p-4 text-sm leading-relaxed text-qs-ink" role="note">
+            <p class="font-semibold text-qs-ink">Before you start</p>
             <p class="mt-2">{{ page.disclaimer }}</p>
           </aside>
         }
@@ -45,8 +45,8 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
                   {{ index + 1 }}
                 </span>
                 <div>
-                  <h2 class="text-xl font-bold text-heading">{{ step.name }}</h2>
-                  <p class="mt-2 leading-relaxed text-default">{{ step.text }}</p>
+                  <h2 class="text-xl font-bold text-qs-ink">{{ step.name }}</h2>
+                  <p class="mt-2 leading-relaxed text-qs-ink">{{ step.text }}</p>
                 </div>
               </li>
             }
@@ -55,12 +55,12 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
 
         @if (page.faqs) {
           <section class="mt-10" aria-labelledby="faq-heading">
-            <h2 id="faq-heading" class="text-2xl font-bold text-heading">Questions people ask</h2>
-            <div class="mt-4 divide-y divide-default rounded-xl border border-default bg-card">
+            <h2 id="faq-heading" class="text-2xl font-bold text-qs-ink">Questions people ask</h2>
+            <div class="mt-4 divide-y divide-default rounded-xl border border-qs-line bg-qs-panel">
               @for (entry of page.faqs; track entry.question) {
                 <div class="p-4">
-                  <h3 class="text-lg font-semibold text-heading">{{ entry.question }}</h3>
-                  <p class="mt-2 leading-relaxed text-default">{{ entry.answer }}</p>
+                  <h3 class="text-lg font-semibold text-qs-ink">{{ entry.question }}</h3>
+                  <p class="mt-2 leading-relaxed text-qs-ink">{{ entry.answer }}</p>
                 </div>
               }
             </div>
@@ -69,12 +69,12 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
 
         @for (section of page.sections; track section.heading) {
           <section class="mt-10">
-            <h2 class="text-2xl font-bold text-heading">{{ section.heading }}</h2>
+            <h2 class="text-2xl font-bold text-qs-ink">{{ section.heading }}</h2>
             @for (paragraph of section.paragraphs; track paragraph) {
-              <p class="mt-3 leading-relaxed text-default" [innerHTML]="rich(paragraph)"></p>
+              <p class="mt-3 leading-relaxed text-qs-ink" [innerHTML]="rich(paragraph)"></p>
             }
             @if (section.bullets) {
-              <ul class="mt-4 list-disc space-y-2 pl-5 text-default">
+              <ul class="mt-4 list-disc space-y-2 pl-5 text-qs-ink">
                 @for (bullet of section.bullets; track bullet) {
                   <li [innerHTML]="rich(bullet)"></li>
                 }
@@ -87,19 +87,19 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
         }
 
         <section class="mt-10" aria-labelledby="related-heading">
-          <h2 id="related-heading" class="text-2xl font-bold text-heading">Keep going</h2>
+          <h2 id="related-heading" class="text-2xl font-bold text-qs-ink">Keep going</h2>
           <ul class="mt-4 grid gap-3 sm:grid-cols-2">
             @for (link of page.related; track link.path) {
               <li>
                 <a
                   [routerLink]="link.path"
                   [fragment]="link.fragment"
-                  class="block min-h-11 rounded-xl border border-default bg-card p-4 hover:bg-card-hover"
+                  class="block min-h-11 rounded-xl border border-qs-line bg-qs-panel p-4 hover:bg-qs-panel-2"
                 >
                   <span class="font-semibold text-qs-accent underline decoration-qs-accent/40 underline-offset-2 text-qs-accent dark:decoration-qs-accent/40">
                     {{ link.label }}
                   </span>
-                  <span class="mt-1 block text-sm text-muted">{{ link.text }}</span>
+                  <span class="mt-1 block text-sm text-qs-muted">{{ link.text }}</span>
                 </a>
               </li>
             }
@@ -117,7 +117,7 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
         </section>
 
         @if (page.disclaimer) {
-          <aside class="mt-8 rounded-xl border border-default bg-card p-4 text-sm leading-relaxed text-default" role="note">
+          <aside class="mt-8 rounded-xl border border-qs-line bg-qs-panel p-4 text-sm leading-relaxed text-qs-ink" role="note">
             <p>{{ page.disclaimer }}</p>
           </aside>
         }

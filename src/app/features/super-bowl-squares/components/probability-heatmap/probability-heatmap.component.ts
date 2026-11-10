@@ -43,7 +43,7 @@ import { BoardSize, getBoardDimensions } from '../../../../core/services/game.se
         }
 
         <!-- Source attribution -->
-        <div class="mt-4 text-xs text-muted text-center">
+        <div class="mt-4 text-xs text-qs-muted text-center">
           Source: <a href="https://www.eldo.co/super-bowl-squares-odds-probabilities-best-worst-numbers.html" 
                      target="_blank" 
                      class="text-qs-accent underline-offset-2 hover:underline">
@@ -113,7 +113,7 @@ export class ProbabilityHeatmapComponent {
 
   getCellClass(row: number, col: number): string {
     if (this.homeNumbers[col] === null || this.awayNumbers[row] === null) {
-      return 'bg-card';
+      return 'bg-qs-panel';
     }
 
     const prob = Number(this.getProbability(row, col));
