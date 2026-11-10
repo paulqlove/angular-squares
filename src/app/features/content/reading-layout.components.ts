@@ -52,7 +52,7 @@ export class ReadingHeaderComponent {
 @Component({
   selector: 'app-reading-section',
   changeDetection: ChangeDetectionStrategy.Eager,
-  host: { class: 'reading-section mt-20 grid gap-x-16 gap-y-6 border-t border-qs-line pt-8 lg:grid-cols-[14rem_minmax(0,1fr)]' },
+  host: { class: 'reading-section mt-20 grid grid-cols-[minmax(0,1fr)] gap-x-16 gap-y-6 border-t border-qs-line pt-8 lg:grid-cols-[14rem_minmax(0,1fr)]' },
   template: `
     <h2 [id]="headingId()" class="text-[1.375rem] font-semibold leading-tight tracking-tight text-qs-ink">{{ heading() }}</h2>
     <div class="qs-body max-w-[40rem] space-y-4 text-[1.0625rem] leading-[1.7]"><ng-content></ng-content></div>
