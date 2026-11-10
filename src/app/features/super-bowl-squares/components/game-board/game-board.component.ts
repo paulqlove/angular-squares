@@ -117,7 +117,7 @@ export class GameBoardComponent implements OnChanges, OnDestroy {
   getSquareClass(row: number, col: number): string {
     const key = `${row}-${col}`;
     const player = this.selectedSquares[key];
-    const baseColor = player ? this.playerColors[player] : 'bg-square';
+    const baseColor = player ? this.playerColors[player] : 'bg-qs-panel';
 
     if (this.highlightedSquare) {
       if (key === this.highlightedSquare) {

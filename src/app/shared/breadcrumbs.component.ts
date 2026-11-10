@@ -18,9 +18,9 @@ import { BreadcrumbItem } from '../core/services/seo.service';
               >
                 {{ item.name }}
               </a>
-              <span aria-hidden="true" class="text-muted">/</span>
+              <span aria-hidden="true" class="text-qs-muted">/</span>
             } @else {
-              <span aria-current="page" class="text-heading">{{ item.name }}</span>
+              <span aria-current="page" class="text-qs-ink">{{ item.name }}</span>
             }
           </li>
         }

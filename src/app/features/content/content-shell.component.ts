@@ -17,11 +17,11 @@ interface NavLink {
     template: `
     <a
       href="#main"
-      class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[200] focus:rounded-md focus:bg-card focus:px-4 focus:py-2 focus:text-heading"
+      class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[200] focus:rounded-md focus:bg-qs-panel focus:px-4 focus:py-2 focus:text-qs-ink"
     >
       Skip to content
     </a>
-    <div class="flex min-h-screen flex-col bg-page overflow-x-hidden">
+    <div class="flex min-h-screen flex-col bg-qs-bg overflow-x-hidden">
       <header appHeadroom class="no-print qs-on-navy bg-qs-tile text-qs-tile-ink">
         <div class="mx-auto flex max-w-[1600px] flex-wrap items-center gap-3 px-4 sm:px-8 py-2">
           <a routerLink="/" aria-label="QuarterScore home" class="flex min-h-11 items-center gap-2 rounded-md">

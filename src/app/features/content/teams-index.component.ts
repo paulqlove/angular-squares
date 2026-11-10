@@ -26,25 +26,25 @@ interface Conference {
         <header>
           <p class="qs-eyebrow">NFL Teams</p>
           <h1 class="qs-title mt-3 text-3xl sm:text-5xl">Football squares by team</h1>
-          <p class="mt-4 text-lg leading-relaxed text-muted">
+          <p class="mt-4 text-lg leading-relaxed text-qs-muted">
             Create a squares board for any NFL team. Pick your team, share the link, and play.
           </p>
         </header>
 
         @for (conf of conferences; track conf.name) {
           <section class="mt-10">
-            <h2 class="text-2xl font-bold text-heading">{{ conf.name }}</h2>
+            <h2 class="text-2xl font-bold text-qs-ink">{{ conf.name }}</h2>
             <div class="mt-4 grid gap-6 sm:grid-cols-2">
               @for (div of conf.divisions; track div.name) {
                 <div>
-                  <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-muted">
+                  <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-qs-muted">
                     {{ conf.name }} {{ div.name }}
                   </h3>
                   <div class="space-y-2">
                     @for (team of div.teams; track team.slug) {
                       <a
                         [routerLink]="'/team/' + team.slug"
-                        class="flex items-center gap-3 rounded-xl border border-default bg-card p-3 transition-colors hover:bg-card-hover"
+                        class="flex items-center gap-3 rounded-xl border border-qs-line bg-qs-panel p-3 transition-colors hover:bg-qs-panel-2"
                       >
                         <span
                           class="flex h-12 w-12 items-center justify-center rounded-lg text-sm font-bold text-white"
@@ -53,8 +53,8 @@ interface Conference {
                           {{ team.abbreviation }}
                         </span>
                         <div>
-                          <p class="font-semibold text-heading">{{ team.city }} {{ team.name }}</p>
-                          <p class="text-sm text-muted">Create a {{ team.name }} board</p>
+                          <p class="font-semibold text-qs-ink">{{ team.city }} {{ team.name }}</p>
+                          <p class="text-sm text-qs-muted">Create a {{ team.name }} board</p>
                         </div>
                       </a>
                     }
@@ -77,30 +77,30 @@ interface Conference {
 
         <!-- Related -->
         <section class="mt-10">
-          <h2 class="text-2xl font-bold text-heading">More ways to play</h2>
+          <h2 class="text-2xl font-bold text-qs-ink">More ways to play</h2>
           <ul class="mt-4 grid gap-3 sm:grid-cols-2">
             <li>
-              <a routerLink="/how-to-play" class="block rounded-xl border border-default bg-card p-4 hover:bg-card-hover">
+              <a routerLink="/how-to-play" class="block rounded-xl border border-qs-line bg-qs-panel p-4 hover:bg-qs-panel-2">
                 <span class="font-semibold text-qs-accent underline decoration-qs-accent/40 underline-offset-2">How to play</span>
-                <span class="mt-1 block text-sm text-muted">The full rules for football squares.</span>
+                <span class="mt-1 block text-sm text-qs-muted">The full rules for football squares.</span>
               </a>
             </li>
             <li>
-              <a routerLink="/super-bowl-squares" class="block rounded-xl border border-default bg-card p-4 hover:bg-card-hover">
+              <a routerLink="/super-bowl-squares" class="block rounded-xl border border-qs-line bg-qs-panel p-4 hover:bg-qs-panel-2">
                 <span class="font-semibold text-qs-accent underline decoration-qs-accent/40 underline-offset-2">Super Bowl squares</span>
-                <span class="mt-1 block text-sm text-muted">The big game board for February.</span>
+                <span class="mt-1 block text-sm text-qs-muted">The big game board for February.</span>
               </a>
             </li>
             <li>
-              <a routerLink="/nfl-playoff-squares" class="block rounded-xl border border-default bg-card p-4 hover:bg-card-hover">
+              <a routerLink="/nfl-playoff-squares" class="block rounded-xl border border-qs-line bg-qs-panel p-4 hover:bg-qs-panel-2">
                 <span class="font-semibold text-qs-accent underline decoration-qs-accent/40 underline-offset-2">NFL playoff squares</span>
-                <span class="mt-1 block text-sm text-muted">Wild card through the championship.</span>
+                <span class="mt-1 block text-sm text-qs-muted">Wild card through the championship.</span>
               </a>
             </li>
             <li>
-              <a routerLink="/college-football-squares" class="block rounded-xl border border-default bg-card p-4 hover:bg-card-hover">
+              <a routerLink="/college-football-squares" class="block rounded-xl border border-qs-line bg-qs-panel p-4 hover:bg-qs-panel-2">
                 <span class="font-semibold text-qs-accent underline decoration-qs-accent/40 underline-offset-2">College football squares</span>
-                <span class="mt-1 block text-sm text-muted">Bowl games and the playoff.</span>
+                <span class="mt-1 block text-sm text-qs-muted">Bowl games and the playoff.</span>
               </a>
             </li>
           </ul>

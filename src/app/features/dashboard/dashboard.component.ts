@@ -83,7 +83,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
         })
     ],
     template: `
-    <div class="min-h-screen bg-page" [attr.inert]="showUpgradeDialog() ? '' : null">
+    <div class="min-h-screen bg-qs-bg" [attr.inert]="showUpgradeDialog() ? '' : null">
       <!-- Header -->
       <app-shared-header variant="solid" appHeadroom>
 

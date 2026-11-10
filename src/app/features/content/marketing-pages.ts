@@ -127,7 +127,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
               </tbody>
             </table>
           </div>
-          <figcaption class="mt-2 text-xs text-muted">Score 24–17 → row 4, column 7 wins</figcaption>
+          <figcaption class="mt-2 text-xs text-qs-muted">Score 24–17 → row 4, column 7 wins</figcaption>
         </figure>`
       },
       {
@@ -156,7 +156,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
               </tbody>
             </table>
           </div>
-          <figcaption class="mt-2 text-xs text-muted">Score 24–17 → "4,5" row, column 7 wins</figcaption>
+          <figcaption class="mt-2 text-xs text-qs-muted">Score 24–17 → "4,5" row, column 7 wins</figcaption>
         </figure>`
       },
       {
@@ -185,7 +185,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
               </tbody>
             </table>
           </div>
-          <figcaption class="mt-2 text-xs text-muted">Score 24–17 → "4,5" row, "6,7" column wins</figcaption>
+          <figcaption class="mt-2 text-xs text-qs-muted">Score 24–17 → "4,5" row, "6,7" column wins</figcaption>
         </figure>`
       },
       {

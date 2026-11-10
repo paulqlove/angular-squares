@@ -11,7 +11,7 @@ import { AuthService } from '../../core/services/auth.service';
   imports: [FormsModule, RouterLink],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
-    <main class="min-h-screen bg-page flex items-center justify-center p-4">
+    <main class="min-h-screen bg-qs-bg flex items-center justify-center p-4">
       <div class="qs-card w-full max-w-md p-8">
         <p class="qs-eyebrow">Sign in</p>
         @switch (state()) {
