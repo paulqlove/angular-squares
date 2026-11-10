@@ -256,6 +256,8 @@ Update this list as each chunk ships (change, Paul tests locally, push, merge).
 | P2 Decided: footer "sports ball" stays; blog intro left alone; tab arrow keys not added (arrow keys switch boards); $5.99 dialog wording unchanged | Decided | n/a |
 | P2 Game page header declutter: no live score (Paul: not needed), no auto-lock note, status pill hidden once numbers are drawn, guest name edit moved into the profile menu | Done | this batch |
 | P2 Help in the profile menu for every signed-in user; ? only when signed out | Done | this batch |
-| P2 Open: one shared modal shell, tab panel markup (no arrow keys: they switch boards) | Not started | |
+| P2 Shared modal shell (app-modal): confirm, Share and sign-in dialogs moved onto it; unused app-dialog deleted | Done | this batch |
+| P2 Shared modal shell still to move: Edit game, Create, Manage players, shrink prompt, upgrade, the two game-page name dialogs | In progress | |
+| P2 Open: tab panel markup (no arrow keys: they switch boards) | Not started | |
 | Everything else in Priority 3 | Not started | |
 

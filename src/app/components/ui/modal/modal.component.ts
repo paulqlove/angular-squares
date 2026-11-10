@@ -1,0 +1,109 @@
+import { ChangeDetectionStrategy, Component, ElementRef, HostListener, computed, effect, inject, input, output } from '@angular/core';
+
+/** Open modals, oldest first. Only the last one answers Esc, so a confirm on top of a dialog closes alone. */
+const openModals: ModalComponent[] = [];
+
+const LEVEL = { 1: 'z-[150]', 2: 'z-[160]', 3: 'z-[170]' } as const;
+const SIZE = { sm: 'max-w-sm', md: 'max-w-md', lg: 'max-w-lg', xl: 'max-w-2xl' } as const;
+const PHONE = {
+  sheet: { overlay: 'items-end p-4 sm:items-center', panel: 'rounded-t-card pb-[env(safe-area-inset-bottom)] sm:rounded-card' },
+  center: { overlay: 'items-center p-4', panel: 'rounded-card' },
+  full: { overlay: 'items-center p-4 max-sm:p-0', panel: 'rounded-card max-sm:h-dvh max-sm:rounded-none max-sm:border-0' }
+} as const;
+const FOCUSABLE = 'button, input, select, textarea, summary, [href], [tabindex]:not([tabindex="-1"])';
+
+/**
+ * The one dialog shell: overlay, panel, dialog semantics, focus (in, trapped, and back to where it was),
+ * Esc and backdrop. The content, including its header, is projected. Put `data-autofocus` on the element
+ * that should take focus first; otherwise the first control does.
+ */
+@Component({
+  selector: 'app-modal',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  template: `
+    @if (open()) {
+      <div animate.enter="qs-modal-enter" animate.leave="qs-modal-leave" [class]="overlayClass()" (click)="onBackdrop()">
+        <div
+          [attr.role]="role()"
+          aria-modal="true"
+          [attr.aria-labelledby]="labelledBy()"
+          [attr.aria-describedby]="describedBy()"
+          [class]="panelClass()"
+          (keydown.tab)="trapTab($event, false)"
+          (keydown.shift.tab)="trapTab($event, true)"
+          (click)="$event.stopPropagation()"
+        >
+          <ng-content></ng-content>
+        </div>
+      </div>
+    }
+  `
+})
+export class ModalComponent {
+  open = input(false);
+  labelledBy = input.required<string>();
+  describedBy = input<string | null>(null);
+  role = input<'dialog' | 'alertdialog'>('dialog');
+  size = input<keyof typeof SIZE>('md');
+  /** sheet: docked to the bottom on phones. center: centred. full: the whole screen on phones. */
+  phone = input<keyof typeof PHONE>('sheet');
+  /** 1 for a normal dialog; 2 or 3 when it opens over another one. Toasts and the tour sit above all of them. */
+  level = input<keyof typeof LEVEL>(1);
+  /** Extra classes for the panel, for dialogs that set their own height or layout. */
+  extraClass = input('');
+  escapeCloses = input(true);
+  backdropCloses = input(true);
+  /** Esc or a backdrop tap asked to close. The owner decides and sets `open` to false. */
+  dismissed = output<void>();
+
+  protected overlayClass = computed(() => `fixed inset-0 flex justify-center bg-black/60 backdrop-blur-sm ${LEVEL[this.level()]} ${PHONE[this.phone()].overlay}`);
+  protected panelClass = computed(() => `animate-modal-in w-full border border-qs-line bg-qs-panel shadow-pop ${SIZE[this.size()]} ${PHONE[this.phone()].panel} ${this.extraClass()}`.trim());
+
+  private host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private returnFocus: HTMLElement | null = null;
+
+  constructor() {
+    effect(onCleanup => {
+      if (!this.open() || typeof document === 'undefined') return;
+      openModals.push(this);
+      this.returnFocus = document.activeElement as HTMLElement | null;
+      const focusTimer = setTimeout(() => this.initialFocus());
+      onCleanup(() => {
+        clearTimeout(focusTimer);
+        openModals.splice(openModals.indexOf(this), 1);
+        const target = this.returnFocus;
+        this.returnFocus = null;
+        setTimeout(() => target?.isConnected && target.focus());
+      });
+    });
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.escapeCloses() && openModals[openModals.length - 1] === this) this.dismissed.emit();
+  }
+
+  protected onBackdrop(): void {
+    if (this.backdropCloses()) this.dismissed.emit();
+  }
+
+  protected trapTab(event: Event, back: boolean): void {
+    const items = this.focusables();
+    if (!items.length) return;
+    const first = items[0];
+    const last = items[items.length - 1];
+    const active = document.activeElement;
+    if (back && active === first) { event.preventDefault(); last.focus(); }
+    else if (!back && active === last) { event.preventDefault(); first.focus(); }
+  }
+
+  private focusables(): HTMLElement[] {
+    return Array.from(this.host.nativeElement.querySelectorAll<HTMLElement>(FOCUSABLE))
+      .filter(e => e.offsetParent !== null && !(e as HTMLButtonElement).disabled);
+  }
+
+  private initialFocus(): void {
+    const preferred = this.host.nativeElement.querySelector<HTMLElement>('[data-autofocus]');
+    (preferred ?? this.focusables()[0])?.focus();
+  }
+}
