@@ -11,7 +11,7 @@ import { PLAYER_COLORS, normalizePlayerColors } from './utils/player-colors';
 import { PreviewRole } from '../../core/services/role-preview.service';
 import { PlanService } from '../../core/services/plan.service';
 import { DEFAULT_EMPTY_QUARTER_RULE, EmptyQuarterRule, QuarterSplit, splitFractions } from '../../core/plans';
-import { AutoManageResult, AutoManageSettings, autoRunLabel } from '../../core/utils/auto-manage';
+import { AutoManageSettings, autoRunLabel } from '../../core/utils/auto-manage';
 import { squareLimitMessage, squareLimitState } from '../../core/utils/square-limit';
 import { AdSlotComponent } from '../../components/ui/ad-slot/ad-slot.component';
 import { AuthService } from '../../core/services/auth.service';
@@ -179,8 +179,8 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   private gameboardWalkthroughSteps: WalkthroughStep[] = [
     {
       target: 'player-name',
-      title: 'Enter Your Name',
-      description: 'Type your name here so others know which squares are yours when you claim them.',
+      title: 'Your name',
+      description: 'Your name is what other players see on the squares you claim. Set it here, or change it later from your profile menu.',
       position: 'bottom'
     },
     {
@@ -252,7 +252,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   /** Season Pass: most squares one name can claim here (undefined = no limit). */
   maxSquaresPerPlayer: number | undefined;
   autoManage: AutoManageSettings | undefined;
-  autoManageResult: AutoManageResult | undefined;
   private openBoardsFor = '';
   private openBoardsLoad: Promise<OpenBoardRow[]> | null = null;
   isLoading = signal(true);
@@ -416,7 +415,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           this.showInOpenBoards = !!data.showInOpenBoards;
           this.autoManage = data.autoManage;
           this.maxSquaresPerPlayer = data.maxSquaresPerPlayer;
-          this.autoManageResult = data.autoManageResult;
           this.loadOpenBoards();
           if (this.fullBoardNotice()) {
             this.gameService.recordBoardStatOnce(this.gameId, 'fullBoardViews');
@@ -1182,32 +1180,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     return this.isGameOwner() && this.planService.features().autoManage && !!this.espnEventId && !(this.isLocked && this.isRandomized);
   }
 
-  /** The one line about auto-manage that everyone sees above the board, or null. */
-  autoManageNote(): { text: string; host: boolean } | null {
-    const at = (ms: number) => new Date(ms).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-    const result = this.autoManageResult;
-    if (result) {
-      if (result.state === 'done') return { text: `Locked and drawn at ${at(result.at)}. ${result.resizedTo ? `The board was shrunk from ${result.resizedFrom} to ${result.resizedTo} squares.` : ''}`.trim(), host: false };
-      return this.isGameOwner() ? { text: result.note, host: false } : null;
-    }
-    if (!this.autoManage || this.isLocked) return null;
-    const kickoff = this.linkedEspnGame()?.date ? Date.parse(this.linkedEspnGame()!.date) : NaN;
-    const when = Number.isFinite(kickoff) ? ` (kickoff ${at(kickoff)})` : '';
-    return this.isGameOwner()
-      ? { text: `On. Locks and draws the numbers 5 minutes after kickoff${when}.`, host: true }
-      : null;
-  }
-
-  async cancelAutoManage(): Promise<void> {
-    try {
-      await this.gameService.setAutoManage(this.gameId, null);
-      this.autoManage = undefined;
-      this.toastService.success('Auto-lock and draw is off');
-    } catch {
-      this.toastService.error('Could not turn it off. Try again.');
-    }
-  }
-
   /** True once the viewer has picked a tab, so switching fades the content in but the first paint does not. */
   tabTouched = false;
 
@@ -1287,7 +1259,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           const date = this.linkedEspnGame()?.date;
           await this.gameService.setAutoManage(this.gameId, values.autoManage ? { enabled: true, resize: true } : null, date ? Date.parse(date) : undefined);
           this.autoManage = values.autoManage ? { enabled: true, resize: true } : undefined;
-          this.autoManageResult = undefined;
         } catch {
           this.toastService.warning('Saved, but Auto-lock and draw could not be changed. Try again in a moment.');
           return;
