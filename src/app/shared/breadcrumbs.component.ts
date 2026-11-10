@@ -7,7 +7,7 @@ import { BreadcrumbItem } from '../core/services/seo.service';
     imports: [RouterLink],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
-    <nav aria-label="Breadcrumb" class="mb-8 text-sm" [class]="column ? 'mx-auto max-w-[44rem]' : ''">
+    <nav aria-label="Breadcrumb" class="no-print mb-8 text-sm">
       <ol class="flex flex-wrap items-center gap-x-2 gap-y-1">
         @for (item of items; track item.path; let last = $last) {
           <li class="flex items-center gap-2">
@@ -30,6 +30,4 @@ import { BreadcrumbItem } from '../core/services/seo.service';
 })
 export class BreadcrumbsComponent {
   @Input({ required: true }) public items: BreadcrumbItem[] = [];
-  /** Line the trail up with a centered reading column (.qs-column). */
-  @Input() public column = false;
 }

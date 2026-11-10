@@ -1,5 +1,6 @@
 import { BreadcrumbItem } from '../../core/services/seo.service';
 import { boardDiagram, DIGITS, PAIRS } from './board-diagram';
+import { pageFacts } from './page-facts';
 import { SCHEDULE } from './schedule.generated';
 import { formatKickoff } from './schedule.model';
 
@@ -236,8 +237,9 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     description: 'Super Bowl squares for Super Bowl LXI on February 14, 2027. Make a free board before the teams are set and share one link with friends.',
     h1: 'Super Bowl squares',
     notice: 'QuarterScore is not affiliated with, endorsed by, or sponsored by the NFL, NBA, or NCAA. Team and event names are used only to describe the games.',
-    eyebrow: 'February 14, 2027',
-    lede: 'Super Bowl LXI is Sunday, February 14, 2027, at SoFi Stadium in Inglewood, with a 6:30 p.m. ET kickoff. You can make the board before either team is known.',
+    eyebrow: 'Super Bowl LXI',
+    lede: 'Make the board before either team is known. Add the team names when the matchup is announced and keep the same link.',
+    heroHtml: pageFacts([['Date', 'Sunday, February 14, 2027'], ['Kickoff', '6:30 p.m. ET'], ['Venue', 'SoFi Stadium, Inglewood']]),
     published: '2026-11-01',
     sections: [
       {
@@ -285,21 +287,21 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     title: 'Thanksgiving Football Squares — QuarterScore',
     description: 'Football squares for Thanksgiving: a free board for the table, one game or three, with a link guests can open between dinner and dessert.',
     h1: 'Thanksgiving football squares',
-    eyebrow: 'November 26, 2026',
-    lede: 'Thanksgiving Thursday, November 26, 2026, has a full slate of games and a house full of people. Football squares gives everyone a square to watch, including guests who do not follow the sport.',
+    eyebrow: 'Game day',
+    lede: 'A full slate of games and a house full of people. Squares gives everyone a reason to watch, including guests who do not follow the sport.',
+    heroHtml: pageFacts([['Date', 'Thursday, November 26, 2026'], ['Games', `${SCHEDULE.thanksgiving.length} this week`]]),
     published: '2026-11-01',
     sections: [
       ...(SCHEDULE.thanksgiving.length > 0 ? [{
         heading: 'Thanksgiving week games',
-        paragraphs: ['Kickoff times are Eastern. Pick one game or run a board for each.'],
+        paragraphs: ['Pick one game or run a board for each.'],
         bullets: SCHEDULE.thanksgiving.map(game =>
           `${game.awayTeamFull} at ${game.homeTeamFull}: ${formatKickoff(game.date)}${game.network ? ` on ${game.network}` : ''}`)
       }] : []),
       {
         heading: 'One board or one per game',
         paragraphs: [
-          'More than one game means you can run several boards or pick the one the table cares about. A single board is easier to explain while the turkey is being carved. Separate boards help if different relatives want different games.',
-          'Share one link in the family thread. People who are in another city claim a square on their phone. Names show up for everyone at the table.'
+          'A single board is easier to explain while the turkey is being carved. Separate boards help if different relatives want different games. Share one link in the family thread, and people in another city can claim a square on their phone.'
         ]
       },
       {
@@ -309,14 +311,13 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
         ],
         bullets: [
           'Create the board the weekend before, not during dinner.',
-          'Draw numbers after the last guest has claimed a square.',
-          'Leave the board open on a laptop where people can check the quarter.'
+          'Draw numbers after the last guest has claimed a square.'
         ]
       },
       {
         heading: 'Kids and non-fans',
         paragraphs: [
-          'The rule is only “your digits match the end of the score.” A child can claim a square under their own name and check the board at the end of the quarter. No playbook required.'
+          'The rule is only \u201cyour digits match the end of the score.\u201d A child can claim a square under their own name and check the board at the end of the quarter.'
         ]
       }
     ],
@@ -324,7 +325,6 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       { path: '/how-to-play', label: 'How to play', text: 'Explain the grid in two minutes.' },
       { path: '/printable-football-squares', label: 'Printable board', text: 'Tape a paper grid to the fridge.' },
       { path: '/nfl-squares', label: 'NFL squares', text: 'The same board for any Sunday game.' },
-      { path: '/create', label: 'Create a board', text: 'Create the Thanksgiving board and share the link.' }
     ],
     cta: {
       path: '/create',
@@ -345,19 +345,18 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       {
         heading: 'What you set up',
         paragraphs: [
-          'Create a board and choose NFL as the sport. Add the two team names in plain text. Send the link. Friends type their names on open squares. When you are ready, lock the board and draw the numbers.',
-          'Each quarter, the last digit of each score points at one square. The person who claimed it wins that quarter’s bragging rights.'
+          'Create a board and choose NFL. Add the two teams and send the link. Friends type their names on open squares. When you are ready, lock the board and draw the numbers. Each quarter, the last digit of each score points at one square.'
         ]
       },
       {
         heading: 'A board you can run every week',
         paragraphs: [
-          'Some groups play one game a week all season. Each game gets its own board and its own link, so old scores stay put. The rules do not change from week to week, which is the point: people already know how to play.'
+          'Some groups play one game a week all season. Each game gets its own board and link, so old scores stay put.'
         ],
         bullets: [
           'No account for the people claiming squares.',
           'A code for anyone standing in the room.',
-          'A heatmap after the draw, using the same historical table as the best-numbers page.'
+          'A heatmap after the draw, from the same table as the best-numbers page.'
         ]
       }
     ],
@@ -379,22 +378,21 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     title: 'NFL Playoff Squares — QuarterScore',
     description: 'NFL playoff squares for wild card weekend, the divisional round, and the conference championships. One free board per game, same link style all January.',
     h1: 'NFL playoff squares',
-    eyebrow: 'January 2027',
-    lede: 'Playoff games are an easy reason to run another board. Wild card weekend is January 16–18, 2027, the divisional round is January 23–24, and the conference championships are January 31.',
+    eyebrow: 'Postseason',
+    lede: 'Playoff games are an easy reason to run another board. Give each game its own.',
+    heroHtml: pageFacts([['Wild card', 'January 16–18, 2027'], ['Divisional', 'January 23–24, 2027'], ['Conference', 'January 31, 2027']]),
     published: '2026-11-01',
     sections: [
       {
         heading: 'One board per game',
         paragraphs: [
-          'A single weekend can have several games. Give each game its own board so the quarter winners stay attached to the right score. Share the links in one message, labeled by the kickoff.',
-          'The rules match any other football board: 100 squares, digits drawn after names are in, and the last digit of each score at the end of the quarter.'
+          'A weekend can have several games. Give each its own board so the quarter winners stay attached to the right score, and share the links in one message labeled by kickoff.'
         ]
       },
       {
         heading: 'Use January as a practice run',
         paragraphs: [
-          'Groups who will also play the February 14 game can use a playoff board to settle the house rules. Decide overtime and empty squares once, then copy that note onto the big-game board.',
-          'Live score entry is still the host’s job if you type the score yourself. The fun part for everyone else is watching their square.'
+          'If you will also play on February 14, use a playoff board to settle the house rules. Decide overtime and empty squares once, then copy that note onto the big-game board.'
         ]
       }
     ],
@@ -417,21 +415,20 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     description: 'College football squares for bowl games and the playoff. Create a free NCAA board, share one link, and score each quarter from the last digits.',
     h1: 'College football squares',
     eyebrow: 'Bowls and the playoff',
-    lede: 'College games use the same squares rules as every other football board. When you create the game, choose NCAA Football, name the two teams, and send the link.',
+    lede: 'The same squares rules as every other football board. Choose NCAA Football, name the two teams, and send the link.',
+    heroHtml: pageFacts([['Playoff, first round', 'December 18–19, 2026'], ['Quarterfinals', 'December 30 and January 1'], ['Title game', 'Monday, January 25, 2027']]),
     published: '2026-11-01',
     sections: [
       {
-        heading: 'Which games people actually host',
+        heading: 'Which games people host',
         paragraphs: [
-          'Bowl season stacks games close together. The first round of the College Football Playoff is December 18–19, 2026. Quarterfinals are December 30 and January 1. The title game is Monday, January 25, 2027.',
-          'One board per game keeps the winners clear. A New Year’s party can have two or three boards on the same TV if you label the links with the kickoff time.'
+          'Bowl season stacks games close together. One board per game keeps the winners clear, and a New Year\u2019s party can have two or three boards on the same TV if you label the links with the kickoff time.'
         ]
       },
       {
         heading: 'The number table is from NFL history',
         paragraphs: [
-          'The public heatmap is built from professional football scoring history. College scores are not the same sport in miniature: totals run higher, and a digit pair can show up on a different schedule. Use the table as a curiosity, not as a description of a college game.',
-          'The board itself does not care. Last digit of each score, one square, one name. That part is identical.'
+          'The heatmap is built from professional football scores. College totals run higher, so treat it as a curiosity. The board itself does not care: last digit of each score, one square, one name.'
         ]
       }
     ],
@@ -479,7 +476,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       {
         heading: 'How the board helps',
         paragraphs: [
-          'Use QuarterScore for names, the number draw, and the quarter-by-quarter result. Put the thank-you and the rule in the game name or in the message where you share the link. Collect any donation through the tool your organization already uses.'
+          'Use QuarterScore for names, the draw and the results. Put the thank-you and the rule in the game name or the message where you share the link, and collect any donation through the tool your organization already uses.'
         ]
       }
     ],
@@ -501,20 +498,20 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     description: 'NBA squares uses the same last-digit board as football. Create a free basketball game, share the link, and follow each quarter.',
     h1: 'NBA squares',
     eyebrow: 'After the football season',
-    lede: 'Basketball squares use the same grid and the same last-digit rule. Scores are higher, quarters are shorter, and the group you already have can keep playing without learning a new game.',
+    lede: 'The same grid and the same last-digit rule. Scores are higher and quarters are shorter, but your group does not need to learn a new game.',
     published: '2026-11-01',
     sections: [
       {
         heading: 'What changes and what does not',
         paragraphs: [
-          'You still have 100 squares, a name on each one, and digits 0 through 9 on the rows and columns. At the end of a quarter, the last digit of each score marks the square. A score of 28 counts as 8, the same way a football score of 17 counts as 7.',
-          'Choose NBA when you create the board so it is labeled for basketball. The historical football heatmap does not describe basketball scoring. Treat it as a football chart if you open it.'
+          'You still have 100 squares and digits 0 through 9 on the rows and columns. A score of 28 counts as 8, the same way a football score of 17 counts as 7.',
+          'Choose NBA when you create the board so it is labeled for basketball. The football heatmap does not describe basketball scoring.'
         ]
       },
       {
         heading: 'Which games to pick',
         paragraphs: [
-          'One marquee game is enough for a group text. A playoff series can be a board per game, not one board for the whole series, so each final score has a clear winner. Share the new link the morning of the game.'
+          'One marquee game is enough for a group text. For a playoff series, make a board per game so each final score has a clear winner.'
         ]
       }
     ],
@@ -536,58 +533,52 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     description: 'Show your football squares board on a TV or big screen with QuarterScore TV mode: the board, the score, each quarter winner and a QR code to join.',
     h1: 'Football squares on TV',
     eyebrow: 'TV mode',
-    lede: 'TV mode puts your board on a big screen: the board, the score, the winner of each quarter and a code friends can scan to follow along. It is free for every account.',
+    lede: 'Put your board on a big screen: the board, the score, each quarter winner and a code friends can scan to follow along. Free for every account.',
+    heroHtml: `<img src="/assets/tv-mode/tv-board.png" alt="QuarterScore TV mode: a squares board with sample player names, the score, the winner of each quarter and a QR code." width="1920" height="1080" class="h-auto w-full rounded-card border border-qs-line">`,
     published: '2026-11-06',
     sections: [
       {
         heading: 'What the screen shows',
         paragraphs: [
-          'The screen resizes to fill the window. We checked it from a 13-inch laptop up to a 4K TV, and the whole board fits with no scrolling.'
+          'The screen fills the window, from a laptop to a 4K TV, with no scrolling.'
         ],
         bullets: [
-          'The board, with each player\u2019s squares in their own color. It fits 25, 50 and 100 square boards.',
-          'The live score and game clock, when the board is linked to a live game.',
-          'The winner of each quarter.',
-          'How many squares are claimed and how many are open.',
-          'A QR code that opens the same board link as **Share**, so friends can follow on their own phones. Nobody needs an account.'
-        ],
-        html: `<figure class="not-prose mt-6">
-          <img src="/assets/tv-mode/tv-board.png" alt="QuarterScore TV mode showing a squares board with sample player names in different colors, the score, the winner of each quarter and a QR code." width="1920" height="1080" class="w-full h-auto rounded-lg border border-slate-300 dark:border-slate-600">
-        </figure>`
+          'The board, with each player\u2019s squares in their own color.',
+          'The live score and clock, when the board is linked to a live game.',
+          'The winner of each quarter, and how many squares are claimed and open.',
+          'A QR code so friends can follow on their phones. They do not need an account.'
+        ]
       },
       {
         heading: 'Get it on the TV',
         paragraphs: [
-          'On a computer or laptop, open your game, open your profile menu at the top right and choose **Present on a TV**. It is there for the host and co-host.',
-          'Then send that browser tab to the TV. These are the standard ways to do it. We have not tested every TV, so try yours before game day.'
+          'On a computer, open your game, open your profile menu at the top right and choose **Present on a TV**. It is there for the host and co-host. Then send that tab to the TV. We have not tested every TV, so try yours before game day.'
         ],
         bullets: [
-          'Chrome or Edge: open the browser menu, choose **Cast**, pick your TV and set **Sources** to **Cast tab**. The computer and the TV need to be on the same Wi-Fi.',
-          'Safari on a Mac: open **Control Center**, choose **Screen Mirroring**, then pick your Apple TV or AirPlay TV.',
-          'Any browser: connect the computer to the TV with an HDMI cable, or open the page in the TV\u2019s own web browser.',
-          'No mirroring: tap **Copy TV link** and open it on any browser or device. It shows the board live and needs no sign-in.'
+          'Chrome or Edge: browser menu, **Cast**, pick your TV, **Sources**, **Cast tab**. Same Wi-Fi for both.',
+          'Safari on a Mac: **Control Center**, **Screen Mirroring**, pick your Apple TV or AirPlay TV.',
+          'Any browser: use an HDMI cable, or open the page in the TV\u2019s own browser.',
+          'No mirroring: tap **Copy TV link** and open it on any device. It shows the board live and needs no sign-in.'
         ],
-        html: `<figure class="not-prose mt-6">
-          <img src="/assets/tv-mode/present-on-a-tv-menu.png" alt="The top right of a QuarterScore game page with the profile menu open, showing the Present on a TV option." width="760" height="620" class="w-full max-w-[760px] h-auto rounded-lg border border-slate-300 dark:border-slate-600">
+        html: `<figure class="not-prose">
+          <img src="/assets/tv-mode/present-on-a-tv-menu.png" alt="The top right of a QuarterScore game page with the profile menu open, showing the Present on a TV option." width="760" height="620" class="h-auto w-full max-w-[560px] rounded-card border border-qs-line">
         </figure>
-        <p class="mt-4">Google explains casting in <a href="https://support.google.com/chrome/answer/3228332" rel="noopener noreferrer" target="_blank" class="underline">Cast from Chrome to your TV</a>.</p>`
+        <p class="mt-4 text-sm text-qs-muted">Google explains casting in <a href="https://support.google.com/chrome/answer/3228332" rel="noopener noreferrer" target="_blank" class="underline">Cast from Chrome to your TV</a>.</p>`
       },
       {
         heading: 'More than one board',
         paragraphs: [
-          'Signed in, press the clock button at the top right of TV mode and pick how often to switch: every 10, 20, 30 or 60 seconds. TV mode then rotates through all of your boards, and **Stop** holds the board on screen. You can also open quarterscore.com/present with no board code. The left and right arrow keys switch boards by hand. When a score changes, it stays on that board for 30 seconds, and finished games are skipped.',
-          'That suits a bar or a big gathering where several groups each have a board.'
+          'Signed in, press the clock button at the top right of TV mode and pick how often to switch, from 10 to 60 seconds. TV mode rotates through all your boards, and **Stop** holds one on screen. The arrow keys switch boards by hand. It suits a bar or a gathering where several groups each have a board.'
         ]
       },
       {
         heading: 'Game-day checklist',
         paragraphs: [],
         bullets: [
-          'The day before: choose **Present on a TV** and check that the TV shows it.',
+          'The day before: choose **Present on a TV** and check the TV shows it.',
           'Link the board to the live game so the score and clock appear.',
           'Put the TV where everyone can see the QR code.',
-          'At kickoff: choose **Present on a TV** again and point out the QR code.',
-          'After the game: the Q4 tile says **Final** once the game is over. Read the winners from the screen.'
+          'After the game: the Q4 tile says **Final**. Read the winners from the screen.'
         ]
       }
     ],
@@ -598,7 +589,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     ],
     cta: {
       path: '/create',
-      label: 'Start a free board',
+      label: 'Create a board',
       note: 'Free. Players do not need an account.'
     }
   },
