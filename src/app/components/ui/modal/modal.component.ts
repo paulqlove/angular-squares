@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, ElementRef, HostListener, computed,
 
 /** Open modals, oldest first. Only the last one answers Esc, so a confirm on top of a dialog closes alone. */
 const openModals: ModalComponent[] = [];
+/** The page's overflow before the first modal opened. Locked on <html>: the stylesheet makes <html> the scroller, so locking <body> does nothing. */
 let pageOverflow = '';
 
 const LEVEL = { 1: 'z-[150]', 2: 'z-[160]', 3: 'z-[170]' } as const;
@@ -68,15 +69,15 @@ export class ModalComponent {
       if (!this.open() || typeof document === 'undefined') return;
       openModals.push(this);
       if (openModals.length === 1) {
-        pageOverflow = document.body.style.overflow;
-        document.body.style.overflow = 'hidden';
+        pageOverflow = document.documentElement.style.overflow;
+        document.documentElement.style.overflow = 'hidden';
       }
       this.returnFocus = document.activeElement as HTMLElement | null;
       const focusTimer = setTimeout(() => this.initialFocus());
       onCleanup(() => {
         clearTimeout(focusTimer);
         openModals.splice(openModals.indexOf(this), 1);
-        if (!openModals.length) document.body.style.overflow = pageOverflow;
+        if (!openModals.length) document.documentElement.style.overflow = pageOverflow;
         const target = this.returnFocus;
         this.returnFocus = null;
         setTimeout(() => target?.isConnected && target.focus());
