@@ -13,8 +13,8 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
     <app-content-shell>
-      <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
-      <article>
+      <app-breadcrumbs [items]="breadcrumbs" [column]="true"></app-breadcrumbs>
+      <article class="qs-column">
         @if (page.notice) {
           <p class="mb-6 rounded-xl border border-qs-line bg-qs-panel p-4 text-sm leading-relaxed text-qs-ink" role="note">
             {{ page.notice }}
@@ -27,7 +27,7 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
           <h1 class="qs-title mt-3 text-4xl sm:text-5xl">
             {{ page.h1 }}
           </h1>
-          <p class="mt-5 max-w-[60ch] text-xl leading-snug text-qs-muted">{{ page.lede }}</p>
+          <p class="mt-5 text-xl leading-snug text-qs-muted">{{ page.lede }}</p>
         </header>
 
         @if (page.disclaimer) {
@@ -38,7 +38,7 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
         }
 
         @if (page.steps) {
-          <ol class="mt-12 max-w-[68ch] space-y-6 sm:mt-16">
+          <ol class="mt-12 space-y-6 sm:mt-16">
             @for (step of page.steps; track step.name; let index = $index) {
               <li class="flex gap-4">
                 <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-qs-accent text-base font-bold text-qs-on-accent" aria-hidden="true">
@@ -56,7 +56,7 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
         @if (page.faqs) {
           <section class="mt-12 sm:mt-16" aria-labelledby="faq-heading">
             <h2 id="faq-heading" class="text-2xl font-semibold leading-tight tracking-tight sm:text-[1.75rem]">Questions people ask</h2>
-            <div class="mt-6 max-w-[68ch] divide-y divide-qs-line border-t border-qs-line">
+            <div class="mt-6 divide-y divide-qs-line border-t border-qs-line">
               @for (entry of page.faqs; track entry.question) {
                 <div class="py-6">
                   <h3 class="text-lg font-semibold text-qs-ink">{{ entry.question }}</h3>
@@ -71,10 +71,10 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
           <section class="mt-12 sm:mt-16">
             <h2 class="text-2xl font-semibold leading-tight tracking-tight text-qs-ink sm:text-[1.75rem]">{{ section.heading }}</h2>
             @for (paragraph of section.paragraphs; track paragraph) {
-              <p class="mt-4 max-w-[68ch] text-[1.0625rem] leading-[1.7] text-qs-ink" [innerHTML]="rich(paragraph)"></p>
+              <p class="mt-4 text-[1.0625rem] leading-[1.7] text-qs-ink" [innerHTML]="rich(paragraph)"></p>
             }
             @if (section.bullets) {
-              <ul class="mt-4 max-w-[68ch] list-disc space-y-2 pl-5 text-[1.0625rem] leading-[1.7] text-qs-ink">
+              <ul class="mt-4 list-disc space-y-2 pl-5 text-[1.0625rem] leading-[1.7] text-qs-ink">
                 @for (bullet of section.bullets; track bullet) {
                   <li [innerHTML]="rich(bullet)"></li>
                 }

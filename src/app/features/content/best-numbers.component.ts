@@ -11,8 +11,8 @@ import { ContentShellComponent } from './content-shell.component';
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
     <app-content-shell >
-      <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
-      <article>
+      <app-breadcrumbs [items]="breadcrumbs" [column]="true"></app-breadcrumbs>
+      <article class="qs-column">
         <header>
           <p class="qs-eyebrow">
             Historical frequencies
@@ -20,7 +20,7 @@ import { ContentShellComponent } from './content-shell.component';
           <h1 class="qs-title mt-3 text-4xl sm:text-5xl">
             Best squares numbers
           </h1>
-          <p class="mt-5 max-w-[60ch] text-xl leading-snug text-qs-muted">
+          <p class="mt-5 text-xl leading-snug text-qs-muted">
             Some last digits show up more often than others in professional football scores.
             This is the same table QuarterScore uses on a board’s heatmap. It describes the past.
             It does not predict your game, and it is not a reason to sweat your draw.
@@ -29,14 +29,14 @@ import { ContentShellComponent } from './content-shell.component';
 
         <section class="mt-12 sm:mt-16" aria-labelledby="why-heading">
           <h2 id="why-heading" class="text-2xl font-semibold leading-tight tracking-tight text-qs-ink sm:text-[1.75rem]">Why 0, 7, 3, and 4 lead</h2>
-          <p class="mt-4 max-w-[68ch] text-[1.0625rem] leading-[1.7] text-qs-ink">
+          <p class="mt-4 text-[1.0625rem] leading-[1.7] text-qs-ink">
             Football scoring clumps. A touchdown with an extra point is 7. A field goal is 3.
             Games and quarters also end on 0 more often than on 2 or 5. In this table, the away
             last digit is 0 about {{ awayShare(0) }} of the time and 7 about {{ awayShare(7) }} of
             the time. Digits 3 and 4 are next. Digits 2 and 5 are the least common, near
             {{ awayShare(2) }} and {{ awayShare(5) }}.
           </p>
-          <p class="mt-4 max-w-[68ch] text-[1.0625rem] leading-[1.7] text-qs-ink">
+          <p class="mt-4 text-[1.0625rem] leading-[1.7] text-qs-ink">
             The home column tells the same story. The single fullest cell is away 7 with home 0,
             at 3.5 percent. A cell marked 0.0, such as 2 and 2, did not appear in the published
             rounding of this table. That is not the same as “impossible.” A less common square
@@ -46,13 +46,13 @@ import { ContentShellComponent } from './content-shell.component';
 
         <section class="mt-12 sm:mt-16" aria-labelledby="table-heading">
           <h2 id="table-heading" class="text-2xl font-semibold leading-tight tracking-tight text-qs-ink sm:text-[1.75rem]">Every digit pair</h2>
-          <p class="mt-4 max-w-[68ch] text-[1.0625rem] leading-[1.7] text-qs-ink">
+          <p class="mt-4 text-[1.0625rem] leading-[1.7] text-qs-ink">
             Rows are the away team’s last digit. Columns are the home team’s last digit.
             Each cell is that pair’s share of historical final scores. Numbers are rounded,
             so the grid totals 99.9 rather than 100.
           </p>
           <p class="mt-2 text-sm text-qs-muted md:hidden">Scroll sideways to read every digit.</p>
-          <div class="mt-4 overflow-x-auto" tabindex="0" aria-label="Historical digit table. Scroll sideways if needed.">
+          <div class="qs-wide mt-4 overflow-x-auto" tabindex="0" aria-label="Historical digit table. Scroll sideways if needed.">
             <table class="w-full min-w-[44rem] border-collapse text-center font-mono text-sm">
               <caption class="sr-only">
                 Historical frequency of each away last digit and home last digit pair, in percent.
@@ -104,7 +104,7 @@ import { ContentShellComponent } from './content-shell.component';
 
         <section class="mt-12 sm:mt-16" aria-labelledby="quarters-heading">
           <h2 id="quarters-heading" class="text-2xl font-semibold leading-tight tracking-tight text-qs-ink sm:text-[1.75rem]">Quarters are not a second table</h2>
-          <p class="mt-4 max-w-[68ch] text-[1.0625rem] leading-[1.7] text-qs-ink">
+          <p class="mt-4 text-[1.0625rem] leading-[1.7] text-qs-ink">
             This page is one grid, not four. Early quarters often sit on smaller scores, so 0 is
             a familiar first-quarter digit, and the final score is where 7s stack up. We do not
             publish a separate percentage for each quarter, because this source does not either.
@@ -114,7 +114,7 @@ import { ContentShellComponent } from './content-shell.component';
 
         <section class="mt-12 sm:mt-16" aria-labelledby="luck-heading">
           <h2 id="luck-heading" class="text-2xl font-semibold leading-tight tracking-tight text-qs-ink sm:text-[1.75rem]">Have fun with it</h2>
-          <p class="mt-4 max-w-[68ch] text-[1.0625rem] leading-[1.7] text-qs-ink">
+          <p class="mt-4 text-[1.0625rem] leading-[1.7] text-qs-ink">
             Numbers are drawn after the names are on the board, so a “good” digit is luck.
             A square that is rare in the table still comes up. Bring the board for the company.
           </p>
