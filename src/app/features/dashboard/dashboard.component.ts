@@ -413,21 +413,20 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
                 <span class="aspect-square" [class]="i < game.squaresFilled ? 'bg-qs-accent' : 'bg-qs-panel'"></span>
               }
             </div>
-            <dl class="grid flex-1 grid-cols-3 gap-x-3">
+            <dl class="grid flex-1 grid-cols-2 gap-x-3">
               <div class="row-span-2 grid grid-rows-subgrid gap-y-1">
                 <dt class="qs-label text-xs text-qs-muted">Squares</dt>
                 <dd class="text-lg font-semibold tabular-nums text-qs-ink">{{ game.squaresFilled }}<span class="text-sm font-normal text-qs-muted">/{{ game.boardSize }}</span></dd>
               </div>
               <div class="row-span-2 grid grid-rows-subgrid gap-y-1">
-                <dt class="qs-label text-xs text-qs-muted">Players</dt>
-                <dd class="text-lg font-semibold tabular-nums text-qs-ink">{{ game.playerCount }}</dd>
+                @if (joined) {
+                  <dt class="qs-label text-xs text-qs-muted">Players</dt>
+                  <dd class="text-lg font-semibold tabular-nums text-qs-ink">{{ game.playerCount }}</dd>
+                } @else {
+                  <dt class="qs-label text-xs text-qs-muted">Confirmed</dt>
+                  <dd class="text-lg font-semibold tabular-nums text-qs-ink">{{ game.confirmedCount }}<span class="text-sm font-normal text-qs-muted">/{{ game.playerCount }}</span></dd>
+                }
               </div>
-              @if (!joined && game.confirmedCount < game.playerCount) {
-                <div class="row-span-2 grid grid-rows-subgrid gap-y-1">
-                  <dt class="qs-label text-xs text-qs-muted">Needs confirm</dt>
-                  <dd class="text-lg font-semibold tabular-nums text-qs-ink">{{ game.playerCount - game.confirmedCount }}</dd>
-                </div>
-              }
             </dl>
           </div>
 
