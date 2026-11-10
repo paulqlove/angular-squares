@@ -413,19 +413,19 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
                 <span class="aspect-square" [class]="i < game.squaresFilled ? 'bg-qs-accent' : 'bg-qs-panel'"></span>
               }
             </div>
-            <dl class="grid flex-1 grid-cols-3 gap-3">
-              <div>
+            <dl class="grid flex-1 grid-cols-3 gap-x-3">
+              <div class="row-span-2 grid grid-rows-subgrid gap-y-1">
                 <dt class="qs-label text-xs text-qs-muted">Squares</dt>
-                <dd class="mt-1 text-lg font-semibold tabular-nums text-qs-ink">{{ game.squaresFilled }}<span class="text-sm font-normal text-qs-muted">/{{ game.boardSize }}</span></dd>
+                <dd class="text-lg font-semibold tabular-nums text-qs-ink">{{ game.squaresFilled }}<span class="text-sm font-normal text-qs-muted">/{{ game.boardSize }}</span></dd>
               </div>
-              <div>
+              <div class="row-span-2 grid grid-rows-subgrid gap-y-1">
                 <dt class="qs-label text-xs text-qs-muted">Players</dt>
-                <dd class="mt-1 text-lg font-semibold tabular-nums text-qs-ink">{{ game.playerCount }}</dd>
+                <dd class="text-lg font-semibold tabular-nums text-qs-ink">{{ game.playerCount }}</dd>
               </div>
               @if (!joined && game.confirmedCount < game.playerCount) {
-                <div>
+                <div class="row-span-2 grid grid-rows-subgrid gap-y-1">
                   <dt class="qs-label text-xs text-qs-muted">Needs confirm</dt>
-                  <dd class="mt-1 text-lg font-semibold tabular-nums text-qs-ink">{{ game.playerCount - game.confirmedCount }}</dd>
+                  <dd class="text-lg font-semibold tabular-nums text-qs-ink">{{ game.playerCount - game.confirmedCount }}</dd>
                 </div>
               }
             </dl>
