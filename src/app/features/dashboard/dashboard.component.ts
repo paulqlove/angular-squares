@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed, inject, effect, HostListener, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, signal, computed, inject, effect, ChangeDetectionStrategy } from '@angular/core';
 
 import { miniGridCells, miniGridClass } from '../../core/utils/mini-grid';
 import { DropdownComponent } from '../../components/ui/dropdown/dropdown.component';
@@ -10,6 +10,7 @@ import { GameService, GameListItem, BoardSize } from '../../core/services/game.s
 import { DEFAULT_SPLIT, DEFAULT_EMPTY_QUARTER_RULE, isNoExpiry } from '../../core/plans';
 import { EspnService, EspnGame, SportType, SPORT_CONFIG } from '../../core/services/espn.service';
 import { getTeamColors } from '../content/teams-data';
+import { ModalComponent } from '../../components/ui/modal/modal.component';
 import { CardMenuComponent, CardMenuItem } from '../../components/ui/card-menu/card-menu.component';
 import { ConfirmService } from '../../core/services/confirm.service';
 import { ToastService } from '../../core/services/toast.service';
@@ -55,7 +56,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
 
 @Component({
     selector: 'app-dashboard',
-    imports: [FormsModule, NgTemplateOutlet, DropdownComponent, CardMenuComponent, CreateGameFormComponent, NgIconComponent, AppHeaderComponent, HeadroomDirective, ProfileMenuComponent, ShareDialogComponent, EditGameDialogComponent, UpgradePassDialogComponent],
+    imports: [ModalComponent, FormsModule, NgTemplateOutlet, DropdownComponent, CardMenuComponent, CreateGameFormComponent, NgIconComponent, AppHeaderComponent, HeadroomDirective, ProfileMenuComponent, ShareDialogComponent, EditGameDialogComponent, UpgradePassDialogComponent],
     providers: [
         provideIcons({
             heroPlus,
@@ -442,45 +443,33 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
       </ng-template>
 
       <!-- Create Game Modal -->
-      @if (showCreateModal()) {
-        <div
-          animate.enter="qs-modal-enter" animate.leave="qs-modal-leave" class="fixed inset-0 z-[150] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm max-sm:p-0"
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="create-game-title"
-            class="flex h-[min(44rem,calc(100dvh-2rem))] w-full max-w-2xl flex-col overflow-hidden rounded-card border border-qs-line bg-qs-panel shadow-pop animate-modal-in max-sm:h-dvh max-sm:rounded-none max-sm:border-0"
-            (click)="$event.stopPropagation()"
-          >
-            <div class="flex items-start justify-between gap-4 border-b border-qs-line px-6 pb-4 pt-5 max-sm:pb-3 max-sm:pt-4">
-              <div>
-                <p class="qs-eyebrow max-sm:hidden">New game</p>
-                <h3 id="create-game-title" class="qs-title mt-2 text-3xl max-sm:mt-0 max-sm:text-2xl">Set up your <span class="text-qs-accent">board</span></h3>
-              </div>
-              <button
-                type="button"
-                (click)="closeCreateModal()"
-                class="qs-btn qs-btn-ghost -mr-2 w-11 px-0 text-qs-muted hover:text-qs-ink"
-                aria-label="Close"
-              >
-                <ng-icon name="heroXMark" class="text-xl"></ng-icon>
-              </button>
-            </div>
-
-            <app-create-game-form
-              [customSplitsAllowed]="planService.features().customSplits"
-              [openBoardsAllowed]="planService.features().activeBoards > 1"
-              [autoManageAllowed]="planService.features().autoManage"
-              [autoManageDefault]="autoManageDefault()"
-              [squareLimitAllowed]="planService.features().squareLimit"
-              [isCreating]="isCreating()"
-              (cancelled)="closeCreateModal()"
-              (submitted)="createGame($event)"
-            ></app-create-game-form>
+      <app-modal [open]="showCreateModal()" labelledBy="create-game-title" size="xl" phone="full" [backdropCloses]="false" extraClass="flex h-[min(44rem,calc(100dvh-2rem))] flex-col overflow-hidden" (dismissed)="dismissCreateModal()">
+        <div class="flex items-start justify-between gap-4 border-b border-qs-line px-6 pb-4 pt-5 max-sm:pb-3 max-sm:pt-4">
+          <div>
+            <p class="qs-eyebrow max-sm:hidden">New game</p>
+            <h3 id="create-game-title" class="qs-title mt-2 text-3xl max-sm:mt-0 max-sm:text-2xl">Set up your <span class="text-qs-accent">board</span></h3>
           </div>
+          <button
+            type="button"
+            (click)="closeCreateModal()"
+            class="qs-btn qs-btn-ghost -mr-2 w-11 px-0 text-qs-muted hover:text-qs-ink"
+            aria-label="Close"
+          >
+            <ng-icon name="heroXMark" class="text-xl"></ng-icon>
+          </button>
         </div>
-      }
+
+        <app-create-game-form
+          [customSplitsAllowed]="planService.features().customSplits"
+          [openBoardsAllowed]="planService.features().activeBoards > 1"
+          [autoManageAllowed]="planService.features().autoManage"
+          [autoManageDefault]="autoManageDefault()"
+          [squareLimitAllowed]="planService.features().squareLimit"
+          [isCreating]="isCreating()"
+          (cancelled)="closeCreateModal()"
+          (submitted)="createGame($event)"
+        ></app-create-game-form>
+      </app-modal>
 
       <!-- Share Modal -->
       <app-share-dialog [isOpen]="!!shareModalGameId()" [gameId]="shareModalGameId() || ''" (closed)="shareModalGameId.set(null)"></app-share-dialog>
@@ -834,6 +823,11 @@ export class DashboardComponent implements OnInit {
     setTimeout(() => trigger?.focus());
   }
 
+  /** Esc: close but keep the entries, so reopening restores them. The X and Cancel clear the draft. */
+  dismissCreateModal(): void {
+    this.showCreateModal.set(false);
+  }
+
   closeCreateModal(): void {
     this.showCreateModal.set(false);
     clearCreateDraft();
@@ -1170,13 +1164,6 @@ export class DashboardComponent implements OnInit {
   }
 
   // Profile dropdown methods
-
-  @HostListener('document:keydown.escape')
-  onEscape(): void {
-    if (this.showCreateModal()) {
-      this.showCreateModal.set(false);
-    }
-  }
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Admin: Gifted Season Pass Management
