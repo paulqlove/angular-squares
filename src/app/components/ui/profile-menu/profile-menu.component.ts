@@ -72,23 +72,21 @@ import { ToggleComponent } from '../toggle/toggle.component';
             }
           </div>
 
-          @if (!currentUser()?.isGuest) {
-            <div class="border-b border-qs-line p-2">
-              <p class="qs-label px-3 pb-1 pt-1 text-qs-muted">Help</p>
-              <button type="button" (click)="showProfileDropdown.set(false); tour.emit()" class="qs-btn qs-btn-ghost w-full justify-start text-qs-ink">
-                <ng-icon name="heroPlayCircle" class="text-base"></ng-icon>
-                Take the tour
-              </button>
-              <a routerLink="/how-to-play" class="qs-btn qs-btn-ghost w-full justify-start text-qs-ink">
-                <ng-icon name="heroBookOpen" class="text-base"></ng-icon>
-                How to play
-              </a>
-              <a routerLink="/faq" class="qs-btn qs-btn-ghost w-full justify-start text-qs-ink">
-                <ng-icon name="heroQuestionMarkCircle" class="text-base"></ng-icon>
-                FAQ
-              </a>
-            </div>
-          }
+          <div class="border-b border-qs-line p-2">
+            <p class="qs-label px-3 pb-1 pt-1 text-qs-muted">Help</p>
+            <button type="button" (click)="showProfileDropdown.set(false); tour.emit()" class="qs-btn qs-btn-ghost w-full justify-start text-qs-ink">
+              <ng-icon name="heroPlayCircle" class="text-base"></ng-icon>
+              Take the tour
+            </button>
+            <a routerLink="/how-to-play" class="qs-btn qs-btn-ghost w-full justify-start text-qs-ink">
+              <ng-icon name="heroBookOpen" class="text-base"></ng-icon>
+              How to play
+            </a>
+            <a routerLink="/faq" class="qs-btn qs-btn-ghost w-full justify-start text-qs-ink">
+              <ng-icon name="heroQuestionMarkCircle" class="text-base"></ng-icon>
+              FAQ
+            </a>
+          </div>
 
           <div class="space-y-5 p-4">
             @if (allowNameEdit) {

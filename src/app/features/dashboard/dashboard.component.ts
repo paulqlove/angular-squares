@@ -20,7 +20,6 @@ import { AppHeaderComponent } from '../../components/ui/app-header/app-header.co
 import { ShareDialogComponent } from '../../components/ui/share-dialog/share-dialog.component';
 import { CreateGameFormComponent, CreateGameSubmit } from '../create/create-game-form.component';
 import { EditGameDialogComponent, EditGameValues } from '../super-bowl-squares/components/edit-game-dialog/edit-game-dialog.component';
-import { HelpMenuComponent } from '../../components/ui/help-menu/help-menu.component';
 import { ProfileMenuComponent } from '../../components/ui/profile-menu/profile-menu.component';
 import { HeadroomDirective } from '../../shared/directives/headroom.directive';
 import { UpgradePassDialogComponent } from './components/upgrade-pass-dialog/upgrade-pass-dialog.component';
@@ -56,7 +55,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
 
 @Component({
     selector: 'app-dashboard',
-    imports: [FormsModule, NgTemplateOutlet, DropdownComponent, CardMenuComponent, CreateGameFormComponent, NgIconComponent, AppHeaderComponent, HeadroomDirective, HelpMenuComponent, ProfileMenuComponent, ShareDialogComponent, EditGameDialogComponent, UpgradePassDialogComponent],
+    imports: [FormsModule, NgTemplateOutlet, DropdownComponent, CardMenuComponent, CreateGameFormComponent, NgIconComponent, AppHeaderComponent, HeadroomDirective, ProfileMenuComponent, ShareDialogComponent, EditGameDialogComponent, UpgradePassDialogComponent],
     providers: [
         provideIcons({
             heroPlus,
@@ -86,7 +85,6 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
     <div class="min-h-screen bg-page" [attr.inert]="showUpgradeDialog() ? '' : null">
       <!-- Header -->
       <app-shared-header variant="solid" appHeadroom>
-        <app-help-menu (tour)="startWalkthrough()"></app-help-menu>
 
         <app-profile-menu walkthroughTarget="profile-dropdown" (tour)="startWalkthrough()"></app-profile-menu>
       </app-shared-header>
