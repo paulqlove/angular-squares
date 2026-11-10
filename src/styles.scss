@@ -588,12 +588,8 @@ button:active:not(:disabled) .turn-icon { transform: rotate(120deg); transition-
   }
 }
 
-/* Reading pages: one centered column for the text (44rem, about 68 characters at 17px). Wide blocks such as
-   tables and the paper board opt out with .qs-wide and break out to the page width, centered on the column. */
-@media screen {
-  .qs-column > * { max-width: 44rem; margin-inline: auto; }
-  .qs-column .qs-wide { position: relative; left: 50%; width: min(64rem, calc(100vw - 2rem)); max-width: none; transform: translateX(-50%); }
-}
-
 /* Body copy on reading pages sits a step below headings, so headings have rank. */
 .qs-body { color: color-mix(in srgb, var(--qs-ink) 82%, var(--qs-bg)); }
+
+/* A reading section's full-width slot (a table, a board) sits under both columns. */
+.reading-section > [wide] { grid-column: 1 / -1; }

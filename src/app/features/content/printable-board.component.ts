@@ -1,12 +1,11 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { SeoService } from '../../core/services/seo.service';
-import { BreadcrumbsComponent } from '../../shared/breadcrumbs.component';
-import { ContentShellComponent } from './content-shell.component';
+import { PageCta, RelatedLink } from './marketing-pages';
+import { ReadingEndComponent, ReadingHeaderComponent, ReadingPageComponent, ReadingSectionComponent } from './reading-layout.components';
 
 @Component({
     selector: 'app-printable-board',
-    imports: [RouterLink, ContentShellComponent, BreadcrumbsComponent],
+    imports: [ReadingPageComponent, ReadingHeaderComponent, ReadingSectionComponent, ReadingEndComponent],
     changeDetection: ChangeDetectionStrategy.Eager,
     styles: `
       .grid-row {
@@ -65,156 +64,105 @@ import { ContentShellComponent } from './content-shell.component';
       }
     `,
     template: `
-    <app-content-shell >
-      <div class="no-print">
-        <app-breadcrumbs [items]="breadcrumbs" [column]="true"></app-breadcrumbs>
-      </div>
-      <article class="qs-column">
-        <header class="no-print">
-          <p class="qs-eyebrow">
-            Free grid
-          </p>
-          <h1 class="qs-title mt-3 text-4xl sm:text-5xl">
-            Printable football squares
-          </h1>
-          <p class="mt-5 text-xl leading-snug text-qs-muted">
-            A blank 10 by 10 grid with no logos. Print it for the wall, or download the PDF.
-            Write names first. Write the digits only after the draw.
-          </p>
-          <div class="mt-6">
-            <a
-              href="assets/printable-football-squares.pdf"
-              download="printable-football-squares.pdf"
-              class="inline-flex min-h-11 items-center justify-center rounded-md bg-qs-accent px-4 font-semibold text-qs-on-accent hover:bg-qs-accent-hover"
-            >
-              Download PDF
-            </a>
-          </div>
-        </header>
+    <app-reading-page [breadcrumbs]="breadcrumbs">
+      <app-reading-header class="no-print" eyebrow="Free grid" title="Printable football squares"
+        lede="A blank 10 by 10 grid with no logos. Print it for the wall, or download the PDF. Write names first. Write the digits only after the draw.">
+        <div actions class="mt-8">
+          <a href="assets/printable-football-squares.pdf" download="printable-football-squares.pdf" class="qs-btn qs-btn-primary">Download PDF</a>
+        </div>
+      </app-reading-header>
 
-        <section class="no-print mt-12 sm:mt-16" aria-labelledby="paper-heading">
-          <h2 id="paper-heading" class="text-2xl font-semibold leading-tight tracking-tight text-qs-ink sm:text-[1.75rem]">How to fill a paper board</h2>
-          <ol class="mt-4 list-decimal space-y-3 pl-5 leading-relaxed text-qs-ink">
-            <li>Write the home team over the columns and the away team beside the rows. Plain names are enough.</li>
-            <li>Pass the sheet around. Each person writes their name in empty squares until you stop.</li>
-            <li>Put the digits 0 through 9 in a hat, twice. Draw one set for the columns and one set for the rows. Write them in the blank header boxes in the order you draw them.</li>
-            <li>At the end of each quarter, take the last digit of each score and find that row and column.</li>
-          </ol>
-          <p class="mt-4 text-[1.0625rem] leading-[1.7] text-qs-ink">
-            Paper gets lost, the math gets argued, and a friend in another city cannot see it.
-            The online board keeps the names, the draw, and the quarter winners in one link.
-            Many parties do both: the live board on the TV, and this sheet on the wall.
-          </p>
-        </section>
+      <app-reading-section class="no-print" heading="How to fill a paper board" headingId="paper-heading">
+        <ol class="list-decimal space-y-3 pl-5">
+          <li>Write the home team over the columns and the away team beside the rows.</li>
+          <li>Pass the sheet around. Each person writes their name in empty squares until you stop.</li>
+          <li>Put the digits 0 through 9 in a hat, twice. Draw one set for the columns and one for the rows, and write them in the header boxes in order.</li>
+          <li>Each quarter, take the last digit of each score and find that row and column.</li>
+        </ol>
+        <p>Many parties do both: the live board on the TV, and this sheet on the wall.</p>
+      </app-reading-section>
 
-        <section class="print-sheet qs-wide mt-12 sm:mt-16" aria-labelledby="grid-heading">
-          <h2 id="grid-heading" class="text-2xl font-semibold leading-tight tracking-tight text-qs-ink sm:text-[1.75rem] no-print">Blank board</h2>
+      <section class="print-sheet mt-20 border-t border-qs-line pt-8 print:mt-0 print:border-0 print:pt-0" aria-labelledby="grid-heading">
+        <h2 id="grid-heading" class="no-print mb-6 text-[1.375rem] font-semibold leading-tight tracking-tight text-qs-ink">Blank board</h2>
 
-          <!-- Print header with branding -->
-          <div class="hidden print:flex items-center justify-between mb-4">
-            <img src="assets/brand/lockup-horizontal.svg" alt="QuarterScore" class="h-6">
-            <span class="text-xs text-slate-500">quarterscore.com</span>
-          </div>
+        <!-- Print header with branding -->
+        <div class="hidden print:flex items-center justify-between mb-4">
+          <img src="assets/brand/lockup-horizontal.svg" alt="QuarterScore" class="h-6">
+          <span class="text-xs text-slate-500">quarterscore.com</span>
+        </div>
 
-          <p class="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
-            <span class="flex items-center gap-1 font-semibold text-qs-ink">
-              <span class="text-base leading-none text-qs-muted" aria-hidden="true">&#8595;</span>
-              Away team: ____________
-            </span>
-            <span class="text-qs-line-strong" aria-hidden="true">/</span>
-            <span class="flex items-center gap-1 font-semibold text-qs-ink">
-              Home team: ____________
-              <span class="text-base leading-none text-qs-muted" aria-hidden="true">&#8594;</span>
-            </span>
-          </p>
+        <p class="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+          <span class="flex items-center gap-1 font-semibold text-qs-ink">
+            <span class="text-base leading-none text-qs-muted" aria-hidden="true">&#8595;</span>
+            Away team: ____________
+          </span>
+          <span class="text-qs-line-strong" aria-hidden="true">/</span>
+          <span class="flex items-center gap-1 font-semibold text-qs-ink">
+            Home team: ____________
+            <span class="text-base leading-none text-qs-muted" aria-hidden="true">&#8594;</span>
+          </span>
+        </p>
 
-          <!-- Responsive CSS Grid board (full width) -->
-          <div
-            role="grid"
-            aria-label="Blank football squares grid"
-            class="flex w-full flex-col gap-px overflow-hidden rounded-md bg-qs-line p-px"
-          >
-            <!-- Top row: corner + 10 header cells -->
-            <div class="grid-row" role="row">
-              <div class="cell corner">
-                <span>AWAY &#8595;</span>
-                <span>HOME &#8594;</span>
-              </div>
-              @for (col of columns; track col) {
-                <div class="cell axis-top" role="columnheader">
-                  <span class="sr-only">Home digit box {{ col }}</span>
-                </div>
-              }
+        <!-- Responsive CSS Grid board (full width) -->
+        <div
+          role="grid"
+          aria-label="Blank football squares grid"
+          class="flex w-full flex-col gap-px overflow-hidden rounded-md bg-qs-line p-px"
+        >
+          <!-- Top row: corner + 10 header cells -->
+          <div class="grid-row" role="row">
+            <div class="cell corner">
+              <span>AWAY &#8595;</span>
+              <span>HOME &#8594;</span>
             </div>
-
-            <!-- 10 rows: side header + 10 squares -->
-            @for (row of columns; track row) {
-              <div class="grid-row" role="row">
-                <div class="cell axis-side" role="rowheader">
-                  <span class="sr-only">Away digit box {{ row }}</span>
-                </div>
-                @for (col of columns; track col) {
-                  <div class="cell" role="gridcell"></div>
-                }
+            @for (col of columns; track col) {
+              <div class="cell axis-top" role="columnheader">
+                <span class="sr-only">Home digit box {{ col }}</span>
               </div>
             }
           </div>
 
-          <p class="mt-4 text-sm leading-relaxed text-qs-ink">
-            <strong>How to read:</strong> Columns are the home team's last digit. Rows are the away team's last digit.
-            Find the square where the row and column meet to see the winner.
-          </p>
-          <p class="mt-2 text-xs text-qs-muted">
-            QuarterScore never collects, holds, or pays out money. quarterscore.com
-          </p>
-        </section>
+          <!-- 10 rows: side header + 10 squares -->
+          @for (row of columns; track row) {
+            <div class="grid-row" role="row">
+              <div class="cell axis-side" role="rowheader">
+                <span class="sr-only">Away digit box {{ row }}</span>
+              </div>
+              @for (col of columns; track col) {
+                <div class="cell" role="gridcell"></div>
+              }
+            </div>
+          }
+        </div>
 
-        <section class="no-print mt-10" aria-labelledby="related-heading">
-          <h2 id="related-heading" class="text-2xl font-semibold leading-tight tracking-tight text-qs-ink sm:text-[1.75rem]">Keep going</h2>
-          <ul class="mt-4 grid gap-3 sm:grid-cols-2">
-            <li>
-              <a routerLink="/how-to-play" class="block rounded-xl border border-qs-line bg-qs-panel p-4 hover:bg-qs-panel-2">
-                <span class="font-semibold text-qs-accent underline decoration-qs-accent/40 underline-offset-2 text-qs-accent">How to play</span>
-                <span class="mt-1 block text-sm text-qs-muted">The same rules, on a live board.</span>
-              </a>
-            </li>
-            <li>
-              <a routerLink="/" class="block rounded-xl border border-qs-line bg-qs-panel p-4 hover:bg-qs-panel-2">
-                <span class="font-semibold text-qs-accent underline decoration-qs-accent/40 underline-offset-2 text-qs-accent">Homepage</span>
-                <span class="mt-1 block text-sm text-qs-muted">See a sample board and start a game.</span>
-              </a>
-            </li>
-            <li>
-              <a routerLink="/super-bowl-squares" class="block rounded-xl border border-qs-line bg-qs-panel p-4 hover:bg-qs-panel-2">
-                <span class="font-semibold text-qs-accent underline decoration-qs-accent/40 underline-offset-2 text-qs-accent">Super Bowl squares</span>
-                <span class="mt-1 block text-sm text-qs-muted">The February 14, 2027 party board.</span>
-              </a>
-            </li>
-            <li>
-              <a routerLink="/football-squares-on-tv" class="block rounded-xl border border-qs-line bg-qs-panel p-4 hover:bg-qs-panel-2">
-                <span class="font-semibold text-qs-accent underline decoration-qs-accent/40 underline-offset-2 text-qs-accent">Football squares on TV</span>
-                <span class="mt-1 block text-sm text-qs-muted">Put the live board on a big screen instead.</span>
-              </a>
-            </li>
-          </ul>
-        </section>
+        <p class="mt-4 text-sm leading-relaxed text-qs-ink">
+          <strong>How to read:</strong> Columns are the home team's last digit. Rows are the away team's last digit.
+          Find the square where the row and column meet to see the winner.
+        </p>
+        <p class="mt-2 text-xs text-qs-muted">
+          QuarterScore never collects, holds, or pays out money. quarterscore.com
+        </p>
+      </section>
 
-        <section class="no-print mt-10 rounded-2xl bg-qs-accent px-5 py-6 text-qs-on-accent">
-          <a routerLink="/create" class="qs-btn qs-btn-ink">
-            Skip the paper and run it live
-          </a>
-          <p class="mt-3 text-sm leading-relaxed text-qs-on-accent">
-            Or keep both. The printable is free, and so is the online board.
-          </p>
-        </section>
-      </article>
-    </app-content-shell>
+      <app-reading-end class="no-print" [related]="related" [cta]="cta"></app-reading-end>
+    </app-reading-page>
   `
 })
 export class PrintableBoardComponent {
   private seo = inject(SeoService);
 
   public readonly columns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  public readonly related: RelatedLink[] = [
+    { path: '/how-to-play', label: 'How to play', text: 'The same rules, on a live board.' },
+    { path: '/', label: 'Homepage', text: 'See a sample board and start a game.' },
+    { path: '/super-bowl-squares', label: 'Super Bowl squares', text: 'The February 14, 2027 party board.' },
+    { path: '/football-squares-on-tv', label: 'Football squares on TV', text: 'Put the live board on a big screen instead.' }
+  ];
+  public readonly cta: PageCta = {
+    path: '/create',
+    label: 'Skip the paper and run it live',
+    note: 'Or keep both. The printable is free, and so is the online board.'
+  };
   public readonly breadcrumbs = [
     { name: 'Home', path: '/' },
     { name: 'Printable football squares', path: '/printable-football-squares' }

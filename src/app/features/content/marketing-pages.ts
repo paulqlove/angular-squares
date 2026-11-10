@@ -536,58 +536,52 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     description: 'Show your football squares board on a TV or big screen with QuarterScore TV mode: the board, the score, each quarter winner and a QR code to join.',
     h1: 'Football squares on TV',
     eyebrow: 'TV mode',
-    lede: 'TV mode puts your board on a big screen: the board, the score, the winner of each quarter and a code friends can scan to follow along. It is free for every account.',
+    lede: 'Put your board on a big screen: the board, the score, each quarter winner and a code friends can scan to follow along. Free for every account.',
+    heroHtml: `<img src="/assets/tv-mode/tv-board.png" alt="QuarterScore TV mode: a squares board with sample player names, the score, the winner of each quarter and a QR code." width="1920" height="1080" class="h-auto w-full rounded-card border border-qs-line">`,
     published: '2026-11-06',
     sections: [
       {
         heading: 'What the screen shows',
         paragraphs: [
-          'The screen resizes to fill the window. We checked it from a 13-inch laptop up to a 4K TV, and the whole board fits with no scrolling.'
+          'The screen fills the window, from a laptop to a 4K TV, with no scrolling.'
         ],
         bullets: [
-          'The board, with each player\u2019s squares in their own color. It fits 25, 50 and 100 square boards.',
-          'The live score and game clock, when the board is linked to a live game.',
-          'The winner of each quarter.',
-          'How many squares are claimed and how many are open.',
-          'A QR code that opens the same board link as **Share**, so friends can follow on their own phones. Nobody needs an account.'
-        ],
-        html: `<figure class="not-prose mt-6">
-          <img src="/assets/tv-mode/tv-board.png" alt="QuarterScore TV mode showing a squares board with sample player names in different colors, the score, the winner of each quarter and a QR code." width="1920" height="1080" class="w-full h-auto rounded-lg border border-slate-300 dark:border-slate-600">
-        </figure>`
+          'The board, with each player\u2019s squares in their own color.',
+          'The live score and clock, when the board is linked to a live game.',
+          'The winner of each quarter, and how many squares are claimed and open.',
+          'A QR code so friends can follow on their phones. They do not need an account.'
+        ]
       },
       {
         heading: 'Get it on the TV',
         paragraphs: [
-          'On a computer or laptop, open your game, open your profile menu at the top right and choose **Present on a TV**. It is there for the host and co-host.',
-          'Then send that browser tab to the TV. These are the standard ways to do it. We have not tested every TV, so try yours before game day.'
+          'On a computer, open your game, open your profile menu at the top right and choose **Present on a TV**. It is there for the host and co-host. Then send that tab to the TV. We have not tested every TV, so try yours before game day.'
         ],
         bullets: [
-          'Chrome or Edge: open the browser menu, choose **Cast**, pick your TV and set **Sources** to **Cast tab**. The computer and the TV need to be on the same Wi-Fi.',
-          'Safari on a Mac: open **Control Center**, choose **Screen Mirroring**, then pick your Apple TV or AirPlay TV.',
-          'Any browser: connect the computer to the TV with an HDMI cable, or open the page in the TV\u2019s own web browser.',
-          'No mirroring: tap **Copy TV link** and open it on any browser or device. It shows the board live and needs no sign-in.'
+          'Chrome or Edge: browser menu, **Cast**, pick your TV, **Sources**, **Cast tab**. Same Wi-Fi for both.',
+          'Safari on a Mac: **Control Center**, **Screen Mirroring**, pick your Apple TV or AirPlay TV.',
+          'Any browser: use an HDMI cable, or open the page in the TV\u2019s own browser.',
+          'No mirroring: tap **Copy TV link** and open it on any device. It shows the board live and needs no sign-in.'
         ],
-        html: `<figure class="not-prose mt-6">
-          <img src="/assets/tv-mode/present-on-a-tv-menu.png" alt="The top right of a QuarterScore game page with the profile menu open, showing the Present on a TV option." width="760" height="620" class="w-full max-w-[760px] h-auto rounded-lg border border-slate-300 dark:border-slate-600">
+        html: `<figure class="not-prose">
+          <img src="/assets/tv-mode/present-on-a-tv-menu.png" alt="The top right of a QuarterScore game page with the profile menu open, showing the Present on a TV option." width="760" height="620" class="h-auto w-full max-w-[560px] rounded-card border border-qs-line">
         </figure>
-        <p class="mt-4">Google explains casting in <a href="https://support.google.com/chrome/answer/3228332" rel="noopener noreferrer" target="_blank" class="underline">Cast from Chrome to your TV</a>.</p>`
+        <p class="mt-4 text-sm text-qs-muted">Google explains casting in <a href="https://support.google.com/chrome/answer/3228332" rel="noopener noreferrer" target="_blank" class="underline">Cast from Chrome to your TV</a>.</p>`
       },
       {
         heading: 'More than one board',
         paragraphs: [
-          'Signed in, press the clock button at the top right of TV mode and pick how often to switch: every 10, 20, 30 or 60 seconds. TV mode then rotates through all of your boards, and **Stop** holds the board on screen. You can also open quarterscore.com/present with no board code. The left and right arrow keys switch boards by hand. When a score changes, it stays on that board for 30 seconds, and finished games are skipped.',
-          'That suits a bar or a big gathering where several groups each have a board.'
+          'Signed in, press the clock button at the top right of TV mode and pick how often to switch, from 10 to 60 seconds. TV mode rotates through all your boards, and **Stop** holds one on screen. The arrow keys switch boards by hand. It suits a bar or a gathering where several groups each have a board.'
         ]
       },
       {
         heading: 'Game-day checklist',
         paragraphs: [],
         bullets: [
-          'The day before: choose **Present on a TV** and check that the TV shows it.',
+          'The day before: choose **Present on a TV** and check the TV shows it.',
           'Link the board to the live game so the score and clock appear.',
           'Put the TV where everyone can see the QR code.',
-          'At kickoff: choose **Present on a TV** again and point out the QR code.',
-          'After the game: the Q4 tile says **Final** once the game is over. Read the winners from the screen.'
+          'After the game: the Q4 tile says **Final**. Read the winners from the screen.'
         ]
       }
     ],
@@ -598,7 +592,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     ],
     cta: {
       path: '/create',
-      label: 'Start a free board',
+      label: 'Create a board',
       note: 'Free. Players do not need an account.'
     }
   },
