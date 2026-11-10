@@ -1,6 +1,6 @@
 import { MaxSquaresFieldComponent } from '../../components/ui/max-squares-field/max-squares-field.component';
 import { autoRunLabel } from '../../core/utils/auto-manage';
-import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroCheckCircle } from '@ng-icons/heroicons/outline';
@@ -302,7 +302,7 @@ export interface CreateGameSubmit {
             }
               <details class="mt-1 text-xs text-qs-muted"><summary class="inline-flex min-h-11 cursor-pointer items-center underline underline-offset-4">How it works</summary><p class="pb-1">If the board is not full it first moves to 50 or 25 squares (squares are shuffled, each player keeps their count). Players can pick until then. Cancel any time before it runs.</p></details>
           </div>
-          <app-toggle [checked]="newGameAutoManage" (onChange)="newGameAutoManage = $event"></app-toggle>
+          <app-toggle [checked]="newGameAutoManage" (onChange)="newGameAutoManage = $event; autoManageTouched = true"></app-toggle>
         </div>
       </div>
     } @else {
@@ -346,7 +346,7 @@ export interface CreateGameSubmit {
   </form>
 `
 })
-export class CreateGameFormComponent implements OnInit {
+export class CreateGameFormComponent implements OnChanges, OnInit {
   @Input() customSplitsAllowed = false;
   @Input() isCreating = false;
   /** Hosts who can run several boards get the Show in my open boards switch. */
@@ -381,6 +381,8 @@ export class CreateGameFormComponent implements OnInit {
   newGameHostNote = '';
   newGameShowInOpenBoards = false;
   newGameAutoManage = false;
+  /** Once the host flips the switch, the plan and profile default stop moving it. */
+  autoManageTouched = false;
   newGameMaxSquares: number | null = null;
   newGameName = '';
   newGamePaymentManager = '';
@@ -408,8 +410,15 @@ export class CreateGameFormComponent implements OnInit {
   private espnService = inject(EspnService);
   private sanitizer = inject(SanitizationService);
 
+  /** The form is mounted before the plan and the profile switch have loaded, so the default follows them until the host chooses. */
+  ngOnChanges(changes: SimpleChanges): void {
+    if (!this.autoManageTouched && (changes['autoManageAllowed'] || changes['autoManageDefault'])) {
+      this.newGameAutoManage = this.autoManageAllowed && this.autoManageDefault;
+    }
+  }
+
   async ngOnInit(): Promise<void> {
-    this.newGameAutoManage = this.autoManageAllowed && this.autoManageDefault;
+    if (!this.autoManageTouched) this.newGameAutoManage = this.autoManageAllowed && this.autoManageDefault;
     const draft = loadCreateDraft();
     if (draft) this.applyDraft(draft);
     await this.fetchEspnGames();

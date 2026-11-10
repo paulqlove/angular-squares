@@ -18,6 +18,23 @@ describe('CreateGameFormComponent', () => {
     return fixture.componentInstance;
   }
 
+  it('turns Auto-lock and draw on once the plan and profile default arrive, until the host chooses', () => {
+    const fixture = TestBed.createComponent(CreateGameFormComponent);
+    const c = fixture.componentInstance;
+    fixture.detectChanges();
+    expect(c.newGameAutoManage).toBe(false);
+    fixture.componentRef.setInput('autoManageAllowed', true);
+    fixture.componentRef.setInput('autoManageDefault', true);
+    fixture.detectChanges();
+    expect(c.newGameAutoManage).toBe(true);
+    c.newGameAutoManage = false;
+    c.autoManageTouched = true;
+    fixture.componentRef.setInput('autoManageDefault', false);
+    fixture.componentRef.setInput('autoManageDefault', true);
+    fixture.detectChanges();
+    expect(c.newGameAutoManage).toBe(false);
+  });
+
   it('prefills the name from a picked game, then follows a new pick', () => {
     const c = setup();
     c.selectEspnGame('1');
