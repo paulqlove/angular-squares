@@ -3,8 +3,6 @@
 .grid-cell {
   @apply h-8 flex items-center justify-center;
   @apply text-[8px] sm:text-xs;
-  border-right: 1px solid var(--color-input);
-  border-bottom: 1px solid var(--color-input);
   width: -webkit-fill-available;
   width: -moz-available;
 

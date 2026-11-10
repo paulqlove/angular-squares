@@ -537,26 +537,26 @@ export class DashboardComponent implements OnInit {
     },
     {
       target: 'create-game',
-      title: 'Create a New Game',
-      description: 'Click here to start your own squares game. You can choose a sport, set points per square, and invite friends.',
+      title: 'Create a new game',
+      description: 'Tap here to start your own squares game. You can choose a sport, set points per square, and invite friends.',
       position: 'bottom'
     },
     {
       target: 'join-game',
-      title: 'Join with a Code',
+      title: 'Join with a code',
       description: 'Have a 6-digit game code? Enter it here to join a friend\'s game instantly.',
       position: 'bottom'
     },
     {
       target: 'my-games',
-      title: 'Your Games',
+      title: 'Your games',
       description: 'All the games you\'ve created will appear here. You can manage, share, or delete them anytime.',
       position: 'top'
     },
     {
       target: 'profile-dropdown',
-      title: 'Your Profile',
-      description: 'Click here to update your display name, change the theme, or sign out.',
+      title: 'Your profile',
+      description: 'Tap here to update your display name, change the theme, or sign out.',
       position: 'bottom'
     }
   ];
