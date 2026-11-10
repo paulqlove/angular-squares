@@ -28,9 +28,9 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
           </header>
 
           @if (page.steps) {
-            <ol class="mt-20 grid gap-10 border-t border-qs-line pt-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-0">
+            <ol class="mt-20 grid gap-x-0 gap-y-10 border-t border-qs-line pt-8 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-[auto_auto_1fr] lg:gap-y-0">
               @for (step of page.steps; track step.name; let index = $index) {
-                <li class="lg:border-l lg:border-qs-line lg:px-6 lg:first:border-l-0 lg:first:pl-0 lg:last:pr-0">
+                <li class="lg:row-span-3 lg:grid lg:border-l lg:border-qs-line lg:px-6 lg:first:border-l-0 lg:first:pl-0 lg:last:pr-0 lg:[grid-template-rows:subgrid]">
                   <p class="qs-label text-qs-accent">0{{ index + 1 }}</p>
                   <h2 class="mt-3 text-lg font-semibold leading-snug text-qs-ink">{{ step.name }}</h2>
                   <p class="qs-body mt-2 text-[0.9375rem] leading-[1.65]">{{ step.text }}</p>
@@ -82,11 +82,11 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
 
           <section class="mt-20 grid gap-x-16 gap-y-6 border-t border-qs-line pt-8 lg:grid-cols-[14rem_minmax(0,1fr)]" aria-labelledby="related-heading">
             <h2 id="related-heading" class="text-[1.375rem] font-semibold leading-tight tracking-tight text-qs-ink">Keep going</h2>
-            <ul class="max-w-[40rem] divide-y divide-qs-line">
+            <ul class="max-w-[40rem] space-y-6">
               @for (link of page.related; track link.path) {
                 <li>
-                  <a [routerLink]="link.path" [fragment]="link.fragment" class="group block min-h-11 py-4 first:pt-0">
-                    <span class="font-semibold text-qs-ink underline decoration-qs-line-strong underline-offset-4 group-hover:decoration-qs-accent">{{ link.label }}</span>
+                  <a [routerLink]="link.path" [fragment]="link.fragment" class="group block min-h-11">
+                    <span class="font-semibold text-qs-ink group-hover:text-qs-accent">{{ link.label }}</span>
                     <span class="mt-1 block text-[0.9375rem] leading-[1.6] text-qs-muted">{{ link.text }}</span>
                   </a>
                 </li>
