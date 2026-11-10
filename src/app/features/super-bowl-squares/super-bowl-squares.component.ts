@@ -212,7 +212,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     {
       target: 'winners-payouts',
       title: 'Winners',
-      description: 'After numbers are randomized and scores come in, you\'ll see the winners for each quarter here.',
+      description: 'After the numbers are drawn and scores come in, you\'ll see the winners for each quarter here.',
       position: 'top'
     }
   ];
