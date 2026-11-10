@@ -1,4 +1,5 @@
 import { BreadcrumbItem } from '../../core/services/seo.service';
+import { boardDiagram, DIGITS, PAIRS } from './board-diagram';
 import { SCHEDULE } from './schedule.generated';
 import { formatKickoff } from './schedule.model';
 
@@ -42,6 +43,8 @@ export interface MarketingPage {
   lede: string;
   /** Short note shown above the title. */
   notice?: string;
+  /** Shown beside the title on wide screens (how-to-play: the board example). */
+  heroHtml?: string;
   published: string;
   sections: PageSection[];
   steps?: HowToStep[];
@@ -62,6 +65,18 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     h1: 'How to play football squares',
     eyebrow: 'Rules',
     lede: 'Football squares is a free board for friends and fans. Choose 100, 50, or 25 squares, add two teams, and pick a winner at the end of each quarter. You do not need to know the sport.',
+    heroHtml: boardDiagram({
+      rows: DIGITS, cols: DIGITS, win: [4, 7], showCaption: false,
+      caption: 'A 10 by 10 board. Score 24 to 17: row 4 meets column 7, and Jo wins the quarter.',
+      names: {
+        '0-2': ['Sam', 'qs-p-sky'], '0-6': ['Lee', 'qs-p-orchid'], '1-4': ['Max', 'qs-p-rose'], '1-9': ['Sam', 'qs-p-sky'],
+        '2-1': ['Tom', 'qs-p-apricot'], '2-7': ['Lee', 'qs-p-orchid'], '3-3': ['Kim', 'qs-p-lilac'], '3-5': ['Max', 'qs-p-rose'],
+        '4-0': ['Sam', 'qs-p-sky'], '4-7': ['Jo', 'qs-p-butter'], '4-8': ['Tom', 'qs-p-apricot'], '5-2': ['Kim', 'qs-p-lilac'],
+        '5-6': ['Max', 'qs-p-rose'], '6-1': ['Lee', 'qs-p-orchid'], '6-4': ['Sam', 'qs-p-sky'], '6-9': ['Kim', 'qs-p-lilac'],
+        '7-3': ['Tom', 'qs-p-apricot'], '7-7': ['Max', 'qs-p-rose'], '8-0': ['Kim', 'qs-p-lilac'], '8-5': ['Sam', 'qs-p-sky'],
+        '9-2': ['Lee', 'qs-p-orchid'], '9-8': ['Max', 'qs-p-rose']
+      }
+    }),
     published: '2026-11-01',
     steps: [
       {
@@ -92,122 +107,46 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
         heading: 'How a quarter is decided',
         paragraphs: [
           'Scores use the last digit only. A score of 17 counts as 7. A score of 20 counts as 0. If the away team’s last digit is on row 7 and the home team’s last digit is on column 0, the square where that row and column meet is the quarter’s square.',
-          'Many groups play for bragging rights each quarter and a bigger brag for the final. QuarterScore can show a suggested split of 20 percent, 20 percent, 20 percent, and 40 percent for the final. That split is only a label. It is not a payment.'
+          'Most groups play for bragging rights. The suggested 20, 20, 20 and 40 percent split is only a label. It is not a payment.'
         ]
       },
       {
-        heading: 'Board sizes: 100, 50, and 25 squares',
+        heading: 'Board sizes',
         paragraphs: [
-          'Not every party has 100 people. QuarterScore offers three board sizes. The classic 100-square board works best for large groups. The 50-square and 25-square boards use paired digits so fewer people can still play.'
+          'Pick the size that fits your group. Smaller boards fill faster and give each square more chances to win.'
+        ],
+        bullets: [
+          '100 squares: large parties and offices.',
+          '50 squares: medium groups.',
+          '25 squares: small gatherings.'
         ]
       },
       {
-        heading: '100 squares (10 × 10) — The classic',
+        heading: '100 squares',
         paragraphs: [
-          'Ten rows, ten columns, one hundred squares. Each axis uses the single digits 0 through 9, one digit per row or column. Every square maps to exactly one score combination.',
-          'Example: If the away team scores 24 and the home team scores 17, the last digits are 4 and 7. The square at row 4, column 7 wins.'
+          '10 rows by 10 columns, one digit each. Every square is one possible score.'
         ],
-        bullets: [
-          'Grid: 10 rows × 10 columns',
-          'Away team (rows): 0, 1, 2, 3, 4, 5, 6, 7, 8, 9',
-          'Home team (columns): 0, 1, 2, 3, 4, 5, 6, 7, 8, 9',
-          'Each square = 1 score combination'
-        ],
-        html: `<figure class="not-prose mt-6 max-w-xs">
-          <div class="overflow-hidden rounded-lg border border-slate-400 dark:border-slate-500">
-            <table class="w-full text-center text-[11px]" style="border-spacing:0">
-              <thead>
-                <tr class="bg-slate-100 dark:bg-slate-700">
-                  <th class="w-6 p-1 text-[9px] text-slate-500 dark:text-slate-400 border-b border-r border-slate-300 dark:border-slate-500"><span class="block">↓</span><span class="block">→</span></th>
-                  ${[0,1,2,3,4,5,6,7,8,9].map(i => `<th class="p-1 font-semibold text-slate-600 dark:text-slate-300 border-b border-r border-slate-300 dark:border-slate-500 last:border-r-0">${i}</th>`).join('')}
-                </tr>
-              </thead>
-              <tbody>
-                ${[0,1,2,3,4,5,6,7,8,9].map(row => `<tr>${`<td class="bg-slate-100 dark:bg-slate-700 p-1 font-semibold text-slate-600 dark:text-slate-300 border-b border-r border-slate-300 dark:border-slate-500">${row}</td>`}${[0,1,2,3,4,5,6,7,8,9].map(col => row === 4 && col === 7 ? '<td class="bg-green-500 p-1 font-bold text-white border-b border-r border-slate-300 dark:border-slate-500">WIN</td>' : '<td class="bg-white dark:bg-slate-800 p-1 border-b border-r border-slate-300 dark:border-slate-500"></td>').join('')}</tr>`).join('')}
-              </tbody>
-            </table>
-          </div>
-          <figcaption class="mt-2 text-xs text-qs-muted">Score 24–17 → row 4, column 7 wins</figcaption>
-        </figure>`
+        html: boardDiagram({ rows: DIGITS, cols: DIGITS, win: [4, 7], caption: 'Score 24 to 17: row 4, column 7.' })
       },
       {
-        heading: '50 squares (5 × 10) — Half board',
+        heading: '50 squares',
         paragraphs: [
-          'Five rows, ten columns. The away team (rows) uses paired digits: row 1 covers 0 and 1, row 2 covers 2 and 3, and so on. The home team (columns) still uses single digits 0 through 9.',
-          'Example: If the away team scores 24 and the home team scores 17, the away digit 4 falls in the "4,5" row, and the home digit 7 is column 7. That square wins. Each square covers two possible away digits but one home digit.'
+          '5 rows by 10 columns. The side uses digit pairs, so each square covers two scores.'
         ],
-        bullets: [
-          'Grid: 5 rows × 10 columns',
-          'Away team (rows): 0,1 / 2,3 / 4,5 / 6,7 / 8,9',
-          'Home team (columns): 0, 1, 2, 3, 4, 5, 6, 7, 8, 9',
-          'Each square = 2 score combinations'
-        ],
-        html: `<figure class="not-prose mt-6 max-w-sm">
-          <div class="overflow-hidden rounded-lg border border-slate-400 dark:border-slate-500">
-            <table class="w-full text-center text-[11px]" style="border-spacing:0">
-              <thead>
-                <tr class="bg-slate-100 dark:bg-slate-700">
-                  <th class="w-8 p-1 text-[9px] text-slate-500 dark:text-slate-400 border-b border-r border-slate-300 dark:border-slate-500"><span class="block">↓</span><span class="block">→</span></th>
-                  ${[0,1,2,3,4,5,6,7,8,9].map(i => `<th class="p-1 font-semibold text-slate-600 dark:text-slate-300 border-b border-r border-slate-300 dark:border-slate-500">${i}</th>`).join('')}
-                </tr>
-              </thead>
-              <tbody>
-                ${['0,1','2,3','4,5','6,7','8,9'].map((pair, row) => `<tr>${`<td class="bg-slate-100 dark:bg-slate-700 p-1 text-[10px] font-semibold text-slate-600 dark:text-slate-300 border-b border-r border-slate-300 dark:border-slate-500">${pair}</td>`}${[0,1,2,3,4,5,6,7,8,9].map(col => row === 2 && col === 7 ? '<td class="bg-green-500 p-1.5 font-bold text-white border-b border-r border-slate-300 dark:border-slate-500">WIN</td>' : '<td class="bg-white dark:bg-slate-800 p-1.5 border-b border-r border-slate-300 dark:border-slate-500"></td>').join('')}</tr>`).join('')}
-              </tbody>
-            </table>
-          </div>
-          <figcaption class="mt-2 text-xs text-qs-muted">Score 24–17 → "4,5" row, column 7 wins</figcaption>
-        </figure>`
+        html: boardDiagram({ rows: PAIRS, cols: DIGITS, win: [2, 7], caption: 'Score 24 to 17: row 4,5, column 7.' })
       },
       {
-        heading: '25 squares (5 × 5) — Quarter board',
+        heading: '25 squares',
         paragraphs: [
-          'Five rows, five columns. Both teams use paired digits. Each row and column covers two digits: 0,1 / 2,3 / 4,5 / 6,7 / 8,9. Every square covers four possible score combinations.',
-          'Example: If the away team scores 24 and the home team scores 17, the away digit 4 lands in the "4,5" row and the home digit 7 lands in the "6,7" column. That square wins. The same square would also win for away 25, home 16 or away 24, home 16 or away 25, home 17.'
+          '5 rows by 5 columns. Both sides use digit pairs, so each square covers four scores.'
         ],
-        bullets: [
-          'Grid: 5 rows × 5 columns',
-          'Away team (rows): 0,1 / 2,3 / 4,5 / 6,7 / 8,9',
-          'Home team (columns): 0,1 / 2,3 / 4,5 / 6,7 / 8,9',
-          'Each square = 4 score combinations'
-        ],
-        html: `<figure class="not-prose mt-6 max-w-[220px]">
-          <div class="overflow-hidden rounded-lg border border-slate-400 dark:border-slate-500">
-            <table class="w-full text-center text-[11px]" style="border-spacing:0">
-              <thead>
-                <tr class="bg-slate-100 dark:bg-slate-700">
-                  <th class="w-9 p-1 text-[9px] text-slate-500 dark:text-slate-400 border-b border-r border-slate-300 dark:border-slate-500"><span class="block">↓</span><span class="block">→</span></th>
-                  ${['0,1','2,3','4,5','6,7','8,9'].map(p => `<th class="p-1.5 text-[10px] font-semibold text-slate-600 dark:text-slate-300 border-b border-r border-slate-300 dark:border-slate-500">${p}</th>`).join('')}
-                </tr>
-              </thead>
-              <tbody>
-                ${['0,1','2,3','4,5','6,7','8,9'].map((pair, row) => `<tr>${`<td class="bg-slate-100 dark:bg-slate-700 p-1 text-[10px] font-semibold text-slate-600 dark:text-slate-300 border-b border-r border-slate-300 dark:border-slate-500">${pair}</td>`}${['0,1','2,3','4,5','6,7','8,9'].map((_, col) => row === 2 && col === 3 ? '<td class="bg-green-500 p-2 font-bold text-white border-b border-r border-slate-300 dark:border-slate-500">WIN</td>' : '<td class="bg-white dark:bg-slate-800 p-2 border-b border-r border-slate-300 dark:border-slate-500"></td>').join('')}</tr>`).join('')}
-              </tbody>
-            </table>
-          </div>
-          <figcaption class="mt-2 text-xs text-qs-muted">Score 24–17 → "4,5" row, "6,7" column wins</figcaption>
-        </figure>`
+        html: boardDiagram({ rows: PAIRS, cols: PAIRS, win: [2, 3], caption: 'Score 24 to 17: row 4,5, column 6,7.' })
       },
       {
-        heading: 'Which size to choose',
+        heading: 'Overtime and empty squares',
         paragraphs: [
-          'Pick the board that matches your group. A party of 20 people might take 5 squares each on a 100-square board, or claim different squares on a smaller board. Smaller boards fill faster and give each square more chances to win.'
-        ],
-        bullets: [
-          '100 squares: Large parties and offices where many people join.',
-          '50 squares: Medium groups who want a full board without needing 100 names.',
-          '25 squares: Small gatherings of 10 to 25 people, or casual game-day fun.'
-        ]
-      },
-      {
-        heading: 'Overtime, empty squares, and ties',
-        paragraphs: [
-          'Agree on the rules before kickoff and post them where the group can see them. The usual house rule is that overtime points count toward the final score, so the last square uses the score when the game actually ends.',
-          'If a winning square was never claimed, there is no name on it and that quarter has no winner. QuarterScore moves the quarter\'s points using the rule the host picked: roll them into Q4, or split them across the other quarters. If a quarter ends on the same digits as the quarter before, the same square wins again.'
-        ],
-        bullets: [
-          'Lock the board when it is as full as you want it, so names stop changing. Then draw the numbers.',
-          'Read the last digit of each score, not the whole score.'
+          'Agree on the rules before kickoff. Most groups count overtime in the final score.',
+          'If nobody holds a winning square, that quarter has no winner. QuarterScore moves its points using the rule the host picked. If a quarter ends on the same digits as the one before, the same square wins again.'
         ]
       }
     ],

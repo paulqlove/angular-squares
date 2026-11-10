@@ -272,6 +272,48 @@ Navy frame (`--qs-tile`), scores in 96 to 160px tabular sans, the board filling 
 - If an ID selector sets `display`, add `[hidden]{display:none!important}` for that element.
 - Bottom padding 110px on any page with a floating bar.
 
+### Reading pages (guides, FAQ, rules, legal, board landing pages)
+
+These are pages people read, not tools they operate. They need their own rules. Added Nov 9, 2026 after the footer pages kept coming out "technically tidy but flat". Components: `app-marketing-page` (the shared template), `boardDiagram()` in `features/content/board-diagram.ts`, `.qs-canvas`, `.qs-body`.
+
+**Process rule: study first, then build, then compare.** Before redesigning any page, capture 4 to 6 pages that look good, measure what they do (font sizes, widths, spacing, colors) and look at them next to your result. Matching a spec of numbers (line length, sizes) is not enough. The pages we studied were Tailwind's blog posts, Anthropic's news pages, Linear Method, Basecamp's Getting Real, Salesforce's what-is-CRM explainer, Josh Comeau's guides and chess.com's how-to-play.
+
+**What every good reading page has**
+
+1. **A display moment.** Headline 60 to 72px, tight tracking, line-height about 1.0. Ours: `clamp(2.5rem, 5.6vw, 4.25rem)`, weight 600, tracking -0.04em, line-height 1.02. A 48px headline reads as a paragraph.
+2. **Rank in the text.** Headings are full ink. Body copy sits one step below (`.qs-body`, ink mixed 82% into the page color). Pure ink on every line gives nothing a rank.
+3. **A structural device that carries information.** A hero visual, a metadata rail, a numbered contents list, a margin heading. A flat column of text with no device is what reads as lazy.
+4. **Visuals get a stage.** Diagrams sit on the dotted canvas (`.qs-canvas`) in a bordered frame, built from tokens, never floating bare and never in a different palette (the old diagrams used slate grays and looked foreign).
+5. **Real rhythm.** 80px above a section (`mt-20`), a 1px line (`border-qs-line`) at its top, 24px between heading and text, 16px between paragraphs. The rhythm does the work of dividers, so add no other rules.
+
+**The layout we use (desktop)**
+
+- Page width 64rem, left-aligned inside a centered page. Breadcrumb, headline and footer all share the same left edge. The footer container is `max-w-[68rem]` with `px-8` so its columns line up with the article.
+- Hero: headline, one line of intro (20px, muted, max 34rem) on the left; on the right a 25rem visual that shows the thing being explained. For How to play it is the real board with made-up players and the winning square lit. No caption under it; the page says it.
+- Steps: a 4-column row under the hero, mono counters `01` to `04` in accent, 18px titles, 15px text, 1px vertical hairlines between columns. Number only true sequences.
+- Sections: a two-column grid, `14rem` margin column for the heading (22px, weight 600), `40rem` max for text (17px, line-height 1.7). Headings are not sticky (the shell clips overflow, so sticky never works).
+- Phones: everything stacks, 16px gutters, no horizontal scroll.
+- End of page: "Keep going" as a plain divided list (no cards, no orphan cells), then one sentence and the primary button. No full-width colored slab.
+- Legal and affiliation notices go below the content, small and muted. Substantive legal cautions (for example the fundraiser page) stay near the top as a quiet note with an accent bar.
+
+**Board diagrams**
+
+- Build every board diagram with `boardDiagram()`. All cells are square (a grid of equal columns with `aspect-square` cells), so a 10 by 10 board looks like a board. Width is capped by column count (about 2.9rem per column).
+- Navy label tiles, paper squares, pastel player colors for names, and the winning square plus its row and column labels in emerald, so the diagram teaches the rule by tracing it.
+- Keep names to 3 letters or fewer (Sam, Kim, Max). Longer names clip in a 34px cell.
+- Hero diagrams carry no caption. Section diagrams keep a one-line caption.
+
+**Rejected, do not repeat**
+
+- Filling empty page space with a sticky table of contents, side rails, illustrations, gradient heroes, per-section icons, pull quotes or drop caps. The fix for empty space is rhythm and one good visual, not more elements.
+- Centering the article text. Left-aligned text in a centered column is right; narrowing the text without centering its column leaves it hugging the left edge.
+- A second body typeface. Space Grotesk at 17px with 1.7 line-height is fine; the problem was line length (110 to 120 characters) and flat hierarchy.
+- Cards around prose. Cards are for things you act on.
+
+**Check before calling a reading page done:** screenshot at 1440 and 390 in both themes; headline, breadcrumb and footer share a left edge; text lines run 60 to 75 characters; nothing scrolls sideways; compare it against two of the reference pages above.
+
+---
+
 ---
 
 ## 7. Logo
@@ -337,6 +379,7 @@ After each PR: screenshot 375, 768, 1280 and 1440 in light and dark; run the con
 - Keep every size on the 4px grid.
 - Fix the height of anything the game changes.
 - Check both themes and 375px before calling a screen done.
+- Study and measure real reference pages before redesigning a reading page (section 6, Reading pages).
 
 **Do not**
 
@@ -346,6 +389,7 @@ After each PR: screenshot 375, 768, 1280 and 1440 in light and dark; run the con
 - Fill squares with brand colors. Squares are paper, pastel or team colors.
 - Add a second accent. Use ink, weight or size for more emphasis.
 - Animate the number draw like a slot machine.
+- Fill empty space on a reading page with rails, icons, illustrations or a sticky contents list.
 - Put the logo on a team-colored area or recolor it to team colors.
 
 ---
