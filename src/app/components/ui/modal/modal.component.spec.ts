@@ -51,6 +51,26 @@ describe('ModalComponent', () => {
     expect(dialog.getAttribute('aria-labelledby')).toBe('a-title');
   });
 
+  it('removes itself from the page after closing, with no animation event needed', async () => {
+    const f = setup();
+    f.componentInstance.a.set(true);
+    await flush(f);
+    f.componentInstance.a.set(false);
+    await flush(f);
+    expect(f.nativeElement.querySelector('.qs-modal-leave')).not.toBeNull();
+    await new Promise(r => setTimeout(r, 200));
+    f.detectChanges();
+    expect(f.nativeElement.querySelector('[role="dialog"]')).toBeNull();
+    f.componentInstance.a.set(true);
+    f.componentInstance.a.set(false);
+    f.componentInstance.a.set(true);
+    await flush(f);
+    await new Promise(r => setTimeout(r, 200));
+    f.detectChanges();
+    expect(f.nativeElement.querySelector('[role="dialog"]')).not.toBeNull();
+    expect(f.nativeElement.querySelector('.qs-modal-leave')).toBeNull();
+  });
+
   it('puts focus on data-autofocus, or the first control, and takes it back on close', async () => {
     const f = setup();
     (f.nativeElement.querySelector('#opener') as HTMLElement).focus();

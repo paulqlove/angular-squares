@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, HostListener, computed, effect, inject, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, HostListener, computed, effect, inject, input, output, signal } from '@angular/core';
 
 /** Open modals, oldest first. Only the last one answers Esc, so a confirm on top of a dialog closes alone. */
 const openModals: ModalComponent[] = [];
@@ -23,8 +23,8 @@ const FOCUSABLE = 'button, input, select, textarea, summary, [href], [tabindex]:
   selector: 'app-modal',
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
-    @if (open()) {
-      <div animate.enter="qs-modal-enter" animate.leave="qs-modal-leave" [class]="overlayClass()" (click)="onBackdrop()">
+    @if (shown()) {
+      <div animate.enter="qs-modal-enter" [class]="overlayClass()" [class.qs-modal-leave]="!open()" (click)="onBackdrop()">
         <div
           [attr.role]="role()"
           aria-modal="true"
@@ -61,10 +61,21 @@ export class ModalComponent {
   protected overlayClass = computed(() => `fixed inset-0 flex justify-center bg-black/60 backdrop-blur-sm ${LEVEL[this.level()]} ${PHONE[this.phone()].overlay}`);
   protected panelClass = computed(() => `animate-modal-in w-full border border-qs-line bg-qs-panel shadow-pop ${SIZE[this.size()]} ${PHONE[this.phone()].panel} ${this.extraClass()}`.trim());
 
+  /** Stays true for the length of the exit fade, then drops on a timer. Not on animationend: a missed event would leave an invisible full-screen layer over the page. */
+  protected shown = signal(false);
+  private destroyRef = inject(DestroyRef);
+  private hideTimer: ReturnType<typeof setTimeout> | undefined;
   private host = inject<ElementRef<HTMLElement>>(ElementRef);
   private returnFocus: HTMLElement | null = null;
 
   constructor() {
+    this.destroyRef.onDestroy(() => clearTimeout(this.hideTimer));
+    effect(() => {
+      const open = this.open();
+      clearTimeout(this.hideTimer);
+      if (open) this.shown.set(true);
+      else if (this.shown()) this.hideTimer = setTimeout(() => this.shown.set(false), 150);
+    });
     effect(onCleanup => {
       if (!this.open() || typeof document === 'undefined') return;
       openModals.push(this);
