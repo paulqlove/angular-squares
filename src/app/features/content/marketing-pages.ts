@@ -220,7 +220,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     ],
     cta: {
       path: '/create',
-      label: 'Create your board',
+      label: 'Create a board',
       note: MONEY_LINE
     }
   },
@@ -287,7 +287,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     ],
     cta: {
       path: '/create',
-      label: 'Start a free game',
+      label: 'Create a board',
       note: MONEY_LINE
     }
   },
@@ -386,7 +386,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       { path: '/how-to-play', label: 'How to play', text: 'Explain the grid in two minutes.' },
       { path: '/printable-football-squares', label: 'Printable board', text: 'Tape a paper grid to the fridge.' },
       { path: '/nfl-squares', label: 'NFL squares', text: 'The same board for any Sunday game.' },
-      { path: '/create', label: 'Start a free game', text: 'Create the Thanksgiving board and share the link.' }
+      { path: '/create', label: 'Create a board', text: 'Create the Thanksgiving board and share the link.' }
     ],
     cta: {
       path: '/create',
@@ -407,7 +407,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       {
         heading: 'What you set up',
         paragraphs: [
-          'Create a game and choose NFL as the sport. Add the two team names in plain text. Send the link. Friends type their names on open squares. When you are ready, randomize the digits and lock the board.',
+          'Create a board and choose NFL as the sport. Add the two team names in plain text. Send the link. Friends type their names on open squares. When you are ready, randomize the digits and lock the board.',
           'Each quarter, the last digit of each score points at one square. The person who claimed it wins that quarter’s bragging rights.'
         ]
       },

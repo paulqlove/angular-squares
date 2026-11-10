@@ -33,7 +33,7 @@ interface NavLink {
             [routerLink]="signedIn() ? '/dashboard' : '/create'"
             class="ml-auto qs-btn qs-btn-primary md:hidden"
           >
-            {{ signedIn() ? 'Dashboard' : 'Start a free game' }}
+            {{ signedIn() ? 'Dashboard' : 'Create a board' }}
           </a>
 
           <button
@@ -69,7 +69,7 @@ interface NavLink {
                   [routerLink]="signedIn() ? '/dashboard' : '/create'"
                   class="qs-btn qs-btn-primary w-full md:w-auto"
                 >
-                  {{ signedIn() ? 'Dashboard' : 'Start a free game' }}
+                  {{ signedIn() ? 'Dashboard' : 'Create a board' }}
                 </a>
               </li>
             </ul>

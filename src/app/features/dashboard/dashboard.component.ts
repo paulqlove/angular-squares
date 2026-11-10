@@ -134,7 +134,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
                 data-walkthrough="create-game"
               >
                 <ng-icon name="heroPlus" class="text-base"></ng-icon>
-                New game
+                New board
               </button>
             }
           </div>
@@ -446,7 +446,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
       <app-modal [open]="showCreateModal()" labelledBy="create-game-title" size="xl" phone="full" [backdropCloses]="false" extraClass="flex h-[min(44rem,calc(100dvh-2rem))] flex-col overflow-hidden" (dismissed)="dismissCreateModal()">
         <div class="flex items-start justify-between gap-4 border-b border-qs-line px-6 pb-4 pt-5 max-sm:pb-3 max-sm:pt-4">
           <div>
-            <p class="qs-eyebrow max-sm:hidden">New game</p>
+            <p class="qs-eyebrow max-sm:hidden">New board</p>
             <h3 id="create-game-title" class="qs-title mt-2 text-3xl max-sm:mt-0 max-sm:text-2xl">Set up your <span class="text-qs-accent">board</span></h3>
           </div>
           <button
@@ -537,8 +537,8 @@ export class DashboardComponent implements OnInit {
     },
     {
       target: 'create-game',
-      title: 'Create a new game',
-      description: 'Tap here to start your own squares game. You can choose a sport, set points per square, and invite friends.',
+      title: 'Create a new board',
+      description: 'Tap here to start your own squares board. You can choose a sport, set points per square, and invite friends.',
       position: 'bottom'
     },
     {

@@ -75,6 +75,6 @@ Knowing the numbers is great for game-day chatter. Pull it up when someone's glo
 
 After the numbers are drawn, QuarterScore's heatmap shades every square on your board by how often that square's digit pair has come up in a fixed table of past NFL scores. The shade is the history of those two digits together, not a single digit, and it does not change as the score changes. The live board is what everyone follows together, on the couch or across the country.
 
-[Start a free game on QuarterScore](https://quarterscore.com/dashboard).
+[Create a board on QuarterScore](https://quarterscore.com/create).
 
 *QuarterScore is not affiliated with, endorsed by, or sponsored by the NFL or any team. Super Bowl is a trademark of the NFL. Entertainment and score-tracking only.*
