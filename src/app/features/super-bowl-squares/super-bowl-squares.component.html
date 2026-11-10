@@ -41,7 +41,7 @@
     }
     <app-help-menu (tour)="startWalkthrough()"></app-help-menu>
     @if (currentUser()) {
-      <app-profile-menu [allowNameEdit]="false" [presentGameId]="isGameOwner() || isManager() ? gameId : null" (tour)="startWalkthrough()"></app-profile-menu>
+      <app-profile-menu [allowNameEdit]="!!currentUser()?.isGuest" [nameEditViaDialog]="true" walkthroughTarget="player-name" (editName)="openNameEditModal()" [presentGameId]="isGameOwner() || isManager() ? gameId : null" (tour)="startWalkthrough()"></app-profile-menu>
     } @else {
       <button type="button" (click)="showAuthModal.set(true)" class="qs-btn qs-btn-primary">Sign in</button>
     }
@@ -124,14 +124,6 @@
             @if (hostNote) {
               <p class="mt-1.5 max-w-prose break-words text-sm text-qs-muted"><span class="qs-label mr-2 text-qs-ink">Host note</span>{{ hostNote }}</p>
             }
-            @if (autoManageNote(); as note) {
-              <p class="mt-1.5 flex max-w-prose flex-wrap items-center gap-x-3 gap-y-1 text-sm text-qs-muted">
-                <span><span class="qs-label mr-2 text-qs-ink">Auto-lock and draw</span>{{ note.text }}</span>
-                @if (note.host) {
-                  <button type="button" class="qs-label min-h-11 text-qs-accent underline underline-offset-4" (click)="cancelAutoManage()">Cancel</button>
-                }
-              </p>
-            }
           </div>
         </div>
 
@@ -141,18 +133,7 @@
             <p class="mb-1.5 text-center sm:text-right"><span class="qs-badge" [class.qs-badge-warn]="counter.full" [class.qs-badge-ok]="!counter.full">{{ counter.held }} of {{ counter.max }} squares</span></p>
           }
           @if (currentUser()?.isGuest && currentUser()?.displayName) {
-            <div class="flex items-center justify-center sm:justify-end gap-1.5">
-              <span class="text-sm text-muted">Playing as:</span>
-              <span class="font-medium text-default">{{ currentUser()?.displayName }}</span>
-              <button
-                (click)="openNameEditModal()"
-                class="inline-flex min-h-11 min-w-11 items-center justify-center text-muted hover:text-heading hover:bg-control rounded transition-colors"
-                title="Edit name"
-                aria-label="Edit your name"
-                >
-                <ng-icon name="heroPencilSquare" class="text-sm"></ng-icon>
-              </button>
-            </div>
+            <!-- A guest's name is edited from the profile menu -->
           } @else if (currentUser() && !currentUser()?.isGuest) {
             @if (!currentUser()?.displayName) {
               <button type="button" (click)="openNameEditModal()" class="qs-btn qs-btn-secondary px-3">Add your name</button>
@@ -182,7 +163,9 @@
               @if (isLiveGame()) {
                 <span class="qs-label inline-flex items-center gap-1.5 text-qs-ink"><span class="h-1.5 w-1.5 rounded-full bg-qs-accent animate-pulse" aria-hidden="true"></span>Live</span>
               }
-              <span class="qs-badge" [class.qs-badge-ok]="!isLocked">{{ isLocked ? (isRandomized ? 'Drawn' : 'Locked') : 'Open' }}</span>
+              @if (!(isLocked && isRandomized)) {
+                <span class="qs-badge" [class.qs-badge-ok]="!isLocked">{{ isLocked ? 'Locked' : 'Open' }}</span>
+              }
               <span class="qs-label text-qs-muted">{{ filledCount() }}/{{ boardSize }} picked</span>
             </span>
           </div>

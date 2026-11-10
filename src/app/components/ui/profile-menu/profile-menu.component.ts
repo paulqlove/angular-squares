@@ -72,49 +72,54 @@ import { ToggleComponent } from '../toggle/toggle.component';
             }
           </div>
 
-          @if (!currentUser()?.isGuest) {
-            <div class="border-b border-qs-line p-2">
-              <p class="qs-label px-3 pb-1 pt-1 text-qs-muted">Help</p>
-              <button type="button" (click)="showProfileDropdown.set(false); tour.emit()" class="qs-btn qs-btn-ghost w-full justify-start text-qs-ink">
-                <ng-icon name="heroPlayCircle" class="text-base"></ng-icon>
-                Take the tour
-              </button>
-              <a routerLink="/how-to-play" class="qs-btn qs-btn-ghost w-full justify-start text-qs-ink">
-                <ng-icon name="heroBookOpen" class="text-base"></ng-icon>
-                How to play
-              </a>
-              <a routerLink="/faq" class="qs-btn qs-btn-ghost w-full justify-start text-qs-ink">
-                <ng-icon name="heroQuestionMarkCircle" class="text-base"></ng-icon>
-                FAQ
-              </a>
-            </div>
-          }
+          <div class="border-b border-qs-line p-2">
+            <p class="qs-label px-3 pb-1 pt-1 text-qs-muted">Help</p>
+            <button type="button" (click)="showProfileDropdown.set(false); tour.emit()" class="qs-btn qs-btn-ghost w-full justify-start text-qs-ink">
+              <ng-icon name="heroPlayCircle" class="text-base"></ng-icon>
+              Take the tour
+            </button>
+            <a routerLink="/how-to-play" class="qs-btn qs-btn-ghost w-full justify-start text-qs-ink">
+              <ng-icon name="heroBookOpen" class="text-base"></ng-icon>
+              How to play
+            </a>
+            <a routerLink="/faq" class="qs-btn qs-btn-ghost w-full justify-start text-qs-ink">
+              <ng-icon name="heroQuestionMarkCircle" class="text-base"></ng-icon>
+              FAQ
+            </a>
+          </div>
 
           <div class="space-y-5 p-4">
             @if (allowNameEdit) {
-<div>
-              <label for="profile-name" class="qs-label mb-1.5 block text-qs-muted">Display name</label>
-              <div class="flex gap-2">
-                <input
-                  id="profile-name"
-                  type="text"
-                  [(ngModel)]="profileName"
-                  placeholder="Your name"
-                  class="qs-input min-w-0 flex-1"
-                  (keyup.enter)="saveProfile()"
-                />
-                <button
-                  type="button"
-                  (click)="saveProfile()"
-                  [disabled]="isSavingProfile() || !profileName.trim()"
-                  [attr.aria-busy]="isSavingProfile()"
-                  class="qs-btn qs-btn-ink shrink-0"
-                >
-                  Save
+              @if (nameEditViaDialog) {
+                <button type="button" (click)="showProfileDropdown.set(false); editName.emit()" class="qs-btn qs-btn-secondary w-full justify-between">
+                  <span class="truncate">{{ currentUser()?.displayName || 'Set your name' }}</span>
+                  <span class="qs-label text-qs-muted">Edit name</span>
                 </button>
-              </div>
-            </div>
-          }
+              } @else {
+                <div>
+                  <label for="profile-name" class="qs-label mb-1.5 block text-qs-muted">Display name</label>
+                  <div class="flex gap-2">
+                    <input
+                      id="profile-name"
+                      type="text"
+                      [(ngModel)]="profileName"
+                      placeholder="Your name"
+                      class="qs-input min-w-0 flex-1"
+                      (keyup.enter)="saveProfile()"
+                    />
+                    <button
+                      type="button"
+                      (click)="saveProfile()"
+                      [disabled]="isSavingProfile() || !profileName.trim()"
+                      [attr.aria-busy]="isSavingProfile()"
+                      class="qs-btn qs-btn-ink shrink-0"
+                    >
+                      Save
+                    </button>
+                  </div>
+                </div>
+              }
+            }
 
           @if (planService.features().autoManage && !currentUser()?.isGuest) {
             <div class="flex items-start justify-between gap-4">
@@ -176,6 +181,9 @@ import { ToggleComponent } from '../toggle/toggle.component';
 export class ProfileMenuComponent {
   /** The game page has its own name editor, so it hides this one. */
   @Input() allowNameEdit = true;
+  /** The game page edits a name in its own dialog (it checks the board for duplicates), so the menu only asks for it. */
+  @Input() nameEditViaDialog = false;
+  @Output() editName = new EventEmitter<void>();
   /** Game page, owner and co-host only: adds "Present on a TV" (hidden on phones). */
   @Input() presentGameId: string | null = null;
   @Input() walkthroughTarget: string | null = null;

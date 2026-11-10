@@ -254,6 +254,8 @@ Update this list as each chunk ships (change, Paul tests locally, push, merge).
 | P2 Dashboard cards: labelled More menu (Edit, Delete, Remove), status on joined cards, "Needs confirm" only above zero, guest banner wording | Done (TV link stays in the Share dialog) | this batch |
 | P2 Copy: one noun (TV link) everywhere with matching code names; Winners explainer is one line with the rule behind a disclosure | Done | this batch |
 | P2 Decided: footer "sports ball" stays; blog intro left alone; tab arrow keys not added (arrow keys switch boards); $5.99 dialog wording unchanged | Decided | n/a |
-| P2 Open: live score strip, one shared modal shell, tab panel markup | Not started | |
+| P2 Game page header declutter: no live score (Paul: not needed), no auto-lock note, status pill hidden once numbers are drawn, guest name edit moved into the profile menu | Done | this batch |
+| P2 Help in the profile menu for every signed-in user; ? only when signed out | Done | this batch |
+| P2 Open: one shared modal shell, tab panel markup (no arrow keys: they switch boards) | Not started | |
 | Everything else in Priority 3 | Not started | |
 

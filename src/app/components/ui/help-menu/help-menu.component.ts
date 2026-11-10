@@ -16,7 +16,7 @@ import { heroBookOpen, heroPlayCircle, heroQuestionMarkCircle } from '@ng-icons/
     @media (prefers-reduced-motion: reduce) { .animate-menu-in { animation: none; } }
   `],
   template: `
-    @if (!authService.currentUser() || authService.currentUser()?.isGuest) {
+    @if (!authService.currentUser()) {
     <div class="relative">
       <button
         type="button"
