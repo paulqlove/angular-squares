@@ -197,3 +197,38 @@ Oct 31, 2026 lab pass on quarterscore.com. Mobile Lighthouse 69 / 80 / 100 / 91 
 - Desktop: every tab keeps the Board's height so Players and Winners never move; phones are unchanged.
 
 **Read it Nov 29 and Jan 15:** `otherBoardJoins` against `fullBoardViewsWithOpenBoards`. If it never fires, the build was cheap and stays quiet.
+
+## Board groups for the More tab (requested Nov 10, 2026, not built)
+
+**Why:** a host with a work group and a friends group should not show the work crowd the friends' boards. Today every board switched on under **Show in my open boards** appears in every other board's More tab.
+
+**What the host wants:**
+- Put open boards into **groups**. A player on a board sees only the open boards in that board's group in More.
+- A board can instead be **open for all groups**, so it shows up in every group's More tab.
+- Example: a work group with several games and a friends group with several games. Anyone with the link to a board in either group can join it, and they see only that group's boards in More.
+- On the dashboard, the existing search field (it appears once a host has 6 or more boards) also searches **by group name**, so typing "work" finds every board in the work group.
+
+**Proposed behavior (to confirm):**
+- Each open board is in one group, or is **open for all groups**. A board not switched on stays hidden, exactly as today.
+- What a player sees in More: the open boards in their board's group, plus every board marked open for all groups. A player on an open-for-all board sees only the other open-for-all boards, so a shared link never exposes a group the player was not invited to.
+- Existing open boards become **open for all groups** on release, so nothing changes until a host creates a group.
+- Group names are the host's own labels. Players never see them.
+- Deleting a group switches its boards off in More (hidden), never to open-for-all, so deleting cannot widen who sees a board.
+- Season Pass only, like the More tab. Cap of 10 groups per host.
+
+**Where it shows up in the app:**
+- **Edit game, create form, game page Edit:** under the **Show in my open boards** switch, a Group picker: the host's groups, **All groups**, and **New group...**. The preview line keeps showing exactly what players see.
+- **Dashboard:** a small group chip on each board card, and group names matched by the search field. Group rename and delete live in a short **Groups** manager reached from the same search area, not a new page.
+
+**Data (sketch):**
+- `users/{ownerId}/boardGroups/{groupId}: { name, createdAt }` (owner only).
+- `openBoards/{ownerId}/{boardId}`: today it holds `true`. It becomes the group id string, or `"*"` for all groups. `true` is read as `"*"`, so existing entries keep working with no migration. The `.validate` rule changes from `== true` to `true` or a short string, and stays owner-write only.
+- `games/{id}/openGroupId` mirrors it for the Edit forms. `getOpenBoards(ownerId, excludeId)` filters by the viewing board's group id plus `"*"` entries.
+- Deploy the rules separately from hosting (`firebase deploy --only database --project squares-4e4f7`) and add rules tests for: owner-only writes, string length cap, `true` still accepted, and a stranger unable to write.
+
+**Open questions for Paul:**
+1. Should a player on an open-for-all board see every group, or only the other open-for-all boards (proposed)?
+2. Is one group per board enough, or should a board be able to sit in two groups?
+3. Is 10 groups the right cap, and should the search threshold stay at 6 boards?
+
+**Read it later:** use `otherBoardJoins` per group, once groups exist, to see whether hosts with more than one group actually join across boards.
