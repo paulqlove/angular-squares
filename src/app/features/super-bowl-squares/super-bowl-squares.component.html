@@ -172,16 +172,16 @@
           <div class="qs-card p-3 sm:p-5">
             <!-- Tabs -->
             <div class="mb-4 flex flex-wrap gap-2" role="tablist">
-              <button (click)="selectTab('board')" role="tab" [attr.aria-selected]="activeTab === 'board'" class="qs-tab px-3 sm:px-4">Board</button>
-              <button (click)="selectTab('probabilities')" role="tab" [attr.aria-selected]="activeTab === 'probabilities'" class="qs-tab px-3 sm:px-4">Heatmap</button>
-              <button (click)="selectTab('boxscore')" role="tab" [attr.aria-selected]="activeTab === 'boxscore'" class="qs-tab px-3 sm:px-4">Box score</button>
+              <button id="tab-board" (click)="selectTab('board')" role="tab" aria-controls="board-tabpanel" [attr.aria-selected]="activeTab === 'board'" class="qs-tab px-3 sm:px-4">Board</button>
+              <button id="tab-probabilities" (click)="selectTab('probabilities')" role="tab" aria-controls="board-tabpanel" [attr.aria-selected]="activeTab === 'probabilities'" class="qs-tab px-3 sm:px-4">Heatmap</button>
+              <button id="tab-boxscore" (click)="selectTab('boxscore')" role="tab" aria-controls="board-tabpanel" [attr.aria-selected]="activeTab === 'boxscore'" class="qs-tab px-3 sm:px-4">Box score</button>
               @if (openBoards().length) {
-                <button (click)="selectTab('more')" role="tab" [attr.aria-selected]="activeTab === 'more'" class="qs-tab px-3 sm:px-4">More</button>
+                <button id="tab-more" (click)="selectTab('more')" role="tab" aria-controls="board-tabpanel" [attr.aria-selected]="activeTab === 'more'" class="qs-tab px-3 sm:px-4">More</button>
               }
             </div>
 
             <!-- Tab Content. At every width the Board stays in place (hidden while another tab shows) and sets the card's height. The other tabs sit on top of it and scroll inside if they are taller, so switching tabs never moves anything below. -->
-            <div class="relative">
+            <div id="board-tabpanel" role="tabpanel" [attr.aria-labelledby]="'tab-' + activeTab" class="relative">
               <div [class]="activeTab === 'board' ? (tabTouched ? 'qs-tab-in' : '') : 'invisible'" [attr.aria-hidden]="activeTab === 'board' ? null : 'true'">
                 <app-game-board
                   [selectedSquares]="selectedSquares"
