@@ -1,5 +1,6 @@
 import { DecimalPipe } from '@angular/common';
-import { Component, Output, EventEmitter, ChangeDetectionStrategy, HostListener } from '@angular/core';
+import { Component, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
+import { ModalComponent } from '../../../../components/ui/modal/modal.component';
 
 import { FormsModule } from '@angular/forms';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
@@ -7,7 +8,7 @@ import { heroCheck, heroUserMinus, heroXMark } from '@ng-icons/heroicons/outline
 
 @Component({
     selector: 'app-payment-dialog',
-    imports: [FormsModule, NgIconComponent, DecimalPipe],
+    imports: [ModalComponent, FormsModule, NgIconComponent, DecimalPipe],
     providers: [
         provideIcons({ heroCheck, heroUserMinus, heroXMark })
     ],
@@ -71,9 +72,8 @@ export class PaymentDialogComponent {
     return this.getPlayersList().filter(p => p.paid).length;
   }
 
-  @HostListener('document:keydown.escape')
-  onEscape(): void {
-    if (!this.isOpen) return;
+  /** Esc or a backdrop tap: first back out of a remove prompt, then close. */
+  onDismiss(): void {
     if (this.removingName) this.cancelRemove();
     else this.close();
   }
