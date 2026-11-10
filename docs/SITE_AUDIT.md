@@ -265,5 +265,38 @@ Update this list as each chunk ships (change, Paul tests locally, push, merge).
 | P3 One word for the action: Create a board (site, tours, dashboard, blog) | Done | this batch |
 | P3 Box score: shared buttons and inputs, rows built with loops (200 lines to 161) | Done | this batch |
 | P3 Old color names moved to current tokens (178 uses, 25 files); legacy aliases and Tailwind keys removed | Done | this batch |
-| Everything else in Priority 3 | Not started | |
+| Footer pages redesign (How to play, FAQ, Best numbers, Printable, TV mode, board pages, legal pages): display headline, hero or facts panel, step row, margin headings, board diagrams from tokens, shared reading components, trimmed copy | Done (not part of the original audit; rules in docs/DESIGN.md, Reading pages) | #234 to #236 |
+| Everything else in Priority 3 | Not started, see "What is left" below | |
+
+## What is left (Nov 9, 2026)
+
+Nothing here is a bug. All of it is polish or could not be checked on screen. Most of it is optional.
+
+**Priority 3 polish, not started**
+- **Buttons and inputs without the shared style:** about 19 buttons (mostly icon and menu buttons, a few on the game page) have no `qs-btn` or `qs-tab`. The box score ones are already fixed.
+- **Field label spacing:** four spacing variants. Add one shared `.qs-field-label`.
+- **Empty states:** no shared pattern (dashboard, payment dialog and players list each do their own).
+- **Menus:** `app-dropdown` (dashboard only) plus separate profile-menu and help-menu popovers.
+- **Typography:** bold and semibold mixed on headings; a few letter-spacing outliers (`tracking-wider`, `[0.3em]`, `[0.2em]`) against `qs-label`'s 0.1em.
+- **Accessibility:**
+  - The tour dots and the box score badge use color alone (add text).
+  - The tour has no `role="dialog"` and does not move focus.
+  - Two `outline-none` uses need a replacement focus ring (recommended first).
+  - Four explicit `motion-reduce` classes are redundant.
+- **Unused classes in the kit** (low value, mostly keep): `qs-badge-bad`, `qs-display`, `qs-fade-rise`, `qs-input-error`, `qs-badge-code`, `qs-btn-danger`.
+- **Copy:** "Lock board" and "Edit game" in the host bar versus "Manage players" and "Players" on phones; footer label "Donation squares" versus the page title "Football squares fundraiser".
+
+**Could not be checked on screen (sandbox gaps)**
+- Google sign-in failing (the new error message exists; the emulator has no Google provider).
+- "Present on a TV" in the sandbox profile menu (probably a fake-account artifact).
+- Dashboard filter chips and the "More" tab.
+- Toast against the host bar on short screens.
+- Create form step 3 on a phone, and the Season Pass views of Create (custom split inputs, toggles).
+
+**Decided or dropped, do not reopen**
+- Sign-in name stays required. Em dashes allowed, used sparingly.
+- Live score strip, the "Drawn" pill, the auto-lock note, the "Playing as" row, the TV legibility changes: dropped (Paul: too busy).
+- Footer "sports ball" line, blog intro and $5.99 dialog wording: unchanged.
+- Tab arrow keys not added (they switch boards).
+- Design principle behind these cuts: less on screen reads as more premium (see the team board note, Nov 9).
 
