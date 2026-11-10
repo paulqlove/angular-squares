@@ -261,7 +261,7 @@ Update this list as each chunk ships (change, Paul tests locally, push, merge).
 | P2 Shared modal shell complete: upgrade dialog and both game-page name dialogs moved; page scroll lock on <html> while any dialog is open | Done | this batch |
 | P2 Board tabs: ids, aria-controls and a labelled tabpanel (no arrow keys: they switch boards) | Done | this batch |
 | P3 Copy and dead code: sentence case and Tap in tours, Confirmed on the TV, heatmap dead border, ripple-grid and score-input deleted | Done | this batch |
-| P3 TV view: larger, darker labels and a note while numbers are not drawn | Done | this batch |
+| P3 TV view legibility: tried, Paul found it too busy, reverted. TV stays as is | Dropped | n/a |
 | P3 One word for the action: Create a board (site, tours, dashboard, blog) | Done | this batch |
 | P3 Box score: shared buttons and inputs, rows built with loops (200 lines to 161) | Done | this batch |
 | P3 Old color names moved to current tokens (178 uses, 25 files); legacy aliases and Tailwind keys removed | Done | this batch |
