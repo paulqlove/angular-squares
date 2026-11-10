@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, ElementRef, HostListener, computed,
 
 /** Open modals, oldest first. Only the last one answers Esc, so a confirm on top of a dialog closes alone. */
 const openModals: ModalComponent[] = [];
+let pageOverflow = '';
 
 const LEVEL = { 1: 'z-[150]', 2: 'z-[160]', 3: 'z-[170]' } as const;
 const SIZE = { sm: 'max-w-sm', md: 'max-w-md', lg: 'max-w-lg', xl: 'max-w-2xl' } as const;
@@ -14,7 +15,7 @@ const FOCUSABLE = 'button, input, select, textarea, summary, [href], [tabindex]:
 
 /**
  * The one dialog shell: overlay, panel, dialog semantics, focus (in, trapped, and back to where it was),
- * Esc and backdrop. The content, including its header, is projected. Put `data-autofocus` on the element
+ * Esc and backdrop, and no page scrolling behind it. The content, including its header, is projected. Put `data-autofocus` on the element
  * that should take focus first; otherwise the first control does.
  */
 @Component({
@@ -66,11 +67,16 @@ export class ModalComponent {
     effect(onCleanup => {
       if (!this.open() || typeof document === 'undefined') return;
       openModals.push(this);
+      if (openModals.length === 1) {
+        pageOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+      }
       this.returnFocus = document.activeElement as HTMLElement | null;
       const focusTimer = setTimeout(() => this.initialFocus());
       onCleanup(() => {
         clearTimeout(focusTimer);
         openModals.splice(openModals.indexOf(this), 1);
+        if (!openModals.length) document.body.style.overflow = pageOverflow;
         const target = this.returnFocus;
         this.returnFocus = null;
         setTimeout(() => target?.isConnected && target.focus());

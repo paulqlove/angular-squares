@@ -90,6 +90,22 @@ describe('ModalComponent', () => {
     expect(f.componentInstance.dismissedA).toBe(0);
   });
 
+  it('stops the page scrolling while any modal is open, and restores it after the last closes', async () => {
+    const f = setup();
+    document.body.style.overflow = 'auto';
+    f.componentInstance.a.set(true);
+    await flush(f);
+    f.componentInstance.b.set(true);
+    await flush(f);
+    expect(document.body.style.overflow).toBe('hidden');
+    f.componentInstance.b.set(false);
+    await flush(f);
+    expect(document.body.style.overflow).toBe('hidden');
+    f.componentInstance.a.set(false);
+    await flush(f);
+    expect(document.body.style.overflow).toBe('auto');
+  });
+
   it('keeps Tab inside', async () => {
     const f = setup();
     f.componentInstance.a.set(true);
