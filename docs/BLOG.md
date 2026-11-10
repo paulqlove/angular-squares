@@ -46,7 +46,7 @@ Required frontmatter:
 - If you mention payment tracking, say that QuarterScore never collects, holds, or pays out money.
 - Do not use NFL, team, or Super Bowl logos. Plain team names are fine. Do not imply the site is an official league product.
 - Mark unfinished writing with `TODO` so it is obvious in the page and in review.
-- Link to the evergreen pages that match the brief (`/how-to-play`, `/faq`, `/super-bowl-squares`, `/best-squares-numbers`, `/printable-football-squares`, and the rest of the footer). The call to action for a normal post is [Start a free game](/dashboard).
+- Link to the evergreen pages that match the brief (`/how-to-play`, `/faq`, `/super-bowl-squares`, `/best-squares-numbers`, `/printable-football-squares`, and the rest of the footer). The call to action for a normal post is [Create a board](/dashboard).
 
 ## Check the result
 
