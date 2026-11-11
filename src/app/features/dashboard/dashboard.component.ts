@@ -323,12 +323,23 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
             @if (isLoadingGames()) {
               <div class="qs-skel-delay mt-6 grid grid-cols-1 items-start gap-3 sm:grid-cols-2 xl:grid-cols-3" aria-busy="true">
                 @for (i of [0, 1, 2]; track i) {
-                  <article class="qs-card flex min-h-[72px] items-center gap-3 p-3" aria-hidden="true">
-                    <div class="qs-skel h-12 w-12 shrink-0"></div>
-                    <div class="flex-1 space-y-2">
-                      <div class="qs-skel h-4 w-2/5"></div>
-                      <div class="qs-skel h-3 w-3/5"></div>
+                  <!-- Same shape as the board card: a row on a phone, from sm up the navy tile, name, teams and the Share bar -->
+                  <article class="qs-card" aria-hidden="true">
+                    <div class="flex min-h-[72px] items-center gap-3 p-3 sm:flex-col sm:items-stretch sm:gap-3.5 sm:pb-4">
+                      <div class="flex shrink-0 sm:min-h-[152px] sm:items-end sm:gap-[18px] sm:rounded-inner sm:bg-qs-tile sm:p-[18px]">
+                        <div class="qs-skel h-12 w-12 sm:h-28 sm:w-28"></div>
+                        <div class="hidden flex-col gap-2 pb-0.5 sm:flex">
+                          <div class="h-9 w-10 animate-pulse rounded-[6px] bg-white/15"></div>
+                          <div class="h-3 w-12 animate-pulse rounded-[6px] bg-white/15"></div>
+                        </div>
+                      </div>
+                      <div class="min-w-0 flex-1 space-y-2 sm:flex-none sm:px-1.5">
+                        <div class="qs-skel h-4 w-2/5 sm:h-5 sm:w-3/5"></div>
+                        <div class="qs-skel h-3 w-3/5 sm:w-2/5"></div>
+                        <div class="qs-skel hidden h-3 w-1/3 sm:block"></div>
+                      </div>
                     </div>
+                    <div class="hidden min-h-11 border-t border-qs-line sm:block"></div>
                   </article>
                 }
               </div>
