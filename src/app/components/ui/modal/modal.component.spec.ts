@@ -15,11 +15,15 @@ import { ModalComponent } from './modal.component';
       <h2 id="b-title">B</h2>
       <button id="b-only" type="button" data-autofocus>only</button>
     </app-modal>
+    <app-modal [open]="c()" labelledBy="c-title" motion="slide">
+      <h2 id="c-title">C</h2>
+    </app-modal>
   `
 })
 class Host {
   a = signal(false);
   b = signal(false);
+  c = signal(false);
   escA = signal(true);
   backdropA = signal(true);
   dismissedA = 0;
@@ -146,5 +150,23 @@ describe('ModalComponent', () => {
     expect(classes).toContain('items-end');
     expect(classes.some(c => /^(p|px|pb)-/.test(c))).toBe(false);
     fixture.destroy();
+  });
+
+  it('slides a sheet up and back down, staying on the page until it is out of view', async () => {
+    const f = setup();
+    f.componentInstance.c.set(true);
+    await flush(f);
+    const panel = document.querySelector<HTMLElement>('[aria-labelledby="c-title"]')!;
+    expect(panel.parentElement!.classList).toContain('qs-sheet-slide');
+    expect(panel.classList).not.toContain('animate-modal-in');
+    f.componentInstance.c.set(false);
+    f.detectChanges();
+    await new Promise(r => setTimeout(r, 160));
+    f.detectChanges();
+    expect(panel.parentElement!.classList).toContain('qs-modal-leave');
+    await new Promise(r => setTimeout(r, 60));
+    f.detectChanges();
+    expect(document.querySelector('[aria-labelledby="c-title"]')).toBeNull();
+    f.destroy();
   });
 });
