@@ -4,6 +4,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { boardArrowStep } from '../../core/utils/board-keys';
+import { drawBoardNumbers } from '../../core/utils/draw-numbers';
 import { isGameOver, startedQuarterCount } from '../../core/utils/quarter-label';
 import { GameService, GameData, EspnLiveSnapshot, BoardSize, getBoardDimensions } from '../../core/services/game.service';
 import { environment } from '../../../environments/environment';
@@ -909,21 +910,9 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // For 10-column/row boards: single digits 0-9
-    // For 5-column/row boards: paired digits stored as group index (0-4)
-    //   Group 0 = digits 0,1; Group 1 = digits 2,3; etc.
-    const generateNumbers = (count: number): number[] => {
-      if (count === 10) {
-        // Standard 10 digits, shuffled
-        return Array.from({length: 10}, (_, i) => i).sort(() => Math.random() - 0.5);
-      } else {
-        // 5 groups (paired digits), shuffled
-        return Array.from({length: 5}, (_, i) => i).sort(() => Math.random() - 0.5);
-      }
-    };
-
-    this.homeNumbers = generateNumbers(cols);
-    this.awayNumbers = generateNumbers(rows);
+    const { homeNumbers, awayNumbers } = drawBoardNumbers(this.boardSize);
+    this.homeNumbers = homeNumbers;
+    this.awayNumbers = awayNumbers;
     this.isRandomized = true;
 
     // Clear the seen flag so animation plays
@@ -1132,7 +1121,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       this.toastService.error('Could not convert the board. Try again.');
       return;
     }
-    await this.setLocked(true);
+    await this.setLocked(true, size);
   }
 
   async lockAsIs(): Promise<void> {
@@ -1159,14 +1148,35 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     }
   }
 
-  private async setLocked(locked: boolean): Promise<void> {
+  /**
+   * Locking also draws the numbers in the same save, the way auto lock does. A board that
+   * already has numbers just locks. `size` is the board size after a convert.
+   */
+  private async setLocked(locked: boolean, size: BoardSize = this.boardSize): Promise<void> {
     void this.stopAutoManage();
-    this.isLocked = locked;
-    try {
-      await this.gameService.updateGame(this.gameId, { isLocked: locked });
-    } catch {
-      this.isLocked = !locked;
+    if (!locked || this.isRandomized) {
+      this.isLocked = locked;
+      try {
+        await this.gameService.updateGame(this.gameId, { isLocked: locked });
+      } catch {
+        this.isLocked = !locked;
+      }
+      return;
     }
+
+    const { homeNumbers, awayNumbers } = drawBoardNumbers(size);
+    try {
+      await this.gameService.updateGame(this.gameId, { isLocked: true, homeNumbers, awayNumbers, isRandomized: true, winners: {} });
+    } catch {
+      this.toastService.error('Could not lock the board. Try again.');
+      return;
+    }
+    this.isLocked = true;
+    this.homeNumbers = homeNumbers;
+    this.awayNumbers = awayNumbers;
+    this.isRandomized = true;
+    this.winners = {};
+    // The game listener sees numbers this browser hasn't seen and plays the reveal.
   }
 
   /** Saves the Edit game popup in one write. */

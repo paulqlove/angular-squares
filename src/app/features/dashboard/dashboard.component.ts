@@ -2,6 +2,7 @@ import { Component, OnInit, signal, computed, inject, effect, ChangeDetectionStr
 
 import { miniGridCells, miniGridClass } from '../../core/utils/mini-grid';
 import { autoLockAt, groupBoards, isBoardFilling as boardIsFilling, isBoardFull, isReadyToLock } from '../../core/utils/board-groups';
+import { drawBoardNumbers } from '../../core/utils/draw-numbers';
 import { DropdownComponent } from '../../components/ui/dropdown/dropdown.component';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -685,22 +686,26 @@ export class DashboardComponent implements OnInit {
   async lockNow(game: GameListItem): Promise<void> {
     if (this.lockingIds().has(game.id)) return;
     const auto = !!game.autoManage?.enabled;
+    const draws = !game.isRandomized;
     const ok = await this.confirmService.ask({
       title: `Lock ${game.name}?`,
-      message: `Players can't pick or change squares once it's locked. You draw the numbers on the game page.${auto ? ' Auto-lock and draw turns off for this board.' : ''}`,
-      confirmLabel: 'Lock board',
+      message: `Players can't pick or change squares once it's locked.${draws ? ' The numbers are drawn now.' : ''}${auto ? ' Auto-lock and draw turns off for this board.' : ''}`,
+      confirmLabel: draws ? 'Lock and draw numbers' : 'Lock board',
       tone: 'primary'
     });
     if (!ok) return;
     this.lockingIds.update(ids => new Set(ids).add(game.id));
     try {
-      await this.gameService.updateGame(game.id, { isLocked: true });
+      // Locking draws the numbers in the same save, as auto lock does; drawn numbers stay as they are.
+      await this.gameService.updateGame(game.id, draws
+        ? { isLocked: true, ...drawBoardNumbers(game.boardSize || 100), isRandomized: true, winners: {} }
+        : { isLocked: true });
       if (auto) {
         await this.gameService.setAutoManage(game.id, null).catch(() =>
           this.toastService.warning('Locked, but Auto-lock and draw could not be turned off. Turn it off in Edit game.'));
       }
       this.justLocked.update(ids => new Set(ids).add(game.id));
-      this.myGames.update(games => games.map(g => g.id === game.id ? { ...g, isLocked: true, autoManage: undefined } : g));
+      this.myGames.update(games => games.map(g => g.id === game.id ? { ...g, isLocked: true, isRandomized: true, autoManage: undefined } : g));
       setTimeout(() => this.justLocked.update(ids => { const next = new Set(ids); next.delete(game.id); return next; }), 1200);
     } catch {
       this.toastService.error('Could not lock the board. Try again.');

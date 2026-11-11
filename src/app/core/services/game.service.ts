@@ -123,6 +123,8 @@ export interface GameListItem {
   playerCount: number;
   squaresFilled: number;
   isLocked: boolean;
+  /** Whether the numbers are drawn. */
+  isRandomized?: boolean;
   pricePerSquare: number;
   /** Board size: 100 (10x10), 50 (5x10), or 25 (5x5). Defaults to 100. */
   boardSize: BoardSize;
@@ -837,6 +839,7 @@ export class GameService {
           playerCount: playerNames.size,
           squaresFilled,
           isLocked: game.isLocked,
+          isRandomized: game.isRandomized,
           pricePerSquare: game.pricePerSquare,
           boardSize: game.boardSize || 100,
           managerId: game.managerId,
@@ -1043,6 +1046,7 @@ export class GameService {
           playerCount: playerNames.size,
           squaresFilled,
           isLocked: game.isLocked,
+          isRandomized: game.isRandomized,
           pricePerSquare: game.pricePerSquare,
           boardSize: game.boardSize || 100,
           managerId: game.managerId,
