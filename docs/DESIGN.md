@@ -247,7 +247,7 @@ Toast bottom center on phones, bottom right on desktop, `--qs-shadow-pop`, 5 sec
 
 ### Dialogs and the share sheet
 
-Centered, radius 10px, `--qs-shadow-pop`, dimmed navy scrim at 60%. Title, one short paragraph, actions right aligned with the primary last. Every dialog uses `app-modal`; a footer action row sits on the panel fill with a 1px `--qs-line` top border and no background tint of its own. Escape closes, focus moves in and returns. Share sheet rows: Copy link (ink button), QR (rendered in navy on paper), Print board, TV view.
+Centered, radius 10px, `--qs-shadow-pop`, dimmed navy scrim at 60%. On phones most dialogs dock as a bottom sheet that runs edge to edge: full width, flush with the bottom, 18px top corners, no scrim showing beside or below it. Title, one short paragraph, actions right aligned with the primary last. Every dialog uses `app-modal`; a footer action row sits on the panel fill with a 1px `--qs-line` top border and no background tint of its own. Escape closes, focus moves in and returns. Share sheet rows: Copy link (ink button), QR (rendered in navy on paper), Print board, TV view.
 
 ### Printable board
 

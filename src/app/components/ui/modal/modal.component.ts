@@ -8,7 +8,8 @@ let pageOverflow = '';
 const LEVEL = { 1: 'z-[150]', 2: 'z-[160]', 3: 'z-[170]' } as const;
 const SIZE = { sm: 'max-w-sm', md: 'max-w-md', lg: 'max-w-lg', xl: 'max-w-2xl' } as const;
 const PHONE = {
-  sheet: { overlay: 'items-end p-4 sm:items-center', panel: 'rounded-t-card pb-[env(safe-area-inset-bottom)] sm:rounded-card' },
+  /* Edge to edge on phones: full width, flush with the bottom, no overlay showing beside or below it. */
+  sheet: { overlay: 'items-end pt-4 sm:items-center sm:p-4', panel: 'rounded-t-[18px] pb-[env(safe-area-inset-bottom)] max-sm:border-x-0 max-sm:border-b-0 sm:rounded-card' },
   center: { overlay: 'items-center p-4', panel: 'rounded-card' },
   full: { overlay: 'items-center p-4 max-sm:p-0', panel: 'rounded-card max-sm:h-dvh max-sm:rounded-none max-sm:border-0' }
 } as const;

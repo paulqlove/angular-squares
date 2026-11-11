@@ -137,4 +137,14 @@ describe('ModalComponent', () => {
     expect(event.defaultPrevented).toBe(true);
     expect(document.activeElement?.id).toBe('a-first');
   });
+  it('docks the phone sheet edge to edge, with no gap beside or below it', async () => {
+    const fixture = setup();
+    fixture.componentInstance.a.set(true);
+    fixture.detectChanges();
+    const overlay = document.querySelector<HTMLElement>('[aria-labelledby="a-title"]')!.parentElement!;
+    const classes = overlay.className.split(/\s+/);
+    expect(classes).toContain('items-end');
+    expect(classes.some(c => /^(p|px|pb)-/.test(c))).toBe(false);
+    fixture.destroy();
+  });
 });

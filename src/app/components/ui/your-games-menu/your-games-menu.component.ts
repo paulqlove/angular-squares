@@ -59,9 +59,11 @@ const CODE = /^[A-Z0-9]{6}$/;
         </div>
       }
 
-      <app-modal [open]="open() && phone()" labelledBy="your-games-title" phone="sheet" extraClass="yg-panel px-1.5 pb-4 pt-2 text-qs-ink" (dismissed)="close()">
+      <app-modal [open]="open() && phone()" labelledBy="your-games-title" phone="sheet" extraClass="yg-panel px-1.5 pt-2 text-qs-ink" (dismissed)="close()">
         <span class="mx-auto mb-2 mt-0.5 block h-1 w-10 rounded bg-qs-line-strong" aria-hidden="true"></span>
-        <ng-container *ngTemplateOutlet="body"></ng-container>
+        <div class="pb-4">
+          <ng-container *ngTemplateOutlet="body"></ng-container>
+        </div>
       </app-modal>
     </div>
 
