@@ -10,6 +10,7 @@ import { GameService, GameData, EspnLiveSnapshot, BoardSize, getBoardDimensions 
 import { environment } from '../../../environments/environment';
 import { PLAYER_COLORS, normalizePlayerColors } from './utils/player-colors';
 import { PreviewRole } from '../../core/services/role-preview.service';
+import { TeamLogoService } from '../../core/services/team-logo.service';
 import { PlanService } from '../../core/services/plan.service';
 import { DEFAULT_EMPTY_QUARTER_RULE, EmptyQuarterRule, QuarterSplit, splitFractions } from '../../core/plans';
 import { AutoManageSettings, autoRunLabel } from '../../core/utils/auto-manage';
@@ -170,6 +171,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   protected planService = inject(PlanService);
   private espnService = inject(EspnService);
+  private teamLogoService = inject(TeamLogoService);
   private confirmService = inject(ConfirmService);
   private toastService = inject(ToastService);
   private walkthroughService = inject(WalkthroughService);
@@ -291,6 +293,12 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
   // ESPN sync state
   linkedEspnGame = signal<EspnGame | null>(null);
+
+  /** Both teams' logos for the board caption and box score: our NFL table, or ESPN's logo for other leagues. */
+  teamLogos(): { away: string | null; home: string | null } {
+    const t = this.teamLogoService.teams({ awayTeam: this.awayTeam, homeTeam: this.homeTeam, espnEventId: this.espnEventId, espnSport: this.espnSport }, this.linkedEspnGame());
+    return { away: t.away.logo, home: t.home.logo };
+  }
   espnEventId: string | undefined;
   espnSport: SportType = 'nfl';
   isSyncingEspn = signal(false);

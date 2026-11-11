@@ -10,6 +10,7 @@ import { GameData, GameService, getBoardDimensions } from '../../core/services/g
 import { boardArrowStep } from '../../core/utils/board-keys';
 import { isGameOver, quarterLabel } from '../../core/utils/quarter-label';
 import { EspnGame, EspnService } from '../../core/services/espn.service';
+import { TeamLogoService } from '../../core/services/team-logo.service';
 import { GameBoardComponent } from '../super-bowl-squares/components/game-board/game-board.component';
 import { PLAYER_COLORS, normalizePlayerColors } from '../super-bowl-squares/utils/player-colors';
 
@@ -34,6 +35,7 @@ export class PresentComponent implements OnInit, OnDestroy {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly teamLogoService = inject(TeamLogoService);
   private readonly toast = inject(ToastService);
 
   protected readonly intervals: number[] = [10, 20, 30, 60];
@@ -149,6 +151,12 @@ export class PresentComponent implements OnInit, OnDestroy {
     this.linkSub?.unsubscribe();
     this.sub?.unsubscribe();
     this.gameService.unsubscribe();
+  }
+
+  /** Both teams' logos for the board caption: our NFL table, or ESPN's logo for other leagues. */
+  protected teamLogos(g: GameData): { away: string | null; home: string | null } {
+    const t = this.teamLogoService.teams(g, this.espnGame());
+    return { away: t.away.logo, home: t.home.logo };
   }
 
   protected boardRows(g: GameData): number {

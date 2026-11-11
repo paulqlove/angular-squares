@@ -2,7 +2,6 @@ import { buildInitials } from '../../utils/initials.utils';
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, ChangeDetectorRef, OnChanges, OnDestroy, SimpleChanges, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BoardSize, getBoardDimensions } from '../../../../core/services/game.service';
-import { getTeamLogoByAbbreviation } from '../../../content/teams-data';
 
 @Component({
     selector: 'app-game-board',
@@ -19,6 +18,9 @@ export class GameBoardComponent implements OnChanges, OnDestroy {
 
   @Input() homeTeam!: string;
   @Input() awayTeam!: string;
+  /** Team logos from TeamLogoService (our NFL table, or ESPN's logo for other leagues). */
+  @Input() awayLogo: string | null = null;
+  @Input() homeLogo: string | null = null;
   @Input() homeNumbers!: (number | null)[];
   @Input() awayNumbers!: (number | null)[];
   @Input() selectedSquares!: { [key: string]: string };
@@ -178,9 +180,5 @@ export class GameBoardComponent implements OnChanges, OnDestroy {
       event.preventDefault();
       this.squareClick.emit({ row, col });
     }
-  }
-
-  getTeamLogo(abbrev: string): string | null {
-    return getTeamLogoByAbbreviation(abbrev, 100);
   }
 } 
