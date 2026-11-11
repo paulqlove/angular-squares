@@ -466,30 +466,34 @@ body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
 .qs-sheet-slide > * { transition: transform 240ms cubic-bezier(.2,0,0,1); }
 .qs-sheet-slide.qs-modal-enter, .qs-sheet-slide.qs-modal-enter > *,
 .qs-sheet-slide.qs-modal-leave, .qs-sheet-slide.qs-modal-leave > * { animation: none; }
-.qs-sheet-slide.qs-modal-leave { opacity: 0; transition: opacity 160ms cubic-bezier(.4,0,1,1); }
-.qs-sheet-slide.qs-modal-leave > * { transform: translateY(100%); transition: transform 180ms cubic-bezier(.4,0,1,1); }
+/* Closing: sheet and scrim leave together on one accelerate curve, so the page never undims before the sheet is gone */
+.qs-sheet-slide.qs-modal-leave { opacity: 0; transition: opacity 200ms cubic-bezier(.3,0,.8,.15); }
+.qs-sheet-slide.qs-modal-leave > * { transform: translateY(100%); transition: transform 200ms cubic-bezier(.3,0,.8,.15); }
 @starting-style {
   .qs-sheet-slide { opacity: 0; }
   .qs-sheet-slide > * { transform: translateY(100%); }
 }
 
-/* Your games popover: drops down from the button and retracts up into it, as one piece */
+/* Your games popover: drops down from the button. Closing is a quick fade with a 4px lift and no squash,
+   on an accelerate curve, shorter than the open (as Material and Tailwind UI menus do). */
 .yg-pop {
   transform-origin: calc(100% - var(--yg-origin, 60px)) 0;
-  transition: opacity 180ms cubic-bezier(.2,0,0,1), transform 180ms cubic-bezier(.2,0,0,1);
+  transition: opacity 150ms cubic-bezier(.2,0,0,1), transform 150ms cubic-bezier(.2,0,0,1);
 }
 .yg-pop.yg-closing {
   opacity: 0;
-  transform: translateY(-8px) scaleY(.96);
-  transition-duration: 140ms;
-  transition-timing-function: cubic-bezier(.4,0,1,1);
+  transform: translateY(-4px);
+  transition-duration: 120ms;
+  transition-timing-function: cubic-bezier(.3,0,1,1);
   pointer-events: none;
 }
 @starting-style { .yg-pop { opacity: 0; transform: translateY(-8px) scaleY(.96); } }
-/* Its rows fall in one after another, 30ms apart; from the sixth on they come in together */
+/* Its rows fall in one after another, 20ms apart; from the fifth on they come in together */
 @keyframes yg-row-in { from { opacity: 0; transform: translateY(-6px); } }
-.yg-row { animation: yg-row-in 160ms cubic-bezier(.2,0,0,1) both; animation-delay: calc(var(--yg-start, 40ms) + min(var(--i, 0), 5) * 30ms); }
-.yg-chevron { transition: transform 180ms cubic-bezier(.2,0,0,1); }
+.yg-row { animation: yg-row-in 140ms cubic-bezier(.2,0,0,1) both; animation-delay: calc(var(--yg-start, 40ms) + min(var(--i, 0), 4) * 20ms); }
+/* The chevron turns with the popover: 150ms open, 120ms close */
+.yg-chevron { transition: transform 150ms cubic-bezier(.2,0,0,1); }
+.yg-chevron:not(.rotate-180) { transition-duration: 120ms; transition-timing-function: cubic-bezier(.3,0,1,1); }
 
 /* Panels that carry the class themselves (dashboard modals, shrink dialog) and small menus */
 .animate-modal-in { animation: qs-pop-in 200ms var(--qs-ease) backwards; }
