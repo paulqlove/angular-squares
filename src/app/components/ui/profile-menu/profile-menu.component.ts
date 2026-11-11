@@ -273,7 +273,6 @@ export class ProfileMenuComponent {
   }
 
   async signOut(): Promise<void> {
-    await this.authService.signOut();
-    this.router.navigate(['/']);
+    if (await this.authService.signOut()) this.router.navigate(['/']);
   }
 }

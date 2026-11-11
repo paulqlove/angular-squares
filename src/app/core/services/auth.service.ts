@@ -413,20 +413,19 @@ export class AuthService {
     }
   }
 
-  // Sign Out
-  async signOut(): Promise<void> {
+  /** Signs out for real and returns true. While previewing a role it does nothing and returns false. */
+  async signOut(): Promise<boolean> {
     if (this.previewRole() !== 'actual') {
       this.toast.warning('Preview only. Switch back to "Me" to really sign out.');
-      return;
+      return false;
     }
     try {
       await this.ensureInitialized();
       this._isLoading.set(true);
-      const currentUser = this._currentUser();
 
-      if (currentUser?.isGuest) {
-        this.clearGuestCookie();
-      }
+      // Always, not only for guests: a guest cookie left from earlier would sign
+      // this browser straight back in as that guest and keep it on the dashboard.
+      this.clearGuestCookie();
 
       // Always sign out of Firebase (guests now have anonymous sessions too)
       if (this.auth.currentUser) {
@@ -434,6 +433,7 @@ export class AuthService {
       }
 
       this._currentUser.set(null);
+      return true;
     } finally {
       this._isLoading.set(false);
     }
