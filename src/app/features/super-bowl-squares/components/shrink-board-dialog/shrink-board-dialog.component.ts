@@ -4,7 +4,7 @@ import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroXMark, heroLockClosed } from '@ng-icons/heroicons/outline';
 import { BoardSize, getBoardDimensions } from '../../../../core/services/game.service';
 
-/** Shown when the host locks a board that is half empty or less: offers a smaller board before locking. */
+/** Shown when the host locks a board that is half empty or less: offers a smaller board before it locks and draws the numbers. */
 @Component({
   selector: 'app-shrink-board-dialog',
   imports: [ModalComponent, NgIconComponent],
@@ -57,9 +57,9 @@ import { BoardSize, getBoardDimensions } from '../../../../core/services/game.se
       <div class="flex flex-col-reverse gap-2 border-t border-qs-line px-6 py-4 sm:flex-row sm:items-center sm:justify-end">
         <button type="button" (click)="lockAsIs.emit()" class="qs-btn qs-btn-ghost w-full text-qs-muted sm:w-auto">
           <ng-icon name="heroLockClosed" class="text-base"></ng-icon>
-          Lock as is
+          Lock and draw as is
         </button>
-        <button type="button" (click)="converted.emit(selected)" class="qs-btn qs-btn-primary w-full sm:w-auto">Convert to {{ selected }} and lock</button>
+        <button type="button" (click)="converted.emit(selected)" class="qs-btn qs-btn-primary w-full sm:w-auto">Convert to {{ selected }}, lock and draw</button>
       </div>
     </app-modal>
   `
