@@ -233,7 +233,9 @@ Navy tile (`--qs-tile`), radius 8px, big tabular sans number, mono caption under
 
 ### Header
 
-Navy bar, 56px, logo lockup (white mark, emerald quarter) left; right side holds the live badge, Light/Dark ghost button and Sign in. Always a solid navy, never over the animated grid. Under 640px the right group wraps to a second row.
+Navy bar, 60px on every page so it never shifts between pages, logo lockup (white mark, emerald quarter) left; right side holds the live badge, Light/Dark ghost button and Sign in. Always a solid navy, never over the animated grid. Under 640px the right group wraps to a second row.
+
+**Your games (game page).** The header button opens one list for everyone signed in, hosts, players and guests: a 360px popover on desktop, the bottom sheet on phones. It shows the five most recent games, the game on screen first with a 3px ink bar and a Viewing tag, and a Host tag on games the person runs or co-hosts. Each row is one link: a 30px mini board, the name, the matchup in muted text, and the state on the right (Filling with the open count in accent mono, Ready to lock with Full, or Locked with the lock icon). Green stays for open squares only. The footer holds Join with a code (an inline six-character field), Create a game when there is only one game, and My dashboard. "Recent" mixes the account's own and joined games with boards opened on this device (`qs-recent-games` in localStorage), which is the only list a guest has.
 
 ### Switch and toggle
 

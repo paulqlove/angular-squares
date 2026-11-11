@@ -1,6 +1,6 @@
 import { Component, OnInit, signal, computed, inject, effect, ChangeDetectionStrategy } from '@angular/core';
 
-import { miniGridCells, miniGridClass } from '../../core/utils/mini-grid';
+import { miniCellClass, miniGridCells, miniGridClass } from '../../core/utils/mini-grid';
 import { autoLockAt, groupBoards, isBoardFilling as boardIsFilling, isBoardFull, isReadyToLock } from '../../core/utils/board-groups';
 import { drawBoardNumbers } from '../../core/utils/draw-numbers';
 import { DropdownComponent } from '../../components/ui/dropdown/dropdown.component';
@@ -657,9 +657,7 @@ export class DashboardComponent implements OnInit {
 
   /** One mini-board square: open or claimed while filling, blank or taken once the board is quiet. */
   miniCellClass(game: GameListItem, index: number): string {
-    const taken = index < game.squaresFilled;
-    if (this.isBoardQuiet(game)) return taken ? 'qs-mini-taken' : 'qs-mini-blank';
-    return taken ? 'qs-mini-claimed' : 'qs-mini-open';
+    return miniCellClass(index, game.squaresFilled, this.isBoardQuiet(game));
   }
 
   /** "Sun 7:25 PM" when Auto-lock and draw will lock this full board, or '' when it is off or its time has passed. */
