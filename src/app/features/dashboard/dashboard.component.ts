@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed, inject, effect, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal, computed, inject, effect, ChangeDetectionStrategy } from '@angular/core';
 
 import { miniCellClass, miniGridCells, miniGridClass } from '../../core/utils/mini-grid';
 import { autoLockAt, groupBoards, isBoardFilling as boardIsFilling, isBoardFull, isReadyToLock } from '../../core/utils/board-groups';
@@ -58,6 +58,16 @@ import {
 type GameSort = 'newest' | 'oldest' | 'name' | 'players' | 'filled' | 'size';
 type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
 
+/** The dashboard tour. On a phone, join and create live in the bottom bar, so those two steps say so. */
+export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): WalkthroughStep[] {
+  if (!phone) return steps;
+  const phoneText: Record<string, Partial<WalkthroughStep>> = {
+    'create-game': { description: 'Tap New board at the bottom of the screen to start your own squares board. You can choose a sport, set points per square, and invite friends.', position: 'top' },
+    'join-game': { description: 'Have a game code? Tap Join with a code at the bottom of the screen to join a friend\'s game.', position: 'top' }
+  };
+  return steps.map(step => ({ ...step, ...phoneText[step.target] }));
+}
+
 @Component({
     selector: 'app-dashboard',
     imports: [ModalComponent, FormsModule, RouterLink, NgTemplateOutlet, DropdownComponent, CardMenuComponent, CreateGameFormComponent, NgIconComponent, AppHeaderComponent, HeadroomDirective, ProfileMenuComponent, ShareDialogComponent, EditGameDialogComponent, UpgradePassDialogComponent],
@@ -95,7 +105,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
         <app-profile-menu walkthroughTarget="profile-dropdown" (tour)="startWalkthrough()"></app-profile-menu>
       </app-shared-header>
 
-      <main class="mx-auto max-w-[1600px] px-4 sm:px-8 pt-6 pb-20 md:pt-8">
+      <main class="mx-auto max-w-[1600px] px-4 sm:px-8 pt-6 pb-32 sm:pb-20 md:pt-8">
         <!-- Heading + actions -->
         <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between" data-walkthrough="hero-section">
           <div>
@@ -103,7 +113,8 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
             <h2 class="qs-title mt-3 text-4xl sm:text-5xl">Your <span class="text-qs-accent">games</span></h2>
           </div>
 
-          <div class="flex flex-col gap-3 sm:flex-row">
+          <!-- From 640px up: join and create sit top right. Phones get the bottom bar instead. -->
+          <div class="hidden gap-3 sm:flex sm:flex-row">
             <div
               class="flex min-h-11 items-stretch overflow-hidden rounded-btn border border-qs-line-strong bg-qs-panel focus-within:outline focus-within:outline-[3px] focus-within:outline-offset-2 focus-within:outline-qs-ink"
               data-walkthrough="join-game"
@@ -377,6 +388,53 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
         }
       </main>
 
+      <!-- Phone: join and create in a bar along the bottom, like the game page's host tools -->
+      <div class="no-print fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-[90] sm:hidden">
+        <div role="toolbar" aria-label="Board actions" class="flex items-stretch gap-1.5 rounded-[12px] border border-qs-line bg-[color-mix(in_srgb,var(--qs-panel)_88%,transparent)] p-1.5 shadow-pop backdrop-blur-md">
+          <button type="button" (click)="showJoinSheet.set(true)" class="qs-btn qs-btn-secondary flex-1" data-walkthrough="join-game">
+            <ng-icon name="heroTicket" class="text-base" aria-hidden="true"></ng-icon>
+            Join with a code
+          </button>
+          @if (canCreateGame()) {
+            <button
+              type="button"
+              (click)="openCreateModal($event)"
+              [disabled]="isCheckingBoardLimit()"
+              [attr.aria-busy]="isCheckingBoardLimit()"
+              class="qs-btn qs-btn-ink flex-1 disabled:cursor-wait"
+              data-walkthrough="create-game"
+            >
+              <ng-icon name="heroPlus" class="text-base" aria-hidden="true"></ng-icon>
+              New board
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Phone: the code field, in a sheet from the bottom bar -->
+      <app-modal [open]="showJoinSheet()" labelledBy="join-sheet-title" size="sm" motion="slide" (dismissed)="showJoinSheet.set(false)">
+        <div class="p-5">
+          <h3 id="join-sheet-title" class="qs-title text-2xl">Join with a code</h3>
+          <p class="mt-1 text-sm text-qs-muted">Enter the six-character code your host shared.</p>
+          <div class="mt-4 flex min-h-11 items-stretch overflow-hidden rounded-btn border border-qs-line-strong bg-qs-panel focus-within:outline focus-within:outline-[3px] focus-within:outline-offset-2 focus-within:outline-qs-ink">
+            <label for="join-code-sheet" class="qs-label flex items-center border-r border-qs-line bg-qs-panel-2 px-3 text-qs-muted whitespace-nowrap">Code</label>
+            <input
+              id="join-code-sheet"
+              type="text"
+              [(ngModel)]="joinGameCode"
+              placeholder="ABC123"
+              maxlength="6"
+              autocomplete="off"
+              autocapitalize="characters"
+              data-autofocus
+              class="w-full min-w-0 bg-transparent px-3 font-mono text-base uppercase tracking-[0.3em] text-qs-ink placeholder:text-qs-muted/60 focus:outline-none"
+              (keyup.enter)="joinGame()"
+            />
+            <button type="button" (click)="joinGame()" [disabled]="joinGameCode.length !== 6" class="qs-btn qs-btn-ink rounded-none">Join</button>
+          </div>
+        </div>
+      </app-modal>
+
       <ng-template #gameCard let-game let-joined="joined">
         <!-- Phone: a row (mini board, name, teams, open count). From sm up: the board on a navy panel with the open count beside it.
              Filling boards get a full-width Share invite bar; locked and full boards go quiet. -->
@@ -556,7 +614,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
     }
   `]
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private gameService = inject(GameService);
   private espnService = inject(EspnService);
@@ -772,8 +830,16 @@ export class DashboardComponent implements OnInit {
   // Profile dropdown state
 
   joinGameCode = '';
+  /** Phone: the Join with a code sheet opened from the bottom bar. */
+  showJoinSheet = signal(false);
+
+  ngOnDestroy(): void {
+    if (typeof document !== 'undefined') document.body.classList.remove('has-phone-bar');
+  }
 
   ngOnInit(): void {
+    // Lifts toasts above the phone bottom bar
+    if (typeof document !== 'undefined') document.body.classList.add('has-phone-bar');
     this.loadMyGames();
     this.authService.waitForAuthReady().then(() => {
       const uid = this.currentUser()?.uid;
@@ -840,7 +906,7 @@ export class DashboardComponent implements OnInit {
 
   startWalkthrough(): void {
     this.walkthroughService.resetCompletion('dashboard');
-    this.walkthroughService.start('dashboard', this.dashboardWalkthroughSteps);
+    this.walkthroughService.start('dashboard', dashboardTourSteps(this.dashboardWalkthroughSteps, window.innerWidth < 640));
   }
 
   clearGameFilters(): void {
