@@ -107,13 +107,59 @@ describe('YourGamesMenuComponent', () => {
     el.remove();
   });
 
-  it('closes on a click outside the menu', async () => {
+  it('closes on a click outside the menu, retracting before it leaves', async () => {
     const fixture = await setup();
     const el: HTMLElement = fixture.nativeElement;
     document.body.appendChild(el);
     document.body.click();
     fixture.detectChanges();
+    expect(el.querySelector('#your-games-menu')?.classList).toContain('yg-closing');
+    await new Promise(r => setTimeout(r, 250));
+    fixture.detectChanges();
     expect(el.querySelector('#your-games-menu')).toBeNull();
+    el.remove();
+  });
+
+  it('drops the rows in one after another', async () => {
+    const el: HTMLElement = (await setup()).nativeElement;
+    const rows = [...el.querySelectorAll<HTMLElement>('a[aria-label^="Open "]')];
+    expect(rows.every(r => r.classList.contains('yg-row'))).toBe(true);
+    expect(rows.map(r => r.style.getPropertyValue('--i'))).toEqual(['0', '1', '2']);
+    expect(el.querySelector('#your-games-menu')!.classList).toContain('yg-pop');
+  });
+
+  it('turns back from a close when reopened before it finishes', async () => {
+    const fixture = await setup();
+    const el: HTMLElement = fixture.nativeElement;
+    const menu = fixture.componentInstance;
+    menu.close();
+    fixture.detectChanges();
+    const panel = el.querySelector('#your-games-menu')!;
+    expect(panel.classList).toContain('yg-closing');
+    menu.toggle();
+    fixture.detectChanges();
+    expect(el.querySelector('#your-games-menu')).toBe(panel);
+    expect(panel.classList).not.toContain('yg-closing');
+    await new Promise(r => setTimeout(r, 250));
+    fixture.detectChanges();
+    expect(el.querySelector('#your-games-menu')).toBe(panel);
+  });
+
+  it('moves focus to the first game on open and back to the button on Esc', async () => {
+    const fixture = await setup();
+    const el: HTMLElement = fixture.nativeElement;
+    document.body.appendChild(el);
+    fixture.componentInstance.close();
+    await new Promise(r => setTimeout(r, 250));
+    fixture.detectChanges();
+    el.querySelector<HTMLButtonElement>('button[aria-label="Your games"]')!.click();
+    fixture.detectChanges();
+    await new Promise(r => setTimeout(r, 10));
+    fixture.detectChanges();
+    expect(document.activeElement?.getAttribute('aria-label')).toBe('Open Game CUR001');
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    fixture.detectChanges();
+    expect(document.activeElement?.getAttribute('aria-label')).toBe('Your games');
     el.remove();
   });
 });

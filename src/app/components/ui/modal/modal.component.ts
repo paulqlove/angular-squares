@@ -52,6 +52,8 @@ export class ModalComponent {
   phone = input<keyof typeof PHONE>('sheet');
   /** 1 for a normal dialog; 2 or 3 when it opens over another one. Toasts and the tour sit above all of them. */
   level = input<keyof typeof LEVEL>(1);
+  /** pop: the panel rises and fades in. slide: a sheet slides up from the bottom edge and back down. */
+  motion = input<'pop' | 'slide'>('pop');
   /** Extra classes for the panel, for dialogs that set their own height or layout. */
   extraClass = input('');
   escapeCloses = input(true);
@@ -59,8 +61,8 @@ export class ModalComponent {
   /** Esc or a backdrop tap asked to close. The owner decides and sets `open` to false. */
   dismissed = output<void>();
 
-  protected overlayClass = computed(() => `fixed inset-0 flex justify-center bg-black/60 backdrop-blur-sm ${LEVEL[this.level()]} ${PHONE[this.phone()].overlay}`);
-  protected panelClass = computed(() => `animate-modal-in w-full border border-qs-line bg-qs-panel shadow-pop ${SIZE[this.size()]} ${PHONE[this.phone()].panel} ${this.extraClass()}`.trim());
+  protected overlayClass = computed(() => `fixed inset-0 flex justify-center bg-black/60 backdrop-blur-sm ${LEVEL[this.level()]} ${PHONE[this.phone()].overlay}${this.motion() === 'slide' ? ' qs-sheet-slide' : ''}`);
+  protected panelClass = computed(() => `${this.motion() === 'slide' ? '' : 'animate-modal-in '}w-full border border-qs-line bg-qs-panel shadow-pop ${SIZE[this.size()]} ${PHONE[this.phone()].panel} ${this.extraClass()}`.trim());
 
   /** Stays true for the length of the exit fade, then drops on a timer. Not on animationend: a missed event would leave an invisible full-screen layer over the page. */
   protected shown = signal(false);
@@ -75,7 +77,7 @@ export class ModalComponent {
       const open = this.open();
       clearTimeout(this.hideTimer);
       if (open) this.shown.set(true);
-      else if (this.shown()) this.hideTimer = setTimeout(() => this.shown.set(false), 150);
+      else if (this.shown()) this.hideTimer = setTimeout(() => this.shown.set(false), this.motion() === 'slide' ? 190 : 150);
     });
     effect(onCleanup => {
       if (!this.open() || typeof document === 'undefined') return;

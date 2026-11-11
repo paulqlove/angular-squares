@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, HostListener, computed, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, HostListener, computed, inject, input, signal, viewChild } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
@@ -15,6 +15,8 @@ const SHOWN = 5;
 const SPARE = 3;
 /** A game code as players type it: six letters and digits. */
 const CODE = /^[A-Z0-9]{6}$/;
+/** How long the popover takes to retract, plus a little; the phone sheet's exit fits inside it too. */
+const CLOSE_MS = 200;
 
 /**
  * Your Games, in the game page header: the five most recent games for hosts, players and guests alike, the one on screen
@@ -26,9 +28,6 @@ const CODE = /^[A-Z0-9]{6}$/;
   providers: [provideIcons({ heroChevronDown, heroChevronRight, heroHashtag, heroLockClosed, heroPlus, heroSquares2x2 })],
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
-    @keyframes menu-in { from { opacity: 0; transform: translateY(-4px); } }
-    .animate-menu-in { animation: menu-in 120ms cubic-bezier(.2,.7,.2,1); }
-    @media (prefers-reduced-motion: reduce) { .animate-menu-in { animation: none; } }
     /* The header sets a light focus ring for its navy bar; the menu is a light panel. */
     .yg-panel :where(a, button, input):focus-visible { outline: 2px solid var(--qs-ink); outline-offset: -2px; }
     .qs-mini { background: var(--qs-line); }
@@ -39,6 +38,7 @@ const CODE = /^[A-Z0-9]{6}$/;
   template: `
     <div class="relative">
       <button
+        #trigger
         type="button"
         (click)="toggle()"
         [attr.aria-expanded]="open()"
@@ -50,18 +50,23 @@ const CODE = /^[A-Z0-9]{6}$/;
       >
         <ng-icon name="heroSquares2x2" class="text-xl"></ng-icon>
         <span class="qs-label hidden sm:inline">Your games</span>
-        <ng-icon name="heroChevronDown" class="hidden text-sm transition-transform sm:inline" [class.rotate-180]="open()"></ng-icon>
+        <ng-icon name="heroChevronDown" class="yg-chevron hidden text-sm sm:inline" [class.rotate-180]="open()"></ng-icon>
       </button>
 
-      @if (open() && !phone()) {
-        <div id="your-games-menu" class="yg-panel absolute right-0 top-full z-50 mt-2 w-[360px] max-w-[calc(100vw-2rem)] rounded-[12px] border border-qs-line bg-qs-panel p-1.5 text-qs-ink shadow-pop animate-menu-in">
+      @if ((open() || closing()) && !phone()) {
+        <div
+          id="your-games-menu"
+          class="yg-panel yg-pop absolute right-0 top-full z-50 mt-2 w-[360px] max-w-[calc(100vw-2rem)] rounded-[12px] border border-qs-line bg-qs-panel p-1.5 text-qs-ink shadow-pop"
+          [class.yg-closing]="!open()"
+          [style.--yg-origin]="originX() + 'px'"
+        >
           <ng-container *ngTemplateOutlet="body"></ng-container>
         </div>
       }
 
-      <app-modal [open]="open() && phone()" labelledBy="your-games-title" phone="sheet" extraClass="yg-panel px-1.5 pt-2 text-qs-ink" (dismissed)="close()">
+      <app-modal [open]="open() && phone()" labelledBy="your-games-title" phone="sheet" motion="slide" extraClass="yg-panel px-1.5 pt-2 text-qs-ink" (dismissed)="close()">
         <span class="mx-auto mb-2 mt-0.5 block h-1 w-10 rounded bg-qs-line-strong" aria-hidden="true"></span>
-        <div class="pb-4">
+        <div class="pb-4" style="--yg-start: 80ms">
           <ng-container *ngTemplateOutlet="body"></ng-container>
         </div>
       </app-modal>
@@ -78,7 +83,7 @@ const CODE = /^[A-Z0-9]{6}$/;
       <div class="flex flex-col">
         @if (!loaded()) {
           @for (i of [0, 1, 2]; track i) {
-            <div class="flex min-h-14 items-center gap-3 px-3 py-2" aria-hidden="true">
+            <div [style.--i]="i" class="yg-row flex min-h-14 items-center gap-3 px-3 py-2" aria-hidden="true">
               <span class="h-[30px] w-[30px] animate-pulse rounded-[3px] bg-qs-panel-2"></span>
               <span class="flex flex-1 flex-col gap-1.5">
                 <span class="h-3.5 w-2/3 animate-pulse rounded bg-qs-panel-2"></span>
@@ -87,7 +92,7 @@ const CODE = /^[A-Z0-9]{6}$/;
             </div>
           }
         } @else if (failed() && !rows().length) {
-          <p class="px-3 py-3 text-sm text-qs-muted">Couldn't load your games. Try again in a moment.</p>
+          <p class="yg-row px-3 py-3 text-sm text-qs-muted">Couldn't load your games. Try again in a moment.</p>
         }
         @for (row of rows(); track row.id) {
           <a
@@ -96,7 +101,8 @@ const CODE = /^[A-Z0-9]{6}$/;
             (click)="close()"
             [attr.aria-current]="row.id === currentGameId() ? 'page' : null"
             [attr.aria-label]="'Open ' + row.name"
-            class="relative grid min-h-14 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-btn px-3 py-2 transition-colors hover:bg-qs-panel-2"
+            [style.--i]="$index"
+            class="yg-row relative grid min-h-14 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-btn px-3 py-2 transition-colors hover:bg-qs-panel-2"
             [class.bg-qs-panel-2]="row.id === currentGameId()"
           >
             @if (row.id === currentGameId()) {
@@ -138,7 +144,7 @@ const CODE = /^[A-Z0-9]{6}$/;
         }
       </div>
 
-      <div class="mt-1.5 flex flex-col border-t border-qs-line pt-1.5">
+      <div class="yg-row mt-1.5 flex flex-col border-t border-qs-line pt-1.5" [style.--i]="footerIndex()">
         @if (joining()) {
           <form class="flex items-center gap-2 px-1.5 py-1" (submit)="$event.preventDefault(); join()">
             <label for="your-games-code" class="sr-only">Game code</label>
@@ -181,10 +187,19 @@ export class YourGamesMenuComponent {
   /** The game on screen, listed first and marked Viewing. */
   currentGameId = input.required<string>();
 
-  close(): void {
+  /** Closes the menu. Focus goes back to the button unless the close came from a click somewhere else on the page. */
+  close(returnFocus = true): void {
+    if (!this.open()) return;
     this.open.set(false);
-    this.joining.set(false);
-    this.code.set('');
+    clearTimeout(this.closeTimer);
+    // The popover stays on screen while it retracts; the phone sheet runs its own exit
+    this.closing.set(!this.phone());
+    this.closeTimer = setTimeout(() => {
+      this.closing.set(false);
+      this.joining.set(false);
+      this.code.set('');
+    }, CLOSE_MS);
+    if (returnFocus && !this.phone()) this.trigger()?.nativeElement.focus({ preventScroll: true });
   }
 
   /**
@@ -194,7 +209,7 @@ export class YourGamesMenuComponent {
    */
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event): void {
-    if (this.open() && !this.phone() && !event.composedPath().includes(this.host.nativeElement)) this.close();
+    if (this.open() && !this.phone() && !event.composedPath().includes(this.host.nativeElement)) this.close(false);
   }
 
   @HostListener('document:keydown.escape')
@@ -207,11 +222,18 @@ export class YourGamesMenuComponent {
       this.close();
       return;
     }
+    // Reopened mid-close: the panel turns back from where it is, and the reset that waited for the exit is dropped
+    clearTimeout(this.closeTimer);
+    this.closing.set(false);
     this.phone.set(typeof window !== 'undefined' && !!window.matchMedia?.('(max-width: 639.98px)').matches);
+    this.originX.set((this.trigger()?.nativeElement.offsetWidth ?? 120) / 2);
     this.open.set(true);
+    setTimeout(() => this.focusFirst());
     void this.load();
   }
 
+  /** True while the popover retracts after closing. */
+  protected closing = signal(false);
   protected code = signal('');
   protected codeValid = computed(() => CODE.test(this.code()));
   protected countLabel = computed(() => (this.rows().length === 1 ? '1 game' : `${this.rows().length} recent`));
@@ -219,9 +241,13 @@ export class YourGamesMenuComponent {
   protected createLink = computed(() => (this.auth.canCreateGame() ? '/dashboard' : '/create'));
   protected createQuery = computed(() => (this.auth.canCreateGame() ? { create: 'true' } : {}));
   protected failed = signal(false);
+  /** The footer falls in after the rows above it. */
+  protected footerIndex = computed(() => (this.loaded() ? this.rows().length : 3));
   protected joining = signal(false);
   protected loaded = signal(false);
   protected open = signal(false);
+  /** Half the button's width, so the popover grows from under the button's middle. */
+  protected originX = signal(60);
   /** Set when the menu opens: phones get the bottom sheet, wider screens the popover. */
   protected phone = signal(false);
   protected rows = signal<YourGameRow[]>([]);
@@ -255,11 +281,28 @@ export class YourGamesMenuComponent {
   }
 
   private auth = inject(AuthService);
+  private closeTimer: ReturnType<typeof setTimeout> | undefined;
   private gameService = inject(GameService);
   private host = inject<ElementRef<HTMLElement>>(ElementRef);
   /** Bumped on each open, so an older load that finishes late doesn't overwrite a newer one. */
   private loadId = 0;
   private router = inject(Router);
+  private trigger = viewChild<ElementRef<HTMLButtonElement>>('trigger');
+
+  /**
+   * Moves focus to the first game. Runs on open and again once the games load, but not after someone has moved on
+   * from the first control themselves.
+   */
+  private focusFirst(): void {
+    if (!this.open() || typeof document === 'undefined') return;
+    const panel = this.host.nativeElement.querySelector<HTMLElement>('.yg-panel');
+    if (!panel) return;
+    const controls = [...panel.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input')];
+    const active = document.activeElement;
+    if (active && panel.contains(active) && active !== controls[0]) return;
+    const target = panel.querySelector<HTMLElement>('a[aria-label^="Open "]') ?? controls[0];
+    target?.focus({ preventScroll: true });
+  }
 
   /** Reads the account's own games and this device's visits, then only the few games the menu shows. */
   private async load(): Promise<void> {
@@ -281,5 +324,6 @@ export class YourGamesMenuComponent {
     this.rows.set(rows.slice(0, SHOWN));
     this.failed.set(failed);
     this.loaded.set(true);
+    setTimeout(() => this.focusFirst());
   }
 }
