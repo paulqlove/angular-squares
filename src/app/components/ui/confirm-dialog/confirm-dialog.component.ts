@@ -21,7 +21,7 @@ import { ModalComponent } from '../modal/modal.component';
         <div class="p-6">
           <h3 id="confirm-title" class="qs-title text-2xl">{{ ask.title }}</h3>
           <p id="confirm-message" class="mt-3 text-qs-muted">{{ ask.message }}</p>
-          <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:flex-wrap sm:justify-end">
             <button type="button" class="qs-btn qs-btn-secondary" data-autofocus (click)="confirm.answer(false)">Cancel</button>
             <button type="button" class="qs-btn" [class]="ask.tone === 'primary' ? 'qs-btn-primary' : 'qs-btn-danger'" (click)="confirm.answer(true)">{{ ask.confirmLabel }}</button>
           </div>
