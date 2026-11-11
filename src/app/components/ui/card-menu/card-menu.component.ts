@@ -19,6 +19,7 @@ export interface CardMenuItem {
       <button
         type="button"
         class="qs-btn qs-btn-ghost w-11 px-0 text-qs-muted hover:text-qs-ink"
+        [class]="triggerClass()"
         aria-haspopup="menu"
         [attr.aria-expanded]="open()"
         [attr.aria-label]="label()"
@@ -46,6 +47,8 @@ export class CardMenuComponent {
   items = input<CardMenuItem[]>([]);
   label = input('More actions');
   picked = output<string>();
+  /** Extra classes for the trigger, e.g. light colors when it sits on a dark panel. */
+  triggerClass = input('');
 
   protected open = signal(false);
   private host = inject<ElementRef<HTMLElement>>(ElementRef);
