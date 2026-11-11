@@ -95,4 +95,25 @@ describe('YourGamesMenuComponent', () => {
     el.querySelector('form')!.dispatchEvent(new Event('submit'));
     expect(navigate).toHaveBeenCalledWith(['/game', 'ABC123']);
   });
+  it('keeps the menu open when Join with a code swaps in the code field', async () => {
+    const fixture = await setup();
+    const el: HTMLElement = fixture.nativeElement;
+    document.body.appendChild(el);
+    // The app re-renders between the button's handler and the document's, as a real click does
+    fixture.autoDetectChanges();
+    [...el.querySelectorAll('button')].find(b => b.textContent?.includes('Join with a code'))!.click();
+    fixture.detectChanges();
+    expect(el.querySelector('#your-games-code')).not.toBeNull();
+    el.remove();
+  });
+
+  it('closes on a click outside the menu', async () => {
+    const fixture = await setup();
+    const el: HTMLElement = fixture.nativeElement;
+    document.body.appendChild(el);
+    document.body.click();
+    fixture.detectChanges();
+    expect(el.querySelector('#your-games-menu')).toBeNull();
+    el.remove();
+  });
 });
