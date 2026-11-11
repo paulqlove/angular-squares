@@ -6,7 +6,7 @@ import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div [class]="containerClass">
-      <div class="mx-auto max-w-[1600px] px-4 sm:px-8 h-14 flex justify-between items-center">
+      <div class="mx-auto max-w-[1600px] px-4 sm:px-8 h-[60px] flex justify-between items-center">
         <div class="flex items-center">
           @if (heading === 'h1') {
             <h1><img src="assets/brand/lockup-horizontal-reversed.svg" alt="QuarterScore" width="192" height="24" class="h-6 w-auto"></h1>
@@ -20,7 +20,7 @@ import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
       </div>
     </div>
     @if (variant === 'fixed') {
-      <div class="h-14"></div>
+      <div class="h-[60px]"></div>
     }
   `
 })
