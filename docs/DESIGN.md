@@ -158,6 +158,7 @@ Rules:
 
 - An eyebrow inside a panel gets a 3px by 12px accent bar before it: `| BOARD 01 / HARBOR AT RIVERSIDE`.
 - Counters read `Q2 · 07:41` or `BOARD 01 / 03`.
+- Section heads that sit side by side (the game page's `01 / Board` and `02 / Players`) are a fixed 37px tall with their contents centered, so a badge on one side never makes it taller than the other and the cards below start and end level.
 - Game codes, branch names and anything typed are mono, uppercase, tracked.
 - Never more than three type sizes in one card.
 
