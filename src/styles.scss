@@ -372,8 +372,10 @@ html, body {
   from { opacity: 0; transform: translateX(-4rem); }
   to { opacity: 1; transform: none; }
 }
-.slide-in-from-right { animation: slide-in-from-right 0.35s ease-out both; }
-.slide-in-from-left { animation: slide-in-from-left 0.35s ease-out both; }
+/* backwards, not both: a transform kept after the animation ends turns this wrapper into the box that position: fixed
+   children measure from, so dialogs inside it would only cover the wrapper instead of the whole screen */
+.slide-in-from-right { animation: slide-in-from-right 0.35s ease-out backwards; }
+.slide-in-from-left { animation: slide-in-from-left 0.35s ease-out backwards; }
 body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
 
 @keyframes toast-in {
@@ -447,11 +449,14 @@ body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
 @keyframes qs-pop-in { from { opacity: 0; transform: translateY(8px) scale(.97); } }
 @keyframes qs-pop-out { to { opacity: 0; transform: translateY(4px) scale(.98); } }
 @keyframes menu-in { from { opacity: 0; transform: translateY(-4px); } }
+/* Enter animations that move things fill backwards, never both or forwards. A transform still applied once the
+   animation ends makes that element the box that position: fixed children measure from, so a dialog inside it
+   covers only that box. Leave animations keep both: they have to hold their hidden end state. */
 
 /* Modals: put animate.enter="qs-modal-enter" animate.leave="qs-modal-leave" on the dimmed backdrop element.
    The backdrop fades and its first child (the panel) pops. */
 .qs-modal-enter { animation: qs-fade-in 150ms var(--qs-ease) both; }
-.qs-modal-enter > * { animation: qs-pop-in 200ms var(--qs-ease) both; }
+.qs-modal-enter > * { animation: qs-pop-in 200ms var(--qs-ease) backwards; }
 .qs-modal-leave { animation: qs-fade-out 120ms var(--qs-ease-in) both; pointer-events: none; }
 .qs-modal-leave > * { animation: qs-pop-out 120ms var(--qs-ease-in) both; }
 
@@ -487,13 +492,13 @@ body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
 .yg-chevron { transition: transform 180ms cubic-bezier(.2,0,0,1); }
 
 /* Panels that carry the class themselves (dashboard modals, shrink dialog) and small menus */
-.animate-modal-in { animation: qs-pop-in 200ms var(--qs-ease) both; }
+.animate-modal-in { animation: qs-pop-in 200ms var(--qs-ease) backwards; }
 .animate-menu-in { animation: menu-in 120ms var(--qs-ease); }
 
 @keyframes qs-rise-in { from { opacity: 0; transform: translateY(6px); } }
 @keyframes qs-icon-pop { from { opacity: .4; transform: scale(.6); } }
-.qs-fade-rise { animation: qs-rise-in 180ms var(--qs-ease) both; }
-.qs-tab-in { animation: qs-rise-in 160ms var(--qs-ease) both; }
+.qs-fade-rise { animation: qs-rise-in 180ms var(--qs-ease) backwards; }
+.qs-tab-in { animation: qs-rise-in 160ms var(--qs-ease) backwards; }
 .icon-pop { animation: qs-icon-pop 280ms var(--qs-ease-spring) both; }
 
 /* Buttons: a quick press */
