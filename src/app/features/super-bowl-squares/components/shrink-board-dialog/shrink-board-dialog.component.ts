@@ -11,7 +11,7 @@ import { BoardSize, getBoardDimensions } from '../../../../core/services/game.se
   providers: [provideIcons({ heroXMark, heroLockClosed })],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
-    <app-modal [open]="isOpen" labelledBy="shrink-board-title" size="lg" extraClass="flex max-h-[90vh] flex-col overflow-hidden" (dismissed)="closed.emit()">
+    <app-modal [open]="isOpen" labelledBy="shrink-board-title" size="xl" extraClass="flex max-h-[90vh] flex-col overflow-hidden" (dismissed)="closed.emit()">
       <div class="flex items-start justify-between gap-4 px-6 pb-4 pt-6">
         <div>
           <p class="qs-eyebrow">Before you lock</p>
@@ -54,7 +54,7 @@ import { BoardSize, getBoardDimensions } from '../../../../core/services/game.se
         </div>
       </div>
 
-      <div class="flex flex-col-reverse gap-2 border-t border-qs-line px-6 py-4 sm:flex-row sm:items-center sm:justify-end">
+      <div class="flex flex-col-reverse gap-2 border-t border-qs-line px-6 py-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
         <button type="button" (click)="lockAsIs.emit()" class="qs-btn qs-btn-ghost w-full text-qs-muted sm:w-auto">
           <ng-icon name="heroLockClosed" class="text-base"></ng-icon>
           Lock and draw as is
