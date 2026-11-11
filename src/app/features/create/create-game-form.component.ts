@@ -285,7 +285,7 @@ export interface CreateGameSubmit {
     }
   </div>
 
-  <div class="flex items-center gap-2 border-t border-qs-line bg-qs-panel-2 px-4 py-3 sm:px-6">
+  <div class="flex items-center gap-2 border-t border-qs-line px-4 py-3 sm:px-6">
     @if (step() === 1) {
       <button type="button" (click)="cancelled.emit()" class="qs-btn qs-btn-ghost px-3 text-qs-muted">Cancel</button>
     } @else {

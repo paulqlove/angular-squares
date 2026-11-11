@@ -54,7 +54,7 @@ import { BoardSize, getBoardDimensions } from '../../../../core/services/game.se
         </div>
       </div>
 
-      <div class="flex flex-col-reverse gap-2 border-t border-qs-line bg-qs-panel-2 px-6 py-4 sm:flex-row sm:items-center sm:justify-end">
+      <div class="flex flex-col-reverse gap-2 border-t border-qs-line px-6 py-4 sm:flex-row sm:items-center sm:justify-end">
         <button type="button" (click)="lockAsIs.emit()" class="qs-btn qs-btn-ghost w-full text-qs-muted sm:w-auto">
           <ng-icon name="heroLockClosed" class="text-base"></ng-icon>
           Lock as is
