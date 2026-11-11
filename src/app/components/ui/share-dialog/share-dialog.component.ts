@@ -69,7 +69,7 @@ import { GameService } from '../../../core/services/game.service';
         <p class="sr-only" aria-live="polite">{{ copied() ? 'Copied to clipboard' : '' }}</p>
       </div>
 
-      <div class="flex justify-end border-t border-qs-line bg-qs-panel-2 px-6 py-4">
+      <div class="flex justify-end border-t border-qs-line px-6 py-4">
         <button type="button" (click)="close()" class="qs-btn qs-btn-secondary min-w-28">Done</button>
       </div>
     </app-modal>
