@@ -118,9 +118,16 @@
             <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
               <h1 class="qs-title text-2xl sm:text-3xl">{{ gameName }}</h1>
             </div>
-            @if (hostNote) {
-              <p class="mt-1.5 max-w-prose break-words text-sm text-qs-muted"><span class="qs-label mr-2 text-qs-ink">Host note</span>{{ hostNote }}</p>
-            }
+            <!-- The note row is always one line tall, so switching between boards with and without a note never moves the board.
+                 A note longer than the line is cut to it, and More opens it in place. -->
+            <div class="mt-1.5 flex min-h-5 max-w-prose items-start gap-2 text-sm leading-5 text-qs-muted">
+              @if (hostNote) {
+                <p #hostNoteEl class="min-w-0 flex-1 break-words" [class.line-clamp-1]="!hostNoteOpen()"><span class="qs-label mr-2 text-qs-ink">Host note</span>{{ hostNote }}</p>
+                @if (hostNoteClamped() || hostNoteOpen()) {
+                  <button type="button" class="shrink-0 font-medium text-qs-ink underline underline-offset-2 hover:text-qs-accent" [attr.aria-expanded]="hostNoteOpen()" (click)="toggleHostNote()">{{ hostNoteOpen() ? 'Less' : 'More' }}</button>
+                }
+              }
+            </div>
           </div>
         </div>
 
