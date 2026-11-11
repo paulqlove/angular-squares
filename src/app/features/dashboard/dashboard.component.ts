@@ -1160,8 +1160,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   async signOut(): Promise<void> {
-    await this.authService.signOut();
-    this.router.navigate(['/']);
+    if (await this.authService.signOut()) this.router.navigate(['/']);
   }
 
   // Edit modal methods
