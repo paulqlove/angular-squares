@@ -34,7 +34,6 @@ import {
   heroChevronRight,
   heroTrash,
   heroShare,
-  heroSquares2x2,
   heroClipboard,
   heroPencilSquare,
   heroXMark,
@@ -54,6 +53,8 @@ import { PaymentDialogComponent } from './components/payment-dialog/payment-dial
 import { ProbabilityHeatmapComponent } from './components/probability-heatmap/probability-heatmap.component';
 import { BoxScoreComponent, ManualScores } from './components/box-score/box-score.component';
 import { HelpMenuComponent } from '../../components/ui/help-menu/help-menu.component';
+import { YourGamesMenuComponent } from '../../components/ui/your-games-menu/your-games-menu.component';
+import { recordRecentVisit } from '../../core/utils/recent-games';
 import { ProfileMenuComponent } from '../../components/ui/profile-menu/profile-menu.component';
 import { ShareDialogComponent } from '../../components/ui/share-dialog/share-dialog.component';
 import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.component';
@@ -62,6 +63,7 @@ import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.co
     selector: 'app-super-bowl-squares',
     imports: [
     FormsModule,
+    YourGamesMenuComponent,
     NgIconComponent,
     GameBoardComponent,
     GameSkeletonComponent,
@@ -90,7 +92,6 @@ import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.co
             heroChevronRight,
             heroTrash,
             heroShare,
-            heroSquares2x2,
             heroClipboard,
             heroPencilSquare,
             heroXMark,
@@ -388,6 +389,8 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       this.isLoading.set(false);
       return;
     }
+    // Your Games lists boards opened on this device, which is the only list a guest has
+    if (isPlatformBrowser(this.platformId)) recordRecentVisit(gameId);
 
     // Subscribe to game updates (skip initial null from BehaviorSubject since we already verified game exists)
     let isFirstEmission = true;

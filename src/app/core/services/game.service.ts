@@ -23,6 +23,7 @@ import { AuthService } from './auth.service';
 import { shuffleSquares, smallerBoardSizes } from '../utils/shuffle-squares';
 import { OpenBoardRow, openBoardRows } from '../utils/open-boards';
 import { readSquareLimit } from '../utils/square-limit';
+import type { RecentVisit } from '../utils/recent-games';
 import { AUTO_MANAGE_DELAY_MS, AutoManageResult, AutoManageSettings, readAutoManage, readAutoManageResult } from '../utils/auto-manage';
 import {
   BoardActivity,
@@ -805,6 +806,20 @@ export class GameService {
     if (!snapshot.exists()) return [];
     const entries = Object.entries(snapshot.val() as Record<string, { createdAt?: number }>);
     return entries.sort((a, b) => (b[1]?.createdAt ?? 0) - (a[1]?.createdAt ?? 0)).map(([id]) => id);
+  }
+
+  /** Games this user hosts or joined, each with when it was created or joined, for the Your Games menu. Reads only the user's own index, not the games. */
+  async getYourGameIndex(userId: string): Promise<RecentVisit[]> {
+    if (!this.isBrowser) return [];
+    const [owned, joined] = await Promise.all([
+      get(ref(this.db, `users/${userId}/games`)),
+      get(ref(this.db, `users/${userId}/joinedGames`))
+    ]);
+    const entries = (snap: typeof owned, field: 'createdAt' | 'joinedAt'): RecentVisit[] =>
+      snap.exists()
+        ? Object.entries(snap.val() as Record<string, Record<string, unknown> | null>).map(([id, v]) => ({ id, at: Number(v?.[field]) || 0 }))
+        : [];
+    return [...entries(owned, 'createdAt'), ...entries(joined, 'joinedAt')];
   }
 
   async getUserGames(userId: string): Promise<GameListItem[]> {
