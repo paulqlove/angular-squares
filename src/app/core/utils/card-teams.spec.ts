@@ -24,3 +24,21 @@ describe('cardTeams', () => {
     expect(cardTeams(undefined, 'PHI')).toBeNull();
   });
 });
+
+describe('cardTeams with ESPN looks', () => {
+  it('gives college teams the logo and nickname ESPN sent with the linked game', () => {
+    const looks = {
+      away: { logo: 'https://a.espncdn.com/i/teamlogos/ncaa/500/194.png', name: 'Buckeyes' },
+      home: { logo: 'https://a.espncdn.com/i/teamlogos/ncaa/500/130.png', name: 'Wolverines' }
+    };
+    expect(cardTeams('OSU', 'MICH', 'ncaaf', looks)).toEqual([
+      { code: 'OSU', logo: looks.away.logo, name: 'Buckeyes' },
+      { code: 'MICH', logo: looks.home.logo, name: 'Wolverines' }
+    ]);
+  });
+
+  it('falls back to the code alone while the look is unknown', () => {
+    const none = { logo: null, name: null };
+    expect(cardTeams('OSU', 'MICH', 'ncaaf', { away: none, home: none })![0]).toEqual({ code: 'OSU', logo: null, name: '' });
+  });
+});

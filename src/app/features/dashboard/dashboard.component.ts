@@ -4,6 +4,7 @@ import { miniCellClass, miniGridCells, miniGridClass } from '../../core/utils/mi
 import { autoLockAt, groupBoards, isBoardFilling as boardIsFilling, isBoardFull, isReadyToLock } from '../../core/utils/board-groups';
 import { drawBoardNumbers } from '../../core/utils/draw-numbers';
 import { CardTeam, cardTeams } from '../../core/utils/card-teams';
+import { TeamLogoService } from '../../core/services/team-logo.service';
 import { DropdownComponent } from '../../components/ui/dropdown/dropdown.component';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -618,6 +619,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private gameService = inject(GameService);
   private espnService = inject(EspnService);
+  private teamLogos = inject(TeamLogoService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private confirmService = inject(ConfirmService);
@@ -798,7 +800,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   /** The card's one line: the teams playing. */
   /** The card's two team lines, away first; null shows "Teams not set". */
   cardTeams(game: GameListItem): CardTeam[] | null {
-    return cardTeams(game.awayTeam, game.homeTeam, game.espnSport);
+    return cardTeams(game.awayTeam, game.homeTeam, game.espnSport, this.teamLogos.teams(game));
   }
 
   /** Get CSS class for mini board grid based on board size */

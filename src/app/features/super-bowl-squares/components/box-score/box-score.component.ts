@@ -1,7 +1,6 @@
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { EspnGame, SportType, SPORT_CONFIG } from '../../../../core/services/espn.service';
-import { getTeamLogoByAbbreviation } from '../../../content/teams-data';
 
 export interface ManualScores {
   q1: { home: number; away: number };
@@ -62,7 +61,7 @@ export interface ManualScores {
             <tr class="border-white/10" [class.border-b]="$first">
               <td class="py-1 font-semibold">
                 <span class="flex items-center gap-1.5">
-                  @if (espnSport === 'nfl' && getTeamLogo(row.name); as logo) {
+                  @if (row.logo; as logo) {
                     <img [src]="logo" [alt]="row.name" class="h-4 w-4 object-contain" />
                   }
                   {{ row.name }}
@@ -91,6 +90,9 @@ export class BoxScoreComponent {
   @Input() scores: ManualScores | null = null;
   @Input() homeTeam = '';
   @Input() awayTeam = '';
+  /** Team logos from TeamLogoService (our NFL table, or ESPN's logo for other leagues). */
+  @Input() awayLogo: string | null = null;
+  @Input() homeLogo: string | null = null;
   @Input() isOwner = false;
   @Output() scoresChange = new EventEmitter<ManualScores>();
 
@@ -104,8 +106,11 @@ export class BoxScoreComponent {
 
   readonly quarterKeys = ['q1', 'q2', 'q3', 'q4'] as const;
 
-  get rows(): { side: 'away' | 'home'; name: string }[] {
-    return [{ side: 'away', name: this.displayAwayTeam }, { side: 'home', name: this.displayHomeTeam }];
+  get rows(): { side: 'away' | 'home'; name: string; logo: string | null }[] {
+    return [
+      { side: 'away', name: this.displayAwayTeam, logo: this.awayLogo },
+      { side: 'home', name: this.displayHomeTeam, logo: this.homeLogo }
+    ];
   }
 
   get displayHomeTeam(): string {
@@ -133,10 +138,6 @@ export class BoxScoreComponent {
 
   getPeriodLabel(): string {
     return SPORT_CONFIG[this.espnSport]?.periodLabel || 'Q';
-  }
-
-  getTeamLogo(abbrev: string): string | null {
-    return getTeamLogoByAbbreviation(abbrev, 100);
   }
 
   startEditing(): void {

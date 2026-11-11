@@ -3,14 +3,14 @@
   <p class="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
     <span class="flex items-center gap-1 font-semibold capitalize text-qs-ink">
       <span class="text-base leading-none text-qs-muted" aria-hidden="true">↓</span>
-      @if (getTeamLogo(awayTeam); as logo) {
+      @if (awayLogo; as logo) {
         <img [src]="logo" [alt]="awayTeam" class="h-4 w-4 object-contain" />
       }
       {{ awayTeam || 'Away' }}
     </span>
     <span class="text-qs-line-strong" aria-hidden="true">/</span>
     <span class="flex items-center gap-1 font-semibold capitalize text-qs-ink">
-      @if (getTeamLogo(homeTeam); as logo) {
+      @if (homeLogo; as logo) {
         <img [src]="logo" [alt]="homeTeam" class="h-4 w-4 object-contain" />
       }
       {{ homeTeam || 'Home' }}<span class="text-base leading-none text-qs-muted" aria-hidden="true">→</span>

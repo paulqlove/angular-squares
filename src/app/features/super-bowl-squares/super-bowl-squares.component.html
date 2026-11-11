@@ -189,6 +189,8 @@
                   [awayNumbersLocked]="awayNumbersLocked()"
                   [homeTeam]="homeTeam"
                   [awayTeam]="awayTeam"
+                  [awayLogo]="teamLogos().away"
+                  [homeLogo]="teamLogos().home"
                   [selectedPlayer]="selectedPlayer"
                   [highlightedSquare]="highlightedSquare"
                   [currentLeaderSquare]="currentLeaderSquare"
@@ -227,6 +229,8 @@
                     [scores]="{ q1: scores.q1, q2: scores.q2, q3: scores.q3, q4: scores.q4 }"
                     [homeTeam]="homeTeam"
                     [awayTeam]="awayTeam"
+                    [awayLogo]="teamLogos().away"
+                    [homeLogo]="teamLogos().home"
                     [isOwner]="!espnEventId && (isGameOwner() || isManager())"
                     (scoresChange)="onBoxScoreChange($event)">
                   </app-box-score>
