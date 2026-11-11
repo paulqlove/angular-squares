@@ -154,7 +154,8 @@
       <div class="grid grid-cols-1 gap-8 px-3 lg:grid-cols-12">
         <!-- 01 Board -->
         <section class="lg:col-span-7" data-walkthrough="game-board" aria-labelledby="board-heading">
-          <div class="mb-3 flex items-baseline justify-between border-b border-qs-line pb-3">
+          <!-- Both section heads are 37px tall whatever they hold, so the Open / Locked badge never makes this one taller than the Players head and the two cards start and end level -->
+          <div class="mb-3 flex min-h-[37px] items-center justify-between border-b border-qs-line pb-3">
             <h3 id="board-heading" class="qs-eyebrow qs-eyebrow-bar">01 / Board</h3>
             <span class="flex items-center gap-4">
               @if (isLiveGame()) {
@@ -245,7 +246,7 @@
         <section class="lg:relative lg:col-span-5" data-walkthrough="players-list" aria-labelledby="players-heading">
           <!-- On desktop the column is pinned to the board's height; the list scrolls inside -->
           <div class="flex flex-col lg:absolute lg:inset-0">
-          <div class="mb-3 flex items-baseline justify-between border-b border-qs-line pb-3">
+          <div class="mb-3 flex min-h-[37px] items-center justify-between border-b border-qs-line pb-3">
             <h3 id="players-heading" class="qs-eyebrow qs-eyebrow-bar">02 / Players</h3>
             <button
               type="button"
