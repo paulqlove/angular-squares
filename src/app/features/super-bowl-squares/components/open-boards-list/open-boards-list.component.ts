@@ -29,7 +29,7 @@ import { miniGridCells, miniGridClass } from '../../../../core/utils/mini-grid';
                   <span class="aspect-square" [class]="i < r.taken ? 'bg-qs-accent' : 'bg-qs-panel'"></span>
                 }
               </div>
-              <div class="col-start-2 row-start-1 flex min-w-0 items-start justify-between gap-2 self-end">
+              <div class="col-start-2 row-start-1 flex min-w-0 items-start justify-between gap-2 self-start">
                 <p class="line-clamp-2 text-base font-semibold leading-snug text-qs-ink">{{ r.name }}</p>
                 <span class="qs-badge qs-badge-ok shrink-0">{{ r.open }} open</span>
               </div>
