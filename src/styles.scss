@@ -71,7 +71,10 @@ html, body {
   --qs-ease: cubic-bezier(.2,.7,.2,1);
   --qs-ease-in: cubic-bezier(.4,0,1,1); /* exits: gentle start, quick end */
   --qs-ease-spring: cubic-bezier(.34,1.56,.64,1); /* small overshoot for state flips */
-  --qs-t-fast: 120ms; --qs-t-state: 200ms; --qs-t-reveal: 450ms;
+  --qs-ease-decel: cubic-bezier(.2,0,0,1); /* menus, sheets and the board switch coming in */
+  --qs-ease-exit: cubic-bezier(.3,0,1,1); /* menus leaving: quick, plain, no squash */
+  --qs-ease-sheet-out: cubic-bezier(.3,0,.8,.15); /* phone sheets and their dim leaving together */
+  --qs-t-press: 80ms; --qs-t-fast: 120ms; --qs-t-menu: 150ms; --qs-t-state: 200ms; --qs-t-sheet: 240ms; --qs-t-reveal: 450ms;
 }
 
 /* Dark mode = navy. Same as the TV view and the reversed logo. */
@@ -461,13 +464,13 @@ body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
 
 /* Bottom sheets that slide (app-modal motion="slide"). Transitions, not keyframes, so a reopen mid-close turns back
    from wherever the sheet is instead of snapping. */
-.qs-sheet-slide { transition: opacity 200ms cubic-bezier(.2,0,0,1); }
-.qs-sheet-slide > * { transition: transform 240ms cubic-bezier(.2,0,0,1); }
+.qs-sheet-slide { transition: opacity var(--qs-t-state) var(--qs-ease-decel); }
+.qs-sheet-slide > * { transition: transform var(--qs-t-sheet) var(--qs-ease-decel); }
 .qs-sheet-slide.qs-modal-enter, .qs-sheet-slide.qs-modal-enter > *,
 .qs-sheet-slide.qs-modal-leave, .qs-sheet-slide.qs-modal-leave > * { animation: none; }
 /* Closing: sheet and scrim leave together on one accelerate curve, so the page never undims before the sheet is gone */
-.qs-sheet-slide.qs-modal-leave { opacity: 0; transition: opacity 200ms cubic-bezier(.3,0,.8,.15); }
-.qs-sheet-slide.qs-modal-leave > * { transform: translateY(100%); transition: transform 200ms cubic-bezier(.3,0,.8,.15); }
+.qs-sheet-slide.qs-modal-leave { opacity: 0; transition: opacity var(--qs-t-state) var(--qs-ease-sheet-out); }
+.qs-sheet-slide.qs-modal-leave > * { transform: translateY(100%); transition: transform var(--qs-t-state) var(--qs-ease-sheet-out); }
 @starting-style {
   .qs-sheet-slide { opacity: 0; }
   .qs-sheet-slide > * { transform: translateY(100%); }
@@ -477,22 +480,22 @@ body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
    on an accelerate curve, shorter than the open (as Material and Tailwind UI menus do). */
 .yg-pop {
   transform-origin: calc(100% - var(--yg-origin, 60px)) 0;
-  transition: opacity 150ms cubic-bezier(.2,0,0,1), transform 150ms cubic-bezier(.2,0,0,1);
+  transition: opacity var(--qs-t-menu) var(--qs-ease-decel), transform var(--qs-t-menu) var(--qs-ease-decel);
 }
 .yg-pop.yg-closing {
   opacity: 0;
   transform: translateY(-4px);
   transition-duration: 120ms;
-  transition-timing-function: cubic-bezier(.3,0,1,1);
+  transition-timing-function: var(--qs-ease-exit);
   pointer-events: none;
 }
 @starting-style { .yg-pop { opacity: 0; transform: translateY(-8px) scaleY(.96); } }
 /* Its rows fall in one after another, 20ms apart; from the fifth on they come in together */
 @keyframes yg-row-in { from { opacity: 0; transform: translateY(-6px); } }
-.yg-row { animation: yg-row-in 140ms cubic-bezier(.2,0,0,1) both; animation-delay: calc(var(--yg-start, 40ms) + min(var(--i, 0), 4) * 20ms); }
+.yg-row { animation: yg-row-in 140ms var(--qs-ease-decel) both; animation-delay: calc(var(--yg-start, 40ms) + min(var(--i, 0), 4) * 20ms); }
 /* The chevron turns with the popover: 150ms open, 120ms close */
-.yg-chevron { transition: transform 150ms cubic-bezier(.2,0,0,1); }
-.yg-chevron:not(.rotate-180) { transition-duration: 120ms; transition-timing-function: cubic-bezier(.3,0,1,1); }
+.yg-chevron { transition: transform 150ms var(--qs-ease-decel); }
+.yg-chevron:not(.rotate-180) { transition-duration: 120ms; transition-timing-function: var(--qs-ease-exit); }
 
 /* Panels that carry the class themselves (dashboard modals, shrink dialog) */
 .animate-modal-in { animation: qs-pop-in 200ms var(--qs-ease) backwards; }
@@ -502,18 +505,18 @@ body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
    Opens by dropping 8px with a slight vertical scale (150ms); closes with a fade and a 4px lift (120ms, accelerate). */
 @keyframes qs-menu-in { from { opacity: 0; transform: translateY(-8px) scaleY(.96); } }
 @keyframes qs-menu-out { to { opacity: 0; transform: translateY(-4px); } }
-.qs-menu-enter { animation: qs-menu-in 150ms cubic-bezier(.2,0,0,1) both; }
-.qs-menu-leave { animation: qs-menu-out 120ms cubic-bezier(.3,0,1,1) both; pointer-events: none; }
+.qs-menu-enter { animation: qs-menu-in var(--qs-t-menu) var(--qs-ease-decel) both; }
+.qs-menu-leave { animation: qs-menu-out var(--qs-t-fast) var(--qs-ease-exit) both; pointer-events: none; }
 
 /* Dialogs docked to the bottom on phones (app-modal phone="sheet") slide like the sheets above, under 640px only.
    From 640px up they stay centred and pop in. Placed after .animate-modal-in so the slide wins on phones. */
 @media (max-width: 639.98px) {
-  .qs-sheet-phone { transition: opacity 200ms cubic-bezier(.2,0,0,1); }
-  .qs-sheet-phone > * { transition: transform 240ms cubic-bezier(.2,0,0,1); }
+  .qs-sheet-phone { transition: opacity var(--qs-t-state) var(--qs-ease-decel); }
+  .qs-sheet-phone > * { transition: transform var(--qs-t-sheet) var(--qs-ease-decel); }
   .qs-sheet-phone.qs-modal-enter, .qs-sheet-phone.qs-modal-enter > *, .qs-sheet-phone > .animate-modal-in,
   .qs-sheet-phone.qs-modal-leave, .qs-sheet-phone.qs-modal-leave > * { animation: none; }
-  .qs-sheet-phone.qs-modal-leave { opacity: 0; transition: opacity 200ms cubic-bezier(.3,0,.8,.15); }
-  .qs-sheet-phone.qs-modal-leave > * { transform: translateY(100%); transition: transform 200ms cubic-bezier(.3,0,.8,.15); }
+  .qs-sheet-phone.qs-modal-leave { opacity: 0; transition: opacity var(--qs-t-state) var(--qs-ease-sheet-out); }
+  .qs-sheet-phone.qs-modal-leave > * { transform: translateY(100%); transition: transform var(--qs-t-state) var(--qs-ease-sheet-out); }
   @starting-style {
     .qs-sheet-phone { opacity: 0; }
     .qs-sheet-phone > * { transform: translateY(100%); }
@@ -528,7 +531,7 @@ body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
 
 /* Buttons: a quick press */
 .qs-btn { transition-property: background-color, color, border-color, transform; }
-.qs-btn:active:not(:disabled) { transform: scale(.97); transition-duration: 80ms; transition-timing-function: var(--qs-ease-in); }
+.qs-btn:active:not(:disabled) { transform: scale(.97); transition-duration: var(--qs-t-press); transition-timing-function: var(--qs-ease-in); }
 
 /* Host bar: the lock turns as it opens or closes, and the clear icon turns when it becomes available */
 .lock-icon { position: relative; display: inline-flex; width: 1em; height: 1em; font-size: 1rem; }
