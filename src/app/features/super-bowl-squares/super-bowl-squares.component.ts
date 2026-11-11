@@ -1,4 +1,4 @@
-import { computed, Component, OnInit, OnDestroy, ViewChild, HostListener, signal, inject, effect, ChangeDetectionStrategy, PLATFORM_ID } from '@angular/core';
+import { computed, Component, ElementRef, OnInit, OnDestroy, ViewChild, HostListener, signal, inject, effect, ChangeDetectionStrategy, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
 import { FormsModule } from '@angular/forms';
@@ -180,7 +180,9 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private gameSub: Subscription | null = null;
   private hostBoardIds: string[] = [];
-  protected slideDir = signal<'left' | 'right' | ''>('');
+  /** The side the next board slides in from after an arrow-key switch; cleared once it has. */
+  private slideFrom: 'left' | 'right' | '' = '';
+  @ViewChild('boardPage') private boardPage?: ElementRef<HTMLElement>;
 
   private gameboardWalkthroughSteps: WalkthroughStep[] = [
     {
@@ -372,22 +374,20 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     // Switching boards reuses this component: drop the previous board's listener and state
     this.gameSub?.unsubscribe();
     this.gameSub = null;
+    // Switching from a board already on screen (arrow keys, Your games) keeps it showing until the next one's data
+    // arrives, then swaps in place. Only a first load, or one after "not found", shows the skeleton.
+    const switching = !this.isLoading() && !this.gameNotFound();
     this.gameNotFound.set(false);
-    this.isLoading.set(true);
-    this.pickSkeletonSize(gameId);
-    // A board opened from the More list starts on its squares, not the list it came from
-    this.activeTab = 'board';
-    this.openBoards.set([]);
     this.openBoardsLoad = null;
     this.liveIndexEnsuredFor = null;
     this.latestEspnLive = null;
-    this.selectedPlayer = null;
-    this.highlightedSquare = null;
-    this.displayHomeNumbers.set([]);
-    this.displayAwayNumbers.set([]);
-    this.linkedEspnGame.set(null);
     this.stopPolling();
     this.stopAnimation();
+    if (!switching) {
+      this.isLoading.set(true);
+      this.pickSkeletonSize(gameId);
+      this.resetBoardView();
+    }
 
     // Check if game exists
     const exists = await this.gameService.gameExists(gameId);
@@ -402,6 +402,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
     // Subscribe to game updates (skip initial null from BehaviorSubject since we already verified game exists)
     let isFirstEmission = true;
+    let awaitingData = true;
     this.gameSub = this.gameService.subscribeToGame(gameId).subscribe((data: GameData | null) => {
         // Skip the initial null emission from BehaviorSubject - we already verified game exists
         if (isFirstEmission && !data) {
@@ -409,6 +410,9 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           return;
         }
         isFirstEmission = false;
+        const firstData = awaitingData && !!data;
+        if (data) awaitingData = false;
+        if (switching && firstData) this.resetBoardView();
         this.isLoading.set(false);
 
         if (data) {
@@ -510,6 +514,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
           // Check if we need to play number reveal animation (first time seeing these numbers)
           this.checkAndPlayAnimation();
+          if (switching && firstData) this.slideInBoard();
         } else {
           this.gameNotFound.set(true);
         }
@@ -1381,7 +1386,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     const ids = this.hostBoardIds;
     const index = ids.indexOf(this.gameId);
     if (!dir || ids.length < 2 || index < 0) return;
-    this.slideDir.set(dir > 0 ? 'right' : 'left');
+    this.slideFrom = dir > 0 ? 'right' : 'left';
     this.router.navigate(['/game', ids[(index + dir + ids.length) % ids.length]]);
   }
 
@@ -1837,5 +1842,29 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     } finally {
       this.isSavingForceName.set(false);
     }
+  }
+
+  /** Clears what belongs to the board on screen, so the next board starts on its squares with nothing selected. */
+  private resetBoardView(): void {
+    // A board opened from the More list starts on its squares, not the list it came from
+    this.activeTab = 'board';
+    this.openBoards.set([]);
+    this.selectedPlayer = null;
+    this.highlightedSquare = null;
+    this.displayHomeNumbers.set([]);
+    this.displayAwayNumbers.set([]);
+    this.linkedEspnGame.set(null);
+  }
+
+  /** After an arrow-key switch, the new board eases in 12px from the side the arrow points to. Transform only, no fade,
+   *  so nothing ever goes blank. Web Animations with no fill, so no transform lingers to trap fixed dialogs inside. */
+  private slideInBoard(): void {
+    const from = this.slideFrom;
+    this.slideFrom = '';
+    if (!from || !isPlatformBrowser(this.platformId) || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    requestAnimationFrame(() => this.boardPage?.nativeElement.animate(
+      [{ transform: `translateX(${from === 'right' ? 12 : -12}px)` }, { transform: 'none' }],
+      { duration: 180, easing: 'cubic-bezier(.2,0,0,1)' }
+    ));
   }
 }

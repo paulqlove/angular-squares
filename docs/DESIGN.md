@@ -221,15 +221,16 @@ Motion is feedback, never decoration. It says "that worked", "that changed" or "
 | Counters and badges | game page, dashboard (`17/100 picked`, `36 open`, Open / Locked) | number or label crossfades, 160ms |
 | Lock | host bar, dashboard card | lock icon turns shut, 260ms spring; a board locked from its card shows open for a beat, then snaps shut |
 | Dashboard card changes group | dashboard | Filling, Ready to lock, Locked: 200 to 300ms ease-out, cards reflow with FLIP |
-| Menus | Your Games, help, profile, card menu | drop from the button 150ms, rows staggered 20ms; close is a fade with a 4px lift, 120ms, accelerate, no squash |
-| Phone bottom sheets | every dialog docked to the bottom on a phone, Your Games | slide up from the bottom (`translateY(100%)` to 0), 240ms; down 200ms, sheet and scrim together on one accelerate curve |
+| Menus | Your Games, help, profile, card menu, dropdowns | drop from the button 150ms (8px and a 0.96 vertical scale), Your Games rows staggered 20ms; close is a fade with a 4px lift, 120ms, accelerate, no squash. Shared classes `qs-menu-enter` / `qs-menu-leave` |
+| Phone bottom sheets | every dialog docked to the bottom on a phone (Manage players, share, confirm and the rest), Join with a code, Your Games | slide up from the bottom (`translateY(100%)` to 0), 240ms; down 200ms, sheet and scrim together on one accelerate curve |
 | Dialogs from 640px up | every dialog | backdrop fades 150ms; panel rises 8px and scales .97 to 1, 200ms; out 120ms ease-in |
 | Toasts | bottom of the screen | rise 8px and fade in, 200ms; fade out and drop 4px, 120ms; the rest glide into place, 200ms |
 | Copy confirmations | share sheet, TV link | icon swaps to a tick with a small pop, 280ms spring; label reads Copied |
 | Tabs | game page | new panel fades in and rises 6px, 160ms |
 | Content after loading | game page, dashboard | fades in, 160ms, no movement (the skeleton already has the page's shape) |
 | Skeletons | everywhere | `qs-skel` shimmer only, shown after a 140ms wait; never Tailwind `animate-pulse` |
-| Board switch | game page arrows, TV rotation | slide 24px and fade, 220ms, from the side the arrow points to |
+| Board switch | game page arrows | the current board stays on screen until the next board's data arrives, then swaps in place and eases 12px in from the side the arrow points to, 180ms, transform only with no fade, so nothing goes blank. Reduced motion: no movement |
+| TV rotation | `/tv` kiosk | slide 4rem and fade, 350ms, from the side it rotates to |
 | Form errors | Create, Edit, sign-in | message fades in and rises 4px, 160ms; scroll smoothly to the field. No shake |
 | Tour spotlight | walkthrough | moves with transform, 200ms; never animate its position or size properties |
 

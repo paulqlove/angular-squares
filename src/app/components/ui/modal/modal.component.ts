@@ -63,7 +63,7 @@ export class ModalComponent {
   /** Esc or a backdrop tap asked to close. The owner decides and sets `open` to false. */
   dismissed = output<void>();
 
-  protected overlayClass = computed(() => `fixed inset-0 flex justify-center bg-black/60 backdrop-blur-sm ${LEVEL[this.level()]} ${PHONE[this.phone()].overlay}${this.motion() === 'slide' ? ' qs-sheet-slide' : ''}`);
+  protected overlayClass = computed(() => `fixed inset-0 flex justify-center bg-black/60 backdrop-blur-sm ${LEVEL[this.level()]} ${PHONE[this.phone()].overlay}${this.motion() === 'slide' ? ' qs-sheet-slide' : this.phone() === 'sheet' ? ' qs-sheet-phone' : ''}`);
   protected panelClass = computed(() => `${this.motion() === 'slide' ? '' : 'animate-modal-in '}w-full border border-qs-line bg-qs-panel shadow-pop ${(this.phone() === 'center' ? SIZE : SIZE_FROM_SM)[this.size()]} ${PHONE[this.phone()].panel} ${this.extraClass()}`.trim());
 
   /** Stays true for the length of the exit fade, then drops on a timer. Not on animationend: a missed event would leave an invisible full-screen layer over the page. */
@@ -79,7 +79,7 @@ export class ModalComponent {
       const open = this.open();
       clearTimeout(this.hideTimer);
       if (open) this.shown.set(true);
-      else if (this.shown()) this.hideTimer = setTimeout(() => this.shown.set(false), this.motion() === 'slide' ? 220 : 150);
+      else if (this.shown()) this.hideTimer = setTimeout(() => this.shown.set(false), this.slidesOut() ? 220 : 150);
     });
     effect(onCleanup => {
       if (!this.open() || typeof document === 'undefined') return;
@@ -128,5 +128,11 @@ export class ModalComponent {
   private initialFocus(): void {
     const preferred = this.host.nativeElement.querySelector<HTMLElement>('[data-autofocus]');
     (preferred ?? this.focusables()[0])?.focus();
+  }
+
+  /** True when the panel leaves by sliding down: a slide sheet, or a docked sheet on a phone-width screen. */
+  private slidesOut(): boolean {
+    if (this.motion() === 'slide') return true;
+    return this.phone() === 'sheet' && typeof matchMedia !== 'undefined' && matchMedia('(max-width: 639.98px)').matches;
   }
 }

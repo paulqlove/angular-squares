@@ -10,11 +10,6 @@ import { heroBookOpen, heroPlayCircle, heroQuestionMarkCircle } from '@ng-icons/
   imports: [RouterLink, NgIconComponent],
   providers: [provideIcons({ heroBookOpen, heroPlayCircle, heroQuestionMarkCircle })],
   changeDetection: ChangeDetectionStrategy.Eager,
-  styles: [`
-    @keyframes menu-in { from { opacity: 0; transform: translateY(-4px); } }
-    .animate-menu-in { animation: menu-in 120ms cubic-bezier(.2,.7,.2,1); }
-    @media (prefers-reduced-motion: reduce) { .animate-menu-in { animation: none; } }
-  `],
   template: `
     @if (!authService.currentUser()) {
     <div class="relative">
@@ -34,7 +29,9 @@ import { heroBookOpen, heroPlayCircle, heroQuestionMarkCircle } from '@ng-icons/
       @if (open()) {
         <div
           id="help-menu"
-          class="absolute right-0 z-50 mt-2 w-64 max-w-[calc(100vw-2rem)] overflow-hidden rounded-card border border-qs-line bg-qs-panel p-2 text-qs-ink shadow-pop animate-menu-in"
+          animate.enter="qs-menu-enter"
+          animate.leave="qs-menu-leave"
+          class="absolute right-0 z-50 mt-2 w-64 max-w-[calc(100vw-2rem)] overflow-hidden rounded-card border border-qs-line bg-qs-panel p-2 text-qs-ink shadow-pop origin-top-right"
         >
           <button type="button" (click)="open.set(false); tour.emit()" class="qs-btn qs-btn-ghost w-full justify-start text-qs-ink">
             <ng-icon name="heroPlayCircle" class="text-base"></ng-icon>

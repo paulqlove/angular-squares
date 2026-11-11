@@ -16,11 +16,6 @@ import { ToggleComponent } from '../toggle/toggle.component';
   imports: [FormsModule, RouterLink, NgIconComponent, ToggleComponent],
   providers: [provideIcons({ heroChevronDown, heroArrowRightOnRectangle, heroComputerDesktop, heroSun, heroMoon, heroQuestionMarkCircle, heroTv, heroPlayCircle, heroBookOpen })],
   changeDetection: ChangeDetectionStrategy.Eager,
-  styles: [`
-    @keyframes menu-in { from { opacity: 0; transform: translateY(-4px); } }
-    .animate-menu-in { animation: menu-in 120ms cubic-bezier(.2,.7,.2,1); }
-    @media (prefers-reduced-motion: reduce) { .animate-menu-in { animation: none; } }
-  `],
   template: `
         <div class="relative" [attr.data-walkthrough]="walkthroughTarget">
       <button
@@ -48,7 +43,9 @@ import { ToggleComponent } from '../toggle/toggle.component';
       @if (showProfileDropdown()) {
         <div
           id="profile-menu"
-          class="absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-card border border-qs-line bg-qs-panel text-qs-ink shadow-pop animate-menu-in"
+          animate.enter="qs-menu-enter"
+          animate.leave="qs-menu-leave"
+          class="absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-card border border-qs-line bg-qs-panel text-qs-ink shadow-pop origin-top-right"
         >
           <div class="flex items-center gap-3 border-b border-qs-line p-4">
             @if (currentUser()?.photoURL) {

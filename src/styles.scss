@@ -448,7 +448,6 @@ body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
 @keyframes qs-fade-out { to { opacity: 0; } }
 @keyframes qs-pop-in { from { opacity: 0; transform: translateY(8px) scale(.97); } }
 @keyframes qs-pop-out { to { opacity: 0; transform: translateY(4px) scale(.98); } }
-@keyframes menu-in { from { opacity: 0; transform: translateY(-4px); } }
 /* Enter animations that move things fill backwards, never both or forwards. A transform still applied once the
    animation ends makes that element the box that position: fixed children measure from, so a dialog inside it
    covers only that box. Leave animations keep both: they have to hold their hidden end state. */
@@ -495,9 +494,31 @@ body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
 .yg-chevron { transition: transform 150ms cubic-bezier(.2,0,0,1); }
 .yg-chevron:not(.rotate-180) { transition-duration: 120ms; transition-timing-function: cubic-bezier(.3,0,1,1); }
 
-/* Panels that carry the class themselves (dashboard modals, shrink dialog) and small menus */
+/* Panels that carry the class themselves (dashboard modals, shrink dialog) */
 .animate-modal-in { animation: qs-pop-in 200ms var(--qs-ease) backwards; }
-.animate-menu-in { animation: menu-in 120ms var(--qs-ease); }
+
+/* Menus and dropdowns (profile, help, card actions, dropdowns): the same motion as the Your games popover.
+   Use animate.enter="qs-menu-enter" animate.leave="qs-menu-leave" on the panel and an origin-top-* class.
+   Opens by dropping 8px with a slight vertical scale (150ms); closes with a fade and a 4px lift (120ms, accelerate). */
+@keyframes qs-menu-in { from { opacity: 0; transform: translateY(-8px) scaleY(.96); } }
+@keyframes qs-menu-out { to { opacity: 0; transform: translateY(-4px); } }
+.qs-menu-enter { animation: qs-menu-in 150ms cubic-bezier(.2,0,0,1) both; }
+.qs-menu-leave { animation: qs-menu-out 120ms cubic-bezier(.3,0,1,1) both; pointer-events: none; }
+
+/* Dialogs docked to the bottom on phones (app-modal phone="sheet") slide like the sheets above, under 640px only.
+   From 640px up they stay centred and pop in. Placed after .animate-modal-in so the slide wins on phones. */
+@media (max-width: 639.98px) {
+  .qs-sheet-phone { transition: opacity 200ms cubic-bezier(.2,0,0,1); }
+  .qs-sheet-phone > * { transition: transform 240ms cubic-bezier(.2,0,0,1); }
+  .qs-sheet-phone.qs-modal-enter, .qs-sheet-phone.qs-modal-enter > *, .qs-sheet-phone > .animate-modal-in,
+  .qs-sheet-phone.qs-modal-leave, .qs-sheet-phone.qs-modal-leave > * { animation: none; }
+  .qs-sheet-phone.qs-modal-leave { opacity: 0; transition: opacity 200ms cubic-bezier(.3,0,.8,.15); }
+  .qs-sheet-phone.qs-modal-leave > * { transform: translateY(100%); transition: transform 200ms cubic-bezier(.3,0,.8,.15); }
+  @starting-style {
+    .qs-sheet-phone { opacity: 0; }
+    .qs-sheet-phone > * { transform: translateY(100%); }
+  }
+}
 
 @keyframes qs-rise-in { from { opacity: 0; transform: translateY(6px); } }
 @keyframes qs-icon-pop { from { opacity: .4; transform: scale(.6); } }
@@ -538,8 +559,8 @@ button:active:not(:disabled) .turn-icon { transform: rotate(120deg); transition-
     animation-iteration-count: 1 !important;
   }
   /* Your games and sliding sheets: a short fade only, with no movement or stagger */
-  .yg-pop, .yg-pop.yg-closing, .qs-sheet-slide, .qs-sheet-slide.qs-modal-leave { transform: none !important; transition: opacity 120ms linear !important; }
-  .qs-sheet-slide > *, .qs-sheet-slide.qs-modal-leave > * { transform: none !important; transition: none !important; }
+  .yg-pop, .yg-pop.yg-closing, .qs-sheet-slide, .qs-sheet-slide.qs-modal-leave, .qs-sheet-phone, .qs-sheet-phone.qs-modal-leave { transform: none !important; transition: opacity 120ms linear !important; }
+  .qs-sheet-slide > *, .qs-sheet-slide.qs-modal-leave > *, .qs-sheet-phone > *, .qs-sheet-phone.qs-modal-leave > * { transform: none !important; transition: none !important; }
   .yg-row { animation: none !important; }
 }
 
