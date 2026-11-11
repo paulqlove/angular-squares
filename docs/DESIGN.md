@@ -240,7 +240,7 @@ Staggers are plain values, not tokens: 20ms between Your games rows (from the fi
 | Board switch | game page arrows and arrow keys | the current board stays on screen until the next board's data arrives (no skeleton, no blank), then swaps in place and eases 12px in from the side the arrow points to, 180ms, `--qs-ease-decel`, transform only with no fade. Reduced motion: an instant swap |
 | TV rotation | `/tv` kiosk | slide 4rem and fade, 350ms, from the side it rotates to |
 | Form errors | Create, Edit, sign-in | message fades in and rises 4px, 160ms; scroll smoothly to the field. No shake |
-| Tour spotlight | walkthrough | moves with transform, 200ms; never animate its position or size properties |
+| Tour (walkthrough) | dashboard and game page tours | the page dims (`--qs-tour-dim`) with a hole cut around the step's target and a 3px accent ring around the hole. The dim and card fade in over 150ms (`--qs-ease-decel`), the card rising like a dialog panel; both leave in 120ms (`--qs-ease-exit`). Between steps the card never disappears: when the next target needs a scroll, the page scrolls smoothly while the spotlight and card hold still, then the ring, hole and card glide to the new target together, 200ms (`--qs-t-state`), `--qs-ease-decel`, and the card's words crossfade (in 200ms, out 120ms). Transform only: the dim is four panels around the hole and the ring is four corners and four edges, so a move is a translate plus a one-axis scale, never a change to position or size. While the page scrolls on its own, everything tracks the target with no animation. A step with no target closes the hole to the middle and centers the card. Reduced motion: instant scroll and the final state at once, dim still shown |
 
 ---
 
