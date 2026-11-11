@@ -374,38 +374,66 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
       </main>
 
       <ng-template #gameCard let-game let-joined="joined">
+        <!-- Phone: a row (mini board, name, teams, open count). From sm up: the board on a navy panel with the open count beside it.
+             Filling boards get a full-width Share invite bar; locked and full boards go quiet. -->
         <article animate.enter="qs-fade-rise" class="qs-card relative min-w-0 transition-[border-color] duration-150 ease-out has-[a:hover]:border-qs-ink has-[[aria-expanded=true]]:z-20">
-          <div class="flex items-center">
+          <div class="relative flex items-center sm:block">
             <a
               [routerLink]="['/game', game.id]"
               [state]="{ boardSize: game.boardSize }"
-              [class.rounded-bl-card]="!isBoardFilling(game)"
-              class="flex min-h-[72px] min-w-0 flex-1 items-center gap-3 rounded-tl-card py-3 pl-3 pr-2 transition-colors duration-150 hover:bg-qs-panel-2 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-qs-accent"
+              class="flex min-h-[72px] min-w-0 flex-1 items-center gap-3 rounded-tl-card py-3 pl-3 pr-2 transition-colors duration-150 hover:bg-qs-panel-2 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-qs-accent sm:flex-col sm:items-stretch sm:gap-3.5 sm:rounded-tr-card sm:p-3 sm:pb-4"
+              [class]="isBoardFilling(game) ? '' : 'rounded-bl-card sm:rounded-br-card'"
               [attr.aria-label]="'Open ' + game.name"
             >
-              <div [class]="'qs-mini grid w-12 shrink-0 gap-px rounded-[3px] bg-qs-line p-px ' + getMiniGridClass(game.boardSize)" aria-hidden="true">
-                @for (i of getBoardCells(game.boardSize); track i) {
-                  <span class="aspect-square" [class]="isBoardQuiet(game) || i < game.squaresFilled ? 'qs-mini-claimed' : 'qs-mini-open'"></span>
-                }
+              <div class="shrink-0 sm:flex sm:min-h-[152px] sm:items-end sm:gap-[18px] sm:rounded-inner sm:bg-qs-tile sm:p-[18px]">
+                <div [class]="'qs-mini grid w-14 shrink-0 gap-px rounded-[3px] p-px sm:w-28 ' + getMiniGridClass(game.boardSize)" aria-hidden="true">
+                  @for (i of getBoardCells(game.boardSize); track i) {
+                    <span class="aspect-square" [class]="miniCellClass(game, i)"></span>
+                  }
+                </div>
+                <div class="hidden min-w-0 flex-col gap-1.5 pb-0.5 sm:flex">
+                  @if (game.isLocked) {
+                    <span class="qs-label inline-flex items-center gap-1.5 text-qs-tile-ink"><ng-icon name="heroLockClosed" class="text-sm" aria-hidden="true"></ng-icon>Locked</span>
+                  } @else if (!isBoardFilling(game)) {
+                    <span class="qs-label text-qs-tile-ink">Full</span>
+                  } @else {
+                    <strong class="text-[40px] font-semibold leading-[0.9] tracking-[-0.04em] tabular-nums text-qs-tile-count">{{ openCount(game) }}</strong>
+                    <span class="qs-label text-qs-tile-count">open</span>
+                    <span class="text-[13px] tabular-nums text-qs-tile-muted">of {{ game.boardSize || 100 }}</span>
+                  }
+                </div>
               </div>
-              <div class="min-w-0">
-                <h5 class="truncate text-base font-semibold leading-tight tracking-tight text-qs-ink">{{ game.name }}</h5>
+              <div class="min-w-0 sm:px-1.5">
+                <h5 class="truncate text-base font-semibold leading-tight tracking-tight text-qs-ink sm:text-xl">{{ game.name }}</h5>
                 <p class="mt-0.5 truncate text-sm text-qs-muted">{{ matchup(game) }}</p>
+                <p class="qs-label mt-1.5 flex items-center gap-1.5 tabular-nums sm:hidden" [class]="isBoardFilling(game) ? 'text-qs-accent' : 'text-qs-muted'">
+                  @if (game.isLocked) {
+                    <ng-icon name="heroLockClosed" class="text-sm" aria-hidden="true"></ng-icon>Locked
+                  } @else if (!isBoardFilling(game)) {
+                    Full
+                  } @else {
+                    {{ openCount(game) }} open
+                  }
+                </p>
               </div>
             </a>
             <app-card-menu
-              class="shrink-0 pr-1"
+              class="shrink-0 pr-1 sm:absolute sm:right-[18px] sm:top-[18px] sm:pr-0"
+              triggerClass="sm:text-qs-tile-muted sm:hover:bg-white/10 sm:hover:text-qs-tile-ink sm:focus-visible:outline-qs-tile-ink"
               [items]="joined ? joinedMenu : hostMenu"
               [label]="'More actions for ' + game.name"
               (picked)="onCardMenu(game, $event)"></app-card-menu>
           </div>
           @if (isBoardFilling(game)) {
-            <div class="flex items-center border-t border-qs-line px-1">
-              <button type="button" (click)="shareGame(game.id)" class="qs-btn qs-btn-ghost min-h-11 gap-2 px-2.5 font-mono text-xs uppercase tracking-[0.1em] text-qs-muted hover:text-qs-ink" [attr.aria-label]="'Share ' + game.name">
-                <ng-icon name="heroShare" class="text-base" aria-hidden="true"></ng-icon>
-                Share
-              </button>
-            </div>
+            <button
+              type="button"
+              (click)="shareGame(game.id)"
+              class="flex min-h-11 w-full items-center justify-center gap-2 rounded-b-card border-t border-qs-line bg-qs-panel text-sm font-medium text-qs-ink transition-colors duration-150 hover:bg-qs-panel-2 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-qs-ink"
+              [attr.aria-label]="'Share invite for ' + game.name"
+            >
+              <ng-icon name="heroShare" class="text-base" aria-hidden="true"></ng-icon>
+              Share invite
+            </button>
           }
         </article>
       </ng-template>
@@ -473,9 +501,19 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
   `,
     changeDetection: ChangeDetectionStrategy.Eager,
     styles: [`
-    /* Mini board on each card: open squares carry the one accent, claimed squares are neutral */
+    /* Mini board on each card. Filling: open squares carry the one accent, claimed squares are neutral.
+       Locked or full: taken squares are filled and empty ones are left blank. From sm up the board sits on the navy tile. */
+    .qs-mini { background: var(--qs-line); }
     .qs-mini-open { background: color-mix(in srgb, var(--qs-accent) 38%, var(--qs-panel)); }
-    .qs-mini-claimed { background: color-mix(in srgb, var(--qs-line-strong) 40%, var(--qs-panel)); }
+    .qs-mini-claimed, .qs-mini-taken { background: color-mix(in srgb, var(--qs-line-strong) 40%, var(--qs-panel)); }
+    .qs-mini-blank { background: var(--qs-panel); }
+    @media (min-width: 640px) {
+      .qs-mini { background: color-mix(in srgb, var(--qs-tile-ink) 10%, var(--qs-tile)); }
+      .qs-mini-open { background: var(--qs-tile-open); }
+      .qs-mini-claimed { background: color-mix(in srgb, var(--qs-tile-ink) 20%, var(--qs-tile)); }
+      .qs-mini-taken { background: color-mix(in srgb, var(--qs-tile-ink) 36%, var(--qs-tile)); }
+      .qs-mini-blank { background: var(--qs-tile); }
+    }
   `]
 })
 export class DashboardComponent implements OnInit {
@@ -588,9 +626,21 @@ export class DashboardComponent implements OnInit {
     return boardIsFilling(game);
   }
 
-  /** Full or locked boards need nothing sold, so their mini board shows all grey. */
+  /** Full or locked boards need nothing sold: taken squares are filled and empty ones are left blank. */
   isBoardQuiet(game: GameListItem): boolean {
     return game.isLocked || isBoardFull(game);
+  }
+
+  /** One mini-board square: open or claimed while filling, blank or taken once the board is quiet. */
+  miniCellClass(game: GameListItem, index: number): string {
+    const taken = index < game.squaresFilled;
+    if (this.isBoardQuiet(game)) return taken ? 'qs-mini-taken' : 'qs-mini-blank';
+    return taken ? 'qs-mini-claimed' : 'qs-mini-open';
+  }
+
+  /** Squares still free, shown beside the mini board. */
+  openCount(game: GameListItem): number {
+    return Math.max(0, (game.boardSize || 100) - game.squaresFilled);
   }
 
   /** The card's one line: the teams playing. */

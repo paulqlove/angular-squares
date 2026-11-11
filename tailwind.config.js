@@ -79,6 +79,8 @@ const colors = {
     'tile-muted': 'var(--qs-tile-muted)',
     'tile-ok': 'var(--qs-tile-ok)',
     'tile-bad': 'var(--qs-tile-bad)',
+    'tile-open': 'var(--qs-tile-open)',
+    'tile-count': 'var(--qs-tile-count)',
   },
 };
 
