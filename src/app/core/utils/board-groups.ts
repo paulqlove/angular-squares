@@ -33,3 +33,14 @@ export function isBoardFull(game: GroupableBoard): boolean {
 export function isBoardFilling(game: GroupableBoard): boolean {
   return !game.isLocked && !isBoardFull(game);
 }
+
+/** Full and still open: the host can lock it from the dashboard card. */
+export function isReadyToLock(game: GroupableBoard): boolean {
+  return !game.isLocked && isBoardFull(game);
+}
+
+/** When Auto-lock and draw will lock this open board, or null when it is off, already locked or its time has passed. */
+export function autoLockAt(game: Pick<GameListItem, 'autoManage' | 'isLocked'>, now = Date.now()): number | null {
+  const runAt = game.autoManage?.enabled ? game.autoManage.runAt : undefined;
+  return !game.isLocked && runAt && runAt > now ? runAt : null;
+}

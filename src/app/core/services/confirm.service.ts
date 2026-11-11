@@ -4,6 +4,8 @@ export interface ConfirmOptions {
   title: string;
   message: string;
   confirmLabel: string;
+  /** danger (default) for deletes and resets; primary for a safe step like locking a board. */
+  tone?: 'danger' | 'primary';
 }
 
 interface PendingConfirm extends ConfirmOptions {

@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, computed, inject, effect, ChangeDetectionStrategy } from '@angular/core';
 
 import { miniGridCells, miniGridClass } from '../../core/utils/mini-grid';
-import { groupBoards, isBoardFilling as boardIsFilling, isBoardFull } from '../../core/utils/board-groups';
+import { autoLockAt, groupBoards, isBoardFilling as boardIsFilling, isBoardFull, isReadyToLock } from '../../core/utils/board-groups';
 import { DropdownComponent } from '../../components/ui/dropdown/dropdown.component';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -35,6 +35,7 @@ import {
   heroShare,
   heroTrash,
   heroLockClosed,
+  heroLockOpen,
   heroUserGroup,
   heroArrowTopRightOnSquare,
   heroXMark,
@@ -66,6 +67,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
             heroShare,
             heroTrash,
             heroLockClosed,
+            heroLockOpen,
             heroUserGroup,
             heroArrowTopRightOnSquare,
             heroXMark,
@@ -382,7 +384,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
               [routerLink]="['/game', game.id]"
               [state]="{ boardSize: game.boardSize }"
               class="flex min-h-[72px] min-w-0 flex-1 items-center gap-3 rounded-tl-card py-3 pl-3 pr-2 transition-colors duration-150 hover:bg-qs-panel-2 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-qs-accent sm:flex-col sm:items-stretch sm:gap-3.5 sm:rounded-tr-card sm:p-3 sm:pb-4"
-              [class]="isBoardFilling(game) ? '' : 'rounded-bl-card sm:rounded-br-card'"
+              [class]="hasCardBar(game, joined) ? '' : 'rounded-bl-card sm:rounded-br-card'"
               [attr.aria-label]="'Open ' + game.name"
             >
               <div class="shrink-0 sm:flex sm:min-h-[152px] sm:items-end sm:gap-[18px] sm:rounded-inner sm:bg-qs-tile sm:p-[18px]">
@@ -393,9 +395,12 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
                 </div>
                 <div class="hidden min-w-0 flex-col gap-1.5 pb-0.5 sm:flex">
                   @if (game.isLocked) {
-                    <span class="qs-label inline-flex items-center gap-1.5 text-qs-tile-ink"><ng-icon name="heroLockClosed" class="text-sm" aria-hidden="true"></ng-icon>Locked</span>
+                    <span class="qs-label inline-flex items-center gap-1.5 text-qs-tile-ink"><span class="lock-icon is-locked" [class.lock-snap]="justLocked().has(game.id)" style="font-size: 14px" aria-hidden="true"><ng-icon name="heroLockClosed" class="lock-closed"></ng-icon><ng-icon name="heroLockOpen" class="lock-open"></ng-icon></span>Locked</span>
                   } @else if (!isBoardFilling(game)) {
                     <span class="qs-label text-qs-tile-ink">Full</span>
+                    @if (autoLockText(game); as autoLock) {
+                      <span class="text-[13px] text-qs-tile-muted">Auto-locks {{ autoLock }}</span>
+                    }
                   } @else {
                     <strong class="text-[40px] font-semibold leading-[0.9] tracking-[-0.04em] tabular-nums text-qs-tile-count">{{ openCount(game) }}</strong>
                     <span class="qs-label text-qs-tile-count">open</span>
@@ -408,9 +413,12 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
                 <p class="mt-0.5 truncate text-sm text-qs-muted">{{ matchup(game) }}</p>
                 <p class="qs-label mt-1.5 flex items-center gap-1.5 tabular-nums sm:hidden" [class]="isBoardFilling(game) ? 'text-qs-accent' : 'text-qs-muted'">
                   @if (game.isLocked) {
-                    <ng-icon name="heroLockClosed" class="text-sm" aria-hidden="true"></ng-icon>Locked
+                    <span class="lock-icon is-locked" [class.lock-snap]="justLocked().has(game.id)" style="font-size: 14px" aria-hidden="true"><ng-icon name="heroLockClosed" class="lock-closed"></ng-icon><ng-icon name="heroLockOpen" class="lock-open"></ng-icon></span>Locked
                   } @else if (!isBoardFilling(game)) {
-                    Full
+                    <span class="shrink-0">Full</span>
+                    @if (autoLockText(game); as autoLock) {
+                      <span class="min-w-0 truncate normal-case tracking-normal">· Auto-locks {{ autoLock }}</span>
+                    }
                   } @else {
                     {{ openCount(game) }} open
                   }
@@ -433,6 +441,17 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
             >
               <ng-icon name="heroShare" class="text-base" aria-hidden="true"></ng-icon>
               Share invite
+            </button>
+          } @else if (canLockFromCard(game, joined)) {
+            <button
+              type="button"
+              (click)="lockNow(game)"
+              [disabled]="lockingIds().has(game.id)"
+              class="lock-preview flex min-h-11 w-full items-center justify-center gap-2 rounded-b-card border-t border-qs-line bg-qs-panel text-sm font-medium text-qs-ink transition-colors duration-150 hover:bg-qs-panel-2 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-qs-ink disabled:cursor-wait disabled:text-qs-muted"
+              [attr.aria-label]="'Lock ' + game.name + ' now'"
+            >
+              <span class="lock-icon" [class.is-locked]="lockingIds().has(game.id)" aria-hidden="true"><ng-icon name="heroLockClosed" class="lock-closed"></ng-icon><ng-icon name="heroLockOpen" class="lock-open"></ng-icon></span>
+              {{ lockingIds().has(game.id) ? 'Locking' : 'Lock now' }}
             </button>
           }
         </article>
@@ -614,6 +633,10 @@ export class DashboardComponent implements OnInit {
   });
   /** Hosted boards grouped by what the host does next. Empty groups are left out. */
   boardGroups = computed(() => groupBoards(this.visibleMyGames()));
+  /** Boards locked from their card in the last moment, so their lock plays the snap-shut animation once. */
+  justLocked = signal<ReadonlySet<string>>(new Set());
+  /** Boards whose Lock now is being saved. */
+  lockingIds = signal<ReadonlySet<string>>(new Set());
   joinedGames = signal<GameListItem[]>([]);
 
   /** Get cells array for mini board preview based on board size */
@@ -636,6 +659,54 @@ export class DashboardComponent implements OnInit {
     const taken = index < game.squaresFilled;
     if (this.isBoardQuiet(game)) return taken ? 'qs-mini-taken' : 'qs-mini-blank';
     return taken ? 'qs-mini-claimed' : 'qs-mini-open';
+  }
+
+  /** "Sun 7:25 PM" when Auto-lock and draw will lock this full board, or '' when it is off or its time has passed. */
+  autoLockText(game: GameListItem): string {
+    const runAt = autoLockAt(game);
+    if (!runAt) return '';
+    const soon = runAt - Date.now() < 6 * 86_400_000;
+    return new Intl.DateTimeFormat(undefined, soon
+      ? { weekday: 'short', hour: 'numeric', minute: '2-digit' }
+      : { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(runAt);
+  }
+
+  /** Only the host locks from the card, and only a full board that is still open (the game page handles shrinking a half-empty one). */
+  canLockFromCard(game: GameListItem, joined: boolean): boolean {
+    return !joined && isReadyToLock(game);
+  }
+
+  /** Filling cards carry Share invite; Ready to lock cards carry Lock now for the host. */
+  hasCardBar(game: GameListItem, joined: boolean): boolean {
+    return this.isBoardFilling(game) || this.canLockFromCard(game, joined);
+  }
+
+  /** Lock now on a Ready to lock card: same write as the game page's Lock button, which also turns Auto-lock and draw off. */
+  async lockNow(game: GameListItem): Promise<void> {
+    if (this.lockingIds().has(game.id)) return;
+    const auto = !!game.autoManage?.enabled;
+    const ok = await this.confirmService.ask({
+      title: `Lock ${game.name}?`,
+      message: `Players can't pick or change squares once it's locked. You draw the numbers on the game page.${auto ? ' Auto-lock and draw turns off for this board.' : ''}`,
+      confirmLabel: 'Lock board',
+      tone: 'primary'
+    });
+    if (!ok) return;
+    this.lockingIds.update(ids => new Set(ids).add(game.id));
+    try {
+      await this.gameService.updateGame(game.id, { isLocked: true });
+      if (auto) {
+        await this.gameService.setAutoManage(game.id, null).catch(() =>
+          this.toastService.warning('Locked, but Auto-lock and draw could not be turned off. Turn it off in Edit game.'));
+      }
+      this.justLocked.update(ids => new Set(ids).add(game.id));
+      this.myGames.update(games => games.map(g => g.id === game.id ? { ...g, isLocked: true, autoManage: undefined } : g));
+      setTimeout(() => this.justLocked.update(ids => { const next = new Set(ids); next.delete(game.id); return next; }), 1200);
+    } catch {
+      this.toastService.error('Could not lock the board. Try again.');
+    } finally {
+      this.lockingIds.update(ids => { const next = new Set(ids); next.delete(game.id); return next; });
+    }
   }
 
   /** Squares still free, shown beside the mini board. */

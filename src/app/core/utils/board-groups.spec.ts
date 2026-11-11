@@ -1,5 +1,5 @@
 import type { GameListItem } from '../services/game.service';
-import { groupBoards, isBoardFilling, isBoardFull } from './board-groups';
+import { autoLockAt, groupBoards, isBoardFilling, isBoardFull, isReadyToLock } from './board-groups';
 
 const board = (id: string, squaresFilled: number, isLocked = false, boardSize: 25 | 50 | 100 = 100) =>
   ({ id, squaresFilled, isLocked, boardSize }) as GameListItem;
@@ -32,5 +32,26 @@ describe('board state helpers', () => {
     expect(isBoardFilling(board('a', 10))).toBe(true);
     expect(isBoardFilling(board('a', 100))).toBe(false);
     expect(isBoardFilling(board('a', 10, true))).toBe(false);
+  });
+});
+
+describe('isReadyToLock', () => {
+  it('is true only for a full board that is still open', () => {
+    expect(isReadyToLock(board('a', 100))).toBe(true);
+    expect(isReadyToLock(board('b', 100, true))).toBe(false);
+    expect(isReadyToLock(board('c', 99))).toBe(false);
+  });
+});
+
+describe('autoLockAt', () => {
+  const now = 1_000_000;
+  it('returns the run time while Auto-lock and draw is on and still ahead', () => {
+    expect(autoLockAt({ isLocked: false, autoManage: { enabled: true, resize: true, runAt: now + 60_000 } }, now)).toBe(now + 60_000);
+  });
+  it('returns null when it is off, already locked, or its time has passed', () => {
+    expect(autoLockAt({ isLocked: false }, now)).toBeNull();
+    expect(autoLockAt({ isLocked: true, autoManage: { enabled: true, resize: true, runAt: now + 60_000 } }, now)).toBeNull();
+    expect(autoLockAt({ isLocked: false, autoManage: { enabled: true, resize: true, runAt: now - 1 } }, now)).toBeNull();
+    expect(autoLockAt({ isLocked: false, autoManage: { enabled: true, resize: true } }, now)).toBeNull();
   });
 });
