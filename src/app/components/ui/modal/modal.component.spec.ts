@@ -15,7 +15,7 @@ import { ModalComponent } from './modal.component';
       <h2 id="b-title">B</h2>
       <button id="b-only" type="button" data-autofocus>only</button>
     </app-modal>
-    <app-modal [open]="c()" labelledBy="c-title" motion="slide">
+    <app-modal [open]="c()" labelledBy="c-title" size="sm" motion="slide">
       <h2 id="c-title">C</h2>
     </app-modal>
   `
@@ -150,6 +150,16 @@ describe('ModalComponent', () => {
     expect(classes).toContain('items-end');
     expect(classes.some(c => /^(p|px|pb)-/.test(c))).toBe(false);
     fixture.destroy();
+  });
+
+  it('lets a small sheet span the whole phone width, capping it only from 640px up', async () => {
+    const f = setup();
+    f.componentInstance.c.set(true);
+    await flush(f);
+    const classes = document.querySelector<HTMLElement>('[aria-labelledby="c-title"]')!.className.split(/\s+/);
+    expect(classes).toContain('w-full');
+    expect(classes).toContain('sm:max-w-sm');
+    expect(classes.some(c => c.startsWith('max-w-'))).toBe(false);
   });
 
   it('slides a sheet up and back down, staying on the page until it is out of view', async () => {

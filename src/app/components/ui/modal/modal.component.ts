@@ -7,6 +7,8 @@ let pageOverflow = '';
 
 const LEVEL = { 1: 'z-[150]', 2: 'z-[160]', 3: 'z-[170]' } as const;
 const SIZE = { sm: 'max-w-sm', md: 'max-w-md', lg: 'max-w-lg', xl: 'max-w-2xl' } as const;
+/** The same caps from 640px up only, so a sheet or a full-screen dialog spans the whole phone width whatever its size. */
+const SIZE_FROM_SM = { sm: 'sm:max-w-sm', md: 'sm:max-w-md', lg: 'sm:max-w-lg', xl: 'sm:max-w-2xl' } as const;
 const PHONE = {
   /* Edge to edge on phones: full width, flush with the bottom, no overlay showing beside or below it. */
   sheet: { overlay: 'items-end pt-4 sm:items-center sm:p-4', panel: 'rounded-t-[18px] pb-[env(safe-area-inset-bottom)] max-sm:border-x-0 max-sm:border-b-0 sm:rounded-card' },
@@ -62,7 +64,7 @@ export class ModalComponent {
   dismissed = output<void>();
 
   protected overlayClass = computed(() => `fixed inset-0 flex justify-center bg-black/60 backdrop-blur-sm ${LEVEL[this.level()]} ${PHONE[this.phone()].overlay}${this.motion() === 'slide' ? ' qs-sheet-slide' : ''}`);
-  protected panelClass = computed(() => `${this.motion() === 'slide' ? '' : 'animate-modal-in '}w-full border border-qs-line bg-qs-panel shadow-pop ${SIZE[this.size()]} ${PHONE[this.phone()].panel} ${this.extraClass()}`.trim());
+  protected panelClass = computed(() => `${this.motion() === 'slide' ? '' : 'animate-modal-in '}w-full border border-qs-line bg-qs-panel shadow-pop ${(this.phone() === 'center' ? SIZE : SIZE_FROM_SM)[this.size()]} ${PHONE[this.phone()].panel} ${this.extraClass()}`.trim());
 
   /** Stays true for the length of the exit fade, then drops on a timer. Not on animationend: a missed event would leave an invisible full-screen layer over the page. */
   protected shown = signal(false);
