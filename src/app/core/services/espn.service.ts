@@ -19,6 +19,35 @@ export interface EspnGame {
   completed: boolean;
   quarters: { home: number; away: number }[];
   date: string; // ISO date string
+  /** Team look for the game picker, when ESPN sends it: nickname, logo (ESPN's image host only) and a colour that shows on a light card */
+  awayName?: string;
+  homeName?: string;
+  awayLogo?: string;
+  homeLogo?: string;
+  awayColor?: string;
+  homeColor?: string;
+}
+
+/** Nickname, logo and a visible colour for one ESPN competitor's team. Anything missing or unsafe is left out. */
+export function teamLook(team: any): { name?: string; logo?: string; color?: string } {
+  if (!team) return {};
+  const logoUrl = typeof team.logo === 'string' ? team.logo : team.logos?.[0]?.href;
+  const logo = typeof logoUrl === 'string' && /^https:\/\/a\.espncdn\.com\//.test(logoUrl) ? logoUrl : undefined;
+  const color = [team.color, team.alternateColor].find(c => typeof c === 'string' && /^[0-9a-f]{6}$/i.test(c) && luminance(c) < 0.8);
+  const name = typeof team.name === 'string' && team.name ? team.name : typeof team.shortDisplayName === 'string' ? team.shortDisplayName : undefined;
+  return { name, logo, color: color ? `#${color.toLowerCase()}` : undefined };
+}
+
+/** Relative luminance of a 6-digit hex colour, 0 (black) to 1 (white). */
+function luminance(hex: string): number {
+  const [r, g, b] = [0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16) / 255).map(c => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+/** The team-look fields of an EspnGame, from its two competitors. */
+function gameLook(away: any, home: any): Partial<EspnGame> {
+  const a = teamLook(away?.team), h = teamLook(home?.team);
+  return { awayName: a.name, homeName: h.name, awayLogo: a.logo, homeLogo: h.logo, awayColor: a.color, homeColor: h.color };
 }
 
 export const SPORT_CONFIG: Record<SportType, { label: string; periods: number; periodLabel: string }> = {
@@ -185,7 +214,8 @@ export class EspnService {
             status: 'pre' as const,
             completed: false,
             quarters: Array(periodCount).fill({ home: 0, away: 0 }),
-            date: event.date || ''
+            date: event.date || '',
+            ...gameLook(awayCompetitor, homeCompetitor)
           };
         });
     } catch (error) {
@@ -240,7 +270,8 @@ export class EspnService {
         status: gameStatus,
         completed: !!status?.type?.completed,
         quarters,
-        date: event.date || ''
+        date: event.date || '',
+        ...gameLook(awayCompetitor, homeCompetitor)
       };
     });
   }

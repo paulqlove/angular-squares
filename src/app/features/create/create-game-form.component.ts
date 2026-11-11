@@ -2,8 +2,6 @@ import { MaxSquaresFieldComponent } from '../../components/ui/max-squares-field/
 import { autoRunLabel } from '../../core/utils/auto-manage';
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { heroCheckCircle } from '@ng-icons/heroicons/outline';
 import { ToggleComponent } from '../../components/ui/toggle/toggle.component';
 import { EmptyQuarterRuleComponent } from '../../components/ui/empty-quarter-rule/empty-quarter-rule.component';
 import { DEFAULT_EMPTY_QUARTER_RULE, EmptyQuarterRule, QuarterSplit, SPLIT_PRESETS, isValidSplit } from '../../core/plans';
@@ -13,8 +11,7 @@ import type { BoardSize } from '../../core/services/game.service';
 import {
   CreateGameDraft, CreateGameValues, buildCreateGameValues, emptyDraft, loadCreateDraft, splitToTenths
 } from '../../core/utils/create-game-draft';
-import { formatGameDate, gameStatusClass, gameStatusText } from '../../core/utils/espn-game-display';
-import { getTeamLogoByAbbreviation } from '../content/teams-data';
+import { GamePickCardComponent } from '../../shared/game-pick-card.component';
 
 export interface CreateGameSubmit {
   draft: CreateGameDraft;
@@ -27,8 +24,7 @@ export interface CreateGameSubmit {
  */
 @Component({
   selector: 'app-create-game-form',
-  imports: [MaxSquaresFieldComponent, FormsModule, NgIconComponent, EmptyQuarterRuleComponent, ToggleComponent],
-  providers: [provideIcons({ heroCheckCircle })],
+  imports: [MaxSquaresFieldComponent, FormsModule, EmptyQuarterRuleComponent, ToggleComponent, GamePickCardComponent],
   host: { class: 'contents' },
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
@@ -89,15 +85,9 @@ export interface CreateGameSubmit {
     <button type="button" class="qs-btn qs-btn-secondary mt-3" (click)="selectSport('custom')">Use custom teams</button>
   } @else if (!gameListOpen && selectedEspnGame(); as game) {
     <!-- Picked: collapse to the choice so the rest of the form is right there -->
-    <div class="mt-2 flex items-center justify-between gap-3 rounded-inner border border-qs-accent bg-qs-panel p-3 outline outline-2 -outline-offset-2 outline-qs-accent">
-      <div class="min-w-0">
-        <span class="qs-badge" [class]="gameStatusClass(game.status)">{{ gameStatusText(game) }}</span>
-        <p class="mt-2 truncate font-semibold text-qs-ink">{{ game.awayTeam }} &#64; {{ game.homeTeam }}</p>
-        @if (game.status === 'pre' && game.date) {
-          <p class="qs-label mt-1 text-xs text-qs-muted">{{ formatGameDate(game.date) }}</p>
-        }
-      </div>
-      <button type="button" (click)="gameListOpen = true" class="qs-btn qs-btn-secondary shrink-0 px-3">Change</button>
+    <div class="mt-2 rounded-inner border border-qs-accent bg-qs-panel p-3 outline outline-2 -outline-offset-2 outline-qs-accent">
+      <app-game-pick-card [game]="game" [sport]="selectedSport" [large]="true"></app-game-pick-card>
+      <button type="button" (click)="gameListOpen = true" class="qs-btn qs-btn-secondary mt-3 w-full">Change game</button>
     </div>
   } @else {
     @if (espnGames().length > 10) {
@@ -119,32 +109,11 @@ export interface CreateGameSubmit {
             type="button"
             (click)="selectEspnGame(game.id)"
             [attr.aria-pressed]="selectedEspnGameId === game.id"
-            class="rounded-inner border bg-qs-panel p-3 text-left transition-colors"
+            [attr.aria-label]="game.awayTeamFull + ' at ' + game.homeTeamFull"
+            class="rounded-inner border bg-qs-panel px-3 pb-3 pt-2.5 text-left transition-colors"
             [class]="selectedEspnGameId === game.id ? 'border-qs-accent outline outline-2 -outline-offset-2 outline-qs-accent' : 'border-qs-line hover:border-qs-line-strong'"
           >
-            <div class="flex items-center justify-between gap-2">
-              <span class="qs-badge" [class]="gameStatusClass(game.status)">{{ gameStatusText(game) }}</span>
-              @if (selectedEspnGameId === game.id) {
-                <ng-icon name="heroCheckCircle" class="text-lg text-qs-accent"></ng-icon>
-              }
-            </div>
-            <p class="mt-2 flex items-center gap-1.5 truncate font-semibold text-qs-ink">
-              @if (selectedSport === 'nfl' && getTeamLogo(game.awayTeam); as logo) {
-                <img [src]="logo" [alt]="game.awayTeam" class="h-4 w-4 object-contain" />
-              }
-              {{ game.awayTeam }} &#64;
-              @if (selectedSport === 'nfl' && getTeamLogo(game.homeTeam); as logo) {
-                <img [src]="logo" [alt]="game.homeTeam" class="h-4 w-4 object-contain" />
-              }
-              {{ game.homeTeam }}
-            </p>
-            <p class="qs-label mt-1 text-xs text-qs-muted">
-              @if (game.status === 'pre' && game.date) {
-                {{ formatGameDate(game.date) }}
-              } @else if (game.status !== 'pre') {
-                {{ game.awayScore }} – {{ game.homeScore }}
-              }
-            </p>
+            <app-game-pick-card [game]="game" [sport]="selectedSport" [large]="true"></app-game-pick-card>
           </button>
         }
       </div>
@@ -443,22 +412,6 @@ export class CreateGameFormComponent implements OnChanges, OnInit {
       g.homeTeamFull.toLowerCase().includes(query) ||
       g.awayTeamFull.toLowerCase().includes(query)
     );
-  }
-
-  formatGameDate(isoDate: string): string {
-    return formatGameDate(isoDate);
-  }
-
-  gameStatusClass(status: string): string {
-    return gameStatusClass(status);
-  }
-
-  gameStatusText(game: EspnGame): string {
-    return gameStatusText(game);
-  }
-
-  getTeamLogo(abbrev: string): string | null {
-    return getTeamLogoByAbbreviation(abbrev, 100);
   }
 
   canCreate(): boolean {

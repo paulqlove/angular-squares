@@ -23,3 +23,18 @@ export function formatGameDate(isoDate: string): string {
     minute: '2-digit'
   });
 }
+
+/** Kickoff time for the game picker: "7:30 PM". */
+export function formatGameTime(isoDate: string): string {
+  return new Date(isoDate).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+}
+
+/** Kickoff day for the game picker: "Today", "Tomorrow", or "Thu, Nov 12". */
+export function formatGameDay(isoDate: string, now: Date = new Date()): string {
+  const day = new Date(isoDate);
+  const start = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const diff = Math.round((start(day) - start(now)) / 86400000);
+  if (diff === 0) return 'Today';
+  if (diff === 1) return 'Tomorrow';
+  return day.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+}

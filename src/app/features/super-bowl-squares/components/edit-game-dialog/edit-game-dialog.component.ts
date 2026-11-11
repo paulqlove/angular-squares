@@ -9,7 +9,7 @@ import type { BoardSize } from '../../../../core/services/game.service';
 import type { EspnGame, SportType } from '../../../../core/services/espn.service';
 import { smallerBoardSizes } from '../../../../core/utils/shuffle-squares';
 import { autoRunLabel } from '../../../../core/utils/auto-manage';
-import { getTeamLogoByAbbreviation } from '../../../content/teams-data';
+import { GamePickCardComponent } from '../../../../shared/game-pick-card.component';
 import { ToggleComponent } from '../../../../components/ui/toggle/toggle.component';
 import { EmptyQuarterRuleComponent } from '../../../../components/ui/empty-quarter-rule/empty-quarter-rule.component';
 
@@ -37,7 +37,7 @@ export interface EditGameValues {
 /** Owner-only "Edit game" popup, shared by the dashboard and the game page. Edits a draft and saves once. */
 @Component({
   selector: 'app-edit-game-dialog',
-  imports: [ModalComponent, MaxSquaresFieldComponent, FormsModule, NgIconComponent, EmptyQuarterRuleComponent, ToggleComponent],
+  imports: [ModalComponent, MaxSquaresFieldComponent, FormsModule, NgIconComponent, EmptyQuarterRuleComponent, ToggleComponent, GamePickCardComponent],
   providers: [provideIcons({ heroXMark, heroTrash, heroLockClosed })],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
@@ -98,51 +98,29 @@ export interface EditGameValues {
                 @if (loadingEspnGames) {
                   <div class="h-[60px] animate-pulse rounded-inner bg-qs-panel-2"></div>
                 } @else if (draft.espnGameId && !changingGame) {
-                  <div class="flex min-h-11 items-center justify-between gap-3 rounded-inner border border-qs-accent bg-qs-panel px-3 py-2">
-                    <div class="min-w-0">
-                      @if (selectedEspnGame(); as sel) {
-                        <p class="truncate text-sm font-semibold text-qs-ink">{{ sel.awayTeam }} &#64; {{ sel.homeTeam }}</p>
-                        @if (sel.status === 'pre' && sel.date) {
-                          <p class="qs-label text-xs text-qs-muted">{{ formatGameDate(sel.date) }}</p>
-                        }
-                      } @else {
-                        <p class="truncate text-sm font-semibold text-qs-ink">Linked game</p>
-                      }
-                    </div>
-                    <button type="button" class="qs-btn qs-btn-secondary shrink-0" (click)="changingGame = true">Change</button>
+                  <div class="rounded-inner border border-qs-accent bg-qs-panel p-3">
+                    @if (selectedEspnGame(); as sel) {
+                      <app-game-pick-card [game]="sel" [sport]="draft.sport"></app-game-pick-card>
+                    } @else {
+                      <p class="truncate text-sm font-semibold text-qs-ink">Linked game</p>
+                    }
+                    <button type="button" class="qs-btn qs-btn-secondary mt-3 w-full" (click)="changingGame = true">Change game</button>
                   </div>
                 } @else {
                   @if (espnGames.length > 10) {
                     <input type="text" [(ngModel)]="espnGameSearch" placeholder="Search teams..." aria-label="Search teams" class="qs-input" />
                   }
-                  <div class="grid max-h-48 grid-cols-1 gap-2 overflow-y-auto">
+                  <div class="grid max-h-72 grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2">
                     @for (game of filteredEspnGames(); track game.id) {
                       <button
                         type="button"
                         (click)="draft.espnGameId = game.id; changingGame = false"
-                        class="rounded-inner border p-3 text-left transition-colors"
-                        [class]="draft.espnGameId === game.id ? 'border-qs-accent bg-qs-accent-soft' : 'border-qs-line hover:border-qs-line-strong'"
+                        [attr.aria-pressed]="draft.espnGameId === game.id"
+                        [attr.aria-label]="game.awayTeamFull + ' at ' + game.homeTeamFull"
+                        class="rounded-inner border bg-qs-panel px-3 pb-3 pt-2.5 text-left transition-colors"
+                        [class]="draft.espnGameId === game.id ? 'border-qs-accent outline outline-2 -outline-offset-2 outline-qs-accent' : 'border-qs-line hover:border-qs-line-strong'"
                       >
-                        <div class="flex items-center justify-between gap-3">
-                          <div class="min-w-0">
-                            <p class="flex items-center gap-1.5 text-sm font-semibold text-qs-ink">
-                              @if (draft.sport === 'nfl' && getTeamLogo(game.awayTeam); as logo) {
-                                <img [src]="logo" [alt]="game.awayTeam" class="h-4 w-4 object-contain" />
-                              }
-                              {{ game.awayTeam }} &#64;
-                              @if (draft.sport === 'nfl' && getTeamLogo(game.homeTeam); as logo) {
-                                <img [src]="logo" [alt]="game.homeTeam" class="h-4 w-4 object-contain" />
-                              }
-                              {{ game.homeTeam }}
-                            </p>
-                            @if (game.status === 'pre' && game.date) {
-                              <p class="qs-label mt-1 text-xs text-qs-muted">{{ formatGameDate(game.date) }}</p>
-                            } @else if (game.status !== 'pre') {
-                              <p class="qs-label mt-1 text-xs text-qs-muted">{{ game.awayScore }} - {{ game.homeScore }}</p>
-                            }
-                          </div>
-                          <span class="shrink-0 rounded-full px-2 py-0.5 text-xs font-medium" [class]="getGameStatusClass(game.status)">{{ getGameStatusText(game) }}</span>
-                        </div>
+                        <app-game-pick-card [game]="game" [sport]="draft.sport"></app-game-pick-card>
                       </button>
                     }
                   </div>
@@ -466,28 +444,6 @@ export class EditGameDialogComponent implements OnChanges {
       g.homeTeamFull.toLowerCase().includes(query) ||
       g.awayTeamFull.toLowerCase().includes(query)
     );
-  }
-
-  formatGameDate(isoDate: string): string {
-    return new Date(isoDate).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-  }
-
-  getGameStatusClass(status: string): string {
-    switch (status) {
-      case 'in': return 'bg-qs-live-fill text-qs-tile';
-      case 'post': return 'bg-qs-ok-soft text-qs-ok';
-      default: return 'bg-qs-panel-2 text-qs-muted';
-    }
-  }
-
-  getGameStatusText(game: EspnGame): string {
-    if (game.status === 'pre') return 'Upcoming';
-    if (game.status === 'in') return `LIVE - Q${game.period} ${game.clock}`;
-    return 'Final';
-  }
-
-  getTeamLogo(abbrev: string): string | null {
-    return getTeamLogoByAbbreviation(abbrev, 100);
   }
 
   onClearClick(): void {
