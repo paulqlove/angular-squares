@@ -413,8 +413,9 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
       </div>
 
       <!-- Phone: the code field, in a sheet from the bottom bar -->
-      <app-modal [open]="showJoinSheet()" labelledBy="join-sheet-title" size="sm" motion="slide" (dismissed)="showJoinSheet.set(false)">
-        <div class="p-5">
+      <app-modal [open]="showJoinSheet()" labelledBy="join-sheet-title" size="sm" motion="slide" extraClass="pt-2" (dismissed)="showJoinSheet.set(false)">
+        <span class="mx-auto mb-1 mt-0.5 block h-1 w-10 rounded bg-qs-line-strong" aria-hidden="true"></span>
+        <div class="px-5 pb-6 pt-3">
           <h3 id="join-sheet-title" class="qs-title text-2xl">Join with a code</h3>
           <p class="mt-1 text-sm text-qs-muted">Enter the six-character code your host shared.</p>
           <div class="mt-4 flex min-h-11 items-stretch overflow-hidden rounded-btn border border-qs-line-strong bg-qs-panel focus-within:outline focus-within:outline-[3px] focus-within:outline-offset-2 focus-within:outline-qs-ink">
