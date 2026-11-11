@@ -477,6 +477,14 @@ body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
 .lock-icon .lock-open { opacity: 1; transform: none; }
 .lock-icon.is-locked .lock-closed { opacity: 1; transform: none; }
 .lock-icon.is-locked .lock-open { opacity: 0; transform: scale(.6) rotate(18deg); }
+/* A board that was just locked: the lock shows open for a beat, then snaps shut (dashboard card) */
+@keyframes qs-lock-shut { from { opacity: 0; transform: scale(.6) rotate(-18deg); } to { opacity: 1; transform: none; } }
+@keyframes qs-lock-unshut { from { opacity: 1; transform: none; } to { opacity: 0; transform: scale(.6) rotate(18deg); } }
+.lock-icon.is-locked.lock-snap .lock-closed { animation: qs-lock-shut 280ms var(--qs-ease-spring) 220ms both; }
+.lock-icon.is-locked.lock-snap .lock-open { animation: qs-lock-unshut 160ms var(--qs-ease) 220ms both; }
+/* A Lock button previews the closed lock on hover and focus */
+.lock-preview:is(:hover, :focus-visible):not(:disabled) .lock-icon .lock-closed { opacity: 1; transform: none; }
+.lock-preview:is(:hover, :focus-visible):not(:disabled) .lock-icon .lock-open { opacity: 0; transform: scale(.6) rotate(18deg); }
 .turn-icon { display: inline-flex; transition: transform 320ms var(--qs-ease); }
 button:disabled .turn-icon { transform: rotate(-90deg); }
 button:active:not(:disabled) .turn-icon { transform: rotate(120deg); transition-duration: 160ms; }

@@ -23,7 +23,7 @@ import { ModalComponent } from '../modal/modal.component';
           <p id="confirm-message" class="mt-3 text-qs-muted">{{ ask.message }}</p>
           <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <button type="button" class="qs-btn qs-btn-secondary" data-autofocus (click)="confirm.answer(false)">Cancel</button>
-            <button type="button" class="qs-btn qs-btn-danger" (click)="confirm.answer(true)">{{ ask.confirmLabel }}</button>
+            <button type="button" class="qs-btn" [class]="ask.tone === 'primary' ? 'qs-btn-primary' : 'qs-btn-danger'" (click)="confirm.answer(true)">{{ ask.confirmLabel }}</button>
           </div>
         </div>
       }
