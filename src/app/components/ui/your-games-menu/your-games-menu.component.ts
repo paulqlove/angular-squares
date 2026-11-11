@@ -16,7 +16,7 @@ const SPARE = 3;
 /** A game code as players type it: six letters and digits. */
 const CODE = /^[A-Z0-9]{6}$/;
 /** How long the popover takes to retract, plus a little; the phone sheet's exit fits inside it too. */
-const CLOSE_MS = 200;
+const CLOSE_MS = 220;
 
 /**
  * Your Games, in the game page header: the five most recent games for hosts, players and guests alike, the one on screen

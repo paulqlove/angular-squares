@@ -79,7 +79,7 @@ export class ModalComponent {
       const open = this.open();
       clearTimeout(this.hideTimer);
       if (open) this.shown.set(true);
-      else if (this.shown()) this.hideTimer = setTimeout(() => this.shown.set(false), this.motion() === 'slide' ? 190 : 150);
+      else if (this.shown()) this.hideTimer = setTimeout(() => this.shown.set(false), this.motion() === 'slide' ? 220 : 150);
     });
     effect(onCleanup => {
       if (!this.open() || typeof document === 'undefined') return;

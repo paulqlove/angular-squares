@@ -62,14 +62,14 @@ describe('ModalComponent', () => {
     f.componentInstance.a.set(false);
     await flush(f);
     expect(f.nativeElement.querySelector('.qs-modal-leave')).not.toBeNull();
-    await new Promise(r => setTimeout(r, 200));
+    await new Promise(r => setTimeout(r, 250));
     f.detectChanges();
     expect(f.nativeElement.querySelector('[role="dialog"]')).toBeNull();
     f.componentInstance.a.set(true);
     f.componentInstance.a.set(false);
     f.componentInstance.a.set(true);
     await flush(f);
-    await new Promise(r => setTimeout(r, 200));
+    await new Promise(r => setTimeout(r, 250));
     f.detectChanges();
     expect(f.nativeElement.querySelector('[role="dialog"]')).not.toBeNull();
     expect(f.nativeElement.querySelector('.qs-modal-leave')).toBeNull();
