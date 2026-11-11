@@ -1,8 +1,9 @@
 import { Component, OnInit, signal, computed, inject, effect, ChangeDetectionStrategy } from '@angular/core';
 
 import { miniGridCells, miniGridClass } from '../../core/utils/mini-grid';
+import { groupBoards, isBoardFilling as boardIsFilling, isBoardFull } from '../../core/utils/board-groups';
 import { DropdownComponent } from '../../components/ui/dropdown/dropdown.component';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NgTemplateOutlet } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
@@ -56,7 +57,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
 
 @Component({
     selector: 'app-dashboard',
-    imports: [ModalComponent, FormsModule, NgTemplateOutlet, DropdownComponent, CardMenuComponent, CreateGameFormComponent, NgIconComponent, AppHeaderComponent, HeadroomDirective, ProfileMenuComponent, ShareDialogComponent, EditGameDialogComponent, UpgradePassDialogComponent],
+    imports: [ModalComponent, FormsModule, RouterLink, NgTemplateOutlet, DropdownComponent, CardMenuComponent, CreateGameFormComponent, NgIconComponent, AppHeaderComponent, HeadroomDirective, ProfileMenuComponent, ShareDialogComponent, EditGameDialogComponent, UpgradePassDialogComponent],
     providers: [
         provideIcons({
             heroPlus,
@@ -304,29 +305,13 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
             }
 
             @if (isLoadingGames()) {
-              <div class="qs-skel-delay mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3" aria-busy="true">
+              <div class="qs-skel-delay mt-6 grid grid-cols-1 items-start gap-3 sm:grid-cols-2 xl:grid-cols-3" aria-busy="true">
                 @for (i of [0, 1, 2]; track i) {
-                  <article class="qs-card p-5" aria-hidden="true">
-                    <div class="flex items-center justify-between gap-3">
-                      <div class="qs-skel h-5 w-16"></div>
-                      <div class="qs-skel h-5 w-12"></div>
-                    </div>
-                    <div class="qs-skel mt-4 h-6 w-2/5"></div>
-                    <div class="qs-skel mt-2 h-4 w-3/5"></div>
-                    <div class="mt-5 flex items-center gap-5">
-                      <div class="qs-skel h-20 w-20 shrink-0"></div>
-                      @for (j of [0, 1, 2]; track j) {
-                        <div class="space-y-2">
-                          <div class="qs-skel h-3 w-14"></div>
-                          <div class="qs-skel h-6 w-10"></div>
-                        </div>
-                      }
-                    </div>
-                    <div class="mt-5 flex items-center gap-3 border-t border-qs-line pt-5">
-                      <div class="qs-skel h-12 flex-1"></div>
-                      <div class="qs-skel h-9 w-9 rounded-full"></div>
-                      <div class="qs-skel h-9 w-9 rounded-full"></div>
-                      <div class="qs-skel h-9 w-9 rounded-full"></div>
+                  <article class="qs-card flex min-h-[72px] items-center gap-3 p-3" aria-hidden="true">
+                    <div class="qs-skel h-12 w-12 shrink-0"></div>
+                    <div class="flex-1 space-y-2">
+                      <div class="qs-skel h-4 w-2/5"></div>
+                      <div class="qs-skel h-3 w-3/5"></div>
                     </div>
                   </article>
                 }
@@ -353,11 +338,20 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
                   <button type="button" class="qs-btn qs-btn-secondary mt-4" (click)="clearGameFilters()">Clear search and filters</button>
                 </div>
               } @else {
-                <div class="mt-5 grid grid-cols-1 gap-x-4 gap-y-0 md:grid-cols-2 xl:grid-cols-3">
-                  @for (game of visibleMyGames(); track game.id) {
-                    <ng-container *ngTemplateOutlet="gameCard; context: { $implicit: game, joined: false }"></ng-container>
-                  }
-                </div>
+                <!-- Grouped by what the host does next: lock it, keep sharing it, or nothing -->
+                @for (group of boardGroups(); track group.key) {
+                  <div class="mt-6" role="group" [attr.aria-label]="group.label">
+                    <div class="flex items-baseline justify-between border-b border-qs-line px-0.5 pb-2">
+                      <h4 class="qs-eyebrow qs-eyebrow-bar">{{ group.label }}</h4>
+                      <span class="qs-label text-qs-muted">{{ group.games.length }}</span>
+                    </div>
+                    <div class="mt-3 grid grid-cols-1 items-start gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                      @for (game of group.games; track game.id) {
+                        <ng-container *ngTemplateOutlet="gameCard; context: { $implicit: game, joined: false }"></ng-container>
+                      }
+                    </div>
+                  </div>
+                }
               }
             }
           </section>
@@ -370,7 +364,7 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
               <h3 id="joined-heading" class="qs-eyebrow qs-eyebrow-bar">{{ canCreateGame() ? '02' : '01' }} / Joined</h3>
               <span class="qs-label text-qs-muted">{{ joinedGames().length }} {{ joinedGames().length === 1 ? 'game' : 'games' }}</span>
             </div>
-            <div class="mt-5 grid grid-cols-1 gap-x-4 gap-y-0 md:grid-cols-2 xl:grid-cols-3">
+            <div class="mt-5 grid grid-cols-1 items-start gap-3 sm:grid-cols-2 xl:grid-cols-3">
               @for (game of joinedGames(); track game.id) {
                 <ng-container *ngTemplateOutlet="gameCard; context: { $implicit: game, joined: true }"></ng-container>
               }
@@ -380,65 +374,38 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
       </main>
 
       <ng-template #gameCard let-game let-joined="joined">
-        <article animate.enter="qs-fade-rise" class="qs-card row-span-4 mb-4 grid p-5 transition-[transform,box-shadow,border-color] duration-200 ease-out [grid-template-rows:subgrid] [row-gap:0] hover:-translate-y-0.5 hover:border-qs-line-strong hover:shadow-card">
-          <div class="flex items-center justify-between gap-3">
-            <span class="qs-badge qs-badge-code font-mono">{{ game.id }}</span>
-            @if (game.isLocked) {
-              <span class="qs-badge">
-                <ng-icon name="heroLockClosed" class="text-xs"></ng-icon>
-                Locked
-              </span>
-            } @else {
-              <span class="qs-badge qs-badge-ok">Open</span>
-            }
-          </div>
-
-          <div class="mt-4 min-w-0">
-            <h4 class="truncate text-xl font-semibold tracking-tight text-qs-ink">{{ game.name }}</h4>
-            <p class="mt-1 truncate text-sm text-qs-muted">
-              @if (game.homeTeam && game.awayTeam) {
-                {{ game.awayTeam }} vs {{ game.homeTeam }}
-              } @else {
-                Teams not set
-              }
-              @if (joined) { · Host {{ game.ownerName }} }
-              · Created {{ formatDate(game.createdAt) }}
-            </p>
-          </div>
-
-          <div class="mt-5 flex items-center gap-5">
-            <div [class]="'grid w-[68px] shrink-0 gap-px rounded-[3px] bg-qs-line p-px ' + getMiniGridClass(game.boardSize)" aria-hidden="true">
-              @for (i of getBoardCells(game.boardSize); track i) {
-                <span class="aspect-square" [class]="i < game.squaresFilled ? 'bg-qs-accent' : 'bg-qs-panel'"></span>
-              }
-            </div>
-            <dl class="grid flex-1 grid-cols-2 gap-x-3">
-              <div class="row-span-2 grid grid-rows-subgrid gap-y-1">
-                <dt class="qs-label text-xs text-qs-muted">Squares</dt>
-                <dd class="text-lg font-semibold tabular-nums text-qs-ink">{{ game.squaresFilled }}<span class="text-sm font-normal text-qs-muted">/{{ game.boardSize }}</span></dd>
-              </div>
-              <div class="row-span-2 grid grid-rows-subgrid gap-y-1">
-                @if (joined) {
-                  <dt class="qs-label text-xs text-qs-muted">Players</dt>
-                  <dd class="text-lg font-semibold tabular-nums text-qs-ink">{{ game.playerCount }}</dd>
-                } @else {
-                  <dt class="qs-label text-xs text-qs-muted">Confirmed</dt>
-                  <dd class="text-lg font-semibold tabular-nums text-qs-ink">{{ game.confirmedCount }}<span class="text-sm font-normal text-qs-muted">/{{ game.playerCount }}</span></dd>
+        <article animate.enter="qs-fade-rise" class="qs-card min-w-0 overflow-hidden transition-[border-color] duration-150 ease-out has-[a:hover]:border-qs-ink">
+          <div class="flex items-center">
+            <a
+              [routerLink]="['/game', game.id]"
+              [state]="{ boardSize: game.boardSize }"
+              class="flex min-h-[72px] min-w-0 flex-1 items-center gap-3 py-3 pl-3 pr-2 transition-colors duration-150 hover:bg-qs-panel-2 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-qs-accent"
+              [attr.aria-label]="'Open ' + game.name"
+            >
+              <div [class]="'qs-mini grid w-12 shrink-0 gap-px rounded-[3px] bg-qs-line p-px ' + getMiniGridClass(game.boardSize)" aria-hidden="true">
+                @for (i of getBoardCells(game.boardSize); track i) {
+                  <span class="aspect-square" [class]="isBoardQuiet(game) || i < game.squaresFilled ? 'qs-mini-claimed' : 'qs-mini-open'"></span>
                 }
               </div>
-            </dl>
-          </div>
-
-          <div class="mt-5 flex items-center gap-1 border-t border-qs-line pt-4">
-            <button type="button" (click)="openGame(game.id, game.boardSize)" class="qs-btn qs-btn-secondary mr-auto flex-1 hover:!border-qs-ink">Open game</button>
-            <button type="button" (click)="shareGame(game.id)" class="qs-btn qs-btn-ghost w-11 px-0 text-qs-muted hover:text-qs-ink" title="Share game" aria-label="Share game">
-              <ng-icon name="heroShare" class="text-lg"></ng-icon>
-            </button>
+              <div class="min-w-0">
+                <h5 class="truncate text-base font-semibold leading-tight tracking-tight text-qs-ink">{{ game.name }}</h5>
+                <p class="mt-0.5 truncate text-sm text-qs-muted">{{ matchup(game) }}</p>
+              </div>
+            </a>
             <app-card-menu
+              class="shrink-0 pr-1"
               [items]="joined ? joinedMenu : hostMenu"
-              label="More actions for this game"
+              [label]="'More actions for ' + game.name"
               (picked)="onCardMenu(game, $event)"></app-card-menu>
           </div>
+          @if (isBoardFilling(game)) {
+            <div class="flex items-center border-t border-qs-line px-1">
+              <button type="button" (click)="shareGame(game.id)" class="qs-btn qs-btn-ghost min-h-11 gap-2 px-2.5 font-mono text-xs uppercase tracking-[0.1em] text-qs-muted hover:text-qs-ink" [attr.aria-label]="'Share ' + game.name">
+                <ng-icon name="heroShare" class="text-base" aria-hidden="true"></ng-icon>
+                Share
+              </button>
+            </div>
+          }
         </article>
       </ng-template>
 
@@ -505,6 +472,9 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
   `,
     changeDetection: ChangeDetectionStrategy.Eager,
     styles: [`
+    /* Mini board on each card: open squares carry the one accent, claimed squares are neutral */
+    .qs-mini-open { background: color-mix(in srgb, var(--qs-accent) 38%, var(--qs-panel)); }
+    .qs-mini-claimed { background: color-mix(in srgb, var(--qs-line-strong) 40%, var(--qs-panel)); }
   `]
 })
 export class DashboardComponent implements OnInit {
@@ -603,11 +573,28 @@ export class DashboardComponent implements OnInit {
       .filter(g => !query || [g.name, g.homeTeam, g.awayTeam, g.id].some(v => (v || '').toLowerCase().includes(query)))
       .sort(sorts[this.gameSort()]);
   });
+  /** Hosted boards grouped by what the host does next. Empty groups are left out. */
+  boardGroups = computed(() => groupBoards(this.visibleMyGames()));
   joinedGames = signal<GameListItem[]>([]);
 
   /** Get cells array for mini board preview based on board size */
   getBoardCells(size: BoardSize): number[] {
     return miniGridCells(size);
+  }
+
+  /** True while a board is unlocked and still has open squares, so Share is worth offering. */
+  isBoardFilling(game: GameListItem): boolean {
+    return boardIsFilling(game);
+  }
+
+  /** Full or locked boards need nothing sold, so their mini board shows all grey. */
+  isBoardQuiet(game: GameListItem): boolean {
+    return game.isLocked || isBoardFull(game);
+  }
+
+  /** The card's one line: the teams playing. */
+  matchup(game: GameListItem): string {
+    return game.homeTeam && game.awayTeam ? `${game.awayTeam} vs ${game.homeTeam}` : 'Teams not set';
   }
 
   /** Get CSS class for mini board grid based on board size */
@@ -909,10 +896,6 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  openGame(gameId: string, boardSize: number): void {
-    this.router.navigate(['/game', gameId], { state: { boardSize } });
-  }
-
   shareGame(gameId: string): void {
     this.shareModalGameId.set(gameId);
   }
@@ -954,10 +937,6 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-
-  formatDate(timestamp: number): string {
-    return new Date(timestamp).toLocaleDateString();
-  }
 
   getGameGradient(game: EspnGame): string {
     const awayColors = getTeamColors(game.awayTeam);

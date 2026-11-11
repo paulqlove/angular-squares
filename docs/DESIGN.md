@@ -214,7 +214,7 @@ Pill, mono 10.5px caps, soft fill with matching dark text.
 
 ### Cards
 
-`--qs-panel` fill, 1px `--qs-line`, `--qs-shadow`, radius 10px, padding 22px. Title row (H2) then content. Dashboard board cards: title, teams line (Small, muted), a mono footer `UPDATED 3 MIN AGO · 64 / 100 CLAIMED`, and a status badge. Hover raises the border to `--qs-ink`.
+`--qs-panel` fill, 1px `--qs-line`, `--qs-shadow`, radius 10px, padding 22px. Title row (H2) then content. Dashboard board cards are grouped under small eyebrow labels by what the host does next: Ready to lock (full, unlocked), Filling, Locked. Each card is one tap target to the game: a 48px mini board, the name, and one muted line with the teams. In the mini board, open squares carry the accent (accent mixed 38% into the panel) and claimed squares are neutral; full or locked boards are all neutral. No badges or counts on the card. A quiet Share row sits under a divider only while a board is filling, and a `…` menu holds Edit and Delete. Hover raises the border to `--qs-ink`.
 
 ### Board (the product)
 
