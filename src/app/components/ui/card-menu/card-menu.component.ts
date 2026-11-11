@@ -28,7 +28,7 @@ export interface CardMenuItem {
         <ng-icon name="heroEllipsisHorizontal" class="text-xl" aria-hidden="true"></ng-icon>
       </button>
       @if (open()) {
-        <div role="menu" class="animate-menu-in absolute right-0 top-full z-30 mt-1.5 w-max min-w-40 overflow-hidden rounded-inner border border-qs-line-strong bg-qs-panel p-1 shadow-pop">
+        <div role="menu" animate.enter="qs-menu-enter" animate.leave="qs-menu-leave" class="absolute right-0 top-full z-30 mt-1.5 w-max min-w-40 overflow-hidden rounded-inner border border-qs-line-strong bg-qs-panel p-1 shadow-pop origin-top-right">
           @for (item of items(); track item.id) {
             <button
               type="button"

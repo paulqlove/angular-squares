@@ -152,6 +152,15 @@ describe('ModalComponent', () => {
     fixture.destroy();
   });
 
+  it('slides a docked dialog on phones too, popping only from 640px up', async () => {
+    const f = setup();
+    f.componentInstance.a.set(true);
+    await flush(f);
+    const overlay = document.querySelector<HTMLElement>('[aria-labelledby="a-title"]')!.parentElement!;
+    expect(overlay.classList).toContain('qs-sheet-phone');
+    expect(overlay.classList).not.toContain('qs-sheet-slide');
+  });
+
   it('lets a small sheet span the whole phone width, capping it only from 640px up', async () => {
     const f = setup();
     f.componentInstance.c.set(true);
