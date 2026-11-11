@@ -374,12 +374,13 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
       </main>
 
       <ng-template #gameCard let-game let-joined="joined">
-        <article animate.enter="qs-fade-rise" class="qs-card min-w-0 overflow-hidden transition-[border-color] duration-150 ease-out has-[a:hover]:border-qs-ink">
+        <article animate.enter="qs-fade-rise" class="qs-card relative min-w-0 transition-[border-color] duration-150 ease-out has-[a:hover]:border-qs-ink has-[[aria-expanded=true]]:z-20">
           <div class="flex items-center">
             <a
               [routerLink]="['/game', game.id]"
               [state]="{ boardSize: game.boardSize }"
-              class="flex min-h-[72px] min-w-0 flex-1 items-center gap-3 py-3 pl-3 pr-2 transition-colors duration-150 hover:bg-qs-panel-2 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-qs-accent"
+              [class.rounded-bl-card]="!isBoardFilling(game)"
+              class="flex min-h-[72px] min-w-0 flex-1 items-center gap-3 rounded-tl-card py-3 pl-3 pr-2 transition-colors duration-150 hover:bg-qs-panel-2 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-qs-accent"
               [attr.aria-label]="'Open ' + game.name"
             >
               <div [class]="'qs-mini grid w-12 shrink-0 gap-px rounded-[3px] bg-qs-line p-px ' + getMiniGridClass(game.boardSize)" aria-hidden="true">
