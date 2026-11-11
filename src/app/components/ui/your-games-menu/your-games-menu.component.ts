@@ -185,10 +185,14 @@ export class YourGamesMenuComponent {
     this.code.set('');
   }
 
-  /** Closes the popover on a click anywhere else. The phone sheet closes from its own backdrop. */
+  /**
+   * Closes the popover on a click anywhere else. The phone sheet closes from its own backdrop.
+   * Reads the click's path, not its target: Join with a code swaps its button for the code field before this runs,
+   * so the target is no longer inside the menu.
+   */
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event): void {
-    if (this.open() && !this.phone() && !this.host.nativeElement.contains(event.target as Node)) this.close();
+    if (this.open() && !this.phone() && !event.composedPath().includes(this.host.nativeElement)) this.close();
   }
 
   @HostListener('document:keydown.escape')
