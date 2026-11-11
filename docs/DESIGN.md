@@ -173,9 +173,65 @@ Rules:
 
 **Elevation:** two levels only. Cards `--qs-shadow`. Dialogs, menus, toasts, the share sheet `--qs-shadow-pop`.
 
-**Motion:** hover and focus 120ms; state changes (toggle, tab, square claim) 200ms; score reveal and quarter winner 400 to 500ms; easing `cubic-bezier(.2,.7,.2,1)`. Animate only opacity, transform and color. Respect `prefers-reduced-motion`. The live dot may pulse; nothing else loops. No slot-machine or shuffle animation when numbers are drawn: fade the digits in over 450ms, in order.
-
 **Icons:** one outline set (Lucide), 1.5px stroke, 20px in toolbars, 16px inline. No emoji as UI.
+
+### Motion
+
+Motion is feedback, never decoration. It says "that worked", "that changed" or "this is new", then gets out of the way. Nothing waits on an animation: a leaving element stops taking clicks at once.
+
+**Tokens**
+
+| Token | Value | Use |
+| --- | --- | --- |
+| `--qs-t-press` | 80ms | press down (`:active`) |
+| `--qs-t-fast` | 120ms | hover, focus, exits |
+| `--qs-t-state` | 200ms | enters, state changes, square claims, toasts, digit swaps |
+| `--qs-t-sheet` | 240ms | phone bottom sheets sliding up |
+| `--qs-t-reveal` | 450ms | quarter winner, number draw (whole digit) |
+| `--qs-stagger` | 30 to 40ms | rows in a menu (30ms), digits in a draw (40ms) |
+| `--qs-ease` | `cubic-bezier(.2,.7,.2,1)` | every enter and state change |
+| `--qs-ease-in` | `cubic-bezier(.4,0,1,1)` | every exit |
+| `--qs-ease-spring` | `cubic-bezier(.34,1.56,.64,1)` | small flips only: lock icon, copy tick, your own square claim |
+
+**Rules**
+
+- Movement uses only `transform` and `opacity`. Hover, focus and selected states may also fade color (background, border, text) over 120ms; that is the only non-transform change, and it never moves anything.
+- Enters ease out over 200ms; exits ease in over 120ms. Travel is small: 4 to 8px for a rise, 24px at most for a slide sideways. Scale stays between .94 and 1.06.
+- Nothing loops except the live dot (amber, a single dot, never a whole badge or pill). The current leader's square may breathe for about 22 seconds and then rests.
+- No page-to-page transitions. Pages load in place; only content inside a page fades in.
+- Every effect has a reduced-motion version: the final state, instantly. The global rule in styles.scss collapses durations; anything driven from TypeScript checks `prefers-reduced-motion` itself.
+- Hover effects only on devices that can hover (`@media (hover: hover)`), so nothing sticks after a tap on a phone.
+- Green motion follows the green rule: only open squares tint emerald on hover, and only while the board is open.
+
+**Patterns**
+
+| Moment | Where | Motion |
+| --- | --- | --- |
+| Button and tab press | everywhere | scale .97, 80ms, ease-in |
+| Square press | board, open squares on an open board | scale .94, 80ms, ease-in |
+| Square hover | board, open squares only, hover devices only | emerald-soft tint, 120ms |
+| Your own claim | board | initials scale .85 to 1 and fade in, 200ms, spring |
+| Someone else's claim | board | initials fade in, 200ms. More than three at once (a load or refresh): no motion |
+| Square let go | board | initials fade out, 120ms, ease-in |
+| Number draw | board, TV | each digit fades in and rises 4px, 300ms, 40ms apart: top row left to right, then the side top to bottom (about 1.1s for 10 x 10). Plays once per viewer per draw. Never random digits |
+| Quarter winner | board, Winners tiles, TV | plays for everyone watching, once per viewer per quarter. The square's emerald fades in over 450ms (an overlay's opacity), with one settle, scale 1 to 1.06 to 1 over 300ms. Its Winners tile fades to emerald over the same 450ms |
+| Score change | box score, Winners tiles, TV | old number fades up 6px, new number fades in, 200ms |
+| Leader moves | board axis | row and column highlight crossfade, 200ms |
+| Dimming | board, when a player or winner is picked | other squares fade to 25% over 160ms, back over 120ms |
+| Counters and badges | game page, dashboard (`17/100 picked`, `36 open`, Open / Locked) | number or label crossfades, 160ms |
+| Lock | host bar, dashboard card | lock icon turns shut, 260ms spring; a board locked from its card shows open for a beat, then snaps shut |
+| Dashboard card changes group | dashboard | Filling, Ready to lock, Locked: 200 to 300ms ease-out, cards reflow with FLIP |
+| Menus | Your Games, help, profile, card menu | drop from the button 180ms, rows staggered 30ms; retract up 140ms |
+| Phone bottom sheets | every dialog docked to the bottom on a phone, Your Games | slide up from the bottom (`translateY(100%)` to 0), 240ms; down 180ms, ease-in |
+| Dialogs from 640px up | every dialog | backdrop fades 150ms; panel rises 8px and scales .97 to 1, 200ms; out 120ms ease-in |
+| Toasts | bottom of the screen | rise 8px and fade in, 200ms; fade out and drop 4px, 120ms; the rest glide into place, 200ms |
+| Copy confirmations | share sheet, TV link | icon swaps to a tick with a small pop, 280ms spring; label reads Copied |
+| Tabs | game page | new panel fades in and rises 6px, 160ms |
+| Content after loading | game page, dashboard | fades in, 160ms, no movement (the skeleton already has the page's shape) |
+| Skeletons | everywhere | `qs-skel` shimmer only, shown after a 140ms wait; never Tailwind `animate-pulse` |
+| Board switch | game page arrows, TV rotation | slide 24px and fade, 220ms, from the side the arrow points to |
+| Form errors | Create, Edit, sign-in | message fades in and rises 4px, 160ms; scroll smoothly to the field. No shake |
+| Tour spotlight | walkthrough | moves with transform, 200ms; never animate its position or size properties |
 
 ---
 
@@ -394,6 +450,9 @@ After each PR: screenshot 375, 768, 1280 and 1440 in light and dark; run the con
 - Animate the number draw like a slot machine.
 - Fill empty space on a reading page with rails, icons, illustrations or a sticky contents list.
 - Put the logo on a team-colored area or recolor it to team colors.
+- Animate between pages.
+- Pulse anything but the single amber live dot.
+- Shake a field, bounce an icon, or play confetti.
 
 ---
 
