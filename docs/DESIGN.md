@@ -179,27 +179,34 @@ Rules:
 
 Motion is feedback, never decoration. It says "that worked", "that changed" or "this is new", then gets out of the way. Nothing waits on an animation: a leaving element stops taking clicks at once.
 
-**Tokens**
+**Approved standard (Nov 11, 2026).** The menu, phone sheet and board switch motion below is what shipped in #257 and #258, and Paul signed it off as the standard. New menus, sheets and switches copy it as written, using the shared classes and tokens rather than new values.
+
+**Tokens** (all in `:root` in `src/styles.scss`)
 
 | Token | Value | Use |
 | --- | --- | --- |
 | `--qs-t-press` | 80ms | press down (`:active`) |
-| `--qs-t-fast` | 120ms | hover, focus, exits |
-| `--qs-t-state` | 200ms | enters, state changes, square claims, toasts, digit swaps |
+| `--qs-t-fast` | 120ms | hover, focus, exits, menus closing |
+| `--qs-t-menu` | 150ms | menus and popovers opening |
+| `--qs-t-state` | 200ms | enters, state changes, square claims, toasts, digit swaps, a phone sheet's dim, a phone sheet sliding down |
 | `--qs-t-sheet` | 240ms | phone bottom sheets sliding up |
 | `--qs-t-reveal` | 450ms | quarter winner, number draw (whole digit) |
-| `--qs-stagger` | 30 to 40ms | rows in a menu (30ms), digits in a draw (40ms) |
-| `--qs-ease` | `cubic-bezier(.2,.7,.2,1)` | every enter and state change |
-| `--qs-ease-in` | `cubic-bezier(.4,0,1,1)` | every exit |
+| `--qs-ease` | `cubic-bezier(.2,.7,.2,1)` | enters and state changes on the page: claims, toasts, tabs, dialogs from 640px up |
+| `--qs-ease-in` | `cubic-bezier(.4,0,1,1)` | exits on the page: squares let go, toasts, dialogs from 640px up |
+| `--qs-ease-decel` | `cubic-bezier(.2,0,0,1)` | menus, phone sheets, their dim and the board switch coming in |
+| `--qs-ease-exit` | `cubic-bezier(.3,0,1,1)` | menus and the Your games chevron closing |
+| `--qs-ease-sheet-out` | `cubic-bezier(.3,0,.8,.15)` | phone sheets and their dim leaving, on the same curve so the page never undims before the sheet is gone |
 | `--qs-ease-spring` | `cubic-bezier(.34,1.56,.64,1)` | small flips only: lock icon, copy tick, your own square claim |
+
+Staggers are plain values, not tokens: 20ms between Your games rows (from the fifth row on they come in together), 40ms between digits in a number draw. The board switch runs from TypeScript (`slideInBoard` in the game page), so it repeats the `--qs-ease-decel` curve as a literal; change both together.
 
 **Rules**
 
 - Movement uses only `transform` and `opacity`. Hover, focus and selected states may also fade color (background, border, text) over 120ms; that is the only non-transform change, and it never moves anything.
-- Enters ease out over 200ms; exits ease in over 120ms. Travel is small: 4 to 8px for a rise, 24px at most for a slide sideways. Scale stays between .94 and 1.06.
+- Enters ease out over 200ms; exits ease in over 120ms. Menus, sheets and the board switch use their own faster set: `--qs-ease-decel` coming in, `--qs-ease-exit` or `--qs-ease-sheet-out` going out, and a close is always quicker and plainer than the open. Travel is small: 4 to 8px for a rise, 24px at most for a slide sideways. Scale stays between .94 and 1.06.
 - Nothing loops except the live dot (amber, a single dot, never a whole badge or pill). The current leader's square may breathe for about 22 seconds and then rests.
 - No page-to-page transitions. Pages load in place; only content inside a page fades in.
-- Every effect has a reduced-motion version: the final state, instantly. The global rule in styles.scss collapses durations; anything driven from TypeScript checks `prefers-reduced-motion` itself.
+- Every effect has a reduced-motion version. The global rule in styles.scss collapses durations, so most effects show their final state instantly; menus open and close at once. Your games and every phone sheet keep a 120ms linear fade with no slide or stagger, so they don't flash. Anything driven from TypeScript checks `prefers-reduced-motion` itself: the board switch then swaps with no movement.
 - Hover effects only on devices that can hover (`@media (hover: hover)`), so nothing sticks after a tap on a phone.
 - Green motion follows the green rule: only open squares tint emerald on hover, and only while the board is open.
 
@@ -221,15 +228,15 @@ Motion is feedback, never decoration. It says "that worked", "that changed" or "
 | Counters and badges | game page, dashboard (`17/100 picked`, `36 open`, Open / Locked) | number or label crossfades, 160ms |
 | Lock | host bar, dashboard card | lock icon turns shut, 260ms spring; a board locked from its card shows open for a beat, then snaps shut |
 | Dashboard card changes group | dashboard | Filling, Ready to lock, Locked: 200 to 300ms ease-out, cards reflow with FLIP |
-| Menus | Your Games, help, profile, card menu, dropdowns | drop from the button 150ms (8px and a 0.96 vertical scale), Your Games rows staggered 20ms; close is a fade with a 4px lift, 120ms, accelerate, no squash. Shared classes `qs-menu-enter` / `qs-menu-leave` |
-| Phone bottom sheets | every dialog docked to the bottom on a phone (Manage players, share, confirm and the rest), Join with a code, Your Games | slide up from the bottom (`translateY(100%)` to 0), 240ms; down 200ms, sheet and scrim together on one accelerate curve |
-| Dialogs from 640px up | every dialog | backdrop fades 150ms; panel rises 8px and scales .97 to 1, 200ms; out 120ms ease-in |
-| Toasts | bottom of the screen | rise 8px and fade in, 200ms; fade out and drop 4px, 120ms; the rest glide into place, 200ms |
+| Menus | Your games, help, profile, card `…` menu, dropdowns | open: drop from the button, opacity 0 to 1 with 8px down and a 0.96 vertical scale to 1, 150ms (`--qs-t-menu`), `--qs-ease-decel`, origin at the button's corner. Close: fade with a 4px lift and no squash, 120ms (`--qs-t-fast`), `--qs-ease-exit`, and it stops taking clicks at once. Your games rows fall in 6px over 140ms, 20ms apart, starting 40ms in; its chevron turns with it (150ms open, 120ms close). Shared classes `qs-menu-enter` / `qs-menu-leave` with `animate.enter` / `animate.leave`; Your games uses `.yg-pop` |
+| Phone bottom sheets | under 640px: every dialog docked to the bottom (Manage players, share, confirm and the rest), Join with a code, Your games | open: the sheet slides up from `translateY(100%)` to 0 over 240ms (`--qs-t-sheet`) while the dim fades in over 200ms, both `--qs-ease-decel`. Close: sheet slides down and the dim fades out together, 200ms, `--qs-ease-sheet-out`. Reopening mid-close turns back from where it is. Classes `qs-sheet-phone` (any docked dialog on a phone) and `qs-sheet-slide` (sheets that always slide) |
+| Dialogs from 640px up | every dialog | backdrop fades in 150ms; panel rises 8px and scales .97 to 1, 200ms, `--qs-ease`. Out 120ms, `--qs-ease-in`: backdrop fades, panel drops 4px and scales to .98. Classes `qs-modal-enter` / `qs-modal-leave` |
+| Toasts | bottom of the screen | target: rise 8px and fade in, 200ms; fade out and drop 4px, 120ms; the rest glide into place, 200ms. Not there yet: live toasts still slide in from the right edge over 300ms (`animate-toast-in`) and leave with no motion |
 | Copy confirmations | share sheet, TV link | icon swaps to a tick with a small pop, 280ms spring; label reads Copied |
 | Tabs | game page | new panel fades in and rises 6px, 160ms |
 | Content after loading | game page, dashboard | fades in, 160ms, no movement (the skeleton already has the page's shape) |
 | Skeletons | everywhere | `qs-skel` shimmer only, shown after a 140ms wait; never Tailwind `animate-pulse` |
-| Board switch | game page arrows | the current board stays on screen until the next board's data arrives, then swaps in place and eases 12px in from the side the arrow points to, 180ms, transform only with no fade, so nothing goes blank. Reduced motion: no movement |
+| Board switch | game page arrows and arrow keys | the current board stays on screen until the next board's data arrives (no skeleton, no blank), then swaps in place and eases 12px in from the side the arrow points to, 180ms, `--qs-ease-decel`, transform only with no fade. Reduced motion: an instant swap |
 | TV rotation | `/tv` kiosk | slide 4rem and fade, 350ms, from the side it rotates to |
 | Form errors | Create, Edit, sign-in | message fades in and rises 4px, 160ms; scroll smoothly to the field. No shake |
 | Tour spotlight | walkthrough | moves with transform, 200ms; never animate its position or size properties |
