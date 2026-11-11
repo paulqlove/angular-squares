@@ -3,6 +3,7 @@ import { Component, OnInit, signal, computed, inject, effect, ChangeDetectionStr
 import { miniCellClass, miniGridCells, miniGridClass } from '../../core/utils/mini-grid';
 import { autoLockAt, groupBoards, isBoardFilling as boardIsFilling, isBoardFull, isReadyToLock } from '../../core/utils/board-groups';
 import { drawBoardNumbers } from '../../core/utils/draw-numbers';
+import { CardTeam, cardTeams } from '../../core/utils/card-teams';
 import { DropdownComponent } from '../../components/ui/dropdown/dropdown.component';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -388,12 +389,22 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
               [class]="hasCardBar(game, joined) ? '' : 'rounded-bl-card sm:rounded-br-card'"
               [attr.aria-label]="'Open ' + game.name"
             >
-              <div class="shrink-0 sm:flex sm:min-h-[152px] sm:items-end sm:gap-[18px] sm:rounded-inner sm:bg-qs-tile sm:p-[18px]">
+              <div class="flex shrink-0 flex-col items-center sm:min-h-[152px] sm:flex-row sm:items-end sm:gap-[18px] sm:rounded-inner sm:bg-qs-tile sm:p-[18px]">
                 <div [class]="'qs-mini grid w-14 shrink-0 gap-px rounded-[3px] p-px sm:w-28 ' + getMiniGridClass(game.boardSize)" aria-hidden="true">
                   @for (i of getBoardCells(game.boardSize); track i) {
                     <span class="aspect-square" [class]="miniCellClass(game, i)"></span>
                   }
                 </div>
+                <!-- Phone: the state sits centered under the mini board -->
+                <p class="qs-label mt-1.5 flex w-14 items-center justify-center gap-1 whitespace-nowrap text-[10.5px] tabular-nums sm:hidden" [class]="isBoardFilling(game) ? 'text-qs-accent' : 'text-qs-muted'">
+                  @if (game.isLocked) {
+                    <span class="lock-icon is-locked" [class.lock-snap]="justLocked().has(game.id)" style="font-size: 12px" aria-hidden="true"><ng-icon name="heroLockClosed" class="lock-closed"></ng-icon><ng-icon name="heroLockOpen" class="lock-open"></ng-icon></span>Locked
+                  } @else if (!isBoardFilling(game)) {
+                    Full
+                  } @else {
+                    {{ openCount(game) }} open
+                  }
+                </p>
                 <div class="hidden min-w-0 flex-col gap-1.5 pb-0.5 sm:flex">
                   @if (game.isLocked) {
                     <span class="qs-label inline-flex items-center gap-1.5 text-qs-tile-ink"><span class="lock-icon is-locked" [class.lock-snap]="justLocked().has(game.id)" style="font-size: 14px" aria-hidden="true"><ng-icon name="heroLockClosed" class="lock-closed"></ng-icon><ng-icon name="heroLockOpen" class="lock-open"></ng-icon></span>Locked</span>
@@ -411,19 +422,28 @@ type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
               </div>
               <div class="min-w-0 sm:px-1.5">
                 <h5 class="truncate text-base font-semibold leading-tight tracking-tight text-qs-ink sm:text-xl">{{ game.name }}</h5>
-                <p class="mt-0.5 truncate text-sm text-qs-muted">{{ matchup(game) }}</p>
-                <p class="qs-label mt-1.5 flex items-center gap-1.5 tabular-nums sm:hidden" [class]="isBoardFilling(game) ? 'text-qs-accent' : 'text-qs-muted'">
-                  @if (game.isLocked) {
-                    <span class="lock-icon is-locked" [class.lock-snap]="justLocked().has(game.id)" style="font-size: 14px" aria-hidden="true"><ng-icon name="heroLockClosed" class="lock-closed"></ng-icon><ng-icon name="heroLockOpen" class="lock-open"></ng-icon></span>Locked
-                  } @else if (!isBoardFilling(game)) {
-                    <span class="shrink-0">Full</span>
-                    @if (autoLockText(game); as autoLock) {
-                      <span class="min-w-0 truncate normal-case tracking-normal">· Auto-locks {{ autoLock }}</span>
+                @if (cardTeams(game); as teams) {
+                  <div class="mt-1.5 flex flex-col gap-1">
+                    @for (team of teams; track $index) {
+                      <span class="flex min-w-0 items-center gap-2 text-sm">
+                        @if (team.logo) {
+                          <img [src]="team.logo" alt="" width="20" height="20" loading="lazy" class="h-5 w-5 shrink-0 object-contain" />
+                        }
+                        @if (team.code) {
+                          <span class="shrink-0 font-semibold text-qs-ink">{{ team.code }}</span>
+                        }
+                        @if (team.name) {
+                          <span class="truncate" [class]="team.code ? 'text-qs-muted' : 'text-qs-ink'">{{ team.name }}</span>
+                        }
+                      </span>
                     }
-                  } @else {
-                    {{ openCount(game) }} open
-                  }
-                </p>
+                  </div>
+                } @else {
+                  <p class="mt-0.5 truncate text-sm text-qs-muted">Teams not set</p>
+                }
+                @if (!game.isLocked && !isBoardFilling(game) && autoLockText(game); as autoLock) {
+                  <p class="mt-1 truncate text-[13px] text-qs-muted sm:hidden">Auto-locks {{ autoLock }}</p>
+                }
               </div>
             </a>
             <app-card-menu
@@ -718,8 +738,9 @@ export class DashboardComponent implements OnInit {
   }
 
   /** The card's one line: the teams playing. */
-  matchup(game: GameListItem): string {
-    return game.homeTeam && game.awayTeam ? `${game.awayTeam} vs ${game.homeTeam}` : 'Teams not set';
+  /** The card's two team lines, away first; null shows "Teams not set". */
+  cardTeams(game: GameListItem): CardTeam[] | null {
+    return cardTeams(game.awayTeam, game.homeTeam, game.espnSport);
   }
 
   /** Get CSS class for mini board grid based on board size */
