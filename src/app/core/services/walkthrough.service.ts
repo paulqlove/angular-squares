@@ -93,10 +93,17 @@ export class WalkthroughService {
     localStorage.removeItem(`walkthrough_${id}_completed`);
   }
 
+  /** The step's target. A page can mark the same target twice (the dashboard's desktop buttons and its phone bar),
+   * so the one that is showing wins; with none showing, the first. */
+  private findTarget(target: string): Element | null {
+    const matches = Array.from(document.querySelectorAll(`[data-walkthrough="${target}"]`));
+    return matches.find(el => el.getClientRects().length > 0) ?? matches[0] ?? null;
+  }
+
   /** Brings an off-screen target into view before it is measured. Only called when the step changes, never from scroll handlers. */
   private scrollToTarget(): void {
     const step = this.currentStep();
-    const element = step && document.querySelector(`[data-walkthrough="${step.target}"]`);
+    const element = step && this.findTarget(step.target);
     if (!element) return;
     const rect = element.getBoundingClientRect();
     if (element.closest('header')) {
@@ -128,7 +135,7 @@ export class WalkthroughService {
       return;
     }
 
-    const element = document.querySelector(`[data-walkthrough="${step.target}"]`);
+    const element = this.findTarget(step.target);
     if (element) {
       this._targetRect.set(element.getBoundingClientRect());
     } else {

@@ -9,7 +9,7 @@ import { PreviewPlan, PreviewRole, RolePreviewService } from '../../../core/serv
   template: `
     @if (authService.isPreviewAdmin() && !hidden()) {
       <div
-        class="no-print fixed bottom-4 [.has-host-bar_&]:bottom-24 left-4 z-[150] flex max-w-[calc(100vw-2rem)] flex-wrap items-center gap-2 rounded-card border bg-qs-panel py-1.5 pl-3 pr-1.5 shadow-pop"
+        class="no-print fixed bottom-4 [.has-host-bar_&]:bottom-24 max-sm:[.has-phone-bar_&]:bottom-24 left-4 z-[150] flex max-w-[calc(100vw-2rem)] flex-wrap items-center gap-2 rounded-card border bg-qs-panel py-1.5 pl-3 pr-1.5 shadow-pop"
         [class]="previewing() ? 'border-qs-warn' : 'border-qs-line'"
       >
         <label for="role-preview" class="qs-label text-qs-muted">View as</label>
