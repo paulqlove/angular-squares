@@ -110,18 +110,16 @@ function playerAt(r: number, c: number): [string, string] {
     .hiw-claim { animation: hiw-claim var(--qs-t-state) var(--qs-ease-spring) both; }
     .hiw-axis { background: var(--qs-tile); color: var(--qs-tile-ink); transition: background-color var(--qs-t-state) var(--qs-ease-decel), color var(--qs-t-state) var(--qs-ease-decel); }
     .hiw-axis.hiw-lead { background: var(--qs-accent); color: var(--qs-on-accent); }
-    .hiw-digit { animation: hiw-digit 300ms var(--qs-ease-decel) both; animation-delay: calc(var(--i) * 40ms); }
     .hiw-after-draw { animation: hiw-rise var(--qs-t-state) var(--qs-ease-decel) both; animation-delay: 1.1s; }
     .hiw-swap { animation: hiw-rise var(--qs-t-state) var(--qs-ease-decel) both; }
     .hiw-num { display: inline-block; animation: hiw-rise var(--qs-t-state) var(--qs-ease-decel) both; }
     .hiw-bar { transform-origin: left; transition: transform var(--qs-t-state) var(--qs-ease-decel); }
-    @keyframes hiw-digit { from { opacity: 0; transform: translateY(4px); } }
     @keyframes hiw-rise { from { opacity: 0; transform: translateY(6px); } }
     @keyframes hiw-claim { from { opacity: 0; transform: scale(.85); } }
     @keyframes hiw-settle { 50% { transform: scale(1.06); } }
     @media (prefers-reduced-motion: reduce) {
       .hiw-cell, .hiw-axis, .hiw-bar { transition: none; }
-      .hiw-digit, .hiw-after-draw, .hiw-swap, .hiw-num, .hiw-claim, .hiw-win { animation: none; }
+      .hiw-after-draw, .hiw-swap, .hiw-num, .hiw-claim, .hiw-win { animation: none; }
     }
   `],
   template: `
@@ -200,12 +198,12 @@ function playerAt(r: number, c: number): [string, string] {
               <span class="bg-qs-panel-2"></span>
               @for (d of cols(); track $index; let c = $index) {
                 <span class="hiw-axis grid h-6 place-items-center font-mono text-xs font-medium sm:h-8 sm:text-sm" [class.hiw-lead]="leadCol() === c" aria-hidden="true">
-                  @if (drawn()) { <span class="hiw-digit" [style.--i]="c">{{ d }}</span> }
+                  @if (drawn()) { <span class="qs-draw-digit" [style.--i]="c">{{ d }}</span> }
                 </span>
               }
               @for (row of cells(); track $index; let r = $index) {
                 <span class="hiw-axis grid place-items-center font-mono text-xs font-medium sm:text-sm" [class.hiw-lead]="leadRow() === r" aria-hidden="true">
-                  @if (drawn()) { <span class="hiw-digit" [style.--i]="r + 10">{{ rows()[r] }}</span> }
+                  @if (drawn()) { <span class="qs-draw-digit" [style.--i]="r + 10">{{ rows()[r] }}</span> }
                 </span>
                 @for (cell of row; track cell.key) {
                   @if (cell.open) {
