@@ -1,4 +1,4 @@
-import { drawBoardNumbers, drawNumberLine } from './draw-numbers';
+import { drawBoardNumbers, drawNumberLine, numberDrawMs } from './draw-numbers';
 
 describe('drawNumberLine', () => {
   it('uses each digit 0-9 once on a 10-wide side', () => {
@@ -25,5 +25,13 @@ describe('drawBoardNumbers', () => {
     const quarter = drawBoardNumbers(25);
     expect(quarter.homeNumbers.length).toBe(5);
     expect(quarter.awayNumbers.length).toBe(5);
+  });
+});
+
+describe('numberDrawMs', () => {
+  it('runs until the last digit has risen in: 300ms each, 40ms apart', () => {
+    expect(numberDrawMs(20)).toBe(1060);
+    expect(numberDrawMs(10)).toBe(660);
+    expect(numberDrawMs(1)).toBe(300);
   });
 });

@@ -30,10 +30,8 @@
         <div
           class="number-cell axis-cell axis-top"
           [class.axis-leader]="leaderCol === i"
-          [class.axis-locked]="isHomeLocked(i)"
-          [class.axis-flickering]="!isHomeLocked(i)"
           role="columnheader">
-          {{ formatNumber(num, homeNumbersPaired) }}
+          @if (drawing) { <span class="qs-draw-digit" [style.--i]="i">{{ formatNumber(num, homeNumbersPaired) }}</span> } @else { {{ formatNumber(num, homeNumbersPaired) }} }
         </div>
       }
     </div>
@@ -44,8 +42,8 @@
         [class]="gridColsClass + ' grid gap-px'"
         role="row">
         <!-- Left side away numbers -->
-        <div class="number-cell axis-cell" [class.axis-leader]="leaderRow === row" [class.axis-locked]="isAwayLocked(row)" [class.axis-flickering]="!isAwayLocked(row)" role="rowheader">
-          {{ formatNumber(awayNum, awayNumbersPaired) }}
+        <div class="number-cell axis-cell" [class.axis-leader]="leaderRow === row" role="rowheader">
+          @if (drawing) { <span class="qs-draw-digit" [style.--i]="homeNumbers.length + row">{{ formatNumber(awayNum, awayNumbersPaired) }}</span> } @else { {{ formatNumber(awayNum, awayNumbersPaired) }} }
         </div>
         <!-- Square cells -->
         @for (homeNum of homeNumbers; track $index; let col = $index) {

@@ -580,6 +580,13 @@ body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
 .qs-tab-in { animation: qs-rise-in 160ms var(--qs-ease) backwards; }
 .icon-pop { animation: qs-icon-pop 280ms var(--qs-ease-spring) both; }
 
+/* The number draw: each digit rises 4px into place over 300ms (decelerate), 40ms after the one before it.
+   --i is the digit's place in the draw: the top row left to right, then the side top to bottom.
+   Shared by the real board and How to play's sample game, so the two always match. */
+@keyframes qs-draw-digit { from { opacity: 0; transform: translateY(4px); } }
+.qs-draw-digit { display: inline-block; animation: qs-draw-digit 300ms var(--qs-ease-decel) both; animation-delay: calc(var(--i) * 40ms); }
+@media (prefers-reduced-motion: reduce) { .qs-draw-digit { animation: none; } }
+
 /* Buttons: a quick press */
 .qs-btn { transition-property: background-color, color, border-color, transform; }
 .qs-btn:active:not(:disabled) { transform: scale(.97); transition-duration: var(--qs-t-press); transition-timing-function: var(--qs-ease-in); }

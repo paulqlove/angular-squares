@@ -19,3 +19,8 @@ export function drawBoardNumbers(boardSize: BoardSize, rng: () => number = Math.
   const { rows, cols } = getBoardDimensions(boardSize);
   return { homeNumbers: drawNumberLine(cols, rng), awayNumbers: drawNumberLine(rows, rng) };
 }
+
+/** How long the number draw (.qs-draw-digit in styles.scss) runs for `digits` digits: 300ms each, 40ms apart. */
+export function numberDrawMs(digits: number): number {
+  return 300 + Math.max(0, digits - 1) * 40;
+}

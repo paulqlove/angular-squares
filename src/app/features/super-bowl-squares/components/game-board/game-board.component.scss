@@ -40,17 +40,6 @@
   color: var(--qs-on-accent);
 }
 
-/* Number reveal animation states */
-.axis-locked {
-  color: var(--qs-tile-ink);
-  transition: color var(--qs-t-fast) var(--qs-ease);
-}
-
-.axis-flickering {
-  color: var(--qs-tile-muted);
-  transition: color var(--qs-t-fast) var(--qs-ease);
-}
-
 .square-cell {
   @extend .number-cell;
   @apply text-[11px] sm:text-xs cursor-pointer p-1 text-center truncate overflow-hidden whitespace-nowrap;
