@@ -1,3 +1,4 @@
+import { quarterLabels, QuarterWin } from './utils/quarter-labels';
 import { computed, Component, ElementRef, OnInit, OnDestroy, ViewChild, HostListener, signal, inject, effect, ChangeDetectionStrategy, PLATFORM_ID, afterNextRender, Injector } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
@@ -854,14 +855,23 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
   /** The squares that won a quarter: the square the quarter's score points to, when it belongs to that quarter's winner. */
   get winnerSquares(): string[] {
+    return this.quarterWins.map(w => w.key);
+  }
+
+  /** Tab text for each winning square ("Q1", "FINAL", "Q1 Q3"), keyed by "row-col". */
+  get winnerQuarterLabels(): Record<string, string> {
+    return quarterLabels(this.quarterWins);
+  }
+
+  private get quarterWins(): QuarterWin[] {
     if (!this.isRandomized) return [];
-    return (['q1', 'q2', 'q3', 'q4'] as const).flatMap(q => {
-      const winner = this.winners[q], score = this.scores[q];
+    return (['q1', 'q2', 'q3', 'q4'] as const).flatMap(quarter => {
+      const winner = this.winners[quarter], score = this.scores[quarter];
       if (!winner || !score) return [];
       const row = this.awayNumbers.findIndex(n => this.digitMatchesNumber(score.away % 10, n, this.awayNumbersPaired));
       const col = this.homeNumbers.findIndex(n => this.digitMatchesNumber(score.home % 10, n, this.homeNumbersPaired));
       const key = `${row}-${col}`;
-      return row !== -1 && col !== -1 && this.selectedSquares[key] === winner ? [key] : [];
+      return row !== -1 && col !== -1 && this.selectedSquares[key] === winner ? [{ key, quarter }] : [];
     });
   }
 
