@@ -17,7 +17,7 @@ describe('dashboardTourSteps', () => {
     expect(phone[0]).toEqual(steps[0]);
     expect(phone[1].description).toContain('bottom of the screen');
     expect(phone[1].position).toBe('top');
-    expect(phone[2].description).toContain('Join with a code');
+    expect(phone[2].description).toContain('Search or code');
     expect(phone[2].position).toBe('top');
     expect(phone[1].title).toBe('Create');
   });
