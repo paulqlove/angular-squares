@@ -6,6 +6,8 @@ export interface WalkthroughStep {
   title: string;
   description: string;
   position?: 'top' | 'bottom' | 'left' | 'right' | 'center';
+  /** A link under the words. Following it ends the tour. */
+  link?: { label: string; path: string };
 }
 
 /** How long the spotlight glides from one target to the next. Matches --qs-t-state. */

@@ -2,12 +2,13 @@ import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { SeoService } from '../../core/services/seo.service';
+import { HowItWorksDemoComponent } from './how-it-works-demo.component';
 import { ReadingEndComponent, ReadingHeaderComponent, ReadingPageComponent, ReadingSectionComponent } from './reading-layout.components';
 import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pages';
 
 @Component({
     selector: 'app-marketing-page',
-    imports: [ReadingPageComponent, ReadingHeaderComponent, ReadingSectionComponent, ReadingEndComponent],
+    imports: [HowItWorksDemoComponent, ReadingPageComponent, ReadingHeaderComponent, ReadingSectionComponent, ReadingEndComponent],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
     <app-reading-page [breadcrumbs]="breadcrumbs">
@@ -16,6 +17,10 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
           <div hero [innerHTML]="trustHtml(page.heroHtml)"></div>
         }
       </app-reading-header>
+
+      @if (page.demo === 'how-it-works') {
+        <app-how-it-works-demo class="mt-12 sm:mt-14"></app-how-it-works-demo>
+      }
 
       @if (page.steps) {
         <ol class="mt-20 grid gap-x-0 gap-y-10 border-t border-qs-line pt-8 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-[auto_auto_1fr] lg:gap-y-0">

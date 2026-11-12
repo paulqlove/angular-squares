@@ -678,7 +678,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       target: 'profile-dropdown',
       title: 'Your profile',
       description: 'Tap here to update your display name, change the theme, or sign out.',
-      position: 'bottom'
+      position: 'bottom',
+      link: { label: 'See how it works', path: '/how-to-play' }
     }
   ];
 
