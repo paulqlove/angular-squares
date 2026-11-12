@@ -9,6 +9,7 @@ import { isGameOver, startedQuarterCount } from '../../core/utils/quarter-label'
 import { GameService, GameData, EspnLiveSnapshot, BoardSize, getBoardDimensions } from '../../core/services/game.service';
 import { environment } from '../../../environments/environment';
 import { PLAYER_COLORS, normalizePlayerColors } from './utils/player-colors';
+import { espnQuarterIsComplete, sameScores, sameWinners } from './utils/espn-winners';
 import { PreviewRole } from '../../core/services/role-preview.service';
 import { TeamLogoService } from '../../core/services/team-logo.service';
 import { PlanService } from '../../core/services/plan.service';
@@ -839,9 +840,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     };
 
     quarterKeys.forEach((quarter, index) => {
-      // Q4 (index 3) requires game completed; Q1-Q3 require period past that quarter
-      const isComplete = index === 3 ? completed : currentPeriod > index + 1;
-      if (isComplete) {
+      if (espnQuarterIsComplete(index, currentPeriod, completed)) {
         const score = this.scores[quarter as keyof typeof this.scores];
         const winner = getWinner(score.home, score.away);
         if (winner) {
@@ -850,8 +849,11 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       }
     });
 
+    // Every sync runs on a snapshot and a write starts a new snapshot, so only write when the winners change.
+    // Rewriting the same board on every snapshot let two open tabs that disagreed flip the winners back and forth.
+    const changed = !sameWinners(this.winners, newWinners);
     this.winners = newWinners;
-    this.gameService.updateGame(this.gameId, { winners: newWinners });
+    if (changed) this.gameService.updateGame(this.gameId, { winners: newWinners });
   }
 
   /** The squares that won a quarter: the square the quarter's score points to, when it belongs to that quarter's winner. */
@@ -1735,8 +1737,9 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
         newScores.q4 = { home: game.homeScore, away: game.awayScore };
       }
 
+      const scoresChanged = !sameScores(this.scores, newScores);
       this.scores = newScores;
-      await this.gameService.updateGame(this.gameId, { scores: newScores });
+      if (scoresChanged) await this.gameService.updateGame(this.gameId, { scores: newScores });
       this.calculateWinnersFromEspn(game.period, game.completed);
 
       // Stop polling if game has ended

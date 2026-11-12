@@ -71,6 +71,15 @@ describe('parseSummary', () => {
     expect(game.completed).toBe(true);
   });
 
+  it('reads the period from the line scores when a final summary sends none', () => {
+    // ESPN's summary for a finished game sends only the status type, with no period or clock.
+    const final: any = structuredClone(collegeSummary);
+    final.header.competitions[0].status = { type: { name: 'STATUS_FINAL', state: 'post', completed: true } };
+    const game = parseSummary(final, 'ncaaf')!;
+    expect(game.completed).toBe(true);
+    expect(game.period).toBe(4);
+  });
+
   it('returns null when there is no game in it', () => {
     expect(parseSummary({}, 'ncaaf')).toBeNull();
     expect(parseSummary({ header: { id: '1', competitions: [] } }, 'nfl')).toBeNull();
