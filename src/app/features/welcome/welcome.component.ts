@@ -1,7 +1,7 @@
 import { Component, ElementRef, signal, inject, OnInit, effect, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { isGameCode, normalizeCodeInput, normalizeGameCode } from '../../core/utils/game-code';
 import { AuthService } from '../../core/services/auth.service';
 import { SeoService } from '../../core/services/seo.service';
 import { SiteFooterComponent } from '../../shared/site-footer.component';
@@ -31,7 +31,7 @@ interface Feature {
 
 @Component({
     selector: 'app-welcome',
-    imports: [FormsModule, RouterLink, NgIconComponent, AppHeaderComponent, HeadroomDirective, AuthModalComponent, PhoneDemoComponent, SiteFooterComponent],
+    imports: [RouterLink, NgIconComponent, AppHeaderComponent, HeadroomDirective, AuthModalComponent, PhoneDemoComponent, SiteFooterComponent],
     providers: [
         provideIcons({
             heroSquares2x2,
@@ -103,12 +103,13 @@ interface Feature {
                     #joinInput
                     id="join-code"
                     type="text"
-                    [(ngModel)]="gameCode"
+                    [value]="gameCode"
+                    (input)="onCodeInput($event)"
                     placeholder="ABC123"
                     autocapitalize="characters"
                     autocomplete="off"
                     class="min-h-11 flex-1 px-4 border border-qs-line-strong rounded-btn uppercase tracking-[0.2em] text-center font-mono text-base bg-qs-panel-2 text-qs-ink"
-                    maxlength="6"
+                    spellcheck="false"
                     (keyup.enter)="joinGame()"
                   />
                   <button
@@ -366,7 +367,7 @@ export class WelcomeComponent implements OnInit {
     });
     const joinCode = this.route.snapshot.queryParamMap.get('join');
     if (joinCode) {
-      this.pendingJoinCode = joinCode.toUpperCase();
+      this.pendingJoinCode = normalizeGameCode(joinCode);
       this.gameCode = this.pendingJoinCode;
       this.showJoinCode.set(true);
     }
@@ -422,9 +423,14 @@ export class WelcomeComponent implements OnInit {
   }
 
   joinGame(): void {
-    if (this.gameCode.length === 6) {
-      this.router.navigate(['/game', this.gameCode.toUpperCase()]);
+    if (isGameCode(this.gameCode)) {
+      this.router.navigate(['/game', this.gameCode]);
     }
+  }
+
+  /** Keeps the field to letters and digits, upper-cased, so a pasted "abc-123" reads ABC123. */
+  onCodeInput(event: Event): void {
+    this.gameCode = normalizeCodeInput(event.target as HTMLInputElement);
   }
 
   openJoinCode(): void {
