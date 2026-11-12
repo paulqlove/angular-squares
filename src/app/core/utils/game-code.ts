@@ -28,3 +28,18 @@ export function normalizeCodeInput(input: HTMLInputElement): string {
   }
   return code;
 }
+
+/**
+ * Asks the database whether a game with this code exists, without loading the Firebase SDK, so the landing page stays
+ * light. A shallow REST read returns `true` for an existing game and `null` for none. Resolves true when the check
+ * itself fails (offline, blocked), so the person still goes to the game page rather than being told it isn't there.
+ */
+export async function gameCodeExists(code: string, databaseURL: string, fetchFn: typeof fetch = fetch): Promise<boolean> {
+  try {
+    const response = await fetchFn(`${databaseURL}/games/${encodeURIComponent(code)}.json?shallow=true`);
+    if (!response.ok) return true;
+    return (await response.json()) !== null;
+  } catch {
+    return true;
+  }
+}

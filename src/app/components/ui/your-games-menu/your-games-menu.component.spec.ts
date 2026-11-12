@@ -25,7 +25,8 @@ describe('YourGamesMenuComponent', () => {
           provide: GameService,
           useValue: {
             getYourGameIndex: async () => index,
-            getGame: async (id: string) => games[id] ?? null
+            getGame: async (id: string) => games[id] ?? null,
+            gameExists: async (id: string) => id === 'ABC123'
           }
         }
       ]
@@ -93,7 +94,31 @@ describe('YourGamesMenuComponent', () => {
     input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
     el.querySelector('form')!.dispatchEvent(new Event('submit'));
+    await new Promise(r => setTimeout(r));
     expect(navigate).toHaveBeenCalledWith(['/game', 'ABC123']);
+  });
+
+  it('says Game not found under the field for a code with no game, keeps the code, and clears it on edit', async () => {
+    const fixture = await setup();
+    const el: HTMLElement = fixture.nativeElement;
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    [...el.querySelectorAll('button')].find(b => b.textContent?.includes('Join with a code'))!.click();
+    fixture.detectChanges();
+    const input = el.querySelector<HTMLInputElement>('#your-games-code')!;
+    input.value = 'ZZZ999';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    el.querySelector('form')!.dispatchEvent(new Event('submit'));
+    await new Promise(r => setTimeout(r));
+    fixture.detectChanges();
+    expect(navigate).not.toHaveBeenCalled();
+    expect(el.querySelector('#your-games-code-error')?.textContent?.trim()).toBe('Game not found');
+    expect(el.querySelector<HTMLInputElement>('#your-games-code')!.value).toBe('ZZZ999');
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+    input.value = 'ZZZ99';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    expect(el.querySelector('#your-games-code-error')).toBeNull();
   });
   it('keeps the menu open when Join with a code swaps in the code field', async () => {
     const fixture = await setup();

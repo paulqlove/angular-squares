@@ -1,7 +1,8 @@
 import { Component, ElementRef, signal, inject, OnInit, effect, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { isGameCode, normalizeCodeInput, normalizeGameCode } from '../../core/utils/game-code';
+import { gameCodeExists, isGameCode, normalizeCodeInput, normalizeGameCode } from '../../core/utils/game-code';
+import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/services/auth.service';
 import { SeoService } from '../../core/services/seo.service';
 import { SiteFooterComponent } from '../../shared/site-footer.component';
@@ -110,6 +111,8 @@ interface Feature {
                     autocomplete="off"
                     class="min-h-11 flex-1 px-4 border border-qs-line-strong rounded-btn uppercase tracking-[0.2em] text-center font-mono text-base bg-qs-panel-2 text-qs-ink"
                     spellcheck="false"
+                    [attr.aria-invalid]="notFound() ? 'true' : null"
+                    [attr.aria-describedby]="notFound() ? 'join-code-error' : null"
                     (keyup.enter)="joinGame()"
                   />
                   <button
@@ -122,6 +125,9 @@ interface Feature {
                     <ng-icon name="heroArrowRight" class="text-base" aria-hidden="true"></ng-icon>
                   </button>
                 </div>
+                @if (notFound()) {
+                  <p id="join-code-error" class="qs-error-in mt-2 text-sm text-qs-bad" role="alert">Game not found</p>
+                }
               </div>
               </div>
             </div>
@@ -258,6 +264,8 @@ interface Feature {
 })
 export class WelcomeComponent implements OnInit {
   private authService = inject(AuthService);
+  /** True while Join checks the code, so a double tap doesn't check twice. */
+  private joining = false;
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private seo = inject(SeoService);
@@ -376,6 +384,8 @@ export class WelcomeComponent implements OnInit {
   @ViewChild('joinInput') private joinInput?: ElementRef<HTMLInputElement>;
 
   gameCode = '';
+  /** Set when Join finds no game with the typed code. Cleared as soon as they edit the code. */
+  notFound = signal(false);
   showAuthModal = signal(false);
   showJoinCode = signal(false);
 
@@ -422,15 +432,22 @@ export class WelcomeComponent implements OnInit {
     this.router.navigate(['/dashboard']);
   }
 
-  joinGame(): void {
-    if (isGameCode(this.gameCode)) {
-      this.router.navigate(['/game', this.gameCode]);
-    }
+  /** Opens the game, or says "Game not found" under the field and keeps the code there when no game has it. */
+  async joinGame(): Promise<void> {
+    const code = this.gameCode;
+    if (!isGameCode(code) || this.joining) return;
+    this.joining = true;
+    const found = await gameCodeExists(code, environment.firebase.databaseURL);
+    this.joining = false;
+    if (code !== this.gameCode) return;
+    if (found) this.router.navigate(['/game', code]);
+    else this.notFound.set(true);
   }
 
   /** Keeps the field to letters and digits, upper-cased, so a pasted "abc-123" reads ABC123. */
   onCodeInput(event: Event): void {
     this.gameCode = normalizeCodeInput(event.target as HTMLInputElement);
+    this.notFound.set(false);
   }
 
   openJoinCode(): void {
