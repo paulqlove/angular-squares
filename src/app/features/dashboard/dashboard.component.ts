@@ -302,26 +302,28 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
             </div>
 
             @if (isLoadingGames()) {
-              <div class="qs-skel-delay mt-6 grid grid-cols-1 items-start gap-3 sm:grid-cols-2 xl:grid-cols-3" aria-busy="true">
+              <div class="qs-skel-delay mt-6 grid grid-cols-1 items-start gap-3 sm:grid-cols-[repeat(auto-fill,minmax(19rem,1fr))]" aria-busy="true">
                 @for (i of [0, 1, 2]; track i) {
                   <!-- Same shape as the board card: a row on a phone, from sm up the navy tile, name, teams and the Share bar -->
+                  <div class="min-w-0 [container-type:inline-size]">
                   <article class="qs-card" aria-hidden="true">
-                    <div class="flex min-h-[72px] items-center gap-3 p-3 sm:flex-col sm:items-stretch sm:gap-3.5 sm:pb-4">
-                      <div class="flex shrink-0 sm:min-h-[152px] sm:items-end sm:gap-[18px] sm:rounded-inner sm:bg-qs-tile sm:p-[18px]">
-                        <div class="qs-skel h-12 w-12 sm:h-28 sm:w-28"></div>
-                        <div class="hidden flex-col gap-2 pb-0.5 sm:flex">
+                    <div class="flex min-h-[72px] items-center gap-3 p-3 [@container(min-width:28rem)]:flex-col [@container(min-width:28rem)]:items-stretch [@container(min-width:28rem)]:gap-3.5 [@container(min-width:28rem)]:pb-4">
+                      <div class="flex shrink-0 [@container(min-width:28rem)]:min-h-[152px] [@container(min-width:28rem)]:items-end [@container(min-width:28rem)]:gap-[18px] [@container(min-width:28rem)]:rounded-inner [@container(min-width:28rem)]:bg-qs-tile [@container(min-width:28rem)]:p-[18px]">
+                        <div class="qs-skel h-12 w-12 [@container(min-width:28rem)]:h-28 [@container(min-width:28rem)]:w-28"></div>
+                        <div class="hidden flex-col gap-2 pb-0.5 [@container(min-width:28rem)]:flex">
                           <div class="h-9 w-10 animate-pulse rounded-[6px] bg-white/15"></div>
                           <div class="h-3 w-12 animate-pulse rounded-[6px] bg-white/15"></div>
                         </div>
                       </div>
-                      <div class="min-w-0 flex-1 space-y-2 sm:flex-none sm:px-1.5">
-                        <div class="qs-skel h-4 w-2/5 sm:h-5 sm:w-3/5"></div>
-                        <div class="qs-skel h-3 w-3/5 sm:w-2/5"></div>
-                        <div class="qs-skel hidden h-3 w-1/3 sm:block"></div>
+                      <div class="min-w-0 flex-1 space-y-2 [@container(min-width:28rem)]:flex-none [@container(min-width:28rem)]:px-1.5">
+                        <div class="qs-skel h-4 w-2/5 [@container(min-width:28rem)]:h-5 [@container(min-width:28rem)]:w-3/5"></div>
+                        <div class="qs-skel h-3 w-3/5 [@container(min-width:28rem)]:w-2/5"></div>
+                        <div class="qs-skel hidden h-3 w-1/3 [@container(min-width:28rem)]:block"></div>
                       </div>
                     </div>
-                    <div class="hidden min-h-11 border-t border-qs-line sm:block"></div>
+                    <div class="hidden min-h-11 border-t border-qs-line [@container(min-width:28rem)]:block"></div>
                   </article>
+                  </div>
                 }
               </div>
             } @else if (myGames().length === 0) {
@@ -353,9 +355,9 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
                       <h4 class="qs-eyebrow qs-eyebrow-bar">{{ group.label }}</h4>
                       <span class="qs-label text-qs-muted">{{ group.games.length }}</span>
                     </div>
-                    <div class="mt-3 grid grid-cols-1 items-start gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                    <div class="mt-3 grid grid-cols-1 items-start gap-3 sm:grid-cols-[repeat(auto-fill,minmax(19rem,1fr))]">
                       @for (game of group.games; track game.id) {
-                        <ng-container *ngTemplateOutlet="gameCard; context: { $implicit: game, joined: false }"></ng-container>
+                        <div class="min-w-0 [container-type:inline-size]"><ng-container *ngTemplateOutlet="gameCard; context: { $implicit: game, joined: false }"></ng-container></div>
                       }
                     </div>
                   </div>
@@ -372,9 +374,9 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
               <h3 id="joined-heading" class="qs-eyebrow qs-eyebrow-bar">{{ canCreateGame() ? '02' : '01' }} / Joined</h3>
               <span class="qs-label text-qs-muted">{{ joinedGames().length }} {{ joinedGames().length === 1 ? 'game' : 'games' }}</span>
             </div>
-            <div class="mt-5 grid grid-cols-1 items-start gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            <div class="mt-5 grid grid-cols-1 items-start gap-3 sm:grid-cols-[repeat(auto-fill,minmax(19rem,1fr))]">
               @for (game of joinedGames(); track game.id) {
-                <ng-container *ngTemplateOutlet="gameCard; context: { $implicit: game, joined: true }"></ng-container>
+                <div class="min-w-0 [container-type:inline-size]"><ng-container *ngTemplateOutlet="gameCard; context: { $implicit: game, joined: true }"></ng-container></div>
               }
             </div>
           </section>
@@ -495,31 +497,31 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
         <!-- Phone: a row (mini board, name, teams, open count). From sm up: the board on a navy panel with the open count beside it.
              Filling boards get a full-width Share invite bar; locked and full boards go quiet. -->
         <article animate.enter="qs-fade-rise" class="qs-card relative min-w-0 transition-[border-color] duration-150 ease-out has-[a:hover]:border-qs-ink has-[[aria-expanded=true]]:z-20">
-          <div class="relative flex items-center sm:block">
+          <div class="relative flex items-center [@container(min-width:28rem)]:block">
             <a
               [routerLink]="['/game', game.id]"
               [state]="{ boardSize: game.boardSize }"
-              class="flex min-h-[72px] min-w-0 flex-1 items-center gap-3 rounded-tl-card py-3 pl-3 pr-2 transition-colors duration-150 hover:bg-qs-panel-2 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-qs-accent sm:flex-col sm:items-stretch sm:gap-3.5 sm:rounded-tr-card sm:p-3 sm:pb-4"
-              [class]="hasCardBar(game, joined) ? '' : 'rounded-bl-card sm:rounded-br-card'"
+              class="flex min-h-[72px] min-w-0 flex-1 items-center gap-3 rounded-tl-card py-3 pl-3 pr-2 transition-colors duration-150 hover:bg-qs-panel-2 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-qs-accent [@container(min-width:28rem)]:flex-col [@container(min-width:28rem)]:items-stretch [@container(min-width:28rem)]:gap-3.5 [@container(min-width:28rem)]:rounded-tr-card [@container(min-width:28rem)]:p-3 [@container(min-width:28rem)]:pb-4"
+              [class]="hasCardBar(game, joined) ? '' : 'rounded-bl-card [@container(min-width:28rem)]:rounded-br-card'"
               [attr.aria-label]="'Open ' + game.name"
             >
-              <div class="flex shrink-0 flex-col items-center sm:min-h-[152px] sm:flex-row sm:items-end sm:gap-[18px] sm:rounded-inner sm:bg-qs-tile sm:p-[18px]">
-                <div [class]="'qs-mini grid w-14 shrink-0 gap-px rounded-[3px] p-px sm:w-28 ' + getMiniGridClass(game.boardSize)" aria-hidden="true">
+              <div class="flex shrink-0 flex-col items-center [@container(min-width:28rem)]:min-h-[152px] [@container(min-width:28rem)]:flex-row [@container(min-width:28rem)]:items-end [@container(min-width:28rem)]:gap-[18px] [@container(min-width:28rem)]:rounded-inner [@container(min-width:28rem)]:bg-qs-tile [@container(min-width:28rem)]:p-[18px]">
+                <div [class]="'qs-mini grid w-14 shrink-0 gap-px rounded-[3px] p-px [@container(min-width:28rem)]:w-28 ' + getMiniGridClass(game.boardSize)" aria-hidden="true">
                   @for (i of getBoardCells(game.boardSize); track i) {
                     <span class="aspect-square" [class]="miniCellClass(game, i)"></span>
                   }
                 </div>
                 <!-- Phone: the state sits centered under the mini board -->
-                <p class="qs-label mt-1.5 flex w-14 items-center justify-center gap-1 whitespace-nowrap text-xs tabular-nums sm:hidden" [class]="isBoardFilling(game) ? 'text-qs-accent' : 'text-qs-muted'">
+                <p class="qs-label mt-1.5 flex w-[4.25rem] items-center justify-center gap-1 whitespace-nowrap text-xs tabular-nums [@container(min-width:28rem)]:hidden" [class]="isBoardFilling(game) ? 'text-qs-accent' : 'text-qs-muted'">
                   @if (game.isLocked) {
-                    <span class="lock-icon is-locked" [class.lock-snap]="justLocked().has(game.id)" style="font-size: 12px" aria-hidden="true"><ng-icon name="heroLockClosed" class="lock-closed"></ng-icon><ng-icon name="heroLockOpen" class="lock-open"></ng-icon></span>Locked
+                    <span class="lock-icon is-locked shrink-0" [class.lock-snap]="justLocked().has(game.id)" style="font-size: 12px" aria-hidden="true"><ng-icon name="heroLockClosed" class="lock-closed"></ng-icon><ng-icon name="heroLockOpen" class="lock-open"></ng-icon></span>Locked
                   } @else if (!isBoardFilling(game)) {
                     Full
                   } @else {
                     {{ openCount(game) }} open
                   }
                 </p>
-                <div class="hidden min-w-0 flex-col gap-1.5 pb-0.5 sm:flex">
+                <div class="hidden min-w-0 flex-col gap-1.5 pb-0.5 [@container(min-width:28rem)]:flex">
                   @if (game.isLocked) {
                     <span class="qs-label inline-flex items-center gap-1.5 text-qs-tile-ink"><span class="lock-icon is-locked" [class.lock-snap]="justLocked().has(game.id)" style="font-size: 14px" aria-hidden="true"><ng-icon name="heroLockClosed" class="lock-closed"></ng-icon><ng-icon name="heroLockOpen" class="lock-open"></ng-icon></span>Locked</span>
                   } @else if (!isBoardFilling(game)) {
@@ -534,8 +536,8 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
                   }
                 </div>
               </div>
-              <div class="min-w-0 sm:px-1.5">
-                <h5 class="truncate text-base font-semibold leading-tight tracking-tight text-qs-ink sm:text-xl">{{ game.name }}</h5>
+              <div class="min-w-0 [@container(min-width:28rem)]:px-1.5">
+                <h5 class="truncate text-base font-semibold leading-tight tracking-tight text-qs-ink [@container(min-width:28rem)]:text-xl">{{ game.name }}</h5>
                 @if (cardTeams(game); as teams) {
                   <div class="mt-1.5 flex flex-col gap-1">
                     @for (team of teams; track $index) {
@@ -556,13 +558,13 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
                   <p class="mt-0.5 truncate text-sm text-qs-muted">Teams not set</p>
                 }
                 @if (!game.isLocked && !isBoardFilling(game) && autoLockText(game); as autoLock) {
-                  <p class="mt-1 truncate text-[13px] text-qs-muted sm:hidden">Auto-locks {{ autoLock }}</p>
+                  <p class="mt-1 truncate text-[13px] text-qs-muted [@container(min-width:28rem)]:hidden">Auto-locks {{ autoLock }}</p>
                 }
               </div>
             </a>
             <app-card-menu
-              class="shrink-0 pr-1 sm:absolute sm:right-[18px] sm:top-[18px] sm:pr-0"
-              triggerClass="sm:text-qs-tile-muted sm:hover:bg-white/10 sm:hover:text-qs-tile-ink sm:focus-visible:outline-qs-tile-ink"
+              class="shrink-0 pr-1 [@container(min-width:28rem)]:absolute [@container(min-width:28rem)]:right-[18px] [@container(min-width:28rem)]:top-[18px] [@container(min-width:28rem)]:pr-0"
+              triggerClass="[@container(min-width:28rem)]:text-qs-tile-muted [@container(min-width:28rem)]:hover:bg-white/10 [@container(min-width:28rem)]:hover:text-qs-tile-ink [@container(min-width:28rem)]:focus-visible:outline-qs-tile-ink"
               [items]="joined ? joinedMenu : hostMenu"
               [label]="'More actions for ' + game.name"
               (picked)="onCardMenu(game, $event)"></app-card-menu>
@@ -661,7 +663,7 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
     .qs-mini-open { background: color-mix(in srgb, var(--qs-accent) 38%, var(--qs-panel)); }
     .qs-mini-claimed, .qs-mini-taken { background: color-mix(in srgb, var(--qs-line-strong) 40%, var(--qs-panel)); }
     .qs-mini-blank { background: var(--qs-panel); }
-    @media (min-width: 640px) {
+    @container (min-width: 28rem) {
       .qs-mini { background: color-mix(in srgb, var(--qs-tile-ink) 10%, var(--qs-tile)); }
       .qs-mini-open { background: var(--qs-tile-open); }
       .qs-mini-claimed { background: color-mix(in srgb, var(--qs-tile-ink) 20%, var(--qs-tile)); }
