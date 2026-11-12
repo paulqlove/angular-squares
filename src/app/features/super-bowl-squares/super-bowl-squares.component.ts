@@ -58,6 +58,9 @@ import { BoxScoreComponent, ManualScores } from './components/box-score/box-scor
 import { HelpMenuComponent } from '../../components/ui/help-menu/help-menu.component';
 import { YourGamesMenuComponent } from '../../components/ui/your-games-menu/your-games-menu.component';
 import { recordRecentVisit } from '../../core/utils/recent-games';
+import { normalizeGameCode } from '../../core/utils/game-code';
+import { ResultsCardComponent } from './components/results-card/results-card.component';
+import { buildResults, ResultsSummary } from './utils/results';
 import { ProfileMenuComponent } from '../../components/ui/profile-menu/profile-menu.component';
 import { ShareDialogComponent } from '../../components/ui/share-dialog/share-dialog.component';
 import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.component';
@@ -66,6 +69,7 @@ import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.co
     selector: 'app-super-bowl-squares',
     imports: [
     FormsModule,
+    ResultsCardComponent,
     YourGamesMenuComponent,
     NgIconComponent,
     GameBoardComponent,
@@ -117,6 +121,8 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   boardSize: BoardSize = 100;
   homeTeam: string = '';
   awayTeam: string = '';
+  /** When the board was made: the results card's date for boards not linked to a live game. */
+  createdAt: number | null = null;
   selectedSquares: { [key: string]: string } = {};
   playerStats: { [key: string]: { squares: number, total: number } } = {};
   currentPrice: number = 10;
@@ -272,6 +278,8 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   skeletonFade = signal(false);
   skeletonSize = signal<BoardSize>(100);
   gameNotFound = signal(false);
+  private resultsKey = '';
+  private resultsValue: ResultsSummary | null = null;
   showShareModal = signal(false);
   showNameEditModal = signal(false);
   editingName = '';
@@ -398,8 +406,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     const exists = await this.gameService.gameExists(gameId);
     if (this.destroyed || this.gameId !== gameId) return;
     if (!exists) {
-      this.gameNotFound.set(true);
-      this.isLoading.set(false);
+      this.leaveMissingGame(gameId);
       return;
     }
     // Your Games lists boards opened on this device, which is the only list a guest has
@@ -422,6 +429,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
         if (data) {
           this.gameName = data.name || 'Football Squares';
+          this.createdAt = typeof data.createdAt === 'number' ? data.createdAt : null;
           this.gameOwnerId = data.ownerId || '';
           this.boardSize = data.boardSize || 100;
           try {
@@ -525,10 +533,25 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           this.checkAndPlayAnimation();
           if (switching && firstData) this.slideInBoard();
         } else {
-          this.gameNotFound.set(true);
+          this.leaveMissingGame(gameId);
         }
       });
     this.subscription.add(this.gameSub);
+  }
+
+  /**
+   * No game has this code (a mistyped link, or a board that was deleted). The page has no "not found" screen: it sends
+   * signed-out visitors to the landing page and signed-in ones to the dashboard, with the code in the join field and
+   * "Game not found" under it. The skeleton stays up meanwhile.
+   */
+  private async leaveMissingGame(gameId: string): Promise<void> {
+    this.gameNotFound.set(true);
+    this.isLoading.set(true);
+    if (!isPlatformBrowser(this.platformId)) return;
+    await this.authService.waitForAuthReady();
+    if (this.destroyed || this.gameId !== gameId) return;
+    const target = this.authService.isAuthenticated() ? '/dashboard' : '/';
+    this.router.navigate([target], { queryParams: { join: normalizeGameCode(gameId), missing: 1 }, replaceUrl: true });
   }
 
   ngOnDestroy(): void {
@@ -1290,6 +1313,24 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     });
   }
 
+  /** The results card's content. The same object comes back until something on it changes, so the card draws its share picture once. */
+  get results(): ResultsSummary {
+    const next = buildResults({
+      name: this.gameName,
+      awayTeam: this.awayTeam,
+      homeTeam: this.homeTeam,
+      date: this.linkedEspnGame()?.date ?? this.createdAt,
+      scores: this.scores,
+      winners: this.winners
+    });
+    const key = JSON.stringify(next);
+    if (key !== this.resultsKey) {
+      this.resultsKey = key;
+      this.resultsValue = next;
+    }
+    return this.resultsValue!;
+  }
+
   /** Same rule as Presentation mode: see isGameOver in core/utils/quarter-label.ts. */
   isGameOver(): boolean {
     return isGameOver({
@@ -1504,14 +1545,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
 
 
-
-  goBack(): void {
-    if (this.authService.isAuthenticated()) {
-      this.router.navigate(['/dashboard']);
-    } else {
-      this.router.navigate(['/']);
-    }
-  }
 
   async onAuthModalAuthenticated(): Promise<void> {
     this.showAuthModal.set(false);

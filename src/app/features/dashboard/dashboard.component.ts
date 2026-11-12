@@ -139,8 +139,11 @@ function readCardView(): CardView {
 
           <!-- From 640px up: one field that searches your boards or joins with a code, then New board. Phones get the bottom bar instead. -->
           <div class="hidden items-center gap-3 sm:flex sm:flex-row">
-            <div role="search" class="w-[400px] min-w-0" data-walkthrough="join-game">
+            <div role="search" class="relative w-[400px] min-w-0" data-walkthrough="join-game">
               <ng-container *ngTemplateOutlet="searchField; context: { $implicit: 'desk' }"></ng-container>
+              @if (showCodeError()) {
+                <p id="code-error-desk" class="qs-error-in absolute left-0 top-full mt-2 text-sm text-qs-bad" role="alert">Game not found</p>
+              }
             </div>
 
             @if (canCreateGame()) {
@@ -399,7 +402,12 @@ function readCardView(): CardView {
         [attr.aria-hidden]="barHidden() ? 'true' : null"
         [style.transform]="searchOpen() && keyboardLift() ? 'translateY(-' + keyboardLift() + 'px)' : null"
       >
-        <div role="toolbar" aria-label="Board actions" class="grid grid-cols-1 rounded-[12px] border border-qs-line bg-[color-mix(in_srgb,var(--qs-panel)_88%,transparent)] p-1.5 shadow-pop backdrop-blur-md">
+        <div role="toolbar" aria-label="Board actions" class="rounded-[12px] border border-qs-line bg-[color-mix(in_srgb,var(--qs-panel)_88%,transparent)] p-1.5 shadow-pop backdrop-blur-md">
+          <!-- The only place the code error sits above its field: under it would be off the bottom of the screen -->
+          @if (searchOpen() && showCodeError()) {
+            <p id="code-error-phone" class="qs-error-in px-2 pb-2 pt-1 text-sm text-qs-bad" role="alert">Game not found</p>
+          }
+          <div class="grid grid-cols-1">
           <div class="qs-swap col-start-1 row-start-1 flex items-stretch gap-1" [class.qs-swap-off]="searchOpen()" [class.qs-swap-left]="searchOpen()" [attr.aria-hidden]="searchOpen() ? 'true' : null">
             <button type="button" (click)="openSearch()" class="qs-search min-w-0 flex-1 text-left" data-walkthrough="join-game" aria-label="Search or enter a game code" [attr.tabindex]="searchOpen() ? -1 : null">
               <ng-icon name="heroMagnifyingGlass" class="qs-search-icon" aria-hidden="true"></ng-icon>
@@ -424,6 +432,7 @@ function readCardView(): CardView {
             <ng-container *ngTemplateOutlet="searchField; context: { $implicit: 'phone' }"></ng-container>
             <button type="button" (click)="closeSearch()" class="qs-btn qs-btn-secondary shrink-0" [attr.tabindex]="searchOpen() ? null : -1">Cancel</button>
           </div>
+          </div>
         </div>
       </div>
 
@@ -440,7 +449,9 @@ function readCardView(): CardView {
             spellcheck="false"
             [attr.data-search]="where"
             [value]="gameSearch()"
-            (input)="gameSearch.set($any($event.target).value)"
+            (input)="onSearchInput($any($event.target).value)"
+            [attr.aria-invalid]="showCodeError() ? 'true' : null"
+            [attr.aria-describedby]="showCodeError() ? 'code-error-' + where : null"
             (keydown.escape)="onSearchEscape(where)"
             (keydown.enter)="onSearchEnter($event)"
             [placeholder]="where === 'phone' ? 'Search or code' : 'Search or enter a game code'"
@@ -794,12 +805,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
   });
   /** Phone: the bottom bar shows the search field and Cancel in place of Join and New board. */
   searchOpen = signal(false);
+  /** "Game not found" shows for the code in the field after Enter, or after a broken game link, until the text changes. */
+  showCodeError = computed(() => {
+    const code = this.codeNotFound();
+    return !!code && code === this.codeCandidate();
+  });
   /** Phone: how far the keyboard covers the bottom of the screen, so the open search rides above it. */
   keyboardLift = signal(0);
   /** Hosted boards matching the search, newest first. */
   visibleMyGames = computed(() => {
     // A real game code joins that game, so it doesn't narrow your list
-    const query = this.codeMatch() ? '' : this.gameSearch().trim().toLowerCase();
+    // and a code with no game shows "Game not found" over the list as it is, not "No games match"
+    const query = this.codeMatch() || this.showCodeError() ? '' : this.gameSearch().trim().toLowerCase();
     return this.myGames()
       .filter(g => !query || [g.name, g.id, ...teamSearchTerms(g.awayTeam, g.homeTeam, g.espnSport, this.teamLogos.teams(g))].some(v => (v || '').toLowerCase().includes(query)))
       .sort((a, b) => b.createdAt - a.createdAt);
@@ -943,6 +960,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (this.isAdmin() && this.currentUser()?.email?.toLowerCase() === 'paulqlove@gmail.com') {
       this.loadGiftedPasses();
     }
+    // A broken game link: the game page sent them here with its code, to show "Game not found" in the search field
+    const params = this.route.snapshot.queryParamMap;
+    const missingCode = params.get('missing') ? gameCodeFrom(params.get('join') ?? '') : null;
+    if (missingCode) {
+      this.gameSearch.set(missingCode);
+      this.codeNotFound.set(missingCode);
+      if (typeof window !== 'undefined' && window.innerWidth < 640) this.searchOpen.set(true);
+      this.router.navigate([], { queryParams: {}, replaceUrl: true });
+    }
     // Check for create intent (query param or sessionStorage from team page)
     const createFromQuery = this.route.snapshot.queryParamMap.get('create') === 'true';
     const createFromStorage = typeof sessionStorage !== 'undefined' && sessionStorage.getItem('qs_create_after_auth') === 'true';
@@ -1014,11 +1040,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   clearSearch(where?: 'phone' | 'desk'): void {
     this.gameSearch.set('');
+    this.codeNotFound.set(null);
     if (where) this.searchInput(where)?.focus();
   }
 
   closeSearch(): void {
     this.gameSearch.set('');
+    this.codeNotFound.set(null);
     this.searchOpen.set(false);
     this.searchInput('phone')?.blur();
   }
@@ -1027,13 +1055,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
   async onSearchEnter(event: Event): Promise<void> {
     const code = this.codeCandidate();
     const found = !!code && (this.codeMatch() === code || await this.gameService.gameExists(code).catch(() => false));
-    if (found) this.joinGame(code);
-    else (event.target as HTMLInputElement).blur();
+    if (found) {
+      this.joinGame(code);
+      return;
+    }
+    if (code && code === this.codeCandidate()) this.codeNotFound.set(code);
+    (event.target as HTMLInputElement).blur();
+  }
+
+  onSearchInput(value: string): void {
+    this.gameSearch.set(value);
+    this.codeNotFound.set(null);
   }
 
   onSearchEscape(where: 'phone' | 'desk'): void {
     if (where === 'phone') this.closeSearch();
-    else this.gameSearch.set('');
+    else this.clearSearch();
   }
 
   openSearch(): void {
@@ -1589,6 +1626,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   /** The last code the server said is a real game. */
   private confirmedCode = signal<string | null>(null);
+  /** The code Enter, or a broken game link, found no game for. */
+  private codeNotFound = signal<string | null>(null);
 
   private searchInput(where: 'phone' | 'desk'): HTMLInputElement | null {
     return typeof document !== 'undefined' ? document.querySelector<HTMLInputElement>(`input[data-search="${where}"]`) : null;

@@ -32,7 +32,10 @@ export const guestGuard: CanActivateFn = (route) => {
   }
 
   const joinCode = normalizeGameCode(route.queryParamMap.get('join'));
-  if (joinCode) {
+  if (joinCode && route.queryParamMap.get('missing')) {
+    // The game page found no game with this code: the dashboard shows "Game not found" with the code in its search
+    router.navigate(['/dashboard'], { queryParams: { join: joinCode, missing: 1 }, replaceUrl: true });
+  } else if (joinCode) {
     router.navigate(['/game', joinCode]);
   } else {
     router.navigate(['/dashboard']);
