@@ -91,7 +91,7 @@ const BASE = 1000;
               @if (walkthroughService.shownStepIndex() > 0) {
                 <button (click)="previous()" class="qs-btn qs-btn-secondary">Back</button>
               }
-              <button (click)="next()" class="qs-btn qs-btn-primary">{{ isLastStep() ? 'Done' : 'Next' }}</button>
+              <button #nextBtn (click)="next()" class="qs-btn qs-btn-primary">{{ isLastStep() ? 'Done' : 'Next' }}</button>
             </div>
           </div>
         </div>
@@ -117,6 +117,14 @@ export class WalkthroughComponent {
       const observer = new ResizeObserver(() => this.cardHeight.set(el.offsetHeight));
       observer.observe(el);
       onCleanup(() => observer.disconnect());
+    });
+    // Next (Done on the last step) takes focus on every step, so Enter moves the tour on
+    effect(onCleanup => {
+      this.walkthroughService.shownStepIndex();
+      const button = this.nextRef()?.nativeElement;
+      if (!button) return;
+      const timer = setTimeout(() => button.focus({ preventScroll: true }));
+      onCleanup(() => clearTimeout(timer));
     });
   }
 
@@ -235,6 +243,7 @@ export class WalkthroughComponent {
   private cardHeight = signal(0);
   private cardRef = viewChild<ElementRef<HTMLElement>>('cardEl');
   private destroyRef = inject(DestroyRef);
+  private nextRef = viewChild<ElementRef<HTMLButtonElement>>('nextBtn');
 
   private measureViewport(): void {
     this.viewport.set({ w: window.innerWidth, h: window.innerHeight });
