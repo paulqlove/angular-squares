@@ -3,7 +3,7 @@ import { Component, OnDestroy, OnInit, signal, computed, inject, effect, ChangeD
 import { miniCellClass, miniGridCells, miniGridClass } from '../../core/utils/mini-grid';
 import { autoLockAt, groupBoards, isBoardFilling as boardIsFilling, isBoardFull, isReadyToLock } from '../../core/utils/board-groups';
 import { drawBoardNumbers } from '../../core/utils/draw-numbers';
-import { CardTeam, cardTeams } from '../../core/utils/card-teams';
+import { CardTeam, cardTeams, teamSearchTerms } from '../../core/utils/card-teams';
 import { TeamLogoService } from '../../core/services/team-logo.service';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -795,7 +795,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     // A real game code joins that game, so it doesn't narrow your list
     const query = this.codeMatch() ? '' : this.gameSearch().trim().toLowerCase();
     return this.myGames()
-      .filter(g => !query || [g.name, g.homeTeam, g.awayTeam, g.id].some(v => (v || '').toLowerCase().includes(query)))
+      .filter(g => !query || [g.name, g.id, ...teamSearchTerms(g.awayTeam, g.homeTeam, g.espnSport, this.teamLogos.teams(g))].some(v => (v || '').toLowerCase().includes(query)))
       .sort((a, b) => b.createdAt - a.createdAt);
   });
   /** Hosted boards grouped by what the host does next. Empty groups are left out. */
