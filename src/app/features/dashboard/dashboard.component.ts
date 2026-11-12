@@ -467,7 +467,7 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
                   }
                 </div>
                 <!-- Phone: the state sits centered under the mini board -->
-                <p class="qs-label mt-1.5 flex w-14 items-center justify-center gap-1 whitespace-nowrap text-[10.5px] tabular-nums sm:hidden" [class]="isBoardFilling(game) ? 'text-qs-accent' : 'text-qs-muted'">
+                <p class="qs-label mt-1.5 flex w-14 items-center justify-center gap-1 whitespace-nowrap text-xs tabular-nums sm:hidden" [class]="isBoardFilling(game) ? 'text-qs-accent' : 'text-qs-muted'">
                   @if (game.isLocked) {
                     <span class="lock-icon is-locked" [class.lock-snap]="justLocked().has(game.id)" style="font-size: 12px" aria-hidden="true"><ng-icon name="heroLockClosed" class="lock-closed"></ng-icon><ng-icon name="heroLockOpen" class="lock-open"></ng-icon></span>Locked
                   } @else if (!isBoardFilling(game)) {

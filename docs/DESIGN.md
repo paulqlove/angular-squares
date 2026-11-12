@@ -82,7 +82,7 @@ Dark mode is navy, not warm black, so it matches the TV view and the reversed lo
 | `--qs-panel-2` | `#263244` | |
 | `--qs-canvas` | `#0b1220`, dots `rgba(243,239,232,.12)` | |
 | `--qs-ink` | `#f3efe8` | |
-| `--qs-muted` | `#94a3b8` | 5.7:1 on panel |
+| `--qs-muted` | `#b4bfcc` | 7.9:1 on panel, 6.9:1 on panel-2. Brightened from `#94a3b8`: small mono labels and team names read faint at 5.7:1 |
 | `--qs-line` / `--qs-line-strong` | `#334155` / `#64748b` | input border 3.1:1 |
 | `--qs-accent` / `-hover` | `#34d399` / `#6ee7b7` | navy text on it 9.3:1; as text on panel 7.6:1 |
 | `--qs-accent-soft` | `#123b2c` | |
@@ -148,7 +148,7 @@ Fonts: **Space Grotesk** (400, 500, 600) for display and body. **JetBrains Mono*
 | H3 | Sans | 16 / 1.3 | 600 | |
 | Body | Sans | 16 / 1.5 | 400 | Inputs never below 16px (iOS zoom) |
 | Small | Sans | 13 / 1.4 | 400 | Legends, helper text, muted |
-| Label (eyebrow, counter, button, tab, badge) | Mono | 11.5 / 1 | 500 | Uppercase, letter spacing 0.09 to 0.14em |
+| Label (eyebrow, counter, button, tab, badge) | Mono | 13 / 1 (`.qs-label`); never under 11.5 | 500 | Uppercase, letter spacing 0.09 to 0.14em |
 | Score (tile) | Sans | 34 to 48 / 1.0 | 600 | -0.04em, `font-variant-numeric: tabular-nums` |
 | Board digits (axis) | Mono | 12 | 500 | Tabular. Floor 10px at 375px |
 | Square text | Sans | 11 | 600 | 2-letter initials under 640px, names at 640px and up |

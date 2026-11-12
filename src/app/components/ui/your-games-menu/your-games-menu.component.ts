@@ -117,10 +117,10 @@ const CLOSE_MS = 220;
               <span class="flex min-w-0 items-center gap-1.5">
                 <span class="truncate text-[15px] font-semibold tracking-[-0.015em]">{{ row.name }}</span>
                 @if (row.host) {
-                  <span class="shrink-0 rounded-[4px] border border-qs-line-strong px-1.5 py-[3px] font-mono text-[10.5px] font-medium uppercase leading-none tracking-[0.08em] text-qs-muted">Host</span>
+                  <span class="shrink-0 rounded-[4px] border border-qs-line-strong px-1.5 py-[3px] font-mono text-[11.5px] font-medium uppercase leading-none tracking-[0.08em] text-qs-muted">Host</span>
                 }
                 @if (row.id === currentGameId()) {
-                  <span class="shrink-0 rounded-[4px] border border-qs-ink px-1.5 py-[3px] font-mono text-[10.5px] font-medium uppercase leading-none tracking-[0.08em] text-qs-ink">Viewing</span>
+                  <span class="shrink-0 rounded-[4px] border border-qs-ink px-1.5 py-[3px] font-mono text-[11.5px] font-medium uppercase leading-none tracking-[0.08em] text-qs-ink">Viewing</span>
                 }
               </span>
               <span class="truncate text-[13px] text-qs-muted">{{ row.matchup }}</span>
@@ -132,11 +132,11 @@ const CLOSE_MS = 220;
                 }
                 @case ('ready') {
                   <span class="text-[13px] text-qs-muted">Ready to lock</span>
-                  <span class="font-mono text-[11.5px] uppercase tracking-[0.06em] text-qs-muted">Full</span>
+                  <span class="font-mono text-xs uppercase tracking-[0.06em] text-qs-muted">Full</span>
                 }
                 @default {
                   <span class="text-[13px] text-qs-muted">Filling</span>
-                  <span class="font-mono text-[11.5px] font-medium uppercase tracking-[0.06em] text-qs-accent">{{ row.openCount }} open</span>
+                  <span class="font-mono text-xs font-medium uppercase tracking-[0.06em] text-qs-accent">{{ row.openCount }} open</span>
                 }
               }
             </span>
