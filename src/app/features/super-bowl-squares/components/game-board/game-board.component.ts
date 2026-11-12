@@ -31,6 +31,8 @@ export class GameBoardComponent implements OnChanges, OnDestroy {
   /** The game is in progress: the leader square breathes for a while. */
   @Input() liveScore = false;
   @Input() winnerSquares: string[] = [];
+  /** Quarter tab text for each winning square, keyed by "row-col": "Q1", "FINAL", "Q1 Q3". Shown from 640px up. */
+  @Input() winnerQuarterLabels: Record<string, string> = {};
   @Input() isRandomized: boolean = false;
   @Input() boardSize: BoardSize = 100;
   /** True while the numbers are being drawn: each digit rises in, as on How to play (.qs-draw-digit). */
@@ -155,7 +157,8 @@ export class GameBoardComponent implements OnChanges, OnDestroy {
     const homeLabel = this.homeTeam || 'Home';
 
     if (player) {
-      const won = this.winnerSquares.includes(`${row}-${col}`) ? ', winning square' : '';
+      const quarters = this.winnerQuarterLabels[`${row}-${col}`];
+      const won = quarters ? `, won ${quarters}` : this.winnerSquares.includes(`${row}-${col}`) ? ', winning square' : '';
       return `Square ${awayLabel} ${awayNum ?? '?'}, ${homeLabel} ${homeNum ?? '?'}, taken by ${player}${won}`;
     }
     return `Square ${awayLabel} ${awayNum ?? '?'}, ${homeLabel} ${homeNum ?? '?'}, available`;

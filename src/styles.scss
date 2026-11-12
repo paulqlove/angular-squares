@@ -58,6 +58,7 @@ html, body {
   /* dark tiles on a light page (live score, winner tiles, TV frame) */
   --qs-tile: #0f172a; --qs-tile-ink: #f3efe8; --qs-tile-muted: #94a3b8;
   --qs-win: #34d399; --qs-win-ink: #0f172a; /* winning squares, both themes */
+  --qs-win-tab: #047857; --qs-win-tab-ink: #ffffff; /* quarter tab on a winning square (desktop); stays green in every season */
   --qs-bar-edge: transparent; /* team colour bars in the game picker; dark themes give them an edge so navy and black stay visible */
   --qs-tile-ok: #1f3d2e; --qs-tile-bad: #5c1f1a;
   --qs-tile-open: #2f9a70; --qs-tile-count: #6fd3a0; /* open squares and the open count on a dark tile (dashboard cards) */
@@ -94,6 +95,8 @@ html, body {
     --qs-live: #fbbf24; --qs-live-fill: #fbbf24;
     --qs-ok: #6fd3a0; --qs-ok-soft: #173a2a; --qs-warn: #f0bd6a; --qs-warn-soft: #3a2d12; --qs-bad: #ff9a90; --qs-bad-soft: #40201c;
     --qs-tile: #020617; --qs-tile-ink: #f3efe8;
+  --qs-win-tab: #34d399; --qs-win-tab-ink: #0f172a;
+    --qs-win-tab: #34d399; --qs-win-tab-ink: #0f172a;
     --qs-shadow: 0 10px 28px -22px rgba(0,0,0,.8);
     --qs-shadow-pop: 0 16px 40px -16px rgba(0,0,0,.85);
     --qs-tour-dim: rgba(2,6,23,.62); --qs-shadow-tour: 0 0 0 1px rgba(243,239,232,.06), 0 24px 56px -12px rgba(0,0,0,.9);
