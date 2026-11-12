@@ -112,7 +112,7 @@ function readCardView(): CardView {
         })
     ],
     template: `
-    <div class="min-h-screen bg-qs-bg" [class.qs-grid-view]="cardView() === 'grid'" [attr.inert]="showUpgradeDialog() ? '' : null">
+    <div class="min-h-screen bg-qs-bg" [class.qs-grid-view]="activeCardView() === 'grid'" [attr.inert]="showUpgradeDialog() ? '' : null">
       <!-- Header -->
       <app-shared-header variant="solid" appHeadroom>
 
@@ -391,10 +391,6 @@ function readCardView(): CardView {
               <h3 id="joined-heading" class="qs-eyebrow qs-eyebrow-bar">{{ canCreateGame() ? '02' : '01' }} / Joined</h3>
               <div class="flex items-center gap-4">
                 <span class="qs-label text-qs-muted">{{ joinedGames().length }} {{ joinedGames().length === 1 ? 'game' : 'games' }}</span>
-                <!-- Players with no Hosting list get the view toggle here instead -->
-                @if (!canCreateGame()) {
-                  <ng-container *ngTemplateOutlet="viewToggle"></ng-container>
-                }
               </div>
             </div>
             <div class="mt-5 grid grid-cols-1 items-start gap-3" data-card-grid [class]="cardGridClass()">
@@ -820,7 +816,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     { id: 'compact', label: 'Compact', icon: 'heroBars3' },
   ];
   /** Board columns: two or three tall cards in Grid; as many 19rem rows as fit in Compact. */
-  cardGridClass = computed(() => this.cardView() === 'grid' ? 'sm:grid-cols-2 xl:grid-cols-3' : 'sm:grid-cols-[repeat(auto-fill,minmax(19rem,1fr))]');
+  /** Grid / Compact is a hosting tool: players who don't host games always see Grid. */
+  activeCardView = computed<CardView>(() => this.canCreateGame() ? this.cardView() : 'grid');
+  cardGridClass = computed(() => this.activeCardView() === 'grid' ? 'sm:grid-cols-2 xl:grid-cols-3' : 'sm:grid-cols-[repeat(auto-fill,minmax(19rem,1fr))]');
   /** The search query. Only applies while search shows. */
   gameSearch = signal('');
   /** Search shows once a host has this many boards. Temporarily 1 so it can be tried on any dashboard; the plan is 6. */
