@@ -12,7 +12,7 @@ import { environment } from '../../../../environments/environment';
   template: `
     @if (adsEnabled) {
       <aside class="no-print" aria-label="Advertisement">
-        <p class="qs-label mb-1.5 text-[10px] text-qs-muted">Advertisement</p>
+        <p class="qs-label mb-1.5 text-[11.5px] text-qs-muted">Advertisement</p>
         <div class="flex min-h-[100px] items-center justify-center rounded-inner border border-dashed border-qs-line-strong bg-qs-panel-2 px-4 text-center text-sm text-qs-muted"></div>
       </aside>
     }
