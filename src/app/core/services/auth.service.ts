@@ -27,6 +27,8 @@ export interface GuestUser {
 const GUEST_COOKIE_KEY = 'squares_guest_user';
 
 const EMAIL_LINK_KEY = 'qs_email_link';
+/** Set while a real account is signed in on this browser, so content pages know to restore it (see restoreSession). */
+const SIGNED_IN_HINT_KEY = 'qs_signed_in';
 const SEND_LINK_URL = 'https://us-central1-squares-4e4f7.cloudfunctions.net/sendSignInLink';
 
 @Injectable({
@@ -141,6 +143,17 @@ export class AuthService {
     return this.ensureInitialized();
   }
 
+  /**
+   * Content pages (How to play, FAQ, team pages, blog) don't load Firebase for visitors. A browser that was signed in
+   * last time, or holds a guest cookie, loads it here, so a refresh shows the account (Dashboard, not Create a board)
+   * instead of looking signed out.
+   */
+  restoreSession(): void {
+    if (!this.isBrowser || this.initPromise) return;
+    if (!this.hasGuestCookie() && !this.readSignedInHint()) return;
+    this.ensureInitialized().catch(() => {});
+  }
+
   /** Guest cookie only. Does not load Firebase. */
   hasGuestCookie(): boolean {
     return this.getGuestFromCookie() !== null;
@@ -203,6 +216,7 @@ export class AuthService {
             isGuest: false
           });
           this.clearGuestCookie();
+          this.writeSignedInHint(true);
           void this.saveFirstTouch(user.uid, user.metadata.creationTime);
         } else if (!user && guest) {
           // Returning guest with cookie but no Firebase auth — sign in anonymously
@@ -216,6 +230,7 @@ export class AuthService {
         } else if (!user) {
           this._currentUser.set(null);
         }
+        if (!user) this.writeSignedInHint(false);
 
         finish();
       });
@@ -445,6 +460,23 @@ export class AuthService {
     const expires = new Date();
     expires.setDate(expires.getDate() + 30); // 30 days
     document.cookie = `${GUEST_COOKIE_KEY}=${encodeURIComponent(JSON.stringify(guestUser))}; expires=${expires.toUTCString()}; path=/; SameSite=Strict`;
+  }
+
+  private readSignedInHint(): boolean {
+    try {
+      return localStorage.getItem(SIGNED_IN_HINT_KEY) === '1';
+    } catch {
+      return false;
+    }
+  }
+
+  private writeSignedInHint(signedIn: boolean): void {
+    try {
+      if (signedIn) localStorage.setItem(SIGNED_IN_HINT_KEY, '1');
+      else localStorage.removeItem(SIGNED_IN_HINT_KEY);
+    } catch {
+      // localStorage not available
+    }
   }
 
   private getGuestFromCookie(): GuestUser | null {

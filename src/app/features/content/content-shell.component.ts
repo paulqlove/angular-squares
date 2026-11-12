@@ -109,6 +109,7 @@ export class ContentShellComponent {
   });
 
   constructor() {
+    this.auth.restoreSession();
     this.router.events.pipe(
       filter((event): event is NavigationEnd => event instanceof NavigationEnd)
     ).subscribe(() => this.menuOpen.set(false));
