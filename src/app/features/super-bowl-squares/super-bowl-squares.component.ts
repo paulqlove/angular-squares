@@ -1,4 +1,4 @@
-import { computed, Component, ElementRef, OnInit, OnDestroy, ViewChild, HostListener, signal, inject, effect, ChangeDetectionStrategy, PLATFORM_ID } from '@angular/core';
+import { computed, Component, ElementRef, OnInit, OnDestroy, ViewChild, HostListener, signal, inject, effect, ChangeDetectionStrategy, PLATFORM_ID, afterNextRender, Injector } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
 import { FormsModule } from '@angular/forms';
@@ -163,6 +163,9 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   selectedPlayer: string | null = null;
   highlightedSquare: string | null = null;
   hostNote = '';
+  /** Whether the host note's row is cut short, so More shows; and whether it is opened in full. */
+  hostNoteClamped = signal(false);
+  hostNoteOpen = signal(false);
   paidPlayers: Set<string> = new Set();
   activeTab: 'board' | 'probabilities' | 'boxscore' | 'more' = 'board';
 
@@ -183,6 +186,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   /** The side the next board slides in from after an arrow-key switch; cleared once it has. */
   private slideFrom: 'left' | 'right' | '' = '';
   @ViewChild('boardPage') private boardPage?: ElementRef<HTMLElement>;
+  @ViewChild('hostNoteEl') private hostNoteEl?: ElementRef<HTMLElement>;
 
   private gameboardWalkthroughSteps: WalkthroughStep[] = [
     {
@@ -317,6 +321,7 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
   // Number reveal animation state
   private platformId = inject(PLATFORM_ID);
+  private injector = inject(Injector);
   isAnimatingNumbers = signal(false);
   displayHomeNumbers = signal<(number | null)[]>([]);
   displayAwayNumbers = signal<(number | null)[]>([]);
@@ -442,7 +447,13 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
           }
           this.homeTeam = data.homeTeam || '';
           this.awayTeam = data.awayTeam || '';
-          this.hostNote = data.hostNote || '';
+          const note = data.hostNote || '';
+          if (note !== this.hostNote) {
+            // A new note, or another board's, starts on its one line
+            this.hostNote = note;
+            this.hostNoteOpen.set(false);
+            this.measureHostNote();
+          }
           this.quarterSplit = data.quarterSplit || null;
           this.quarterPayouts = splitFractions(data.quarterSplit);
           this.emptyQuarterRule = data.emptyQuarterRule || DEFAULT_EMPTY_QUARTER_RULE;
@@ -1274,7 +1285,11 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       this.quarterPayouts = splitFractions(split);
       this.homeTeam = homeTeam;
       this.awayTeam = awayTeam;
-      this.hostNote = hostNote;
+      if (hostNote !== this.hostNote) {
+        this.hostNote = hostNote;
+        this.hostNoteOpen.set(false);
+        this.measureHostNote();
+      }
       this.currentPrice = price;
       this.calculatePlayerStats();
       if (values.showInOpenBoards !== this.showInOpenBoards) {
@@ -1372,6 +1387,19 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     return Object.keys(this.selectedSquares).length;
   }
 
+  /** After the note renders, checks whether it runs past its one line. Opened, it keeps More's answer from before. */
+  private measureHostNote(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    afterNextRender({
+      read: () => {
+        const el = this.hostNoteEl?.nativeElement;
+        if (!el) return this.hostNoteClamped.set(false);
+        if (this.hostNoteOpen()) return;
+        this.hostNoteClamped.set(el.scrollHeight > el.clientHeight + 1);
+      }
+    }, { injector: this.injector });
+  }
+
   /** Tour steps; the host-only steps only for owner and co-host. */
   private walkthroughSteps(): WalkthroughStep[] {
     const host = this.isGameOwner() || this.isManager();
@@ -1388,6 +1416,15 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
     if (!dir || ids.length < 2 || index < 0) return;
     this.slideFrom = dir > 0 ? 'right' : 'left';
     this.router.navigate(['/game', ids[(index + dir + ids.length) % ids.length]]);
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    this.measureHostNote();
+  }
+
+  toggleHostNote(): void {
+    this.hostNoteOpen.update(open => !open);
   }
 
   @HostListener('document:click')
