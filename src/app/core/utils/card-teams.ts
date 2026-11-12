@@ -25,6 +25,27 @@ export function cardTeams(
   return [cardTeam(away, sport, looks?.away), cardTeam(home, sport, looks?.home)];
 }
 
+/**
+ * Every name a board's teams go by, for dashboard search: what the board saved (PHI),
+ * plus the NFL city and name (Philadelphia, Eagles) or the name ESPN gives other leagues.
+ */
+export function teamSearchTerms(
+  awayTeam: string | undefined,
+  homeTeam: string | undefined,
+  sport?: string,
+  looks?: { away: TeamLook; home: TeamLook }
+): string[] {
+  return [teamTerms(awayTeam, sport, looks?.away), teamTerms(homeTeam, sport, looks?.home)].flat();
+}
+
+function teamTerms(saved: string | undefined, sport?: string, look?: TeamLook): string[] {
+  const value = (saved || '').trim();
+  if (!value) return [];
+  const nfl = !sport || sport === 'nfl' ? getTeamByAbbreviation(value) : undefined;
+  if (nfl) return [value, `${nfl.city} ${nfl.name}`];
+  return look?.name ? [value, look.name] : [value];
+}
+
 function cardTeam(value: string, sport?: string, look?: TeamLook): CardTeam {
   const nfl = !sport || sport === 'nfl' ? getTeamByAbbreviation(value) : undefined;
   if (nfl) return { code: nfl.abbreviation, logo: getTeamLogo(nfl, 100), name: nfl.name };

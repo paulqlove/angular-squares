@@ -1,4 +1,4 @@
-import { cardTeams } from './card-teams';
+import { cardTeams, teamSearchTerms } from './card-teams';
 
 describe('cardTeams', () => {
   it('gives NFL teams a logo, code and name, away first', () => {
@@ -40,5 +40,26 @@ describe('cardTeams with ESPN looks', () => {
   it('falls back to the code alone while the look is unknown', () => {
     const none = { logo: null, name: null };
     expect(cardTeams('OSU', 'MICH', 'ncaaf', { away: none, home: none })![0]).toEqual({ code: 'OSU', logo: null, name: '' });
+  });
+});
+
+describe('teamSearchTerms', () => {
+  it('adds the city and name to NFL codes, so "Eagles" finds a PHI board', () => {
+    const terms = teamSearchTerms('PHI', 'DAL');
+    expect(terms).toEqual(['PHI', 'Philadelphia Eagles', 'DAL', 'Dallas Cowboys']);
+    expect(terms.some(t => t.toLowerCase().includes('eagles'))).toBe(true);
+  });
+
+  it('keeps what a custom board typed', () => {
+    expect(teamSearchTerms('Team Paul', 'Team Eric')).toEqual(['Team Paul', 'Team Eric']);
+  });
+
+  it('adds the name ESPN gives other leagues once it is known', () => {
+    const looks = { away: { logo: null, name: 'Buckeyes' }, home: { logo: null, name: null } };
+    expect(teamSearchTerms('OSU', 'MICH', 'ncaaf', looks)).toEqual(['OSU', 'Buckeyes', 'MICH']);
+  });
+
+  it('is empty when the teams are not set', () => {
+    expect(teamSearchTerms('', undefined)).toEqual([]);
   });
 });
