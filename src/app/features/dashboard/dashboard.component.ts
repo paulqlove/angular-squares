@@ -5,7 +5,6 @@ import { autoLockAt, groupBoards, isBoardFilling as boardIsFilling, isBoardFull,
 import { drawBoardNumbers } from '../../core/utils/draw-numbers';
 import { CardTeam, cardTeams } from '../../core/utils/card-teams';
 import { TeamLogoService } from '../../core/services/team-logo.service';
-import { DropdownComponent } from '../../components/ui/dropdown/dropdown.component';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NgTemplateOutlet } from '@angular/common';
@@ -53,11 +52,10 @@ import {
   heroSun,
   heroMoon,
   heroComputerDesktop,
-  heroChevronDown
+  heroChevronDown,
+  heroMagnifyingGlass
 } from '@ng-icons/heroicons/outline';
 
-type GameSort = 'newest' | 'oldest' | 'name' | 'players' | 'filled' | 'size';
-type GameStatusFilter = 'all' | 'open' | 'locked' | 'private' | 'public';
 
 /** The dashboard tour. On a phone, join and create live in the bottom bar, so those two steps say so. */
 export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): WalkthroughStep[] {
@@ -71,7 +69,7 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
 
 @Component({
     selector: 'app-dashboard',
-    imports: [ModalComponent, FormsModule, RouterLink, NgTemplateOutlet, DropdownComponent, CardMenuComponent, CreateGameFormComponent, NgIconComponent, AppHeaderComponent, HeadroomDirective, ProfileMenuComponent, ShareDialogComponent, EditGameDialogComponent, UpgradePassDialogComponent],
+    imports: [ModalComponent, FormsModule, RouterLink, NgTemplateOutlet, CardMenuComponent, CreateGameFormComponent, NgIconComponent, AppHeaderComponent, HeadroomDirective, ProfileMenuComponent, ShareDialogComponent, EditGameDialogComponent, UpgradePassDialogComponent],
     providers: [
         provideIcons({
             heroPlus,
@@ -95,7 +93,8 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
             heroSun,
             heroMoon,
             heroComputerDesktop,
-            heroChevronDown
+            heroChevronDown,
+            heroMagnifyingGlass
         })
     ],
     template: `
@@ -106,7 +105,7 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
         <app-profile-menu walkthroughTarget="profile-dropdown" (tour)="startWalkthrough()"></app-profile-menu>
       </app-shared-header>
 
-      <main class="mx-auto max-w-[1600px] px-4 sm:px-8 pt-6 pb-32 sm:pb-20 md:pt-8">
+      <main class="mx-auto max-w-[1600px] px-4 sm:px-8 pt-6 pb-32 md:pt-8 {{ showSearch() ? 'sm:pb-28' : 'sm:pb-20' }}">
         <!-- Heading + actions -->
         <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between" data-walkthrough="hero-section">
           <div>
@@ -302,24 +301,6 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
               }
             </div>
 
-            @if (!isLoadingGames() && myGames().length >= 6) {
-              <div class="mt-4 flex flex-wrap items-center gap-2">
-                <input type="search" [value]="gameSearch()" (input)="gameSearch.set($any($event.target).value)" placeholder="Search by name or team" aria-label="Search your boards" class="qs-input min-h-9 min-w-0 flex-1 basis-full py-0 sm:basis-48" />
-                <div class="hidden flex-wrap gap-1.5 sm:flex" role="group" aria-label="Filter boards">
-                  @for (f of statusFilters; track f.value) {
-                    <button type="button" class="qs-tab min-h-11 px-3" [attr.aria-pressed]="gameStatus() === f.value" (click)="gameStatus.set(f.value)">{{ f.label }}</button>
-                  }
-                </div>
-                <div class="grid basis-full grid-cols-2 gap-2 sm:hidden">
-                  <app-dropdown [fill]="true" [options]="statusFilters" [value]="gameStatus()" (valueChange)="gameStatus.set($any($event))" prefix="Show: " ariaLabel="Filter boards"></app-dropdown>
-                  <app-dropdown [fill]="true" [options]="sortOptions" [value]="gameSort()" (valueChange)="gameSort.set($any($event))" prefix="Sort: " ariaLabel="Sort boards"></app-dropdown>
-                </div>
-                <div class="ml-auto hidden items-center sm:flex">
-                  <app-dropdown [options]="sortOptions" [value]="gameSort()" (valueChange)="gameSort.set($any($event))" prefix="Sort: " ariaLabel="Sort boards"></app-dropdown>
-                </div>
-              </div>
-            }
-
             @if (isLoadingGames()) {
               <div class="qs-skel-delay mt-6 grid grid-cols-1 items-start gap-3 sm:grid-cols-2 xl:grid-cols-3" aria-busy="true">
                 @for (i of [0, 1, 2]; track i) {
@@ -360,9 +341,9 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
               </div>
             } @else {
               @if (visibleMyGames().length === 0) {
-                <div class="qs-card mt-5 p-8 text-center">
-                  <p class="text-qs-muted">No boards match.</p>
-                  <button type="button" class="qs-btn qs-btn-secondary mt-4" (click)="clearGameFilters()">Clear search and filters</button>
+                <div class="qs-card mt-5 p-8 text-center" role="status">
+                  <p class="text-qs-muted">No games match “{{ gameSearch().trim() }}”</p>
+                  <button type="button" class="qs-btn qs-btn-secondary mt-4" (click)="clearSearch()">Clear</button>
                 </div>
               } @else {
                 <!-- Grouped by what the host does next: lock it, keep sharing it, or nothing -->
@@ -400,28 +381,90 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
         }
       </main>
 
-      <!-- Phone: join and create in a bar along the bottom, like the game page's host tools -->
-      <div class="no-print fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-[90] sm:hidden">
-        <div role="toolbar" aria-label="Board actions" class="flex items-stretch gap-1.5 rounded-[12px] border border-qs-line bg-[color-mix(in_srgb,var(--qs-panel)_88%,transparent)] p-1.5 shadow-pop backdrop-blur-md">
-          <button type="button" (click)="showJoinSheet.set(true)" class="qs-btn qs-btn-secondary flex-1" data-walkthrough="join-game">
-            <ng-icon name="heroTicket" class="text-base" aria-hidden="true"></ng-icon>
-            Join with a code
-          </button>
-          @if (canCreateGame()) {
-            <button
-              type="button"
-              (click)="openCreateModal($event)"
-              [disabled]="isCheckingBoardLimit()"
-              [attr.aria-busy]="isCheckingBoardLimit()"
-              class="qs-btn qs-btn-ink flex-1 disabled:cursor-wait"
-              data-walkthrough="create-game"
-            >
-              <ng-icon name="heroPlus" class="text-base" aria-hidden="true"></ng-icon>
-              New board
+      <!-- Phone: join and create in a bar along the bottom, like the game page's host tools. With 6+ hosted
+           boards a search button sits first; it opens a field with Cancel in the same bar, lifted above the keyboard. -->
+      <div
+        class="qs-dock no-print fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-[90] sm:hidden"
+        [class.qs-dock-off]="barHidden()"
+        [attr.aria-hidden]="barHidden() ? 'true' : null"
+        [style.transform]="searchOpen() && keyboardLift() ? 'translateY(-' + keyboardLift() + 'px)' : null"
+      >
+        <div role="toolbar" aria-label="Board actions" class="grid grid-cols-1 rounded-[12px] border border-qs-line bg-[color-mix(in_srgb,var(--qs-panel)_88%,transparent)] p-1.5 shadow-pop backdrop-blur-md">
+          <div class="qs-swap col-start-1 row-start-1 flex items-stretch gap-1.5" [class.qs-swap-off]="searchOpen()" [class.qs-swap-left]="searchOpen()" [attr.aria-hidden]="searchOpen() ? 'true' : null">
+            @if (showSearch()) {
+              <button type="button" (click)="openSearch()" class="qs-btn qs-btn-secondary w-11 shrink-0 px-0" aria-label="Search games" [attr.tabindex]="searchOpen() ? -1 : null">
+                <ng-icon name="heroMagnifyingGlass" class="text-base" aria-hidden="true"></ng-icon>
+              </button>
+            }
+            <!-- With the search button in the row, Join's label shortens so New board keeps its full name -->
+            <button type="button" (click)="showJoinSheet.set(true)" class="qs-btn qs-btn-secondary min-w-0 flex-1" data-walkthrough="join-game" [attr.aria-label]="showSearch() ? 'Join with a code' : null" [attr.tabindex]="searchOpen() ? -1 : null">
+              <ng-icon name="heroTicket" class="text-base" aria-hidden="true"></ng-icon>
+              {{ showSearch() ? 'Join' : 'Join with a code' }}
             </button>
+            @if (canCreateGame()) {
+              <button
+                type="button"
+                (click)="openCreateModal($event)"
+                [disabled]="isCheckingBoardLimit()"
+                [attr.aria-busy]="isCheckingBoardLimit()"
+                [attr.tabindex]="searchOpen() ? -1 : null"
+                class="qs-btn qs-btn-ink min-w-0 flex-1 disabled:cursor-wait"
+                data-walkthrough="create-game"
+              >
+                <ng-icon name="heroPlus" class="text-base" aria-hidden="true"></ng-icon>
+                New board
+              </button>
+            }
+          </div>
+          @if (showSearch()) {
+            <div class="qs-swap col-start-1 row-start-1 flex items-stretch gap-1.5" [class.qs-swap-off]="!searchOpen()" [class.qs-swap-right]="!searchOpen()" [attr.aria-hidden]="searchOpen() ? null : 'true'" role="search">
+              <ng-container *ngTemplateOutlet="searchField; context: { $implicit: 'phone' }"></ng-container>
+              <button type="button" (click)="closeSearch()" class="qs-btn qs-btn-secondary shrink-0" [attr.tabindex]="searchOpen() ? null : -1">Cancel</button>
+            </div>
           }
         </div>
       </div>
+
+      <!-- From 640px up: with 6+ hosted boards, a search pill floats at the bottom center like the game page's host tools -->
+      @if (showSearch()) {
+        <div
+          class="qs-dock no-print fixed inset-x-3 bottom-4 z-[90] mx-auto hidden max-w-fit sm:block"
+          [class.qs-dock-off]="barHidden()"
+          [attr.aria-hidden]="barHidden() ? 'true' : null"
+          animate.enter="qs-dock-enter"
+          animate.leave="qs-dock-leave"
+        >
+          <div role="search" class="rounded-[12px] border border-qs-line bg-[color-mix(in_srgb,var(--qs-panel)_88%,transparent)] p-2 shadow-pop backdrop-blur-md">
+            <ng-container *ngTemplateOutlet="searchField; context: { $implicit: 'desk' }"></ng-container>
+          </div>
+        </div>
+      }
+
+      <ng-template #searchField let-where>
+        <div class="flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-btn border border-qs-line-strong bg-qs-panel pl-3 pr-1 focus-within:outline focus-within:outline-[3px] focus-within:outline-offset-2 focus-within:outline-qs-ink" [class.sm:w-80]="where === 'desk'">
+          <ng-icon name="heroMagnifyingGlass" class="shrink-0 text-base text-qs-muted" aria-hidden="true"></ng-icon>
+          <input
+            #searchInput
+            type="search"
+            enterkeyhint="search"
+            autocomplete="off"
+            [attr.data-search]="where"
+            [value]="gameSearch()"
+            (input)="gameSearch.set($any($event.target).value)"
+            (keydown.escape)="onSearchEscape(where)"
+            (keydown.enter)="$any($event.target).blur()"
+            placeholder="Search games"
+            aria-label="Search games"
+            [attr.tabindex]="where === 'phone' && !searchOpen() ? -1 : null"
+            class="qs-search-input min-w-0 flex-1 bg-transparent text-base text-qs-ink placeholder:text-qs-muted focus:outline-none"
+          />
+          @if (gameSearch()) {
+            <button type="button" (click)="clearSearch(where)" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-btn text-qs-muted hover:text-qs-ink" aria-label="Clear search" [attr.tabindex]="where === 'phone' && !searchOpen() ? -1 : null">
+              <ng-icon name="heroXMark" class="text-base" aria-hidden="true"></ng-icon>
+            </button>
+          }
+        </div>
+      </ng-template>
 
       <!-- Phone: the code field, in a sheet from the bottom bar -->
       <app-modal [open]="showJoinSheet()" labelledBy="join-sheet-title" size="sm" motion="slide" extraClass="pt-2" (dismissed)="showJoinSheet.set(false)">
@@ -640,6 +683,31 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private sanitizationService = inject(SanitizationService);
 
   constructor() {
+    // The phone keyboard covers fixed elements on iOS, so the open search lifts by the covered height
+    effect(onCleanup => {
+      const vv = typeof window !== 'undefined' ? window.visualViewport : null;
+      if (!this.searchOpen() || !vv) {
+        this.keyboardLift.set(0);
+        return;
+      }
+      const update = (): void => this.keyboardLift.set(Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop)));
+      update();
+      vv.addEventListener('resize', update);
+      vv.addEventListener('scroll', update);
+      onCleanup(() => {
+        vv.removeEventListener('resize', update);
+        vv.removeEventListener('scroll', update);
+      });
+    });
+    // Search goes away below six boards, so the phone bar can't stay stuck on an empty field
+    effect(() => {
+      if (!this.showSearch()) this.searchOpen.set(false);
+    });
+    // Toasts lift above the desktop search pill too
+    effect(() => {
+      const pill = this.showSearch() && !this.barHidden();
+      if (typeof document !== 'undefined') document.body.classList.toggle('has-host-bar', pill);
+    });
     // Lock body scroll when any modal is open
     effect(() => {
       const anyModalOpen = this.showCreateModal() || this.showEditModal() || this.showUpgradeDialog();
@@ -688,41 +756,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
   protected readonly Infinity = Infinity;
 
   myGames = signal<GameListItem[]>([]);
+  /** The search query. Only applies while search shows (6+ hosted boards). */
   gameSearch = signal('');
-  gameSort = signal<GameSort>('newest');
-  gameStatus = signal<GameStatusFilter>('all');
-  readonly sortOptions: { value: GameSort; label: string }[] = [
-    { value: 'newest', label: 'Newest first' },
-    { value: 'oldest', label: 'Oldest first' },
-    { value: 'name', label: 'Name A–Z' },
-    { value: 'players', label: 'Most players' },
-    { value: 'filled', label: 'Most full' },
-    { value: 'size', label: 'Board size' }
-  ];
-  readonly statusFilters: { value: GameStatusFilter; label: string }[] = [
-    { value: 'all', label: 'All' },
-    { value: 'open', label: 'Open' },
-    { value: 'locked', label: 'Locked' },
-    { value: 'private', label: 'Private' },
-    { value: 'public', label: 'Public' }
-  ];
-  /** Hosted boards after the search, status filter and sort. */
+  /** Search shows once a host has six or more boards. */
+  showSearch = computed(() => !this.isLoadingGames() && this.myGames().length >= 6);
+  /** Phone: the bottom bar shows the search field and Cancel in place of Join and New board. */
+  searchOpen = signal(false);
+  /** Phone: how far the keyboard covers the bottom of the screen, so the open search rides above it. */
+  keyboardLift = signal(0);
+  /** Hosted boards matching the search, newest first. */
   visibleMyGames = computed(() => {
-    const query = this.gameSearch().trim().toLowerCase();
-    const status = this.gameStatus();
-    const fill = (g: GameListItem): number => g.squaresFilled / (g.boardSize || 100);
-    const sorts: Record<GameSort, (a: GameListItem, b: GameListItem) => number> = {
-      newest: (a, b) => b.createdAt - a.createdAt,
-      oldest: (a, b) => a.createdAt - b.createdAt,
-      name: (a, b) => a.name.localeCompare(b.name),
-      players: (a, b) => b.playerCount - a.playerCount,
-      filled: (a, b) => fill(b) - fill(a),
-      size: (a, b) => (b.boardSize || 100) - (a.boardSize || 100)
-    };
+    const query = this.showSearch() ? this.gameSearch().trim().toLowerCase() : '';
     return this.myGames()
-      .filter(g => status === 'all' || (status === 'public' ? !!g.showInOpenBoards : status === 'private' ? !g.showInOpenBoards : (status === 'locked') === g.isLocked))
       .filter(g => !query || [g.name, g.homeTeam, g.awayTeam, g.id].some(v => (v || '').toLowerCase().includes(query)))
-      .sort(sorts[this.gameSort()]);
+      .sort((a, b) => b.createdAt - a.createdAt);
   });
   /** Hosted boards grouped by what the host does next. Empty groups are left out. */
   boardGroups = computed(() => groupBoards(this.visibleMyGames()));
@@ -847,9 +894,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   joinGameCode = '';
   /** Phone: the Join with a code sheet opened from the bottom bar. */
   showJoinSheet = signal(false);
+  /** The bottom bar and the search pill step out of the way while a sheet or dialog is open. */
+  barHidden = computed(() => this.showJoinSheet() || this.showCreateModal() || this.showEditModal() || this.showUpgradeDialog() || !!this.shareModalGameId());
 
   ngOnDestroy(): void {
-    if (typeof document !== 'undefined') document.body.classList.remove('has-phone-bar');
+    if (typeof document !== 'undefined') document.body.classList.remove('has-phone-bar', 'has-host-bar');
   }
 
   ngOnInit(): void {
@@ -920,13 +969,32 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   startWalkthrough(): void {
+    // The tour points at Join and New board, which the open search covers on a phone
+    if (this.searchOpen()) this.closeSearch();
     this.walkthroughService.resetCompletion('dashboard');
     this.walkthroughService.start('dashboard', dashboardTourSteps(this.dashboardWalkthroughSteps, window.innerWidth < 640));
   }
 
-  clearGameFilters(): void {
+  clearSearch(where?: 'phone' | 'desk'): void {
     this.gameSearch.set('');
-    this.gameStatus.set('all');
+    if (where) this.searchInput(where)?.focus();
+  }
+
+  closeSearch(): void {
+    this.gameSearch.set('');
+    this.searchOpen.set(false);
+    this.searchInput('phone')?.blur();
+  }
+
+  onSearchEscape(where: 'phone' | 'desk'): void {
+    if (where === 'phone') this.closeSearch();
+    else this.gameSearch.set('');
+  }
+
+  openSearch(): void {
+    this.searchOpen.set(true);
+    // Focus inside the tap itself so iOS raises the keyboard; the field is already in the bar, only faded out
+    this.searchInput('phone')?.focus({ preventScroll: true });
   }
 
   async loadMyGames(): Promise<void> {
@@ -1463,5 +1531,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   isPassExpired(expiresAt: number): boolean {
     return expiresAt <= Date.now();
+  }
+
+  private searchInput(where: 'phone' | 'desk'): HTMLInputElement | null {
+    return typeof document !== 'undefined' ? document.querySelector<HTMLInputElement>(`input[data-search="${where}"]`) : null;
   }
 }
