@@ -755,6 +755,11 @@ button:active:not(:disabled) .turn-icon { transform: rotate(120deg); transition-
   -webkit-print-color-adjust: exact;
 }
 
+/* On a phone the team sheet shrinks to fit the screen instead of scrolling sideways. */
+@media screen and (max-width: 639.98px) {
+  .team-sheet .sheet-grid { zoom: 0.5; }
+}
+
 @media print {
   html.print-team-sheet body *:not(:has(.team-sheet)):not(.team-sheet):not(.team-sheet *) {
     display: none !important;
@@ -764,6 +769,17 @@ button:active:not(:disabled) .turn-icon { transform: rotate(120deg); transition-
     border: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
+    box-shadow: none !important;
+    max-width: none !important;
+  }
+
+  /* The page around the sheet (the dotted stage, section rules and spacing) prints as nothing. */
+  html.print-team-sheet body *:has(.team-sheet) {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
   }
 
   html.print-team-sheet .team-sheet .overflow-x-auto {

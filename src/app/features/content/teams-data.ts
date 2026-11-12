@@ -102,3 +102,19 @@ export function getTeamsByConference(conference: 'AFC' | 'NFC'): NflTeam[] {
 export function getTeamsByDivision(conference: 'AFC' | 'NFC', division: 'North' | 'South' | 'East' | 'West'): NflTeam[] {
   return NFL_TEAMS.filter(t => t.conference === conference && t.division === division);
 }
+
+/** A team badge's colors: the team color with white or near-black letters, whichever reads better. A few mid blues and
+ * teals miss 4.5:1 with both, so those get the team color a shade darker, just enough for white letters to read. */
+export function teamBadge(hex: string): { background: string; ink: string } {
+  const rgb = [0, 2, 4].map(i => parseInt(hex.replace('#', '').slice(i, i + 2), 16));
+  const lum = (c: number[]) => {
+    const [r, g, b] = c.map(v => v / 255).map(v => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const onWhite = (c: number[]) => 1.05 / (lum(c) + 0.05);
+  const onInk = (lum(rgb) + 0.05) / 0.0636;
+  if (onInk >= 4.5 && onInk > onWhite(rgb)) return { background: hex, ink: '#0f172a' };
+  let shade = rgb;
+  for (let k = 0.95; onWhite(shade) < 4.5 && k > 0.5; k -= 0.05) shade = rgb.map(v => Math.round(v * k));
+  return { background: `#${shade.map(v => v.toString(16).padStart(2, '0')).join('')}`, ink: '#ffffff' };
+}

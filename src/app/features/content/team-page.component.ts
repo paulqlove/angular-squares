@@ -5,7 +5,11 @@ import { AuthService } from '../../core/services/auth.service';
 import { BreadcrumbsComponent } from '../../shared/breadcrumbs.component';
 import { ContentShellComponent } from './content-shell.component';
 import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.component';
-import { NflTeam, getTeamBySlug, NFL_TEAMS } from './teams-data';
+import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import { heroPrinter } from '@ng-icons/heroicons/outline';
+import { NflTeam, getTeamBySlug, NFL_TEAMS, teamBadge } from './teams-data';
+import { ReadingEndComponent, ReadingSectionComponent } from './reading-layout.components';
+import { PageCta, RelatedLink } from './marketing-pages';
 import { TeamHelmetComponent } from '../../shared/team-helmet.component';
 import { EspnService, EspnGame } from '../../core/services/espn.service';
 import { SCHEDULE } from './schedule.generated';
@@ -13,204 +17,147 @@ import { ScheduledGame, formatKickoff } from './schedule.model';
 
 @Component({
   selector: 'app-team-page',
-  imports: [RouterLink, ContentShellComponent, BreadcrumbsComponent, AuthModalComponent, TeamHelmetComponent],
+  imports: [RouterLink, ContentShellComponent, BreadcrumbsComponent, AuthModalComponent, TeamHelmetComponent, NgIconComponent, ReadingSectionComponent, ReadingEndComponent],
+  providers: [provideIcons({ heroPrinter })],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-content-shell>
+      <div class="mx-auto max-w-[64rem]">
       <app-breadcrumbs [items]="breadcrumbs"></app-breadcrumbs>
 
-      @if (team) {
+      @if (team; as team) {
         <article>
-          <!-- Team Header -->
-          <header
-            class="relative -mx-4 -mt-4 mb-8 overflow-hidden px-6 py-10 sm:-mx-8 sm:rounded-2xl"
-            [style.background]="'linear-gradient(135deg, ' + team.primaryColor + ' 0%, ' + team.secondaryColor + ' 100%)'"
-          >
-            <div class="relative z-10 flex items-center gap-6 ps-6">
-              <app-team-helmet [color]="team.primaryColor" [initials]="team.abbreviation" [size]="104" />
-              <div>
-                <p class="text-sm font-medium uppercase tracking-wider" [style.color]="getContrastColor(team.primaryColor)">
-                  {{ team.conference }} {{ team.division }}
-                </p>
-                <h1 class="mt-1 text-3xl font-bold sm:text-5xl" [style.color]="getContrastColor(team.primaryColor)">
-                  {{ team.city }} {{ team.name }}
-                </h1>
-                <p class="mt-2 text-base opacity-90 sm:text-lg" [style.color]="getContrastColor(team.primaryColor)">
-                  Football squares for {{ team.name }} fans
-                </p>
+          <!-- One plain header. The team color shows only in the badge and on the printable board. -->
+          <header class="grid gap-12 lg:grid-cols-[minmax(0,1fr)_25rem] lg:items-start lg:gap-16">
+            <div>
+              <p class="flex items-center gap-3">
+                <span class="flex h-7 min-w-7 items-center justify-center rounded-md px-1 font-mono text-[0.625rem] font-bold"
+                      [style.background]="badge(team.primaryColor).background" [style.color]="badge(team.primaryColor).ink">{{ team.abbreviation }}</span>
+                <span class="qs-eyebrow">{{ team.conference }} {{ team.division }}</span>
+              </p>
+              <h1 class="qs-title mt-5 text-balance text-[clamp(2.5rem,5.6vw,4.25rem)] leading-[1.02] tracking-[-0.04em]">{{ team.city }} {{ team.name }} squares</h1>
+              <p class="mt-6 max-w-[34rem] text-xl leading-[1.5] text-qs-muted">
+                Run a free squares board for any {{ team.name }} game. Share the link and watch it fill up.
+              </p>
+              <div class="mt-8 flex flex-wrap gap-3">
+                <button type="button" (click)="createBoard()" class="qs-btn qs-btn-primary">Create a board</button>
+                <a routerLink="/how-to-play" class="qs-btn qs-btn-secondary">How to play</a>
               </div>
             </div>
+
+            @if (games().length > 0) {
+              <section class="rounded-card border border-qs-line bg-qs-panel shadow-pop lg:mt-2" aria-labelledby="games-heading">
+                <div class="flex items-baseline justify-between px-5 pb-1 pt-4">
+                  <h2 id="games-heading" class="qs-label text-qs-muted">Upcoming games</h2>
+                  <span class="qs-label text-qs-muted">{{ games().length }}</span>
+                </div>
+                <ul>
+                  @for (game of games(); track game.id) {
+                    <li class="flex items-center gap-3 border-b border-qs-line px-5 py-3">
+                      <div class="min-w-0 flex-1">
+                        <p class="font-mono text-sm font-semibold tracking-wide text-qs-ink">{{ abbr(game.awayTeam) }} &#64; {{ abbr(game.homeTeam) }}</p>
+                        <p class="mt-0.5 text-sm text-qs-muted">{{ formatDate(game.date) }}</p>
+                      </div>
+                      <button type="button" (click)="printSheet(game)" class="qs-btn qs-btn-ghost w-11 shrink-0 px-0 text-qs-muted hover:text-qs-ink"
+                              [attr.aria-label]="'Print the ' + abbr(game.awayTeam) + ' at ' + abbr(game.homeTeam) + ' board'">
+                        <ng-icon name="heroPrinter" class="text-lg" aria-hidden="true"></ng-icon>
+                      </button>
+                      <button type="button" (click)="createForGame(game)" class="qs-btn qs-btn-secondary shrink-0"
+                              [attr.aria-label]="'Create a board for ' + abbr(game.awayTeam) + ' at ' + abbr(game.homeTeam)">Create</button>
+                    </li>
+                  }
+                </ul>
+                  <p class="px-5 py-3 text-sm text-qs-muted">Share the link before kickoff.</p>
+              </section>
+            }
           </header>
 
-          <!-- CTA -->
-          <section class="rounded-2xl border border-qs-line bg-qs-panel p-6 sm:p-8">
-            <h2 class="text-2xl font-bold text-qs-ink">Create a squares board for any {{ team.name }} game</h2>
-            <p class="mt-2 text-qs-ink">
-              Set up a football squares game for the next {{ team.city }} {{ team.name }} game.
-              Share the link with friends and watch the board fill up.
-            </p>
-            <div class="mt-6 flex flex-wrap gap-3">
-              <button
-                type="button"
-                (click)="createBoard()"
-                class="inline-flex min-h-11 items-center justify-center rounded-md px-6 font-semibold"
-                [style.background]="team.primaryColor"
-                [style.color]="getContrastColor(team.primaryColor)"
-              >
-                Create a board
-              </button>
-              <a routerLink="/how-to-play" class="qs-btn qs-btn-secondary">
-                How to play
-              </a>
-            </div>
-          </section>
-
-          <!-- Upcoming Games -->
-          @if (loading() || games().length > 0) {
-          <section class="mt-10">
-            <h2 class="text-2xl font-bold text-qs-ink">Upcoming {{ team.name }} games</h2>
-            <p class="mt-2 text-qs-muted">
-              Pick any game to run a squares board. Share the link before kickoff.
-            </p>
-
-            @if (loading()) {
-              <div class="mt-6 animate-pulse space-y-3">
-                @for (i of [1,2,3]; track i) {
-                  <div class="h-16 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
-                }
-              </div>
-            } @else if (games().length > 0) {
-              <div class="mt-6 space-y-3">
-                @for (game of games(); track game.id) {
-                  <div class="flex items-center justify-between gap-4 rounded-xl border border-qs-line bg-qs-panel p-4">
-                    <div>
-                      <p class="font-semibold text-qs-ink">
-                        {{ game.awayTeam }} @ {{ game.homeTeam }}
-                      </p>
-                      <p class="text-sm text-qs-muted">{{ formatDate(game.date) }}</p>
-                    </div>
-                    <div class="flex shrink-0 flex-wrap justify-end gap-2">
-                      <button type="button" (click)="printSheet(game)" class="qs-btn qs-btn-secondary">
-                        Print board
-                      </button>
-                      <button type="button" (click)="createForGame(game)" class="qs-btn qs-btn-primary">
-                        Create a board
-                      </button>
-                    </div>
-                  </div>
-                }
-              </div>
-            }
-          </section>
-          }
-
           <!-- Team-themed printable board -->
-          <section class="mt-10" aria-labelledby="sheet-heading">
-            <h2 id="sheet-heading" class="text-2xl font-bold text-qs-ink">{{ team.name }} squares board</h2>
-            <p class="mt-2 text-qs-muted">
-              Print it for the wall, or choose "Save as PDF" in the print window. Write names first, then draw the digits.
-            </p>
-            <div class="team-sheet mt-4 rounded-[10px] border border-qs-line bg-white p-4 text-slate-900 sm:p-6">
-              <div class="flex items-center justify-between gap-3">
-                <img src="assets/brand/lockup-horizontal.svg" alt="QuarterScore" width="192" height="24" class="h-6 w-auto">
-                <span class="text-xs text-slate-600">{{ sheet().date }}</span>
-              </div>
-              <p class="mt-3 text-lg font-bold">{{ sheet().away.label }} at {{ sheet().home.label }}</p>
-              <div class="mt-3 overflow-x-auto">
-                <div class="sheet-grid grid min-w-[560px]" style="grid-template-columns: 84px 40px repeat(10, minmax(0, 1fr));">
-                  <div class="flex h-[84px] items-center justify-center gap-4 rounded-t-md text-2xl font-bold uppercase tracking-wide"
-                       style="grid-column: 1 / -1; padding-left: 124px;" [style.background]="sheet().home.bg" [style.color]="sheet().home.fg">
-                    @if (sheet().home.abbr; as abbr) {
-                      <app-team-helmet [color]="sheet().home.bg" [initials]="abbr" [size]="72" />
-                    }
-                    {{ sheet().home.label }}
+          <app-reading-section [heading]="team.name + ' squares board'" headingId="sheet-heading">
+            <p>Print it for the wall, or save it as a PDF. Write names first, then draw the digits.</p>
+            <div wide class="lg:col-span-2">
+              <div class="team-sheet-stage qs-canvas rounded-card border border-qs-line p-3 sm:p-10">
+                <div class="team-sheet mx-auto max-w-[44rem] rounded-card border border-qs-line bg-white p-4 text-slate-900 shadow-pop sm:p-6">
+                  <div class="flex items-center justify-between gap-3">
+                    <img src="assets/brand/lockup-horizontal.svg" alt="QuarterScore" width="192" height="24" class="h-6 w-auto">
+                    <span class="font-mono text-xs text-slate-600">{{ sheet().date }}</span>
                   </div>
-                  <div class="flex flex-col items-center justify-center rounded-bl-md text-2xl font-bold uppercase tracking-wide"
-                       style="grid-row: 2 / span 11;"
-                       [style.background]="sheet().away.bg" [style.color]="sheet().away.fg">
-                    <div class="flex items-center gap-4 whitespace-nowrap" style="transform: rotate(-90deg);">
-                      @if (sheet().away.abbr; as abbr) {
-                        <app-team-helmet [color]="sheet().away.bg" [initials]="abbr" [size]="72" />
+                  <p class="mt-3 text-lg font-bold">{{ sheet().away.label }} at {{ sheet().home.label }}</p>
+                  <div class="mt-3 overflow-x-auto">
+                    <div class="sheet-grid grid min-w-[560px]" style="grid-template-columns: 84px 40px repeat(10, minmax(0, 1fr));">
+                      <div class="flex h-[84px] items-center justify-center gap-4 rounded-t-md text-2xl font-bold uppercase tracking-wide"
+                           style="grid-column: 1 / -1; padding-left: 124px;" [style.background]="sheet().home.bg" [style.color]="sheet().home.fg">
+                        @if (sheet().home.abbr; as abbr) {
+                          <app-team-helmet [color]="sheet().home.bg" [initials]="abbr" [size]="72" />
+                        }
+                        {{ sheet().home.label }}
+                      </div>
+                      <div class="flex flex-col items-center justify-center rounded-bl-md text-2xl font-bold uppercase tracking-wide"
+                           style="grid-row: 2 / span 11;"
+                           [style.background]="sheet().away.bg" [style.color]="sheet().away.fg">
+                        <div class="flex items-center gap-4 whitespace-nowrap" style="transform: rotate(-90deg);">
+                          @if (sheet().away.abbr; as abbr) {
+                            <app-team-helmet [color]="sheet().away.bg" [initials]="abbr" [size]="72" />
+                          }
+                          {{ sheet().away.label }}
+                        </div>
+                      </div>
+                      <div class="h-10 border border-slate-900 bg-slate-100"></div>
+                      @for (c of digits; track c) {
+                        <div class="h-10 border border-slate-900" [style.background]="sheet().home.tint" aria-hidden="true"></div>
                       }
-                      {{ sheet().away.label }}
+                      @for (r of digits; track r) {
+                        <div class="h-12 border border-slate-900" [style.background]="sheet().away.tint" aria-hidden="true"></div>
+                        @for (c of digits; track c) {
+                          <div class="h-12 border border-slate-900" aria-hidden="true"></div>
+                        }
+                      }
                     </div>
                   </div>
-                  <div class="h-10 border border-slate-900 bg-slate-100"></div>
-                  @for (c of digits; track c) {
-                    <div class="h-10 border border-slate-900" [style.background]="sheet().home.tint" aria-hidden="true"></div>
-                  }
-                  @for (r of digits; track r) {
-                    <div class="h-12 border border-slate-900" [style.background]="sheet().away.tint" aria-hidden="true"></div>
-                    @for (c of digits; track c) {
-                      <div class="h-12 border border-slate-900" aria-hidden="true"></div>
-                    }
-                  }
+                  <p class="mt-3 text-xs text-slate-600">
+                    Columns are the {{ sheet().home.label }} score's last digit, rows are the {{ sheet().away.label }}'s.
+                    Run this board live at quarterscore.com.
+                  </p>
                 </div>
               </div>
-              <p class="mt-3 text-xs text-slate-600">
-                Columns are the {{ sheet().home.label }} score's last digit, rows are the {{ sheet().away.label }}'s.
-                Run this board live at quarterscore.com.
-              </p>
+              <button type="button" (click)="printSheet()" class="qs-btn qs-btn-secondary mt-6">
+                <ng-icon name="heroPrinter" class="text-base" aria-hidden="true"></ng-icon>
+                Print this board
+              </button>
             </div>
-            <button type="button" (click)="printSheet()" class="qs-btn qs-btn-primary mt-4">
-              Print this board
-            </button>
-          </section>
+          </app-reading-section>
 
-          <!-- How It Works -->
-          <section class="mt-10">
-            <h2 class="text-2xl font-bold text-qs-ink">How {{ team.name }} squares work</h2>
-            <div class="mt-4 space-y-4 text-qs-ink">
-              <p>
-                Football squares is a simple game that makes every {{ team.name }} game more exciting.
-                You don't need to know football - just claim a square and watch the score.
-              </p>
-              <ol class="list-decimal space-y-2 pl-5">
-                <li>The host creates a 10x10 board (100 squares total)</li>
-                <li>Friends claim squares by typing their name</li>
-                <li>Numbers 0-9 are randomly assigned to each row and column</li>
-                <li>At the end of each quarter, the last digit of each team's score determines the winning square</li>
-              </ol>
-              <p>
-                For example, if the {{ team.name }} are winning 17-14 at halftime, the square at row 7, column 4 wins Q2.
-              </p>
-            </div>
-            <a routerLink="/how-to-play" class="mt-4 inline-flex items-center font-medium text-qs-accent underline underline-offset-2">
-              Read the full rules
-            </a>
-          </section>
-
-          <!-- Other Teams -->
-          <section class="mt-10">
-            <h2 class="text-2xl font-bold text-qs-ink">Other {{ team.conference }} {{ team.division }} teams</h2>
-            <div class="mt-4 grid gap-3 sm:grid-cols-3">
-              @for (rival of divisionRivals; track rival.slug) {
-                <a
-                  [routerLink]="'/team/' + rival.slug"
-                  class="flex items-center gap-3 rounded-xl border border-qs-line bg-qs-panel p-3 hover:bg-qs-panel-2"
-                >
-                  <span
-                    class="flex h-10 w-10 items-center justify-center rounded-lg text-xs font-bold"
-                    [style.background]="rival.primaryColor"
-                    [style.color]="getContrastColor(rival.primaryColor)"
-                  >
-                    {{ rival.abbreviation }}
-                  </span>
-                  <span class="font-medium text-qs-ink">{{ rival.city }} {{ rival.name }}</span>
-                </a>
+          <!-- The rules, as four steps -->
+          <app-reading-section [heading]="'How ' + team.name + ' squares work'">
+            <p>Claim a square and watch the score. You don't need to know football.</p>
+            <ol wide class="grid gap-y-8 border-y border-qs-line py-6 sm:grid-cols-2 lg:col-span-2 lg:grid-cols-4 lg:gap-y-0">
+              @for (step of steps(); track step.name; let index = $index) {
+                <li class="lg:border-l lg:border-qs-line lg:px-6 lg:first:border-l-0 lg:first:pl-0 lg:last:pr-0">
+                  <p class="qs-label text-qs-accent">0{{ index + 1 }}</p>
+                  <h3 class="mt-3 text-lg font-semibold leading-snug text-qs-ink">{{ step.name }}</h3>
+                  <p class="qs-body mt-2 text-[0.9375rem] leading-[1.65]">{{ step.text }}</p>
+                </li>
               }
-            </div>
-          </section>
+            </ol>
+          </app-reading-section>
 
-          <!-- All Teams Link -->
-          <section class="mt-10 rounded-2xl bg-qs-accent px-5 py-6 text-qs-on-accent">
-            <a routerLink="/teams" class="qs-btn qs-btn-ink">
-              View all NFL teams
-            </a>
-            <p class="mt-3 text-sm leading-relaxed text-qs-on-accent">
-              Create a squares board for any team. Free for everyone.
-            </p>
-          </section>
+          <!-- Other teams in the division -->
+          <app-reading-section [heading]="'Other ' + team.conference + ' ' + team.division + ' teams'">
+            <ul class="!mt-0 grid gap-3 sm:grid-cols-3">
+              @for (rival of divisionRivals; track rival.slug) {
+                <li>
+                  <a [routerLink]="'/team/' + rival.slug"
+                     class="flex min-h-11 items-center gap-3 rounded-card border border-qs-line bg-qs-panel p-3 transition-colors hover:bg-qs-panel-2">
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg font-mono text-xs font-bold"
+                          [style.background]="badge(rival.primaryColor).background" [style.color]="badge(rival.primaryColor).ink">{{ rival.abbreviation }}</span>
+                    <span class="text-[0.9375rem] font-semibold leading-snug text-qs-ink">{{ rival.city }} {{ rival.name }}</span>
+                  </a>
+                </li>
+              }
+            </ul>
+          </app-reading-section>
+
+          <app-reading-end [related]="related" [cta]="cta"></app-reading-end>
         </article>
       } @else {
         <div class="py-12 text-center">
@@ -221,6 +168,7 @@ import { ScheduledGame, formatKickoff } from './schedule.model';
           </a>
         </div>
       }
+      </div>
     </app-content-shell>
 
     <app-auth-modal
@@ -238,11 +186,31 @@ export class TeamPageComponent implements OnInit {
   private espn = inject(EspnService);
   private authService = inject(AuthService);
 
+  public readonly badge = teamBadge;
   public team: NflTeam | undefined;
+  public readonly cta: PageCta = {
+    path: '/create',
+    label: 'Create a board',
+    note: 'Create a squares board for any team. Free for everyone.'
+  };
+  public readonly related: RelatedLink[] = [
+    { path: '/teams', label: 'All NFL teams', text: 'Pick any team and run a board for its next game.' },
+    { path: '/how-to-play', label: 'How to play', text: 'The full rules for football squares.' },
+    { path: '/best-squares-numbers', label: 'Best numbers', text: 'Which squares hit most often in past games.' }
+  ];
+  /** The four rules steps, with the team's name in the example. */
+  public readonly steps = computed(() => {
+    const name = this.team?.name ?? 'Home team';
+    return [
+      { name: 'Make the board', text: 'The host sets up a 10 by 10 board for the game.' },
+      { name: 'Claim squares', text: 'Friends tap a square and type their name. No account needed.' },
+      { name: 'Draw the numbers', text: 'Each row and column gets a random digit from 0 to 9.' },
+      { name: 'Win a quarter', text: `${name} up 17 to 14 at the half? Row 7, column 4 wins Q2.` }
+    ];
+  });
   public breadcrumbs: { name: string; path: string }[] = [];
   public divisionRivals: NflTeam[] = [];
   public games = signal<EspnGame[]>([]);
-  public loading = signal(false);
   public showAuthModal = signal(false);
   public readonly digits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
   private printGame = signal<EspnGame | null>(null);
@@ -305,8 +273,9 @@ export class TeamPageComponent implements OnInit {
       breadcrumbs: this.breadcrumbs
     });
 
+    // The build-time schedule draws the games card. With none, the card stays out rather than showing placeholders
+    // that would vanish and shift the page.
     this.games.set((SCHEDULE.teams[slug] ?? []).map(toEspnGame));
-    this.loading.set(this.games().length === 0);
     this.loadGames();
   }
 
@@ -318,8 +287,6 @@ export class TeamPageComponent implements OnInit {
       if (teamGames.length > 0) this.games.set(teamGames);
     } catch {
       // keep the build-time schedule
-    } finally {
-      this.loading.set(false);
     }
   }
 
@@ -331,8 +298,14 @@ export class TeamPageComponent implements OnInit {
     return luminance > 0.5 ? '#000000' : '#FFFFFF';
   }
 
+  /** The team's short name, for "KC @ ATL". */
+  public abbr(name: string): string {
+    return findTeam(name)?.abbreviation ?? name;
+  }
+
+  /** "Sun, Nov 15 · 1:00 PM ET" */
   public formatDate(dateStr: string): string {
-    return formatKickoff(dateStr);
+    return formatKickoff(dateStr).replace(/, (\d{1,2}:\d{2})/, ' · $1');
   }
 
   public printSheet(game?: EspnGame): void {
