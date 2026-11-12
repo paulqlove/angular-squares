@@ -1,6 +1,6 @@
-import { Component, inject, HostListener, computed, signal, ChangeDetectionStrategy, DestroyRef, ElementRef, afterNextRender, viewChild, effect } from '@angular/core';
+import { Component, inject, HostListener, computed, signal, ChangeDetectionStrategy, DestroyRef, ElementRef, afterNextRender, viewChild, effect, untracked } from '@angular/core';
 
-import { WalkthroughService } from '../../../core/services/walkthrough.service';
+import { WALKTHROUGH_GLIDE_MS, WalkthroughService } from '../../../core/services/walkthrough.service';
 
 /** Space between the target and the ring. */
 const GAP = 6;
@@ -10,45 +10,44 @@ const RING = 3;
 /** Space between the ring and the card, and between the card and the screen edge. */
 const PADDING = 16;
 
+/** The ring's outer box, and how visible it is (0 hides the ring and the hole). */
+interface Box { x: number; y: number; w: number; h: number; o: number; }
+
+/** A rounded rectangle as SVG path commands, for the hole in the dim. */
+function roundedRect(x: number, y: number, w: number, h: number, r: number): string {
+  const c = Math.max(0, Math.min(r, w / 2, h / 2));
+  return `M${x + c} ${y}H${x + w - c}A${c} ${c} 0 0 1 ${x + w} ${y + c}V${y + h - c}A${c} ${c} 0 0 1 ${x + w - c} ${y + h}`
+    + `H${x + c}A${c} ${c} 0 0 1 ${x} ${y + h - c}V${y + c}A${c} ${c} 0 0 1 ${x + c} ${y}Z`;
+}
+
 /**
  * The tour: dims the page, cuts a hole around the step's target with a ring around it, and shows the step's card.
- * Everything moves with transform only. The dim is four panels around the hole and the ring is four corners and four
- * edges, so a move between targets is a translate and a one-axis scale, never a change to position or size.
- * Between steps the card stays on screen, glides with the ring and crossfades its words.
+ * The dim and the ring are one SVG drawn at real size. An earlier version stretched 1px layers by hundreds of times,
+ * which Android Chrome drew with gaps and black bands. Between steps the ring glides (a short tween of its box),
+ * and the card stays on screen, glides with it and crossfades its words.
  */
 @Component({
     selector: 'app-walkthrough',
     imports: [],
     changeDetection: ChangeDetectionStrategy.Eager,
     styles: [`
-      .tour { position: fixed; inset: 0; z-index: 300; overflow: hidden; pointer-events: none; }
-      .tour-piece { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; }
-      .tour-dim { background: var(--qs-tour-dim); }
-      .tour-ring { background: var(--qs-accent); }
-      .tour-corner { width: 10px; height: 10px; border: 0 solid var(--qs-accent); }
-      .tour-glide .tour-piece, .tour-glide .tour-card-wrap {
-        transition: transform var(--qs-t-state) var(--qs-ease-decel), opacity var(--qs-t-state) var(--qs-ease-decel);
-      }
+      .tour { position: fixed; inset: 0; z-index: 300; pointer-events: none; }
+      /* One drawing for the dim and the ring, at real size: no scaled layers, which Android Chrome draws with gaps */
+      .tour-svg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; }
+      .tour-dim { fill: var(--qs-tour-dim); }
+      .tour-ring { fill: none; stroke: var(--qs-accent); }
+      .tour-glide .tour-card-wrap { transition: transform var(--qs-t-state) var(--qs-ease-decel); }
       .tour-card-wrap { position: absolute; left: 0; top: 0; pointer-events: auto; }
     `],
     template: `
     @if (walkthroughService.isActive() && walkthroughService.shownStep()) {
       <div class="tour" [class.tour-glide]="walkthroughService.gliding()" animate.enter="qs-tour-enter" animate.leave="qs-tour-leave">
-        <!-- Dim: four panels around the hole. The page stays usable, as before; only the card takes clicks. -->
-        <div class="tour-piece tour-dim w-full" [style.height.px]="viewport().h" [style.transform]="g().dimTop"></div>
-        <div class="tour-piece tour-dim w-full" [style.height.px]="viewport().h" [style.transform]="g().dimBottom"></div>
-        <div class="tour-piece tour-dim h-px" [style.width.px]="viewport().w" [style.transform]="g().dimLeft"></div>
-        <div class="tour-piece tour-dim h-px" [style.width.px]="viewport().w" [style.transform]="g().dimRight"></div>
-
-        <!-- Ring: corners move, edges move and stretch along their own length, so the line keeps its thickness -->
-        <div class="tour-piece tour-corner" style="border-top-width: 3px; border-left-width: 3px; border-top-left-radius: 10px" [style.transform]="g().tl" [style.opacity]="g().ring ? 1 : 0"></div>
-        <div class="tour-piece tour-corner" style="border-top-width: 3px; border-right-width: 3px; border-top-right-radius: 10px" [style.transform]="g().tr" [style.opacity]="g().ring ? 1 : 0"></div>
-        <div class="tour-piece tour-corner" style="border-bottom-width: 3px; border-left-width: 3px; border-bottom-left-radius: 10px" [style.transform]="g().bl" [style.opacity]="g().ring ? 1 : 0"></div>
-        <div class="tour-piece tour-corner" style="border-bottom-width: 3px; border-right-width: 3px; border-bottom-right-radius: 10px" [style.transform]="g().br" [style.opacity]="g().ring ? 1 : 0"></div>
-        <div class="tour-piece tour-ring w-px" style="height: 3px" [style.transform]="g().top" [style.opacity]="g().ring ? 1 : 0"></div>
-        <div class="tour-piece tour-ring w-px" style="height: 3px" [style.transform]="g().bottom" [style.opacity]="g().ring ? 1 : 0"></div>
-        <div class="tour-piece tour-ring h-px" style="width: 3px" [style.transform]="g().left" [style.opacity]="g().ring ? 1 : 0"></div>
-        <div class="tour-piece tour-ring h-px" style="width: 3px" [style.transform]="g().right" [style.opacity]="g().ring ? 1 : 0"></div>
+        <!-- Dim with a hole cut around the target, and the ring around the hole. The page stays usable, as before; only the card takes clicks. -->
+        <svg class="tour-svg" aria-hidden="true" focusable="false">
+          <path class="tour-dim" fill-rule="evenodd" [attr.d]="g().dim" />
+          <rect class="tour-ring" [attr.x]="g().ringX" [attr.y]="g().ringY" [attr.width]="g().ringW" [attr.height]="g().ringH"
+            [attr.rx]="g().ringR" [attr.stroke-width]="ring" [attr.opacity]="g().ringO" />
+        </svg>
 
         <!-- Card: stays up between steps and glides with the ring; its words crossfade -->
         <div class="tour-card-wrap" [style.width.px]="card().w" [style.transform]="card().transform" (click)="$event.stopPropagation()">
@@ -107,6 +106,12 @@ export class WalkthroughComponent {
       observer.observe(el);
       onCleanup(() => observer.disconnect());
     });
+    // Move the ring to each new target: a glide between steps, a jump otherwise (first step, scroll, resize)
+    effect(() => {
+      const to = this.target();
+      untracked(() => this.moveTo(to, this.walkthroughService.gliding()));
+    });
+    this.destroyRef.onDestroy(() => this.stopTween());
   }
 
   walkthroughService = inject(WalkthroughService);
@@ -152,41 +157,25 @@ export class WalkthroughComponent {
     return at(left, top);
   });
 
-  /** The dim panels and ring pieces as transforms. With no target the hole closes to a point in the middle. */
+  /** The dim's outline with its hole, and the ring, from where the ring is drawn right now. */
   g = computed(() => {
-    const { w: vw, h: vh } = this.viewport();
-    const rect = this.walkthroughService.targetRect();
-    const ring = !!rect && this.walkthroughService.shownStep()?.position !== 'center';
-    // The ring's outer box, on whole pixels so the pieces meet without seams
-    const x = ring ? Math.round(rect!.left - GAP - RING) : Math.round(vw / 2);
-    const y = ring ? Math.round(rect!.top - GAP - RING) : Math.round(vh / 2);
-    const w = ring ? Math.round(rect!.width + (GAP + RING) * 2) : 0;
-    const h = ring ? Math.round(rect!.height + (GAP + RING) * 2) : 0;
-    // The hole is the ring's inner edge; the ring covers the dim's square corners
-    const hx = ring ? x + RING : x;
-    const hy = ring ? y + RING : y;
-    const hw = Math.max(0, w - RING * 2);
-    const hh = Math.max(0, h - RING * 2);
-    const t = (tx: number, ty: number) => `translate(${tx}px, ${ty}px)`;
-    // Edges overlap the corners by 1px each side, so no hairline shows mid-glide
-    const across = Math.max(0, w - RADIUS * 2 + 2);
-    const down = Math.max(0, h - RADIUS * 2 + 2);
+    const { x, y, w, h, o } = this.drawn();
+    const half = RING / 2;
+    // The hole is the ring's inner edge; the dim reaches far past the screen so a resize never shows an edge
+    const hole = roundedRect(x + RING, y + RING, Math.max(0, w - RING * 2), Math.max(0, h - RING * 2), RADIUS - RING);
     return {
-      ring,
-      dimTop: t(0, hy - vh),
-      dimBottom: t(0, hy + hh),
-      dimLeft: `${t(hx - vw, hy)} scaleY(${hh})`,
-      dimRight: `${t(hx + hw, hy)} scaleY(${hh})`,
-      tl: t(x, y),
-      tr: t(x + w - RADIUS, y),
-      bl: t(x, y + h - RADIUS),
-      br: t(x + w - RADIUS, y + h - RADIUS),
-      top: `${t(x + RADIUS - 1, y)} scaleX(${across})`,
-      bottom: `${t(x + RADIUS - 1, y + h - RING)} scaleX(${across})`,
-      left: `${t(x, y + RADIUS - 1)} scaleY(${down})`,
-      right: `${t(x + w - RING, y + RADIUS - 1)} scaleY(${down})`
+      dim: `M-10000 -10000H20000V20000H-10000Z${o > 0 ? hole : ''}`,
+      ringX: x + half,
+      ringY: y + half,
+      ringW: Math.max(0, w - RING),
+      ringH: Math.max(0, h - RING),
+      ringR: RADIUS - half,
+      ringO: o
     };
   });
+
+  /** The ring's thickness, for the template. */
+  readonly ring = RING;
 
   isLastStep = computed(() => this.walkthroughService.shownStepIndex() === this.walkthroughService.totalSteps() - 1);
 
@@ -222,8 +211,51 @@ export class WalkthroughComponent {
   }
 
   private cardHeight = signal(0);
+  /** Where the ring is drawn right now; differs from target() only mid-glide. */
+  private drawn = signal<Box>({ x: 0, y: 0, w: 0, h: 0, o: 0 });
+  private frame = 0;
+  /** Where the ring belongs for the step on screen, on whole pixels. With no target there is no hole and no ring. */
+  private target = computed<Box>(() => {
+    const rect = this.walkthroughService.targetRect();
+    if (!rect || this.walkthroughService.shownStep()?.position === 'center') return { ...untracked(this.drawn), o: 0 };
+    return {
+      x: Math.round(rect.left - GAP - RING),
+      y: Math.round(rect.top - GAP - RING),
+      w: Math.round(rect.width + (GAP + RING) * 2),
+      h: Math.round(rect.height + (GAP + RING) * 2),
+      o: 1
+    };
+  });
   private cardRef = viewChild<ElementRef<HTMLElement>>('cardEl');
   private destroyRef = inject(DestroyRef);
+
+  private moveTo(to: Box, glide: boolean): void {
+    this.stopTween();
+    const from = this.drawn();
+    if (!glide || typeof requestAnimationFrame === 'undefined') {
+      this.drawn.set(to);
+      return;
+    }
+    // Coming from no ring: fade it in where it lands rather than flying in from the last spot
+    const start = from.o === 0 ? { ...to, o: 0 } : from;
+    const began = performance.now();
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - began) / WALKTHROUGH_GLIDE_MS);
+      const e = 1 - Math.pow(1 - t, 3);
+      const mix = (a: number, b: number) => a + (b - a) * e;
+      this.drawn.set({
+        x: Math.round(mix(start.x, to.x)), y: Math.round(mix(start.y, to.y)),
+        w: Math.round(mix(start.w, to.w)), h: Math.round(mix(start.h, to.h)), o: mix(start.o, to.o)
+      });
+      this.frame = t < 1 ? requestAnimationFrame(tick) : 0;
+    };
+    this.frame = requestAnimationFrame(tick);
+  }
+
+  private stopTween(): void {
+    if (this.frame && typeof cancelAnimationFrame !== 'undefined') cancelAnimationFrame(this.frame);
+    this.frame = 0;
+  }
 
   private measureViewport(): void {
     this.viewport.set({ w: window.innerWidth, h: window.innerHeight });
