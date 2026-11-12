@@ -23,6 +23,14 @@ export const SCOREBOARD_URLS: Record<SportType, string> = {
   afl: "https://site.api.espn.com/apis/site/v2/sports/australian-football/afl/scoreboard",
 };
 
+/**
+ * The scoreboard URL the score sync reads. College football asks for every FBS game (groups=80, limit=300):
+ * the plain college scoreboard lists only ~20 featured games, so most college boards would never get scores.
+ */
+export function scoreboardUrl(sport: SportType): string {
+  return sport === "ncaaf" ? `${SCOREBOARD_URLS[sport]}?groups=80&limit=300` : SCOREBOARD_URLS[sport];
+}
+
 export function isSportType(value: string): value is SportType {
   return (SPORT_TYPES as readonly string[]).includes(value);
 }
@@ -104,7 +112,7 @@ export async function fetchScoreboard(
   sport: SportType,
   fetchImpl: typeof fetch = fetch
 ): Promise<ParsedEspnGame[]> {
-  const response = await fetchImpl(SCOREBOARD_URLS[sport], {
+  const response = await fetchImpl(scoreboardUrl(sport), {
     headers: {
       Accept: "application/json",
       "User-Agent": "quarterscore-scores/1.0 (+https://quarterscore.com)",

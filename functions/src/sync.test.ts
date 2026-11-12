@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { parseScoreboard } from "./espn";
+import { fetchScoreboard, parseScoreboard, scoreboardUrl } from "./espn";
 import { emptyScores, QuarterScores } from "./scoring";
 import { groupLiveBoards, syncLiveScores } from "./sync";
 
@@ -221,5 +221,28 @@ describe("syncLiveScores", () => {
       "12": { GOODID: { sport: "curling" }, "../x": { sport: "nfl" } },
       "bad/id": { GOODID: { sport: "nfl" } },
     }), []);
+  });
+});
+
+describe("scoreboardUrl", () => {
+  it("asks for every FBS game for college football", () => {
+    assert.equal(
+      scoreboardUrl("ncaaf"),
+      "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?groups=80&limit=300"
+    );
+  });
+
+  it("keeps the plain scoreboard for other leagues", () => {
+    assert.equal(scoreboardUrl("nfl"), "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard");
+  });
+
+  it("is the URL fetchScoreboard requests", async () => {
+    const urls: string[] = [];
+    const fakeFetch = (async (url: string) => {
+      urls.push(url);
+      return { ok: true, json: async () => ({ events: [] }) };
+    }) as unknown as typeof fetch;
+    await fetchScoreboard("ncaaf", fakeFetch);
+    assert.deepEqual(urls, [scoreboardUrl("ncaaf")]);
   });
 });
