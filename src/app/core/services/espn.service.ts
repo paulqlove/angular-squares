@@ -116,7 +116,7 @@ export class EspnService {
       const seen = new Set<string>();
       const merged: EspnGame[] = [];
       for (const data of dataArrays) {
-        for (const game of this.parseGames(data, sport)) {
+        for (const game of parseScoreboard(data, sport)) {
           if (!seen.has(game.id)) {
             seen.add(game.id);
             merged.push(game);
@@ -163,14 +163,29 @@ export class EspnService {
     }
   }
 
+  /**
+   * One linked game, by its ESPN event id: teams, logos, score and status.
+   * Reads the game's own summary, because the scoreboard ignores `event` and for college football only lists ~20 featured games.
+   * Falls back to the league scoreboard when the summary can't be read.
+   */
   async getGame(eventId: string, sport: SportType = 'nfl'): Promise<EspnGame | null> {
-    if (!this.isBrowser) return null;
+    if (!this.isBrowser || !eventId) return null;
 
     try {
-      const response = await fetch(`${this.API_URLS[sport]}?event=${eventId}`);
+      const response = await fetch(`${this.API_URLS[sport].replace(/\/scoreboard$/, '/summary')}?event=${encodeURIComponent(eventId)}`);
+      if (response.ok) {
+        const game = parseSummary(await response.json(), sport);
+        if (game && game.id === eventId) return game;
+      }
+    } catch (error) {
+      console.error('Failed to fetch ESPN game summary:', error);
+    }
+
+    try {
+      const params = sport === 'ncaaf' ? 'groups=80&limit=300&' : '';
+      const response = await fetch(`${this.API_URLS[sport]}?${params}event=${encodeURIComponent(eventId)}`);
       const data = await response.json();
-      const games = this.parseGames(data, sport);
-      return games.find(g => g.id === eventId) || null;
+      return parseScoreboard(data, sport).find(g => g.id === eventId) || null;
     } catch (error) {
       console.error('Failed to fetch ESPN game:', error);
       return null;
@@ -223,56 +238,78 @@ export class EspnService {
       return [];
     }
   }
+}
 
-  private parseGames(data: any, sport: SportType): EspnGame[] {
-    if (!data?.events) return [];
+/** Every game on an ESPN scoreboard response. */
+export function parseScoreboard(data: any, sport: SportType): EspnGame[] {
+  if (!Array.isArray(data?.events)) return [];
+  return data.events.map((event: any) => parseEvent(event, event?.competitions?.[0], event?.status, sport));
+}
 
-    const periodCount = SPORT_CONFIG[sport].periods;
+/**
+ * The game in an ESPN summary response (`/summary?event=ID`), or null when it has none.
+ * The summary keeps the game under `header`, with status on the competition and period scores as `displayValue` text.
+ */
+export function parseSummary(data: any, sport: SportType): EspnGame | null {
+  const header = data?.header;
+  const competition = header?.competitions?.[0];
+  const id = header?.id ?? competition?.id;
+  if (!competition || id == null) return null;
+  return parseEvent({ id: String(id), date: competition.date }, competition, competition.status, sport);
+}
 
-    return data.events.map((event: any) => {
-      const competition = event.competitions?.[0];
-      const status = event.status;
-      const homeCompetitor = competition?.competitors?.find((c: any) => c.homeAway === 'home');
-      const awayCompetitor = competition?.competitors?.find((c: any) => c.homeAway === 'away');
+/** One game from an event (id, name, date), its competition and its status. */
+function parseEvent(event: any, competition: any, status: any, sport: SportType): EspnGame {
+  const periodCount = SPORT_CONFIG[sport].periods;
+  const homeCompetitor = competition?.competitors?.find((c: any) => c.homeAway === 'home');
+  const awayCompetitor = competition?.competitors?.find((c: any) => c.homeAway === 'away');
 
-      // Parse quarter/period scores from linescores
-      const quarters: { home: number; away: number }[] = [];
-      const homeLinescores = homeCompetitor?.linescores || [];
-      const awayLinescores = awayCompetitor?.linescores || [];
-      const maxPeriods = Math.max(homeLinescores.length, awayLinescores.length, periodCount);
+  // Parse quarter/period scores from linescores
+  const quarters: { home: number; away: number }[] = [];
+  const homeLinescores = homeCompetitor?.linescores || [];
+  const awayLinescores = awayCompetitor?.linescores || [];
+  const maxPeriods = Math.max(homeLinescores.length, awayLinescores.length, periodCount);
 
-      for (let i = 0; i < maxPeriods; i++) {
-        quarters.push({
-          home: homeLinescores[i]?.value || 0,
-          away: awayLinescores[i]?.value || 0
-        });
-      }
-
-      // Map status type to our status enum
-      let gameStatus: 'pre' | 'in' | 'post' = 'pre';
-      if (status?.type?.name === 'STATUS_IN_PROGRESS' || status?.type?.name === 'STATUS_HALFTIME') {
-        gameStatus = 'in';
-      } else if (status?.type?.name === 'STATUS_FINAL' || status?.type?.completed) {
-        gameStatus = 'post';
-      }
-
-      return {
-        id: event.id,
-        name: event.name || `${awayCompetitor?.team?.abbreviation || 'Away'} at ${homeCompetitor?.team?.abbreviation || 'Home'}`,
-        homeTeam: homeCompetitor?.team?.abbreviation || homeCompetitor?.team?.shortDisplayName || 'Home',
-        awayTeam: awayCompetitor?.team?.abbreviation || awayCompetitor?.team?.shortDisplayName || 'Away',
-        homeTeamFull: homeCompetitor?.team?.displayName || homeCompetitor?.team?.name || homeCompetitor?.team?.abbreviation || 'Home',
-        awayTeamFull: awayCompetitor?.team?.displayName || awayCompetitor?.team?.name || awayCompetitor?.team?.abbreviation || 'Away',
-        homeScore: parseInt(homeCompetitor?.score || '0', 10),
-        awayScore: parseInt(awayCompetitor?.score || '0', 10),
-        period: status?.period || 0,
-        clock: status?.displayClock || '',
-        status: gameStatus,
-        completed: !!status?.type?.completed,
-        quarters,
-        date: event.date || '',
-        ...gameLook(awayCompetitor, homeCompetitor)
-      };
+  for (let i = 0; i < maxPeriods; i++) {
+    quarters.push({
+      home: linescoreValue(homeLinescores[i]),
+      away: linescoreValue(awayLinescores[i])
     });
   }
+
+  // Map status type to our status enum
+  let gameStatus: 'pre' | 'in' | 'post' = 'pre';
+  if (status?.type?.name === 'STATUS_IN_PROGRESS' || status?.type?.name === 'STATUS_HALFTIME') {
+    gameStatus = 'in';
+  } else if (status?.type?.name === 'STATUS_FINAL' || status?.type?.completed) {
+    gameStatus = 'post';
+  }
+
+  const homeTeamFull = homeCompetitor?.team?.displayName || homeCompetitor?.team?.name || homeCompetitor?.team?.abbreviation || 'Home';
+  const awayTeamFull = awayCompetitor?.team?.displayName || awayCompetitor?.team?.name || awayCompetitor?.team?.abbreviation || 'Away';
+
+  return {
+    id: String(event?.id ?? ''),
+    name: event?.name || `${awayTeamFull} at ${homeTeamFull}`,
+    homeTeam: homeCompetitor?.team?.abbreviation || homeCompetitor?.team?.shortDisplayName || 'Home',
+    awayTeam: awayCompetitor?.team?.abbreviation || awayCompetitor?.team?.shortDisplayName || 'Away',
+    homeTeamFull,
+    awayTeamFull,
+    homeScore: parseInt(homeCompetitor?.score || '0', 10) || 0,
+    awayScore: parseInt(awayCompetitor?.score || '0', 10) || 0,
+    period: status?.period || 0,
+    clock: status?.displayClock || '',
+    status: gameStatus,
+    completed: !!status?.type?.completed,
+    quarters,
+    date: event?.date || '',
+    ...gameLook(awayCompetitor, homeCompetitor)
+  };
+}
+
+/** A period score: the scoreboard sends `value`, the summary only `displayValue`. */
+function linescoreValue(line: any): number {
+  if (typeof line?.value === 'number') return line.value;
+  const parsed = parseFloat(line?.displayValue);
+  return Number.isFinite(parsed) ? parsed : 0;
 }
