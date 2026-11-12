@@ -1,4 +1,5 @@
 import { inject, PLATFORM_ID } from '@angular/core';
+import { normalizeGameCode } from '../utils/game-code';
 import { isPlatformBrowser } from '@angular/common';
 import { Router, CanActivateFn } from '@angular/router';
 import { AuthService } from '../services/auth.service';
@@ -30,7 +31,7 @@ export const guestGuard: CanActivateFn = (route) => {
     return true;
   }
 
-  const joinCode = route.queryParamMap.get('join');
+  const joinCode = normalizeGameCode(route.queryParamMap.get('join'));
   if (joinCode) {
     router.navigate(['/game', joinCode]);
   } else {

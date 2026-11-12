@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit, signal, computed, inject, effect, ChangeDetectionStrategy } from '@angular/core';
+import { GAME_CODE_LENGTH } from '../../core/utils/game-code';
 
 import { miniCellClass, miniGridCells, miniGridClass } from '../../core/utils/mini-grid';
 import { autoLockAt, groupBoards, isBoardFilling as boardIsFilling, isBoardFull, isReadyToLock } from '../../core/utils/board-groups';
@@ -68,10 +69,13 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
   return steps.map(step => ({ ...step, ...phoneText[step.target] }));
 }
 
-/** The search text as a game code: six letters or digits, upper-cased. Null when it can't be one. */
+/**
+ * The search text as a game code: six letters or digits once spaces, dashes and other marks are dropped, upper-cased,
+ * so a pasted "abc-123" or "ABC 123" works. Null when it can't be one. The server confirms the code before Join shows.
+ */
 export function gameCodeFrom(text: string): string | null {
-  const trimmed = text.trim();
-  return /^[a-z0-9]{6}$/i.test(trimmed) ? trimmed.toUpperCase() : null;
+  const letters = text.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  return letters.length === GAME_CODE_LENGTH ? letters : null;
 }
 
 type CardView = 'grid' | 'compact';

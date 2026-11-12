@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, ElementRef, HostListener, computed, inject, input, signal, viewChild } from '@angular/core';
+import { isGameCode, normalizeCodeInput } from '../../../core/utils/game-code';
 import { NgTemplateOutlet } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
@@ -13,8 +14,6 @@ import { ModalComponent } from '../modal/modal.component';
 const SHOWN = 5;
 /** Extra ids read in case some of the newest were deleted since. */
 const SPARE = 3;
-/** A game code as players type it: six letters and digits. */
-const CODE = /^[A-Z0-9]{6}$/;
 /** How long the popover takes to retract, plus a little; the phone sheet's exit fits inside it too. */
 const CLOSE_MS = 220;
 
@@ -152,9 +151,8 @@ const CLOSE_MS = 220;
               id="your-games-code"
               type="text"
               [value]="code()"
-              (input)="setCode($any($event.target).value)"
+              (input)="setCode($any($event.target))"
               placeholder="ABC123"
-              maxlength="6"
               autocapitalize="characters"
               autocomplete="off"
               spellcheck="false"
@@ -235,7 +233,7 @@ export class YourGamesMenuComponent {
   /** True while the popover retracts after closing. */
   protected closing = signal(false);
   protected code = signal('');
-  protected codeValid = computed(() => CODE.test(this.code()));
+  protected codeValid = computed(() => isGameCode(this.code()));
   protected countLabel = computed(() => (this.rows().length === 1 ? '1 game' : `${this.rows().length} recent`));
   /** Guests can't host, so their Create goes to the public set-up page, which asks them to sign in when they finish. */
   protected createLink = computed(() => (this.auth.canCreateGame() ? '/dashboard' : '/create'));
@@ -271,8 +269,9 @@ export class YourGamesMenuComponent {
     void this.router.navigate(['/game', code]);
   }
 
-  protected setCode(value: string): void {
-    this.code.set(value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6));
+  /** Keeps the field to letters and digits, upper-cased. No maxlength on the field: it would cut a pasted "ABC-123" to "ABC-12" before the dash is dropped. */
+  protected setCode(input: HTMLInputElement): void {
+    this.code.set(normalizeCodeInput(input));
   }
 
   protected startJoin(): void {
