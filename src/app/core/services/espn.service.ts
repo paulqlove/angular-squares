@@ -297,7 +297,9 @@ function parseEvent(event: any, competition: any, status: any, sport: SportType)
     awayTeamFull,
     homeScore: parseInt(homeCompetitor?.score || '0', 10) || 0,
     awayScore: parseInt(awayCompetitor?.score || '0', 10) || 0,
-    period: status?.period || 0,
+    // The summary's status carries no period, so a finished game would read as period 0 and lose its Q1–Q3
+    // winners. Fall back to how many periods have line scores.
+    period: status?.period || Math.max(homeLinescores.length, awayLinescores.length),
     clock: status?.displayClock || '',
     status: gameStatus,
     completed: !!status?.type?.completed,
