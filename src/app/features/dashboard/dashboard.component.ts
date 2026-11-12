@@ -781,7 +781,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       title: `Lock ${game.name}?`,
       message: `Players can't pick or change squares once it's locked.${draws ? ' The numbers are drawn now.' : ''}${auto ? ' Auto-lock and draw turns off for this board.' : ''}`,
       confirmLabel: draws ? 'Lock and draw numbers' : 'Lock board',
-      tone: 'primary'
+      tone: 'primary',
+      rememberKey: 'lock-board'
     });
     if (!ok) return;
     this.lockingIds.update(ids => new Set(ids).add(game.id));
