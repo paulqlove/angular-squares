@@ -11,6 +11,10 @@ const RADIUS = 10;
 const RING = 3;
 /** Space between the ring and the card, and between the card and the screen edge. */
 const PADDING = 16;
+/** Stretched pieces (ring edges, side dim panels) are laid out at this length and scaled down to size. Phones with a
+ * fractional pixel ratio (2.4, 2.625) round a 1px box to whole device pixels, so a 1px piece scaled up came out up to
+ * 17% short and left gaps in the ring. Rounding a long box costs less than a device pixel. */
+const BASE = 1000;
 
 /**
  * The tour: dims the page, cuts a hole around the step's target with a ring around it, and shows the step's card.
@@ -25,6 +29,8 @@ const PADDING = 16;
     styles: [`
       .tour { position: fixed; inset: 0; z-index: 300; overflow: hidden; pointer-events: none; }
       .tour-piece { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; }
+      .tour-long-x { width: 1000px; }
+      .tour-long-y { height: 1000px; }
       .tour-dim { background: var(--qs-tour-dim); }
       .tour-ring { background: var(--qs-accent); }
       .tour-corner { width: 10px; height: 10px; border: 0 solid var(--qs-accent); }
@@ -39,18 +45,18 @@ const PADDING = 16;
         <!-- Dim: four panels around the hole. The page stays usable, as before; only the card takes clicks. -->
         <div class="tour-piece tour-dim w-full" [style.height.px]="viewport().h" [style.transform]="g().dimTop"></div>
         <div class="tour-piece tour-dim w-full" [style.height.px]="viewport().h" [style.transform]="g().dimBottom"></div>
-        <div class="tour-piece tour-dim h-px" [style.width.px]="viewport().w" [style.transform]="g().dimLeft"></div>
-        <div class="tour-piece tour-dim h-px" [style.width.px]="viewport().w" [style.transform]="g().dimRight"></div>
+        <div class="tour-piece tour-dim tour-long-y" [style.width.px]="viewport().w" [style.transform]="g().dimLeft"></div>
+        <div class="tour-piece tour-dim tour-long-y" [style.width.px]="viewport().w" [style.transform]="g().dimRight"></div>
 
         <!-- Ring: corners move, edges move and stretch along their own length, so the line keeps its thickness -->
         <div class="tour-piece tour-corner" style="border-top-width: 3px; border-left-width: 3px; border-top-left-radius: 10px" [style.transform]="g().tl" [style.opacity]="g().ring ? 1 : 0"></div>
         <div class="tour-piece tour-corner" style="border-top-width: 3px; border-right-width: 3px; border-top-right-radius: 10px" [style.transform]="g().tr" [style.opacity]="g().ring ? 1 : 0"></div>
         <div class="tour-piece tour-corner" style="border-bottom-width: 3px; border-left-width: 3px; border-bottom-left-radius: 10px" [style.transform]="g().bl" [style.opacity]="g().ring ? 1 : 0"></div>
         <div class="tour-piece tour-corner" style="border-bottom-width: 3px; border-right-width: 3px; border-bottom-right-radius: 10px" [style.transform]="g().br" [style.opacity]="g().ring ? 1 : 0"></div>
-        <div class="tour-piece tour-ring w-px" style="height: 3px" [style.transform]="g().top" [style.opacity]="g().ring ? 1 : 0"></div>
-        <div class="tour-piece tour-ring w-px" style="height: 3px" [style.transform]="g().bottom" [style.opacity]="g().ring ? 1 : 0"></div>
-        <div class="tour-piece tour-ring h-px" style="width: 3px" [style.transform]="g().left" [style.opacity]="g().ring ? 1 : 0"></div>
-        <div class="tour-piece tour-ring h-px" style="width: 3px" [style.transform]="g().right" [style.opacity]="g().ring ? 1 : 0"></div>
+        <div class="tour-piece tour-ring tour-long-x" style="height: 3px" [style.transform]="g().top" [style.opacity]="g().ring ? 1 : 0"></div>
+        <div class="tour-piece tour-ring tour-long-x" style="height: 3px" [style.transform]="g().bottom" [style.opacity]="g().ring ? 1 : 0"></div>
+        <div class="tour-piece tour-ring tour-long-y" style="width: 3px" [style.transform]="g().left" [style.opacity]="g().ring ? 1 : 0"></div>
+        <div class="tour-piece tour-ring tour-long-y" style="width: 3px" [style.transform]="g().right" [style.opacity]="g().ring ? 1 : 0"></div>
 
         <!-- Card: stays up between steps and glides with the ring; its words crossfade -->
         <div class="tour-card-wrap" [style.width.px]="card().w" [style.transform]="card().transform" (click)="$event.stopPropagation()">
@@ -180,16 +186,16 @@ export class WalkthroughComponent {
       ring,
       dimTop: t(0, hy - vh),
       dimBottom: t(0, hy + hh),
-      dimLeft: `${t(hx - vw, hy)} scaleY(${hh})`,
-      dimRight: `${t(hx + hw, hy)} scaleY(${hh})`,
+      dimLeft: `${t(hx - vw, hy)} scaleY(${hh / BASE})`,
+      dimRight: `${t(hx + hw, hy)} scaleY(${hh / BASE})`,
       tl: t(x, y),
       tr: t(x + w - RADIUS, y),
       bl: t(x, y + h - RADIUS),
       br: t(x + w - RADIUS, y + h - RADIUS),
-      top: `${t(x + RADIUS - 1, y)} scaleX(${across})`,
-      bottom: `${t(x + RADIUS - 1, y + h - RING)} scaleX(${across})`,
-      left: `${t(x, y + RADIUS - 1)} scaleY(${down})`,
-      right: `${t(x + w - RING, y + RADIUS - 1)} scaleY(${down})`
+      top: `${t(x + RADIUS - 1, y)} scaleX(${across / BASE})`,
+      bottom: `${t(x + RADIUS - 1, y + h - RING)} scaleX(${across / BASE})`,
+      left: `${t(x, y + RADIUS - 1)} scaleY(${down / BASE})`,
+      right: `${t(x + w - RING, y + RADIUS - 1)} scaleY(${down / BASE})`
     };
   });
 
