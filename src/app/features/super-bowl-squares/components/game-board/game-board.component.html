@@ -55,6 +55,7 @@
             (click)="onSquareClick(row, col)"
             (keydown)="onSquareKeydown($event, row, col)">
             <span class="sm:hidden" aria-hidden="true">{{ getSquareInitials(row, col) }}</span><span class="hidden sm:inline">{{ getSquarePlayer(row, col) }}</span>
+            @if (winnerQuarterLabels[row + '-' + col]; as quarters) { <span class="square-tab hidden sm:block" aria-hidden="true">{{ quarters }}</span> }
           </div>
         }
       </div>

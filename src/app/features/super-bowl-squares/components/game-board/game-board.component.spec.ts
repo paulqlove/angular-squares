@@ -40,3 +40,31 @@ describe('GameBoardComponent number draw', () => {
     expect(digits[10].textContent).toBe('5');
   });
 });
+
+@Component({
+  imports: [GameBoardComponent],
+  template: `
+    <app-game-board homeTeam="KC" awayTeam="PHI" [homeNumbers]="home" [awayNumbers]="away" [selectedSquares]="squares"
+      [playerColors]="{}" [isRandomized]="true" [winnerSquares]="['0-1', '2-3']"
+      [winnerQuarterLabels]="{ '0-1': 'Q1 Q3', '2-3': 'FINAL' }" />
+  `
+})
+class WinnersHost {
+  home = [3, 8, 0, 1, 2, 4, 5, 6, 7, 9];
+  away = [5, 1, 9, 0, 2, 3, 4, 6, 7, 8];
+  squares = { '0-1': 'Marcus Johnson', '2-3': 'Ana Lucia', '4-4': 'Dev' };
+}
+
+describe('GameBoardComponent winning squares', () => {
+  it('puts a quarter tab on each winning square and names the quarters for screen readers', () => {
+    const fixture = TestBed.createComponent(WinnersHost);
+    fixture.detectChanges();
+    const el: HTMLElement = fixture.nativeElement;
+    const tabs = [...el.querySelectorAll('.square-tab')].map(t => t.textContent!.trim());
+    expect(tabs).toEqual(['Q1 Q3', 'FINAL']);
+    const winner = el.querySelector('[aria-label*="Marcus Johnson"]')!;
+    expect(winner.classList).toContain('square-winner');
+    expect(winner.getAttribute('aria-label')).toContain('won Q1 Q3');
+    expect(el.querySelector('[aria-label*="Dev"] .square-tab')).toBeNull();
+  });
+});

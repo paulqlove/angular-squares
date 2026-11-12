@@ -13,6 +13,7 @@ import { EspnGame, EspnService } from '../../core/services/espn.service';
 import { TeamLogoService } from '../../core/services/team-logo.service';
 import { GameBoardComponent } from '../super-bowl-squares/components/game-board/game-board.component';
 import { PLAYER_COLORS, normalizePlayerColors } from '../super-bowl-squares/utils/player-colors';
+import { quarterLabels, QuarterWin } from '../super-bowl-squares/utils/quarter-labels';
 
 const PIN_MS = 30000;
 /** Phones and portrait tablets: the TV layout is not built for them. Landscape phones top out near 930px. */
@@ -187,12 +188,21 @@ export class PresentComponent implements OnInit, OnDestroy {
   }
 
   protected winnerSquares(): string[] {
+    return this.quarterWins().map(w => w.key);
+  }
+
+  /** Quarter tab text on each winning square ("Q1", "FINAL", "Q1 Q3"), as on the game page. */
+  protected winnerQuarterLabels(): Record<string, string> {
+    return quarterLabels(this.quarterWins());
+  }
+
+  private quarterWins(): QuarterWin[] {
     const g = this.game();
     if (!g?.isRandomized) return [];
-    return QUARTERS.flatMap(q => {
-      const winner = g.winners?.[q];
-      const key = winner && g.scores?.[q] ? this.squareFor(g, g.scores[q]) : null;
-      return key && g.selectedSquares?.[key] === winner ? [key] : [];
+    return QUARTERS.flatMap(quarter => {
+      const winner = g.winners?.[quarter];
+      const key = winner && g.scores?.[quarter] ? this.squareFor(g, g.scores[quarter]) : null;
+      return key && g.selectedSquares?.[key] === winner ? [{ key, quarter }] : [];
     });
   }
 
