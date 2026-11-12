@@ -381,7 +381,7 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
         }
       </main>
 
-      <!-- Phone: join and create in a bar along the bottom, like the game page's host tools. With 6+ hosted
+      <!-- Phone: join and create in a bar along the bottom, like the game page's host tools. With enough hosted
            boards a search button sits first; it opens a field with Cancel in the same bar, lifted above the keyboard. -->
       <div
         class="qs-dock no-print fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-[90] sm:hidden"
@@ -425,7 +425,7 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
         </div>
       </div>
 
-      <!-- From 640px up: with 6+ hosted boards, a search pill floats at the bottom center like the game page's host tools -->
+      <!-- From 640px up: with enough hosted boards, a search pill floats at the bottom center like the game page's host tools -->
       @if (showSearch()) {
         <div
           class="qs-dock no-print fixed inset-x-3 bottom-4 z-[90] mx-auto hidden max-w-fit sm:block"
@@ -756,10 +756,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   protected readonly Infinity = Infinity;
 
   myGames = signal<GameListItem[]>([]);
-  /** The search query. Only applies while search shows (6+ hosted boards). */
+  /** The search query. Only applies while search shows. */
   gameSearch = signal('');
-  /** Search shows once a host has six or more boards. */
-  showSearch = computed(() => !this.isLoadingGames() && this.myGames().length >= 6);
+  /** Search shows once a host has this many boards. Temporarily 1 so it can be tried on any dashboard; the plan is 6. */
+  readonly searchMinBoards = 1;
+  showSearch = computed(() => !this.isLoadingGames() && this.myGames().length >= this.searchMinBoards);
   /** Phone: the bottom bar shows the search field and Cancel in place of Join and New board. */
   searchOpen = signal(false);
   /** Phone: how far the keyboard covers the bottom of the screen, so the open search rides above it. */
