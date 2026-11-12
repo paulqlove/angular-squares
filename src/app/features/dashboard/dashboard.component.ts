@@ -1,4 +1,5 @@
-import { Component, OnDestroy, OnInit, signal, computed, inject, effect, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, signal, computed, inject, effect, ChangeDetectionStrategy, afterNextRender } from '@angular/core';
+import { ScrollGrow } from './scroll-grow';
 
 import { miniCellClass, miniGridCells, miniGridClass } from '../../core/utils/mini-grid';
 import { autoLockAt, groupBoards, isBoardFilling as boardIsFilling, isBoardFull, isReadyToLock } from '../../core/utils/board-groups';
@@ -304,23 +305,17 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
             @if (isLoadingGames()) {
               <div class="qs-skel-delay mt-6 grid grid-cols-1 items-start gap-3 sm:grid-cols-2 xl:grid-cols-3" aria-busy="true">
                 @for (i of [0, 1, 2]; track i) {
-                  <!-- Same shape as the board card: a row on a phone, from sm up the navy tile, name, teams and the Share bar -->
-                  <article class="qs-card" aria-hidden="true">
-                    <div class="flex min-h-[72px] items-center gap-3 p-3 sm:flex-col sm:items-stretch sm:gap-3.5 sm:pb-4">
-                      <div class="flex shrink-0 sm:min-h-[152px] sm:items-end sm:gap-[18px] sm:rounded-inner sm:bg-qs-tile sm:p-[18px]">
-                        <div class="qs-skel h-12 w-12 sm:h-28 sm:w-28"></div>
-                        <div class="hidden flex-col gap-2 pb-0.5 sm:flex">
-                          <div class="h-9 w-10 animate-pulse rounded-[6px] bg-white/15"></div>
-                          <div class="h-3 w-12 animate-pulse rounded-[6px] bg-white/15"></div>
-                        </div>
-                      </div>
-                      <div class="min-w-0 flex-1 space-y-2 sm:flex-none sm:px-1.5">
-                        <div class="qs-skel h-4 w-2/5 sm:h-5 sm:w-3/5"></div>
-                        <div class="qs-skel h-3 w-3/5 sm:w-2/5"></div>
-                        <div class="qs-skel hidden h-3 w-1/3 sm:block"></div>
+                  <!-- Same shape as the compact board card: the thumbnail, name, teams and the bar -->
+                  <article class="qs-card h-32" aria-hidden="true">
+                    <div class="flex h-[88px] gap-3 p-2">
+                      <div class="qs-skel h-[52px] w-[52px] shrink-0 rounded-[6px]"></div>
+                      <div class="min-w-0 flex-1 space-y-2.5 pt-2">
+                        <div class="qs-skel h-4 w-3/5"></div>
+                        <div class="qs-skel h-3 w-2/5"></div>
+                        <div class="qs-skel h-3 w-1/3"></div>
                       </div>
                     </div>
-                    <div class="hidden min-h-11 border-t border-qs-line sm:block"></div>
+                    <div class="h-10 border-t border-qs-line"></div>
                   </article>
                 }
               </div>
@@ -492,103 +487,96 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
       </app-modal>
 
       <ng-template #gameCard let-game let-joined="joined">
-        <!-- Phone: a row (mini board, name, teams, open count). From sm up: the board on a navy panel with the open count beside it.
-             Filling boards get a full-width Share invite bar; locked and full boards go quiet. -->
-        <article animate.enter="qs-fade-rise" class="qs-card relative min-w-0 transition-[border-color] duration-150 ease-out has-[a:hover]:border-qs-ink has-[[aria-expanded=true]]:z-20">
-          <div class="relative flex items-center sm:block">
-            <a
-              [routerLink]="['/game', game.id]"
-              [state]="{ boardSize: game.boardSize }"
-              class="flex min-h-[72px] min-w-0 flex-1 items-center gap-3 rounded-tl-card py-3 pl-3 pr-2 transition-colors duration-150 hover:bg-qs-panel-2 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-qs-accent sm:flex-col sm:items-stretch sm:gap-3.5 sm:rounded-tr-card sm:p-3 sm:pb-4"
-              [class]="hasCardBar(game, joined) ? '' : 'rounded-bl-card sm:rounded-br-card'"
-              [attr.aria-label]="'Open ' + game.name"
-            >
-              <div class="flex shrink-0 flex-col items-center sm:min-h-[152px] sm:flex-row sm:items-end sm:gap-[18px] sm:rounded-inner sm:bg-qs-tile sm:p-[18px]">
-                <div [class]="'qs-mini grid w-14 shrink-0 gap-px rounded-[3px] p-px sm:w-28 ' + getMiniGridClass(game.boardSize)" aria-hidden="true">
-                  @for (i of getBoardCells(game.boardSize); track i) {
-                    <span class="aspect-square" [class]="miniCellClass(game, i)"></span>
-                  }
-                </div>
-                <!-- Phone: the state sits centered under the mini board -->
-                <p class="qs-label mt-1.5 flex w-14 items-center justify-center gap-1 whitespace-nowrap text-xs tabular-nums sm:hidden" [class]="isBoardFilling(game) ? 'text-qs-accent' : 'text-qs-muted'">
-                  @if (game.isLocked) {
-                    <span class="lock-icon is-locked" [class.lock-snap]="justLocked().has(game.id)" style="font-size: 12px" aria-hidden="true"><ng-icon name="heroLockClosed" class="lock-closed"></ng-icon><ng-icon name="heroLockOpen" class="lock-open"></ng-icon></span>Locked
-                  } @else if (!isBoardFilling(game)) {
-                    Full
-                  } @else {
-                    {{ openCount(game) }} open
-                  }
-                </p>
-                <div class="hidden min-w-0 flex-col gap-1.5 pb-0.5 sm:flex">
-                  @if (game.isLocked) {
-                    <span class="qs-label inline-flex items-center gap-1.5 text-qs-tile-ink"><span class="lock-icon is-locked" [class.lock-snap]="justLocked().has(game.id)" style="font-size: 14px" aria-hidden="true"><ng-icon name="heroLockClosed" class="lock-closed"></ng-icon><ng-icon name="heroLockOpen" class="lock-open"></ng-icon></span>Locked</span>
-                  } @else if (!isBoardFilling(game)) {
-                    <span class="qs-label text-qs-tile-ink">Full</span>
-                    @if (autoLockText(game); as autoLock) {
-                      <span class="text-[13px] text-qs-tile-muted">Auto-locks {{ autoLock }}</span>
-                    }
-                  } @else {
-                    <strong class="text-[40px] font-semibold leading-[0.9] tracking-[-0.04em] tabular-nums text-qs-tile-count">{{ openCount(game) }}</strong>
-                    <span class="qs-label text-qs-tile-count">open</span>
-                    <span class="text-[13px] tabular-nums text-qs-tile-muted">of {{ game.boardSize || 100 }}</span>
-                  }
-                </div>
-              </div>
-              <div class="min-w-0 sm:px-1.5">
-                <h5 class="truncate text-base font-semibold leading-tight tracking-tight text-qs-ink sm:text-xl">{{ game.name }}</h5>
-                @if (cardTeams(game); as teams) {
-                  <div class="mt-1.5 flex flex-col gap-1">
-                    @for (team of teams; track $index) {
-                      <span class="flex min-w-0 items-center gap-2 text-sm">
-                        @if (team.logo) {
-                          <img [src]="team.logo" alt="" width="20" height="20" loading="lazy" class="h-5 w-5 shrink-0 object-contain" />
-                        }
-                        @if (team.code) {
-                          <span class="shrink-0 font-semibold text-qs-ink">{{ team.code }}</span>
-                        }
-                        @if (team.name) {
-                          <span class="truncate" [class]="team.code ? 'text-qs-muted' : 'text-qs-ink'">{{ team.name }}</span>
-                        }
-                      </span>
-                    }
-                  </div>
-                } @else {
-                  <p class="mt-0.5 truncate text-sm text-qs-muted">Teams not set</p>
+        <!-- Scroll-grow card (scroll-grow.ts): compact everywhere but the row on the focus line, which opens to the full card.
+             The parts are placed absolutely and moved by transforms; the link covers the card, the menu and the action bar sit above it. -->
+        <article data-grow animate.enter="qs-fade-rise" class="g-card qs-card relative min-w-0 transition-[border-color] duration-150 ease-out has-[a:hover]:border-qs-ink has-[[aria-expanded=true]]:z-20">
+          <div data-g="hero" class="g-part g-hero h-[100px] bg-qs-tile" aria-hidden="true">
+            <div data-g="mini" [class]="'qs-mini g-part g-mini grid w-[72px] gap-px rounded-[3px] p-px ' + getMiniGridClass(game.boardSize)">
+              @for (i of getBoardCells(game.boardSize); track i) {
+                <span class="aspect-square" [class]="miniCellClass(game, i)"></span>
+              }
+            </div>
+            <div data-g="count" class="g-part g-count flex h-[72px] flex-col gap-1.5" [class.justify-end]="!isBoardFilling(game)">
+              @if (game.isLocked) {
+                <span class="qs-label inline-flex items-center gap-1.5 whitespace-nowrap text-qs-tile-ink"><span class="lock-icon is-locked shrink-0" [class.lock-snap]="justLocked().has(game.id)" style="font-size: 14px"><ng-icon name="heroLockClosed" class="lock-closed"></ng-icon><ng-icon name="heroLockOpen" class="lock-open"></ng-icon></span>Locked</span>
+              } @else if (!isBoardFilling(game)) {
+                <span class="qs-label text-qs-tile-ink">Full</span>
+                @if (autoLockText(game); as autoLock) {
+                  <span class="whitespace-nowrap text-[13px] text-qs-tile-muted">Auto-locks {{ autoLock }}</span>
                 }
-                @if (!game.isLocked && !isBoardFilling(game) && autoLockText(game); as autoLock) {
-                  <p class="mt-1 truncate text-[13px] text-qs-muted sm:hidden">Auto-locks {{ autoLock }}</p>
-                }
-              </div>
-            </a>
+              } @else {
+                <strong class="text-[38px] font-semibold leading-[0.9] tracking-[-0.04em] tabular-nums text-qs-tile-count">{{ openCount(game) }}</strong>
+                <span class="qs-label text-qs-tile-count">open</span>
+                <span class="text-[13px] tabular-nums text-qs-tile-muted">of {{ game.boardSize || 100 }}</span>
+              }
+            </div>
+          </div>
+          <!-- Compact: the state sits under the thumbnail -->
+          <p data-g="label" class="g-part g-label w-16 whitespace-nowrap text-center font-mono text-[11.5px] font-medium uppercase tracking-[0.04em] tabular-nums" [class]="isBoardFilling(game) ? 'text-qs-accent' : 'text-qs-muted'" aria-hidden="true">
+            {{ game.isLocked ? 'Locked' : !isBoardFilling(game) ? 'Full' : openCount(game) + ' open' }}
+          </p>
+          <h5 data-g="title" class="g-part g-title truncate text-lg font-semibold leading-[22px] tracking-tight text-qs-ink">{{ game.name }}</h5>
+          <div data-g="teams" class="g-part g-teams flex flex-col">
+            @if (cardTeams(game); as teams) {
+              @for (team of teams; track $index) {
+                <span class="flex h-5 min-w-0 items-center gap-2 text-[13px]">
+                  @if (team.logo) {
+                    <img [src]="team.logo" alt="" width="16" height="16" loading="lazy" class="h-4 w-4 shrink-0 object-contain" />
+                  }
+                  @if (team.code) {
+                    <span class="shrink-0 font-semibold text-qs-ink">{{ team.code }}</span>
+                  }
+                  @if (team.name) {
+                    <span class="truncate" [class]="team.code ? 'text-qs-muted' : 'text-qs-ink'">{{ team.name }}</span>
+                  }
+                </span>
+              }
+            } @else {
+              <span class="h-5 truncate text-[13px] leading-5 text-qs-muted">Teams not set</span>
+            }
+          </div>
+          <a
+            [routerLink]="['/game', game.id]"
+            [state]="{ boardSize: game.boardSize }"
+            class="absolute inset-0 z-[1] rounded-card focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-qs-accent"
+            [attr.aria-label]="'Open ' + game.name"
+          ></a>
+          <div data-g="more" class="g-part g-more z-[2]">
             <app-card-menu
-              class="shrink-0 pr-1 sm:absolute sm:right-[18px] sm:top-[18px] sm:pr-0"
-              triggerClass="sm:text-qs-tile-muted sm:hover:bg-white/10 sm:hover:text-qs-tile-ink sm:focus-visible:outline-qs-tile-ink"
+              triggerClass="g-more-btn"
               [items]="joined ? joinedMenu : hostMenu"
               [label]="'More actions for ' + game.name"
               (picked)="onCardMenu(game, $event)"></app-card-menu>
           </div>
-          @if (isBoardFilling(game)) {
-            <button
-              type="button"
-              (click)="shareGame(game.id)"
-              class="flex min-h-11 w-full items-center justify-center gap-2 rounded-b-card border-t border-qs-line bg-qs-panel text-sm font-medium text-qs-ink transition-colors duration-150 hover:bg-qs-panel-2 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-qs-ink"
-              [attr.aria-label]="'Share invite for ' + game.name"
-            >
-              <ng-icon name="heroShare" class="text-base" aria-hidden="true"></ng-icon>
-              Share invite
-            </button>
-          } @else if (canLockFromCard(game, joined)) {
-            <button
-              type="button"
-              (click)="lockNow(game)"
-              [disabled]="lockingIds().has(game.id)"
-              class="lock-preview flex min-h-11 w-full items-center justify-center gap-2 rounded-b-card border-t border-qs-line bg-qs-panel text-sm font-medium text-qs-ink transition-colors duration-150 hover:bg-qs-panel-2 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-qs-ink disabled:cursor-wait disabled:text-qs-muted"
-              [attr.aria-label]="'Lock ' + game.name + ' now'"
-            >
-              <span class="lock-icon" [class.is-locked]="lockingIds().has(game.id)" aria-hidden="true"><ng-icon name="heroLockClosed" class="lock-closed"></ng-icon><ng-icon name="heroLockOpen" class="lock-open"></ng-icon></span>
-              {{ lockingIds().has(game.id) ? 'Locking' : 'Lock now' }}
-            </button>
-          }
+          <div data-g="foot" class="g-part g-foot w-full" [style.z-index]="hasCardBar(game, joined) ? 2 : null">
+            @if (isBoardFilling(game)) {
+              <button
+                type="button"
+                (click)="shareGame(game.id)"
+                class="flex h-10 w-full items-center justify-center gap-2 rounded-b-card border-t border-qs-line bg-qs-panel text-sm font-medium text-qs-ink transition-colors duration-150 hover:bg-qs-panel-2 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-qs-ink"
+                [attr.aria-label]="'Share invite for ' + game.name"
+              >
+                <ng-icon name="heroShare" class="text-base" aria-hidden="true"></ng-icon>
+                Share invite
+              </button>
+            } @else if (canLockFromCard(game, joined)) {
+              <button
+                type="button"
+                (click)="lockNow(game)"
+                [disabled]="lockingIds().has(game.id)"
+                class="lock-preview flex h-10 w-full items-center justify-center gap-2 rounded-b-card border-t border-qs-line bg-qs-panel text-sm font-medium text-qs-ink transition-colors duration-150 hover:bg-qs-panel-2 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-qs-ink disabled:cursor-wait disabled:text-qs-muted"
+                [attr.aria-label]="'Lock ' + game.name + ' now'"
+              >
+                <span class="lock-icon" [class.is-locked]="lockingIds().has(game.id)" aria-hidden="true"><ng-icon name="heroLockClosed" class="lock-closed"></ng-icon><ng-icon name="heroLockOpen" class="lock-open"></ng-icon></span>
+                {{ lockingIds().has(game.id) ? 'Locking' : 'Lock now' }}
+              </button>
+            } @else {
+              <!-- Locked and joined boards: the bar reads Open board and belongs to the card's link underneath -->
+              <span class="pointer-events-none flex h-10 w-full items-center justify-center gap-2 rounded-b-card border-t border-qs-line text-sm font-medium text-qs-muted" aria-hidden="true">
+                Open board<ng-icon name="heroArrowRight" class="text-base"></ng-icon>
+              </span>
+            }
+          </div>
         </article>
       </ng-template>
 
@@ -655,19 +643,28 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
   `,
     changeDetection: ChangeDetectionStrategy.Eager,
     styles: [`
-    /* Mini board on each card. Filling: open squares carry the one accent, claimed squares are neutral.
-       Locked or full: taken squares are filled and empty ones are left blank. From sm up the board sits on the navy tile. */
-    .qs-mini { background: var(--qs-line); }
-    .qs-mini-open { background: color-mix(in srgb, var(--qs-accent) 38%, var(--qs-panel)); }
-    .qs-mini-claimed, .qs-mini-taken { background: color-mix(in srgb, var(--qs-line-strong) 40%, var(--qs-panel)); }
-    .qs-mini-blank { background: var(--qs-panel); }
-    @media (min-width: 640px) {
-      .qs-mini { background: color-mix(in srgb, var(--qs-tile-ink) 10%, var(--qs-tile)); }
-      .qs-mini-open { background: var(--qs-tile-open); }
-      .qs-mini-claimed { background: color-mix(in srgb, var(--qs-tile-ink) 20%, var(--qs-tile)); }
-      .qs-mini-taken { background: color-mix(in srgb, var(--qs-tile-ink) 36%, var(--qs-tile)); }
-      .qs-mini-blank { background: var(--qs-tile); }
-    }
+    /* Mini board on each card, always on the navy tile. Filling: open squares carry the one accent, claimed squares are neutral.
+       Locked or full: taken squares are filled and empty ones are left blank. */
+    .qs-mini { background: color-mix(in srgb, var(--qs-tile-ink) 10%, var(--qs-tile)); }
+    .qs-mini-open { background: var(--qs-tile-open); }
+    .qs-mini-claimed { background: color-mix(in srgb, var(--qs-tile-ink) 20%, var(--qs-tile)); }
+    .qs-mini-taken { background: color-mix(in srgb, var(--qs-tile-ink) 36%, var(--qs-tile)); }
+    .qs-mini-blank { background: var(--qs-tile); }
+
+    /* Scroll-grow card (scroll-grow.ts). The defaults below are the compact card, so it looks right before the first frame. */
+    .g-card { height: 128px; }
+    .g-part { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+    .g-hero { left: 8px; top: 8px; width: calc(100% - 16px); clip-path: inset(2px calc(100% - 54px) 46px 2px round 6px); }
+    .g-mini { transform: translate(7px, 7px) scale(0.5833); }
+    .g-count { left: 102px; top: 14px; opacity: 0; }
+    .g-label { left: 4px; top: 66px; }
+    .g-title { transform: translate(74px, 12px) scale(0.8333); width: calc((100% - 122px) / 0.8333); }
+    .g-teams { transform: translate(74px, 38px); width: calc(100% - 88px); }
+    .g-more { left: auto; right: 4px; transform: translateY(2px); }
+    .g-foot { transform: translateY(88px); }
+    .g-card .g-more ::ng-deep .g-more-btn { transition: color 120ms ease-out, background-color 120ms ease-out; }
+    .g-open .g-more ::ng-deep .g-more-btn { color: var(--qs-tile-muted); }
+    .g-open .g-more ::ng-deep .g-more-btn:hover { color: var(--qs-tile-ink); background: rgb(255 255 255 / 0.1); }
   `]
 })
 export class DashboardComponent implements OnInit, OnDestroy {
@@ -678,11 +675,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private confirmService = inject(ConfirmService);
+  private host = inject<ElementRef<HTMLElement>>(ElementRef);
+  /** Opens the row of cards on the focus line as you scroll (browser only). */
+  private scrollGrow: ScrollGrow | null = null;
   private toastService = inject(ToastService);
   private walkthroughService = inject(WalkthroughService);
   private sanitizationService = inject(SanitizationService);
 
   constructor() {
+    afterNextRender(() => { this.scrollGrow = new ScrollGrow(this.host.nativeElement); });
     // The phone keyboard covers fixed elements on iOS, so the open search lifts by the covered height
     effect(onCleanup => {
       const vv = typeof window !== 'undefined' ? window.visualViewport : null;
@@ -899,6 +900,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   barHidden = computed(() => this.showJoinSheet() || this.showCreateModal() || this.showEditModal() || this.showUpgradeDialog() || !!this.shareModalGameId());
 
   ngOnDestroy(): void {
+    this.scrollGrow?.destroy();
     if (typeof document !== 'undefined') document.body.classList.remove('has-phone-bar', 'has-host-bar');
   }
 
