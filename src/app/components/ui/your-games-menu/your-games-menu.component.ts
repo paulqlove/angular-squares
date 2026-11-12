@@ -156,10 +156,15 @@ const CLOSE_MS = 220;
               autocapitalize="characters"
               autocomplete="off"
               spellcheck="false"
+              [attr.aria-invalid]="notFound() ? 'true' : null"
+              [attr.aria-describedby]="notFound() ? 'your-games-code-error' : null"
               class="min-h-11 min-w-0 flex-1 rounded-btn border border-qs-line-strong bg-qs-panel-2 px-3 text-center font-mono text-base uppercase tracking-[0.2em] text-qs-ink"
             />
             <button type="submit" class="qs-btn qs-btn-primary" [disabled]="!codeValid()">Join</button>
           </form>
+          @if (notFound()) {
+            <p id="your-games-code-error" class="qs-error-in px-3 pb-1.5 text-sm text-qs-bad" role="alert">Game not found</p>
+          }
         } @else {
           <button type="button" (click)="startJoin()" class="flex min-h-11 items-center gap-3 rounded-btn px-3 text-left text-sm transition-colors hover:bg-qs-panel-2">
             <ng-icon name="heroHashtag" class="shrink-0 text-lg text-qs-muted"></ng-icon>
@@ -196,6 +201,7 @@ export class YourGamesMenuComponent {
       this.closing.set(false);
       this.joining.set(false);
       this.code.set('');
+      this.notFound.set(false);
     }, CLOSE_MS);
     if (returnFocus && !this.phone()) this.trigger()?.nativeElement.focus({ preventScroll: true });
   }
@@ -243,6 +249,8 @@ export class YourGamesMenuComponent {
   protected footerIndex = computed(() => (this.loaded() ? this.rows().length : 3));
   protected joining = signal(false);
   protected loaded = signal(false);
+  /** Set when Join finds no game with the typed code. Cleared as soon as they edit the code. */
+  protected notFound = signal(false);
   protected open = signal(false);
   /** Half the button's width, so the popover grows from under the button's middle. */
   protected originX = signal(60);
@@ -262,9 +270,19 @@ export class YourGamesMenuComponent {
     return miniGridClass(row.boardSize);
   }
 
-  protected join(): void {
-    if (!this.codeValid()) return;
+  /** Opens the game, or says "Game not found" under the field and keeps the code there when no game has it. */
+  protected async join(): Promise<void> {
+    if (!this.codeValid() || this.checking) return;
     const code = this.code();
+    this.checking = true;
+    // A failed check (offline) still goes to the game page, as before
+    const found = await this.gameService.gameExists(code).catch(() => true);
+    this.checking = false;
+    if (code !== this.code()) return;
+    if (!found) {
+      this.notFound.set(true);
+      return;
+    }
     this.close();
     void this.router.navigate(['/game', code]);
   }
@@ -272,6 +290,7 @@ export class YourGamesMenuComponent {
   /** Keeps the field to letters and digits, upper-cased. No maxlength on the field: it would cut a pasted "ABC-123" to "ABC-12" before the dash is dropped. */
   protected setCode(input: HTMLInputElement): void {
     this.code.set(normalizeCodeInput(input));
+    this.notFound.set(false);
   }
 
   protected startJoin(): void {
@@ -280,6 +299,8 @@ export class YourGamesMenuComponent {
   }
 
   private auth = inject(AuthService);
+  /** True while Join checks the code, so a double tap doesn't check twice. */
+  private checking = false;
   private closeTimer: ReturnType<typeof setTimeout> | undefined;
   private gameService = inject(GameService);
   private host = inject<ElementRef<HTMLElement>>(ElementRef);

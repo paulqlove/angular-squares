@@ -627,6 +627,10 @@ body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
 @keyframes qs-icon-pop { from { opacity: .4; transform: scale(.6); } }
 .qs-fade-rise { animation: qs-rise-in 180ms var(--qs-ease) backwards; }
 .qs-tab-in { animation: qs-rise-in 160ms var(--qs-ease) backwards; }
+/* A field's error message: fades in and rises 4px, 160ms, no shake (docs/DESIGN.md, Form errors). */
+@keyframes qs-error-in { from { opacity: 0; transform: translateY(4px); } }
+.qs-error-in { animation: qs-error-in 160ms var(--qs-ease) backwards; }
+@media (prefers-reduced-motion: reduce) { .qs-error-in { animation: none; } }
 .icon-pop { animation: qs-icon-pop 280ms var(--qs-ease-spring) both; }
 
 /* The number draw: each digit rises 4px into place over 300ms (decelerate), 40ms after the one before it.
