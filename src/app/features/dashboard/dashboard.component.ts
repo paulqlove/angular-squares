@@ -466,8 +466,8 @@ function readCardView(): CardView {
       }
 
       <ng-template #searchField let-where>
-        <div class="qs-search-field flex h-11 min-w-0 flex-1 items-center gap-2 rounded-btn border border-qs-line-strong bg-qs-panel-2 pl-3 pr-0 focus-within:outline focus-within:outline-[3px] focus-within:outline-offset-2 focus-within:outline-qs-ink" [class.sm:w-80]="where === 'desk'">
-          <ng-icon name="heroMagnifyingGlass" class="shrink-0 text-xl text-qs-muted" aria-hidden="true"></ng-icon>
+        <div class="qs-search min-w-0 flex-1" [class.sm:w-80]="where === 'desk'">
+          <ng-icon name="heroMagnifyingGlass" class="qs-search-icon" aria-hidden="true"></ng-icon>
           <input
             #searchInput
             type="search"
@@ -481,11 +481,10 @@ function readCardView(): CardView {
             placeholder="Search games"
             aria-label="Search games"
             [attr.tabindex]="where === 'phone' && !searchOpen() ? -1 : null"
-            class="qs-search-input min-w-0 flex-1 bg-transparent text-base text-qs-ink placeholder:text-qs-muted focus:outline-none"
           />
           @if (gameSearch()) {
-            <button type="button" (click)="clearSearch(where)" class="qs-search-clear -my-px -mr-px flex h-11 w-11 shrink-0 items-center justify-center rounded-btn text-qs-muted hover:text-qs-ink" aria-label="Clear search" [attr.tabindex]="where === 'phone' && !searchOpen() ? -1 : null">
-              <ng-icon name="heroXMark" class="text-base" aria-hidden="true"></ng-icon>
+            <button type="button" (click)="clearSearch(where)" class="qs-search-clear" aria-label="Clear search" [attr.tabindex]="where === 'phone' && !searchOpen() ? -1 : null">
+              <ng-icon name="heroXMark" aria-hidden="true"></ng-icon>
             </button>
           }
         </div>
@@ -516,18 +515,17 @@ function readCardView(): CardView {
         </div>
       </app-modal>
 
-      <!-- Grid or Compact cards: two joined icon tabs at the right end of the list heading, from 640px up (phones always show the compact row) -->
+      <!-- Grid or Compact cards: two borderless icon buttons at the right end of the list heading, from 640px up (phones always show the compact row) -->
       <ng-template #viewToggle>
-        <div role="group" aria-label="Card view" class="hidden shrink-0 sm:flex">
-          @for (v of cardViews; track v.id; let first = $first) {
+        <div role="group" aria-label="Card view" class="hidden shrink-0 gap-0.5 sm:flex">
+          @for (v of cardViews; track v.id) {
             <button
               type="button"
               (click)="setCardView(v.id)"
               [attr.aria-pressed]="cardView() === v.id"
               [attr.aria-label]="v.label + ' view'"
               [title]="v.label + ' view'"
-              class="qs-tab qs-view-btn w-11 px-0"
-              [class]="first ? 'rounded-r-none' : '-ml-px rounded-l-none'"
+              class="qs-view-btn"
             >
               <ng-icon [name]="v.icon" class="text-xl" aria-hidden="true"></ng-icon>
             </button>
@@ -720,15 +718,12 @@ function readCardView(): CardView {
       .qs-grid-view .qs-mini-taken { background: color-mix(in srgb, var(--qs-tile-ink) 36%, var(--qs-tile)); }
       .qs-grid-view .qs-mini-blank { background: var(--qs-tile); }
     }
-    /* Search field and view toggle: one 44px control family, ink focus ring only (global), no green */
-    .qs-search-field { transition: border-color var(--qs-t-fast) var(--qs-ease); }
-    @media (hover: hover) { .qs-search-field:hover { border-color: var(--qs-ink); } }
-    .qs-search-clear { transition: color var(--qs-t-fast) var(--qs-ease), transform var(--qs-t-fast) var(--qs-ease); }
-    .qs-search-clear:active, .qs-view-btn:active { transform: scale(.97); transition-duration: var(--qs-t-press); transition-timing-function: var(--qs-ease-in); }
-    .qs-view-btn { transition-property: background-color, color, border-color, transform; }
-    .qs-view-btn:hover, .qs-view-btn[aria-pressed="true"] { position: relative; z-index: 1; }
-    .qs-view-btn:focus-visible { position: relative; z-index: 2; }
-    @media (hover: none) { .qs-view-btn:hover:not([aria-pressed="true"]) { border-color: var(--qs-line); } }
+    /* Grid / Compact: borderless 44px icon buttons; muted at rest, panel-2 on hover, ink when pressed. Global focus ring. */
+    .qs-view-btn { display: flex; width: 44px; height: 44px; align-items: center; justify-content: center; border-radius: var(--qs-r-btn); color: var(--qs-muted);
+      transition: background-color var(--qs-t-fast) var(--qs-ease), color var(--qs-t-fast) var(--qs-ease), transform var(--qs-t-fast) var(--qs-ease); }
+    @media (hover: hover) { .qs-view-btn:hover:not([aria-pressed="true"]) { background: var(--qs-panel-2); color: var(--qs-ink); } }
+    .qs-view-btn[aria-pressed="true"] { background: var(--qs-ink); color: var(--qs-bg); }
+    .qs-view-btn:active { transform: scale(.97); transition-duration: var(--qs-t-press); transition-timing-function: var(--qs-ease-in); }
   `]
 })
 export class DashboardComponent implements OnInit, OnDestroy {

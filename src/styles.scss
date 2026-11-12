@@ -77,6 +77,8 @@ html, body {
   --qs-ease-decel: cubic-bezier(.2,0,0,1); /* menus, sheets and the board switch coming in */
   --qs-ease-exit: cubic-bezier(.3,0,1,1); /* menus leaving: quick, plain, no squash */
   --qs-ease-sheet-out: cubic-bezier(.3,0,.8,.15); /* phone sheets and their dim leaving together */
+  /* Search fields: borderless, ink mixed 12% into the panel (about #e2e2e3 light, #384150 dark) */
+  --qs-search-fill: color-mix(in srgb, var(--qs-ink) 12%, var(--qs-panel));
   --qs-t-press: 80ms; --qs-t-fast: 120ms; --qs-t-menu: 150ms; --qs-t-state: 200ms; --qs-t-sheet: 240ms; --qs-t-reveal: 450ms;
 }
 
@@ -331,6 +333,35 @@ html, body {
   .qs-input:focus { outline: none; border-color: var(--qs-ink); box-shadow: 0 0 0 1px var(--qs-ink); }
   .qs-input-error { border-color: var(--qs-bad); background: var(--qs-bad-soft); }
 
+  /* Search field: one shared borderless field (dashboard, Search teams, Search players). Icon, input, optional clear. */
+  .qs-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    height: 44px;
+    padding: 0 12px;
+    border-radius: var(--qs-r-btn);
+    background: var(--qs-search-fill);
+    color: var(--qs-ink);
+    transition: box-shadow var(--qs-t-fast) var(--qs-ease);
+  }
+  .qs-search:focus-within { box-shadow: inset 0 0 0 2px var(--qs-ink); }
+  .qs-search:has(.qs-search-clear) { padding-right: 0; }
+  .qs-search > .qs-search-icon { flex-shrink: 0; font-size: 20px; color: var(--qs-muted); }
+  .qs-search input { flex: 1; min-width: 0; height: 100%; border: 0; background: transparent; color: inherit; font-size: 16px; }
+  .qs-search input::placeholder { color: var(--qs-muted); opacity: 1; }
+  .qs-search input:focus, .qs-search input:focus-visible { outline: none; }
+  .qs-search input::-webkit-search-cancel-button { appearance: none; }
+  .qs-search-clear {
+    display: flex; flex-shrink: 0; align-items: center; justify-content: center;
+    width: 44px; height: 44px; border-radius: var(--qs-r-btn);
+    font-size: 16px; color: var(--qs-muted);
+    transition: color var(--qs-t-fast) var(--qs-ease), transform var(--qs-t-fast) var(--qs-ease);
+  }
+  .qs-search-clear:hover { color: var(--qs-ink); }
+  .qs-search-clear:active { transform: scale(.97); transition-duration: var(--qs-t-press); transition-timing-function: var(--qs-ease-in); }
+
   .qs-card {
     background: var(--qs-panel);
     border: 1px solid var(--qs-line);
@@ -542,7 +573,6 @@ body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
   transition: opacity var(--qs-t-fast) var(--qs-ease-exit), transform var(--qs-t-fast) var(--qs-ease-exit); }
 .qs-swap.qs-swap-left { transform: translateX(-12px); }
 .qs-swap.qs-swap-right { transform: translateX(12px); }
-.qs-search-input::-webkit-search-cancel-button { appearance: none; }
 
 @keyframes qs-rise-in { from { opacity: 0; transform: translateY(6px); } }
 @keyframes qs-icon-pop { from { opacity: .4; transform: scale(.6); } }
