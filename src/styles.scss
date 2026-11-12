@@ -66,6 +66,9 @@ html, body {
   --qs-r-chip: 4px; --qs-r-btn: 6px; --qs-r-inner: 8px; --qs-r-card: 10px; --qs-r-bar: 12px; --qs-r-pill: 999px;
   --qs-shadow: 0 10px 28px -22px rgba(15,23,42,.4);
   --qs-shadow-pop: 0 16px 40px -16px rgba(15,23,42,.45);
+  /* the walkthrough: page dim around the spotlight, and the step card's lift */
+  --qs-tour-dim: rgba(15,23,42,.42);
+  --qs-shadow-tour: 0 0 0 1px rgba(15,23,42,.06), 0 24px 56px -12px rgba(15,23,42,.55);
 
   /* motion */
   --qs-ease: cubic-bezier(.2,.7,.2,1);
@@ -91,6 +94,7 @@ html, body {
     --qs-tile: #020617; --qs-tile-ink: #f3efe8;
     --qs-shadow: 0 10px 28px -22px rgba(0,0,0,.8);
     --qs-shadow-pop: 0 16px 40px -16px rgba(0,0,0,.85);
+    --qs-tour-dim: rgba(2,6,23,.62); --qs-shadow-tour: 0 0 0 1px rgba(243,239,232,.06), 0 24px 56px -12px rgba(0,0,0,.9);
     --qs-p-rose: #d29aa3; --qs-p-coral: #d4a28c; --qs-p-apricot: #cfaf80; --qs-p-butter: #c9ba7c; --qs-p-tan: #b9a68e; --qs-p-sky: #93aacb; --qs-p-aqua: #91b3c1; --qs-p-periwinkle: #9ea1cc; --qs-p-lilac: #ae9cc6; --qs-p-orchid: #c49ab8;
   }
 }
@@ -106,6 +110,7 @@ html, body {
   --qs-tile: #020617; --qs-tile-ink: #f3efe8;
   --qs-shadow: 0 10px 28px -22px rgba(0,0,0,.8);
   --qs-shadow-pop: 0 16px 40px -16px rgba(0,0,0,.85);
+  --qs-tour-dim: rgba(2,6,23,.62); --qs-shadow-tour: 0 0 0 1px rgba(243,239,232,.06), 0 24px 56px -12px rgba(0,0,0,.9);
   --qs-p-rose: #d29aa3; --qs-p-coral: #d4a28c; --qs-p-apricot: #cfaf80; --qs-p-butter: #c9ba7c; --qs-p-tan: #b9a68e; --qs-p-sky: #93aacb; --qs-p-aqua: #91b3c1; --qs-p-periwinkle: #9ea1cc; --qs-p-lilac: #ae9cc6; --qs-p-orchid: #c49ab8;
 }
 
@@ -428,21 +433,6 @@ body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
   animation: pulse-subtle 2s ease-in-out infinite;
 }
 
-@keyframes tooltip-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-tooltip-in {
-  animation: tooltip-in 0.2s var(--qs-ease);
-}
-
 /* ---- Motion ------------------------------------------------------------------------------------------------
    Rules: feedback and state changes only, never decorative; nothing waits on an animation (leaving elements stop taking
    clicks at once); only transform and opacity; enters ease out (200ms), exits ease in (120ms); reduced motion collapses
@@ -496,6 +486,16 @@ body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
 /* The chevron turns with the popover: 150ms open, 120ms close */
 .yg-chevron { transition: transform 150ms var(--qs-ease-decel); }
 .yg-chevron:not(.rotate-180) { transition-duration: 120ms; transition-timing-function: var(--qs-ease-exit); }
+
+/* Walkthrough: the dim and spotlight fade in like a dialog's backdrop (150ms) and out in 120ms; the step card rises
+   like a dialog panel. Between steps the card stays up and its words crossfade (in 200ms, out 120ms). */
+.qs-tour-card { box-shadow: var(--qs-shadow-tour); }
+.qs-tour-enter { animation: qs-fade-in var(--qs-t-menu) var(--qs-ease-decel) both; }
+.qs-tour-enter .qs-tour-card { animation: qs-pop-in var(--qs-t-state) var(--qs-ease) backwards; }
+.qs-tour-leave { animation: qs-fade-out var(--qs-t-fast) var(--qs-ease-exit) both; }
+.qs-tour-leave .qs-tour-card { animation: qs-pop-out var(--qs-t-fast) var(--qs-ease-exit) both; pointer-events: none; }
+.qs-tour-swap-in { animation: qs-fade-in var(--qs-t-state) var(--qs-ease-decel) backwards; }
+.qs-tour-swap-out { animation: qs-fade-out var(--qs-t-fast) var(--qs-ease-exit) both; pointer-events: none; }
 
 /* Panels that carry the class themselves (dashboard modals, shrink dialog) */
 .animate-modal-in { animation: qs-pop-in 200ms var(--qs-ease) backwards; }
