@@ -7,5 +7,4 @@ Disallow: /spa.html
 # A plain-text guide to the site for them: https://quarterscore.com/llms.txt
 # The full text of every guide: https://quarterscore.com/llms-full.txt
 
-Agentmap: https://quarterscore.com/.well-known/ard.json
 Sitemap: https://quarterscore.com/sitemap.xml

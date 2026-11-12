@@ -138,7 +138,7 @@ Game owners can link a board to an ESPN game. `environment.serverScoring` defaul
 - **Build command**: `npm run build` outputs to `dist/angular-squares/`
 - **Deploy**: merging to `main` runs `.github/workflows/firebase-hosting-merge.yml`, which builds and deploys to the `live` channel. PRs get a preview channel from `firebase-hosting-pr.yml`. There is no manual deploy command, and `ng deploy` / GitHub Pages is no longer used.
 - **Prerender routes**: `npm start` and builds run `scripts/build-content.mjs`, which fails on any route it doesn't know. Add client-only routes to its `clientRoutes` set.
-- **AI agent files**: the same script writes `src/llms.txt` and `src/llms-full.txt` from the page data (`scripts/agent-files.mjs`). When a feature changes, update its `FACTS` list, `public/skills/football-squares/SKILL.md` and the WebApplication JSON-LD on the welcome page. The agent manifest is `public/.well-known/ard.json`, linked from `robots.txt` (`Agentmap:`) and `index.html` (`rel="ard"`).
+- **AI agent files**: the same script writes `src/llms.txt` and `src/llms-full.txt` from the page data (`scripts/agent-files.mjs`). When a feature changes, update its `FACTS` list, `public/skills/football-squares/SKILL.md` and the WebApplication JSON-LD on the welcome page. The agent manifest is `public/.well-known/ard.json`, linked from `index.html` (`rel="ard ai-catalog"`). Keep `specVersion: "1.0"` and an entry `type` that both Lighthouse 13.5 and 13.6 accept (`text/markdown; profile="urn:air:agent-skills"`). Don't add `Agentmap:` to `robots.txt`: Lighthouse's robots.txt audit calls it an unknown directive and SEO drops to 92.
 
 ## Prompt Gaps
 
