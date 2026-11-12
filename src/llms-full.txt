@@ -1,0 +1,362 @@
+# QuarterScore: full guide text
+
+> QuarterScore is a free website for running football squares (also called Super Bowl squares) online. A host makes a 100, 50 or 25 square board and shares one link, friends claim squares by typing a name, and live scores pick the winner of each quarter. QuarterScore never collects, holds, or pays out money.
+
+This file collects the text of every guide on https://quarterscore.com/ so an assistant can answer from one place. Each section names the page it came from.
+
+## Key facts
+
+- Free to use. Creating a board and claiming squares costs nothing.
+- QuarterScore never collects, holds, or pays out money. Most groups play for bragging rights.
+- Players do not need an account. They open the link and type a name on a square. Only the host signs in, to save and run the board.
+- Boards come in 100, 50 or 25 squares.
+- A board is shared by one link or a six-character game code. Games are not listed in a public directory.
+- Squares update in real time for everyone on the board.
+- The host locks the board, then the digits 0 through 9 are drawn at random for the rows and the columns, so nobody picks a digit.
+- Quarter winners are found automatically from the last digit of each team's score.
+- Boards can follow a live game: the score and clock come from ESPN, for NFL, NCAA football, UFL, NBA, WNBA and AFL games. Any other game works as a custom board with your own team names.
+- Points split 20, 20, 20 and 40 percent across the four quarters as standard. These are points, never money.
+- If a quarter's winning square is empty, the host chooses whether its points roll into the final quarter or are shared across the other quarters.
+- Hosts can mark players as checked in or paid, add a co-host, and leave a short note on the board.
+- TV mode puts the board, live score, quarter winners and a QR code to join on a big screen. It can rotate through several boards every 10 to 60 seconds, and Copy TV link opens it on any screen with no sign-in.
+- A printable blank 10 by 10 grid and a PDF are free to download.
+- The Best numbers page and the Hit rate tab show how often each last-digit pair has come up in historical scoring.
+
+## How to play football squares
+
+Source: https://quarterscore.com/how-to-play
+
+Football squares is a free board for friends and fans. Choose 100, 50, or 25 squares, add two teams, and pick a winner at the end of each quarter. You do not need to know the sport.
+
+### Steps
+
+1. Create a board: The host names the two teams, picks the sport and signs in to save the board. Then share the link or the six-character code.
+2. Claim squares by name: Friends open the link and type a name on empty squares. Players do not need an account.
+3. Lock and draw the numbers: After the squares are claimed, the host locks the board, then draws the digits 0 through 9 down the side and across the top.
+4. Match the score each quarter: When a quarter ends, take the last digit of each team’s score. The row digit and the column digit meet on one square. That name wins the quarter.
+
+### The grid
+
+A standard board is 10 rows by 10 columns. Each square can hold one name. One team runs down the rows. The other runs across the columns. The digits 0 through 9 are assigned to each side only after people have claimed squares, so nobody can pick a digit on purpose.
+
+### How a quarter is decided
+
+Scores use the last digit only. A score of 17 counts as 7. A score of 20 counts as 0. If the away team’s last digit is on row 7 and the home team’s last digit is on column 0, the square where that row and column meet is the quarter’s square.
+
+Most groups play for bragging rights. The suggested 20, 20, 20 and 40 percent split is only a label. It is not a payment.
+
+### Board sizes
+
+Pick the size that fits your group. Smaller boards fill faster and give each square more chances to win.
+
+- 100 squares: large parties and offices.
+- 50 squares: medium groups.
+- 25 squares: small gatherings.
+
+### 100 squares
+
+10 rows by 10 columns, one digit each. Every square is one possible score.
+
+### 50 squares
+
+5 rows by 10 columns. The side uses digit pairs, so each square covers two scores.
+
+### 25 squares
+
+5 rows by 5 columns. Both sides use digit pairs, so each square covers four scores.
+
+### Overtime and empty squares
+
+Agree on the rules before kickoff. Most groups count overtime in the final score.
+
+If nobody holds a winning square, that quarter has no winner. QuarterScore moves its points using the rule the host picked. If a quarter ends on the same digits as the one before, the same square wins again.
+
+## Football squares FAQ
+
+Source: https://quarterscore.com/faq
+
+Short answers for hosts and players. Squares here is a free game for friends and fans, with bragging rights.
+
+### Still setting the board up?
+
+The rules page walks through the grid, the draw, and how a quarter winner is chosen. The printable page is there if you also want a paper copy on the wall.
+
+### Questions
+
+**Does QuarterScore cost money?**
+
+No. Creating a board and claiming squares is free. QuarterScore never collects, holds, or pays out money.
+
+**Do players need an account?**
+
+No. Anyone with the link can claim a square by typing a name. The host signs in to save the board, lock it, and change settings.
+
+**How are the numbers randomized?**
+
+The host locks the board, then draws the numbers. A shuffle assigns the digits 0 through 9 once down the rows and once across the columns. Do this after squares are claimed, so the draw is the same for everyone and nobody chooses a digit.
+
+**Are games private?**
+
+A game is reached by its link or six-character code. It is not listed in a public directory. Anyone who has the code can open the board, so share it only with your group.
+
+**What happens in overtime?**
+
+Set the rule before kickoff. Most groups let overtime count toward the final score, and the final square uses the score at the end of the game. Post the rule on the board so nobody is surprised.
+
+**What if the board is not full?**
+
+Empty squares can still be the winning square if the score lands there. When that happens the quarter has no winner, and QuarterScore moves its points for you. The host picks the rule when creating the board and can change it later from Edit game: roll the points into Q4 (if Q4 has no winner either, Q4's points are split among the other quarters), or split them across the other quarters. You can also leave the board unlocked until more people claim a square.
+
+**What if the score does not change in a quarter?**
+
+The last digits stay the same, so the same square wins that quarter too. That is a normal result, not a mistake.
+
+**Can I see which squares show up most often?**
+
+Yes. Open Best numbers for the historical table, or use the Hit rate tab on a live board after the digits are drawn. The table is about how often digit pairs have appeared. It is not a promise about your game.
+
+**Does QuarterScore handle money?**
+
+No. QuarterScore never collects, holds, or pays out money. Hosts who track who brought a contribution do that outside the app, and they follow their own local rules.
+
+## Super Bowl squares
+
+Source: https://quarterscore.com/super-bowl-squares
+
+Make the board before either team is known. Add the team names when the matchup is announced and keep the same link.
+
+QuarterScore is not affiliated with, endorsed by, or sponsored by the NFL, NBA, or NCAA. Team and event names are used only to describe the games.
+
+### Make the board before the matchup is set
+
+Squares does not need the teams. Friends claim a square by name, then you draw the digits. When the matchup is announced, add the team names and keep the same link.
+
+February 14 is also Valentine’s Day in 2027. One board still works for a party that mixes fans and people who came for the snacks. Nobody has to understand the sport.
+
+### What the host does
+
+Create the board, share the link, and ask people to claim squares in the weeks before the game. On game day, lock the board, draw the numbers where everyone can see the draw, and leave it on a TV.
+
+- One link for the group chat, the office, or the party.
+- Players claim squares without creating an account.
+- Each quarter, the last digit of each score names the square.
+- Celebrate moments, not money. Bragging rights are enough.
+
+### Rules to post early
+
+Write down what you will do with overtime, with a square nobody claimed, and with a quarter that ends on the same digits as the one before. The how-to-play page is the short version you can send with the link.
+
+## Thanksgiving football squares
+
+Source: https://quarterscore.com/thanksgiving-football-squares
+
+A full slate of games and a house full of people. Squares gives everyone a reason to watch, including guests who do not follow the sport.
+
+### One board or one per game
+
+A single board is easier to explain while the turkey is being carved. Separate boards help if different relatives want different games. Share one link in the family thread, and people in another city can claim a square on their phone.
+
+### Rewards that fit the day
+
+First pick of leftovers, a pass on dishes, or picking the next movie is plenty. Say it out loud before you draw numbers.
+
+- Create the board the weekend before, not during dinner.
+- Draw numbers after the last guest has claimed a square.
+
+### Kids and non-fans
+
+The rule is only “your digits match the end of the score.” A child can claim a square under their own name and check the board at the end of the quarter.
+
+## NFL squares
+
+Source: https://quarterscore.com/nfl-squares
+
+The same 10 by 10 board works for a Thursday game, a Sunday slate, or a one-off with friends. Pick the game, share the link, and draw the numbers when the squares are claimed.
+
+### What you set up
+
+Create a board and choose NFL. Add the two teams and send the link. Friends type their names on open squares. When you are ready, lock the board and draw the numbers. Each quarter, the last digit of each score points at one square.
+
+### A board you can run every week
+
+Some groups play one game a week all season. Each game gets its own board and link, so old scores stay put.
+
+- No account for the people claiming squares.
+- A code for anyone standing in the room.
+- A Hit rate tab after the draw, from the same table as the best-numbers page.
+
+## NFL playoff squares
+
+Source: https://quarterscore.com/nfl-playoff-squares
+
+Playoff games are an easy reason to run another board. Give each game its own.
+
+### One board per game
+
+A weekend can have several games. Give each its own board so the quarter winners stay attached to the right score, and share the links in one message labeled by kickoff.
+
+### Use January as a practice run
+
+If you will also play on February 14, use a playoff board to settle the house rules. Decide overtime and empty squares once, then copy that note onto the big-game board.
+
+## College football squares
+
+Source: https://quarterscore.com/college-football-squares
+
+The same squares rules as every other football board. Choose NCAA Football, name the two teams, and send the link.
+
+### Which games people host
+
+Bowl season stacks games close together. One board per game keeps the winners clear, and a New Year’s party can have two or three boards on the same TV if you label the links with the kickoff time.
+
+### The number table is from NFL history
+
+The Hit rate tab is built from professional football scores. College totals run higher, so treat it as a curiosity. The board itself does not care: last digit of each score, one square, one name.
+
+## Donation squares
+
+Source: https://quarterscore.com/football-squares-fundraiser
+
+Squares can bring supporters around a game. These are formats where the cause is the winner. If you want players to receive anything of value, stop and check your state’s charitable gaming rules first. In many states that is regulated or not allowed.
+
+### Formats that keep the focus on the cause
+
+Pick one of these and write it at the top of the board. Do not mix them.
+
+- Free to claim, with a separate optional donation. Anyone can take a square without donating, and everyone has the same chance at a thank-you gift from a sponsor. The donation link lives somewhere else.
+- A board with nothing to win. Supporters take a square to back the cause and get a thank-you on the board.
+- The winning square picks the charity. Supporters name a charity, and each quarter’s winning square decides which one gets the shout-out.
+
+### What this page does not teach
+
+A board that charges for a square and then pays part of that money to the people whose squares come up is a different thing, and it is unlawful in many places even when a charity keeps a share. This site will not walk through that setup.
+
+Schools, booster clubs, and congregations often have their own policies on top of state law. Ask them before you announce anything.
+
+### How the board helps
+
+Use QuarterScore for names, the draw and the results. Put the thank-you and the rule in the game name or the message where you share the link, and collect any donation through the tool your organization already uses.
+
+QuarterScore is a free board and scoring tool. We never collect, hold, or pay out money. Raffles and games of chance are regulated by state law and often limited to qualified nonprofits. Check your state’s rules and your school, district, or organization’s policies before you start. This page is not legal advice.
+
+## NBA squares
+
+Source: https://quarterscore.com/nba-squares
+
+The same grid and the same last-digit rule. Scores are higher and quarters are shorter, but your group does not need to learn a new game.
+
+### What changes and what does not
+
+You still have 100 squares and digits 0 through 9 on the rows and columns. A score of 28 counts as 8, the same way a football score of 17 counts as 7.
+
+Choose NBA when you create the board so it is labeled for basketball. The football hit rates do not describe basketball scoring.
+
+### Which games to pick
+
+One marquee game is enough for a group text. For a playoff series, make a board per game so each final score has a clear winner.
+
+## Football squares on TV
+
+Source: https://quarterscore.com/football-squares-on-tv
+
+Put your board on a big screen: the board, the score, each quarter winner and a code friends can scan to follow along. Free for every account.
+
+### What the screen shows
+
+The screen fills the window, from a laptop to a 4K TV, with no scrolling.
+
+- The board, with each player’s squares in their own color.
+- The live score and clock, when the board is linked to a live game.
+- The winner of each quarter, and how many squares are claimed and open.
+- A QR code so friends can follow on their phones. They do not need an account.
+
+### Get it on the TV
+
+On a computer, open your game, open your profile menu at the top right and choose **Present on a TV**. It is there for the host and co-host. Then send that tab to the TV. We have not tested every TV, so try yours before game day.
+
+- Chrome or Edge: browser menu, **Cast**, pick your TV, **Sources**, **Cast tab**. Same Wi-Fi for both.
+- Safari on a Mac: **Control Center**, **Screen Mirroring**, pick your Apple TV or AirPlay TV.
+- Any browser: use an HDMI cable, or open the page in the TV’s own browser.
+- No mirroring: tap **Copy TV link** and open it on any device. It shows the board live and needs no sign-in.
+
+### More than one board
+
+Signed in, press the clock button at the top right of TV mode and pick how often to switch, from 10 to 60 seconds. TV mode rotates through all your boards, and **Stop** holds one on screen. The arrow keys switch boards by hand. It suits a bar or a gathering where several groups each have a board.
+
+### Game-day checklist
+
+- The day before: choose **Present on a TV** and check the TV shows it.
+- Link the board to the live game so the score and clock appear.
+- Put the TV where everyone can see the QR code.
+- After the game: the Q4 tile says **Final**. Read the winners from the screen.
+
+## Terms of use
+
+Source: https://quarterscore.com/terms
+
+QuarterScore is a free board for organizing a squares game with friends and fans. These terms are the rules for using the site.
+
+### The service
+
+You can create a board, share its link, claim squares by name, draw digits, and record scores. The site is provided as-is, without a promise that it will always be available or error-free.
+
+QuarterScore never collects, holds, or pays out money. Anything your group arranges stays between the people in that group. Hosts are responsible for following the law where they live, including rules on games of chance.
+
+### Your board
+
+Do not use the site for anything unlawful, and do not put someone else’s personal information on a square without a reason they would expect. Game links are secrets by default. Anyone with the link can view that board. If a host turns on “Show in my open boards”, that board’s name, teams, points per square and open-square count can be seen by anyone who opens another of that host’s boards.
+
+We may remove a board that breaks these terms or that we are required to remove. You may stop using the site at any time.
+
+## Privacy
+
+Source: https://quarterscore.com/privacy
+
+QuarterScore stores what it needs to run a board. It does not sell personal information, and it never collects, holds, or pays out money.
+
+### What is stored
+
+If you sign in, the account provider gives us an identifier and, when you allow it, your name, email, and photo. A guest can save a display name in a cookie on that device so the board can show it. You can clear that cookie in your browser.
+
+Boards store the game name, team names, the names typed onto squares, scores, and settings such as whether the board is locked. That information is visible to anyone with the game link. A host can also choose to show a board in their open boards, which shows its name, teams, points per square and open-square count to people looking at that host’s other boards.
+
+### What we do not do
+
+We do not sell personal information. We do not ask for payment card numbers. Analytics, when it is turned on, uses a first-party analytics identifier to count visits and is not used to build an advertising profile or for ads. If a measurement id is not configured, analytics does not load.
+
+Hosting, sign-in, and the database are provided by Google. Their systems process the data required to deliver those services.
+
+### Your choices
+
+Do not put a name on a square if you do not want people with the link to see it. Sign out on a shared computer. Clearing the site’s cookie removes the guest name from that browser.
+
+## Contact us
+
+Source: https://quarterscore.com/contact
+
+Stuck on a board, found a bug, or have an idea? Send an email and a real person will read it.
+
+### Email us
+
+One address for everything: shown on https://quarterscore.com/contact.
+
+### What to include
+
+A few details help us fix things faster.
+
+- The link to your board (the address in your browser). Please do not send passwords.
+- What you expected to happen and what happened instead.
+- Your device and browser, for example iPhone Safari or Chrome on a Mac.
+- A screenshot, if you have one.
+
+### Good to know
+
+Most questions are answered in the FAQ and the how-to-play guide, linked below. QuarterScore is a small independent project, so replies can take a day or two, and game days are the busiest.
+
+## Best squares numbers
+
+Source: https://quarterscore.com/best-squares-numbers
+
+How often each pair of last digits (away team, home team) has shown up in historical scoring, in percent. One grid covers the whole game, because the source does not split it by quarter. History is not a promise about any one game.
+
+The five most common pairs: 7 and 0 (3.5%), 0 and 7 (3.4%), 4 and 7 (2.9%), 7 and 4 (2.9%), 0 and 3 (2.8%).

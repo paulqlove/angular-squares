@@ -65,6 +65,21 @@
                 "glob": "rss.xml",
                 "input": "src",
                 "output": "/"
+              },
+              {
+                "glob": "{llms.txt,llms-full.txt}",
+                "input": "src",
+                "output": "/"
+              },
+              {
+                "glob": "ard.json",
+                "input": "public/.well-known",
+                "output": "/.well-known"
+              },
+              {
+                "glob": "**/*",
+                "input": "public/skills",
+                "output": "/skills"
               }
             ],
             "styles": [

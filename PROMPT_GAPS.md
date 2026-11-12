@@ -41,3 +41,16 @@ Review periodically and promote useful entries into CLAUDE.md.
 > Production is Firebase Hosting. Every push to `main` deploys quarterscore.com through GitHub Actions. PRs get a preview URL. GitHub Pages (`ng deploy`) is only the rollback target. The app is Angular 22, Node 24.15+ (see `.nvmrc`), and tests run on Vitest (`npm test`), not Karma.
 
 **Status:** Open
+
+---
+
+### 2026-11-12 — Free plan limits aren't in CLAUDE.md
+
+**What went wrong:** While writing llms.txt, I first listed custom quarter splits as a feature everyone gets. `core/plans.ts` gates custom splits, extra active boards, auto-manage and square limits behind the Season Pass, and free hosts keep 20/20/20/40 with one active board.
+
+**Assumption made:** That every feature on the board is free, because the marketing pages say "free".
+
+**Suggested CLAUDE.md addition:**
+> Plans live in `core/plans.ts`. Free hosts get one active board and the 20/20/20/40 split; the Season Pass adds custom splits, more boards, auto-manage and square limits. Public copy (marketing pages, llms.txt, JSON-LD) only promises free-plan features, and doesn't mention the pass until checkout is live.
+
+**Status:** Open

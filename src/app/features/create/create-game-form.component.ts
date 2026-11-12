@@ -47,9 +47,9 @@ export interface CreateGameSubmit {
     @switch (step()) {
       @case (1) {
         <div class="flex min-h-0 flex-1 flex-col gap-6" animate.enter="qs-tab-in">
-          <h3 id="create-step-heading" tabindex="-1" class="sr-only">Your game</h3>
+          <h2 id="create-step-heading" tabindex="-1" class="sr-only">Your game</h2>
           <section>
-  <h4 class="qs-label text-qs-muted">Sport</h4>
+  <h3 class="qs-label text-qs-muted">Sport</h3>
   <div class="mt-2 flex flex-wrap gap-2" role="group" aria-label="Sport">
     @for (sport of sportOptions; track sport.value) {
       <button
@@ -64,7 +64,7 @@ export interface CreateGameSubmit {
   </div>
 </section>
           <section class="flex min-h-0 flex-1 flex-col">
-  <h4 class="qs-label text-qs-muted">{{ selectedSport === 'custom' ? 'Teams' : 'Game' }}</h4>
+  <h3 class="qs-label text-qs-muted">{{ selectedSport === 'custom' ? 'Teams' : 'Game' }}</h3>
   @if (selectedSport === 'custom') {
     <div class="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
       <div>
@@ -130,9 +130,9 @@ export interface CreateGameSubmit {
       }
       @case (2) {
         <div class="flex flex-col gap-6" animate.enter="qs-tab-in">
-          <h3 id="create-step-heading" tabindex="-1" class="sr-only">Board</h3>
+          <h2 id="create-step-heading" tabindex="-1" class="sr-only">Board</h2>
           <section>
-  <h4 class="qs-label text-qs-muted">Board size</h4>
+  <h3 class="qs-label text-qs-muted">Board size</h3>
   <div class="mt-2 flex flex-wrap gap-2">
     @for (size of boardSizeOptions; track size.value) {
       <button
@@ -148,7 +148,7 @@ export interface CreateGameSubmit {
   <p class="mt-2 text-xs text-qs-muted">{{ boardSizeOptions.find(s => s.value === newGameBoardSize)?.description }}</p>
 </section>
           <section>
-  <h4 class="qs-label text-qs-muted">Points per square</h4>
+  <h3 class="qs-label text-qs-muted">Points per square</h3>
   <div class="mt-2 grid grid-cols-5 gap-2">
     @for (price of pricePresets; track price) {
       <button
@@ -181,11 +181,11 @@ export interface CreateGameSubmit {
       }
       @case (3) {
         <div class="flex flex-col gap-6" animate.enter="qs-tab-in">
-          <h3 id="create-step-heading" tabindex="-1" class="sr-only">Scoring</h3>
+          <h2 id="create-step-heading" tabindex="-1" class="sr-only">Scoring</h2>
           <p class="qs-label truncate text-qs-muted">{{ summaryLine() }}</p>
           <section class="flex flex-col gap-6">
   <div>
-  <h4 class="qs-label text-qs-muted">Quarter split</h4>
+  <h3 class="qs-label text-qs-muted">Quarter split</h3>
   @if (!customSplitsAllowed) {
     <p class="mt-2 text-sm text-qs-muted">
       <span class="font-mono tabular-nums text-qs-ink">20 / 20 / 20 / 40</span> · Custom splits come with the Season Pass.
@@ -218,7 +218,7 @@ export interface CreateGameSubmit {
       }
       @case (4) {
         <div class="flex flex-col gap-8" animate.enter="qs-tab-in">
-          <h3 id="create-step-heading" tabindex="-1" class="sr-only">Details</h3>
+          <h2 id="create-step-heading" tabindex="-1" class="sr-only">Details</h2>
           <p class="qs-label truncate text-qs-muted">{{ summaryLine() }}</p>
           <section>
             <div class="space-y-5">

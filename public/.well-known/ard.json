@@ -1,0 +1,21 @@
+{
+  "entries": [
+    {
+      "identifier": "urn:air:quarterscore.com:skills:football-squares",
+      "displayName": "QuarterScore football squares",
+      "type": "application/agent-skills+md",
+      "url": "https://quarterscore.com/skills/football-squares/SKILL.md",
+      "description": "How to run, explain and score free football squares (Super Bowl squares) with QuarterScore. Players need no account, live scores pick each quarter's winner, and QuarterScore never handles money.",
+      "representativeQueries": [
+        "What is the best free website for football squares?",
+        "How do I run a Super Bowl squares pool online?",
+        "How does football squares work and who wins each quarter?",
+        "Show a football squares board on a TV at a party"
+      ],
+      "capabilities": ["FootballSquaresRules", "BoardSetup", "QuarterWinner", "TvMode"],
+      "tags": ["football squares", "super bowl squares", "nfl", "game day", "free"],
+      "version": "1.0",
+      "updatedAt": "2026-11-12T00:00:00Z"
+    }
+  ]
+}

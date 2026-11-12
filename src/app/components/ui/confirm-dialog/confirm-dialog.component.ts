@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, linkedSignal, signal } from '@angular/core';
 import { ConfirmService } from '../../../core/services/confirm.service';
 import { ModalComponent } from '../modal/modal.component';
 
@@ -17,7 +17,7 @@ import { ModalComponent } from '../modal/modal.component';
       [level]="3"
       (dismissed)="no()"
     >
-      @if (confirm.pending(); as ask) {
+      @if (shownAsk(); as ask) {
         <div class="p-6">
           <h3 id="confirm-title" class="qs-title text-2xl">{{ ask.title }}</h3>
           <p id="confirm-message" class="mt-3 text-qs-muted">{{ ask.message }}</p>
@@ -39,6 +39,11 @@ import { ModalComponent } from '../modal/modal.component';
 export class ConfirmDialogComponent {
   protected confirm = inject(ConfirmService);
   protected never = signal(false);
+  /** The question on screen. Kept through the closing fade, so the dialog keeps its title (its accessible name) until it is gone. */
+  protected shownAsk = linkedSignal<ReturnType<ConfirmService['pending']>, ReturnType<ConfirmService['pending']>>({
+    source: this.confirm.pending,
+    computation: (pending, previous) => pending ?? previous?.value ?? null
+  });
 
   protected no(): void {
     this.never.set(false);

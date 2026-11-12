@@ -2,12 +2,12 @@
 @if (isLoading()) {
   <!-- Loading: the page's own shape, so moving between boards does not flash a spinner -->
   <app-shared-header variant="fixed" heading="p"></app-shared-header>
-  <div class="qs-skel-delay mx-auto max-w-[1600px] px-1 pb-16 pt-2 sm:px-5">
+  <main class="qs-skel-delay mx-auto max-w-[1600px] px-1 pb-16 pt-2 sm:px-5">
     <app-game-skeleton [size]="skeletonSize()" [fade]="skeletonFade()"></app-game-skeleton>
-  </div>
+  </main>
 } @else if (gameNotFound()) {
   <!-- Game Not Found State -->
-  <div class="flex items-center justify-center min-h-screen p-4 bg-qs-bg">
+  <main class="flex items-center justify-center min-h-screen p-4 bg-qs-bg">
     <div class="max-w-md text-center">
       <div class="flex items-center justify-center w-20 h-20 mx-auto mb-6 bg-qs-bad-soft rounded-full">
         <svg class="w-10 h-10 text-qs-bad" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -25,7 +25,7 @@
         Go Back
       </button>
     </div>
-  </div>
+  </main>
 } @else {
   <!-- Main Game View -->
   <app-shared-header variant="fixed" heading="p">
@@ -109,7 +109,7 @@
     (clearGame)="onClearGame(true)"
   ></app-edit-game-dialog>
 
-  <div class="mx-auto max-w-[1600px] px-1 pb-16 pt-2 sm:px-5" [class.pb-32]="isGameOwner() || isManager()" #boardPage>
+  <main class="mx-auto max-w-[1600px] px-1 pb-16 pt-2 sm:px-5" [class.pb-32]="isGameOwner() || isManager()" #boardPage>
     <div class="space-y-6">
       <!-- Game Info Bar -->
       <div class="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
@@ -337,7 +337,7 @@
         (playerRemoved)="onPlayerRemoved($event)">
       </app-payment-dialog>
     </div>
-  </div>
+  </main>
 
   <!-- Share Modal -->
   <app-share-dialog [isOpen]="showShareModal()" [gameId]="gameId" (closed)="closeShareModal()"></app-share-dialog>

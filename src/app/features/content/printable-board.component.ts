@@ -49,7 +49,7 @@ import { ReadingEndComponent, ReadingHeaderComponent, ReadingPageComponent, Read
       }
       .corner {
         background: #f1f5f9;
-        color: #64748b;
+        color: #5b6b81;
         aspect-ratio: auto;
         height: 1.5rem;
         font-size: 0.5rem;
@@ -87,7 +87,7 @@ import { ReadingEndComponent, ReadingHeaderComponent, ReadingPageComponent, Read
 
         <!-- Print header with branding -->
         <div class="hidden print:flex items-center justify-between mb-4">
-          <img src="assets/brand/lockup-horizontal.svg" alt="QuarterScore" class="h-6">
+          <img src="assets/brand/lockup-horizontal.svg" alt="QuarterScore" width="192" height="24" class="h-6 w-auto">
           <span class="text-xs text-slate-500">quarterscore.com</span>
         </div>
 

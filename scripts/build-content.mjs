@@ -5,6 +5,7 @@ import matter from 'gray-matter';
 import { marked } from 'marked';
 import sanitizeHtml from 'sanitize-html';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import { writeAgentFiles } from './agent-files.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const origin = 'https://quarterscore.com';
@@ -358,6 +359,7 @@ try {
   console.warn(`Schedule: ${error?.message ?? error}`);
 }
 writeSchedule(schedule);
+await writeAgentFiles({ root, origin, posts });
 // PDF is pre-generated with Playwright for better quality
 // await writePdf();
 console.log(`Content build: ${posts.length} post(s), ${paths.length} prerendered path(s), schedule for ${Object.keys(schedule.teams).length} team(s), ${schedule.thanksgiving.length} Thanksgiving game(s).`);
