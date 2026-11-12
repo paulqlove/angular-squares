@@ -1,12 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { NFL_TEAMS, getTeamLogo } from './teams-data';
 
 interface DemoStep {
-  /** Short label for the phone step strip. */
+  /** Short label for the step bar. */
   short: string;
   title: string;
   text: string;
-  /** What the board shows, in one line under it. */
-  hint: string;
+  /** The Next button's label on this step. */
+  next: string;
 }
 
 interface DemoCell {
@@ -15,194 +16,394 @@ interface DemoCell {
   initials: string;
   /** Player color class, or '' for an open square. */
   color: string;
+  open: boolean;
   you: boolean;
   win: boolean;
+  /** On the winning square's row or column while a quarter is shown. */
+  cross: boolean;
   dim: boolean;
+}
+
+interface DemoQuarter {
+  label: string;
+  away: number;
+  home: number;
+  points: number;
 }
 
 const STEPS: DemoStep[] = [
   {
     short: 'Pick',
-    title: 'Pick a square',
-    text: 'Open squares are green. Tap one and type your name. Your friends do the same until the board fills.',
-    hint: 'You picked a square. The numbers on the edges are still hidden.'
+    title: 'Pick your square',
+    text: 'Everyone opens the board’s link and taps an open square to claim it. Your name goes right on the board. Try it: tap any green square.',
+    next: 'Lock and draw'
   },
   {
     short: 'Draw',
-    title: 'Numbers get drawn',
-    text: 'Once the board is full, the host locks it and 0 to 9 are shuffled across the top and down the side. Nobody picks their digits.',
-    hint: 'Your square is now Chiefs 7, Cowboys 4.'
+    title: 'Lock it and draw the numbers',
+    text: 'When the board is full, the host locks it and QuarterScore draws 0 to 9 at random across the top and down the side. Nobody knows their numbers until now.',
+    next: 'Play the game'
   },
   {
-    short: 'Score',
-    title: 'The score picks a winner',
-    text: 'At the end of each quarter, take the last digit of each team’s score. Where that row and column meet wins the quarter.',
-    hint: 'Chiefs 17, Cowboys 14: column 7 meets row 4. You win Q1.'
+    short: 'Win',
+    title: 'The score picks each winner',
+    text: 'At the end of each quarter, take the last digit of each team’s score. The square where those two numbers meet wins that quarter’s points.',
+    next: 'Play again'
   }
 ];
 
-/** Digits as they come out of the draw: across the top (Chiefs) and down the side (Cowboys). */
-const COLS = [3, 8, 0, 7, 5, 1, 9, 4, 2, 6];
-const ROWS = [6, 2, 9, 4, 0, 7, 3, 8, 1, 5];
-/** Your square: row 4 (Cowboys) meets column 7 (Chiefs). */
-const YOU = '3-3';
+/** Digits before the draw is fixed to the picked square: across the top (Chiefs) and down the side (Cowboys). */
+const BASE_COLS = [3, 8, 0, 7, 5, 1, 9, 4, 2, 6];
+const BASE_ROWS = [6, 2, 9, 4, 0, 7, 3, 8, 1, 5];
+/** The demo always deals your square Chiefs 7, Cowboys 4, so the first quarter is yours. */
+const YOUR_HOME = 7;
+const YOUR_AWAY = 4;
+const DEFAULT_PICK = '3-3';
+/** Running scores at the end of each quarter. Points follow the board's split: 20, 20, 20, 40 of 100. */
+const QUARTERS: DemoQuarter[] = [
+  { label: 'Q1', home: 17, away: 14, points: 20 },
+  { label: 'Q2', home: 24, away: 21, points: 20 },
+  { label: 'Q3', home: 31, away: 28, points: 20 },
+  { label: 'Q4', home: 38, away: 35, points: 40 }
+];
 const PLAYERS: [string, string][] = [
   ['Sam', 'qs-p-sky'], ['Lee', 'qs-p-orchid'], ['Max', 'qs-p-rose'], ['Tom', 'qs-p-apricot'],
-  ['Kim', 'qs-p-lilac'], ['Jo', 'qs-p-butter'], ['Ana', 'qs-p-aqua'], ['Bo', 'qs-p-tan'],
-  ['Cy', 'qs-p-periwinkle'], ['Di', 'qs-p-coral']
+  ['Kim', 'qs-p-lilac'], ['Jo', 'qs-p-aqua'], ['Ana', 'qs-p-tan'], ['Bo', 'qs-p-periwinkle'],
+  ['Cy', 'qs-p-coral'], ['Di', 'qs-p-sky']
 ];
-/** Squares already claimed when you arrive; the rest fill in once the board is full. */
+/** Squares already claimed when you arrive; the rest fill in once the board locks. */
 const EARLY = new Set(['0-1', '0-3', '0-6', '1-4', '1-8', '2-1', '2-4', '2-7', '3-0', '3-5', '4-2', '4-8', '5-2', '5-6', '5-9', '6-1', '6-4', '6-9', '7-3', '7-7', '8-0', '8-5', '8-7', '9-2', '9-8']);
+const HOME_TEAM = NFL_TEAMS.find(t => t.abbreviation === 'KC')!;
+const AWAY_TEAM = NFL_TEAMS.find(t => t.abbreviation === 'DAL')!;
+
+/** Puts `digit` at `index`, swapping it with wherever it was, so every digit still appears once. */
+function dealTo(base: number[], index: number, digit: number): number[] {
+  const out = [...base];
+  const from = out.indexOf(digit);
+  [out[from], out[index]] = [out[index], out[from]];
+  return out;
+}
+
+function playerAt(r: number, c: number): [string, string] {
+  return PLAYERS[(r * 7 + c * 3) % PLAYERS.length];
+}
 
 /**
- * How to play, by doing: a small sample board you step through. Pick a square, the numbers get drawn,
- * then a quarter's score lights up the winning square. Plain signals, no timers, so it prerenders as step 1.
+ * How to play, by doing: a sample game you play through in three steps. You claim a square on an open board,
+ * the host locks it and the numbers are drawn, then each quarter's score lights up its winning square.
+ * Plain signals and CSS motion, no timers, so it prerenders as step 1.
  */
 @Component({
   selector: 'app-how-it-works-demo',
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
     :host { display: block; }
-    .hiw-cell, .hiw-axis { transition: background-color var(--qs-t-state) var(--qs-ease-decel), color var(--qs-t-state) var(--qs-ease-decel), opacity var(--qs-t-state) var(--qs-ease-decel), box-shadow var(--qs-t-state) var(--qs-ease-decel); }
-    .hiw-open { background: color-mix(in srgb, var(--qs-accent) 16%, var(--qs-panel)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--qs-accent) 32%, var(--qs-panel)); }
+    .hiw-cell { transition: background-color var(--qs-t-state) var(--qs-ease-decel), opacity 160ms var(--qs-ease-decel), box-shadow var(--qs-t-state) var(--qs-ease-decel); }
+    .hiw-cell.hiw-dim { opacity: .25; }
+    .hiw-cell.hiw-cross { opacity: .6; }
+    .hiw-open { background: color-mix(in srgb, var(--qs-accent) 14%, var(--qs-panel)); cursor: pointer; }
+    @media (hover: hover) { .hiw-open:hover { background: color-mix(in srgb, var(--qs-accent) 30%, var(--qs-panel)); } }
+    .hiw-open:active { transform: scale(.94); transition: transform var(--qs-t-press) var(--qs-ease-in); }
+    .hiw-open:focus-visible { outline: 2px solid var(--qs-ink); outline-offset: -2px; }
     .hiw-you { box-shadow: inset 0 0 0 2px var(--qs-ink); }
-    .hiw-win { box-shadow: inset 0 0 0 3px var(--qs-accent); }
-    .hiw-digit { animation: hiw-digit var(--qs-t-state) var(--qs-ease-decel) both; animation-delay: calc(var(--i) * 20ms); }
+    .hiw-win { background: var(--qs-win) !important; color: var(--qs-win-ink); animation: hiw-settle 300ms var(--qs-ease) both; position: relative; z-index: 1; }
+    .hiw-claim { animation: hiw-claim var(--qs-t-state) var(--qs-ease-spring) both; }
+    .hiw-axis { background: var(--qs-tile); color: var(--qs-tile-ink); transition: background-color var(--qs-t-state) var(--qs-ease-decel), color var(--qs-t-state) var(--qs-ease-decel); }
+    .hiw-axis.hiw-lead { background: var(--qs-accent); color: var(--qs-on-accent); }
+    .hiw-digit { animation: hiw-digit 300ms var(--qs-ease-decel) both; animation-delay: calc(var(--i) * 40ms); }
+    .hiw-after-draw { animation: hiw-rise var(--qs-t-state) var(--qs-ease-decel) both; animation-delay: 1.1s; }
+    .hiw-swap { animation: hiw-rise var(--qs-t-state) var(--qs-ease-decel) both; }
+    .hiw-num { display: inline-block; animation: hiw-rise var(--qs-t-state) var(--qs-ease-decel) both; }
+    .hiw-bar { transform-origin: left; transition: transform var(--qs-t-state) var(--qs-ease-decel); }
     @keyframes hiw-digit { from { opacity: 0; transform: translateY(4px); } }
+    @keyframes hiw-rise { from { opacity: 0; transform: translateY(6px); } }
+    @keyframes hiw-claim { from { opacity: 0; transform: scale(.85); } }
+    @keyframes hiw-settle { 50% { transform: scale(1.06); } }
     @media (prefers-reduced-motion: reduce) {
-      .hiw-cell, .hiw-axis { transition: none; }
-      .hiw-digit { animation: none; }
+      .hiw-cell, .hiw-axis, .hiw-bar { transition: none; }
+      .hiw-digit, .hiw-after-draw, .hiw-swap, .hiw-num, .hiw-claim, .hiw-win { animation: none; }
     }
   `],
   template: `
-    <section class="qs-card grid overflow-hidden lg:grid-cols-[18rem_minmax(0,1fr)]" aria-labelledby="hiw-heading">
-      <h2 id="hiw-heading" class="sr-only">Try it on a sample board</h2>
+    <section class="qs-card overflow-hidden !p-0" aria-labelledby="hiw-heading">
+      <h2 id="hiw-heading" class="sr-only">Play a sample game</h2>
 
-      <!-- Steps: a list with the open step's words on desktop, a strip of three on phones -->
-      <ol class="flex gap-1 border-b border-qs-line p-2 lg:flex-col lg:gap-1.5 lg:border-b-0 lg:border-r lg:p-4">
-        @for (s of steps; track s.title; let i = $index) {
-          <li class="min-w-0 flex-1 lg:flex-none">
+      <!-- Step bar: three steps, each with a bar that fills as you reach it -->
+      <ol class="grid grid-cols-3 border-b border-qs-line">
+        @for (s of steps; track s.short; let i = $index) {
+          <li class="min-w-0 border-l border-qs-line first:border-l-0">
             <button
               type="button"
-              (click)="step.set(i)"
+              (click)="goTo(i)"
               [attr.aria-current]="i === step() ? 'step' : null"
-              class="grid w-full justify-items-center gap-1.5 rounded-inner border px-1.5 py-2.5 text-center transition-colors duration-150 lg:grid-cols-[2rem_minmax(0,1fr)] lg:justify-items-start lg:gap-3 lg:p-3.5 lg:text-left"
-              [class]="i === step() ? 'border-qs-line bg-qs-panel-2' : 'border-transparent hover:bg-qs-panel-2'"
+              class="group relative flex w-full items-center gap-2.5 px-3 py-3.5 text-left transition-colors duration-150 hover:bg-qs-panel-2 sm:px-6 sm:py-4"
             >
-              <span
-                class="grid h-8 w-8 place-items-center rounded-full border font-mono text-sm"
-                [class]="i === step() ? 'border-qs-ink bg-qs-ink text-qs-bg' : i < step() ? 'border-qs-ink text-qs-ink' : 'border-qs-line-strong text-qs-muted'"
-                aria-hidden="true"
-              >{{ i < step() ? '✓' : i + 1 }}</span>
-              <span class="min-w-0">
-                <span class="block text-[13px] font-semibold lg:hidden" [class]="i === step() ? 'text-qs-ink' : 'text-qs-muted'">{{ s.short }}</span>
-                <span class="hidden pt-1 text-[17px] font-semibold leading-snug lg:block" [class]="i === step() ? 'text-qs-ink' : 'text-qs-muted'">{{ s.title }}</span>
-                @if (i === step()) {
-                  <span class="mt-1.5 hidden text-sm leading-[1.45] text-qs-muted lg:block">{{ s.text }}</span>
-                }
-              </span>
+              <span class="qs-label shrink-0" [class]="i <= step() ? 'text-qs-accent' : 'text-qs-muted'">0{{ i + 1 }}</span>
+              <span class="truncate text-[15px] font-semibold sm:text-base" [class]="i === step() ? 'text-qs-ink' : 'text-qs-muted'">{{ s.short }}</span>
+              <span class="absolute inset-x-0 bottom-0 h-[3px] bg-qs-accent hiw-bar" [style.transform]="i <= step() ? 'scaleX(1)' : 'scaleX(0)'" aria-hidden="true"></span>
             </button>
           </li>
         }
       </ol>
 
-      <div class="flex min-w-0 flex-col items-center gap-4 px-3.5 py-5 sm:px-7 sm:py-6">
-        <div class="text-center lg:hidden" aria-live="polite">
-          <p class="text-[17px] font-semibold text-qs-ink">{{ current().title }}</p>
-          <p class="mt-1 text-[15px] leading-[1.45] text-qs-muted">{{ current().text }}</p>
-        </div>
-
-        <!-- Score tiles: kickoff once the numbers are drawn, then the end of Q1 -->
-        <div class="flex min-h-16 items-stretch gap-2 sm:gap-2.5" aria-hidden="true">
-          @if (step() === 0) {
-            <div class="flex min-w-20 flex-col justify-center rounded-inner bg-qs-tile px-3 py-2 sm:px-4"><b class="text-[26px] font-semibold leading-none tracking-[-0.03em] text-qs-tile-muted sm:text-3xl">–</b><span class="qs-label mt-1.5 whitespace-nowrap text-[11.5px] text-qs-tile-muted">KC</span></div>
-            <div class="flex min-w-20 flex-col justify-center rounded-inner bg-qs-tile px-3 py-2 sm:px-4"><b class="text-[26px] font-semibold leading-none tracking-[-0.03em] text-qs-tile-muted sm:text-3xl">–</b><span class="qs-label mt-1.5 whitespace-nowrap text-[11.5px] text-qs-tile-muted">DAL</span></div>
-          } @else if (step() === 1) {
-            <div class="flex min-w-20 flex-col justify-center rounded-inner bg-qs-tile px-3 py-2 sm:px-4"><b class="text-[26px] font-semibold leading-none tracking-[-0.03em] tabular-nums text-qs-tile-ink sm:text-3xl">0</b><span class="qs-label mt-1.5 whitespace-nowrap text-[11.5px] text-qs-tile-muted">KC · start</span></div>
-            <div class="flex min-w-20 flex-col justify-center rounded-inner bg-qs-tile px-3 py-2 sm:px-4"><b class="text-[26px] font-semibold leading-none tracking-[-0.03em] tabular-nums text-qs-tile-ink sm:text-3xl">0</b><span class="qs-label mt-1.5 whitespace-nowrap text-[11.5px] text-qs-tile-muted">DAL · start</span></div>
-          } @else if (step() === 2) {
-            <div class="flex min-w-20 flex-col justify-center rounded-inner bg-qs-tile px-3 py-2 sm:px-4"><b class="text-[26px] font-semibold leading-none tracking-[-0.03em] tabular-nums text-qs-tile-muted sm:text-3xl">1<span class="text-qs-tile-ink">7</span></b><span class="qs-label mt-1.5 whitespace-nowrap text-[11.5px] text-qs-tile-muted">KC · Q1</span></div>
-            <div class="flex min-w-20 flex-col justify-center rounded-inner bg-qs-tile px-3 py-2 sm:px-4"><b class="text-[26px] font-semibold leading-none tracking-[-0.03em] tabular-nums text-qs-tile-muted sm:text-3xl">1<span class="text-qs-tile-ink">4</span></b><span class="qs-label mt-1.5 whitespace-nowrap text-[11.5px] text-qs-tile-muted">DAL · Q1</span></div>
-            <div class="flex min-w-20 flex-col justify-center rounded-inner bg-qs-tile-ok px-3 py-2 sm:px-4"><b class="text-[26px] font-semibold leading-none tracking-[-0.03em] text-qs-tile-ink sm:text-3xl">Q1</b><span class="qs-label mt-1.5 whitespace-nowrap text-[11.5px] text-qs-tile-muted">You win</span></div>
+      <div class="grid lg:grid-cols-[minmax(0,23rem)_minmax(0,1fr)] lg:grid-rows-[auto_1fr]">
+        <!-- The step's words -->
+        <div class="px-5 pb-2 pt-6 sm:px-8 sm:pt-8 lg:col-start-1 lg:row-start-1 lg:pb-0" aria-live="polite">
+          @for (s of [current()]; track s.title) {
+            <div class="hiw-swap">
+              <p class="qs-eyebrow qs-eyebrow-bar">Step {{ step() + 1 }} of 3</p>
+              <h3 class="qs-title mt-4 text-[28px] text-qs-ink sm:text-[34px]">{{ s.title }}</h3>
+              <p class="mt-3 text-[15px] leading-[1.6] text-qs-muted sm:text-base">{{ s.text }}</p>
+            </div>
           }
         </div>
 
-        <!-- The board: Chiefs across the top, Cowboys down the side -->
-        <div class="w-full max-w-[30rem]">
-          <p class="qs-label mb-2 pl-7 text-center text-[11.5px] text-qs-muted" aria-hidden="true">Chiefs · KC →</p>
-          <div class="flex gap-1.5">
-            <p class="qs-label text-center text-[11.5px] text-qs-muted [transform:rotate(180deg)] [writing-mode:vertical-rl]" aria-hidden="true">Cowboys · DAL →</p>
-            <div role="img" [attr.aria-label]="boardLabel()" class="grid min-w-0 flex-1 grid-cols-[1.25rem_repeat(10,minmax(0,1fr))] gap-[2px] sm:grid-cols-[1.75rem_repeat(10,minmax(0,1fr))] sm:gap-[3px]">
-              <span></span>
-              @for (d of cols; track $index) {
-                <span class="hiw-axis grid aspect-square place-items-center rounded-[3px] font-mono text-xs font-medium" [class]="axisClass(false, $index)">
-                  @if (drawn()) { <span class="hiw-digit" [style.--i]="$index">{{ d }}</span> } @else { <span class="opacity-40">?</span> }
+        <!-- The stage: a game card on the board canvas, like the game page -->
+        <div class="qs-canvas !rounded-none border-y border-qs-line p-3 sm:p-6 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:border-y-0 lg:border-l lg:p-8">
+          <div class="mx-auto w-full max-w-[34rem] rounded-card border border-qs-line bg-qs-panel p-3 shadow-pop sm:p-5">
+            <!-- Board name and state -->
+            <div class="flex items-center justify-between gap-3">
+              <p class="truncate text-[15px] font-semibold text-qs-ink sm:text-base">Sunday Night Squares</p>
+              @for (b of [badge()]; track b.text) {
+                <span class="qs-badge hiw-swap shrink-0" [class.qs-badge-ok]="b.ok">{{ b.text }}</span>
+              }
+            </div>
+
+            <!-- Score: kickoff until the game starts, then the quarter on screen -->
+            <div class="mt-3 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 rounded-inner bg-qs-tile px-3 py-2.5 text-qs-tile-ink sm:px-4" aria-hidden="true">
+              <div class="flex min-w-0 items-center gap-2">
+                <img [src]="homeLogo" alt="" width="28" height="28" class="h-6 w-6 shrink-0 object-contain sm:h-7 sm:w-7" />
+                <span class="qs-label text-[12px] text-qs-tile-muted">KC</span>
+                <b class="ml-auto font-mono text-2xl font-medium tabular-nums sm:text-[28px]">
+                  @for (v of [score().home]; track v) { <span class="hiw-num">@if (scored()) {<span class="text-qs-tile-muted">{{ tens(v) }}</span><span class="text-qs-accent">{{ v % 10 }}</span>} @else {<span>{{ v }}</span>}</span> }
+                </b>
+              </div>
+              <span class="qs-label px-1 text-[11.5px] text-qs-tile-muted">{{ scored() ? 'End ' + quarterLabel() : 'Kickoff' }}</span>
+              <div class="flex min-w-0 items-center gap-2">
+                <b class="font-mono text-2xl font-medium tabular-nums sm:text-[28px]">
+                  @for (v of [score().away]; track v) { <span class="hiw-num">@if (scored()) {<span class="text-qs-tile-muted">{{ tens(v) }}</span><span class="text-qs-accent">{{ v % 10 }}</span>} @else {<span>{{ v }}</span>}</span> }
+                </b>
+                <span class="qs-label ml-auto text-[12px] text-qs-tile-muted">DAL</span>
+                <img [src]="awayLogo" alt="" width="28" height="28" class="h-6 w-6 shrink-0 object-contain sm:h-7 sm:w-7" />
+              </div>
+            </div>
+
+            <!-- Axis caption, the same as the game page -->
+            <p class="mb-2 mt-4 flex items-center gap-2 text-sm" aria-hidden="true">
+              <span class="flex items-center gap-1 font-semibold text-qs-ink"><span class="text-base leading-none text-qs-muted">↓</span><img [src]="awayLogo" alt="" class="h-4 w-4 object-contain" />Cowboys</span>
+              <span class="text-qs-line-strong">/</span>
+              <span class="flex items-center gap-1 font-semibold text-qs-ink"><img [src]="homeLogo" alt="" class="h-4 w-4 object-contain" />Chiefs<span class="text-base leading-none text-qs-muted">→</span></span>
+            </p>
+
+            <!-- The board: 1px lines and gaps, navy number bars, like the real one -->
+            <div role="group" [attr.aria-label]="boardLabel()" class="grid grid-cols-[1.5rem_repeat(10,minmax(0,1fr))] gap-px overflow-hidden rounded-inner bg-qs-line p-px sm:grid-cols-[2rem_repeat(10,minmax(0,1fr))]">
+              <span class="bg-qs-panel-2"></span>
+              @for (d of cols(); track $index; let c = $index) {
+                <span class="hiw-axis grid h-6 place-items-center font-mono text-xs font-medium sm:h-8 sm:text-sm" [class.hiw-lead]="leadCol() === c" aria-hidden="true">
+                  @if (drawn()) { <span class="hiw-digit" [style.--i]="c">{{ d }}</span> }
                 </span>
               }
               @for (row of cells(); track $index; let r = $index) {
-                <span class="hiw-axis grid place-items-center rounded-[3px] font-mono text-xs font-medium" [class]="axisClass(true, r)">
-                  @if (drawn()) { <span class="hiw-digit" [style.--i]="r + 10">{{ rows[r] }}</span> } @else { <span class="opacity-40">?</span> }
+                <span class="hiw-axis grid place-items-center font-mono text-xs font-medium sm:text-sm" [class.hiw-lead]="leadRow() === r" aria-hidden="true">
+                  @if (drawn()) { <span class="hiw-digit" [style.--i]="r + 10">{{ rows()[r] }}</span> }
                 </span>
-                @for (c of row; track c.key) {
-                  <span
-                    class="hiw-cell grid aspect-square place-items-center overflow-hidden rounded-[3px] text-[8px] font-semibold leading-none text-slate-900 sm:text-[10px]"
-                    [class]="(c.color || 'hiw-open') + (c.you ? ' hiw-you' : '') + (c.win ? ' hiw-win' : '') + (c.dim ? ' opacity-[.35]' : '')"
-                  ><span class="sm:hidden">{{ c.initials }}</span><span class="hidden sm:inline">{{ c.name }}</span></span>
+                @for (cell of row; track cell.key) {
+                  @if (cell.open) {
+                    <button
+                      type="button"
+                      class="hiw-cell hiw-open aspect-square"
+                      [attr.aria-label]="'Claim square ' + (r + 1) + ', ' + ($index + 1)"
+                      (click)="claim(cell.key)"
+                    ></button>
+                  } @else {
+                    <span
+                      class="hiw-cell grid aspect-square place-items-center overflow-hidden px-px text-center text-[9px] font-semibold leading-none text-slate-900 sm:text-[11px]"
+                      [class]="cell.color"
+                      [class.hiw-you]="cell.you"
+                      [class.hiw-win]="cell.win"
+                      [class.hiw-cross]="cell.cross"
+                      [class.hiw-dim]="cell.dim"
+                      aria-hidden="true"
+                    ><span [class.hiw-claim]="cell.you && step() === 0"><span class="sm:hidden">{{ cell.initials }}</span><span class="hidden sm:inline">{{ cell.name }}</span></span></span>
+                  }
                 }
               }
+            </div>
+
+            <div class="qs-label mt-3 flex justify-between gap-3 text-[11.5px] text-qs-muted" aria-hidden="true">
+              <span class="hidden sm:inline">10 × 10 · 100 squares</span>
+              <span class="whitespace-nowrap max-sm:ml-auto">Points 20 · 20 · 20 · 40</span>
             </div>
           </div>
         </div>
 
-        <p class="min-h-5 text-center text-sm text-qs-muted" aria-live="polite">{{ current().hint }}</p>
-
-        <div class="flex w-full max-w-[30rem] items-center gap-2">
-          @if (step() > 0) {
-            <button type="button" class="qs-btn qs-btn-secondary" (click)="step.set(step() - 1)">Back</button>
+        <!-- What the step means for you, then Back and Next -->
+        <div class="flex flex-col gap-6 px-5 pb-6 pt-5 sm:px-8 sm:pb-8 lg:col-start-1 lg:row-start-2 lg:pt-6">
+          @if (step() === 0) {
+            <div class="hiw-swap rounded-inner border border-qs-line bg-qs-panel-2 p-4">
+              <div class="flex items-baseline justify-between gap-3">
+                <p class="qs-label text-qs-muted">Open squares</p>
+                <p class="font-mono text-qs-ink"><b class="text-2xl font-medium text-qs-accent">{{ openCount() }}</b> <span class="ml-1 text-sm text-qs-muted">of 100</span></p>
+              </div>
+              <ul class="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-sm text-qs-muted">
+                <li class="flex items-center gap-2"><span class="hiw-open h-3.5 w-3.5 rounded-[3px]" aria-hidden="true"></span>Open</li>
+                <li class="flex items-center gap-2"><span class="qs-p-sky h-3.5 w-3.5 rounded-[3px]" aria-hidden="true"></span>Taken</li>
+                <li class="flex items-center gap-2"><span class="qs-p-butter hiw-you h-3.5 w-3.5 rounded-[3px]" aria-hidden="true"></span>Yours</li>
+              </ul>
+              <p class="mt-3 border-t border-qs-line pt-3 text-sm text-qs-ink">{{ picked() ? 'That square is yours. Its numbers come in the draw.' : 'Tap a green square on the board to take it.' }}</p>
+            </div>
+          } @else if (step() === 1) {
+            <div class="hiw-swap">
+              <p class="qs-label text-qs-muted">Your numbers</p>
+              <div class="mt-3 grid grid-cols-2 gap-2">
+                <div class="hiw-after-draw rounded-inner bg-qs-tile px-4 py-3">
+                  <b class="font-mono text-[34px] font-medium leading-none text-qs-tile-ink">{{ yourHome }}</b>
+                  <p class="qs-label mt-2 text-[11.5px] text-qs-tile-muted">Chiefs</p>
+                </div>
+                <div class="hiw-after-draw rounded-inner bg-qs-tile px-4 py-3">
+                  <b class="font-mono text-[34px] font-medium leading-none text-qs-tile-ink">{{ yourAway }}</b>
+                  <p class="qs-label mt-2 text-[11.5px] text-qs-tile-muted">Cowboys</p>
+                </div>
+              </div>
+              <p class="mt-3 text-sm text-qs-muted">You win any quarter that ends with the Chiefs on a {{ yourHome }} and the Cowboys on a {{ yourAway }}, like 17 to 14.</p>
+            </div>
+          } @else {
+            <div class="hiw-swap">
+              <p class="qs-label text-qs-muted">Tap a quarter</p>
+              <ul class="mt-3 divide-y divide-qs-line overflow-hidden rounded-inner border border-qs-line">
+                @for (q of quarterRows(); track q.label; let i = $index) {
+                  <li>
+                    <button
+                      type="button"
+                      (click)="quarter.set(i)"
+                      [attr.aria-pressed]="quarter() === i"
+                      class="grid w-full grid-cols-[2.25rem_4.5rem_minmax(0,1fr)_auto] items-center gap-2 px-3 py-2.5 text-left text-sm transition-colors duration-150"
+                      [class]="quarter() === i ? 'bg-qs-ink text-qs-bg' : 'bg-qs-panel text-qs-ink hover:bg-qs-panel-2'"
+                    >
+                      <span class="qs-label">{{ q.label }}</span>
+                      <span class="font-mono tabular-nums">{{ q.home }}–{{ q.away }}</span>
+                      <span class="truncate font-semibold">{{ q.winner }}</span>
+                      <span class="font-mono text-xs tabular-nums" [class]="quarter() === i ? 'opacity-70' : 'text-qs-muted'">{{ q.points }} pts</span>
+                    </button>
+                  </li>
+                }
+              </ul>
+              <p class="mt-3 text-sm text-qs-muted">
+                @if (quarter() === 0) { Chiefs 17, Cowboys 14: column 7 meets row 4. That's your square, so the first 20 points are yours. } @else { {{ quarterRows()[quarter()].home }} and {{ quarterRows()[quarter()].away }} end in {{ quarterRows()[quarter()].home % 10 }} and {{ quarterRows()[quarter()].away % 10 }}, so {{ quarterRows()[quarter()].winner }} takes {{ quarterRows()[quarter()].label }}. }
+              </p>
+            </div>
           }
-          <span class="flex-1"></span>
-          <button type="button" class="qs-btn qs-btn-primary" (click)="next()">{{ step() === steps.length - 1 ? 'Play again' : 'Next' }}</button>
+
+          <div class="mt-auto flex items-center gap-2">
+            @if (step() > 0) {
+              <button type="button" class="qs-btn qs-btn-secondary" (click)="goTo(step() - 1)">Back</button>
+            }
+            <span class="flex-1"></span>
+            <button type="button" class="qs-btn qs-btn-primary" (click)="next()">
+              {{ current().next }}
+              @if (step() < 2) { <span aria-hidden="true">→</span> }
+            </button>
+          </div>
         </div>
       </div>
     </section>
   `
 })
 export class HowItWorksDemoComponent {
-  public readonly cols = COLS;
-  public readonly rows = ROWS;
+  public readonly awayLogo = getTeamLogo(AWAY_TEAM);
+  public readonly homeLogo = getTeamLogo(HOME_TEAM);
+  /** The square you claimed, or null until you tap one. */
+  public readonly picked = signal<string | null>(null);
+  public readonly quarter = signal(0);
   public readonly step = signal(0);
   public readonly steps = STEPS;
+  public readonly yourAway = YOUR_AWAY;
+  public readonly yourHome = YOUR_HOME;
 
-  /** The board for the step on screen: open squares at first, every square claimed once the numbers are drawn. */
+  public readonly badge = computed(() => {
+    const step = this.step();
+    if (step === 0) return { ok: false, text: `${this.openCount()} open` };
+    if (step === 1) return { ok: false, text: 'Locked' };
+    return { ok: true, text: `${this.quarterLabel()} final` };
+  });
+
+  public readonly boardLabel = computed(() => {
+    const step = this.step();
+    if (step === 0) return `A sample 10 by 10 board with ${this.openCount()} open squares.`;
+    if (step === 1) return `The board is locked and the numbers are drawn. Your square is Chiefs ${YOUR_HOME}, Cowboys ${YOUR_AWAY}.`;
+    const q = this.quarterRows()[this.quarter()];
+    return `End of ${q.label}: Chiefs ${q.home}, Cowboys ${q.away}. ${q.winner} wins ${q.points} points.`;
+  });
+
+  /** The board for the step on screen: some squares open at first, every square claimed once it locks. */
   public readonly cells = computed<DemoCell[][]>(() => {
     const step = this.step();
-    const full = step >= 1;
-    const scored = step === 2;
-    return ROWS.map((_, r) => COLS.map((__, c) => {
+    const you = this.yourKey();
+    const win = this.winKey();
+    const [winRow, winCol] = win ? win.split('-').map(Number) : [-1, -1];
+    return BASE_ROWS.map((_, r) => BASE_COLS.map((__, c) => {
       const key = `${r}-${c}`;
-      const you = key === YOU;
-      const claimed = you || full || EARLY.has(key);
-      const [name, color] = you ? ['You', 'qs-p-butter'] : claimed ? PLAYERS[(r * 7 + c * 3) % PLAYERS.length] : ['', ''];
-      return { key, name, initials: you ? name : name.slice(0, 2), color, you, win: scored && you, dim: scored && !you };
+      const isYou = key === you && (step > 0 || this.picked() !== null);
+      const claimed = isYou || step > 0 || EARLY.has(key);
+      const [name, color] = isYou ? ['You', 'qs-p-butter'] : claimed ? playerAt(r, c) : ['', ''];
+      const isWin = key === win;
+      const cross = !!win && !isWin && (r === winRow || c === winCol);
+      return { key, name, initials: isYou ? name : name.slice(0, 2), color, open: !claimed, you: isYou, win: isWin, cross, dim: !!win && !isWin && !cross };
     }));
   });
 
+  /** Column digits, dealt so your column draws a 7. */
+  public readonly cols = computed(() => dealTo(BASE_COLS, this.yourCol(), YOUR_HOME));
   public readonly current = computed(() => STEPS[this.step()]);
   public readonly drawn = computed(() => this.step() >= 1);
+  public readonly leadCol = computed(() => (this.scored() ? this.cols().indexOf(this.score().home % 10) : -1));
+  public readonly leadRow = computed(() => (this.scored() ? this.rows().indexOf(this.score().away % 10) : -1));
+  public readonly openCount = computed(() => this.cells().flat().filter(c => c.open).length);
+  public readonly quarterLabel = computed(() => QUARTERS[this.quarter()].label);
 
-  public readonly boardLabel = computed(() => [
-    'A sample 10 by 10 board.',
-    this.drawn() ? 'The numbers are drawn.' : 'The numbers are not drawn yet.',
-    this.current().hint
-  ].join(' '));
+  /** Every quarter with its winner, for the list beside the board. */
+  public readonly quarterRows = computed(() => QUARTERS.map(q => {
+    const r = this.rows().indexOf(q.away % 10);
+    const c = this.cols().indexOf(q.home % 10);
+    const winner = `${r}-${c}` === this.yourKey() ? 'You' : playerAt(r, c)[0];
+    return { ...q, winner };
+  }));
 
-  /** The row and column that meet on the winning square light up once the score is in. */
-  public axisClass(row: boolean, index: number): string {
-    const hot = this.step() === 2 && index === 3;
-    return hot ? 'bg-qs-ink text-qs-bg font-semibold' : 'bg-qs-tile text-qs-tile-muted';
+  /** Row digits, dealt so your row draws a 4. */
+  public readonly rows = computed(() => dealTo(BASE_ROWS, this.yourRow(), YOUR_AWAY));
+  public readonly score = computed(() => (this.scored() ? QUARTERS[this.quarter()] : { home: 0, away: 0 }));
+  public readonly scored = computed(() => this.step() === 2);
+
+  public claim(key: string): void {
+    if (this.step() !== 0 || this.picked()) return;
+    this.picked.set(key);
+  }
+
+  public goTo(index: number): void {
+    if (index > 0 && !this.picked()) this.picked.set(DEFAULT_PICK);
+    if (index === 2 && this.step() !== 2) this.quarter.set(0);
+    this.step.set(index);
   }
 
   public next(): void {
-    this.step.set(this.step() === STEPS.length - 1 ? 0 : this.step() + 1);
+    if (this.step() === STEPS.length - 1) {
+      this.picked.set(null);
+      this.quarter.set(0);
+      this.step.set(0);
+      return;
+    }
+    this.goTo(this.step() + 1);
   }
+
+  public tens(value: number): string {
+    return value >= 10 ? String(Math.floor(value / 10)) : '';
+  }
+
+  private readonly winKey = computed(() => {
+    if (!this.scored()) return null;
+    return `${this.leadRow()}-${this.leadCol()}`;
+  });
+  private readonly yourCol = computed(() => Number(this.yourKey().split('-')[1]));
+  private readonly yourKey = computed(() => this.picked() ?? DEFAULT_PICK);
+  private readonly yourRow = computed(() => Number(this.yourKey().split('-')[0]));
 }
