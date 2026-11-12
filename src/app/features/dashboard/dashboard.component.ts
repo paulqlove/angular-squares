@@ -53,7 +53,8 @@ import {
   heroMoon,
   heroComputerDesktop,
   heroChevronDown,
-  heroMagnifyingGlass
+  heroMagnifyingGlass,
+  heroBars3
 } from '@ng-icons/heroicons/outline';
 
 
@@ -65,6 +66,18 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
     'join-game': { description: 'Have a game code? Tap Join with a code at the bottom of the screen to join a friend\'s game.', position: 'top' }
   };
   return steps.map(step => ({ ...step, ...phoneText[step.target] }));
+}
+
+type CardView = 'grid' | 'compact';
+const CARD_VIEW_KEY = 'qs-card-view';
+
+/** The card view this device last chose; Grid until one is chosen. */
+function readCardView(): CardView {
+  try {
+    return typeof localStorage !== 'undefined' && localStorage.getItem(CARD_VIEW_KEY) === 'compact' ? 'compact' : 'grid';
+  } catch {
+    return 'grid';
+  }
 }
 
 @Component({
@@ -94,11 +107,12 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
             heroMoon,
             heroComputerDesktop,
             heroChevronDown,
-            heroMagnifyingGlass
+            heroMagnifyingGlass,
+            heroBars3
         })
     ],
     template: `
-    <div class="min-h-screen bg-qs-bg" [attr.inert]="showUpgradeDialog() ? '' : null">
+    <div class="min-h-screen bg-qs-bg" [class.qs-grid-view]="cardView() === 'grid'" [attr.inert]="showUpgradeDialog() ? '' : null">
       <!-- Header -->
       <app-shared-header variant="solid" appHeadroom>
 
@@ -297,31 +311,36 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
             <div class="flex items-baseline justify-between border-b border-qs-line pb-3">
               <h3 id="hosting-heading" class="qs-eyebrow qs-eyebrow-bar">01 / Hosting</h3>
               @if (!isLoadingGames()) {
-                <span class="qs-label text-qs-muted">{{ visibleMyGames().length === myGames().length ? myGames().length : visibleMyGames().length + ' of ' + myGames().length }} {{ myGames().length === 1 ? 'game' : 'games' }}</span>
+                <div class="flex items-center gap-4">
+                  @if (myGames().length > 0) {
+                    <ng-container *ngTemplateOutlet="viewToggle"></ng-container>
+                  }
+                  <span class="qs-label text-qs-muted">{{ visibleMyGames().length === myGames().length ? myGames().length : visibleMyGames().length + ' of ' + myGames().length }} {{ myGames().length === 1 ? 'game' : 'games' }}</span>
+                </div>
               }
             </div>
 
             @if (isLoadingGames()) {
-              <div class="qs-skel-delay mt-6 grid grid-cols-1 items-start gap-3 sm:grid-cols-[repeat(auto-fill,minmax(19rem,1fr))]" aria-busy="true">
+              <div class="qs-skel-delay mt-6 grid grid-cols-1 items-start gap-3" [class]="cardGridClass()" aria-busy="true">
                 @for (i of [0, 1, 2]; track i) {
                   <!-- Same shape as the board card: a row on a phone, from sm up the navy tile, name, teams and the Share bar -->
                   <div class="min-w-0 [container-type:inline-size]">
                   <article class="qs-card" aria-hidden="true">
-                    <div class="flex min-h-[72px] items-center gap-3 p-3 [@container(min-width:28rem)]:flex-col [@container(min-width:28rem)]:items-stretch [@container(min-width:28rem)]:gap-3.5 [@container(min-width:28rem)]:pb-4">
-                      <div class="flex shrink-0 [@container(min-width:28rem)]:min-h-[152px] [@container(min-width:28rem)]:items-end [@container(min-width:28rem)]:gap-[18px] [@container(min-width:28rem)]:rounded-inner [@container(min-width:28rem)]:bg-qs-tile [@container(min-width:28rem)]:p-[18px]">
-                        <div class="qs-skel h-12 w-12 [@container(min-width:28rem)]:h-28 [@container(min-width:28rem)]:w-28"></div>
-                        <div class="hidden flex-col gap-2 pb-0.5 [@container(min-width:28rem)]:flex">
+                    <div class="flex min-h-[72px] items-center gap-3 p-3 tall:flex-col tall:items-stretch tall:gap-3.5 tall:pb-4">
+                      <div class="flex shrink-0 tall:min-h-[152px] tall:items-end tall:gap-[18px] tall:rounded-inner tall:bg-qs-tile tall:p-[18px]">
+                        <div class="qs-skel h-12 w-12 tall:h-28 tall:w-28"></div>
+                        <div class="hidden flex-col gap-2 pb-0.5 tall:flex">
                           <div class="h-9 w-10 animate-pulse rounded-[6px] bg-white/15"></div>
                           <div class="h-3 w-12 animate-pulse rounded-[6px] bg-white/15"></div>
                         </div>
                       </div>
-                      <div class="min-w-0 flex-1 space-y-2 [@container(min-width:28rem)]:flex-none [@container(min-width:28rem)]:px-1.5">
-                        <div class="qs-skel h-4 w-2/5 [@container(min-width:28rem)]:h-5 [@container(min-width:28rem)]:w-3/5"></div>
-                        <div class="qs-skel h-3 w-3/5 [@container(min-width:28rem)]:w-2/5"></div>
-                        <div class="qs-skel hidden h-3 w-1/3 [@container(min-width:28rem)]:block"></div>
+                      <div class="min-w-0 flex-1 space-y-2 tall:flex-none tall:px-1.5">
+                        <div class="qs-skel h-4 w-2/5 tall:h-5 tall:w-3/5"></div>
+                        <div class="qs-skel h-3 w-3/5 tall:w-2/5"></div>
+                        <div class="qs-skel hidden h-3 w-1/3 tall:block"></div>
                       </div>
                     </div>
-                    <div class="hidden min-h-11 border-t border-qs-line [@container(min-width:28rem)]:block"></div>
+                    <div class="hidden min-h-11 border-t border-qs-line tall:block"></div>
                   </article>
                   </div>
                 }
@@ -355,7 +374,7 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
                       <h4 class="qs-eyebrow qs-eyebrow-bar">{{ group.label }}</h4>
                       <span class="qs-label text-qs-muted">{{ group.games.length }}</span>
                     </div>
-                    <div class="mt-3 grid grid-cols-1 items-start gap-3 sm:grid-cols-[repeat(auto-fill,minmax(19rem,1fr))]">
+                    <div class="mt-3 grid grid-cols-1 items-start gap-3" [class]="cardGridClass()">
                       @for (game of group.games; track game.id) {
                         <div class="min-w-0 [container-type:inline-size]"><ng-container *ngTemplateOutlet="gameCard; context: { $implicit: game, joined: false }"></ng-container></div>
                       }
@@ -372,9 +391,14 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
           <section class="mt-8" aria-labelledby="joined-heading">
             <div class="flex items-baseline justify-between border-b border-qs-line pb-3">
               <h3 id="joined-heading" class="qs-eyebrow qs-eyebrow-bar">{{ canCreateGame() ? '02' : '01' }} / Joined</h3>
-              <span class="qs-label text-qs-muted">{{ joinedGames().length }} {{ joinedGames().length === 1 ? 'game' : 'games' }}</span>
+              <div class="flex items-center gap-4">
+                @if (!canCreateGame() || myGames().length === 0) {
+                  <ng-container *ngTemplateOutlet="viewToggle"></ng-container>
+                }
+                <span class="qs-label text-qs-muted">{{ joinedGames().length }} {{ joinedGames().length === 1 ? 'game' : 'games' }}</span>
+              </div>
             </div>
-            <div class="mt-5 grid grid-cols-1 items-start gap-3 sm:grid-cols-[repeat(auto-fill,minmax(19rem,1fr))]">
+            <div class="mt-5 grid grid-cols-1 items-start gap-3" [class]="cardGridClass()">
               @for (game of joinedGames(); track game.id) {
                 <div class="min-w-0 [container-type:inline-size]"><ng-container *ngTemplateOutlet="gameCard; context: { $implicit: game, joined: true }"></ng-container></div>
               }
@@ -493,26 +517,43 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
         </div>
       </app-modal>
 
+      <!-- Grid or Compact cards. From 640px up only: phones always show the compact row. -->
+      <ng-template #viewToggle>
+        <div role="group" aria-label="Card view" class="hidden items-center rounded-btn border border-qs-line bg-qs-panel p-0.5 sm:inline-flex">
+          @for (v of cardViews; track v.id) {
+            <button
+              type="button"
+              (click)="setCardView(v.id)"
+              [attr.aria-pressed]="cardView() === v.id"
+              class="flex h-7 items-center gap-1.5 rounded-[4px] px-2.5 text-[13px] font-medium transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-qs-accent"
+              [class]="cardView() === v.id ? 'bg-qs-ink text-qs-bg' : 'text-qs-muted hover:text-qs-ink'"
+            >
+              <ng-icon [name]="v.icon" class="text-sm" aria-hidden="true"></ng-icon>{{ v.label }}
+            </button>
+          }
+        </div>
+      </ng-template>
+
       <ng-template #gameCard let-game let-joined="joined">
         <!-- Phone: a row (mini board, name, teams, open count). From sm up: the board on a navy panel with the open count beside it.
              Filling boards get a full-width Share invite bar; locked and full boards go quiet. -->
         <article animate.enter="qs-fade-rise" class="qs-card relative min-w-0 transition-[border-color] duration-150 ease-out has-[a:hover]:border-qs-ink has-[[aria-expanded=true]]:z-20">
-          <div class="relative flex items-center [@container(min-width:28rem)]:block">
+          <div class="relative flex items-center tall:block">
             <a
               [routerLink]="['/game', game.id]"
               [state]="{ boardSize: game.boardSize }"
-              class="flex min-h-[72px] min-w-0 flex-1 items-center gap-3 rounded-tl-card py-3 pl-3 pr-2 transition-colors duration-150 hover:bg-qs-panel-2 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-qs-accent [@container(min-width:28rem)]:flex-col [@container(min-width:28rem)]:items-stretch [@container(min-width:28rem)]:gap-3.5 [@container(min-width:28rem)]:rounded-tr-card [@container(min-width:28rem)]:p-3 [@container(min-width:28rem)]:pb-4"
-              [class]="hasCardBar(game, joined) ? '' : 'rounded-bl-card [@container(min-width:28rem)]:rounded-br-card'"
+              class="flex min-h-[72px] min-w-0 flex-1 items-center gap-3 rounded-tl-card py-3 pl-3 pr-2 transition-colors duration-150 hover:bg-qs-panel-2 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-qs-accent tall:flex-col tall:items-stretch tall:gap-3.5 tall:rounded-tr-card tall:p-3 tall:pb-4"
+              [class]="hasCardBar(game, joined) ? '' : 'rounded-bl-card tall:rounded-br-card'"
               [attr.aria-label]="'Open ' + game.name"
             >
-              <div class="flex shrink-0 flex-col items-center [@container(min-width:28rem)]:min-h-[152px] [@container(min-width:28rem)]:flex-row [@container(min-width:28rem)]:items-end [@container(min-width:28rem)]:gap-[18px] [@container(min-width:28rem)]:rounded-inner [@container(min-width:28rem)]:bg-qs-tile [@container(min-width:28rem)]:p-[18px]">
-                <div [class]="'qs-mini grid w-14 shrink-0 gap-px rounded-[3px] p-px [@container(min-width:28rem)]:w-28 ' + getMiniGridClass(game.boardSize)" aria-hidden="true">
+              <div class="flex shrink-0 flex-col items-center tall:min-h-[152px] tall:flex-row tall:items-end tall:gap-[18px] tall:rounded-inner tall:bg-qs-tile tall:p-[18px]">
+                <div [class]="'qs-mini grid w-14 shrink-0 gap-px rounded-[3px] p-px tall:w-28 ' + getMiniGridClass(game.boardSize)" aria-hidden="true">
                   @for (i of getBoardCells(game.boardSize); track i) {
                     <span class="aspect-square" [class]="miniCellClass(game, i)"></span>
                   }
                 </div>
                 <!-- Phone: the state sits centered under the mini board -->
-                <p class="qs-label mt-1.5 flex w-[4.25rem] items-center justify-center gap-1 whitespace-nowrap text-xs tabular-nums [@container(min-width:28rem)]:hidden" [class]="isBoardFilling(game) ? 'text-qs-accent' : 'text-qs-muted'">
+                <p class="qs-label mt-1.5 flex w-[4.25rem] items-center justify-center gap-1 whitespace-nowrap text-xs tabular-nums tall:hidden" [class]="isBoardFilling(game) ? 'text-qs-accent' : 'text-qs-muted'">
                   @if (game.isLocked) {
                     <span class="lock-icon is-locked shrink-0" [class.lock-snap]="justLocked().has(game.id)" style="font-size: 12px" aria-hidden="true"><ng-icon name="heroLockClosed" class="lock-closed"></ng-icon><ng-icon name="heroLockOpen" class="lock-open"></ng-icon></span>Locked
                   } @else if (!isBoardFilling(game)) {
@@ -521,7 +562,7 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
                     {{ openCount(game) }} open
                   }
                 </p>
-                <div class="hidden min-w-0 flex-col gap-1.5 pb-0.5 [@container(min-width:28rem)]:flex">
+                <div class="hidden min-w-0 flex-col gap-1.5 pb-0.5 tall:flex">
                   @if (game.isLocked) {
                     <span class="qs-label inline-flex items-center gap-1.5 text-qs-tile-ink"><span class="lock-icon is-locked" [class.lock-snap]="justLocked().has(game.id)" style="font-size: 14px" aria-hidden="true"><ng-icon name="heroLockClosed" class="lock-closed"></ng-icon><ng-icon name="heroLockOpen" class="lock-open"></ng-icon></span>Locked</span>
                   } @else if (!isBoardFilling(game)) {
@@ -536,8 +577,8 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
                   }
                 </div>
               </div>
-              <div class="min-w-0 [@container(min-width:28rem)]:px-1.5">
-                <h5 class="truncate text-base font-semibold leading-tight tracking-tight text-qs-ink [@container(min-width:28rem)]:text-xl">{{ game.name }}</h5>
+              <div class="min-w-0 tall:px-1.5">
+                <h5 class="truncate text-base font-semibold leading-tight tracking-tight text-qs-ink tall:text-xl">{{ game.name }}</h5>
                 @if (cardTeams(game); as teams) {
                   <div class="mt-1.5 flex flex-col gap-1">
                     @for (team of teams; track $index) {
@@ -558,13 +599,13 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
                   <p class="mt-0.5 truncate text-sm text-qs-muted">Teams not set</p>
                 }
                 @if (!game.isLocked && !isBoardFilling(game) && autoLockText(game); as autoLock) {
-                  <p class="mt-1 truncate text-[13px] text-qs-muted [@container(min-width:28rem)]:hidden">Auto-locks {{ autoLock }}</p>
+                  <p class="mt-1 truncate text-[13px] text-qs-muted tall:hidden">Auto-locks {{ autoLock }}</p>
                 }
               </div>
             </a>
             <app-card-menu
-              class="shrink-0 pr-1 [@container(min-width:28rem)]:absolute [@container(min-width:28rem)]:right-[18px] [@container(min-width:28rem)]:top-[18px] [@container(min-width:28rem)]:pr-0"
-              triggerClass="[@container(min-width:28rem)]:text-qs-tile-muted [@container(min-width:28rem)]:hover:bg-white/10 [@container(min-width:28rem)]:hover:text-qs-tile-ink [@container(min-width:28rem)]:focus-visible:outline-qs-tile-ink"
+              class="shrink-0 pr-1 tall:absolute tall:right-[18px] tall:top-[18px] tall:pr-0"
+              triggerClass="tall:text-qs-tile-muted tall:hover:bg-white/10 tall:hover:text-qs-tile-ink tall:focus-visible:outline-qs-tile-ink"
               [items]="joined ? joinedMenu : hostMenu"
               [label]="'More actions for ' + game.name"
               (picked)="onCardMenu(game, $event)"></app-card-menu>
@@ -670,6 +711,14 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
       .qs-mini-taken { background: color-mix(in srgb, var(--qs-tile-ink) 36%, var(--qs-tile)); }
       .qs-mini-blank { background: var(--qs-tile); }
     }
+    /* Grid view: the tall card from 640px up, whatever the card's width (same as the tall: variant) */
+    @media (min-width: 640px) {
+      .qs-grid-view .qs-mini { background: color-mix(in srgb, var(--qs-tile-ink) 10%, var(--qs-tile)); }
+      .qs-grid-view .qs-mini-open { background: var(--qs-tile-open); }
+      .qs-grid-view .qs-mini-claimed { background: color-mix(in srgb, var(--qs-tile-ink) 20%, var(--qs-tile)); }
+      .qs-grid-view .qs-mini-taken { background: color-mix(in srgb, var(--qs-tile-ink) 36%, var(--qs-tile)); }
+      .qs-grid-view .qs-mini-blank { background: var(--qs-tile); }
+    }
   `]
 })
 export class DashboardComponent implements OnInit, OnDestroy {
@@ -758,6 +807,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
   protected readonly Infinity = Infinity;
 
   myGames = signal<GameListItem[]>([]);
+  /** Grid shows the tall cards from 640px up, as before; Compact shows every board as a short row. Remembered on this device. */
+  cardView = signal<CardView>(readCardView());
+  readonly cardViews: ReadonlyArray<{ id: CardView; label: string; icon: string }> = [
+    { id: 'grid', label: 'Grid', icon: 'heroSquares2x2' },
+    { id: 'compact', label: 'Compact', icon: 'heroBars3' },
+  ];
+  /** Board columns: two or three tall cards in Grid; as many 19rem rows as fit in Compact. */
+  cardGridClass = computed(() => this.cardView() === 'grid' ? 'sm:grid-cols-2 xl:grid-cols-3' : 'sm:grid-cols-[repeat(auto-fill,minmax(19rem,1fr))]');
   /** The search query. Only applies while search shows. */
   gameSearch = signal('');
   /** Search shows once a host has this many boards. Temporarily 1 so it can be tried on any dashboard; the plan is 6. */
@@ -1191,6 +1248,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
   joinGame(): void {
     if (this.joinGameCode.length === 6) {
       this.router.navigate(['/game', this.joinGameCode.toUpperCase()]);
+    }
+  }
+
+  setCardView(view: CardView): void {
+    this.cardView.set(view);
+    try {
+      localStorage.setItem(CARD_VIEW_KEY, view);
+    } catch {
+      // Storage blocked: the choice lasts until the page reloads
     }
   }
 

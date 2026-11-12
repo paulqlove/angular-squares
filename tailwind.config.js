@@ -163,5 +163,8 @@ module.exports = {
     'grid-cols-[auto_repeat(5,minmax(0,1fr))]',
     'grid-cols-[auto_repeat(10,minmax(0,1fr))]',
   ],
-  plugins: [],
+  plugins: [
+    // Dashboard board cards: the tall card. On a card wider than 28rem, or in Grid view from 640px up.
+    ({ addVariant }) => addVariant('tall', ['@container (min-width: 28rem)', '@media (min-width: 640px) { .qs-grid-view & }']),
+  ],
 };
