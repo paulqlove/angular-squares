@@ -3,7 +3,7 @@ import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, Chang
 import { ModalComponent } from '../../../../components/ui/modal/modal.component';
 import { FormsModule } from '@angular/forms';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { heroXMark, heroTrash, heroLockClosed } from '@ng-icons/heroicons/outline';
+import { heroXMark, heroTrash, heroLockClosed, heroMagnifyingGlass } from '@ng-icons/heroicons/outline';
 import { DEFAULT_EMPTY_QUARTER_RULE, DEFAULT_SPLIT, EmptyQuarterRule, QuarterSplit, SPLIT_PRESETS, isValidSplit } from '../../../../core/plans';
 import type { BoardSize } from '../../../../core/services/game.service';
 import type { EspnGame, SportType } from '../../../../core/services/espn.service';
@@ -38,7 +38,7 @@ export interface EditGameValues {
 @Component({
   selector: 'app-edit-game-dialog',
   imports: [ModalComponent, MaxSquaresFieldComponent, FormsModule, NgIconComponent, EmptyQuarterRuleComponent, ToggleComponent, GamePickCardComponent],
-  providers: [provideIcons({ heroXMark, heroTrash, heroLockClosed })],
+  providers: [provideIcons({ heroXMark, heroTrash, heroLockClosed, heroMagnifyingGlass })],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <app-modal [open]="isOpen" labelledBy="edit-game-title" size="xl" phone="full" extraClass="flex h-[min(44rem,calc(100dvh-2rem))] flex-col overflow-hidden" (dismissed)="close()">
@@ -108,7 +108,10 @@ export interface EditGameValues {
                   </div>
                 } @else {
                   @if (espnGames.length > 10) {
-                    <input type="text" [(ngModel)]="espnGameSearch" placeholder="Search teams..." aria-label="Search teams" class="qs-input" />
+                    <div class="qs-search">
+                      <ng-icon name="heroMagnifyingGlass" class="qs-search-icon" aria-hidden="true"></ng-icon>
+                      <input type="search" [(ngModel)]="espnGameSearch" placeholder="Search teams" aria-label="Search teams" autocomplete="off" (keydown.enter)="$event.preventDefault()" />
+                    </div>
                   }
                   <div class="grid max-h-72 grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2">
                     @for (game of filteredEspnGames(); track game.id) {
@@ -259,17 +262,19 @@ export interface EditGameValues {
                     </div>
                   } @else if (players.length > 0) {
                     <div class="relative">
-                      <input
-                        id="edit-game-cohost"
-                        type="text"
-                        [(ngModel)]="coHostQuery"
-                        (input)="showResults = true; coHostIndex = -1"
-                        (focus)="showResults = true"
-                        (keydown)="onCoHostKeydown($event)"
-                        placeholder="Search players..."
-                        class="qs-input"
-                        autocomplete="off"
-                      />
+                      <div class="qs-search">
+                        <ng-icon name="heroMagnifyingGlass" class="qs-search-icon" aria-hidden="true"></ng-icon>
+                        <input
+                          id="edit-game-cohost"
+                          type="text"
+                          [(ngModel)]="coHostQuery"
+                          (input)="showResults = true; coHostIndex = -1"
+                          (focus)="showResults = true"
+                          (keydown)="onCoHostKeydown($event)"
+                          placeholder="Search players"
+                          autocomplete="off"
+                        />
+                      </div>
                       @if (showResults && coHostResults().length > 0) {
                         <div class="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-inner border border-qs-line bg-qs-panel shadow-pop">
                           @for (player of coHostResults(); track player.uid; let i = $index) {

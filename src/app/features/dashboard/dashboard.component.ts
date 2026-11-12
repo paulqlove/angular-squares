@@ -112,7 +112,7 @@ function readCardView(): CardView {
         })
     ],
     template: `
-    <div class="min-h-screen bg-qs-bg" [class.qs-grid-view]="cardView() === 'grid'" [attr.inert]="showUpgradeDialog() ? '' : null">
+    <div class="min-h-screen bg-qs-bg" [class.qs-grid-view]="activeCardView() === 'grid'" [attr.inert]="showUpgradeDialog() ? '' : null">
       <!-- Header -->
       <app-shared-header variant="solid" appHeadroom>
 
@@ -308,15 +308,18 @@ function readCardView(): CardView {
           }
 
           <section class="mt-8" data-walkthrough="my-games" aria-labelledby="hosting-heading">
-            <div class="flex items-baseline justify-between border-b border-qs-line pb-3">
+            <div class="flex items-center justify-between gap-3 border-b border-qs-line pb-3 sm:min-h-11">
               <h3 id="hosting-heading" class="qs-eyebrow qs-eyebrow-bar">01 / Hosting</h3>
-              @if (!isLoadingGames()) {
-                <span class="qs-label text-qs-muted">{{ visibleMyGames().length === myGames().length ? myGames().length : visibleMyGames().length + ' of ' + myGames().length }} {{ myGames().length === 1 ? 'game' : 'games' }}</span>
-              }
+              <div class="flex items-center gap-4">
+                @if (!isLoadingGames()) {
+                  <span class="qs-label text-qs-muted">{{ visibleMyGames().length === myGames().length ? myGames().length : visibleMyGames().length + ' of ' + myGames().length }} {{ myGames().length === 1 ? 'game' : 'games' }}</span>
+                }
+                <ng-container *ngTemplateOutlet="viewToggle"></ng-container>
+              </div>
             </div>
 
             @if (isLoadingGames()) {
-              <div class="qs-skel-delay mt-6 grid grid-cols-1 items-start gap-3" [class]="cardGridClass()" aria-busy="true">
+              <div class="qs-skel-delay mt-6 grid grid-cols-1 items-start gap-3" data-card-grid [class]="cardGridClass()" aria-busy="true">
                 @for (i of [0, 1, 2]; track i) {
                   <!-- Same shape as the board card: a row on a phone, from sm up the navy tile, name, teams and the Share bar -->
                   <div class="min-w-0 [container-type:inline-size]">
@@ -369,7 +372,7 @@ function readCardView(): CardView {
                       <h4 class="qs-eyebrow qs-eyebrow-bar">{{ group.label }}</h4>
                       <span class="qs-label text-qs-muted">{{ group.games.length }}</span>
                     </div>
-                    <div class="mt-3 grid grid-cols-1 items-start gap-3" [class]="cardGridClass()">
+                    <div class="mt-3 grid grid-cols-1 items-start gap-3" data-card-grid [class]="cardGridClass()">
                       @for (game of group.games; track game.id) {
                         <div class="min-w-0 [container-type:inline-size]"><ng-container *ngTemplateOutlet="gameCard; context: { $implicit: game, joined: false }"></ng-container></div>
                       }
@@ -384,11 +387,13 @@ function readCardView(): CardView {
         <!-- Joined -->
         @if (joinedGames().length > 0) {
           <section class="mt-8" aria-labelledby="joined-heading">
-            <div class="flex items-baseline justify-between border-b border-qs-line pb-3">
+            <div class="flex items-center justify-between gap-3 border-b border-qs-line pb-3 sm:min-h-11">
               <h3 id="joined-heading" class="qs-eyebrow qs-eyebrow-bar">{{ canCreateGame() ? '02' : '01' }} / Joined</h3>
-              <span class="qs-label text-qs-muted">{{ joinedGames().length }} {{ joinedGames().length === 1 ? 'game' : 'games' }}</span>
+              <div class="flex items-center gap-4">
+                <span class="qs-label text-qs-muted">{{ joinedGames().length }} {{ joinedGames().length === 1 ? 'game' : 'games' }}</span>
+              </div>
             </div>
-            <div class="mt-5 grid grid-cols-1 items-start gap-3" [class]="cardGridClass()">
+            <div class="mt-5 grid grid-cols-1 items-start gap-3" data-card-grid [class]="cardGridClass()">
               @for (game of joinedGames(); track game.id) {
                 <div class="min-w-0 [container-type:inline-size]"><ng-container *ngTemplateOutlet="gameCard; context: { $implicit: game, joined: true }"></ng-container></div>
               }
@@ -406,10 +411,10 @@ function readCardView(): CardView {
         [style.transform]="searchOpen() && keyboardLift() ? 'translateY(-' + keyboardLift() + 'px)' : null"
       >
         <div role="toolbar" aria-label="Board actions" class="grid grid-cols-1 rounded-[12px] border border-qs-line bg-[color-mix(in_srgb,var(--qs-panel)_88%,transparent)] p-1.5 shadow-pop backdrop-blur-md">
-          <div class="qs-swap col-start-1 row-start-1 flex items-stretch gap-1.5" [class.qs-swap-off]="searchOpen()" [class.qs-swap-left]="searchOpen()" [attr.aria-hidden]="searchOpen() ? 'true' : null">
+          <div class="qs-swap col-start-1 row-start-1 flex items-stretch gap-1" [class.qs-swap-off]="searchOpen()" [class.qs-swap-left]="searchOpen()" [attr.aria-hidden]="searchOpen() ? 'true' : null">
             @if (showSearch()) {
               <button type="button" (click)="openSearch()" class="qs-btn qs-btn-secondary w-11 shrink-0 px-0" aria-label="Search games" [attr.tabindex]="searchOpen() ? -1 : null">
-                <ng-icon name="heroMagnifyingGlass" class="text-base" aria-hidden="true"></ng-icon>
+                <ng-icon name="heroMagnifyingGlass" class="text-xl" aria-hidden="true"></ng-icon>
               </button>
             }
             <!-- With the search button in the row, Join's label shortens so New board keeps its full name -->
@@ -433,7 +438,7 @@ function readCardView(): CardView {
             }
           </div>
           @if (showSearch()) {
-            <div class="qs-swap col-start-1 row-start-1 flex items-stretch gap-1.5" [class.qs-swap-off]="!searchOpen()" [class.qs-swap-right]="!searchOpen()" [attr.aria-hidden]="searchOpen() ? null : 'true'" role="search">
+            <div class="qs-swap col-start-1 row-start-1 flex items-stretch gap-1" [class.qs-swap-off]="!searchOpen()" [class.qs-swap-right]="!searchOpen()" [attr.aria-hidden]="searchOpen() ? null : 'true'" role="search">
               <ng-container *ngTemplateOutlet="searchField; context: { $implicit: 'phone' }"></ng-container>
               <button type="button" (click)="closeSearch()" class="qs-btn qs-btn-secondary shrink-0" [attr.tabindex]="searchOpen() ? null : -1">Cancel</button>
             </div>
@@ -450,16 +455,15 @@ function readCardView(): CardView {
           animate.enter="qs-dock-enter"
           animate.leave="qs-dock-leave"
         >
-          <div class="flex items-stretch gap-1.5 rounded-[12px] border border-qs-line bg-[color-mix(in_srgb,var(--qs-panel)_88%,transparent)] p-2 shadow-pop backdrop-blur-md">
-            <div role="search" class="flex min-w-0"><ng-container *ngTemplateOutlet="searchField; context: { $implicit: 'desk' }"></ng-container></div>
-            <ng-container *ngTemplateOutlet="viewToggle"></ng-container>
+          <div role="search" class="flex rounded-[12px] border border-qs-line bg-[color-mix(in_srgb,var(--qs-panel)_88%,transparent)] p-2 shadow-pop backdrop-blur-md">
+            <ng-container *ngTemplateOutlet="searchField; context: { $implicit: 'desk' }"></ng-container>
           </div>
         </div>
       }
 
       <ng-template #searchField let-where>
-        <div class="flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-btn border border-qs-line-strong bg-qs-panel pl-3 pr-1 focus-within:outline focus-within:outline-[3px] focus-within:outline-offset-2 focus-within:outline-qs-ink" [class.sm:w-80]="where === 'desk'">
-          <ng-icon name="heroMagnifyingGlass" class="shrink-0 text-base text-qs-muted" aria-hidden="true"></ng-icon>
+        <div class="qs-search min-w-0 flex-1" [class.sm:w-80]="where === 'desk'">
+          <ng-icon name="heroMagnifyingGlass" class="qs-search-icon" aria-hidden="true"></ng-icon>
           <input
             #searchInput
             type="search"
@@ -473,11 +477,10 @@ function readCardView(): CardView {
             placeholder="Search games"
             aria-label="Search games"
             [attr.tabindex]="where === 'phone' && !searchOpen() ? -1 : null"
-            class="qs-search-input min-w-0 flex-1 bg-transparent text-base text-qs-ink placeholder:text-qs-muted focus:outline-none"
           />
           @if (gameSearch()) {
-            <button type="button" (click)="clearSearch(where)" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-btn text-qs-muted hover:text-qs-ink" aria-label="Clear search" [attr.tabindex]="where === 'phone' && !searchOpen() ? -1 : null">
-              <ng-icon name="heroXMark" class="text-base" aria-hidden="true"></ng-icon>
+            <button type="button" (click)="clearSearch(where)" class="qs-search-clear" aria-label="Clear search" [attr.tabindex]="where === 'phone' && !searchOpen() ? -1 : null">
+              <ng-icon name="heroXMark" aria-hidden="true"></ng-icon>
             </button>
           }
         </div>
@@ -508,9 +511,9 @@ function readCardView(): CardView {
         </div>
       </app-modal>
 
-      <!-- Grid or Compact cards, icon only, attached to the search pill (from 640px up; phones always show the compact row) -->
+      <!-- Grid or Compact cards: two borderless icon buttons at the right end of the list heading, from 640px up (phones always show the compact row) -->
       <ng-template #viewToggle>
-        <div role="group" aria-label="Card view" class="flex shrink-0 items-center gap-0.5 rounded-btn border border-qs-line-strong bg-qs-panel p-1">
+        <div role="group" aria-label="Card view" class="hidden shrink-0 gap-0.5 sm:flex">
           @for (v of cardViews; track v.id) {
             <button
               type="button"
@@ -518,10 +521,9 @@ function readCardView(): CardView {
               [attr.aria-pressed]="cardView() === v.id"
               [attr.aria-label]="v.label + ' view'"
               [title]="v.label + ' view'"
-              class="flex h-9 w-9 items-center justify-center rounded-[4px] transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-qs-accent"
-              [class]="cardView() === v.id ? 'bg-qs-ink text-qs-bg' : 'text-qs-muted hover:bg-qs-panel-2 hover:text-qs-ink'"
+              class="qs-view-btn"
             >
-              <ng-icon [name]="v.icon" class="text-lg" aria-hidden="true"></ng-icon>
+              <ng-icon [name]="v.icon" class="text-xl" aria-hidden="true"></ng-icon>
             </button>
           }
         </div>
@@ -712,6 +714,12 @@ function readCardView(): CardView {
       .qs-grid-view .qs-mini-taken { background: color-mix(in srgb, var(--qs-tile-ink) 36%, var(--qs-tile)); }
       .qs-grid-view .qs-mini-blank { background: var(--qs-tile); }
     }
+    /* Grid / Compact: borderless 44px icon buttons; muted at rest, panel-2 on hover, ink when pressed. Global focus ring. */
+    .qs-view-btn { display: flex; width: 44px; height: 44px; align-items: center; justify-content: center; border-radius: var(--qs-r-btn); color: var(--qs-muted);
+      transition: background-color var(--qs-t-fast) var(--qs-ease), color var(--qs-t-fast) var(--qs-ease), transform var(--qs-t-fast) var(--qs-ease); }
+    @media (hover: hover) { .qs-view-btn:hover:not([aria-pressed="true"]) { background: var(--qs-panel-2); color: var(--qs-ink); } }
+    .qs-view-btn[aria-pressed="true"] { background: var(--qs-ink); color: var(--qs-bg); }
+    .qs-view-btn:active { transform: scale(.97); transition-duration: var(--qs-t-press); transition-timing-function: var(--qs-ease-in); }
   `]
 })
 export class DashboardComponent implements OnInit, OnDestroy {
@@ -808,7 +816,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     { id: 'compact', label: 'Compact', icon: 'heroBars3' },
   ];
   /** Board columns: two or three tall cards in Grid; as many 19rem rows as fit in Compact. */
-  cardGridClass = computed(() => this.cardView() === 'grid' ? 'sm:grid-cols-2 xl:grid-cols-3' : 'sm:grid-cols-[repeat(auto-fill,minmax(19rem,1fr))]');
+  /** Grid / Compact is a hosting tool: players who don't host games always see Grid. */
+  activeCardView = computed<CardView>(() => this.canCreateGame() ? this.cardView() : 'grid');
+  cardGridClass = computed(() => this.activeCardView() === 'grid' ? 'sm:grid-cols-2 xl:grid-cols-3' : 'sm:grid-cols-[repeat(auto-fill,minmax(19rem,1fr))]');
   /** The search query. Only applies while search shows. */
   gameSearch = signal('');
   /** Search shows once a host has this many boards. Temporarily 1 so it can be tried on any dashboard; the plan is 6. */
@@ -981,6 +991,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
       }
       setTimeout(() => this.openCreateModalDirect(), 100);
     }
+  }
+
+  /** Switching card view: the cards fade in over 160ms with no movement (none under reduced motion). */
+  private fadeInCards(): void {
+    if (typeof document === 'undefined' || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    document.querySelectorAll<HTMLElement>('[data-card-grid]').forEach(el =>
+      el.animate?.([{ opacity: 0 }, { opacity: 1 }], { duration: 160, easing: 'cubic-bezier(.2,.7,.2,1)' }));
   }
 
   /** Open create modal directly without event (for query param trigger). Finishes a create the visitor started signed out. */
@@ -1246,7 +1263,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   setCardView(view: CardView): void {
+    if (view === this.cardView()) return;
     this.cardView.set(view);
+    this.fadeInCards();
     try {
       localStorage.setItem(CARD_VIEW_KEY, view);
     } catch {

@@ -2,6 +2,8 @@ import { MaxSquaresFieldComponent } from '../../components/ui/max-squares-field/
 import { autoRunLabel } from '../../core/utils/auto-manage';
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import { heroMagnifyingGlass } from '@ng-icons/heroicons/outline';
 import { ToggleComponent } from '../../components/ui/toggle/toggle.component';
 import { EmptyQuarterRuleComponent } from '../../components/ui/empty-quarter-rule/empty-quarter-rule.component';
 import { DEFAULT_EMPTY_QUARTER_RULE, EmptyQuarterRule, QuarterSplit, SPLIT_PRESETS, isValidSplit } from '../../core/plans';
@@ -24,7 +26,8 @@ export interface CreateGameSubmit {
  */
 @Component({
   selector: 'app-create-game-form',
-  imports: [MaxSquaresFieldComponent, FormsModule, EmptyQuarterRuleComponent, ToggleComponent, GamePickCardComponent],
+  imports: [MaxSquaresFieldComponent, FormsModule, NgIconComponent, EmptyQuarterRuleComponent, ToggleComponent, GamePickCardComponent],
+  providers: [provideIcons({ heroMagnifyingGlass })],
   host: { class: 'contents' },
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
@@ -92,14 +95,17 @@ export interface CreateGameSubmit {
   } @else {
     @if (espnGames().length > 10) {
       <div class="mt-2">
-        <input
-          type="search"
-          aria-label="Search games"
-          [(ngModel)]="espnGameSearch"
-          (keydown.enter)="$event.preventDefault()"
-          placeholder="Search teams..."
-          class="qs-input w-full"
-        />
+        <div class="qs-search">
+          <ng-icon name="heroMagnifyingGlass" class="qs-search-icon" aria-hidden="true"></ng-icon>
+          <input
+            type="search"
+            aria-label="Search teams"
+            [(ngModel)]="espnGameSearch"
+            (keydown.enter)="$event.preventDefault()"
+            placeholder="Search teams"
+            autocomplete="off"
+          />
+        </div>
       </div>
     }
     <div class="qs-canvas mt-3 min-h-40 flex-1 overflow-y-auto rounded-inner p-2 max-sm:flex-none max-sm:overflow-visible">
