@@ -311,12 +311,7 @@ function readCardView(): CardView {
             <div class="flex items-baseline justify-between border-b border-qs-line pb-3">
               <h3 id="hosting-heading" class="qs-eyebrow qs-eyebrow-bar">01 / Hosting</h3>
               @if (!isLoadingGames()) {
-                <div class="flex items-center gap-4">
-                  @if (myGames().length > 0) {
-                    <ng-container *ngTemplateOutlet="viewToggle"></ng-container>
-                  }
-                  <span class="qs-label text-qs-muted">{{ visibleMyGames().length === myGames().length ? myGames().length : visibleMyGames().length + ' of ' + myGames().length }} {{ myGames().length === 1 ? 'game' : 'games' }}</span>
-                </div>
+                <span class="qs-label text-qs-muted">{{ visibleMyGames().length === myGames().length ? myGames().length : visibleMyGames().length + ' of ' + myGames().length }} {{ myGames().length === 1 ? 'game' : 'games' }}</span>
               }
             </div>
 
@@ -391,12 +386,7 @@ function readCardView(): CardView {
           <section class="mt-8" aria-labelledby="joined-heading">
             <div class="flex items-baseline justify-between border-b border-qs-line pb-3">
               <h3 id="joined-heading" class="qs-eyebrow qs-eyebrow-bar">{{ canCreateGame() ? '02' : '01' }} / Joined</h3>
-              <div class="flex items-center gap-4">
-                @if (!canCreateGame() || myGames().length === 0) {
-                  <ng-container *ngTemplateOutlet="viewToggle"></ng-container>
-                }
-                <span class="qs-label text-qs-muted">{{ joinedGames().length }} {{ joinedGames().length === 1 ? 'game' : 'games' }}</span>
-              </div>
+              <span class="qs-label text-qs-muted">{{ joinedGames().length }} {{ joinedGames().length === 1 ? 'game' : 'games' }}</span>
             </div>
             <div class="mt-5 grid grid-cols-1 items-start gap-3" [class]="cardGridClass()">
               @for (game of joinedGames(); track game.id) {
@@ -460,8 +450,9 @@ function readCardView(): CardView {
           animate.enter="qs-dock-enter"
           animate.leave="qs-dock-leave"
         >
-          <div role="search" class="rounded-[12px] border border-qs-line bg-[color-mix(in_srgb,var(--qs-panel)_88%,transparent)] p-2 shadow-pop backdrop-blur-md">
-            <ng-container *ngTemplateOutlet="searchField; context: { $implicit: 'desk' }"></ng-container>
+          <div class="flex items-stretch gap-1.5 rounded-[12px] border border-qs-line bg-[color-mix(in_srgb,var(--qs-panel)_88%,transparent)] p-2 shadow-pop backdrop-blur-md">
+            <div role="search" class="flex min-w-0"><ng-container *ngTemplateOutlet="searchField; context: { $implicit: 'desk' }"></ng-container></div>
+            <ng-container *ngTemplateOutlet="viewToggle"></ng-container>
           </div>
         </div>
       }
@@ -517,18 +508,20 @@ function readCardView(): CardView {
         </div>
       </app-modal>
 
-      <!-- Grid or Compact cards. From 640px up only: phones always show the compact row. -->
+      <!-- Grid or Compact cards, icon only, attached to the search pill (from 640px up; phones always show the compact row) -->
       <ng-template #viewToggle>
-        <div role="group" aria-label="Card view" class="hidden items-center rounded-btn border border-qs-line bg-qs-panel p-0.5 sm:inline-flex">
+        <div role="group" aria-label="Card view" class="flex shrink-0 items-center gap-0.5 rounded-btn border border-qs-line-strong bg-qs-panel p-1">
           @for (v of cardViews; track v.id) {
             <button
               type="button"
               (click)="setCardView(v.id)"
               [attr.aria-pressed]="cardView() === v.id"
-              class="flex h-7 items-center gap-1.5 rounded-[4px] px-2.5 text-[13px] font-medium transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-qs-accent"
-              [class]="cardView() === v.id ? 'bg-qs-ink text-qs-bg' : 'text-qs-muted hover:text-qs-ink'"
+              [attr.aria-label]="v.label + ' view'"
+              [title]="v.label + ' view'"
+              class="flex h-9 w-9 items-center justify-center rounded-[4px] transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-qs-accent"
+              [class]="cardView() === v.id ? 'bg-qs-ink text-qs-bg' : 'text-qs-muted hover:bg-qs-panel-2 hover:text-qs-ink'"
             >
-              <ng-icon [name]="v.icon" class="text-sm" aria-hidden="true"></ng-icon>{{ v.label }}
+              <ng-icon [name]="v.icon" class="text-lg" aria-hidden="true"></ng-icon>
             </button>
           }
         </div>
