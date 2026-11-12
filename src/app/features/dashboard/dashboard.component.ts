@@ -293,7 +293,7 @@ function readCardView(): CardView {
           }
 
           <section class="mt-8" data-walkthrough="my-games" aria-labelledby="hosting-heading">
-            <div class="flex min-h-11 items-center justify-between gap-3">
+            <div class="flex min-h-11 items-center justify-between gap-3 border-b border-qs-line pb-2">
               <div class="flex min-w-0 items-baseline gap-2.5">
                 <h3 id="hosting-heading" class="qs-section-title">Hosting</h3>
                 @if (!isLoadingGames()) {
@@ -372,7 +372,7 @@ function readCardView(): CardView {
         <!-- Joined -->
         @if (joinedGames().length > 0) {
           <section [class]="canCreateGame() ? 'mt-10 sm:mt-14' : 'mt-8'" aria-labelledby="joined-heading">
-            <div class="flex min-h-11 items-center gap-3">
+            <div class="flex min-h-11 items-center gap-3 border-b border-qs-line pb-2">
               <div class="flex min-w-0 items-baseline gap-2.5">
                 <h3 id="joined-heading" class="qs-section-title">Joined</h3>
                 <span class="qs-label text-qs-muted">{{ joinedGames().length }} {{ joinedGames().length === 1 ? 'game' : 'games' }}</span>
