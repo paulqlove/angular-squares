@@ -9,7 +9,7 @@ export const environment = {
   adsEnabled: false,
   firebase: {
     apiKey: 'AIzaSyBij6Rm7noCjgQVLvclvqRc34UtY2wQLsE',
-    authDomain: 'squares-4e4f7.firebaseapp.com',
+    authDomain: 'quarterscore.com',
     databaseURL: 'https://squares-4e4f7-default-rtdb.firebaseio.com',
     projectId: 'squares-4e4f7',
     storageBucket: 'squares-4e4f7.firebasestorage.app',
