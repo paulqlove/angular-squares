@@ -314,15 +314,53 @@ export class WelcomeComponent implements OnInit {
       published: '2026-11-01',
       breadcrumbs: [{ name: 'Home', path: '/' }],
       extraJsonLd: [
-        { '@context': 'https://schema.org', '@type': 'WebSite', name: 'QuarterScore', url: 'https://quarterscore.com/' },
+        {
+          '@context': 'https://schema.org',
+          '@type': 'Organization',
+          '@id': 'https://quarterscore.com/#organization',
+          name: 'QuarterScore',
+          url: 'https://quarterscore.com/',
+          logo: 'https://quarterscore.com/assets/logo.png',
+          description: 'QuarterScore makes free football squares boards for friends, families and offices. It never collects, holds, or pays out money.'
+        },
+        {
+          '@context': 'https://schema.org',
+          '@type': 'WebSite',
+          '@id': 'https://quarterscore.com/#website',
+          name: 'QuarterScore',
+          alternateName: 'QuarterScore Football Squares',
+          url: 'https://quarterscore.com/',
+          publisher: { '@id': 'https://quarterscore.com/#organization' }
+        },
         {
           '@context': 'https://schema.org',
           '@type': 'WebApplication',
           name: 'QuarterScore',
           url: 'https://quarterscore.com/',
-          applicationCategory: 'EntertainmentApplication',
+          description: 'Free football squares (Super Bowl squares) online. Make a 100, 50 or 25 square board, share one link, and live scores pick each quarter\'s winner. Players do not need an account.',
+          image: 'https://quarterscore.com/assets/og-image.png',
+          applicationCategory: 'GameApplication',
+          applicationSubCategory: 'Football squares',
           operatingSystem: 'Any (web browser)',
-          offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' }
+          browserRequirements: 'Requires a modern web browser with JavaScript.',
+          isAccessibleForFree: true,
+          inLanguage: 'en-US',
+          publisher: { '@id': 'https://quarterscore.com/#organization' },
+          offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+          featureList: [
+            '100, 50 or 25 square boards',
+            'Share by link or six-character game code',
+            'Players join with just a name, no account',
+            'Squares update in real time',
+            'Numbers drawn at random after the board is locked',
+            'Automatic quarter winners from live ESPN scores',
+            'NFL, NCAA football, UFL, NBA, WNBA and AFL games, or custom teams',
+            'Choose what happens when a winning square is empty',
+            'Check-in and paid tracking, co-hosts and a host note',
+            'TV mode with a QR code to join and rotating boards',
+            'Printable blank board and PDF',
+            'Historical hit rates for every digit pair'
+          ]
         }
       ]
     });

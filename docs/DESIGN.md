@@ -44,6 +44,30 @@ The logo is a navy 2×2 board with the top-right quarter filled emerald (Nov 1 2
 
 ---
 
+## Hick's law (standing design principle)
+
+Source: Laws of UX, lawsofux.com/hicks-law. Added Nov 12, 2026 at Paul's request. All QuarterScore design work follows it.
+
+**The law:** The time it takes to make a decision increases with the number and complexity of choices.
+
+### Takeaways (Laws of UX)
+
+1. Minimize choices when response times are critical to decrease decision time.
+2. Break complex tasks into smaller steps in order to decrease cognitive load.
+3. Avoid overwhelming users by highlighting recommended options.
+4. Use progressive onboarding to minimize cognitive load for new users.
+5. Be careful not to simplify to the point of abstraction.
+
+### How we apply it in QuarterScore
+
+1. **Fewer choices at time-critical moments.** During a live game the screen answers "who's winning this quarter" first. Picking squares and joining games show one main action per screen.
+2. **Small steps for complex tasks.** Setting up a board is a short sequence of steps (game, price, players, lock), each with only what that step needs, never one long form.
+3. **Highlight the recommended option.** When there's a choice, one option is the default and visually leads (for example, the green New board, or Join when a code matches). Other options stay quiet.
+4. **Progressive onboarding.** A new host or player sees only what they need now. Extras like Grid/Compact or Season Pass show up once they host or need them.
+5. **Don't simplify into abstraction.** Keep clear labels and real words over icon-only or vague controls. If removing something makes a screen harder to understand, keep it.
+
+Scope: applies to future work. It is not a reason to redesign screens Paul has already approved.
+
 ## 2. Color
 
 Define every color as a CSS variable prefixed `--qs-`. Host team colors use `--home` and `--away` and are never mixed into the `--qs-` set. All pairs below were checked with the WCAG 2.1 relative-luminance formula.

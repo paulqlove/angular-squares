@@ -22,7 +22,7 @@
     "public": "dist/angular-squares/browser",
     "ignore": [
       "firebase.json",
-      "**/.*",
+      "**/.DS_Store",
       "**/node_modules/**",
       "CNAME"
     ],
@@ -42,7 +42,7 @@
         "destination": "/game.html"
       },
       {
-        "source": "**",
+        "source": "!/@(.well-known|skills)/**",
         "destination": "/spa.html"
       }
     ],
@@ -101,11 +101,33 @@
         ]
       },
       {
-        "source": "/@(robots.txt|sitemap.xml)",
+        "source": "/@(robots.txt|sitemap.xml|llms.txt|llms-full.txt)",
         "headers": [
           {
             "key": "Cache-Control",
             "value": "public, max-age=3600"
+          }
+        ]
+      },
+      {
+        "source": "/skills/**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=3600"
+          }
+        ]
+      },
+      {
+        "source": "/.well-known/ard.json",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=3600"
+          },
+          {
+            "key": "Access-Control-Allow-Origin",
+            "value": "*"
           }
         ]
       },

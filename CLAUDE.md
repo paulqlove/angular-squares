@@ -138,6 +138,7 @@ Game owners can link a board to an ESPN game. `environment.serverScoring` defaul
 - **Build command**: `npm run build` outputs to `dist/angular-squares/`
 - **Deploy**: merging to `main` runs `.github/workflows/firebase-hosting-merge.yml`, which builds and deploys to the `live` channel. PRs get a preview channel from `firebase-hosting-pr.yml`. There is no manual deploy command, and `ng deploy` / GitHub Pages is no longer used.
 - **Prerender routes**: `npm start` and builds run `scripts/build-content.mjs`, which fails on any route it doesn't know. Add client-only routes to its `clientRoutes` set.
+- **AI agent files**: the same script writes `src/llms.txt` and `src/llms-full.txt` from the page data (`scripts/agent-files.mjs`). When a feature changes, update its `FACTS` list, `public/skills/football-squares/SKILL.md` and the WebApplication JSON-LD on the welcome page. The agent manifest is `public/.well-known/ard.json`, linked from `robots.txt` (`Agentmap:`) and `index.html` (`rel="ard"`).
 
 ## Prompt Gaps
 

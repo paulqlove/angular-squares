@@ -7,7 +7,7 @@ import { RouterLink } from '@angular/router';
     imports: [RouterLink],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
-    <div class="flex items-center justify-center min-h-screen p-4 bg-qs-bg">
+    <main class="flex items-center justify-center min-h-screen p-4 bg-qs-bg">
       <div class="max-w-md text-center">
         <img
           src="assets/logo.webp"
@@ -26,7 +26,7 @@ import { RouterLink } from '@angular/router';
         </a>
         <p class="mt-4"><a routerLink="/create" class="text-qs-accent underline underline-offset-4">Create a board</a></p>
       </div>
-    </div>
+    </main>
   `
 })
 export class NotFoundComponent implements OnInit {

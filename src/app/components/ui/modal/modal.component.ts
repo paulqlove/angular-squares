@@ -25,6 +25,9 @@ const FOCUSABLE = 'button, input, select, textarea, summary, [href], [tabindex]:
 @Component({
   selector: 'app-modal',
   changeDetection: ChangeDetectionStrategy.Eager,
+  // A static role="alertdialog" on <app-modal> also lands on the host as an attribute, which would make the host an
+  // unnamed dialog for screen readers and AI agents. The role belongs on the panel only.
+  host: { '[attr.role]': 'null' },
   template: `
     @if (shown()) {
       <div animate.enter="qs-modal-enter" [class]="overlayClass()" [class.qs-modal-leave]="!open()" (click)="onBackdrop()">

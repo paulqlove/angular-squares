@@ -112,7 +112,7 @@ import { ScheduledGame, formatKickoff } from './schedule.model';
             </p>
             <div class="team-sheet mt-4 rounded-[10px] border border-qs-line bg-white p-4 text-slate-900 sm:p-6">
               <div class="flex items-center justify-between gap-3">
-                <img src="assets/brand/lockup-horizontal.svg" alt="QuarterScore" class="h-6">
+                <img src="assets/brand/lockup-horizontal.svg" alt="QuarterScore" width="192" height="24" class="h-6 w-auto">
                 <span class="text-xs text-slate-600">{{ sheet().date }}</span>
               </div>
               <p class="mt-3 text-lg font-bold">{{ sheet().away.label }} at {{ sheet().home.label }}</p>

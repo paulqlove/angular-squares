@@ -1,0 +1,87 @@
+# QuarterScore
+
+> QuarterScore is a free website for running football squares (also called Super Bowl squares) online. A host makes a 100, 50 or 25 square board and shares one link, friends claim squares by typing a name, and live scores pick the winner of each quarter. QuarterScore never collects, holds, or pays out money.
+
+Site: https://quarterscore.com/
+
+Key facts:
+
+- Free to use. Creating a board and claiming squares costs nothing.
+- QuarterScore never collects, holds, or pays out money. Most groups play for bragging rights.
+- Players do not need an account. They open the link and type a name on a square. Only the host signs in, to save and run the board.
+- Boards come in 100, 50 or 25 squares.
+- A board is shared by one link or a six-character game code. Games are not listed in a public directory.
+- Squares update in real time for everyone on the board.
+- The host locks the board, then the digits 0 through 9 are drawn at random for the rows and the columns, so nobody picks a digit.
+- Quarter winners are found automatically from the last digit of each team's score.
+- Boards can follow a live game: the score and clock come from ESPN, for NFL, NCAA football, UFL, NBA, WNBA and AFL games. Any other game works as a custom board with your own team names.
+- Points split 20, 20, 20 and 40 percent across the four quarters as standard. These are points, never money.
+- If a quarter's winning square is empty, the host chooses whether its points roll into the final quarter or are shared across the other quarters.
+- Hosts can mark players as checked in or paid, add a co-host, and leave a short note on the board.
+- TV mode puts the board, live score, quarter winners and a QR code to join on a big screen. It can rotate through several boards every 10 to 60 seconds, and Copy TV link opens it on any screen with no sign-in.
+- A printable blank 10 by 10 grid and a PDF are free to download.
+- The Best numbers page and the Hit rate tab show how often each last-digit pair has come up in historical scoring.
+- In that history the most common last-digit pairs (away, home) are 7 and 0 (3.5%), 0 and 7 (3.4%), 4 and 7 (2.9%), 7 and 4 (2.9%), 0 and 3 (2.8%). History is not a promise about any one game.
+
+## Guides
+
+- [How to play football squares](https://quarterscore.com/how-to-play): How to play football squares: 100, 50, or 25 squares, numbers drawn after the board fills, and a winner each quarter from the last digit of each score.
+- [Football squares FAQ](https://quarterscore.com/faq): Football squares FAQ: cost, accounts, how numbers are drawn, private games, overtime, unfilled boards, and whether QuarterScore handles money.
+- [Super Bowl squares](https://quarterscore.com/super-bowl-squares): Super Bowl squares for Super Bowl LXI on February 14, 2027. Make a free board before the teams are set and share one link with friends.
+- [Thanksgiving football squares](https://quarterscore.com/thanksgiving-football-squares): Football squares for Thanksgiving: a free board for the table, one game or three, with a link guests can open between dinner and dessert.
+- [NFL squares](https://quarterscore.com/nfl-squares): NFL squares on a free 10 by 10 board. Share a link, claim squares by name, and follow each quarter without a spreadsheet.
+- [NFL playoff squares](https://quarterscore.com/nfl-playoff-squares): NFL playoff squares for wild card weekend, the divisional round, and the conference championships. One free board per game, same link style all January.
+- [College football squares](https://quarterscore.com/college-football-squares): College football squares for bowl games and the playoff. Create a free NCAA board, share one link, and score each quarter from the last digits.
+- [Donation squares](https://quarterscore.com/football-squares-fundraiser): Donation-style football squares for a school, team, or charity. Free to claim, optional donations, and nothing of value for players. QuarterScore never handles the money.
+- [NBA squares](https://quarterscore.com/nba-squares): NBA squares uses the same last-digit board as football. Create a free basketball game, share the link, and follow each quarter.
+- [Football squares on TV](https://quarterscore.com/football-squares-on-tv): Show your football squares board on a TV or big screen with QuarterScore TV mode: the board, the score, each quarter winner and a QR code to join.
+
+## Tools
+
+- [Create a free board](https://quarterscore.com/create): Set up a 100, 50 or 25 square board. The host signs in when the board is saved.
+- [Best squares numbers](https://quarterscore.com/best-squares-numbers): How often each last-digit pair has shown up in historical scoring.
+- [Printable football squares](https://quarterscore.com/printable-football-squares): A free blank 10 by 10 grid, a print view and a PDF.
+- [Football squares by NFL team](https://quarterscore.com/teams): A board page for each of the 32 NFL teams.
+
+## NFL team boards
+
+- [Buffalo Bills football squares](https://quarterscore.com/team/buffalo-bills)
+- [Miami Dolphins football squares](https://quarterscore.com/team/miami-dolphins)
+- [New England Patriots football squares](https://quarterscore.com/team/new-england-patriots)
+- [New York Jets football squares](https://quarterscore.com/team/new-york-jets)
+- [Baltimore Ravens football squares](https://quarterscore.com/team/baltimore-ravens)
+- [Cincinnati Bengals football squares](https://quarterscore.com/team/cincinnati-bengals)
+- [Cleveland Browns football squares](https://quarterscore.com/team/cleveland-browns)
+- [Pittsburgh Steelers football squares](https://quarterscore.com/team/pittsburgh-steelers)
+- [Houston Texans football squares](https://quarterscore.com/team/houston-texans)
+- [Indianapolis Colts football squares](https://quarterscore.com/team/indianapolis-colts)
+- [Jacksonville Jaguars football squares](https://quarterscore.com/team/jacksonville-jaguars)
+- [Tennessee Titans football squares](https://quarterscore.com/team/tennessee-titans)
+- [Denver Broncos football squares](https://quarterscore.com/team/denver-broncos)
+- [Kansas City Chiefs football squares](https://quarterscore.com/team/kansas-city-chiefs)
+- [Las Vegas Raiders football squares](https://quarterscore.com/team/las-vegas-raiders)
+- [Los Angeles Chargers football squares](https://quarterscore.com/team/los-angeles-chargers)
+- [Dallas Cowboys football squares](https://quarterscore.com/team/dallas-cowboys)
+- [New York Giants football squares](https://quarterscore.com/team/new-york-giants)
+- [Philadelphia Eagles football squares](https://quarterscore.com/team/philadelphia-eagles)
+- [Washington Commanders football squares](https://quarterscore.com/team/washington-commanders)
+- [Chicago Bears football squares](https://quarterscore.com/team/chicago-bears)
+- [Detroit Lions football squares](https://quarterscore.com/team/detroit-lions)
+- [Green Bay Packers football squares](https://quarterscore.com/team/green-bay-packers)
+- [Minnesota Vikings football squares](https://quarterscore.com/team/minnesota-vikings)
+- [Atlanta Falcons football squares](https://quarterscore.com/team/atlanta-falcons)
+- [Carolina Panthers football squares](https://quarterscore.com/team/carolina-panthers)
+- [New Orleans Saints football squares](https://quarterscore.com/team/new-orleans-saints)
+- [Tampa Bay Buccaneers football squares](https://quarterscore.com/team/tampa-bay-buccaneers)
+- [Arizona Cardinals football squares](https://quarterscore.com/team/arizona-cardinals)
+- [Los Angeles Rams football squares](https://quarterscore.com/team/los-angeles-rams)
+- [Seattle Seahawks football squares](https://quarterscore.com/team/seattle-seahawks)
+- [San Francisco 49ers football squares](https://quarterscore.com/team/san-francisco-49ers)
+
+## Optional
+
+- [Full text of every guide](https://quarterscore.com/llms-full.txt): the guides, steps and FAQs above in one plain-text file.
+- [Terms of use](https://quarterscore.com/terms): Terms for using QuarterScore, a free football squares board. The site never collects, holds, or pays out money.
+- [Privacy](https://quarterscore.com/privacy): What QuarterScore stores: account details if you sign in, a guest name on your device, and the squares, scores, and settings on boards you join.
+- [Contact us](https://quarterscore.com/contact): Email QuarterScore for help with a football squares board, a bug report, or an idea.
+- [Sitemap](https://quarterscore.com/sitemap.xml)

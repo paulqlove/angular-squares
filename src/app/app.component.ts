@@ -60,7 +60,12 @@ export class AppComponent implements OnDestroy {
 
   private syncRobotsMeta(url: string): void {
     const path = url.split(/[?#]/)[0];
-    if (path === '/create' || path === '/game' || path.startsWith('/game/') || path.startsWith('/tv/')) {
+    let leaf = this.router.routerState.snapshot.root;
+    while (leaf.firstChild) leaf = leaf.firstChild;
+    // Private and app-only screens, and the not-found page, stay out of search results and AI answers.
+    const notFound = leaf.routeConfig?.path === '**';
+    const appOnly = ['/create', '/game', '/present', '/dashboard'].some(p => path === p || path.startsWith(`${p}/`));
+    if (notFound || appOnly || path.startsWith('/tv/') || path.startsWith('/auth/')) {
       this.meta.updateTag({ name: 'robots', content: 'noindex' });
       return;
     }
