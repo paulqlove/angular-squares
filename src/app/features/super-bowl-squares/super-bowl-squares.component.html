@@ -1,30 +1,9 @@
 <!-- Loading State -->
-@if (isLoading()) {
-  <!-- Loading: the page's own shape, so moving between boards does not flash a spinner -->
+@if (isLoading() || gameNotFound()) {
+  <!-- Loading: the page's own shape, so moving between boards does not flash a spinner. A missing game keeps it up while the page moves to the landing page or dashboard. -->
   <app-shared-header variant="fixed" heading="p"></app-shared-header>
   <main class="qs-skel-delay mx-auto max-w-[1600px] px-1 pb-16 pt-2 sm:px-5">
     <app-game-skeleton [size]="skeletonSize()" [fade]="skeletonFade()"></app-game-skeleton>
-  </main>
-} @else if (gameNotFound()) {
-  <!-- Game Not Found State -->
-  <main class="flex items-center justify-center min-h-screen p-4 bg-qs-bg">
-    <div class="max-w-md text-center">
-      <div class="flex items-center justify-center w-20 h-20 mx-auto mb-6 bg-qs-bad-soft rounded-full">
-        <svg class="w-10 h-10 text-qs-bad" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-        </svg>
-      </div>
-      <h1 class="qs-title mb-2 text-3xl">Game not found</h1>
-      <p class="mb-6 text-qs-muted">
-        The game code <code class="px-2 py-1 font-mono bg-qs-panel-2 rounded">{{ gameId }}</code> doesn't exist or has been deleted.
-      </p>
-      <button
-        (click)="goBack()"
-        class="qs-btn qs-btn-primary"
-        >
-        Go Back
-      </button>
-    </div>
   </main>
 } @else {
   <!-- Main Game View -->
@@ -156,6 +135,13 @@
           }
         </div>
       </div>
+
+      <!-- Results: once the game is over, the final score and each quarter's winner sit above the board -->
+      @if (isGameOver()) {
+        <div class="px-3">
+          <app-results-card [results]="results"></app-results-card>
+        </div>
+      }
 
       <!-- Board + players -->
       <div class="grid grid-cols-1 gap-8 px-3 lg:grid-cols-12">

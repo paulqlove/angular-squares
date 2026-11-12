@@ -1,5 +1,5 @@
-import { Component, ElementRef, signal, inject, OnInit, effect, ViewChild, ChangeDetectionStrategy } from '@angular/core';
-
+import { Component, ElementRef, signal, inject, OnInit, effect, ViewChild, ChangeDetectionStrategy, PLATFORM_ID, untracked } from '@angular/core';
+import { isPlatformBrowser, Location } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { gameCodeExists, isGameCode, normalizeCodeInput, normalizeGameCode } from '../../core/utils/game-code';
 import { environment } from '../../../environments/environment';
@@ -109,7 +109,7 @@ interface Feature {
                     placeholder="ABC123"
                     autocapitalize="characters"
                     autocomplete="off"
-                    class="min-h-11 flex-1 px-4 border border-qs-line-strong rounded-btn uppercase tracking-[0.2em] text-center font-mono text-base bg-qs-panel-2 text-qs-ink"
+                    class="min-h-11 min-w-0 flex-1 px-4 border border-qs-line-strong rounded-btn uppercase tracking-[0.2em] text-center font-mono text-base bg-qs-panel-2 text-qs-ink"
                     spellcheck="false"
                     [attr.aria-invalid]="notFound() ? 'true' : null"
                     [attr.aria-describedby]="notFound() ? 'join-code-error' : null"
@@ -132,7 +132,7 @@ interface Feature {
               </div>
             </div>
 
-            <p class="qs-label mt-6 text-qs-muted">Free · Players don't need an account</p>
+            <p class="qs-label mt-11 text-qs-muted">Free · Players don't need an account</p>
           </div>
 
           <app-phone-demo class="min-[1000px]:-mb-[14rem] min-[1000px]:-translate-x-8 xl:-translate-x-12 min-[1600px]:-translate-x-20"></app-phone-demo>
@@ -266,6 +266,8 @@ export class WelcomeComponent implements OnInit {
   private authService = inject(AuthService);
   /** True while Join checks the code, so a double tap doesn't check twice. */
   private joining = false;
+  private location = inject(Location);
+  private platformId = inject(PLATFORM_ID);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private seo = inject(SeoService);
@@ -307,9 +309,11 @@ export class WelcomeComponent implements OnInit {
   constructor() {
     effect(() => {
       if (this.authService.isAuthenticated()) {
+        // A code with no game goes to the dashboard, which shows "Game not found" in its search, never to the game page
+        const missing = untracked(() => this.notFound());
         const joinCode = this.gameCode || this.pendingJoinCode;
-        const url = joinCode ? `/game/${joinCode.toUpperCase()}` : '/dashboard';
-        this.router.navigateByUrl(url);
+        if (missing && joinCode) this.router.navigate(['/dashboard'], { queryParams: { join: joinCode, missing: 1 } });
+        else this.router.navigateByUrl(joinCode ? `/game/${joinCode.toUpperCase()}` : '/dashboard');
       }
     });
   }
@@ -373,11 +377,21 @@ export class WelcomeComponent implements OnInit {
         }
       ]
     });
-    const joinCode = this.route.snapshot.queryParamMap.get('join');
+    // A shared link (?join=CODE) opens the join field with the code in it. A code with no game says "Game not found"
+    // under the field, both when the game page sent them here (missing=1) and when the code is checked here.
+    const params = this.route.snapshot.queryParamMap;
+    const joinCode = normalizeGameCode(params.get('join'));
     if (joinCode) {
-      this.pendingJoinCode = normalizeGameCode(joinCode);
-      this.gameCode = this.pendingJoinCode;
+      this.gameCode = joinCode;
       this.showJoinCode.set(true);
+      if (params.get('missing')) {
+        this.notFound.set(true);
+        // Drop the flag, so a reload checks the code again
+        this.location.replaceState('/', `join=${joinCode}`);
+      } else {
+        this.pendingJoinCode = joinCode;
+        if (isPlatformBrowser(this.platformId)) this.checkJoinCode(joinCode);
+      }
     }
   }
 
@@ -460,4 +474,11 @@ export class WelcomeComponent implements OnInit {
   }
 
   private pendingJoinCode = '';
+
+  private async checkJoinCode(code: string): Promise<void> {
+    const found = await gameCodeExists(code, environment.firebase.databaseURL);
+    if (found || code !== this.gameCode) return;
+    this.pendingJoinCode = '';
+    this.notFound.set(true);
+  }
 }
