@@ -523,6 +523,27 @@ body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
   }
 }
 
+/* Dashboard bottom bar and search pill. The bar lifts with the phone keyboard and fades away under sheets and dialogs:
+   back in 200ms (decelerate), away in 120ms (accelerate), and it stops taking taps at once. */
+.qs-dock { transition: opacity var(--qs-t-state) var(--qs-ease-decel), transform var(--qs-t-state) var(--qs-ease-decel), visibility 0s; }
+.qs-dock > * { transition: transform var(--qs-t-state) var(--qs-ease-decel); }
+.qs-dock.qs-dock-off { opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity var(--qs-t-fast) var(--qs-ease-exit), transform var(--qs-t-state) var(--qs-ease-decel), visibility 0s var(--qs-t-fast); }
+.qs-dock.qs-dock-off > * { transform: translateY(8px); transition: transform var(--qs-t-fast) var(--qs-ease-exit); }
+@keyframes qs-dock-in { from { opacity: 0; transform: translateY(8px); } }
+@keyframes qs-dock-out { to { opacity: 0; transform: translateY(4px); } }
+.qs-dock-enter > * { animation: qs-dock-in var(--qs-t-state) var(--qs-ease-decel) backwards; }
+.qs-dock-enter { animation: qs-fade-in var(--qs-t-state) var(--qs-ease-decel) backwards; }
+.qs-dock-leave { animation: qs-dock-out var(--qs-t-fast) var(--qs-ease-exit) both; pointer-events: none; }
+/* Phone bar: Join and New board step aside for the search field and Cancel, crossfading in the same spot.
+   The arriving row slides 12px in over 200ms (decelerate); the leaving one goes in 120ms (accelerate). */
+.qs-swap { transition: opacity var(--qs-t-state) var(--qs-ease-decel), transform var(--qs-t-state) var(--qs-ease-decel); }
+.qs-swap.qs-swap-off { opacity: 0; pointer-events: none;
+  transition: opacity var(--qs-t-fast) var(--qs-ease-exit), transform var(--qs-t-fast) var(--qs-ease-exit); }
+.qs-swap.qs-swap-left { transform: translateX(-12px); }
+.qs-swap.qs-swap-right { transform: translateX(12px); }
+.qs-search-input::-webkit-search-cancel-button { appearance: none; }
+
 @keyframes qs-rise-in { from { opacity: 0; transform: translateY(6px); } }
 @keyframes qs-icon-pop { from { opacity: .4; transform: scale(.6); } }
 .qs-fade-rise { animation: qs-rise-in 180ms var(--qs-ease) backwards; }
