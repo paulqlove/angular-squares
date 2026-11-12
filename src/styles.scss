@@ -261,6 +261,29 @@ html, body {
     height: 12px;
     background: var(--qs-accent);
   }
+  /* Section heading: a short accent bar, then the word. Hosting and Joined on the dashboard; Board, Players and Winners on the game page. */
+  .qs-section-title {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 10px;
+    color: var(--qs-ink);
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+  .qs-section-title::before {
+    content: "";
+    flex-shrink: 0;
+    width: 3px;
+    height: 18px;
+    align-self: center;
+    background: var(--qs-accent);
+  }
+  @media (max-width: 639px) {
+    .qs-section-title { font-size: 20px; }
+    .qs-section-title::before { height: 15px; }
+  }
   .qs-display {
     font-size: clamp(36px, 4.4vw, 68px);
     font-weight: 600;
@@ -361,6 +384,29 @@ html, body {
   }
   .qs-search-clear:hover { color: var(--qs-ink); }
   .qs-search-clear:active { transform: scale(.97); transition-duration: var(--qs-t-press); transition-timing-function: var(--qs-ease-in); }
+  /* Join inside the search field once the text is a real game code */
+  .qs-search-join {
+    display: flex; flex-shrink: 0; align-items: center; justify-content: center;
+    height: 44px; padding: 4px;
+  }
+  .qs-search-join > span {
+    display: flex; align-items: center; gap: 6px;
+    height: 36px; padding: 0 12px; border-radius: 4px;
+    background: var(--qs-accent); color: var(--qs-on-accent);
+    transition: background-color var(--qs-t-fast) var(--qs-ease), transform var(--qs-t-fast) var(--qs-ease);
+  }
+  .qs-search-join:hover > span { background: var(--qs-accent-hover); }
+  .qs-search-join:active > span { transform: scale(.97); transition-duration: var(--qs-t-press); transition-timing-function: var(--qs-ease-in); }
+  .qs-search-join:focus-visible { outline: none; }
+  .qs-search-join:focus-visible > span { outline: 2px solid var(--qs-ink); outline-offset: 2px; }
+  .qs-search:has(.qs-search-join) { padding-right: 0; }
+  .qs-search-join-enter { animation: qs-search-join-in var(--qs-t-fast) var(--qs-ease) both; }
+  .qs-search-join-leave { animation: qs-search-join-out var(--qs-t-fast) var(--qs-ease-exit) both; }
+  @keyframes qs-search-join-in { from { opacity: 0; transform: scale(.97); } }
+  @keyframes qs-search-join-out { to { opacity: 0; transform: scale(.97); } }
+  @media (prefers-reduced-motion: reduce) {
+    .qs-search-join-enter, .qs-search-join-leave { animation: none; }
+  }
 
   .qs-card {
     background: var(--qs-panel);

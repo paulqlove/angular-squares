@@ -63,9 +63,15 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
   if (!phone) return steps;
   const phoneText: Record<string, Partial<WalkthroughStep>> = {
     'create-game': { description: 'Tap New board at the bottom of the screen to start your own squares board. You can choose a sport, set points per square, and invite friends.', position: 'top' },
-    'join-game': { description: 'Have a game code? Tap Join with a code at the bottom of the screen to join a friend\'s game.', position: 'top' }
+    'join-game': { description: 'Have a game code? Tap Search or code at the bottom of the screen, type the code, and tap Join.', position: 'top' }
   };
   return steps.map(step => ({ ...step, ...phoneText[step.target] }));
+}
+
+/** The search text as a game code: six letters or digits, upper-cased. Null when it can't be one. */
+export function gameCodeFrom(text: string): string | null {
+  const trimmed = text.trim();
+  return /^[a-z0-9]{6}$/i.test(trimmed) ? trimmed.toUpperCase() : null;
 }
 
 type CardView = 'grid' | 'compact';
@@ -119,7 +125,7 @@ function readCardView(): CardView {
         <app-profile-menu walkthroughTarget="profile-dropdown" (tour)="startWalkthrough()"></app-profile-menu>
       </app-shared-header>
 
-      <main class="mx-auto max-w-[1600px] px-4 sm:px-8 pt-6 pb-32 md:pt-8 {{ showSearch() ? 'sm:pb-28' : 'sm:pb-20' }}">
+      <main class="mx-auto max-w-[1600px] px-4 sm:px-8 pt-6 pb-32 md:pt-8 sm:pb-20">
         <!-- Heading + actions -->
         <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between" data-walkthrough="hero-section">
           <div>
@@ -127,31 +133,10 @@ function readCardView(): CardView {
             <h2 class="qs-title mt-3 text-4xl sm:text-5xl">Your <span class="text-qs-accent">games</span></h2>
           </div>
 
-          <!-- From 640px up: join and create sit top right. Phones get the bottom bar instead. -->
-          <div class="hidden gap-3 sm:flex sm:flex-row">
-            <div
-              class="flex min-h-11 items-stretch overflow-hidden rounded-btn border border-qs-line-strong bg-qs-panel focus-within:outline focus-within:outline-[3px] focus-within:outline-offset-2 focus-within:outline-qs-ink"
-              data-walkthrough="join-game"
-            >
-              <label for="join-code" class="qs-label flex items-center border-r border-qs-line bg-qs-panel-2 px-3 text-qs-muted whitespace-nowrap">Code</label>
-              <input
-                id="join-code"
-                type="text"
-                [(ngModel)]="joinGameCode"
-                placeholder="ABC123"
-                maxlength="6"
-                autocomplete="off"
-                class="w-full min-w-0 bg-transparent px-3 font-mono text-base uppercase tracking-[0.3em] text-qs-ink placeholder:text-qs-muted/60 focus:outline-none sm:w-36"
-                (keyup.enter)="joinGame()"
-              />
-              <button
-                type="button"
-                (click)="joinGame()"
-                [disabled]="joinGameCode.length !== 6"
-                class="qs-btn qs-btn-ink rounded-none"
-              >
-                Join
-              </button>
+          <!-- From 640px up: one field that searches your boards or joins with a code, then New board. Phones get the bottom bar instead. -->
+          <div class="hidden items-center gap-3 sm:flex sm:flex-row">
+            <div role="search" class="w-[400px] min-w-0" data-walkthrough="join-game">
+              <ng-container *ngTemplateOutlet="searchField; context: { $implicit: 'desk' }"></ng-container>
             </div>
 
             @if (canCreateGame()) {
@@ -308,18 +293,18 @@ function readCardView(): CardView {
           }
 
           <section class="mt-8" data-walkthrough="my-games" aria-labelledby="hosting-heading">
-            <div class="flex items-center justify-between gap-3 border-b border-qs-line pb-3 sm:min-h-11">
-              <h3 id="hosting-heading" class="qs-eyebrow qs-eyebrow-bar">01 / Hosting</h3>
-              <div class="flex items-center gap-4">
+            <div class="flex min-h-11 items-center justify-between gap-3">
+              <div class="flex min-w-0 items-baseline gap-2.5">
+                <h3 id="hosting-heading" class="qs-section-title">Hosting</h3>
                 @if (!isLoadingGames()) {
                   <span class="qs-label text-qs-muted">{{ visibleMyGames().length === myGames().length ? myGames().length : visibleMyGames().length + ' of ' + myGames().length }} {{ myGames().length === 1 ? 'game' : 'games' }}</span>
                 }
-                <ng-container *ngTemplateOutlet="viewToggle"></ng-container>
               </div>
+              <ng-container *ngTemplateOutlet="viewToggle"></ng-container>
             </div>
 
             @if (isLoadingGames()) {
-              <div class="qs-skel-delay mt-6 grid grid-cols-1 items-start gap-3" data-card-grid [class]="cardGridClass()" aria-busy="true">
+              <div class="qs-skel-delay mt-4 grid grid-cols-1 items-start gap-3" data-card-grid [class]="cardGridClass()" aria-busy="true">
                 @for (i of [0, 1, 2]; track i) {
                   <!-- Same shape as the board card: a row on a phone, from sm up the navy tile, name, teams and the Share bar -->
                   <div class="min-w-0 [container-type:inline-size]">
@@ -344,7 +329,7 @@ function readCardView(): CardView {
                 }
               </div>
             } @else if (myGames().length === 0) {
-              <div class="qs-card mt-5 p-10 text-center">
+              <div class="qs-card mt-4 p-10 text-center">
                 <p class="qs-title text-2xl">No boards yet</p>
                 <p class="mt-2 text-qs-muted">Create a board, share the code, and let everyone pick their squares.</p>
                 <button
@@ -360,17 +345,17 @@ function readCardView(): CardView {
               </div>
             } @else {
               @if (visibleMyGames().length === 0) {
-                <div class="qs-card mt-5 p-8 text-center" role="status">
+                <div class="qs-card mt-4 p-8 text-center" role="status">
                   <p class="text-qs-muted">No games match “{{ gameSearch().trim() }}”</p>
                   <button type="button" class="qs-btn qs-btn-secondary mt-4" (click)="clearSearch()">Clear</button>
                 </div>
               } @else {
                 <!-- Grouped by what the host does next: lock it, keep sharing it, or nothing -->
-                @for (group of boardGroups(); track group.key) {
-                  <div class="mt-6" role="group" [attr.aria-label]="group.label">
-                    <div class="flex items-baseline justify-between border-b border-qs-line px-0.5 pb-2">
-                      <h4 class="qs-eyebrow qs-eyebrow-bar">{{ group.label }}</h4>
-                      <span class="qs-label text-qs-muted">{{ group.games.length }}</span>
+                @for (group of boardGroups(); track group.key; let first = $first) {
+                  <div [class]="first ? 'mt-4' : 'mt-8'" role="group" [attr.aria-label]="group.label">
+                    <div class="flex items-baseline gap-2 px-0.5">
+                      <h4 class="qs-label text-qs-muted">{{ group.label }}</h4>
+                      <span class="qs-label text-qs-muted opacity-70">{{ group.games.length }}</span>
                     </div>
                     <div class="mt-3 grid grid-cols-1 items-start gap-3" data-card-grid [class]="cardGridClass()">
                       @for (game of group.games; track game.id) {
@@ -386,14 +371,14 @@ function readCardView(): CardView {
 
         <!-- Joined -->
         @if (joinedGames().length > 0) {
-          <section class="mt-8" aria-labelledby="joined-heading">
-            <div class="flex items-center justify-between gap-3 border-b border-qs-line pb-3 sm:min-h-11">
-              <h3 id="joined-heading" class="qs-eyebrow qs-eyebrow-bar">{{ canCreateGame() ? '02' : '01' }} / Joined</h3>
-              <div class="flex items-center gap-4">
+          <section [class]="canCreateGame() ? 'mt-10 sm:mt-14' : 'mt-8'" aria-labelledby="joined-heading">
+            <div class="flex min-h-11 items-center gap-3">
+              <div class="flex min-w-0 items-baseline gap-2.5">
+                <h3 id="joined-heading" class="qs-section-title">Joined</h3>
                 <span class="qs-label text-qs-muted">{{ joinedGames().length }} {{ joinedGames().length === 1 ? 'game' : 'games' }}</span>
               </div>
             </div>
-            <div class="mt-5 grid grid-cols-1 items-start gap-3" data-card-grid [class]="cardGridClass()">
+            <div class="mt-4 grid grid-cols-1 items-start gap-3" data-card-grid [class]="cardGridClass()">
               @for (game of joinedGames(); track game.id) {
                 <div class="min-w-0 [container-type:inline-size]"><ng-container *ngTemplateOutlet="gameCard; context: { $implicit: game, joined: true }"></ng-container></div>
               }
@@ -402,8 +387,8 @@ function readCardView(): CardView {
         }
       </main>
 
-      <!-- Phone: join and create in a bar along the bottom, like the game page's host tools. With enough hosted
-           boards a search button sits first; it opens a field with Cancel in the same bar, lifted above the keyboard. -->
+      <!-- Phone: the search-or-code field and New board in a bar along the bottom, like the game page's host tools.
+           Tapping the field opens it with Cancel in the same bar, lifted above the keyboard. -->
       <div
         class="qs-dock no-print fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-[90] sm:hidden"
         [class.qs-dock-off]="barHidden()"
@@ -412,15 +397,9 @@ function readCardView(): CardView {
       >
         <div role="toolbar" aria-label="Board actions" class="grid grid-cols-1 rounded-[12px] border border-qs-line bg-[color-mix(in_srgb,var(--qs-panel)_88%,transparent)] p-1.5 shadow-pop backdrop-blur-md">
           <div class="qs-swap col-start-1 row-start-1 flex items-stretch gap-1" [class.qs-swap-off]="searchOpen()" [class.qs-swap-left]="searchOpen()" [attr.aria-hidden]="searchOpen() ? 'true' : null">
-            @if (showSearch()) {
-              <button type="button" (click)="openSearch()" class="qs-btn qs-btn-secondary w-11 shrink-0 px-0" aria-label="Search games" [attr.tabindex]="searchOpen() ? -1 : null">
-                <ng-icon name="heroMagnifyingGlass" class="text-xl" aria-hidden="true"></ng-icon>
-              </button>
-            }
-            <!-- With the search button in the row, Join's label shortens so New board keeps its full name -->
-            <button type="button" (click)="showJoinSheet.set(true)" class="qs-btn qs-btn-secondary min-w-0 flex-1" data-walkthrough="join-game" [attr.aria-label]="showSearch() ? 'Join with a code' : null" [attr.tabindex]="searchOpen() ? -1 : null">
-              <ng-icon name="heroTicket" class="text-base" aria-hidden="true"></ng-icon>
-              {{ showSearch() ? 'Join' : 'Join with a code' }}
+            <button type="button" (click)="openSearch()" class="qs-search min-w-0 flex-1 text-left" data-walkthrough="join-game" aria-label="Search or enter a game code" [attr.tabindex]="searchOpen() ? -1 : null">
+              <ng-icon name="heroMagnifyingGlass" class="qs-search-icon" aria-hidden="true"></ng-icon>
+              <span class="truncate text-base text-qs-muted">Search or code</span>
             </button>
             @if (canCreateGame()) {
               <button
@@ -429,7 +408,7 @@ function readCardView(): CardView {
                 [disabled]="isCheckingBoardLimit()"
                 [attr.aria-busy]="isCheckingBoardLimit()"
                 [attr.tabindex]="searchOpen() ? -1 : null"
-                class="qs-btn qs-btn-ink min-w-0 flex-1 disabled:cursor-wait"
+                class="qs-btn qs-btn-primary shrink-0 disabled:cursor-wait"
                 data-walkthrough="create-game"
               >
                 <ng-icon name="heroPlus" class="text-base" aria-hidden="true"></ng-icon>
@@ -437,79 +416,52 @@ function readCardView(): CardView {
               </button>
             }
           </div>
-          @if (showSearch()) {
-            <div class="qs-swap col-start-1 row-start-1 flex items-stretch gap-1" [class.qs-swap-off]="!searchOpen()" [class.qs-swap-right]="!searchOpen()" [attr.aria-hidden]="searchOpen() ? null : 'true'" role="search">
-              <ng-container *ngTemplateOutlet="searchField; context: { $implicit: 'phone' }"></ng-container>
-              <button type="button" (click)="closeSearch()" class="qs-btn qs-btn-secondary shrink-0" [attr.tabindex]="searchOpen() ? null : -1">Cancel</button>
-            </div>
-          }
+          <div class="qs-swap col-start-1 row-start-1 flex items-stretch gap-1" [class.qs-swap-off]="!searchOpen()" [class.qs-swap-right]="!searchOpen()" [attr.aria-hidden]="searchOpen() ? null : 'true'" role="search">
+            <ng-container *ngTemplateOutlet="searchField; context: { $implicit: 'phone' }"></ng-container>
+            <button type="button" (click)="closeSearch()" class="qs-btn qs-btn-secondary shrink-0" [attr.tabindex]="searchOpen() ? null : -1">Cancel</button>
+          </div>
         </div>
       </div>
 
-      <!-- From 640px up: with enough hosted boards, a search pill floats at the bottom center like the game page's host tools -->
-      @if (showSearch()) {
-        <div
-          class="qs-dock no-print fixed inset-x-3 bottom-4 z-[90] mx-auto hidden max-w-fit sm:block"
-          [class.qs-dock-off]="barHidden()"
-          [attr.aria-hidden]="barHidden() ? 'true' : null"
-          animate.enter="qs-dock-enter"
-          animate.leave="qs-dock-leave"
-        >
-          <div role="search" class="flex rounded-[12px] border border-qs-line bg-[color-mix(in_srgb,var(--qs-panel)_88%,transparent)] p-2 shadow-pop backdrop-blur-md">
-            <ng-container *ngTemplateOutlet="searchField; context: { $implicit: 'desk' }"></ng-container>
-          </div>
-        </div>
-      }
-
+      <!-- One field searches the boards you host and joins a game by its code. Join shows inside it once the text is a real code. -->
       <ng-template #searchField let-where>
-        <div class="qs-search min-w-0 flex-1" [class.sm:w-80]="where === 'desk'">
+        <div class="qs-search min-w-0 flex-1">
           <ng-icon name="heroMagnifyingGlass" class="qs-search-icon" aria-hidden="true"></ng-icon>
           <input
             #searchInput
             type="search"
-            enterkeyhint="search"
+            [attr.enterkeyhint]="codeMatch() ? 'go' : 'search'"
             autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
             [attr.data-search]="where"
             [value]="gameSearch()"
             (input)="gameSearch.set($any($event.target).value)"
             (keydown.escape)="onSearchEscape(where)"
-            (keydown.enter)="$any($event.target).blur()"
-            placeholder="Search games"
-            aria-label="Search games"
+            (keydown.enter)="onSearchEnter($event)"
+            [placeholder]="where === 'phone' ? 'Search or code' : 'Search or enter a game code'"
+            aria-label="Search or enter a game code"
             [attr.tabindex]="where === 'phone' && !searchOpen() ? -1 : null"
           />
-          @if (gameSearch()) {
+          @if (codeMatch(); as code) {
+            <button
+              type="button"
+              (click)="joinGame()"
+              class="qs-search-join"
+              animate.enter="qs-search-join-enter"
+              animate.leave="qs-search-join-leave"
+              [attr.aria-label]="'Join game ' + code"
+              [attr.tabindex]="where === 'phone' && !searchOpen() ? -1 : null"
+            >
+              <span><ng-icon name="heroTicket" class="text-base" aria-hidden="true"></ng-icon><span class="qs-label">Join</span></span>
+            </button>
+          } @else if (gameSearch()) {
             <button type="button" (click)="clearSearch(where)" class="qs-search-clear" aria-label="Clear search" [attr.tabindex]="where === 'phone' && !searchOpen() ? -1 : null">
               <ng-icon name="heroXMark" aria-hidden="true"></ng-icon>
             </button>
           }
         </div>
       </ng-template>
-
-      <!-- Phone: the code field, in a sheet from the bottom bar -->
-      <app-modal [open]="showJoinSheet()" labelledBy="join-sheet-title" size="sm" motion="slide" extraClass="pt-2" (dismissed)="showJoinSheet.set(false)">
-        <span class="mx-auto mb-1 mt-0.5 block h-1 w-10 rounded bg-qs-line-strong" aria-hidden="true"></span>
-        <div class="px-5 pb-6 pt-3">
-          <h3 id="join-sheet-title" class="qs-title text-2xl">Join with a code</h3>
-          <p class="mt-1 text-sm text-qs-muted">Enter the six-character code your host shared.</p>
-          <div class="mt-4 flex min-h-11 items-stretch overflow-hidden rounded-btn border border-qs-line-strong bg-qs-panel focus-within:outline focus-within:outline-[3px] focus-within:outline-offset-2 focus-within:outline-qs-ink">
-            <label for="join-code-sheet" class="qs-label flex items-center border-r border-qs-line bg-qs-panel-2 px-3 text-qs-muted whitespace-nowrap">Code</label>
-            <input
-              id="join-code-sheet"
-              type="text"
-              [(ngModel)]="joinGameCode"
-              placeholder="ABC123"
-              maxlength="6"
-              autocomplete="off"
-              autocapitalize="characters"
-              data-autofocus
-              class="w-full min-w-0 bg-transparent px-3 font-mono text-base uppercase tracking-[0.3em] text-qs-ink placeholder:text-qs-muted/60 focus:outline-none"
-              (keyup.enter)="joinGame()"
-            />
-            <button type="button" (click)="joinGame()" [disabled]="joinGameCode.length !== 6" class="qs-btn qs-btn-ink rounded-none">Join</button>
-          </div>
-        </div>
-      </app-modal>
 
       <!-- Grid or Compact cards: two borderless icon buttons at the right end of the list heading, from 640px up (phones always show the compact row) -->
       <ng-template #viewToggle>
@@ -751,14 +703,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
         vv.removeEventListener('scroll', update);
       });
     });
-    // Search goes away below six boards, so the phone bar can't stay stuck on an empty field
-    effect(() => {
-      if (!this.showSearch()) this.searchOpen.set(false);
-    });
-    // Toasts lift above the desktop search pill too
-    effect(() => {
-      const pill = this.showSearch() && !this.barHidden();
-      if (typeof document !== 'undefined') document.body.classList.toggle('has-host-bar', pill);
+    // Once the text could be a game code, ask the server whether that game exists, a moment after typing stops
+    effect(onCleanup => {
+      const code = this.codeCandidate();
+      if (!code) return;
+      let live = true;
+      const timer = setTimeout(() => {
+        this.gameService.gameExists(code)
+          .then(found => { if (live && found) this.confirmedCode.set(code); })
+          .catch(() => undefined);
+      }, 250);
+      onCleanup(() => {
+        live = false;
+        clearTimeout(timer);
+      });
     });
     // Lock body scroll when any modal is open
     effect(() => {
@@ -784,8 +742,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     },
     {
       target: 'join-game',
-      title: 'Join with a code',
-      description: 'Have a 6-digit game code? Enter it here to join a friend\'s game instantly.',
+      title: 'Search or join with a code',
+      description: 'Type to find one of your boards, or enter a friend\'s 6-character game code and press Join.',
       position: 'bottom'
     },
     {
@@ -819,18 +777,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
   /** Grid / Compact is a hosting tool: players who don't host games always see Grid. */
   activeCardView = computed<CardView>(() => this.canCreateGame() ? this.cardView() : 'grid');
   cardGridClass = computed(() => this.activeCardView() === 'grid' ? 'sm:grid-cols-2 xl:grid-cols-3' : 'sm:grid-cols-[repeat(auto-fill,minmax(19rem,1fr))]');
-  /** The search query. Only applies while search shows. */
+  /** The text in the search-or-code field. */
   gameSearch = signal('');
-  /** Search shows once a host has this many boards. Temporarily 1 so it can be tried on any dashboard; the plan is 6. */
-  readonly searchMinBoards = 1;
-  showSearch = computed(() => !this.isLoadingGames() && this.myGames().length >= this.searchMinBoards);
+  /** The text as a game code: six letters or digits, upper-cased. Null when it can't be one. */
+  codeCandidate = computed(() => gameCodeFrom(this.gameSearch()));
+  /** The game code the server confirmed for the current text. Join shows inside the field while it's set. */
+  codeMatch = computed(() => {
+    const code = this.codeCandidate();
+    return code && this.confirmedCode() === code ? code : null;
+  });
   /** Phone: the bottom bar shows the search field and Cancel in place of Join and New board. */
   searchOpen = signal(false);
   /** Phone: how far the keyboard covers the bottom of the screen, so the open search rides above it. */
   keyboardLift = signal(0);
   /** Hosted boards matching the search, newest first. */
   visibleMyGames = computed(() => {
-    const query = this.showSearch() ? this.gameSearch().trim().toLowerCase() : '';
+    // A real game code joins that game, so it doesn't narrow your list
+    const query = this.codeMatch() ? '' : this.gameSearch().trim().toLowerCase();
     return this.myGames()
       .filter(g => !query || [g.name, g.homeTeam, g.awayTeam, g.id].some(v => (v || '').toLowerCase().includes(query)))
       .sort((a, b) => b.createdAt - a.createdAt);
@@ -955,14 +918,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // Profile dropdown state
 
-  joinGameCode = '';
-  /** Phone: the Join with a code sheet opened from the bottom bar. */
-  showJoinSheet = signal(false);
-  /** The bottom bar and the search pill step out of the way while a sheet or dialog is open. */
-  barHidden = computed(() => this.showJoinSheet() || this.showCreateModal() || this.showEditModal() || this.showUpgradeDialog() || !!this.shareModalGameId());
+  /** The phone bottom bar steps out of the way while a sheet or dialog is open. */
+  barHidden = computed(() => this.showCreateModal() || this.showEditModal() || this.showUpgradeDialog() || !!this.shareModalGameId());
 
   ngOnDestroy(): void {
-    if (typeof document !== 'undefined') document.body.classList.remove('has-phone-bar', 'has-host-bar');
+    if (typeof document !== 'undefined') document.body.classList.remove('has-phone-bar');
   }
 
   ngOnInit(): void {
@@ -1040,7 +1000,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   startWalkthrough(): void {
-    // The tour points at Join and New board, which the open search covers on a phone
+    // The tour points at the search-or-code field and New board, which the open search covers on a phone
     if (this.searchOpen()) this.closeSearch();
     this.walkthroughService.resetCompletion('dashboard');
     this.walkthroughService.start('dashboard', dashboardTourSteps(this.dashboardWalkthroughSteps, window.innerWidth < 640));
@@ -1055,6 +1015,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.gameSearch.set('');
     this.searchOpen.set(false);
     this.searchInput('phone')?.blur();
+  }
+
+  /** Enter joins when the text is a real game code, checking with the server first if the check hasn't come back yet. */
+  async onSearchEnter(event: Event): Promise<void> {
+    const code = this.codeCandidate();
+    const found = !!code && (this.codeMatch() === code || await this.gameService.gameExists(code).catch(() => false));
+    if (found) this.joinGame(code);
+    else (event.target as HTMLInputElement).blur();
   }
 
   onSearchEscape(where: 'phone' | 'desk'): void {
@@ -1256,10 +1224,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  joinGame(): void {
-    if (this.joinGameCode.length === 6) {
-      this.router.navigate(['/game', this.joinGameCode.toUpperCase()]);
-    }
+  joinGame(code: string | null = this.codeMatch()): void {
+    if (code) this.router.navigate(['/game', code]);
   }
 
   setCardView(view: CardView): void {
@@ -1614,6 +1580,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   isPassExpired(expiresAt: number): boolean {
     return expiresAt <= Date.now();
   }
+
+  /** The last code the server said is a real game. */
+  private confirmedCode = signal<string | null>(null);
 
   private searchInput(where: 'phone' | 'desk'): HTMLInputElement | null {
     return typeof document !== 'undefined' ? document.querySelector<HTMLInputElement>(`input[data-search="${where}"]`) : null;
