@@ -304,7 +304,7 @@ function readCardView(): CardView {
             </div>
 
             @if (isLoadingGames()) {
-              <div class="qs-skel-delay mt-4 grid grid-cols-1 items-start gap-3" data-card-grid [class]="cardGridClass()" aria-busy="true">
+              <div class="qs-skel-delay mt-4 grid grid-cols-1 gap-3" data-card-grid [class]="cardGridClass()" aria-busy="true">
                 @for (i of [0, 1, 2]; track i) {
                   <!-- Same shape as the board card: a row on a phone, from sm up the navy tile, name, teams and the Share bar -->
                   <div class="min-w-0 [container-type:inline-size]">
@@ -357,7 +357,7 @@ function readCardView(): CardView {
                       <h4 class="qs-label text-qs-muted">{{ group.label }}</h4>
                       <span class="qs-label text-qs-muted opacity-70">{{ group.games.length }}</span>
                     </div>
-                    <div class="mt-3 grid grid-cols-1 items-start gap-3" data-card-grid [class]="cardGridClass()">
+                    <div class="mt-3 grid grid-cols-1 gap-3" data-card-grid [class]="cardGridClass()">
                       @for (game of group.games; track game.id) {
                         <div class="min-w-0 [container-type:inline-size]"><ng-container *ngTemplateOutlet="gameCard; context: { $implicit: game, joined: false }"></ng-container></div>
                       }
@@ -378,7 +378,7 @@ function readCardView(): CardView {
                 <span class="qs-label text-qs-muted">{{ joinedGames().length }} {{ joinedGames().length === 1 ? 'game' : 'games' }}</span>
               </div>
             </div>
-            <div class="mt-4 grid grid-cols-1 items-start gap-3" data-card-grid [class]="cardGridClass()">
+            <div class="mt-4 grid grid-cols-1 gap-3" data-card-grid [class]="cardGridClass()">
               @for (game of joinedGames(); track game.id) {
                 <div class="min-w-0 [container-type:inline-size]"><ng-container *ngTemplateOutlet="gameCard; context: { $implicit: game, joined: true }"></ng-container></div>
               }
@@ -484,20 +484,23 @@ function readCardView(): CardView {
       <ng-template #gameCard let-game let-joined="joined">
         <!-- Phone: a row (mini board, name, teams, open count). From sm up: the board on a navy panel with the open count beside it.
              Filling boards get a full-width Share invite bar; locked and full boards go quiet. -->
-        <article animate.enter="qs-fade-rise" class="qs-card relative min-w-0 transition-[border-color] duration-150 ease-out has-[a:hover]:border-qs-ink has-[[aria-expanded=true]]:z-20">
-          <div class="relative flex items-center tall:block">
+        <article animate.enter="qs-fade-rise" class="qs-card relative flex h-full min-w-0 flex-col transition-[border-color] duration-150 ease-out has-[a:hover]:border-qs-ink has-[[aria-expanded=true]]:z-20">
+          <div class="relative flex flex-1 items-center tall:block">
             <a
               [routerLink]="['/game', game.id]"
               [state]="{ boardSize: game.boardSize }"
-              class="flex min-h-[72px] min-w-0 flex-1 items-center gap-3 rounded-tl-card py-3 pl-3 pr-2 transition-colors duration-150 hover:bg-qs-panel-2 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-qs-accent tall:flex-col tall:items-stretch tall:gap-3.5 tall:rounded-tr-card tall:p-3 tall:pb-4"
+              class="flex min-h-[72px] min-w-0 flex-1 items-center gap-3 self-stretch rounded-tl-card py-3 pl-3 pr-2 transition-colors duration-150 hover:bg-qs-panel-2 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-qs-accent tall:flex-col tall:items-stretch tall:gap-3.5 tall:rounded-tr-card tall:p-3 tall:pb-4"
               [class]="hasCardBar(game, joined) ? '' : 'rounded-bl-card tall:rounded-br-card'"
               [attr.aria-label]="'Open ' + game.name"
             >
               <div class="flex shrink-0 flex-col items-center tall:min-h-[152px] tall:flex-row tall:items-end tall:gap-[18px] tall:rounded-inner tall:bg-qs-tile tall:p-[18px]">
-                <div [class]="'qs-mini grid w-14 shrink-0 gap-px rounded-[3px] p-px tall:w-28 ' + getMiniGridClass(game.boardSize)" aria-hidden="true">
-                  @for (i of getBoardCells(game.boardSize); track i) {
-                    <span class="aspect-square" [class]="miniCellClass(game, i)"></span>
-                  }
+                <!-- A square box, so 25, 50 and 100-square boards give every card the same height -->
+                <div class="flex aspect-square w-14 shrink-0 items-center tall:w-28 tall:items-end" aria-hidden="true">
+                  <div [class]="'qs-mini grid w-full gap-px rounded-[3px] p-px ' + getMiniGridClass(game.boardSize)">
+                    @for (i of getBoardCells(game.boardSize); track i) {
+                      <span class="aspect-square" [class]="miniCellClass(game, i)"></span>
+                    }
+                  </div>
                 </div>
                 <!-- Phone: the state sits centered under the mini board -->
                 <p class="qs-label mt-1.5 flex w-[4.25rem] items-center justify-center gap-1 whitespace-nowrap text-xs tabular-nums tall:hidden" [class]="isBoardFilling(game) ? 'text-qs-accent' : 'text-qs-muted'">
