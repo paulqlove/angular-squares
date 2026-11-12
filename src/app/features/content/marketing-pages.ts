@@ -44,8 +44,10 @@ export interface MarketingPage {
   lede: string;
   /** Short note shown above the title. */
   notice?: string;
-  /** Shown beside the title on wide screens (how-to-play: the board example). */
+  /** Shown beside the title on wide screens. */
   heroHtml?: string;
+  /** A hands-on sample board under the title (how-to-play). */
+  demo?: 'how-it-works';
   published: string;
   sections: PageSection[];
   steps?: HowToStep[];
@@ -66,18 +68,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     h1: 'How to play football squares',
     eyebrow: 'Rules',
     lede: 'Football squares is a free board for friends and fans. Choose 100, 50, or 25 squares, add two teams, and pick a winner at the end of each quarter. You do not need to know the sport.',
-    heroHtml: boardDiagram({
-      rows: DIGITS, cols: DIGITS, win: [4, 7], showCaption: false,
-      caption: 'A 10 by 10 board. Score 24 to 17: row 4 meets column 7, and Jo wins the quarter.',
-      names: {
-        '0-2': ['Sam', 'qs-p-sky'], '0-6': ['Lee', 'qs-p-orchid'], '1-4': ['Max', 'qs-p-rose'], '1-9': ['Sam', 'qs-p-sky'],
-        '2-1': ['Tom', 'qs-p-apricot'], '2-7': ['Lee', 'qs-p-orchid'], '3-3': ['Kim', 'qs-p-lilac'], '3-5': ['Max', 'qs-p-rose'],
-        '4-0': ['Sam', 'qs-p-sky'], '4-7': ['Jo', 'qs-p-butter'], '4-8': ['Tom', 'qs-p-apricot'], '5-2': ['Kim', 'qs-p-lilac'],
-        '5-6': ['Max', 'qs-p-rose'], '6-1': ['Lee', 'qs-p-orchid'], '6-4': ['Sam', 'qs-p-sky'], '6-9': ['Kim', 'qs-p-lilac'],
-        '7-3': ['Tom', 'qs-p-apricot'], '7-7': ['Max', 'qs-p-rose'], '8-0': ['Kim', 'qs-p-lilac'], '8-5': ['Sam', 'qs-p-sky'],
-        '9-2': ['Lee', 'qs-p-orchid'], '9-8': ['Max', 'qs-p-rose']
-      }
-    }),
+    demo: 'how-it-works',
     published: '2026-11-01',
     steps: [
       {

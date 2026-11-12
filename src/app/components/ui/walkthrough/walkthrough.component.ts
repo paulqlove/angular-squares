@@ -1,5 +1,7 @@
 import { Component, inject, HostListener, computed, signal, ChangeDetectionStrategy, DestroyRef, ElementRef, afterNextRender, viewChild, effect } from '@angular/core';
 
+import { RouterLink } from '@angular/router';
+
 import { WalkthroughService } from '../../../core/services/walkthrough.service';
 
 /** Space between the target and the ring. */
@@ -18,7 +20,7 @@ const PADDING = 16;
  */
 @Component({
     selector: 'app-walkthrough',
-    imports: [],
+    imports: [RouterLink],
     changeDetection: ChangeDetectionStrategy.Eager,
     styles: [`
       .tour { position: fixed; inset: 0; z-index: 300; overflow: hidden; pointer-events: none; }
@@ -58,6 +60,9 @@ const PADDING = 16;
                 <div class="[grid-area:1/1]" animate.enter="qs-tour-swap-in" animate.leave="qs-tour-swap-out">
                   <h3 class="text-lg font-bold text-qs-ink mb-2">{{ step.title }}</h3>
                   <p class="text-sm text-qs-muted mb-4">{{ step.description }}</p>
+                  @if (step.link) {
+                    <a [routerLink]="step.link.path" (click)="skip()" class="-mt-2 mb-4 inline-flex items-center gap-1 text-sm font-semibold text-qs-accent underline-offset-4 hover:underline">{{ step.link.label }} <span aria-hidden="true">→</span></a>
+                  }
                 </div>
               }
             </div>
