@@ -64,11 +64,13 @@ import { buildResults, ResultsSummary } from './utils/results';
 import { ProfileMenuComponent } from '../../components/ui/profile-menu/profile-menu.component';
 import { ShareDialogComponent } from '../../components/ui/share-dialog/share-dialog.component';
 import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.component';
+import { DockAtEndDirective } from '../../shared/directives/dock-at-end.directive';
 
 @Component({
     selector: 'app-super-bowl-squares',
     imports: [
     FormsModule,
+    DockAtEndDirective,
     ResultsCardComponent,
     YourGamesMenuComponent,
     NgIconComponent,

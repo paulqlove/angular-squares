@@ -25,9 +25,9 @@
 
   <!-- Host tools: floating bar, bottom center, owner and co-host only -->
   @if (isGameOwner() || isManager()) {
-    <div class="no-print fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-[90] mx-auto sm:bottom-4 sm:max-w-fit" data-walkthrough="host-tools">
+    <div class="qs-dockable no-print fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-[90] mx-auto sm:bottom-4 sm:max-w-fit" appDockAtEnd data-walkthrough="host-tools">
       <div role="toolbar" [attr.aria-label]="isGameOwner() ? 'Host tools' : 'Co-host tools'"
-        class="flex items-stretch gap-1 rounded-[12px] border border-qs-line bg-[color-mix(in_srgb,var(--qs-panel)_88%,transparent)] p-1.5 shadow-pop backdrop-blur-md sm:items-center sm:gap-2 sm:p-2">
+        class="qs-bar-frame flex items-stretch gap-1 rounded-[12px] p-1.5 sm:items-center sm:gap-2 sm:p-2">
         <p class="qs-eyebrow qs-eyebrow-bar hidden px-2 lg:block">{{ isGameOwner() ? 'Host tools' : 'Co-host' }}</p>
         @if (isGameOwner()) {
           <!-- The next game-day step is the primary button: Lock and draw (one save), then Clear or Draw for a redraw -->
