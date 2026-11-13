@@ -4,6 +4,30 @@ This file records product and design decisions, newest first. To add one, put a 
 
 ---
 
+## D-019 · Split the three oversized files now
+
+- **Date:** Nov 13 2026
+- **Decision:** Split `super-bowl-squares.component.ts` (~1,850 lines), `dashboard.component.ts` (~1,640) and `game.service.ts` (~1,280) now, as their own cleanup PRs, not only when a feature touches them.
+- **Options considered:** split now as a cleanup project; split only when a change touches the file
+- **Why:** not recorded
+- **Decided by:** Paul
+
+## D-018 · Lighter tests
+
+- **Date:** Nov 13 2026
+- **Decision:** Unit tests are required for new or changed logic in services and utilities (scoring, data), plus rules tests for rules changes. UI is checked with screenshots instead of tests.
+- **Options considered:** tests for every logic change; tests for services and utilities only, with screenshots for UI
+- **Why:** not recorded
+- **Decided by:** Paul
+
+## D-017 · The Consolidator is its own skill
+
+- **Date:** Nov 13 2026
+- **Decision:** The efficiency and consolidation reviewer is a separate skill (`.claude/skills/consolidator/`) that reviews every PR before Paul sees it, apart from the engineering skill (`.claude/skills/quarterscore-engineering/`).
+- **Options considered:** one engineering skill with a reviewer section; a separate reviewer skill
+- **Why:** not recorded
+- **Decided by:** Paul
+
 ## D-016 · Spanish shelved for now
 
 - **Date:** Nov 13 2026
