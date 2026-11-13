@@ -74,9 +74,17 @@ const PHONE_QUERY = '(max-width: 639.98px)';
     }
     /* Phones play the vertical Short, so the box turns tall, capped so it fits on screen with room around it. Same width as PHONE_QUERY. */
     @media (max-width: 639.98px) {
+      /* Full column width, so the tall player centers on the page and not inside a narrower box. */
+      :host(.has-phone) {
+        max-width: none;
+      }
       :host(.has-phone) .howto-box {
         aspect-ratio: 9 / 16;
         width: min(100%, calc(min(64svh, 34rem) * 9 / 16));
+        margin-inline: auto;
+      }
+      :host(.has-phone) figcaption {
+        text-align: center;
       }
       :host(.has-phone) .howto-sketch {
         width: 78%;
