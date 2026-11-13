@@ -120,6 +120,11 @@ async function token(key, scope) {
 }
 const post = async (url, tok, body) => { const r = await fetch(url, { method: 'POST', headers: { authorization: `Bearer ${tok}`, 'content-type': 'application/json' }, body: JSON.stringify(body) }); const j = await r.json(); if (j.error) throw new Error(j.error.message); return j; };
 
+// Spanish watch (section 9): filled in by the Google sections when they run.
+const es = {};
+const LATAM = new Set(['Mexico', 'Guatemala', 'Belize', 'Honduras', 'El Salvador', 'Nicaragua', 'Costa Rica', 'Panama', 'Cuba', 'Dominican Republic', 'Puerto Rico', 'Colombia', 'Venezuela', 'Ecuador', 'Peru', 'Bolivia', 'Chile', 'Argentina', 'Uruguay', 'Paraguay']);
+const SPANISH_QUERY = /(cuadros?|cuadr[ií]cula|casillas|quiniela|en espa[nñ]ol|f[uú]tbol americano|super ?taz[oó]n|c[oó]mo (jugar|funcionan))/i;
+
 p('\n## 6. Traffic (Google Analytics; last 2 days lag; counts only since Nov 9, 2026)');
 if (!existsSync(keyPath) || !GA) p(`- Not connected. Needs ${keyPath} and a property ID in ${join(CFG, 'ga-property-id.txt')}. See docs/REPORTS.md.`);
 else {
@@ -133,6 +138,13 @@ else {
     if (!ch.rows?.length) p('- No data in the window yet.');
     const pg = await post(url, tok, { dateRanges: range, dimensions: [{ name: 'pagePath' }], metrics: [{ name: 'screenPageViews' }], orderBys: [{ metric: { metricName: 'screenPageViews' }, desc: true }], limit: 8 });
     (pg.rows || []).forEach((r) => p(`  - ${r.dimensionValues[0].value}: ${r.metricValues[0].value} views`));
+    const month = [{ startDate: '30daysAgo', endDate: 'today' }];
+    const sum = (rows, test) => (rows || []).filter((r) => test(r.dimensionValues[0].value)).reduce((n, r) => n + Number(r.metricValues[0].value), 0);
+    const lg = await post(url, tok, { dateRanges: month, dimensions: [{ name: 'languageCode' }], metrics: [{ name: 'activeUsers' }] });
+    const ct = await post(url, tok, { dateRanges: month, dimensions: [{ name: 'country' }], metrics: [{ name: 'activeUsers' }] });
+    es.users = sum(lg.rows, () => true);
+    es.spanish = sum(lg.rows, (v) => /^es(-|$)/i.test(v));
+    es.latam = sum(ct.rows, (v) => LATAM.has(v));
   } catch (e) { p(`- Google Analytics failed: ${e.message}`); }
 }
 
@@ -149,6 +161,10 @@ else {
     p(t ? `- ${body.startDate} to ${body.endDate}: ${t.clicks} clicks, ${t.impressions} impressions, avg position ${t.position.toFixed(1)}` : `- ${body.startDate} to ${body.endDate}: no clicks or impressions yet`);
     const q = await post(url, tok, { ...body, dimensions: ['query'], rowLimit: 8 });
     (q.rows || []).forEach((r) => p(`  - "${r.keys[0]}": ${r.clicks} clicks, ${r.impressions} impressions, position ${r.position.toFixed(1)}`));
+    const all = await post(url, tok, { startDate: day(now - 30 * DAY), endDate: day(now - 2 * DAY), dimensions: ['query'], rowLimit: 1000 });
+    const hits = (all.rows || []).filter((r) => SPANISH_QUERY.test(r.keys[0]));
+    es.queryImpressions = hits.reduce((n, r) => n + r.impressions, 0);
+    es.topQueries = hits.sort((a, b) => b.impressions - a.impressions).slice(0, 3).map((r) => `"${r.keys[0]}" ${r.impressions}`);
   } catch (e) { p(`- Search Console failed: ${e.message}`); }
 }
 
@@ -166,6 +182,20 @@ else {
   touches.forEach((t) => { const k = t.path.startsWith('/team/') ? '/team/*' : t.path; lands[k] = (lands[k] || 0) + 1; });
   p('- First page: ' + Object.entries(lands).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([k, v]) => `${k} ${v}`).join(', '));
 }
+
+// 9. Spanish watch. Decision it informs: build the Spanish starter pages (shelved Nov 13, 2026).
+// Go when the Season Pass test passes AND any one line below passes, then only if it projects 25+ extra passes a season.
+p('\n## 9. Spanish watch (last 30 days; Spanish is shelved until a line passes)');
+const mark = (ok) => (ok ? 'PASS' : 'not yet');
+if (es.users === undefined) p('- Google Analytics not connected, so browser language and country are missing.');
+else {
+  p(`- Spanish browsers: ${es.spanish} of ${es.users} users. Go line 5% and 100+ a month: ${mark(es.spanish >= 100 && es.spanish >= es.users * 0.05)}`);
+  p(`- Mexico and Latin America: ${es.latam} of ${es.users} users. Go line 10%: ${mark(es.users >= 30 && es.latam >= es.users * 0.1)}`);
+}
+if (es.queryImpressions === undefined) p('- Search Console not connected, so Spanish searches are missing.');
+else p(`- Spanish searches: ${es.queryImpressions} impressions${es.topQueries.length ? ` (${es.topQueries.join(', ')})` : ''}. Go line 50 a month: ${mark(es.queryImpressions >= 50)}`);
+p('- Check by hand: requests for Spanish (contact form, email, YouTube; go line 3 in a season) and Spanish in the top 3 caption languages in YouTube Studio.');
+p('- Paying hosts gate: section 1 (go line 10% of hosts shown click Notify me).');
 
 p('\n## Not in this report');
 p('- Real monthly costs (pull from billing) and the Stripe numbers (no checkout yet).');
