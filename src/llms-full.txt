@@ -95,6 +95,18 @@ No. Anyone with the link can claim a square by typing a name. The host signs in 
 
 The host locks the board, then draws the numbers. A shuffle assigns the digits 0 through 9 once down the rows and once across the columns. Do this after squares are claimed, so the draw is the same for everyone and nobody chooses a digit.
 
+**How do I find my squares on the board?**
+
+Tap your name in the players list. Your squares light up on the board. Tap your name again to clear it.
+
+**How do I change a game after I make it?**
+
+The host opens the game and taps Edit game (Edit on a phone). Change the name, the teams or the points, or open More options to add a note for players. Then tap Save changes.
+
+**How do I see who’s playing?**
+
+The host taps Manage players (Players on a phone) to see everyone on the board. Confirm a player, or remove one to open their squares back up. Then tap Done.
+
 **Are games private?**
 
 A game is reached by its link or six-character code. It is not listed in a public directory. Anyone who has the code can open the board, so share it only with your group.

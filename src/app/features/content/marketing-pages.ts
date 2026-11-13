@@ -3,6 +3,7 @@ import { boardDiagram, DIGITS, PAIRS } from './board-diagram';
 import { pageFacts } from './page-facts';
 import { SCHEDULE } from './schedule.generated';
 import { formatKickoff } from './schedule.model';
+import { HOWTO_VIDEOS, HowToVideo } from './howto-videos';
 
 export interface PageSection {
   heading: string;
@@ -14,11 +15,15 @@ export interface PageSection {
 export interface FaqEntry {
   question: string;
   answer: string;
+  /** A how-to clip under the answer. */
+  video?: HowToVideo;
 }
 
 export interface HowToStep {
   name: string;
   text: string;
+  /** A how-to clip under the step. */
+  video?: HowToVideo;
 }
 
 export interface RelatedLink {
@@ -73,15 +78,18 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     steps: [
       {
         name: 'Create a board',
-        text: 'The host names the two teams, picks the sport and signs in to save the board. Then share the link or the six-character code.'
+        text: 'The host names the two teams, picks the sport and signs in to save the board. Then share the link or the six-character code.',
+        video: HOWTO_VIDEOS.createBoard
       },
       {
         name: 'Claim squares by name',
-        text: 'Friends open the link and type a name on empty squares. Players do not need an account.'
+        text: 'Friends open the link and type a name on empty squares. Players do not need an account.',
+        video: HOWTO_VIDEOS.pickSquares
       },
       {
         name: 'Lock and draw the numbers',
-        text: 'After the squares are claimed, the host locks the board, then draws the digits 0 through 9 down the side and across the top.'
+        text: 'After the squares are claimed, the host locks the board, then draws the digits 0 through 9 down the side and across the top.',
+        video: HOWTO_VIDEOS.lockAndDraw
       },
       {
         name: 'Match the score each quarter',
@@ -177,6 +185,21 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
         answer: 'The host locks the board, then draws the numbers. A shuffle assigns the digits 0 through 9 once down the rows and once across the columns. Do this after squares are claimed, so the draw is the same for everyone and nobody chooses a digit.'
       },
       {
+        question: 'How do I find my squares on the board?',
+        answer: 'Tap your name in the players list. Your squares light up on the board. Tap your name again to clear it.',
+        video: HOWTO_VIDEOS.highlightPlayer
+      },
+      {
+        question: 'How do I change a game after I make it?',
+        answer: 'The host opens the game and taps Edit game (Edit on a phone). Change the name, the teams or the points, or open More options to add a note for players. Then tap Save changes.',
+        video: HOWTO_VIDEOS.editGame
+      },
+      {
+        question: 'How do I see who’s playing?',
+        answer: 'The host taps Manage players (Players on a phone) to see everyone on the board. Confirm a player, or remove one to open their squares back up. Then tap Done.',
+        video: HOWTO_VIDEOS.managePlayers
+      },
+      {
         question: 'Are games private?',
         answer: 'A game is reached by its link or six-character code. It is not listed in a public directory. Anyone who has the code can open the board, so share it only with your group.'
       },
@@ -194,7 +217,8 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       },
       {
         question: 'Can I see which squares show up most often?',
-        answer: 'Yes. Open Best numbers for the historical table, or use the Hit rate tab on a live board after the digits are drawn. The table is about how often digit pairs have appeared. It is not a promise about your game.'
+        answer: 'Yes. Open Best numbers for the historical table, or use the Hit rate tab on a live board after the digits are drawn. The table is about how often digit pairs have appeared. It is not a promise about your game.',
+        video: HOWTO_VIDEOS.hitRate
       },
       {
         question: 'Does QuarterScore handle money?',

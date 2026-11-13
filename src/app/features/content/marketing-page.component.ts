@@ -3,12 +3,13 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { SeoService } from '../../core/services/seo.service';
 import { HowItWorksDemoComponent } from './how-it-works-demo.component';
+import { HowToVideoComponent } from './howto-video.component';
 import { ReadingEndComponent, ReadingHeaderComponent, ReadingPageComponent, ReadingSectionComponent } from './reading-layout.components';
 import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pages';
 
 @Component({
     selector: 'app-marketing-page',
-    imports: [HowItWorksDemoComponent, ReadingPageComponent, ReadingHeaderComponent, ReadingSectionComponent, ReadingEndComponent],
+    imports: [HowItWorksDemoComponent, HowToVideoComponent, ReadingPageComponent, ReadingHeaderComponent, ReadingSectionComponent, ReadingEndComponent],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
     <app-reading-page [breadcrumbs]="breadcrumbs">
@@ -28,7 +29,12 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
             <li class="lg:row-span-3 lg:grid lg:border-l lg:border-qs-line lg:px-6 lg:first:border-l-0 lg:first:pl-0 lg:last:pr-0 lg:[grid-template-rows:subgrid]">
               <p class="qs-label text-qs-accent">0{{ index + 1 }}</p>
               <h2 class="mt-3 text-lg font-semibold leading-snug text-qs-ink">{{ step.name }}</h2>
-              <p class="qs-body mt-2 text-[0.9375rem] leading-[1.65]">{{ step.text }}</p>
+              <div>
+                <p class="qs-body mt-2 text-[0.9375rem] leading-[1.65]">{{ step.text }}</p>
+                @if (step.video) {
+                  <app-howto-video class="mt-5 max-w-[30rem]" [video]="step.video"></app-howto-video>
+                }
+              </div>
             </li>
           }
         </ol>
@@ -47,6 +53,9 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
               <div class="py-6 first:pt-0">
                 <h3 class="text-lg font-semibold leading-snug text-qs-ink">{{ entry.question }}</h3>
                 <p class="mt-2">{{ entry.answer }}</p>
+                @if (entry.video) {
+                  <app-howto-video class="mt-5 max-w-[30rem]" [video]="entry.video"></app-howto-video>
+                }
               </div>
             }
           </div>
