@@ -26,7 +26,7 @@ const YOUTUBE_ID = /^[A-Za-z0-9_-]{11}$/;
               referrerpolicy="strict-origin-when-cross-origin"></iframe>
           } @else {
             <button type="button" (click)="play()" class="howto-poster group absolute inset-0 flex h-full w-full items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus" [attr.aria-label]="'Play video: ' + video().title + ', ' + length()">
-              <span class="absolute left-3 top-3 max-w-[70%] rounded-inner bg-qs-tile px-2.5 py-1.5 text-left text-xs font-semibold leading-snug text-qs-tile-ink sm:left-4 sm:top-4 sm:text-sm">{{ video().caption }}</span>
+              <span class="absolute left-3 top-3 z-10 max-w-[70%] rounded-inner bg-qs-tile px-2.5 py-1.5 text-left text-xs font-semibold leading-snug text-qs-tile-ink sm:left-4 sm:top-4 sm:text-sm">{{ video().caption }}</span>
               <span class="howto-sketch" aria-hidden="true"><span class="howto-sketch-bar"></span></span>
               <span class="absolute flex h-12 w-12 items-center justify-center rounded-full bg-qs-tile text-qs-tile-ink shadow-pop transition-transform duration-[var(--qs-t-fast)] ease-[var(--qs-ease)] group-hover:scale-105 group-active:scale-95 sm:h-14 sm:w-14" aria-hidden="true">
                 <svg viewBox="0 0 24 24" class="ml-0.5 h-5 w-5 sm:h-6 sm:w-6" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.53.85l10.2-6.5a1 1 0 0 0 0-1.7L9.53 4.65A1 1 0 0 0 8 5.5Z"/></svg>
@@ -40,6 +40,9 @@ const YOUTUBE_ID = /^[A-Za-z0-9_-]{11}$/;
     }
   `,
   styles: `
+    :host {
+      container-type: inline-size;
+    }
     .howto-sketch {
       position: relative;
       width: 46%;
@@ -53,6 +56,12 @@ const YOUTUBE_ID = /^[A-Za-z0-9_-]{11}$/;
       background-size: 10% 10%;
       background-position: 0 16%;
       box-shadow: var(--qs-shadow);
+    }
+    /* In a narrow column the board drawing would crowd the caption, so the poster keeps only the caption, play button and length. */
+    @container (max-width: 280px) {
+      .howto-sketch {
+        display: none;
+      }
     }
     .howto-sketch-bar {
       position: absolute;
