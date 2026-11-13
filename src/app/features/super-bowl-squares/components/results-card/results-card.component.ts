@@ -115,7 +115,7 @@ export class ResultsCardComponent implements OnDestroy {
     try {
       const file = this.file ?? (await this.prepare(this.results()));
       if (!file) return;
-      const data: ShareData = { files: [file], title: `${this.results().title} results` };
+      const data = shareData(file);
       if (typeof navigator.canShare === 'function' && navigator.canShare(data)) {
         try {
           await navigator.share(data);
@@ -147,6 +147,14 @@ export class ResultsCardComponent implements OnDestroy {
 }
 
 const FILE_NAME = 'quarterscore-results.png';
+
+/**
+ * What the share sheet gets: the picture and nothing else. iPhones turn each extra field (a title or text) into
+ * another item, so Copy put more than one thing on the clipboard.
+ */
+export function shareData(file: File): ShareData {
+  return { files: [file] };
+}
 
 function download(file: File): void {
   const url = URL.createObjectURL(file);
