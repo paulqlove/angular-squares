@@ -632,6 +632,12 @@ body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
 .qs-dockable.qs-docked::before { opacity: 1; transition: opacity var(--qs-t-state) var(--qs-ease); }
 .qs-dockable.qs-docked > .qs-bar-frame { translate: 0 12px; }
 .qs-dockable.qs-docked > .qs-bar-frame::before { opacity: 0; }
+/* Chrome on Android paints the strip under the page (its bottom chin, over the gesture bar) in the page's own background.
+   While a bar is docked or a bottom sheet is open, that background is the bar's or the sheet's, so the strip matches and
+   the bar reads as running to the screen's edge. <body> keeps the page colour, so only that strip changes. */
+@media (max-width: 639.98px) {
+  html.qs-bar-docked, html.qs-sheet-open { background: var(--qs-panel); }
+}
 @media (prefers-reduced-motion: reduce) {
   .qs-dockable::before, .qs-dockable > .qs-bar-frame, .qs-dockable > .qs-bar-frame::before { transition: none !important; }
 }

@@ -8,6 +8,11 @@ describe('nextDocked', () => {
     expect(nextDocked(false, 1190, 800, 2000)).toBe(false);
   });
 
+  it('docks a few pixels short of the end, where phones often stop', () => {
+    expect(nextDocked(false, 1194.6, 800, 2000)).toBe(true);
+    expect(nextDocked(false, 1193, 800, 2000)).toBe(false);
+  });
+
   it('stays docked until the page is scrolled 24px back up', () => {
     expect(nextDocked(true, 1190, 800, 2000)).toBe(true);
     expect(nextDocked(true, 1177, 800, 2000)).toBe(true);

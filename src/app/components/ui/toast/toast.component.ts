@@ -7,7 +7,7 @@ import { ToastService, Toast } from '../../../core/services/toast.service';
     imports: [],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
-    <div class="fixed bottom-4 [.has-host-bar_&]:bottom-24 max-sm:[.has-phone-bar_&]:bottom-24 right-4 z-[200] flex flex-col gap-2">
+    <div class="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] [.has-host-bar_&]:bottom-[calc(6rem+env(safe-area-inset-bottom))] max-sm:[.has-phone-bar_&]:bottom-[calc(6rem+env(safe-area-inset-bottom))] right-4 z-[200] flex flex-col gap-2">
       @for (toast of toastService.toasts(); track toast.id) {
         <div
           class="animate-toast-in flex items-center gap-3 px-4 py-3 rounded-card border border-qs-line bg-qs-panel text-qs-ink shadow-pop min-w-[280px] max-w-sm"
