@@ -24,13 +24,14 @@ import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pa
       }
 
       @if (page.steps) {
-        <ol class="mt-20 grid gap-x-0 gap-y-10 border-t border-qs-line pt-8 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-[auto_auto_auto_1fr] lg:gap-y-0">
+        <ol class="mt-20 grid gap-x-0 gap-y-10 border-t border-qs-line pt-8 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-[auto_auto_auto_1fr] lg:gap-x-12 lg:gap-y-0">
           @for (step of page.steps; track step.name; let index = $index) {
-            <li class="lg:row-span-4 lg:grid lg:border-l lg:border-qs-line lg:px-6 lg:first:border-l-0 lg:first:pl-0 lg:last:pr-0 lg:[grid-template-rows:subgrid]">
+            <li class="lg:relative lg:row-span-4 lg:grid lg:[grid-template-rows:subgrid] lg:before:absolute lg:before:inset-y-0 lg:before:-left-6 lg:before:w-px lg:before:bg-qs-line lg:first:before:hidden">
               <p class="qs-label text-qs-accent">0{{ index + 1 }}</p>
               <h2 class="mt-3 text-lg font-semibold leading-snug text-qs-ink">{{ step.name }}</h2>
               <p class="qs-body mt-2 text-[0.9375rem] leading-[1.65]">{{ step.text }}</p>
-              <!-- Its own subgrid row, so on desktop every clip starts at the same height whatever the text above it. -->
+              <!-- Its own subgrid row, so on desktop every clip starts at the same height whatever the text above it.
+                   Columns are split by the gap with a drawn divider, so every clip is the same width too. -->
               @if (step.video) {
                 <app-howto-video class="mt-5 max-w-[30rem] lg:self-start" [video]="step.video"></app-howto-video>
               }
