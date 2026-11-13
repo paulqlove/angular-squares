@@ -59,8 +59,6 @@ import { HelpMenuComponent } from '../../components/ui/help-menu/help-menu.compo
 import { YourGamesMenuComponent } from '../../components/ui/your-games-menu/your-games-menu.component';
 import { recordRecentVisit } from '../../core/utils/recent-games';
 import { normalizeGameCode } from '../../core/utils/game-code';
-import { ResultsCardComponent } from './components/results-card/results-card.component';
-import { buildResults, ResultsSummary } from './utils/results';
 import { ProfileMenuComponent } from '../../components/ui/profile-menu/profile-menu.component';
 import { ShareDialogComponent } from '../../components/ui/share-dialog/share-dialog.component';
 import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.component';
@@ -71,7 +69,6 @@ import { DockAtEndDirective } from '../../shared/directives/dock-at-end.directiv
     imports: [
     FormsModule,
     DockAtEndDirective,
-    ResultsCardComponent,
     YourGamesMenuComponent,
     NgIconComponent,
     GameBoardComponent,
@@ -123,8 +120,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   boardSize: BoardSize = 100;
   homeTeam: string = '';
   awayTeam: string = '';
-  /** When the board was made: the results card's date for boards not linked to a live game. */
-  createdAt: number | null = null;
   selectedSquares: { [key: string]: string } = {};
   playerStats: { [key: string]: { squares: number, total: number } } = {};
   currentPrice: number = 10;
@@ -280,8 +275,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   skeletonFade = signal(false);
   skeletonSize = signal<BoardSize>(100);
   gameNotFound = signal(false);
-  private resultsKey = '';
-  private resultsValue: ResultsSummary | null = null;
   showShareModal = signal(false);
   showNameEditModal = signal(false);
   editingName = '';
@@ -431,7 +424,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
 
         if (data) {
           this.gameName = data.name || 'Football Squares';
-          this.createdAt = typeof data.createdAt === 'number' ? data.createdAt : null;
           this.gameOwnerId = data.ownerId || '';
           this.boardSize = data.boardSize || 100;
           try {
@@ -1313,24 +1305,6 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
       linkedStatus: game?.status ?? null,
       period: game?.period ?? null
     });
-  }
-
-  /** The results card's content. The same object comes back until something on it changes, so the card draws its share picture once. */
-  get results(): ResultsSummary {
-    const next = buildResults({
-      name: this.gameName,
-      awayTeam: this.awayTeam,
-      homeTeam: this.homeTeam,
-      date: this.linkedEspnGame()?.date ?? this.createdAt,
-      scores: this.scores,
-      winners: this.winners
-    });
-    const key = JSON.stringify(next);
-    if (key !== this.resultsKey) {
-      this.resultsKey = key;
-      this.resultsValue = next;
-    }
-    return this.resultsValue!;
   }
 
   /** Same rule as Presentation mode: see isGameOver in core/utils/quarter-label.ts. */
