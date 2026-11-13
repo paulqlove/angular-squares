@@ -4,12 +4,30 @@ import { HowToVideo } from './howto-videos';
 
 describe('HowToVideoComponent', () => {
   const clip: HowToVideo = { youtubeId: 'E7pps5O65BM', title: 'Create a board', caption: 'Tap New board', seconds: 30 };
+  const embed = (id: string) => `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&playsinline=1&fs=1`;
+  const realMatchMedia = window.matchMedia;
+
+  /** Stands in for the phone-width media query: true acts like a phone. */
+  const screenIs = (phone: boolean) => {
+    window.matchMedia = vi.fn().mockReturnValue({ matches: phone } as MediaQueryList);
+  };
+
+  afterEach(() => {
+    window.matchMedia = realMatchMedia;
+    document.documentElement.style.overflow = '';
+  });
 
   const setup = (video: HowToVideo) => {
     const fixture = TestBed.createComponent(HowToVideoComponent);
     fixture.componentRef.setInput('video', video);
     fixture.detectChanges();
     return { fixture, el: fixture.nativeElement as HTMLElement };
+  };
+
+  const tap = async (fixture: ReturnType<typeof setup>['fixture'], el: HTMLElement) => {
+    el.querySelector<HTMLButtonElement>('.howto-poster')!.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
   };
 
   it('shows the poster and loads nothing from YouTube until tapped', () => {
@@ -20,15 +38,45 @@ describe('HowToVideoComponent', () => {
     expect(el.querySelector('iframe')).toBeNull();
   });
 
-  it('swaps the poster for the no-cookie player on tap', async () => {
+  it('plays the vertical Short in place on a phone, with full screen allowed', async () => {
+    screenIs(true);
+    const { fixture, el } = setup({ ...clip, phoneYoutubeId: 'mw8cVm6KS2g' });
+    expect(el.classList).toContain('has-phone');
+    await tap(fixture, el);
+    const frame = el.querySelector('.howto-box iframe')!;
+    expect(el.querySelector('.howto-poster')).toBeNull();
+    expect(el.querySelector('dialog')).toBeNull();
+    expect(frame.getAttribute('src')).toBe(embed('mw8cVm6KS2g'));
+    expect(frame.getAttribute('title')).toBe('Create a board');
+    expect(frame.hasAttribute('allowfullscreen')).toBe(true);
+    expect(frame.getAttribute('allow')).toContain('fullscreen');
+  });
+
+  it('plays the desktop clip in place on a phone when there is no Short', async () => {
+    screenIs(true);
     const { fixture, el } = setup(clip);
-    el.querySelector('button')!.click();
+    expect(el.classList).not.toContain('has-phone');
+    await tap(fixture, el);
+    expect(el.querySelector('.howto-box iframe')!.getAttribute('src')).toBe(embed('E7pps5O65BM'));
+  });
+
+  it('opens the desktop clip large over the page on wider screens, and closes it again', async () => {
+    screenIs(false);
+    const { fixture, el } = setup({ ...clip, phoneYoutubeId: 'mw8cVm6KS2g' });
+    await tap(fixture, el);
+    const dialog = el.querySelector('dialog')!;
+    const frame = dialog.querySelector('iframe')!;
+    expect(frame.getAttribute('src')).toBe(embed('E7pps5O65BM'));
+    expect(frame.hasAttribute('allowfullscreen')).toBe(true);
+    expect(el.querySelector('.howto-poster')).not.toBeNull();
+    expect(document.documentElement.style.overflow).toBe('hidden');
+
+    dialog.querySelector<HTMLButtonElement>('[aria-label="Close video"]')!.click();
     fixture.detectChanges();
     await fixture.whenStable();
-    const frame = el.querySelector('iframe')!;
-    expect(el.querySelector('button')).toBeNull();
-    expect(frame.getAttribute('src')).toBe('https://www.youtube-nocookie.com/embed/E7pps5O65BM?autoplay=1&rel=0&playsinline=1');
-    expect(frame.getAttribute('title')).toBe('Create a board');
+    expect(el.querySelector('dialog')).toBeNull();
+    expect(el.querySelector('iframe')).toBeNull();
+    expect(document.documentElement.style.overflow).toBe('');
   });
 
   it('renders nothing without a valid YouTube ID', () => {

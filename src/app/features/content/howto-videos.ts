@@ -8,18 +8,21 @@ export interface HowToVideo {
   caption: string;
   /** Length in seconds, shown on the poster. */
   seconds: number;
+  /** The vertical 9:16 Short of the same clip, played instead on phone widths. */
+  phoneYoutubeId?: string;
 }
 
 /**
  * Every how-to clip on the site, in one place. To swap a clip, change its ID here.
  * Clips are 1280 wide desktop recordings with a caption strip under them.
+ * Each also has a vertical Short of the same clip, which phones play instead.
  */
 export const HOWTO_VIDEOS = {
-  createBoard: { youtubeId: 'E7pps5O65BM', title: 'Create a board', caption: 'Tap New board', seconds: 30 },
-  pickSquares: { youtubeId: '5PjS38Sehr0', title: 'Pick your squares', caption: 'Tap an open square', seconds: 20 },
-  lockAndDraw: { youtubeId: 'fwTM-LCwtKU', title: 'Lock and draw the numbers', caption: 'Tap Lock and draw', seconds: 17 },
-  highlightPlayer: { youtubeId: 'PkffVOGg34s', title: 'Highlight a player’s squares', caption: 'Tap a name', seconds: 15 },
-  hitRate: { youtubeId: 'P5nPXXfPrjY', title: 'Use the Hit rate tab', caption: 'Tap Hit rate', seconds: 19 },
-  editGame: { youtubeId: 'DXY4T3dyBX8', title: 'Edit your game and add a note', caption: 'Tap Edit game', seconds: 25 },
-  managePlayers: { youtubeId: '-vajIuxNQcE', title: 'Manage players', caption: 'Tap Manage players', seconds: 23 }
+  createBoard: { youtubeId: 'E7pps5O65BM', title: 'Create a board', caption: 'Tap New board', seconds: 30, phoneYoutubeId: 'mw8cVm6KS2g' },
+  pickSquares: { youtubeId: '5PjS38Sehr0', title: 'Pick your squares', caption: 'Tap an open square', seconds: 20, phoneYoutubeId: 'IDppJEHBk_g' },
+  lockAndDraw: { youtubeId: 'fwTM-LCwtKU', title: 'Lock and draw the numbers', caption: 'Tap Lock and draw', seconds: 17, phoneYoutubeId: 'WPZ1O8n-83I' },
+  highlightPlayer: { youtubeId: 'PkffVOGg34s', title: 'Highlight a player’s squares', caption: 'Tap a name', seconds: 15, phoneYoutubeId: 'c5XMGo8ry6M' },
+  hitRate: { youtubeId: 'P5nPXXfPrjY', title: 'Use the Hit rate tab', caption: 'Tap Hit rate', seconds: 19, phoneYoutubeId: '9b_VQOSLFlU' },
+  editGame: { youtubeId: 'DXY4T3dyBX8', title: 'Edit your game and add a note', caption: 'Tap Edit game', seconds: 25, phoneYoutubeId: 'v_O0Y-y8EMs' },
+  managePlayers: { youtubeId: '-vajIuxNQcE', title: 'Manage players', caption: 'Tap Manage players', seconds: 23, phoneYoutubeId: 'J3j5tqJvp58' }
 } satisfies Record<string, HowToVideo>;
