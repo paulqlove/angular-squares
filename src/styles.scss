@@ -618,7 +618,8 @@ body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
 /* Floating bottom bars (dashboard phone bar, game page host tools). The frame (border, 88% fill, blur, shadow) is drawn
    by .qs-bar-frame::before so it can fade on its own. On phones, at the end of the page, appDockAtEnd adds .qs-docked:
    a solid strip flush with the sides and bottom fades in behind the bar, the frame fades out and the buttons drop 12px
-   into the strip (200ms). Scrolling back up reverses it: the strip goes in 120ms, the frame and buttons come back in 200ms. */
+   into the strip (200ms). The strip's top edge sits 8px above the dropped frame, so the buttons have room under it.
+   Scrolling back up reverses it: the strip goes in 120ms, the frame and buttons come back in 200ms. */
 .qs-bar-frame { position: relative; }
 .qs-bar-frame::before { content: ''; position: absolute; inset: 0; border-radius: inherit; border: 1px solid var(--qs-line);
   background: color-mix(in srgb, var(--qs-panel) 88%, transparent); box-shadow: var(--qs-shadow-pop); backdrop-filter: blur(12px);
@@ -626,7 +627,7 @@ body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
 .qs-bar-frame > * { position: relative; }
 /* Low specificity, so the dashboard bar's own hide transition (.qs-dock-off > *) still wins while it hides */
 :where(.qs-dockable) > .qs-bar-frame { transition: translate var(--qs-t-state) var(--qs-ease), transform var(--qs-t-state) var(--qs-ease-decel); }
-.qs-dockable::before { content: ''; position: absolute; left: -0.75rem; right: -0.75rem; top: 12px;
+.qs-dockable::before { content: ''; position: absolute; left: -0.75rem; right: -0.75rem; top: 4px;
   bottom: calc(-0.75rem - env(safe-area-inset-bottom)); background: var(--qs-panel); border-top: 1px solid var(--qs-line);
   opacity: 0; pointer-events: none; transition: opacity var(--qs-t-fast) var(--qs-ease-in); }
 .qs-dockable.qs-docked::before { opacity: 1; transition: opacity var(--qs-t-state) var(--qs-ease); }
