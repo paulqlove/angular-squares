@@ -21,6 +21,7 @@ On Paul's Mac the Firebase CLI is already signed in. Ask Claude "generate the an
 
 Rules: every percentage shows its count and appears only when n is at least 30. Admins and any uid in `~/.config/quarterscore/exclude-uids.txt` (one per line, `#` for comments) are left out of every count.
 8. **Where new hosts come from** - search, social, direct or a named site, plus the first page they landed on. Saved once when a new account signs in (`users/{uid}/firstTouch`); guests and accounts made before Nov 6 are not covered.
+9. **Spanish watch** - last 30 days: Spanish browsers (GA4 language), Mexico and Latin America visitors (GA4 country) and impressions for Spanish search words (Search Console), each against its go line. Decision it informs: whether to build the Spanish starter pages (shelved Nov 13, 2026). Go when the Season Pass test passes and any one line passes, then only if it projects 25+ extra passes a season. Requests for Spanish and YouTube caption languages are checked by hand.
 
 ## Setup for the Google sections (once, about 15 minutes)
 
