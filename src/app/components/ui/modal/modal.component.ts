@@ -4,6 +4,8 @@ import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, HostListene
 const openModals: ModalComponent[] = [];
 /** The page's overflow before the first modal opened. Locked on <html>: the stylesheet makes <html> the scroller, so locking <body> does nothing. */
 let pageOverflow = '';
+/** Open modals that show as a bottom sheet on phones. While any is open, <html> takes the sheet's colour (see .qs-sheet-open in styles.scss). */
+let openSheets = 0;
 
 const LEVEL = { 1: 'z-[150]', 2: 'z-[160]', 3: 'z-[170]' } as const;
 const SIZE = { sm: 'max-w-sm', md: 'max-w-md', lg: 'max-w-lg', xl: 'max-w-2xl' } as const;
@@ -91,12 +93,15 @@ export class ModalComponent {
         pageOverflow = document.documentElement.style.overflow;
         document.documentElement.style.overflow = 'hidden';
       }
+      const sheet = this.phone() === 'sheet';
+      if (sheet && ++openSheets === 1) document.documentElement.classList.add('qs-sheet-open');
       this.returnFocus = document.activeElement as HTMLElement | null;
       const focusTimer = setTimeout(() => this.initialFocus());
       onCleanup(() => {
         clearTimeout(focusTimer);
         openModals.splice(openModals.indexOf(this), 1);
         if (!openModals.length) document.documentElement.style.overflow = pageOverflow;
+        if (sheet && --openSheets === 0) document.documentElement.classList.remove('qs-sheet-open');
         const target = this.returnFocus;
         this.returnFocus = null;
         setTimeout(() => target?.isConnected && target.focus());
