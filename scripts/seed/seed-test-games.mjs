@@ -15,8 +15,8 @@ const DATABASE_URL = 'https://squares-4e4f7-default-rtdb.firebaseio.com';
 const SEED_TAG = `seed-${new Date().toISOString().slice(0, 10)}`;
 
 const args = parseArgs(process.argv.slice(2));
-if (!args.paul || !args.eric) {
-  console.error('Usage: node seed-test-games.mjs --paul <email> --eric <email> [--write]');
+if (!args.paul || (!args.eric && !args.extra)) {
+  console.error('Usage: node seed-test-games.mjs --paul <email> --eric <email> [--write]   (or --paul <email> --extra [--write] for five more boards for one account)');
   process.exit(1);
 }
 const WRITE = !!args.write;
@@ -37,7 +37,7 @@ const PLAN = {
     { name: 'Front Office Football Club', size: 100, state: 'filling', fill: 0.42, link: 'nfl' },
     { name: 'Sunday Couch Crew', size: 100, state: 'filling', fill: 0.71, link: 'nfl' },
     { name: 'Turkey Day Showdown', size: 50, state: 'filling', fill: 0.18, teams: ['NYG', 'DAL'] },
-    { name: 'The Waffle House Wagers', size: 25, state: 'ready', fill: 1, teams: ['ATL', 'NO'] },
+    { name: 'The Waffle House Crew', size: 25, state: 'ready', fill: 1, teams: ['ATL', 'NO'] },
     { name: 'Hilltop Fantasy League', size: 100, state: 'ready', fill: 1, teams: ['SF', 'SEA'] },
     { name: 'Monday Night Regulars', size: 100, state: 'locked', fill: 0.86, teams: ['BAL', 'PIT'] },
     { name: 'Rivalry Week Bash', size: 50, state: 'live', period: 3, fill: 0.92, teams: ['GB', 'CHI'] },
@@ -59,6 +59,17 @@ const PLAN = {
   ]
 };
 
+// --extra: five more boards for the first account only
+const EXTRA = {
+  paul: [
+    { name: 'Thursday Night Lights Crew', size: 100, state: 'filling', fill: 0.35, teams: ['PIT', 'CLE'] },
+    { name: 'Office Chili Cook-Off Squares', size: 50, state: 'filling', fill: 0.62, teams: ['DAL', 'PHI'] },
+    { name: 'Neighborhood Block Party', size: 100, state: 'ready', fill: 1, teams: ['GB', 'MIN'] },
+    { name: 'Fourth and Long Society', size: 25, state: 'locked', fill: 0.84, teams: ['SF', 'LAR'] },
+    { name: 'Sunday Funday Regulars', size: 100, state: 'live', period: 3, fill: 0.93, teams: ['KC', 'DEN'] }
+  ]
+};
+
 // Cumulative scores at the end of each quarter, for live and final boards
 const SCORE_LINES = [
   [[7, 3], [14, 10], [17, 20], [24, 27]],
@@ -74,7 +85,7 @@ const auth = getAuth();
 const db = getDatabase();
 
 const owners = {};
-for (const key of ['paul', 'eric']) {
+for (const key of args.extra ? ['paul'] : ['paul', 'eric']) {
   const user = await auth.getUserByEmail(args[key]).catch(err => {
     console.error(`No account found for the ${key} email (${err.code || err.message}). Nothing was written.`);
     process.exit(1);
@@ -88,7 +99,7 @@ const taken = new Set((await db.ref('games').once('value').then(s => Object.keys
 
 const updates = {};
 let n = 0;
-for (const [key, boards] of Object.entries(PLAN)) {
+for (const [key, boards] of Object.entries(args.extra ? EXTRA : PLAN)) {
   const owner = owners[key];
   for (const plan of boards) {
     const id = newBoardId(taken);
@@ -106,10 +117,12 @@ for (const [key, boards] of Object.entries(PLAN)) {
         [game.awayTeam, game.homeTeam] = plan.link === 'ncaaf' ? ['UGA', 'TENN'] : ['NYJ', 'NE'];
       }
     }
-    updates[`games/${id}`] = { id, ...game };
+    // The app reads picks from `squares`, not `selectedSquares`
+    const { selectedSquares, ...rest } = game;
+    updates[`games/${id}`] = { id, ...rest, squares: selectedSquares };
     updates[`users/${owner.uid}/games/${id}`] = { createdAt: game.createdAt, name: game.name };
     updates[`openBoards/${owner.uid}/${id}`] = true;
-    const picked = Object.keys(game.selectedSquares).length;
+    const picked = Object.keys(selectedSquares).length;
     console.log(`  ${id}  ${key.padEnd(4)}  ${String(plan.size).padStart(3)}  ${plan.state.padEnd(7)}  ${String(picked).padStart(3)}/${plan.size}  ${game.awayTeam} @ ${game.homeTeam}${game.espnEventId ? ' (ESPN ' + game.espnEventId + ')' : ''}  ${game.name}`);
   }
 }
@@ -254,6 +267,7 @@ function parseArgs(argv) {
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--write') out.write = true;
+    else if (a === '--extra') out.extra = true;
     else if (a.startsWith('--')) out[a.slice(2)] = argv[++i];
   }
   return out;
