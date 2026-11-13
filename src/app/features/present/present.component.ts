@@ -1,4 +1,4 @@
-import { Component, HostListener, OnDestroy, OnInit, PLATFORM_ID, ViewEncapsulation, computed, inject, signal } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, PLATFORM_ID, ViewEncapsulation, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { Location, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
@@ -29,6 +29,17 @@ const QUARTERS = ['q1', 'q2', 'q3', 'q4'] as const;
   encapsulation: ViewEncapsulation.None
 })
 export class PresentComponent implements OnInit, OnDestroy {
+  constructor() {
+    // Track the floating host controls' width, so the title leaves room for them (see the header in the template).
+    effect(onCleanup => {
+      const el = this.controlsRef()?.nativeElement;
+      if (!el || typeof ResizeObserver === 'undefined') return;
+      const observer = new ResizeObserver(() => this.controlsWidth.set(el.offsetWidth));
+      observer.observe(el);
+      onCleanup(() => observer.disconnect());
+    });
+  }
+
   private readonly auth = inject(AuthService);
   private readonly espn = inject(EspnService);
   private readonly gameService = inject(GameService);
@@ -68,6 +79,8 @@ export class PresentComponent implements OnInit, OnDestroy {
   protected readonly showTimer = signal<boolean>(false);
   /** Host buttons show on any movement, then fade after a few seconds. */
   protected readonly controlsVisible = signal<boolean>(true);
+  /** Width of the host controls in pixels, 0 when there are none (the TV link shows no controls). */
+  protected readonly controlsWidth = signal<number>(0);
   /** True on /tv/:token: a TV with no sign-in, rotating the boards the host chose, at the speed the host chose. */
   protected readonly kiosk = signal<boolean>(false);
   protected readonly kioskOff = signal<boolean>(false);
@@ -77,6 +90,7 @@ export class PresentComponent implements OnInit, OnDestroy {
   protected readonly boardCount = signal<number>(0);
   protected readonly slideDir = signal<'left' | 'right'>('right');
 
+  private readonly controlsRef = viewChild<ElementRef<HTMLElement>>('controls');
   private boardIds: string[] = [];
   private index = 0;
   private lastScore = '';

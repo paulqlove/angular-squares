@@ -7,7 +7,8 @@
   </main>
 } @else {
 <main class="relative flex h-screen flex-col overflow-hidden bg-qs-bg px-4 pt-3 text-qs-ink lg:px-6 pb-6 lg:pb-8">
-  <div class="mb-3 flex shrink-0 items-center gap-3">
+  <!-- The right padding keeps room for the host controls that float over the header, so a long title shrinks instead of running under them. -->
+  <div class="mb-3 flex shrink-0 items-center gap-3" [style.padding-right.px]="controlsWidth() ? controlsWidth() + 12 : null">
     <div class="flex min-w-0 flex-1 items-center gap-4">
       <span class="flex shrink-0 items-center rounded-inner bg-qs-tile px-3 py-2">
         <img src="assets/brand/lockup-horizontal-reversed.svg" alt="QuarterScore" width="192" height="24" class="h-6 w-auto lg:h-8">
@@ -17,7 +18,7 @@
   </div>
 
   <!-- Host controls float over the header, so they never change the size of the board. They fade out after a few seconds. -->
-  <div class="absolute right-4 top-3 z-20 flex max-w-[85%] flex-wrap items-center justify-end gap-2 rounded-card bg-qs-bg/90 p-2 transition-opacity duration-300 lg:right-6"
+  <div #controls class="absolute right-4 top-3 z-20 flex max-w-[85%] flex-wrap items-center justify-end gap-2 rounded-card bg-qs-bg/90 p-2 transition-opacity duration-300 lg:right-6"
     [class.opacity-0]="!controlsVisible()" [class.pointer-events-none]="!controlsVisible()" [attr.inert]="controlsVisible() ? null : ''">
       @if (!kiosk()) {
         <!-- Always in the layout, grows from 0 width, so opening and closing slide instead of popping. The negative margin cancels the flex gap while closed. -->
@@ -26,7 +27,6 @@
           [class.opacity-0]="!showTimer()" [class.pointer-events-none]="!showTimer()"
           [attr.inert]="showTimer() ? null : ''" [attr.aria-hidden]="showTimer() ? null : 'true'">
           <div class="flex min-w-0 items-center gap-2 overflow-hidden whitespace-nowrap">
-            <span class="qs-label text-qs-muted">Switch every</span>
             @for (s of intervals; track s) {
               <button type="button" class="qs-tab px-3" role="tab" [attr.aria-selected]="rotating() && interval() === s" (click)="rotating() ? setInterval(s) : startRotation(s)">{{ s }}s</button>
             }
