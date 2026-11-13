@@ -136,13 +136,6 @@
         </div>
       </div>
 
-      <!-- Results: once the game is over, the final score and each quarter's winner sit above the board -->
-      @if (isGameOver()) {
-        <div class="px-3">
-          <app-results-card [results]="results"></app-results-card>
-        </div>
-      }
-
       <!-- Board + players -->
       <div class="grid grid-cols-1 gap-8 px-3 lg:grid-cols-12">
         <!-- Board -->
