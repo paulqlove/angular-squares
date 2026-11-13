@@ -71,6 +71,7 @@ private get db(): Database {
 - `providedIn: 'root'` singletons
 - Modern `inject()` function
 - Clear separation: AuthService, GameService, EspnService, ThemeService
+- `GameService` is the one entry point components use for boards. It delegates to smaller services that share one lazy database handle (`GameDatabaseService`): `GameRecordService` (read, subscribe, update), `GameLifecycleService` (create, reset, resize, delete), `BoardSettingsService`, `UserGamesService`, `LiveGameIndexService`, `TvLinkService`, `EntitlementService` and `SeasonPassService`. Parsing lives in `core/utils/game-parse.ts`; the game types live in `core/utils/game-data.ts` and are re-exported from `game.service.ts`.
 
 ### Routing
 
