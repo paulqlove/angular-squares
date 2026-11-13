@@ -31,7 +31,7 @@ import { ScheduledGame, formatKickoff } from './schedule.model';
           <header class="grid gap-12 lg:grid-cols-[minmax(0,1fr)_25rem] lg:items-start lg:gap-16">
             <div>
               <p class="flex items-center gap-3">
-                <span class="flex h-7 min-w-7 items-center justify-center rounded-md px-1 font-mono text-[0.625rem] font-bold"
+                <span translate="no" class="flex h-7 min-w-7 items-center justify-center rounded-md px-1 font-mono text-[0.625rem] font-bold"
                       [style.background]="badge(team.primaryColor).background" [style.color]="badge(team.primaryColor).ink">{{ team.abbreviation }}</span>
                 <span class="qs-eyebrow">{{ team.conference }} {{ team.division }}</span>
               </p>
@@ -55,7 +55,7 @@ import { ScheduledGame, formatKickoff } from './schedule.model';
                   @for (game of games(); track game.id) {
                     <li class="flex items-center gap-3 border-b border-qs-line px-5 py-3">
                       <div class="min-w-0 flex-1">
-                        <p class="font-mono text-sm font-semibold tracking-wide text-qs-ink">{{ abbr(game.awayTeam) }} &#64; {{ abbr(game.homeTeam) }}</p>
+                        <p translate="no" class="font-mono text-sm font-semibold tracking-wide text-qs-ink">{{ abbr(game.awayTeam) }} &#64; {{ abbr(game.homeTeam) }}</p>
                         <p class="mt-0.5 text-sm text-qs-muted">{{ formatDate(game.date) }}</p>
                       </div>
                       <button type="button" (click)="printSheet(game)" class="qs-btn qs-btn-ghost w-11 shrink-0 px-0 text-qs-muted hover:text-qs-ink"
@@ -148,9 +148,9 @@ import { ScheduledGame, formatKickoff } from './schedule.model';
                 <li>
                   <a [routerLink]="'/team/' + rival.slug"
                      class="flex min-h-11 items-center gap-3 rounded-card border border-qs-line bg-qs-panel p-3 transition-colors hover:bg-qs-panel-2">
-                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg font-mono text-xs font-bold"
+                    <span translate="no" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg font-mono text-xs font-bold"
                           [style.background]="badge(rival.primaryColor).background" [style.color]="badge(rival.primaryColor).ink">{{ rival.abbreviation }}</span>
-                    <span class="text-[0.9375rem] font-semibold leading-snug text-qs-ink">{{ rival.city }} {{ rival.name }}</span>
+                    <span translate="no" class="text-[0.9375rem] font-semibold leading-snug text-qs-ink">{{ rival.city }} {{ rival.name }}</span>
                   </a>
                 </li>
               }

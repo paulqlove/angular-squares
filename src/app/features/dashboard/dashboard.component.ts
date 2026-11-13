@@ -545,9 +545,9 @@ function readCardView(): CardView {
                 </div>
               </div>
               <div class="min-w-0 tall:px-1.5">
-                <h5 class="truncate text-base font-semibold leading-tight tracking-tight text-qs-ink tall:text-xl">{{ game.name }}</h5>
+                <h5 translate="no" class="truncate text-base font-semibold leading-tight tracking-tight text-qs-ink tall:text-xl">{{ game.name }}</h5>
                 @if (cardTeams(game); as teams) {
-                  <div class="mt-1.5 flex flex-col gap-1">
+                  <div translate="no" class="mt-1.5 flex flex-col gap-1">
                     @for (team of teams; track $index) {
                       <span class="flex min-w-0 items-center gap-2 text-sm">
                         @if (team.logo) {

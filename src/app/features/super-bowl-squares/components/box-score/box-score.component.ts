@@ -20,7 +20,7 @@ export interface ManualScores {
         <span class="qs-label text-qs-tile-muted">{{ game ? 'ESPN' : 'Scoreboard' }}</span>
         <div class="flex items-center gap-2">
           @if (game) {
-            <span class="px-1.5 py-0.5 rounded text-xs"
+            <span translate="no" class="px-1.5 py-0.5 rounded text-xs"
               [class.bg-qs-live-fill]="game.status === 'in'"
               [class.text-qs-tile]="game.status === 'in'"
               [class.animate-pulse]="game.status === 'in'"
@@ -45,7 +45,7 @@ export interface ManualScores {
           }
         </div>
       </div>
-      <table class="w-full text-xs">
+      <table translate="no" class="w-full text-xs">
         <thead>
           <tr class="text-qs-tile-muted border-b border-white/10">
             <th class="text-left py-1 w-16"></th>

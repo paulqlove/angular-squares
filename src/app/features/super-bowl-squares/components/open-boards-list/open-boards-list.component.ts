@@ -30,10 +30,10 @@ import { miniGridCells, miniGridClass } from '../../../../core/utils/mini-grid';
                 }
               </div>
               <div class="col-start-2 row-start-1 flex min-w-0 items-start justify-between gap-2 self-start">
-                <p class="line-clamp-2 text-base font-semibold leading-snug text-qs-ink">{{ r.name }}</p>
+                <p translate="no" class="line-clamp-2 text-base font-semibold leading-snug text-qs-ink">{{ r.name }}</p>
                 <span class="qs-badge qs-badge-ok shrink-0">{{ r.open }} open</span>
               </div>
-              <p class="col-start-2 row-start-2 truncate font-mono text-xs uppercase tracking-wider text-qs-muted">{{ r.awayTeam || 'Away' }} v {{ r.homeTeam || 'Home' }}</p>
+              <p translate="no" class="col-start-2 row-start-2 truncate font-mono text-xs uppercase tracking-wider text-qs-muted">{{ r.awayTeam || 'Away' }} v {{ r.homeTeam || 'Home' }}</p>
               <p class="col-start-2 row-start-3 line-clamp-2 self-start text-xs tabular-nums text-qs-muted">{{ r.taken }}/{{ r.size }} taken · {{ r.pricePerSquare }} pts per square</p>
               <ng-icon name="heroChevronRight" class="col-start-3 row-span-3 row-start-1 self-center text-base text-qs-muted" aria-hidden="true"></ng-icon>
             </a>
