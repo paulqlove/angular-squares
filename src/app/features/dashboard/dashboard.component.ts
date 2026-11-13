@@ -27,6 +27,7 @@ import { CreateGameFormComponent, CreateGameSubmit } from '../create/create-game
 import { EditGameDialogComponent, EditGameValues } from '../super-bowl-squares/components/edit-game-dialog/edit-game-dialog.component';
 import { ProfileMenuComponent } from '../../components/ui/profile-menu/profile-menu.component';
 import { HeadroomDirective } from '../../shared/directives/headroom.directive';
+import { DockAtEndDirective } from '../../shared/directives/dock-at-end.directive';
 import { UpgradePassDialogComponent } from './components/upgrade-pass-dialog/upgrade-pass-dialog.component';
 import { PlanService } from '../../core/services/plan.service';
 import { ActiveBoardLimitError } from '../../core/errors/active-board-limit.error';
@@ -92,7 +93,7 @@ function readCardView(): CardView {
 
 @Component({
     selector: 'app-dashboard',
-    imports: [ModalComponent, FormsModule, RouterLink, NgTemplateOutlet, CardMenuComponent, CreateGameFormComponent, NgIconComponent, AppHeaderComponent, HeadroomDirective, ProfileMenuComponent, ShareDialogComponent, EditGameDialogComponent, UpgradePassDialogComponent],
+    imports: [ModalComponent, FormsModule, RouterLink, NgTemplateOutlet, CardMenuComponent, CreateGameFormComponent, NgIconComponent, AppHeaderComponent, HeadroomDirective, DockAtEndDirective, ProfileMenuComponent, ShareDialogComponent, EditGameDialogComponent, UpgradePassDialogComponent],
     providers: [
         provideIcons({
             heroPlus,
@@ -397,12 +398,13 @@ function readCardView(): CardView {
       <!-- Phone: the search-or-code field and New board in a bar along the bottom, like the game page's host tools.
            Tapping the field opens it with Cancel in the same bar, lifted above the keyboard. -->
       <div
-        class="qs-dock no-print fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-[90] sm:hidden"
+        class="qs-dock qs-dockable no-print fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-[90] sm:hidden"
+        appDockAtEnd [dockPaused]="searchOpen()"
         [class.qs-dock-off]="barHidden()"
         [attr.aria-hidden]="barHidden() ? 'true' : null"
         [style.transform]="searchOpen() && keyboardLift() ? 'translateY(-' + keyboardLift() + 'px)' : null"
       >
-        <div role="toolbar" aria-label="Board actions" class="rounded-[12px] border border-qs-line bg-[color-mix(in_srgb,var(--qs-panel)_88%,transparent)] p-1.5 shadow-pop backdrop-blur-md">
+        <div role="toolbar" aria-label="Board actions" class="qs-bar-frame rounded-[12px] p-1.5">
           <!-- The only place the code error sits above its field: under it would be off the bottom of the screen -->
           @if (searchOpen() && showCodeError()) {
             <p id="code-error-phone" class="qs-error-in px-2 pb-2 pt-1 text-sm text-qs-bad" role="alert">Game not found</p>
