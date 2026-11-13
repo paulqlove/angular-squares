@@ -54,3 +54,16 @@ Review periodically and promote useful entries into CLAUDE.md.
 > Plans live in `core/plans.ts`. Free hosts get one active board and the 20/20/20/40 split; the Season Pass adds custom splits, more boards, auto-manage and square limits. Public copy (marketing pages, llms.txt, JSON-LD) only promises free-plan features, and doesn't mention the pass until checkout is live.
 
 **Status:** Open
+
+---
+
+### 2026-11-13 — The session's dev branch already held an open PR
+
+**What went wrong:** For a docs-only job, I reset the session's assigned branch (`claude/dashboard-card-redesign-32wbxf`) to main and force-pushed. That branch was the head of open PR #267 (walkthrough SVG), so the push replaced its commit. I restored the old tip within minutes and moved the docs to a new branch (#306).
+
+**Assumption made:** That the assigned dev branch only held work that had already merged, because the last few PRs on it had merged.
+
+**Suggested CLAUDE.md addition:**
+> Each change gets its own `claude/<topic>` branch off the latest main, one PR per branch. Before force-pushing or resetting any branch, list PRs with that head branch (state all) and don't touch it if one is open.
+
+**Status:** Open
