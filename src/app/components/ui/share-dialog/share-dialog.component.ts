@@ -44,7 +44,7 @@ import { GameService } from '../../../core/services/game.service';
         <div>
           <p class="qs-label mb-1.5 text-qs-muted">Game code</p>
           <div class="flex items-stretch gap-2">
-            <code id="share-code" class="flex flex-1 items-center justify-center rounded-btn border border-qs-line bg-qs-panel-2 py-3 font-mono text-2xl font-semibold tracking-[0.3em] text-qs-ink">{{ gameId }}</code>
+            <code translate="no" id="share-code" class="flex flex-1 items-center justify-center rounded-btn border border-qs-line bg-qs-panel-2 py-3 font-mono text-2xl font-semibold tracking-[0.3em] text-qs-ink">{{ gameId }}</code>
             <button type="button" (click)="copy(gameId, 'code')" class="qs-btn qs-btn-primary min-w-28" aria-label="Copy game code">
               <ng-icon [name]="copied() === 'code' ? 'heroCheck' : 'heroClipboard'" [class.icon-pop]="copied() === 'code'" class="text-base"></ng-icon>
               {{ copied() === 'code' ? 'Copied' : 'Copy' }}

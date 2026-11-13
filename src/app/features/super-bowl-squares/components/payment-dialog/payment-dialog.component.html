@@ -14,7 +14,7 @@
       @if (removingName === player.name) {
         <div class="my-2 rounded-inner bg-qs-bad-soft p-3" role="group" [attr.aria-label]="'Remove ' + player.name">
           <p class="text-sm text-qs-ink">
-            Remove <strong class="font-semibold">{{ player.name }}</strong>? Their {{ player.squares }} {{ player.squares === 1 ? 'square opens' : 'squares open' }} back up.
+            Remove <strong translate="no" class="font-semibold">{{ player.name }}</strong>? Their {{ player.squares }} {{ player.squares === 1 ? 'square opens' : 'squares open' }} back up.
           </p>
           <div class="mt-3 flex justify-end gap-2">
             <button type="button" (click)="cancelRemove()" class="qs-btn qs-btn-ghost px-3 text-qs-muted">Cancel</button>
@@ -26,7 +26,7 @@
         <div class="flex min-w-0 items-center gap-3">
           <span class="h-3 w-3 shrink-0 rounded-full" [class]="player.color || 'bg-qs-line-strong'" aria-hidden="true"></span>
           <div class="min-w-0">
-            <p class="truncate font-medium text-qs-ink">{{ player.name }}</p>
+            <p translate="no" class="truncate font-medium text-qs-ink">{{ player.name }}</p>
             <p class="qs-label text-xs text-qs-muted">{{ player.squares }} {{ player.squares === 1 ? 'square' : 'squares' }} · {{ player.total | number: '1.0-2' }} pts</p>
           </div>
         </div>

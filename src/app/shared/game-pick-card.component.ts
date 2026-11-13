@@ -33,7 +33,7 @@ interface TeamRow {
       }
     </div>
     @for (team of teams(); track $index) {
-      <div class="flex min-w-0 items-center gap-2.5 pt-2">
+      <div translate="no" class="flex min-w-0 items-center gap-2.5 pt-2">
         @if (team.logo) {
           <img [src]="team.logo" alt="" width="24" height="24" loading="lazy" class="h-6 w-6 shrink-0 object-contain" />
         } @else {

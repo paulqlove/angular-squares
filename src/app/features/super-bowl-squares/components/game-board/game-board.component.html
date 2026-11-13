@@ -1,7 +1,7 @@
 <div class="relative overflow-hidden">
   <!-- Axis caption: side team runs down, top team runs across -->
   <p class="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
-    <span class="flex items-center gap-1 font-semibold capitalize text-qs-ink">
+    <span translate="no" class="flex items-center gap-1 font-semibold capitalize text-qs-ink">
       <span class="text-base leading-none text-qs-muted" aria-hidden="true">↓</span>
       @if (awayLogo; as logo) {
         <img [src]="logo" [alt]="awayTeam" class="h-4 w-4 object-contain" />
@@ -9,7 +9,7 @@
       {{ awayTeam || 'Away' }}
     </span>
     <span class="text-qs-line-strong" aria-hidden="true">/</span>
-    <span class="flex items-center gap-1 font-semibold capitalize text-qs-ink">
+    <span translate="no" class="flex items-center gap-1 font-semibold capitalize text-qs-ink">
       @if (homeLogo; as logo) {
         <img [src]="logo" [alt]="homeTeam" class="h-4 w-4 object-contain" />
       }
@@ -22,7 +22,7 @@
   </p>
   <!-- Like the landing-page board: 1px outline and gaps, rounded corners -->
   <div>
-  <div role="grid" aria-label="Football squares game board" class="flex flex-col gap-px overflow-hidden rounded-inner bg-qs-line p-px">
+  <div translate="no" role="grid" aria-label="Football squares game board" class="flex flex-col gap-px overflow-hidden rounded-inner bg-qs-line p-px">
     <!-- Top row with home numbers (empty navy bar until numbers are drawn) -->
     <div [class]="gridColsClass + ' grid gap-px'" role="row">
       <div class="number-cell axis-top bg-qs-panel-2" aria-hidden="true"></div>

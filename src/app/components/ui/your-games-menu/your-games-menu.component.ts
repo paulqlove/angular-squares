@@ -114,7 +114,7 @@ const CLOSE_MS = 220;
             </span>
             <span class="flex min-w-0 flex-col">
               <span class="flex min-w-0 items-center gap-1.5">
-                <span class="truncate text-[15px] font-semibold tracking-[-0.015em]">{{ row.name }}</span>
+                <span translate="no" class="truncate text-[15px] font-semibold tracking-[-0.015em]">{{ row.name }}</span>
                 @if (row.host) {
                   <span class="shrink-0 rounded-[4px] border border-qs-line-strong px-1.5 py-[3px] font-mono text-[11.5px] font-medium uppercase leading-none tracking-[0.08em] text-qs-muted">Host</span>
                 }
@@ -122,7 +122,7 @@ const CLOSE_MS = 220;
                   <span class="shrink-0 rounded-[4px] border border-qs-ink px-1.5 py-[3px] font-mono text-[11.5px] font-medium uppercase leading-none tracking-[0.08em] text-qs-ink">Viewing</span>
                 }
               </span>
-              <span class="truncate text-[13px] text-qs-muted">{{ row.matchup }}</span>
+              <span translate="no" class="truncate text-[13px] text-qs-muted">{{ row.matchup }}</span>
             </span>
             <span class="flex flex-col items-end gap-[3px] whitespace-nowrap text-right">
               @switch (row.state) {

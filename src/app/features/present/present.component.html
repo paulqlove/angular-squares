@@ -97,10 +97,10 @@
         @if (live(); as l) {
           <div class="qs-card p-4">
             <p class="qs-label mb-2 text-qs-muted">{{ l.status || 'Score' }}</p>
-            <div class="flex items-baseline justify-between text-3xl font-bold lg:text-4xl">
+            <div translate="no" class="flex items-baseline justify-between text-3xl font-bold lg:text-4xl">
               <span class="uppercase">{{ g.awayTeam }}</span><span>{{ l.away }}</span>
             </div>
-            <div class="flex items-baseline justify-between text-3xl font-bold lg:text-4xl">
+            <div translate="no" class="flex items-baseline justify-between text-3xl font-bold lg:text-4xl">
               <span class="uppercase">{{ g.homeTeam }}</span><span>{{ l.home }}</span>
             </div>
           </div>
@@ -112,8 +112,8 @@
             <div class="flex flex-1 items-center justify-between border-b border-qs-line text-2xl last:border-0 lg:text-3xl">
               <span class="qs-label text-qs-muted">{{ label(q) }}</span>
               @if (g.winners?.[q]; as w) {
-                <span class="mx-4 min-w-0 flex-1 truncate text-lg leading-tight tabular-nums text-qs-muted lg:text-2xl" [style.font-size]="scoreFont()">{{ winningScore(q) }}</span>
-                <span [class]="colors()[w] + ' max-w-[50%] shrink-0 truncate rounded-inner px-3 py-0.5 font-semibold text-slate-900'" [style.font-size]="badgeFont()">{{ w }}</span>
+                <span translate="no" class="mx-4 min-w-0 flex-1 truncate text-lg leading-tight tabular-nums text-qs-muted lg:text-2xl" [style.font-size]="scoreFont()">{{ winningScore(q) }}</span>
+                <span translate="no" [class]="colors()[w] + ' max-w-[50%] shrink-0 truncate rounded-inner px-3 py-0.5 font-semibold text-slate-900'" [style.font-size]="badgeFont()">{{ w }}</span>
               } @else {
                 <span class="text-qs-muted">—</span>
               }

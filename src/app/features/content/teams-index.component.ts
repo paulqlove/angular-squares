@@ -43,10 +43,10 @@ interface Conference {
                         <li>
                           <a [routerLink]="'/team/' + team.slug"
                              class="flex min-h-11 items-center gap-3 rounded-card border border-qs-line bg-qs-panel p-3 transition-colors hover:bg-qs-panel-2">
-                            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg font-mono text-xs font-bold"
+                            <span translate="no" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg font-mono text-xs font-bold"
                                   [style.background]="badge(team.primaryColor).background" [style.color]="badge(team.primaryColor).ink">{{ team.abbreviation }}</span>
                             <span class="min-w-0">
-                              <span class="block text-[0.9375rem] font-semibold leading-snug text-qs-ink">{{ team.city }} {{ team.name }}</span>
+                              <span translate="no" class="block text-[0.9375rem] font-semibold leading-snug text-qs-ink">{{ team.city }} {{ team.name }}</span>
                               <span class="block text-sm text-qs-muted">Create a {{ team.name }} board</span>
                             </span>
                           </a>

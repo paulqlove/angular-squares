@@ -13,7 +13,7 @@ import { Component, ChangeDetectionStrategy, Input } from '@angular/core';
         <path d="M12 68 H50 M12 68 V92 H26 C36 92 44 86 50 76 M12 80 H56 M30 52 L38 80 M48 58 L30 80" fill="none" />
         <circle cx="72" cy="70" r="4.5" fill="none" />
       </g>
-      <text x="41" y="49" text-anchor="middle" font-family="'Space Grotesk', system-ui, sans-serif" font-weight="700" font-size="25"
+      <text translate="no" x="41" y="49" text-anchor="middle" font-family="'Space Grotesk', system-ui, sans-serif" font-weight="700" font-size="25"
             [attr.fill]="ink">{{ initials }}</text>
     </svg>
   `

@@ -11,7 +11,7 @@
           [attr.aria-pressed]="selectedPlayer === entry.player">
           <div class="flex min-w-0 flex-wrap items-center gap-2">
             <span class="h-3 w-3 shrink-0 rounded-full" [class]="playerColors[entry.player]" aria-hidden="true"></span>
-            <span class="truncate font-medium text-qs-ink">{{ entry.player }}</span>
+            <span translate="no" class="truncate font-medium text-qs-ink">{{ entry.player }}</span>
             @if (entry.probability !== null) {
               <span class="qs-badge" [appTooltip]="'Chance of holding a winning square, from past scores'">{{ entry.probability }}%</span>
             }
