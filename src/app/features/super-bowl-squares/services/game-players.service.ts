@@ -53,10 +53,17 @@ export class GamePlayersService {
     });
   }
 
-  /** Owner and co-host: take a player off the board. Frees their squares and clears everything tied to their name. */
+  /**
+   * Owner and co-host: take a player off the board. Frees their squares and clears everything tied to their name.
+   * Not on a locked board, where it would empty squares that can't be picked again and wipe their quarter wins.
+   */
   public async onPlayerRemoved(playerName: string): Promise<void> {
     const state = this.state;
     if (!state.isHost()) return;
+    if (state.isLocked) {
+      this.toastService.warning('Unlock the game to remove a player.');
+      return;
+    }
 
     const previous = this.snapshot();
 
@@ -104,7 +111,7 @@ export class GamePlayersService {
   }
 
   private refreshPaymentDialog(): void {
-    this.ui.paymentDialog?.setData(this.state.playerStats, this.state.playerColors, this.state.paidPlayers);
+    this.ui.paymentDialog?.setData(this.state.playerStats, this.state.playerColors, this.state.paidPlayers, this.state.isLocked);
   }
 
   /** Puts back the players a failed removal took off. */
