@@ -2,7 +2,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ElementRef, Injector, PLATFORM_ID, afterNextRender, computed, effect, inject, untracked } from '@angular/core';
 import { NgIconComponent } from '@ng-icons/core';
 
-import { captureLayout, glideToNewLayout } from '../../../../shared/flip-layout';
+import { captureLayout, glideToNewLayout } from '../../utils/flip-layout';
 import { DashboardDialogsService } from '../../services/dashboard-dialogs.service';
 import { DashboardSearchService } from '../../services/dashboard-search.service';
 import { DashboardViewService } from '../../services/dashboard-view.service';

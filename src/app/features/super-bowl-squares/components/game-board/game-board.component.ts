@@ -19,9 +19,9 @@ export class GameBoardComponent implements OnChanges {
   private readonly winnerArrivals = new ArrivalTracker();
 
   /** The board on screen, so switching boards never replays a quarter winner. */
-  @Input() boardId = '';
+  @Input() public boardId: string = '';
   /** A locked board: squares can't be picked, so they get no hover or press. */
-  @Input() locked = false;
+  @Input() public locked: boolean = false;
   @Input() homeTeam!: string;
   @Input() awayTeam!: string;
   /** Team logos from TeamLogoService (our NFL table, or ESPN's logo for other leagues). */
@@ -109,13 +109,13 @@ export class GameBoardComponent implements OnChanges {
   }
 
   /** How a square's name comes in: a spring for your own claim, a fade for someone else's. */
-  nameEnter(key: string): string {
+  public nameEnter(key: string): string {
     if (this.changes.own.has(key)) return 'qs-name-own';
     return this.changes.others.has(key) ? 'qs-name-in' : '';
   }
 
   /** A square that was let go: its name fades out. */
-  nameLeave(key: string): string {
+  public nameLeave(key: string): string {
     return this.changes.released.has(key) ? 'qs-name-out' : '';
   }
 
@@ -123,23 +123,22 @@ export class GameBoardComponent implements OnChanges {
 
   getSquareClass(row: number, col: number): string {
     const key = `${row}-${col}`;
+    // Kept on every path, so showing a winner or picking a player doesn't replay the winner's fade
+    const winIn = this.arrivingWinners.has(key) ? ' square-win-in' : '';
     const player = this.selectedSquares[key];
     const baseColor = player ? this.playerColors[player] : 'bg-qs-panel';
 
     if (this.highlightedSquare) {
-      if (key === this.highlightedSquare) {
-        return `${baseColor} square-highlight`;
-      }
-      return `${baseColor} opacity-25`;
+      return baseColor + (key === this.highlightedSquare ? ' square-highlight' : ' opacity-25') + winIn;
     }
 
     if (this.selectedPlayer && player !== this.selectedPlayer) {
-      return `${baseColor} opacity-25`;
+      return `${baseColor} opacity-25${winIn}`;
     }
 
-    const leader = !this.highlightedSquare && key === this.currentLeaderSquare ? ' square-leader' + (player ? '' : ' square-leader-empty') + (this.liveScore ? ' square-live' : '') : '';
+    const leader = key === this.currentLeaderSquare ? ' square-leader' + (player ? '' : ' square-leader-empty') + (this.liveScore ? ' square-live' : '') : '';
     const open = !player && !this.locked ? ' qs-square-open' : '';
-    return baseColor + leader + open + (this.arrivingWinners.has(key) ? ' square-win-in' : '');
+    return baseColor + leader + open + winIn;
   }
 
   get leaderRow(): number | null {

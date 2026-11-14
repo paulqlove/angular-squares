@@ -45,9 +45,10 @@ export class ArrivalTracker {
   /** The keys that are new since the last call for this board, or null when nothing changed at all. */
   public next(boardId: string, keys: readonly string[]): string[] | null {
     const seen = this.boardId === boardId ? this.seen : null;
-    if (seen && seen.size === keys.length && keys.every(key => seen.has(key))) return null;
+    const now = new Set(keys); // a square can win more than one quarter, so keys can repeat
+    if (seen && seen.size === now.size && [...now].every(key => seen.has(key))) return null;
     this.boardId = boardId;
-    this.seen = new Set(keys);
-    return seen ? keys.filter(key => !seen.has(key)) : [];
+    this.seen = now;
+    return seen ? [...now].filter(key => !seen.has(key)) : [];
   }
 }

@@ -42,6 +42,14 @@ describe('ArrivalTracker', () => {
     expect(tracker.next('a', ['q2', 'q1'])).toBeNull();
   });
 
+  it('treats a square that won two quarters as one key', () => {
+    const tracker = new ArrivalTracker();
+    tracker.next('a', ['1-1']);
+    expect(tracker.next('a', ['1-1', '1-1'])).toBeNull();
+    expect(tracker.next('a', ['1-1', '1-1', '2-2'])).toEqual(['2-2']);
+    expect(tracker.next('a', ['1-1', '1-1', '2-2'])).toBeNull();
+  });
+
   it('gives nothing new after a switch to another board', () => {
     const tracker = new ArrivalTracker();
     tracker.next('a', ['q1']);
