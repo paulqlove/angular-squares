@@ -472,7 +472,7 @@ After each PR: screenshot 375, 768, 1280 and 1440 in light and dark; run the con
 
 ## 11. How-to videos and thumbnails
 
-**Videos.** Simple how-tos with fake data. Bella voiceover (ElevenLabs), warm and calm, no music. Step lines on screen, tight trims, logo end card, no zoom, light box on taps. YouTube: not made for kids, comments off. Landscape 16:9 plus a vertical 9:16 Short of each. Site embeds are tap-to-load; on phones the Short plays.
+**Videos.** Simple how-tos with fake data. Bella voiceover (ElevenLabs), warm and calm, no music. Step lines on screen, tight trims, logo end card, no zoom, light box on taps. YouTube: not made for kids, comments off. Landscape 16:9 plus a vertical 9:16 Short of each. Site embeds are tap-to-load, and the poster is the video's own YouTube thumbnail (the Short's on phones), with our play button and length on it; on phones the Short plays.
 
 **Thumbnails: style A "Board" (Paul, Nov 13).**
 
