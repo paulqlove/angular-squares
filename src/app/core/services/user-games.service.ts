@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { get, ref, remove, set } from 'firebase/database';
-import { GameListItem } from '../utils/game-data';
+import { GameData, GameListItem } from '../utils/game-data';
 import { readGameIndexVisits, renamePlayerInGame, sortGameIdsNewestFirst, toGameListItem } from '../utils/game-parse';
 import type { RecentVisit } from '../utils/recent-games';
 import { AuthService } from './auth.service';
@@ -28,27 +28,18 @@ export class UserGamesService {
     });
   }
 
+  /** Boards the user joined (not owned), newest first, read in parallel. */
+  public async getJoinedGameRecords(userId: string): Promise<GameData[]> {
+    if (!this.database.isBrowser) return [];
+    const snapshot = await get(ref(this.database.db, `users/${userId}/joinedGames`));
+    if (!snapshot.exists()) return [];
+    const games = await Promise.all(Object.keys(snapshot.val()).map(gameId => this.records.getGame(gameId)));
+    return newestFirst(games);
+  }
+
   // Get games user has joined (not owned)
   public async getJoinedGames(userId: string): Promise<GameListItem[]> {
-    if (!this.database.isBrowser) return [];
-    const joinedGamesRef = ref(this.database.db, `users/${userId}/joinedGames`);
-    const snapshot = await get(joinedGamesRef);
-
-    if (!snapshot.exists()) {
-      return [];
-    }
-
-    const gameIds = Object.keys(snapshot.val());
-    const games: GameListItem[] = [];
-
-    for (const gameId of gameIds) {
-      const game = await this.records.getGame(gameId);
-      if (game) {
-        games.push(toGameListItem(gameId, game, false));
-      }
-    }
-
-    return games.sort((a, b) => b.createdAt - a.createdAt);
+    return (await this.getJoinedGameRecords(userId)).map(game => toGameListItem(game.id as string, game, false));
   }
 
   // Get games created by a user
@@ -60,30 +51,24 @@ export class UserGamesService {
     return sortGameIdsNewestFirst(snapshot.val() as Record<string, { createdAt?: number }>);
   }
 
-  public async getUserGames(userId: string): Promise<GameListItem[]> {
+  /** Boards the user hosts, newest first, read in parallel. A deleted board's leftover entry is dropped from their list. */
+  public async getUserGameRecords(userId: string): Promise<GameData[]> {
     if (!this.database.isBrowser) return [];
-    const userGamesRef = ref(this.database.db, `users/${userId}/games`);
-    const snapshot = await get(userGamesRef);
-
-    if (!snapshot.exists()) {
-      return [];
-    }
-
-    const gameIds = Object.keys(snapshot.val());
-    const games: GameListItem[] = [];
-
-    for (const gameId of gameIds) {
+    const snapshot = await get(ref(this.database.db, `users/${userId}/games`));
+    if (!snapshot.exists()) return [];
+    const games = await Promise.all(Object.keys(snapshot.val()).map(async gameId => {
       const game = await this.records.getGame(gameId);
       if (!game && this.authService.previewRole() === 'actual') {
         // The host deleted this game: drop the leftover entry from this user's own list.
         void remove(ref(this.database.db, `users/${userId}/joinedGames/${gameId}`)).catch(() => {});
       }
-      if (game) {
-        games.push(toGameListItem(gameId, game, true));
-      }
-    }
+      return game;
+    }));
+    return newestFirst(games);
+  }
 
-    return games.sort((a, b) => b.createdAt - a.createdAt);
+  public async getUserGames(userId: string): Promise<GameListItem[]> {
+    return (await this.getUserGameRecords(userId)).map(game => toGameListItem(game.id as string, game, true));
   }
 
   /** Games this user hosts or joined, each with when it was created or joined, for the Your Games menu. Reads only the user's own index, not the games. */
@@ -129,4 +114,9 @@ export class UserGamesService {
   private readonly authService: AuthService = inject(AuthService);
   private readonly database: GameDatabaseService = inject(GameDatabaseService);
   private readonly records: GameRecordService = inject(GameRecordService);
+}
+
+/** The boards that still exist, newest first. */
+function newestFirst(games: (GameData | null)[]): GameData[] {
+  return games.filter((game): game is GameData => !!game).sort((a, b) => b.createdAt - a.createdAt);
 }

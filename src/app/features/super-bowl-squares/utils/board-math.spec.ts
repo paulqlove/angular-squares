@@ -11,8 +11,7 @@ import {
   playerStatsFor,
   quarterWins,
   renamePlayer,
-  squareForScore,
-  withoutEntries
+  squareForScore
 } from './board-math';
 
 // Columns are the home team's digits, rows the away team's.
@@ -139,11 +138,5 @@ describe('renamePlayer', () => {
       playerUserIds: { Tee: 'uid-1' }
     });
     expect(data.playerColors).toEqual({ Tara: 'qs-p-sky' });
-  });
-});
-
-describe('withoutEntries', () => {
-  it('drops the entries the test picks', () => {
-    expect(withoutEntries({ a: 'Tara', b: 'Kim' }, (_, name) => name === 'Kim')).toEqual({ a: 'Tara' });
   });
 });

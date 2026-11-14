@@ -22,14 +22,16 @@ export interface PlanFeatures {
   autoManage: boolean;
   /** Cap how many squares one player can take on a board. */
   squareLimit: boolean;
+  /** One list of players across every board the host runs or co-hosts. */
+  playersView: boolean;
 }
 
 export const DAY_MS = 86_400_000;
 
 export const PLANS: Record<PlanId, PlanFeatures> = {
-  free: { label: 'Free', priceUsd: 0, activeBoards: 1, customSplits: false, adFree: false, liveScoring: false, autoManage: false, squareLimit: false },
-  season: { label: 'Season Pass', priceUsd: 5.99, activeBoards: 25, customSplits: true, adFree: true, liveScoring: true, autoManage: true, squareLimit: true },
-  admin: { label: 'Admin', priceUsd: 0, activeBoards: Number.POSITIVE_INFINITY, customSplits: true, adFree: true, liveScoring: true, autoManage: true, squareLimit: true }
+  free: { label: 'Free', priceUsd: 0, activeBoards: 1, customSplits: false, adFree: false, liveScoring: false, autoManage: false, squareLimit: false, playersView: false },
+  season: { label: 'Season Pass', priceUsd: 5.99, activeBoards: 25, customSplits: true, adFree: true, liveScoring: true, autoManage: true, squareLimit: true, playersView: true },
+  admin: { label: 'Admin', priceUsd: 0, activeBoards: Number.POSITIVE_INFINITY, customSplits: true, adFree: true, liveScoring: true, autoManage: true, squareLimit: true, playersView: true }
 };
 
 export interface Entitlement {

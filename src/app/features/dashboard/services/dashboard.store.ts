@@ -3,11 +3,12 @@ import { Injectable, Signal, computed, inject, signal } from '@angular/core';
 import { CardMenuItem } from '../../../components/ui/card-menu/card-menu.component';
 import { AuthService, AuthUser } from '../../../core/services/auth.service';
 import { ConfirmService } from '../../../core/services/confirm.service';
-import { GameListItem, GameService } from '../../../core/services/game.service';
+import { GameData, GameListItem, GameService } from '../../../core/services/game.service';
 import { TeamLogoService } from '../../../core/services/team-logo.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { BoardGroup, groupBoards } from '../../../core/utils/board-groups';
 import { drawBoardNumbers } from '../../../core/utils/draw-numbers';
+import { toGameListItem } from '../../../core/utils/game-parse';
 import { filterHostedGames } from './dashboard-filters';
 import { DashboardSearchService } from './dashboard-search.service';
 
@@ -30,6 +31,8 @@ export class DashboardStore {
   /** Boards whose Lock now is being saved. */
   public readonly lockingIds = signal<ReadonlySet<string>>(new Set());
   public readonly myGames = signal<GameListItem[]>([]);
+  /** Every board this user hosts or co-hosts, in full, for the Players view. Newest first, hosted ones first. */
+  public readonly runBoards = signal<GameData[]>([]);
   public readonly shareModalGameId = signal<string | null>(null);
   /** Hosted boards matching the search, newest first. */
   public readonly visibleMyGames = computed<GameListItem[]>(() => {
@@ -46,6 +49,7 @@ export class DashboardStore {
       try {
         await this.gameService.deleteGame(gameId, user.uid);
         this.myGames.update(games => games.filter(g => g.id !== gameId));
+        this.runBoards.update(boards => boards.filter(b => b.id !== gameId));
       } catch {
         this.toastService.error('Could not delete the game. Try again.');
       }
@@ -57,12 +61,14 @@ export class DashboardStore {
     if (user && !user.isGuest) {
       this.isLoadingGames.set(true);
       try {
-        const [owned, joined] = await Promise.all([
-          this.gameService.getUserGames(user.uid),
-          this.gameService.getJoinedGames(user.uid)
+        const [ownedRecords, joinedRecords] = await Promise.all([
+          this.gameService.getUserGameRecords(user.uid),
+          this.gameService.getJoinedGameRecords(user.uid)
         ]);
+        const owned = ownedRecords.map(game => toGameListItem(game.id as string, game, true));
         this.myGames.set(owned);
-        this.joinedGames.set(joined);
+        this.joinedGames.set(joinedRecords.map(game => toGameListItem(game.id as string, game, false)));
+        this.runBoards.set([...ownedRecords, ...joinedRecords.filter(game => game.managerId === user.uid)]);
         const linked = owned.filter(game => !!game.espnEventId);
         if (linked.length > 0) {
           this.gameService.ensureLiveGameIndexes(linked.map(game => ({
@@ -106,6 +112,7 @@ export class DashboardStore {
       }
       this.justLocked.update(ids => new Set(ids).add(game.id));
       this.myGames.update(games => games.map(g => g.id === game.id ? { ...g, isLocked: true, isRandomized: true, autoManage: undefined } : g));
+      this.runBoards.update(boards => boards.map(b => b.id === game.id ? { ...b, isLocked: true } : b));
       setTimeout(() => this.justLocked.update(ids => { const next = new Set(ids); next.delete(game.id); return next; }), 1200);
     } catch {
       this.toastService.error('Could not lock the board. Try again.');
@@ -129,6 +136,14 @@ export class DashboardStore {
 
   public shareGame(gameId: string): void {
     this.shareModalGameId.set(gameId);
+  }
+
+  /** Puts a board the Players view just changed back into both lists, so its card shows the same counts. */
+  public setRunBoard(board: GameData): void {
+    this.runBoards.update(boards => boards.map(b => b.id === board.id ? board : b));
+    const item = (joined: boolean) => toGameListItem(board.id as string, board, !joined);
+    this.myGames.update(games => games.map(g => g.id === board.id ? item(false) : g));
+    this.joinedGames.update(games => games.map(g => g.id === board.id ? item(true) : g));
   }
 
   /** Applies a change to one hosted board in the list, after it was saved. */

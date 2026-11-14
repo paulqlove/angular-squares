@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { get, onValue, ref, update } from 'firebase/database';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { GameData } from '../utils/game-data';
+import { GameChange, GameData } from '../utils/game-data';
 import { isLinkableEspnId, parseGameData } from '../utils/game-parse';
 import { AuthService } from './auth.service';
 import { GameDatabaseService } from './game-database.service';
@@ -83,10 +83,28 @@ export class GameRecordService {
 
   // Update game data — uses multi-path updates from root so Firebase evaluates
   // each path's .write rules independently.
-  public async updateGame(gameId: string, data: Partial<GameData>): Promise<void> {
+  public updateGame(gameId: string, data: Partial<GameData>): Promise<void> {
+    return this.updateGames([{ gameId, data }]);
+  }
+
+  /** Several boards in one multi-path update, so either every board saves or none does. */
+  public async updateGames(changes: ReadonlyArray<GameChange>): Promise<void> {
     if (!this.database.isBrowser) return;
     if (this.authService.blockPreviewWrite()) throw new Error('Preview only');
+    const parts = await Promise.all(changes.map(change => this.gameUpdates(change.gameId, change.data)));
+    const updates: Record<string, unknown> = Object.assign({}, ...parts);
+    if (Object.keys(updates).length === 0) return;
+    await update(ref(this.database.db), updates);
+  }
 
+  private readonly _currentGame: BehaviorSubject<GameData | null> = new BehaviorSubject<GameData | null>(null);
+  private readonly authService: AuthService = inject(AuthService);
+  private readonly database: GameDatabaseService = inject(GameDatabaseService);
+  private gameSubscription: (() => void) | null = null;
+  private readonly liveGameIndex: LiveGameIndexService = inject(LiveGameIndexService);
+
+  /** The root-relative paths that save one board's changed fields. */
+  private async gameUpdates(gameId: string, data: Partial<GameData>): Promise<Record<string, any>> {
     const prefix = `games/${gameId}`;
     const updates: Record<string, any> = {};
 
@@ -170,13 +188,6 @@ export class GameRecordService {
       }
     }));
 
-    if (Object.keys(updates).length === 0) return;
-    await update(ref(this.database.db), updates);
+    return updates;
   }
-
-  private readonly _currentGame: BehaviorSubject<GameData | null> = new BehaviorSubject<GameData | null>(null);
-  private readonly authService: AuthService = inject(AuthService);
-  private readonly database: GameDatabaseService = inject(GameDatabaseService);
-  private gameSubscription: (() => void) | null = null;
-  private readonly liveGameIndex: LiveGameIndexService = inject(LiveGameIndexService);
 }
