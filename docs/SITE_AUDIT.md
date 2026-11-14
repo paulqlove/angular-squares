@@ -9,7 +9,7 @@ Date: 2026-11-08. Four reviewers audited the site in parallel: three UI designer
 | Claim | Result |
 | --- | --- |
 | Marketing CTAs go to `/dashboard` and signed-out visitors land on the home page | True. 16 `/dashboard` references in `features/content`; `authGuard` runs `router.navigate(['/'], { queryParams: { returnUrl } })` |
-| The fixed header (z-100) sits above z-50 modals | True. `app-header.component.ts:34` is `z-[100]`; the dashboard Create modal at `dashboard.component.ts:456` is `z-50` |
+| The fixed header (z-100) sits above z-50 modals | True. `site-header.component.ts:130` is `z-[100]`; the dashboard Create modal at `dashboard.component.ts:456` is `z-50` |
 | `components/ui/dialog` is the shared dialog | **False.** `app-dialog` is not used anywhere. It is dead code. One reviewer's claim that it is the shell for the upgrade, Share, Create and Auth dialogs was wrong |
 | 31 em dashes are rule violations | Not confirmed. The ones sampled are browser page titles, and no rule was found. Left off the backlog |
 | No banned money words in visible copy | True per two reviewers. Internal names (`winners-and-payouts`, `quarterPayouts`) are code only |

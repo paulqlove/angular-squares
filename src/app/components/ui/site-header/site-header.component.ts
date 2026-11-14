@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, OnInit, computed, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, OnInit, afterNextRender, computed, inject, input, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
-import { filter } from 'rxjs';
+import { filter, fromEvent } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 
 interface NavLink {
@@ -11,7 +11,7 @@ interface NavLink {
 }
 
 /** How the bar sits: scrolls away (static), slides away on scroll down and back on scroll up (headroom), or stays put (fixed). */
-export type SiteHeaderPosition = 'static' | 'headroom' | 'fixed';
+type SiteHeaderPosition = 'static' | 'headroom' | 'fixed';
 
 /**
  * The navy bar on every page: the logo, a link home, on the left and the page's own buttons on the right.
@@ -23,8 +23,7 @@ export type SiteHeaderPosition = 'static' | 'headroom' | 'fixed';
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'hostClass()',
-    '(focusin)': 'hidden.set(false)',
-    '(window:scroll)': 'onScroll()'
+    '(focusin)': 'hidden.set(false)'
   },
   template: `
     <header [class]="barClass()">
@@ -87,10 +86,16 @@ export type SiteHeaderPosition = 'static' | 'headroom' | 'fixed';
 })
 export class SiteHeaderComponent implements OnInit {
   constructor() {
+    const destroyRef = inject(DestroyRef);
     this.router.events.pipe(
       filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-      takeUntilDestroyed(inject(DestroyRef))
+      takeUntilDestroyed(destroyRef)
     ).subscribe(() => this.menuOpen.set(false));
+    // Only the headroom bar listens to scrolling, so pages with a static or fixed bar don't re-render on every scroll.
+    afterNextRender(() => {
+      if (this.position() !== 'headroom') return;
+      fromEvent(window, 'scroll', { passive: true }).pipe(takeUntilDestroyed(destroyRef)).subscribe(() => this.onScroll());
+    });
   }
 
   public readonly guideLinks: NavLink[] = [
@@ -102,7 +107,6 @@ export class SiteHeaderComponent implements OnInit {
   ];
   /** Pages with their own `<h1>` pass `p`, so each page keeps a single h1. */
   public readonly heading = input<'h1' | 'p'>('h1');
-  public readonly hidden = signal(false);
   public readonly menuOpen = signal(false);
   public readonly nav = input<'none' | 'guides'>('none');
   public readonly position = input<SiteHeaderPosition>('static');
@@ -117,16 +121,6 @@ export class SiteHeaderComponent implements OnInit {
     if (this.nav() === 'guides') this.auth.restoreSession();
   }
 
-  /** Headroom: hide on scroll down past the bar, show on scroll up or when something inside takes focus. */
-  public onScroll(): void {
-    if (this.position() !== 'headroom') return;
-    const y = window.scrollY;
-    if (Math.abs(y - this.lastY) < 4) return;
-    const bar = this.el.nativeElement;
-    this.hidden.set(y > this.lastY && y > bar.offsetHeight && !bar.contains(document.activeElement));
-    this.lastY = y;
-  }
-
   public toggleMenu(): void {
     this.menuOpen.update(open => !open);
   }
@@ -138,6 +132,8 @@ export class SiteHeaderComponent implements OnInit {
   /** Signed-in hosts already have a dashboard, so the call to action becomes a link to it. */
   protected readonly ctaLabel = computed(() => (this.signedIn() ? 'Dashboard' : 'Create a board'));
   protected readonly ctaPath = computed(() => (this.signedIn() ? '/dashboard' : '/create'));
+  /** Headroom: true while the bar is slid away. */
+  protected readonly hidden = signal(false);
   protected readonly hostClass = computed(() => {
     // Reading pages print without the bar; the app pages print as they always have.
     const base = this.nav() === 'guides' ? 'no-print block' : 'block';
@@ -154,4 +150,13 @@ export class SiteHeaderComponent implements OnInit {
     const user = this.auth.currentUser();
     return !!user && !user.isGuest;
   });
+
+  /** Headroom: hide on scroll down past the bar, show on scroll up or when something inside takes focus. */
+  private onScroll(): void {
+    const y = window.scrollY;
+    if (Math.abs(y - this.lastY) < 4) return;
+    const bar = this.el.nativeElement;
+    this.hidden.set(y > this.lastY && y > bar.offsetHeight && !bar.contains(document.activeElement));
+    this.lastY = y;
+  }
 }
