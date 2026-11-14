@@ -1,0 +1,12 @@
+@for (v of view.cardViews; track v.id) {
+  <button
+    type="button"
+    (click)="view.setCardView(v.id)"
+    [attr.aria-pressed]="view.cardView() === v.id"
+    [attr.aria-label]="v.label + ' view'"
+    [title]="v.label + ' view'"
+    class="qs-view-btn"
+  >
+    <ng-icon [name]="v.icon" class="text-xl" aria-hidden="true"></ng-icon>
+  </button>
+}

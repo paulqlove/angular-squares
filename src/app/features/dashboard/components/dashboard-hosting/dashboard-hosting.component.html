@@ -1,0 +1,71 @@
+<div class="flex min-h-11 items-center justify-between gap-3 border-b border-qs-line pb-2">
+  <div class="flex min-w-0 items-baseline gap-2.5">
+    <h3 id="hosting-heading" class="qs-section-title">Hosting</h3>
+    @if (!store.isLoadingGames()) {
+      <span class="qs-label text-qs-muted">{{ countLabel() }}</span>
+    }
+  </div>
+  <div appDashboardViewToggle role="group" aria-label="Card view" class="hidden shrink-0 gap-0.5 sm:flex"></div>
+</div>
+
+@if (store.isLoadingGames()) {
+  <div class="qs-skel-delay mt-4 grid grid-cols-1 gap-3" data-card-grid [class]="view.cardGridClass()" aria-busy="true">
+    @for (i of skeletons; track i) {
+      <!-- Same shape as the board card: a row on a phone, from sm up the navy tile, name, teams and the Share bar -->
+      <div class="min-w-0 [container-type:inline-size]">
+      <article class="qs-card" aria-hidden="true">
+        <div class="flex min-h-[72px] items-center gap-3 p-3 tall:flex-col tall:items-stretch tall:gap-3.5 tall:pb-4">
+          <div class="flex shrink-0 tall:min-h-[152px] tall:items-end tall:gap-[18px] tall:rounded-inner tall:bg-qs-tile tall:p-[18px]">
+            <div class="qs-skel h-12 w-12 tall:h-28 tall:w-28"></div>
+            <div class="hidden flex-col gap-2 pb-0.5 tall:flex">
+              <div class="h-9 w-10 animate-pulse rounded-[6px] bg-white/15"></div>
+              <div class="h-3 w-12 animate-pulse rounded-[6px] bg-white/15"></div>
+            </div>
+          </div>
+          <div class="min-w-0 flex-1 space-y-2 tall:flex-none tall:px-1.5">
+            <div class="qs-skel h-4 w-2/5 tall:h-5 tall:w-3/5"></div>
+            <div class="qs-skel h-3 w-3/5 tall:w-2/5"></div>
+            <div class="qs-skel hidden h-3 w-1/3 tall:block"></div>
+          </div>
+        </div>
+        <div class="hidden min-h-11 border-t border-qs-line tall:block"></div>
+      </article>
+      </div>
+    }
+  </div>
+} @else if (store.myGames().length === 0) {
+  <div class="qs-card mt-4 p-10 text-center">
+    <p class="qs-title text-2xl">No boards yet</p>
+    <p class="mt-2 text-qs-muted">Create a board, share the code, and let everyone pick their squares.</p>
+    <button
+      type="button"
+      (click)="dialogs.openCreateModal($event)"
+      [disabled]="dialogs.isCheckingBoardLimit()"
+      [attr.aria-busy]="dialogs.isCheckingBoardLimit()"
+      class="qs-btn qs-btn-primary mt-6 disabled:cursor-wait"
+    >
+      <ng-icon name="heroPlus" class="text-base"></ng-icon>
+      Create your first board
+    </button>
+  </div>
+} @else if (store.visibleMyGames().length === 0) {
+  <div class="qs-card mt-4 p-8 text-center" role="status">
+    <p class="text-qs-muted">No games match “{{ search.gameSearch().trim() }}”</p>
+    <button type="button" class="qs-btn qs-btn-secondary mt-4" (click)="search.clearSearch()">Clear</button>
+  </div>
+} @else {
+  <!-- Grouped by what the host does next: lock it, keep sharing it, or nothing -->
+  @for (group of store.boardGroups(); track group.key; let first = $first) {
+    <div [class]="first ? 'mt-4' : 'mt-8'" role="group" [attr.aria-label]="group.label">
+      <div class="flex items-baseline gap-2 px-0.5">
+        <h4 class="qs-label text-qs-muted">{{ group.label }}</h4>
+        <span class="qs-label text-qs-muted opacity-70">{{ group.games.length }}</span>
+      </div>
+      <div class="mt-3 grid grid-cols-1 gap-3" data-card-grid [class]="view.cardGridClass()">
+        @for (game of group.games; track game.id) {
+          <div appGameCard class="min-w-0 [container-type:inline-size]" [game]="game" [joined]="false"></div>
+        }
+      </div>
+    </div>
+  }
+}

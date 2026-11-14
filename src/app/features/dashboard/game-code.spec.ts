@@ -1,4 +1,4 @@
-import { gameCodeFrom } from './dashboard.component';
+import { gameCodeFrom } from './services/dashboard-filters';
 
 describe('gameCodeFrom', () => {
   it('reads six letters or digits as a code, upper-cased', () => {

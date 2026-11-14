@@ -1,0 +1,154 @@
+<div class="min-h-screen bg-qs-bg" [class.qs-grid-view]="view.activeCardView() === 'grid'" [attr.inert]="dialogs.showUpgradeDialog() ? '' : null">
+  <!-- Header -->
+  <app-shared-header variant="solid" appHeadroom>
+
+    <app-profile-menu walkthroughTarget="profile-dropdown" (tour)="startWalkthrough()"></app-profile-menu>
+  </app-shared-header>
+
+  <main class="mx-auto max-w-[1600px] px-4 sm:px-8 pt-6 pb-32 md:pt-8 sm:pb-20">
+    <!-- Heading + actions -->
+    <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between" data-walkthrough="hero-section">
+      <div>
+        <p class="qs-eyebrow">Dashboard</p>
+        <h2 class="qs-title mt-3 text-4xl sm:text-5xl">Your <span class="text-qs-accent">games</span></h2>
+      </div>
+
+      <!-- From 640px up: one field that searches your boards or joins with a code, then New board. Phones get the bottom bar instead. -->
+      <div class="hidden items-center gap-3 sm:flex sm:flex-row">
+        <div role="search" class="relative w-[400px] min-w-0" data-walkthrough="join-game">
+          <div appDashboardSearchField class="qs-search min-w-0 flex-1" [where]="'desk'"></div>
+          @if (search.showCodeError()) {
+            <p id="code-error-desk" class="qs-error-in absolute left-0 top-full mt-2 text-sm text-qs-bad" role="alert">Game not found</p>
+          }
+        </div>
+
+        @if (store.canCreateGame()) {
+          <button
+            type="button"
+            (click)="dialogs.openCreateModal($event)"
+            [disabled]="dialogs.isCheckingBoardLimit()"
+            [attr.aria-busy]="dialogs.isCheckingBoardLimit()"
+            class="qs-btn qs-btn-primary disabled:cursor-wait"
+            data-walkthrough="create-game"
+          >
+            <ng-icon name="heroPlus" class="text-base"></ng-icon>
+            New board
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (!store.canCreateGame()) {
+      <div class="mt-8 flex flex-col gap-4 rounded-card border border-qs-line bg-qs-warn-soft p-5 sm:flex-row sm:items-center sm:justify-between">
+        <p class="text-qs-warn">
+          <span class="font-semibold">You're playing as a guest.</span>
+          Sign in to host your own games.
+        </p>
+        <button type="button" (click)="signOut()" class="qs-btn qs-btn-ink shrink-0">Sign in</button>
+      </div>
+    }
+
+    <!-- Hosting -->
+    @if (store.canCreateGame()) {
+      <!-- Plan card: the upgrade entry point, so only free hosts see it. Season and Admin see their plan in the profile menu. -->
+      @if (planService.plan() !== 'season' && planService.plan() !== 'admin') {
+        <div class="qs-card mt-8 flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between" aria-label="Your plan">
+          <div class="min-w-0">
+            <p class="qs-label text-qs-muted">Your plan</p>
+            <p class="qs-title mt-1 text-2xl">
+              {{ planService.features().label }}
+              @if (planService.daysLeft()) {
+                <span class="qs-label align-middle text-qs-muted">· {{ planService.daysLeft() }} days left</span>
+              }
+            </p>
+          </div>
+          <button type="button" (click)="dialogs.openUpgrade($event)" class="qs-btn qs-btn-secondary shrink-0">
+            See Season Pass
+          </button>
+        </div>
+      }
+
+      <!-- Admin Panel: Gifted Season Passes (admin account only) -->
+      @if (admin.canManagePasses()) {
+        <section appDashboardAdminPanel class="mt-8" aria-labelledby="admin-heading"></section>
+      }
+
+      <section appDashboardHosting class="mt-8" data-walkthrough="my-games" aria-labelledby="hosting-heading"></section>
+    }
+
+    <!-- Joined -->
+    @if (store.joinedGames().length > 0) {
+      <section appDashboardJoined [class]="store.canCreateGame() ? 'mt-10 sm:mt-14' : 'mt-8'" aria-labelledby="joined-heading"></section>
+    }
+  </main>
+
+  <!-- Phone: the search-or-code field and New board in a bar along the bottom, lifted above the keyboard while the search is open -->
+  <div
+    appDashboardPhoneBar
+    class="qs-dock qs-dockable no-print fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-[90] sm:hidden"
+    appDockAtEnd [dockPaused]="search.searchOpen()"
+    [class.qs-dock-off]="dialogs.barHidden()"
+    [attr.aria-hidden]="dialogs.barHidden() ? 'true' : null"
+    [style.transform]="search.searchOpen() && search.keyboardLift() ? 'translateY(-' + search.keyboardLift() + 'px)' : null"
+  ></div>
+
+  <!-- Create Game Modal -->
+  <app-modal [open]="dialogs.showCreateModal()" labelledBy="create-game-title" size="xl" phone="full" [backdropCloses]="false" extraClass="flex h-[min(44rem,calc(100dvh-2rem))] flex-col overflow-hidden" (dismissed)="dialogs.dismissCreateModal()">
+    <div class="flex items-start justify-between gap-4 border-b border-qs-line px-6 pb-4 pt-5 max-sm:pb-3 max-sm:pt-4">
+      <div>
+        <p class="qs-eyebrow max-sm:hidden">New board</p>
+        <h3 id="create-game-title" class="qs-title mt-2 text-3xl max-sm:mt-0 max-sm:text-2xl">Set up your <span class="text-qs-accent">board</span></h3>
+      </div>
+      <button
+        type="button"
+        (click)="dialogs.closeCreateModal()"
+        class="qs-btn qs-btn-ghost -mr-2 w-11 px-0 text-qs-muted hover:text-qs-ink"
+        aria-label="Close"
+      >
+        <ng-icon name="heroXMark" class="text-xl"></ng-icon>
+      </button>
+    </div>
+
+    <app-create-game-form
+      [customSplitsAllowed]="planService.features().customSplits"
+      [openBoardsAllowed]="planService.features().activeBoards > 1"
+      [autoManageAllowed]="planService.features().autoManage"
+      [autoManageDefault]="dialogs.autoManageDefault()"
+      [squareLimitAllowed]="planService.features().squareLimit"
+      [isCreating]="dialogs.isCreating()"
+      (cancelled)="dialogs.closeCreateModal()"
+      (submitted)="dialogs.createGame($event)"
+    ></app-create-game-form>
+  </app-modal>
+
+  <!-- Share Modal -->
+  <app-share-dialog [isOpen]="!!store.shareModalGameId()" [gameId]="store.shareModalGameId() || ''" (closed)="store.shareModalGameId.set(null)"></app-share-dialog>
+
+  <!-- Edit Game Modal -->
+  <app-edit-game-dialog
+    [isOpen]="edit.showEditModal()"
+    [showGameFields]="true"
+    [closeOnSave]="false"
+    [saving]="edit.isSavingGame()"
+    [values]="edit.editValues()"
+    [boardSize]="edit.editingGame()?.boardSize ?? 100"
+    [squaresFilled]="edit.editingGame()?.squaresFilled ?? 0"
+    [numbersDrawn]="edit.editBoardRandomized()"
+    [espnGames]="edit.editEspnGames()"
+    [loadingEspnGames]="edit.isLoadingEditEspnGames()"
+    [canAutoManage]="planService.features().autoManage && !edit.editingGame()?.isLocked"
+    [canShowInOpenBoards]="edit.canEditShowInOpenBoards()"
+    [canLimitSquares]="planService.features().squareLimit && !!edit.editingGame()"
+    [players]="edit.editGamePlayers()"
+    [coHostName]="edit.coHostName()"
+    (closed)="edit.closeEditModal()"
+    (saved)="edit.saveGameEdits($event)"
+    (sportChange)="edit.fetchEditEspnGames($event)"
+    (coHostAssign)="edit.assignManagerFromPlayer($event)"
+    (coHostRemove)="edit.removeManager()"
+  ></app-edit-game-dialog>
+
+</div>
+@if (dialogs.showUpgradeDialog()) {
+  <app-upgrade-pass-dialog [trigger]="dialogs.upgradeTrigger()" [boardName]="dialogs.endedBoard()?.name ?? ''" (dismissed)="dialogs.closeUpgrade()" (resetOld)="dialogs.resetOldBoard()" (deleteOld)="dialogs.deleteOldBoard()" />
+}

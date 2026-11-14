@@ -1,0 +1,35 @@
+<ng-icon name="heroMagnifyingGlass" class="qs-search-icon" aria-hidden="true"></ng-icon>
+<input
+  type="search"
+  [attr.enterkeyhint]="search.codeMatch() ? 'go' : 'search'"
+  autocomplete="off"
+  autocapitalize="off"
+  spellcheck="false"
+  [attr.data-search]="where()"
+  [value]="search.gameSearch()"
+  (input)="search.onSearchInput($any($event.target).value)"
+  [attr.aria-invalid]="search.showCodeError() ? 'true' : null"
+  [attr.aria-describedby]="search.showCodeError() ? 'code-error-' + where() : null"
+  (keydown.escape)="search.onSearchEscape(where())"
+  (keydown.enter)="search.onSearchEnter($event)"
+  [placeholder]="where() === 'phone' ? 'Search or code' : 'Search or enter a game code'"
+  aria-label="Search or enter a game code"
+  [attr.tabindex]="outOfTabOrder() ? -1 : null"
+/>
+@if (search.codeMatch(); as code) {
+  <button
+    type="button"
+    (click)="search.joinGame()"
+    class="qs-search-join"
+    animate.enter="qs-search-join-enter"
+    animate.leave="qs-search-join-leave"
+    [attr.aria-label]="'Join game ' + code"
+    [attr.tabindex]="outOfTabOrder() ? -1 : null"
+  >
+    <span><ng-icon name="heroTicket" class="text-base" aria-hidden="true"></ng-icon><span class="qs-label">Join</span></span>
+  </button>
+} @else if (search.gameSearch()) {
+  <button type="button" (click)="search.clearSearch(where())" class="qs-search-clear" aria-label="Clear search" [attr.tabindex]="outOfTabOrder() ? -1 : null">
+    <ng-icon name="heroXMark" aria-hidden="true"></ng-icon>
+  </button>
+}

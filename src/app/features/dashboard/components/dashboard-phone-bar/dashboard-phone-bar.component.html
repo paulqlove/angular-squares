@@ -1,0 +1,32 @@
+<div role="toolbar" aria-label="Board actions" class="qs-bar-frame rounded-[12px] p-1.5">
+  <!-- The only place the code error sits above its field: under it would be off the bottom of the screen -->
+  @if (search.searchOpen() && search.showCodeError()) {
+    <p id="code-error-phone" class="qs-error-in px-2 pb-2 pt-1 text-sm text-qs-bad" role="alert">Game not found</p>
+  }
+  <div class="grid grid-cols-1">
+  <div class="qs-swap col-start-1 row-start-1 flex items-stretch gap-1" [class.qs-swap-off]="search.searchOpen()" [class.qs-swap-left]="search.searchOpen()" [attr.aria-hidden]="search.searchOpen() ? 'true' : null">
+    <button type="button" (click)="search.openSearch()" class="qs-search min-w-0 flex-1 text-left" data-walkthrough="join-game" aria-label="Search or enter a game code" [attr.tabindex]="search.searchOpen() ? -1 : null">
+      <ng-icon name="heroMagnifyingGlass" class="qs-search-icon" aria-hidden="true"></ng-icon>
+      <span class="truncate text-base text-qs-muted">Search or code</span>
+    </button>
+    @if (store.canCreateGame()) {
+      <button
+        type="button"
+        (click)="dialogs.openCreateModal($event)"
+        [disabled]="dialogs.isCheckingBoardLimit()"
+        [attr.aria-busy]="dialogs.isCheckingBoardLimit()"
+        [attr.tabindex]="search.searchOpen() ? -1 : null"
+        class="qs-btn qs-btn-primary shrink-0 disabled:cursor-wait"
+        data-walkthrough="create-game"
+      >
+        <ng-icon name="heroPlus" class="text-base" aria-hidden="true"></ng-icon>
+        New board
+      </button>
+    }
+  </div>
+  <div class="qs-swap col-start-1 row-start-1 flex items-stretch gap-1" [class.qs-swap-off]="!search.searchOpen()" [class.qs-swap-right]="!search.searchOpen()" [attr.aria-hidden]="search.searchOpen() ? null : 'true'" role="search">
+    <div appDashboardSearchField class="qs-search min-w-0 flex-1" [where]="'phone'"></div>
+    <button type="button" (click)="search.closeSearch()" class="qs-btn qs-btn-secondary shrink-0" [attr.tabindex]="search.searchOpen() ? null : -1">Cancel</button>
+  </div>
+  </div>
+</div>

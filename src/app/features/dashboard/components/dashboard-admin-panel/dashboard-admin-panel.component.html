@@ -1,0 +1,101 @@
+<div class="flex items-baseline justify-between border-b border-qs-line pb-3">
+  <button
+    type="button"
+    (click)="admin.toggleAdminPanel()"
+    class="qs-eyebrow qs-eyebrow-bar flex items-center gap-2 hover:text-qs-ink transition-colors"
+    id="admin-heading"
+  >
+    <ng-icon
+      [name]="admin.showAdminPanel() ? 'heroChevronDown' : 'heroArrowRight'"
+      class="text-sm"
+    ></ng-icon>
+    Admin / Season Passes
+  </button>
+  @if (!admin.isLoadingGiftedPasses()) {
+    <span class="qs-label text-qs-muted">{{ admin.giftedPasses().length }} gifted</span>
+  }
+</div>
+
+@if (admin.showAdminPanel()) {
+  <div class="mt-5 space-y-4">
+    <!-- Grant new pass - inline form -->
+    <div class="flex items-center gap-2 rounded-card border border-qs-line bg-qs-panel p-1">
+      <input
+        type="email"
+        [(ngModel)]="admin.newGiftEmail"
+        placeholder="Email address"
+        class="min-w-0 flex-1 bg-transparent px-3 py-2 text-qs-ink placeholder:text-qs-muted/60 focus:outline-none"
+        (keyup.enter)="admin.grantSeasonPass()"
+      />
+      <div class="flex items-center gap-1 border-l border-qs-line pl-2">
+        <input
+          type="number"
+          [(ngModel)]="admin.newGiftDays"
+          min="1"
+          max="365"
+          class="w-16 bg-transparent px-2 py-2 text-center text-qs-ink focus:outline-none"
+        />
+        <span class="text-sm text-qs-muted pr-1">days</span>
+      </div>
+      <button
+        type="button"
+        (click)="admin.grantSeasonPass()"
+        [disabled]="admin.isGrantingPass() || !admin.newGiftEmail.trim()"
+        class="qs-btn qs-btn-primary shrink-0"
+      >
+        {{ admin.isGrantingPass() ? 'Adding...' : 'Add' }}
+      </button>
+    </div>
+
+    <!-- List of gifted passes -->
+    @if (admin.isLoadingGiftedPasses()) {
+      <div class="qs-card animate-pulse bg-qs-panel-2 h-20"></div>
+    } @else if (admin.giftedPasses().length === 0) {
+      <p class="text-center text-qs-muted py-6">No gifted passes yet</p>
+    } @else {
+      <div class="overflow-hidden rounded-card border border-qs-line">
+        <table class="w-full text-left">
+          <thead class="bg-qs-panel-2 text-xs uppercase tracking-wider text-qs-muted">
+            <tr>
+              <th class="px-4 py-2 font-medium">Email</th>
+              <th class="px-4 py-2 font-medium text-right">Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-qs-line bg-qs-panel">
+            @for (pass of admin.giftedPasses(); track pass.email) {
+              <tr class="group">
+                <td class="min-w-0 break-all px-4 py-3 text-qs-ink">{{ pass.email }}</td>
+                <td class="px-4 py-3">
+                  <div class="flex items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    (click)="admin.revokePass(pass.email)"
+                    class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-qs-muted transition-colors hover:text-qs-warn focus-visible:opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                    [attr.aria-label]="'Revoke the pass for ' + pass.email"
+                    title="Revoke pass"
+                  >
+                    <ng-icon name="heroXMark" class="text-base"></ng-icon>
+                  </button>
+                  <button
+                    type="button"
+                    class="inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium transition-[filter] hover:brightness-110 disabled:cursor-default disabled:hover:brightness-100"
+                    [class]="admin.isPassExpired(pass.expiresAt)
+                      ? 'bg-qs-warn-soft text-qs-warn'
+                      : 'bg-qs-ok-soft text-qs-ok'"
+                    [disabled]="admin.hasNoExpiry(pass.expiresAt) || admin.updatingPassEmail() === pass.email"
+                    [attr.title]="admin.hasNoExpiry(pass.expiresAt) ? 'This pass never expires' : 'Click to make this pass never expire'"
+                    [attr.aria-label]="admin.hasNoExpiry(pass.expiresAt) ? pass.email + ': never expires' : 'Make the pass for ' + pass.email + ' never expire'"
+                    (click)="admin.makePassPermanent(pass.email)"
+                  >
+                    {{ admin.formatExpiry(pass.expiresAt) }}
+                  </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+}
