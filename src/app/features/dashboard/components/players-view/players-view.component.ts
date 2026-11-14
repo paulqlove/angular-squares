@@ -4,15 +4,16 @@ import { heroCheck, heroChevronDown, heroChevronUp, heroLockClosed, heroMagnifyi
 
 import { PlayersViewService } from '../../services/players-view.service';
 import { PlayerCardComponent } from './player-card.component';
-import { PlayerRowComponent } from './player-row.component';
+import { PlayerGamesComponent } from './player-games.component';
 
 /**
  * The Players view (Season Pass): find a player, narrow to one game, then the players in two groups, Unconfirmed and
- * Confirmed: a table with a tile per game from 640px up, a card per player on a phone. Sits in the Hosting section in place of the boards (`<div appPlayersView>`).
+ * Confirmed: a card per player, opening into a full-width panel of their games. Sits in the Hosting section in place
+ * of the boards (`<div appPlayersView>`).
  */
 @Component({
   selector: 'div[appPlayersView]',
-  imports: [NgIconComponent, PlayerCardComponent, PlayerRowComponent],
+  imports: [NgIconComponent, PlayerCardComponent, PlayerGamesComponent],
   providers: [provideIcons({ heroCheck, heroChevronDown, heroChevronUp, heroLockClosed, heroMagnifyingGlass, heroUserMinus, heroXMark })],
   templateUrl: './players-view.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
