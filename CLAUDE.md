@@ -94,6 +94,7 @@ games/{gameId}/
   homeNumbers/awayNumbers: number[]
   scores: { q1, q2, q3, q4 }
   playerColors, winners, paidPlayers
+  paidSquares: number[] (by position in paidPlayers: squares that name held at the host's Confirm; more now = Unconfirmed)
   homeTeam, awayTeam, hostNote (free-text host note, max 140)
   isLocked, isRandomized, pricePerSquare
   quarterSplit (optional custom split), emptyQuarterRule: 'final' | 'redistribute' (default 'final')

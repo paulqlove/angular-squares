@@ -309,6 +309,20 @@ describe('player maps', () => {
   it('the co-host can update the paid list', async () => {
     await assertSucceeds(set(cohost(), `${G}/paidPlayers`, ['Alice', 'Bob', 'Guesty']));
   });
+
+  it('the host can record confirmed square counts', async () => {
+    await assertSucceeds(write(owner(), { [`${G}/paidSquares/0`]: 1 }));
+    await assertSucceeds(write(cohost(), { [`${G}/paidSquares/1`]: 1 }));
+  });
+
+  it('a confirmed square count must be a whole number of squares', async () => {
+    await assertFails(write(owner(), { [`${G}/paidSquares/0`]: 1.5 }));
+    await assertFails(write(owner(), { [`${G}/paidSquares/0`]: 'all' }));
+  });
+
+  it('a player cannot raise their own confirmed square count', async () => {
+    await assertFails(write(player(), { [`${G}/paidSquares/0`]: 50 }));
+  });
 });
 
 describe('owner-only fields', () => {

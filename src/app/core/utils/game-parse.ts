@@ -1,6 +1,7 @@
 import { isEmptyQuarterRule } from '../plans';
 import type { RecentVisit } from './recent-games';
 import { readAutoManage, readAutoManageResult } from './auto-manage';
+import { confirmedPlayers } from './paid-squares';
 import { readSquareLimit } from './square-limit';
 import { BoardSize, EspnLiveSnapshot, GameData, GameListItem, SportType, TvLink, getBoardDimensions } from './game-data';
 
@@ -87,6 +88,7 @@ export function parseGameData(gameId: string, rawData: any, now: number = Date.n
     autoManageResult: readAutoManageResult(rawData.autoManageResult),
     maxSquaresPerPlayer: readSquareLimit(rawData.maxSquaresPerPlayer),
     paidPlayers: rawData.paidPlayers || [],
+    paidSquares: rawData.paidSquares || {},
     espnEventId: rawData.espnEventId || undefined,
     espnSport: rawData.espnSport || undefined,
     espnLive: readEspnLive(rawData.espnLive),
@@ -208,7 +210,7 @@ export function sortGameIdsNewestFirst(value: Record<string, { createdAt?: numbe
 export function toGameListItem(gameId: string, game: GameData, includeHostSettings: boolean): GameListItem {
   const playerNames = new Set(Object.values(game.selectedSquares));
   const squaresFilled = Object.keys(game.selectedSquares).length;
-  const confirmedCount = (game.paidPlayers || []).filter(p => playerNames.has(p)).length;
+  const confirmedCount = confirmedPlayers(game.selectedSquares, game.paidPlayers || [], game.paidSquares).size;
   return {
     id: gameId,
     name: game.name,

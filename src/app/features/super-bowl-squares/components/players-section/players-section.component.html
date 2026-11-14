@@ -16,13 +16,13 @@
     [boardSize]="state.boardSize"
     [selectedSquares]="state.selectedSquares"
     [playerStats]="state.playerStats"
-    [paidPlayers]="state.paidPlayers">
+    [paidPlayers]="state.confirmedPlayers">
   </app-game-status>
   <div [class.hidden]="!ui.isPlayersListVisible" class="min-h-0 flex-1 overflow-y-auto border-t border-qs-line lg:block">
     <app-players-list
       [playerStats]="state.playerStats"
       [playerColors]="state.playerColors"
-      [paidPlayers]="state.paidPlayers"
+      [paidPlayers]="state.confirmedPlayers"
       [homeNumbers]="state.homeNumbers"
       [awayNumbers]="state.awayNumbers"
       [selectedSquares]="state.selectedSquares"

@@ -7,6 +7,8 @@ import { SanitizationService } from '../../../core/services/sanitization.service
 import { TeamLogoService } from '../../../core/services/team-logo.service';
 import { DEFAULT_EMPTY_QUARTER_RULE, EmptyQuarterRule, QuarterSplit, splitFractions } from '../../../core/plans';
 import { AutoManageSettings } from '../../../core/utils/auto-manage';
+import { confirmedPlayers } from '../../../core/utils/paid-squares';
+import type { PaidCounts } from '../../../core/utils/game-data';
 import { isGameOver, startedQuarterCount } from '../../../core/utils/quarter-label';
 import { smallerBoardSizes } from '../../../core/utils/shuffle-squares';
 import { squareLimitState } from '../../../core/utils/square-limit';
@@ -31,6 +33,8 @@ export class GameStateService {
   public awayNumbers: (number | null)[] = [];
   public awayTeam: string = '';
   public boardSize: BoardSize = 100;
+  /** Paid players who hold no squares beyond what the host confirmed; the page shows these as Confirmed. */
+  public confirmedPlayers: Set<string> = new Set();
   /** The name this viewer plays as, sanitized. PlayerNameService owns the rules for changing it. */
   public currentPlayerName: string = '';
   public currentPrice: number = 10;
@@ -73,6 +77,8 @@ export class GameStateService {
   public readonly openBoards: WritableSignal<OpenBoardRow[]> = signal([]);
   public readonly ownerId: WritableSignal<string> = signal('');
   public paidPlayers: Set<string> = new Set();
+  /** How many squares each paid name held when the host confirmed it. */
+  public paidSquares: PaidCounts = {};
   public playerColors: { [key: string]: string } = {};
   public playerStats: { [key: string]: PlayerStats } = {};
   public playerUserIds: { [name: string]: string } = {};
@@ -157,6 +163,7 @@ export class GameStateService {
     this.emptyQuarterRule = data.emptyQuarterRule || DEFAULT_EMPTY_QUARTER_RULE;
     this.adFreeUntil = data.adFreeUntil || 0;
     this.paidPlayers = new Set(data.paidPlayers || []);
+    this.paidSquares = data.paidSquares || {};
     this.playerColors = normalizePlayerColors(data.playerColors || {});
     this.winners = data.winners || {};
     this.playerUserIds = data.playerUserIds || {};
@@ -172,6 +179,7 @@ export class GameStateService {
     const { stats, totalPot } = playerStatsFor(this.selectedSquares, this.currentPrice);
     this.playerStats = stats;
     this.totalPot = totalPot;
+    this.confirmedPlayers = confirmedPlayers(this.selectedSquares, this.paidPlayers, this.paidSquares);
   }
 
   /** The host can switch on lock-and-draw before kickoff: Season Pass, a linked game, numbers not drawn yet. */

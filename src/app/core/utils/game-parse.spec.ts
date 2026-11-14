@@ -163,6 +163,11 @@ describe('game parse helpers', () => {
       expect(item.boardSize).toBe(100);
     });
 
+    it('does not count a confirmed player who added squares after the confirm', () => {
+      const later = parseGameData('ABC123', { squares: { '0-0': 'Ann', '0-1': 'Ann' }, paidPlayers: ['Ann'], paidSquares: [1] });
+      expect(toGameListItem('ABC123', later, true).confirmedCount).toBe(0);
+    });
+
     it('adds host settings only for owned boards', () => {
       const owned = toGameListItem('ABC123', game, true);
       expect(owned.showInOpenBoards).toBe(true);

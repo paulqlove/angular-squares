@@ -10,6 +10,7 @@ import { GameData, GameService, getBoardDimensions } from '../../core/services/g
 import { boardArrowStep } from '../../core/utils/board-keys';
 import { isGameOver, quarterLabel } from '../../core/utils/quarter-label';
 import { EspnGame, EspnService } from '../../core/services/espn.service';
+import { confirmedPlayers } from '../../core/utils/paid-squares';
 import { TeamLogoService } from '../../core/services/team-logo.service';
 import { GameBoardComponent } from '../super-bowl-squares/components/game-board/game-board.component';
 import { PLAYER_COLORS, normalizePlayerColors } from '../super-bowl-squares/utils/player-colors';
@@ -372,8 +373,8 @@ export class PresentComponent implements OnInit, OnDestroy {
   }
 
   protected verified(): number {
-    const paid = new Set(this.game()?.paidPlayers ?? []);
-    return new Set(Object.values(this.game()?.selectedSquares ?? {}).filter(p => paid.has(p))).size;
+    const game = this.game();
+    return game ? confirmedPlayers(game.selectedSquares ?? {}, game.paidPlayers ?? [], game.paidSquares).size : 0;
   }
 
   private startKiosk(token: string): void {

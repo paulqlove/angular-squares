@@ -165,6 +165,68 @@ describe('game page services', () => {
       expect(toast.warning).toHaveBeenCalled();
     });
 
+    it('shows a confirmed player as Unconfirmed after they add a square', async () => {
+      const state = hostedBoard();
+      state.selectedSquares = { '0-0': 'Kim' };
+      state.calculatePlayerStats();
+      const players = TestBed.inject(GamePlayersService);
+      players.onManagePayments();
+      players.onPaidPlayersChange(['Kim']);
+      expect(updateGame).toHaveBeenCalledWith('G1', { paidPlayers: ['Kim'], paidSquares: [1] });
+      expect(state.confirmedPlayers.has('Kim')).toBe(true);
+      state.selectedSquares = { '0-0': 'Kim', '0-1': 'Kim' };
+      state.calculatePlayerStats();
+      expect(state.confirmedPlayers.has('Kim')).toBe(false);
+    });
+
+    it('keeps a square added while Manage players is open unconfirmed when the host confirms someone else', () => {
+      const state = hostedBoard();
+      state.selectedSquares = { '0-0': 'Kim', '0-1': 'Tara' };
+      state.calculatePlayerStats();
+      const players = TestBed.inject(GamePlayersService);
+      players.onManagePayments();
+      players.onPaidPlayersChange(['Kim']);
+      state.selectedSquares = { ...state.selectedSquares, '0-2': 'Kim' };
+      state.calculatePlayerStats();
+      players.onPaidPlayersChange(['Kim', 'Tara']);
+      expect(state.paidSquares).toEqual([1, 1]);
+      expect([...state.confirmedPlayers]).toEqual(['Tara']);
+    });
+
+    it('confirms only the squares Manage players showed, even if the player added more since', () => {
+      const state = hostedBoard();
+      state.selectedSquares = { '0-0': 'Kim' };
+      state.calculatePlayerStats();
+      const players = TestBed.inject(GamePlayersService);
+      players.onManagePayments();
+      state.selectedSquares = { '0-0': 'Kim', '0-1': 'Kim' };
+      state.calculatePlayerStats();
+      players.onPaidPlayersChange(['Kim']);
+      expect(state.paidSquares).toEqual([1]);
+      expect(state.confirmedPlayers.has('Kim')).toBe(false);
+    });
+
+    it('keeps a paid player who added squares on the paid list when the host confirms someone else', () => {
+      const state = hostedBoard();
+      state.selectedSquares = { '0-0': 'Ann', '0-1': 'Ann', '0-2': 'Bob' };
+      state.paidPlayers = new Set(['Ann']);
+      state.paidSquares = [1];
+      state.calculatePlayerStats();
+      const players = TestBed.inject(GamePlayersService);
+      players.onManagePayments();
+      players.onPaidPlayersChange(['Bob']);
+      expect([...state.paidPlayers]).toEqual(['Ann', 'Bob']);
+      expect(state.paidSquares).toEqual([1, 1]);
+    });
+
+    it('gives the host a count for players confirmed before counts were kept', () => {
+      const state = hostedBoard();
+      state.selectedSquares = { '0-0': 'Kim', '0-1': 'Kim' };
+      state.paidPlayers = new Set(['Kim']);
+      TestBed.inject(GamePlayersService).backfillPaidSquares();
+      expect(updateGame).toHaveBeenCalledWith('G1', { paidSquares: [2] });
+    });
+
     it('gives a new player the next free color', () => {
       const state = hostedBoard();
       state.selectedSquares = { '0-0': 'Kim' };

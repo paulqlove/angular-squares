@@ -2,6 +2,8 @@ import { inject, Injectable } from '@angular/core';
 import { AuthService } from '../../../core/services/auth.service';
 import { GameService } from '../../../core/services/game.service';
 import { ToastService } from '../../../core/services/toast.service';
+import type { PaidCounts } from '../../../core/utils/game-data';
+import { filledPaidSquares, paidCountsByName, paidSquaresFor } from '../../../core/utils/paid-squares';
 import { nextPlayerColor, withoutEntries } from '../utils/board-math';
 import { GamePageUiService } from './game-page-ui.service';
 import { GameStateService } from './game-state.service';
@@ -9,6 +11,7 @@ import { GameStateService } from './game-state.service';
 interface PlayersSnapshot {
   colors: { [key: string]: string };
   paid: Set<string>;
+  paidSquares: PaidCounts;
   squares: { [key: string]: string };
   userIds: { [name: string]: string };
   winners: { [key: string]: string };
@@ -39,6 +42,16 @@ export class GamePlayersService {
     }
   }
 
+  /** Host only: paid names confirmed before counts were kept get what they hold now, so later squares show as new. */
+  public backfillPaidSquares(): void {
+    const state = this.state;
+    if (!state.isHost()) return;
+    const filled = filledPaidSquares(state.selectedSquares, state.paidPlayers, state.paidSquares);
+    if (!filled) return;
+    state.paidSquares = filled;
+    this.gameService.updateGame(state.gameId, { paidSquares: state.paidSquares }).catch(() => {});
+  }
+
   /** Opens Manage players; only owners and managers can manage payments. */
   public onManagePayments(): void {
     if (!this.state.isHost()) return;
@@ -46,10 +59,25 @@ export class GamePlayersService {
     this.ui.paymentDialog?.open();
   }
 
+  /**
+   * The host's Confirm marks. A name the host just confirmed covers the squares Manage players showed for it; everyone
+   * else keeps their earlier count, so a square added while it was open still shows as new. Paid names it showed as
+   * Unconfirmed stay on the paid list with their old count.
+   */
   public onPaidPlayersChange(paidPlayers: string[]): void {
-    this.state.paidPlayers = new Set(paidPlayers);
-    this.gameService.updateGame(this.state.gameId, {
-      paidPlayers: Array.from(this.state.paidPlayers)
+    const state = this.state;
+    const justConfirmed: { [name: string]: number } = {};
+    paidPlayers.filter(name => !this.shownConfirmed.has(name)).forEach(name => justConfirmed[name] = this.shownSquares[name] ?? 0);
+    const previous = paidCountsByName(state.paidPlayers, state.paidSquares);
+    const stillPaid = [...state.paidPlayers].filter(name => !this.shownConfirmed.has(name) && !paidPlayers.includes(name));
+    const next = [...stillPaid, ...paidPlayers];
+    this.shownConfirmed = new Set(paidPlayers);
+    state.paidPlayers = new Set(next);
+    state.paidSquares = paidSquaresFor(state.selectedSquares, next, previous, justConfirmed);
+    state.calculatePlayerStats();
+    this.gameService.updateGame(state.gameId, {
+      paidPlayers: Array.from(state.paidPlayers),
+      paidSquares: state.paidSquares
     });
   }
 
@@ -69,7 +97,9 @@ export class GamePlayersService {
 
     state.selectedSquares = withoutEntries(state.selectedSquares, (_, name) => name === playerName);
     state.playerColors = withoutEntries(state.playerColors, key => key === playerName);
+    const paidCounts = paidCountsByName(state.paidPlayers, state.paidSquares);
     state.paidPlayers = new Set([...state.paidPlayers].filter(name => name !== playerName));
+    state.paidSquares = paidSquaresFor(state.selectedSquares, Array.from(state.paidPlayers), paidCounts);
     state.playerUserIds = withoutEntries(state.playerUserIds, key => key === playerName);
     state.winners = withoutEntries(state.winners, (_, name) => name === playerName);
     if (this.ui.selectedPlayer === playerName) this.ui.selectedPlayer = null;
@@ -81,6 +111,7 @@ export class GamePlayersService {
         selectedSquares: state.selectedSquares,
         playerColors: state.playerColors,
         paidPlayers: Array.from(state.paidPlayers),
+        paidSquares: state.paidSquares,
         playerUserIds: state.playerUserIds,
         winners: state.winners
       });
@@ -95,6 +126,10 @@ export class GamePlayersService {
 
   private readonly authService: AuthService = inject(AuthService);
   private readonly gameService: GameService = inject(GameService);
+  /** The Confirm marks Manage players was last given, to tell a new confirm from one already there. */
+  private shownConfirmed: Set<string> = new Set();
+  /** The square counts Manage players was last given, so a confirm covers what the host saw. */
+  private shownSquares: { [name: string]: number } = {};
   private readonly state: GameStateService = inject(GameStateService);
   private readonly toastService: ToastService = inject(ToastService);
   private readonly ui: GamePageUiService = inject(GamePageUiService);
@@ -111,7 +146,9 @@ export class GamePlayersService {
   }
 
   private refreshPaymentDialog(): void {
-    this.ui.paymentDialog?.setData(this.state.playerStats, this.state.playerColors, this.state.paidPlayers, this.state.isLocked);
+    this.shownConfirmed = new Set(this.state.confirmedPlayers);
+    this.shownSquares = Object.fromEntries(Object.entries(this.state.playerStats).map(([name, stats]) => [name, stats.squares]));
+    this.ui.paymentDialog?.setData(this.state.playerStats, this.state.playerColors, new Set(this.shownConfirmed), this.state.isLocked);
   }
 
   /** Puts back the players a failed removal took off. */
@@ -120,6 +157,7 @@ export class GamePlayersService {
     state.selectedSquares = previous.squares;
     state.playerColors = previous.colors;
     state.paidPlayers = previous.paid;
+    state.paidSquares = previous.paidSquares;
     state.playerUserIds = previous.userIds;
     state.winners = previous.winners;
     state.calculatePlayerStats();
@@ -133,6 +171,7 @@ export class GamePlayersService {
       squares: state.selectedSquares,
       colors: state.playerColors,
       paid: state.paidPlayers,
+      paidSquares: state.paidSquares,
       userIds: state.playerUserIds,
       winners: state.winners
     };
