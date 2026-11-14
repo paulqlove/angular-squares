@@ -4,7 +4,7 @@
     <app-profile-menu walkthroughTarget="profile-dropdown" (tour)="startWalkthrough()"></app-profile-menu>
   </app-site-header>
 
-  <main class="mx-auto max-w-[1600px] px-4 sm:px-8 pt-6 pb-[calc(5.125rem+env(safe-area-inset-bottom))] sm:pb-20 md:pt-8">
+  <main class="mx-auto max-w-[1600px] px-4 sm:px-8 pt-6 pb-32 sm:pb-20 md:pt-8">
     <!-- Heading + actions -->
     <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between" data-walkthrough="hero-section">
       <div>
@@ -81,14 +81,14 @@
     }
   </main>
 
-  <!-- No footer on phones: the bottom bar holds the end of the page, and the guides it links to have their own footer -->
+  <!-- No footer on phones, like the game page: the bottom bar docks at the end of the page, and main's 128px bottom padding keeps the last card clear of it -->
   <app-site-footer width="wide" class="block bg-qs-panel max-sm:hidden"></app-site-footer>
 
-  <!-- Phone: the search-or-code field and New board in a solid bar across the bottom, lifted above the keyboard while the search is open.
-       The page's bottom padding is the bar's height (57px plus the home indicator) and a 24px gap. -->
+  <!-- Phone: the search-or-code field and New board in a bar along the bottom, lifted above the keyboard while the search is open -->
   <div
     appDashboardPhoneBar
-    class="qs-dock no-print fixed inset-x-0 bottom-0 z-[90] border-t border-qs-line bg-qs-panel px-3 pt-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom))] sm:hidden"
+    class="qs-dock qs-dockable no-print fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-[90] sm:hidden"
+    appDockAtEnd [dockPaused]="search.searchOpen()"
     [class.qs-dock-off]="dialogs.barHidden() || players.filterOpen()"
     [attr.aria-hidden]="dialogs.barHidden() || players.filterOpen() ? 'true' : null"
     [style.transform]="search.searchOpen() && search.keyboardLift() ? 'translateY(-' + search.keyboardLift() + 'px)' : null"
