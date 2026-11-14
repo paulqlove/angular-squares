@@ -3,8 +3,8 @@ import { confirmedPlayers, paidCountsByName, squaresByPlayer } from '../../../co
 
 /**
  * The Players view: every player across the boards a Season Pass host runs (hosts or co-hosts), with their squares,
- * points and Confirm state per game. Players group only when the same account holds them; names typed by a board's
- * host or co-host belong to that host, so each stays its own entry until the host merges by hand.
+ * points and Confirm state per game. Players group when the same account holds them; names typed by a board's host or
+ * co-host belong to that host and group by name across that host's boards.
  */
 
 /** One board as the Players view reads it. */
@@ -26,7 +26,7 @@ export interface PlayerGame {
 
 /** One player across the host's boards. */
 export interface PlayerSummary {
-  /** The account id, or board and name for a name with no account of its own. */
+  /** The account id, or host and name ("host-uid/Pat") for a name a host typed in. */
   key: string;
   name: string;
   /** Other names the same account uses on other boards, like "Sammy" next to "Sam". */
@@ -109,11 +109,15 @@ function mostUsedName(games: readonly PlayerGame[]): string {
   return Array.from(uses).reduce((best, next) => next[1] > best[1] ? next : best)[0];
 }
 
-/** The account behind a name, unless it is the board's host or co-host, who own every name they typed in. */
+/**
+ * The account behind a name. A name the board's host or co-host typed in (or claimed as themselves) belongs to that
+ * host, so it groups by host and exact name: "Paul Love" on each of Paul's boards is one player. Exact, so two
+ * spellings on one board never fold into one entry and clash when saved.
+ */
 function playerKey(board: PlayersBoard, name: string): string {
   const uid = board.playerUserIds?.[name];
   const isHostTyped = !uid || uid === board.ownerId || uid === board.managerId;
-  return isHostTyped ? `${board.id}/${name}` : uid;
+  return isHostTyped ? `${uid || board.ownerId}/${name}` : uid;
 }
 
 function summarize(key: string, games: PlayerGame[]): PlayerSummary {

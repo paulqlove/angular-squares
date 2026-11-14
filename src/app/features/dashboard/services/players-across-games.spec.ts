@@ -22,18 +22,26 @@ describe('players across games', () => {
     expect(players[0].points).toBe(40);
   });
 
-  it('keeps names the host typed in apart on each board', () => {
+  it("groups a name the host typed in, or claimed as themselves, across the host's boards", () => {
     const players = playersAcrossGames([
-      board('A', ['Pat'], { playerUserIds: { Pat: HOST } }),
-      board('B', ['Pat'])
+      board('A', ['Paul Love'], { playerUserIds: { 'Paul Love': HOST } }),
+      board('B', ['Paul Love']),
+      board('C', ['Paul Love'])
     ]);
-    expect(players.map(player => player.key)).toEqual(['A/Pat', 'B/Pat']);
+    expect(players.map(player => player.key)).toEqual([`${HOST}/Paul Love`]);
+    expect(players[0].games.length).toBe(3);
+    expect(players[0].sameNameIndex).toBe(0);
+  });
+
+  it('keeps a typed name apart from an account with the same name', () => {
+    const players = playersAcrossGames([board('A', ['Pat']), board('B', ['Pat'], { playerUserIds: { Pat: 'pat-uid' } })]);
+    expect(players.map(player => player.key)).toEqual([`${HOST}/Pat`, 'pat-uid']);
     expect(players.map(player => player.sameNameIndex)).toEqual([1, 2]);
   });
 
   it("treats a co-host's typed names as the co-host's, not a player's account", () => {
     const players = playersAcrossGames([board('A', ['Lee'], { managerId: 'co-uid', playerUserIds: { Lee: 'co-uid' } })]);
-    expect(players[0].key).toBe('A/Lee');
+    expect(players[0].key).toBe('co-uid/Lee');
   });
 
   it('marks a player Unconfirmed when any board has an unconfirmed square', () => {
