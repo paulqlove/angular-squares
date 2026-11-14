@@ -12,7 +12,7 @@
   [attr.aria-describedby]="search.showCodeError() ? 'code-error-' + where() : null"
   (keydown.escape)="search.onSearchEscape(where())"
   (keydown.enter)="search.onSearchEnter($event)"
-  [placeholder]="where() === 'phone' ? 'Search or code' : 'Search or enter a game code'"
+  [placeholder]="where() === 'phone' ? 'Games & codes' : 'Search or enter a game code'"
   aria-label="Search or enter a game code"
   [attr.tabindex]="outOfTabOrder() ? -1 : null"
 />

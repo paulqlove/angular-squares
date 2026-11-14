@@ -7,7 +7,7 @@ import { PlayersViewService } from '../../services/players-view.service';
 
 /**
  * An opened player: each of their games with its squares and points, a green toggle that confirms that game and a remove
- * icon (a lock on locked games), then Remove… and Confirm rest. Removing asks first: on a phone under the game's own
+ * icon (a lock on locked games), then Remove… and Confirm all. Removing asks first: on a phone under the game's own
  * row, otherwise above the buttons. Phones list unconfirmed games first and fold away confirmed ones past five, in the order they had when the card
  * opened.
  */
