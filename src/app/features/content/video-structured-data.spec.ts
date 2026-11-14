@@ -38,6 +38,10 @@ describe('video structured data', () => {
     expect(pageVideos(MARKETING_PAGES['faq'])).toEqual([HOWTO_VIDEOS.highlightPlayer, HOWTO_VIDEOS.editGame, HOWTO_VIDEOS.managePlayers, HOWTO_VIDEOS.hitRate]);
   });
 
+  it('collects a clip shown in a page section', () => {
+    expect(pageVideos(MARKETING_PAGES['super-bowl-squares'])).toEqual([HOWTO_VIDEOS.createBoard]);
+  });
+
   it('finds no clips on a page without any', () => {
     expect(pageVideos(page({}))).toEqual([]);
   });
