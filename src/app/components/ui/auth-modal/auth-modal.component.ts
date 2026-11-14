@@ -52,6 +52,9 @@ import { AuthService } from '../../../core/services/auth.service';
         >
           Join as Guest
         </button>
+        @if (guestError()) {
+          <p class="text-center text-sm text-qs-bad" role="alert">Couldn't join as a guest. Try again or sign in with Google.</p>
+        }
         <p class="text-center text-xs text-qs-muted">
           Guest users can join games but cannot create new ones
         </p>
@@ -133,6 +136,7 @@ export class AuthModalComponent implements OnChanges {
   emailSentTo = signal<string | null>(null);
   emailError = signal<string | null>(null);
   googleError = signal(false);
+  guestError = signal(false);
 
   validEmail(): boolean {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.linkEmail.trim());
@@ -199,9 +203,13 @@ export class AuthModalComponent implements OnChanges {
   }
 
   async continueAsGuest(): Promise<void> {
-    if (this.guestName.trim()) {
+    if (!this.guestName.trim()) return;
+    this.guestError.set(false);
+    try {
       await this.authService.signInAsGuest(this.guestName.trim());
       this.authenticated.emit();
+    } catch {
+      this.guestError.set(true);
     }
   }
 }
