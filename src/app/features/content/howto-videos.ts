@@ -84,5 +84,13 @@ export const HOWTO_VIDEOS = {
     uploadDate: '2026-11-13T10:16:51-08:00',
     seconds: 23,
     phoneYoutubeId: 'J3j5tqJvp58'
+  },
+  tvMode: {
+    youtubeId: 'ZlLOcsJjTBo',
+    title: 'Show your board on a TV',
+    description: 'The host opens the profile menu, chooses Present on a TV, and sends the live board to a TV or big screen.',
+    uploadDate: '2026-11-13T20:27:51-08:00',
+    seconds: 33,
+    phoneYoutubeId: 'SyOLBzGlN-0'
   }
 } satisfies Record<string, HowToVideo>;

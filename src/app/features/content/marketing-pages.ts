@@ -619,7 +619,9 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
         html: `<figure class="not-prose">
           <img src="/assets/tv-mode/present-on-a-tv-menu.png" alt="The top right of a QuarterScore game page with the profile menu open, showing the Present on a TV option." width="760" height="620" class="h-auto w-full max-w-[560px] rounded-card border border-qs-line">
         </figure>
-        <p class="mt-4 text-sm text-qs-muted">Google explains casting in <a href="https://support.google.com/chrome/answer/3228332" rel="noopener noreferrer" target="_blank" class="underline">Cast from Chrome to your TV</a>.</p>`
+        <p class="mt-4 text-sm text-qs-muted">Google explains casting in <a href="https://support.google.com/chrome/answer/3228332" rel="noopener noreferrer" target="_blank" class="underline">Cast from Chrome to your TV</a>.</p>`,
+        videoIntro: 'Watch a host put the board on a TV in 33 seconds.',
+        video: HOWTO_VIDEOS.tvMode
       },
       {
         heading: 'More than one board',
