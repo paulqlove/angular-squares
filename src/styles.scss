@@ -777,6 +777,13 @@ button:active:not(:disabled) .turn-icon { transform: rotate(120deg); transition-
   }
 }
 
+/* Printable page: each sheet on its own page; "Print this sheet" prints the chosen one alone */
+@media print {
+  .print-sheet ~ .print-sheet { break-before: page; }
+  html.print-one-sheet .print-sheet:not(.print-chosen) { display: none !important; }
+  html.print-one-sheet .print-sheet { break-before: auto; }
+}
+
 /* Team page: print only the themed sheet, in color */
 .team-sheet {
   print-color-adjust: exact;

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pre-Numbered Football Squares - QuarterScore</title>
+  <style>
+    @page {
+      size: letter landscape;
+      margin: 0.5in;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #fff;
+      color: #0f172a;
+    }
+
+    .page {
+      width: 10in;
+      height: 7.5in;
+      padding: 0.25in;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.25in;
+    }
+
+    .url {
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .teams {
+      display: flex;
+      gap: 1in;
+      margin-bottom: 0.15in;
+      font-size: 13px;
+    }
+
+    .team-label strong {
+      font-weight: 600;
+    }
+
+    .team-line {
+      border-bottom: 1px solid #0f172a;
+      width: 1.8in;
+      display: inline-block;
+      margin-left: 6px;
+    }
+
+    .board-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    table.board {
+      width: 100%;
+      height: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: fixed;
+      border: 2px solid #0f172a;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    table.board td,
+    table.board th {
+      border: 1px solid #0f172a;
+      text-align: center;
+      vertical-align: middle;
+      font-size: 10px;
+      font-weight: 500;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    table.board th.corner {
+      background: #f1f5f9;
+      color: #64748b;
+      font-size: 8px;
+      font-weight: 500;
+      line-height: 1.3;
+    }
+
+    table.board th.header-cell {
+      background: #f1f5f9;
+      color: #94a3b8;
+      font-weight: 500;
+      width: 9%;
+      height: 0.45in;
+    }
+
+    table.board th.side-cell {
+      background: #f1f5f9;
+      color: #94a3b8;
+      font-weight: 500;
+      width: 0.5in;
+    }
+
+    table.board td {
+      background: #fff;
+    }
+
+    /* Digits printed in a fixed shuffled order (src/app/features/content/printable-digits.ts). */
+    table.board th.header-cell,
+    table.board th.side-cell {
+      color: #0f172a;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    /* Fold lines: fold the numbers under while people sign. */
+    table.board thead th {
+      border-bottom: 2px dashed #0f172a;
+    }
+
+    table.board th.side-cell,
+    table.board th.corner {
+      border-right: 2px dashed #0f172a;
+    }
+
+    .footer {
+      margin-top: 0.15in;
+      display: flex;
+      justify-content: space-between;
+      font-size: 9px;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <img src="brand/lockup-horizontal.svg" alt="QuarterScore" style="height: 24px;">
+      <span class="url">quarterscore.com</span>
+    </div>
+
+    <div class="teams">
+      <div class="team-label">
+        <strong>Home team (columns):</strong>
+        <span class="team-line"></span>
+      </div>
+      <div class="team-label">
+        <strong>Away team (rows):</strong>
+        <span class="team-line"></span>
+      </div>
+    </div>
+
+    <div class="board-container">
+      <table class="board">
+        <thead>
+          <tr>
+            <th class="corner">AWAY&darr;<br>HOME&rarr;</th>
+            <th class="header-cell">0</th>
+            <th class="header-cell">8</th>
+            <th class="header-cell">7</th>
+            <th class="header-cell">3</th>
+            <th class="header-cell">5</th>
+            <th class="header-cell">6</th>
+            <th class="header-cell">2</th>
+            <th class="header-cell">1</th>
+            <th class="header-cell">4</th>
+            <th class="header-cell">9</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th class="side-cell">9</th>
+            <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+          </tr>
+          <tr>
+            <th class="side-cell">2</th>
+            <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+          </tr>
+          <tr>
+            <th class="side-cell">8</th>
+            <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+          </tr>
+          <tr>
+            <th class="side-cell">1</th>
+            <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+          </tr>
+          <tr>
+            <th class="side-cell">5</th>
+            <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+          </tr>
+          <tr>
+            <th class="side-cell">0</th>
+            <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+          </tr>
+          <tr>
+            <th class="side-cell">6</th>
+            <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+          </tr>
+          <tr>
+            <th class="side-cell">7</th>
+            <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+          </tr>
+          <tr>
+            <th class="side-cell">4</th>
+            <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+          </tr>
+          <tr>
+            <th class="side-cell">3</th>
+            <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="footer">
+      <div>
+        <strong>How to play:</strong> Fill names first, with the numbers folded under. Each quarter, the last digit of each score finds the winner.
+      </div>
+      <div>
+        Free online boards at <strong>quarterscore.com</strong>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

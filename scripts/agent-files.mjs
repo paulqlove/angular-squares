@@ -22,7 +22,7 @@ const FACTS = [
   'If a quarter\'s winning square is empty, the host chooses whether its points roll into the final quarter or are shared across the other quarters.',
   'Hosts can mark players as checked in or paid, add a co-host, and leave a short note on the board.',
   'TV mode puts the board, live score, quarter winners and a QR code to join on a big screen. It can rotate through several boards every 10 to 60 seconds, and Copy TV link opens it on any screen with no sign-in.',
-  'A printable blank 10 by 10 grid and a PDF are free to download.',
+  'Printable sheets are free to print or download as PDFs: a blank 10 by 10 grid, a 25-square sheet that uses digit pairs, and a 10 by 10 board with the digits already filled in.',
   'The Best numbers page and the Hit rate tab show how often each last-digit pair has come up in historical scoring.'
 ];
 
@@ -30,7 +30,7 @@ const FACTS = [
 const TOOL_PAGES = [
   { path: '/create', label: 'Create a free board', text: 'Set up a 100, 50 or 25 square board. The host signs in when the board is saved.' },
   { path: '/best-squares-numbers', label: 'Best squares numbers', text: 'How often each last-digit pair has shown up in historical scoring.' },
-  { path: '/printable-football-squares', label: 'Printable football squares', text: 'A free blank 10 by 10 grid, a print view and a PDF.' },
+  { path: '/printable-football-squares', label: 'Printable football squares', text: 'Free sheets to print or download: a blank 10 by 10 grid, a 25-square sheet and a pre-numbered board.' },
   { path: '/teams', label: 'Football squares by NFL team', text: 'A board page for each of the 32 NFL teams.' }
 ];
 

@@ -19,7 +19,7 @@ This file collects the text of every guide on https://quarterscore.com/ so an as
 - If a quarter's winning square is empty, the host chooses whether its points roll into the final quarter or are shared across the other quarters.
 - Hosts can mark players as checked in or paid, add a co-host, and leave a short note on the board.
 - TV mode puts the board, live score, quarter winners and a QR code to join on a big screen. It can rotate through several boards every 10 to 60 seconds, and Copy TV link opens it on any screen with no sign-in.
-- A printable blank 10 by 10 grid and a PDF are free to download.
+- Printable sheets are free to print or download as PDFs: a blank 10 by 10 grid, a 25-square sheet that uses digit pairs, and a 10 by 10 board with the digits already filled in.
 - The Best numbers page and the Hit rate tab show how often each last-digit pair has come up in historical scoring.
 
 ## How to play football squares
