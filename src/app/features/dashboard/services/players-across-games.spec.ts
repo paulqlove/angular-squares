@@ -1,4 +1,4 @@
-import { PlayersBoard, phoneGames, playerTiles, playersAcrossGames } from './players-across-games';
+import { PlayersBoard, phoneGames, phoneLayout, playerTiles, playersAcrossGames } from './players-across-games';
 
 const HOST = 'host-uid';
 
@@ -129,5 +129,22 @@ describe('players across games', () => {
     expect(folded.shown.map(game => game.gameId)).toEqual(['B', 'D', 'F', 'A', 'C']);
     expect(folded.hidden).toBe(2);
     expect(phoneGames(player.games, true).hidden).toBe(0);
+  });
+
+  it('keeps each phone row on the same game while the host toggles, so a tap never lands on another game', () => {
+    const names = 'ABCDEFG'.split('');
+    const unpaid = playersAcrossGames(names.map(id => board(id, ['Kim'], { playerUserIds: { Kim: 'kim-uid' } })))[0];
+    const opened = phoneLayout(unpaid.games);
+    expect(phoneGames(unpaid.games, false, opened).shown.map(game => game.gameId)).toEqual(names);
+
+    // The host confirms A and B: they stay in the top two rows, and no unconfirmed game folds away.
+    const toggled = playersAcrossGames(names.map(id => board(id, ['Kim'], {
+      playerUserIds: { Kim: 'kim-uid' },
+      ...(id === 'A' || id === 'B' ? { paidPlayers: ['Kim'], paidSquares: [1] } : {})
+    })))[0];
+    const shown = phoneGames(toggled.games, false, opened);
+    expect(shown.shown.map(game => game.gameId)).toEqual(names);
+    expect(shown.shown.slice(0, 2).map(game => game.confirmed)).toEqual([true, true]);
+    expect(shown.hidden).toBe(0);
   });
 });

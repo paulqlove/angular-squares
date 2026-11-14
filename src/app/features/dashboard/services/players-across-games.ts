@@ -25,6 +25,12 @@ export interface PlayerGame {
 }
 
 /** One player across the host's boards. */
+/** A phone's game rows: the order of game ids, and how many show before "Show N more". */
+export interface PhoneLayout {
+  order: string[];
+  count: number;
+}
+
 export interface PlayerSummary {
   /** The account id, or host and name ("host-uid/Pat") for a name a host typed in. */
   key: string;
@@ -68,11 +74,21 @@ export function playersAcrossGames(boards: readonly PlayersBoard[]): PlayerSumma
 /**
  * A player's games on a phone: unconfirmed first, then confirmed, in the boards' order within each.
  * Until shown in full, every unconfirmed game and enough confirmed ones to make five; the rest are all confirmed.
+ * Pass the layout from when the card opened (`order`, `count`) to keep it while the host toggles: a game that changes
+ * state stays in its row, so the next tap lands on the game the host meant.
  */
-export function phoneGames(games: readonly PlayerGame[], showAll: boolean): { shown: PlayerGame[]; hidden: number } {
-  const ordered = [...games.filter(game => !game.confirmed), ...games.filter(game => game.confirmed)];
-  const count = showAll ? ordered.length : Math.max(5, games.filter(game => !game.confirmed).length);
+export function phoneGames(games: readonly PlayerGame[], showAll: boolean, opened?: PhoneLayout): { shown: PlayerGame[]; hidden: number } {
+  const layout = opened ?? phoneLayout(games);
+  const place = (game: PlayerGame) => { const i = layout.order.indexOf(game.gameId); return i < 0 ? layout.order.length : i; };
+  const ordered = [...games].sort((a, b) => place(a) - place(b));
+  const count = showAll ? ordered.length : layout.count;
   return { shown: ordered.slice(0, count), hidden: Math.max(0, ordered.length - count) };
+}
+
+/** Where each game sits on a phone and how many show before the fold, from the games as they stand now. */
+export function phoneLayout(games: readonly PlayerGame[]): PhoneLayout {
+  const order = [...games.filter(game => !game.confirmed), ...games.filter(game => game.confirmed)].map(game => game.gameId);
+  return { order, count: Math.max(5, games.filter(game => !game.confirmed).length) };
 }
 
 /** One tile per board, in the boards' order: the player's place on that board, or null where they don't play. */

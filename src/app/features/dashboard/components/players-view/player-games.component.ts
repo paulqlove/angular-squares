@@ -2,13 +2,14 @@ import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { NgIconComponent } from '@ng-icons/core';
 
-import { PlayerGame, PlayerSummary, phoneGames } from '../../services/players-across-games';
+import { PhoneLayout, PlayerGame, PlayerSummary, phoneGames, phoneLayout } from '../../services/players-across-games';
 import { PlayersViewService } from '../../services/players-view.service';
 
 /**
  * An opened player: each of their games with its squares and points, a green toggle that confirms that game and a remove
  * icon (a lock on locked games), then Remove… and Confirm rest. Removing asks first: on a phone under the game's own
- * row, otherwise above the buttons. Phones list unconfirmed games first and fold away confirmed ones past five.
+ * row, otherwise above the buttons. Phones list unconfirmed games first and fold away confirmed ones past five, in the order they had when the card
+ * opened.
  */
 @Component({
   selector: 'div[appPlayerGames]',
@@ -25,9 +26,15 @@ import { PlayersViewService } from '../../services/players-view.service';
   `]
 })
 export class PlayerGamesComponent {
-  /** The games listed: all in board order, or on a phone unconfirmed first with confirmed ones past five folded away. */
-  public readonly games = computed<{ shown: PlayerGame[]; hidden: number }>(() =>
-    this.phone() ? phoneGames(this.player().games, this.showAll()) : { shown: this.player().games, hidden: 0 });
+  /**
+   * The games listed: all in board order, or on a phone unconfirmed first with confirmed ones past five folded away.
+   * The phone rows keep the order they had when the card opened, so toggling a game never slides another under the finger.
+   */
+  public readonly games = computed<{ shown: PlayerGame[]; hidden: number }>(() => {
+    if (!this.phone()) return { shown: this.player().games, hidden: 0 };
+    this.opened ??= phoneLayout(this.player().games);
+    return phoneGames(this.player().games, this.showAll(), this.opened);
+  });
   /** Games that can still be removed from here: locked games keep their squares. */
   public readonly openGames = computed<PlayerGame[]>(() => this.player().games.filter(game => !game.locked));
   /** The phone layout: one column inside the player's card. */
@@ -63,4 +70,7 @@ export class PlayerGamesComponent {
   }
 
   protected readonly players: PlayersViewService = inject(PlayersViewService);
+
+  /** The phone rows as they stood when this card opened (this panel is made fresh each time it opens). */
+  private opened: PhoneLayout | null = null;
 }

@@ -36,7 +36,7 @@
       @for (player of group.players; track player.key) {
         <article appPlayerCard [player]="player" [boardIds]="boardIds()" animate.enter="qs-row-in"></article>
         @if (players.openKey() === player.key) {
-          <div class="qs-card col-span-full" role="region" [attr.aria-label]="player.name + '’s games'" animate.enter="qs-row-in">
+          <div class="qs-card col-span-full" role="region" [attr.aria-label]="player.name + '’s games'" animate.enter="qs-row-in" animate.leave="qs-row-out">
             <div appPlayerGames [player]="player" [phone]="true" class="sm:hidden"></div>
             <div appPlayerGames [player]="player" class="hidden sm:block"></div>
           </div>
@@ -54,3 +54,5 @@
     }
   </div>
 }
+
+<p class="sr-only" aria-live="polite">{{ players.announcement() }}</p>

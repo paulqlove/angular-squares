@@ -656,6 +656,14 @@ body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
 .qs-fade-rise { animation: qs-rise-in 180ms var(--qs-ease) backwards; }
 /* A row arriving in a list (the Players view: a card opening, a player moving group): fades in, 160ms, no movement. */
 .qs-row-in { animation: qs-fade-in 160ms var(--qs-ease) backwards; }
+/* A Players card's games panel closing: fades out, 120ms. */
+.qs-row-out { animation: qs-fade-out 120ms var(--qs-ease-exit) forwards; }
+/* "All confirmed" on a Players card: the check grows in from 0.8 over 160ms, then after a 900ms hold the card fades and
+   drops 8px over 200ms before it lands in Confirmed. Reduced motion: no scale or drop, a plain 120ms fade (end of file). */
+@keyframes qs-check-in { from { opacity: 0; transform: scale(.8); } }
+@keyframes qs-card-drop { to { opacity: 0; transform: translateY(8px); } }
+.qs-check-in { animation: qs-check-in 160ms var(--qs-ease) backwards; }
+.qs-card-leave { animation: qs-card-drop 200ms var(--qs-ease-in) forwards; pointer-events: none; }
 .qs-tab-in { animation: qs-rise-in 160ms var(--qs-ease) backwards; }
 /* A field's error message: fades in and rises 4px, 160ms, no shake (docs/DESIGN.md, Form errors). */
 @keyframes qs-error-in { from { opacity: 0; transform: translateY(4px); } }
@@ -832,3 +840,9 @@ button:active:not(:disabled) .turn-icon { transform: rotate(120deg); transition-
 
 /* A reading section's full-width slot (a table, a board) sits under both columns. */
 .reading-section > [wide] { grid-column: 1 / -1; }
+
+/* Reduced motion keeps the "All confirmed" card's exit as a plain 120ms fade, so it doesn't jump away (see .qs-card-leave). */
+@media (prefers-reduced-motion: reduce) {
+  .qs-check-in { animation: none !important; }
+  .qs-card-leave { animation: qs-fade-out 120ms linear forwards !important; }
+}
