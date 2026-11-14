@@ -1,0 +1,28 @@
+<div role="toolbar" [attr.aria-label]="state.isGameOwner() ? 'Host tools' : 'Co-host tools'"
+  class="qs-bar-frame flex items-stretch gap-1 rounded-[12px] p-1.5 sm:items-center sm:gap-2 sm:p-2">
+  <p class="qs-eyebrow qs-eyebrow-bar hidden px-2 lg:block">{{ state.isGameOwner() ? 'Host tools' : 'Co-host' }}</p>
+  @if (state.isGameOwner()) {
+    <!-- The next game-day step is the primary button: Lock and draw (one save), then Clear or Draw for a redraw -->
+    <button type="button" (click)="host.toggleLock()" class="qs-btn host-btn" [class.qs-btn-primary]="!state.isLocked" [class.qs-btn-secondary]="state.isLocked" [attr.aria-pressed]="state.isLocked">
+      <span class="lock-icon" [class.is-locked]="state.isLocked" aria-hidden="true">
+        <ng-icon name="heroLockClosed" class="lock-closed"></ng-icon>
+        <ng-icon name="heroLockOpen" class="lock-open"></ng-icon>
+      </span>
+      <span class="sm:hidden">{{ state.isLocked ? 'Unlock' : 'Lock' }}</span><span class="hidden sm:inline">{{ state.isLocked ? 'Unlock' : state.isRandomized ? 'Lock board' : 'Lock and draw' }}</span>
+    </button>
+    <button type="button" (click)="host.randomizeNumbers()" [disabled]="state.isLocked === state.isRandomized" class="qs-btn host-btn" [class.qs-btn-primary]="state.isLocked && !state.isRandomized" [class.qs-btn-secondary]="!(state.isLocked && !state.isRandomized)" [title]="state.isLocked && state.isRandomized ? 'Unlock the board to clear numbers' : !state.isLocked && !state.isRandomized ? 'Locking the board draws the numbers' : ''">
+      <span class="turn-icon" aria-hidden="true"><ng-icon [name]="state.isRandomized ? 'heroArrowPath' : 'heroSparkles'" class="text-base"></ng-icon></span>
+      <span class="sm:hidden">{{ state.isRandomized ? 'Clear' : 'Draw' }}</span><span class="hidden sm:inline">{{ state.isRandomized ? 'Clear numbers' : 'Draw numbers' }}</span>
+    </button>
+  }
+  <button type="button" (click)="players.onManagePayments()" class="qs-btn qs-btn-secondary host-btn">
+    <ng-icon name="heroUsers" class="text-base"></ng-icon>
+    <span class="sm:hidden">Players</span><span class="hidden sm:inline">Manage players</span>
+  </button>
+  @if (state.isGameOwner()) {
+    <button type="button" (click)="ui.showSettings.set(true)" class="qs-btn qs-btn-ghost host-btn">
+      <ng-icon name="heroPencilSquare" class="text-base"></ng-icon>
+      <span class="sm:hidden">Edit</span><span class="hidden sm:inline">Edit game</span>
+    </button>
+  }
+</div>

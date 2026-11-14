@@ -1,0 +1,33 @@
+<!-- On desktop the column is pinned to the board's height; the list scrolls inside -->
+<div class="flex flex-col lg:absolute lg:inset-0">
+<div class="mb-4 flex min-h-11 items-center justify-between gap-3">
+  <h3 id="players-heading" class="qs-section-title">Players</h3>
+  <button
+    type="button"
+    (click)="ui.togglePlayersList()"
+    [attr.aria-expanded]="ui.isPlayersListVisible"
+    class="qs-label flex min-h-11 items-center gap-1 px-1 text-qs-muted hover:text-qs-ink lg:hidden">
+    {{ ui.isPlayersListVisible ? 'Hide' : 'Show ' + state.playerCount + (state.playerCount === 1 ? ' player' : ' players') }}
+    <ng-icon name="heroChevronDown" [class.rotate-180]="ui.isPlayersListVisible" class="text-base transition-transform"></ng-icon>
+  </button>
+</div>
+<div class="qs-card flex min-h-0 flex-1 flex-col overflow-hidden">
+  <app-game-status class="shrink-0"
+    [boardSize]="state.boardSize"
+    [selectedSquares]="state.selectedSquares"
+    [playerStats]="state.playerStats"
+    [paidPlayers]="state.paidPlayers">
+  </app-game-status>
+  <div [class.hidden]="!ui.isPlayersListVisible" class="min-h-0 flex-1 overflow-y-auto border-t border-qs-line lg:block">
+    <app-players-list
+      [playerStats]="state.playerStats"
+      [playerColors]="state.playerColors"
+      [paidPlayers]="state.paidPlayers"
+      [homeNumbers]="state.homeNumbers"
+      [awayNumbers]="state.awayNumbers"
+      [selectedSquares]="state.selectedSquares"
+      (playerSelected)="ui.selectedPlayer = $event">
+    </app-players-list>
+  </div>
+</div>
+</div>
