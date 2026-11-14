@@ -1,4 +1,4 @@
-import { withPlayerConfirmed, withoutPlayer } from './board-players';
+import { withPlayerConfirmCount, withPlayerConfirmed, withoutPlayer } from './board-players';
 
 const squares = { '0-0': 'Dana', '0-1': 'Dana', '0-2': 'Kim' };
 
@@ -11,6 +11,12 @@ describe('board players', () => {
   it('confirms a player with new squares again at their current count', () => {
     expect(withPlayerConfirmed({ selectedSquares: squares, paidPlayers: ['Dana'], paidSquares: [1] }, 'Dana'))
       .toEqual({ paidPlayers: ['Dana'], paidSquares: [2] });
+  });
+
+  it('sets one player back to an earlier Confirm mark and keeps the others', () => {
+    const board = { selectedSquares: squares, paidPlayers: ['Dana', 'Kim'], paidSquares: [2, 1] };
+    expect(withPlayerConfirmCount(board, 'Dana', null)).toEqual({ paidPlayers: ['Kim'], paidSquares: [1] });
+    expect(withPlayerConfirmCount(board, 'Dana', 1)).toEqual({ paidPlayers: ['Dana', 'Kim'], paidSquares: [1, 1] });
   });
 
   it('takes a player off and clears everything tied to their name', () => {

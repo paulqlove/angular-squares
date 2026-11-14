@@ -79,6 +79,26 @@ describe('PlayersViewService', () => {
     expect(view.unconfirmed().length).toBe(1);
   });
 
+  it('toggles one game on with no Undo note, then back to how it stood', async () => {
+    runBoards.update(boards => boards.map(b => b.id === 'A' ? { ...b, paidPlayers: ['Dana'], paidSquares: [1] } : b));
+    const view = TestBed.inject(PlayersViewService);
+    const game = () => view.players()[0].games.find(g => g.gameId === 'A');
+    expect(game()?.newSquares).toBe(1);
+
+    await view.toggleGame(view.players()[0], 'A');
+    expect(updateGames.mock.calls[0][0]).toEqual([{ gameId: 'A', data: { paidPlayers: ['Dana'], paidSquares: [2] } }]);
+    expect(game()?.confirmed).toBe(true);
+    expect(view.confirmNote()).toBeNull();
+
+    await view.toggleGame(view.players()[0], 'A');
+    expect(updateGames.mock.calls[1][0]).toEqual([{ gameId: 'A', data: { paidPlayers: ['Dana'], paidSquares: [1] } }]);
+    expect(game()?.newSquares).toBe(1);
+
+    await view.toggleGame(view.players()[0], 'B');
+    await view.toggleGame(view.players()[0], 'B');
+    expect(updateGames.mock.calls[3][0]).toEqual([{ gameId: 'B', data: { paidPlayers: [], paidSquares: [] } }]);
+  });
+
   it('puts the boards back and says so when a save fails', async () => {
     updateGames.mockReturnValueOnce(Promise.reject(new Error('denied')));
     const view = TestBed.inject(PlayersViewService);

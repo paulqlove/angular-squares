@@ -21,21 +21,15 @@
             <ng-icon name="heroUserMinus" class="text-base" aria-hidden="true"></ng-icon>
           </button>
         }
-        <span class="flex w-14 justify-end">
-          @if (game.confirmed) {
-            <span class="inline-flex h-11 w-11 items-center justify-center">
-              <ng-icon name="heroCheck" class="text-lg text-qs-ink" [class.qs-check-pop]="popped().has(game.gameId)" aria-label="Confirmed"></ng-icon>
-            </span>
-          } @else if (game.newSquares) {
-            <button type="button" class="qs-badge qs-badge-warn min-h-11 px-2" title="Confirm this game"
-              [attr.aria-label]="'Confirm ' + game.newSquares + ' new on ' + game.gameName" (click)="confirmOne(game)">+{{ game.newSquares }} new</button>
-          } @else {
-            <button type="button" class="inline-flex h-11 w-11 items-center justify-center" title="Confirm this game"
-              [attr.aria-label]="'Confirm ' + player().name + ' on ' + game.gameName" (click)="confirmOne(game)">
-              <span class="qs-ring" aria-hidden="true"></span>
-            </button>
-          }
-        </span>
+        @if (game.newSquares && !game.confirmed) {
+          <span class="qs-badge qs-badge-warn whitespace-nowrap">+{{ game.newSquares }} new</span>
+        }
+        <!-- Green toggle: on is confirmed, off puts the game back how it was -->
+        <button type="button" role="switch" class="inline-flex h-11 w-14 shrink-0 items-center justify-end rounded-inner focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+          [attr.aria-checked]="game.confirmed" [attr.aria-label]="'Confirm ' + player().name + ' on ' + game.gameName"
+          [title]="game.confirmed ? 'Confirmed' : 'Not confirmed yet'" (click)="players.toggleGame(player(), game.gameId)">
+          <span class="qs-switch" [class.qs-switch-on]="game.confirmed" aria-hidden="true"></span>
+        </button>
       </div>
       @if (removingInRow() === game.gameId) {
         <ng-container [ngTemplateOutlet]="question"></ng-container>
