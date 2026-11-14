@@ -1,20 +1,23 @@
-<button
-  type="button"
-  class="flex w-full items-center gap-3 p-3.5 text-left focus-visible:outline-offset-[-3px]"
-  [attr.aria-expanded]="isOpen()"
-  (click)="players.toggleOpen(player().key)"
->
+<button type="button" class="flex w-full items-start gap-2 text-left focus-visible:outline-none" [attr.aria-expanded]="isOpen()">
   <span class="min-w-0 flex-1">
     <span translate="no" class="block truncate font-medium">{{ player().name }}</span>
-    <span class="mt-0.5 block font-semibold tabular-nums">{{ player().points }} pts</span>
+    <span class="mt-0.5 block font-semibold tabular-nums sm:hidden">{{ player().points }} pts</span>
     @if (player().newSquares) {
       <span class="block text-xs tabular-nums text-qs-warn">+{{ player().newSquares }} new {{ player().newSquares === 1 ? 'square' : 'squares' }}</span>
     } @else if (player().sameNameIndex) {
       <span class="block text-xs text-qs-muted">Same name, account {{ player().sameNameIndex }}</span>
+    } @else if (player().otherNames.length) {
+      <span translate="no" class="block truncate text-xs text-qs-muted">also {{ player().otherNames.join(', ') }}</span>
     }
   </span>
-  <ng-icon [name]="isOpen() ? 'heroChevronUp' : 'heroChevronDown'" class="text-xl text-qs-muted" aria-hidden="true"></ng-icon>
+  <span class="hidden shrink-0 text-right sm:block">
+    <span class="block font-semibold tabular-nums">{{ player().points }} pts</span>
+    <span class="block text-xs tabular-nums text-qs-muted">{{ player().squares }} sq</span>
+  </span>
+  <ng-icon [name]="isOpen() ? 'heroChevronUp' : 'heroChevronDown'" class="shrink-0 text-xl text-qs-muted" aria-hidden="true"></ng-icon>
 </button>
-@if (isOpen()) {
-  <div appPlayerGames [player]="player()" [phone]="true" animate.enter="qs-row-in"></div>
-}
+<!-- Desktop: a tile per game, so a game sits in the same spot on every card -->
+<div class="mt-3 hidden flex-wrap items-center gap-x-4 gap-y-1 sm:flex">
+  <div appPlayerTiles [player]="player()" [boardIds]="boardIds()"></div>
+  <span class="whitespace-nowrap text-sm tabular-nums text-qs-muted">{{ player().games.length }} {{ player().games.length === 1 ? 'game' : 'games' }}</span>
+</div>

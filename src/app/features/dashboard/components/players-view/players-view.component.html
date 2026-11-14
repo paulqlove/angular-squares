@@ -30,25 +30,18 @@
       <h4 class="qs-label text-qs-muted">{{ group.label }}</h4>
       <span class="qs-label text-qs-muted opacity-70">{{ group.players.length }}</span>
     </div>
-    <!-- Phone: a card per player -->
-    @for (player of group.players; track player.key) {
-      <article appPlayerCard [player]="player" class="sm:hidden" animate.enter="qs-row-in"></article>
-    }
-    <div class="qs-card mt-3 hidden overflow-hidden sm:block">
-      <table class="w-full table-fixed border-collapse">
-        <colgroup><col class="w-[24%]" /><col class="w-[48%]" /><col class="w-[18%]" /><col class="w-[10%]" /></colgroup>
-        <thead>
-          <tr class="text-left">
-            <th scope="col" class="qs-label py-3 pl-5 pr-3 text-xs text-qs-muted">Player</th>
-            <th scope="col" class="qs-label px-3 py-3 text-xs text-qs-muted">Games</th>
-            <th scope="col" class="qs-label px-3 py-3 text-xs text-qs-muted">Total</th>
-            <th scope="col"><span class="sr-only">Open</span></th>
-          </tr>
-        </thead>
-        @for (player of group.players; track player.key) {
-          <tbody appPlayerRow [player]="player" [boardIds]="boardIds()" animate.enter="qs-row-in"></tbody>
+    <!-- A card per player: two a row on a phone, three from 1024px. Dense flow lets the cards after an open one
+         fill its row, so its games open in a full-width panel right under that row. -->
+    <div class="mt-3 grid grid-flow-row-dense grid-cols-2 gap-3 lg:grid-cols-3">
+      @for (player of group.players; track player.key) {
+        <article appPlayerCard [player]="player" [boardIds]="boardIds()" animate.enter="qs-row-in"></article>
+        @if (players.openKey() === player.key) {
+          <div class="qs-card col-span-full" role="region" [attr.aria-label]="player.name + '’s games'" animate.enter="qs-row-in">
+            <div appPlayerGames [player]="player" [phone]="true" class="sm:hidden"></div>
+            <div appPlayerGames [player]="player" class="hidden sm:block"></div>
+          </div>
         }
-      </table>
+      }
     </div>
   </div>
 } @empty {

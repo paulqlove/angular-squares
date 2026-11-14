@@ -13,7 +13,7 @@ import { PlayersViewService } from '../../services/players-view.service';
 @Component({
   selector: 'div[appPlayerGames]',
   imports: [NgIconComponent, NgTemplateOutlet],
-  host: { class: 'block', '[class]': "phone() ? 'border-t border-qs-line px-3.5 pb-3.5' : 'rounded-inner border border-qs-line bg-qs-panel px-5 pb-4 pt-1'" },
+  host: { '[class]': "phone() ? 'px-3.5 pb-3.5 pt-1' : 'px-5 pb-4 pt-1'" },
   templateUrl: './player-games.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: [`
