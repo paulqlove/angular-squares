@@ -39,7 +39,7 @@ export function dashboardTourSteps(steps: WalkthroughStep[], phone: boolean): Wa
   if (!phone) return steps;
   const phoneText: Record<string, Partial<WalkthroughStep>> = {
     'create-game': { description: 'Tap New board at the bottom of the screen to start your own squares board. You can choose a sport, set points per square, and invite friends.', position: 'top' },
-    'join-game': { description: 'Have a game code? Tap Search or code at the bottom of the screen, type the code, and tap Join.', position: 'top' }
+    'join-game': { description: 'Have a game code? Tap Games & codes at the bottom of the screen, type the code, and tap Join.', position: 'top' }
   };
   return steps.map(step => ({ ...step, ...phoneText[step.target] }));
 }
