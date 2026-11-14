@@ -1,11 +1,10 @@
 <div class="min-h-screen bg-qs-bg" [class.qs-grid-view]="view.activeCardView() === 'grid'" [attr.inert]="dialogs.showUpgradeDialog() ? '' : null">
   <!-- Header -->
-  <app-shared-header variant="solid" appHeadroom>
-
+  <app-site-header position="headroom">
     <app-profile-menu walkthroughTarget="profile-dropdown" (tour)="startWalkthrough()"></app-profile-menu>
-  </app-shared-header>
+  </app-site-header>
 
-  <main class="mx-auto max-w-[1600px] px-4 sm:px-8 pt-6 pb-32 md:pt-8 sm:pb-20">
+  <main class="mx-auto max-w-[1600px] px-4 sm:px-8 pt-6 pb-20 md:pt-8">
     <!-- Heading + actions -->
     <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between" data-walkthrough="hero-section">
       <div>
@@ -81,6 +80,9 @@
       <section appDashboardJoined [class]="store.canCreateGame() ? 'mt-10 sm:mt-14' : 'mt-8'" aria-labelledby="joined-heading"></section>
     }
   </main>
+
+  <!-- Phones: the bottom padding keeps the footer's last line clear of the bottom bar, which docks at the end of the page -->
+  <app-site-footer width="wide" class="block bg-qs-panel max-sm:pb-24"></app-site-footer>
 
   <!-- Phone: the search-or-code field and New board in a bar along the bottom, lifted above the keyboard while the search is open -->
   <div

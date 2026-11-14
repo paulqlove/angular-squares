@@ -16,8 +16,7 @@ import {
   heroChartBar,
   heroArrowRight
 } from '@ng-icons/heroicons/outline';
-import { AppHeaderComponent } from '../../components/ui/app-header/app-header.component';
-import { HeadroomDirective } from '../../shared/directives/headroom.directive';
+import { SiteHeaderComponent } from '../../components/ui/site-header/site-header.component';
 import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.component';
 import { PhoneDemoComponent } from './phone-demo.component';
 import { NFL_TEAMS, getTeamLogo, NflTeam } from '../content/teams-data';
@@ -32,7 +31,7 @@ interface Feature {
 
 @Component({
     selector: 'app-welcome',
-    imports: [RouterLink, NgIconComponent, AppHeaderComponent, HeadroomDirective, AuthModalComponent, PhoneDemoComponent, SiteFooterComponent],
+    imports: [RouterLink, NgIconComponent, SiteHeaderComponent, AuthModalComponent, PhoneDemoComponent, SiteFooterComponent],
     providers: [
         provideIcons({
             heroSquares2x2,
@@ -47,7 +46,7 @@ interface Feature {
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
     <div class="min-h-screen bg-qs-bg text-qs-ink">
-      <app-shared-header heading="p" appHeadroom>
+      <app-site-header heading="p" position="headroom">
         @if (isAuthenticated()) {
           <button type="button" (click)="goToDashboard()" class="qs-btn qs-btn-ghost">
             Dashboard
@@ -57,7 +56,7 @@ interface Feature {
             Sign in
           </button>
         }
-      </app-shared-header>
+      </app-site-header>
 
       <main id="main">
       <!-- Hero -->
@@ -250,7 +249,7 @@ interface Feature {
       </section>
       </main>
 
-      <app-site-footer></app-site-footer>
+      <app-site-footer width="wide"></app-site-footer>
     </div>
 
     <!-- Auth Modal -->

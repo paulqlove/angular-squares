@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 interface FooterLink {
@@ -17,7 +17,7 @@ interface FooterGroup {
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
     <footer class="no-print border-t border-qs-line bg-qs-panel text-sm">
-      <div class="mx-auto grid max-w-[68rem] gap-8 px-4 sm:px-8 py-10 sm:grid-cols-2 lg:grid-cols-3">
+      <div class="mx-auto grid gap-8 px-4 sm:px-8 py-10 sm:grid-cols-2 lg:grid-cols-3" [class]="widthClass()">
         @for (group of groups; track group.heading) {
           <nav [attr.aria-label]="group.heading">
             <h2 class="qs-eyebrow qs-eyebrow-bar">{{ group.heading }}</h2>
@@ -37,7 +37,7 @@ interface FooterGroup {
         }
       </div>
       <div class="border-t border-qs-line">
-        <div class="mx-auto max-w-[68rem] px-4 sm:px-8 py-6 text-xs leading-relaxed text-qs-muted">
+        <div class="mx-auto px-4 sm:px-8 py-6 text-xs leading-relaxed text-qs-muted" [class]="widthClass()">
           <p>QuarterScore is not affiliated with, endorsed by, or sponsored by the NFL, NBA, NCAA, or any team. Super Bowl is a trademark of the NFL. Entertainment and score-tracking only. QuarterScore does not accept, hold, transfer, or pay out money, and does not facilitate wagering.</p>
           <p class="mt-2">Made with love for sports ball fans</p>
         </div>
@@ -79,4 +79,8 @@ export class SiteFooterComponent {
       ]
     }
   ];
+  /** `reading` lines up with the 64rem reading column; `wide` with the 1600px app pages (Home, Dashboard). */
+  public readonly width = input<'reading' | 'wide'>('reading');
+
+  protected readonly widthClass = computed(() => (this.width() === 'wide' ? 'max-w-[1600px]' : 'max-w-[68rem]'));
 }
