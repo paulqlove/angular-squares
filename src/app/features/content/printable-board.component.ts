@@ -46,6 +46,7 @@ import { ReadingEndComponent, ReadingHeaderComponent, ReadingPageComponent, Read
       .axis-side {
         background: #f1f5f9;
         color: #94a3b8;
+        aspect-ratio: auto;
       }
       .corner {
         background: #f1f5f9;
@@ -60,6 +61,30 @@ import { ReadingEndComponent, ReadingHeaderComponent, ReadingPageComponent, Read
         .corner {
           height: 2.25rem;
           font-size: 0.625rem;
+        }
+      }
+      /* Paper: real borders, because browsers leave out background colors when printing by default. */
+      @media print {
+        /* Light-theme ink, so a dark-theme page doesn't print pale text on white. */
+        .print-sheet {
+          --qs-ink: #0f172a;
+          --qs-muted: #5b6070;
+          --qs-line-strong: #8b909d;
+        }
+        .board {
+          gap: 0;
+          padding: 0;
+          border-radius: 0;
+          background: none;
+          border-top: 1pt solid #000;
+          border-left: 1pt solid #000;
+        }
+        .grid-row {
+          gap: 0;
+        }
+        .cell {
+          border-right: 1pt solid #000;
+          border-bottom: 1pt solid #000;
         }
       }
     `,
@@ -107,7 +132,7 @@ import { ReadingEndComponent, ReadingHeaderComponent, ReadingPageComponent, Read
         <div
           role="grid"
           aria-label="Blank football squares grid"
-          class="flex w-full flex-col gap-px overflow-hidden rounded-md bg-qs-line p-px"
+          class="board flex w-full flex-col gap-px overflow-hidden rounded-md bg-qs-line p-px"
         >
           <!-- Top row: corner + 10 header cells -->
           <div class="grid-row" role="row">
