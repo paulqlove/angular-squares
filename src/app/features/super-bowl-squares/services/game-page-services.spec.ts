@@ -153,6 +153,18 @@ describe('game page services', () => {
       expect(state.winners).toEqual({});
     });
 
+    it('keeps a player and their quarter wins on a locked board', async () => {
+      const state = hostedBoard();
+      state.isLocked = true;
+      state.selectedSquares = { '0-0': 'Kim', '0-1': 'Tara' };
+      state.winners = { q1: 'Kim' };
+      await TestBed.inject(GamePlayersService).onPlayerRemoved('Kim');
+      expect(state.selectedSquares).toEqual({ '0-0': 'Kim', '0-1': 'Tara' });
+      expect(state.winners).toEqual({ q1: 'Kim' });
+      expect(updateGame).not.toHaveBeenCalled();
+      expect(toast.warning).toHaveBeenCalled();
+    });
+
     it('gives a new player the next free color', () => {
       const state = hostedBoard();
       state.selectedSquares = { '0-0': 'Kim' };

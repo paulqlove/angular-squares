@@ -47,15 +47,21 @@
               Confirm
             }
           </button>
-          <button
-            type="button"
-            (click)="askRemove(player.name)"
-            class="qs-btn qs-btn-ghost w-11 shrink-0 px-0 text-qs-muted hover:text-qs-bad"
-            [attr.aria-label]="'Remove ' + player.name"
-            title="Remove player"
-          >
-            <ng-icon name="heroUserMinus" class="text-xl"></ng-icon>
-          </button>
+          @if (isLocked) {
+            <span class="inline-flex h-11 w-11 shrink-0 items-center justify-center text-qs-muted" role="img" aria-label="Locked: unlock the game to remove players" title="Unlock the game to remove players">
+              <ng-icon name="heroLockClosed" class="text-xl"></ng-icon>
+            </span>
+          } @else {
+            <button
+              type="button"
+              (click)="askRemove(player.name)"
+              class="qs-btn qs-btn-ghost w-11 shrink-0 px-0 text-qs-muted hover:text-qs-bad"
+              [attr.aria-label]="'Remove ' + player.name"
+              title="Remove player"
+            >
+              <ng-icon name="heroUserMinus" class="text-xl"></ng-icon>
+            </button>
+          }
         </div>
       </div>
       }

@@ -4,13 +4,13 @@ import { ModalComponent } from '../../../../components/ui/modal/modal.component'
 
 import { FormsModule } from '@angular/forms';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { heroCheck, heroUserMinus, heroXMark } from '@ng-icons/heroicons/outline';
+import { heroCheck, heroLockClosed, heroUserMinus, heroXMark } from '@ng-icons/heroicons/outline';
 
 @Component({
     selector: 'app-payment-dialog',
     imports: [ModalComponent, FormsModule, NgIconComponent, DecimalPipe],
     providers: [
-        provideIcons({ heroCheck, heroUserMinus, heroXMark })
+        provideIcons({ heroCheck, heroLockClosed, heroUserMinus, heroXMark })
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
     templateUrl: './payment-dialog.component.html'
@@ -20,6 +20,8 @@ export class PaymentDialogComponent {
   @Output() playerRemoved = new EventEmitter<string>();
 
   isOpen = false;
+  /** A locked board keeps its players, so Remove gives way to a lock. */
+  isLocked = false;
   /** The player whose row is asking "Remove?"; the confirmation stays inside that row. */
   removingName: string | null = null;
   private playerStats: { [key: string]: { squares: number; total: number } } = {};
@@ -29,11 +31,14 @@ export class PaymentDialogComponent {
   setData(
     playerStats: { [key: string]: { squares: number; total: number } },
     playerColors: { [key: string]: string },
-    paidPlayers: Set<string>
+    paidPlayers: Set<string>,
+    isLocked: boolean
   ) {
     this.playerStats = playerStats;
     this.playerColors = playerColors;
     this.paidPlayers = paidPlayers;
+    this.isLocked = isLocked;
+    if (isLocked) this.removingName = null;
   }
 
   getPlayersList() {
