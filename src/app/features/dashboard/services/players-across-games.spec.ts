@@ -1,4 +1,4 @@
-import { PlayersBoard, playerTiles, playersAcrossGames } from './players-across-games';
+import { PlayersBoard, phoneGames, playerTiles, playersAcrossGames } from './players-across-games';
 
 const HOST = 'host-uid';
 
@@ -96,5 +96,17 @@ describe('players across games', () => {
   it('lays out one tile per board, empty where the player is not on it', () => {
     const [player] = playersAcrossGames([board('A', ['Kim'], { playerUserIds: { Kim: 'kim-uid' } })]);
     expect(playerTiles(player, ['B', 'A']).map(tile => tile?.gameId ?? null)).toEqual([null, 'A']);
+  });
+
+  it('lists unconfirmed games first on a phone and folds away confirmed ones past five', () => {
+    const boards = 'ABCDEFG'.split('').map((id, i) => board(id, ['Kim'], {
+      playerUserIds: { Kim: 'kim-uid' },
+      ...(i % 2 === 0 ? { paidPlayers: ['Kim'], paidSquares: [1] } : {})
+    }));
+    const [player] = playersAcrossGames(boards);
+    const folded = phoneGames(player.games, false);
+    expect(folded.shown.map(game => game.gameId)).toEqual(['B', 'D', 'F', 'A', 'C']);
+    expect(folded.hidden).toBe(2);
+    expect(phoneGames(player.games, true).hidden).toBe(0);
   });
 });

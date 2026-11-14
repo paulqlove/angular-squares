@@ -56,6 +56,16 @@ export function playersAcrossGames(boards: readonly PlayersBoard[]): PlayerSumma
   return players.sort((a, b) => Number(a.confirmed) - Number(b.confirmed) || a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }) || a.sameNameIndex - b.sameNameIndex);
 }
 
+/**
+ * A player's games on a phone: unconfirmed first, then confirmed, in the boards' order within each.
+ * Until shown in full, every unconfirmed game and enough confirmed ones to make five; the rest are all confirmed.
+ */
+export function phoneGames(games: readonly PlayerGame[], showAll: boolean): { shown: PlayerGame[]; hidden: number } {
+  const ordered = [...games.filter(game => !game.confirmed), ...games.filter(game => game.confirmed)];
+  const count = showAll ? ordered.length : Math.max(5, games.filter(game => !game.confirmed).length);
+  return { shown: ordered.slice(0, count), hidden: Math.max(0, ordered.length - count) };
+}
+
 /** One tile per board, in the boards' order: the player's place on that board, or null where they don't play. */
 export function playerTiles(player: Pick<PlayerSummary, 'games'>, boardIds: readonly string[]): Array<PlayerGame | null> {
   return boardIds.map(id => player.games.find(game => game.gameId === id) ?? null);

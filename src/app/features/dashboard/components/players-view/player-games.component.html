@@ -1,64 +1,85 @@
-<ul class="grid grid-cols-1 gap-x-10 md:grid-cols-2 xl:grid-cols-3">
-  @for (game of player().games; track game.gameId) {
-    <li class="flex min-h-11 items-center gap-2 border-b border-qs-line py-1">
-      <span translate="no" class="min-w-0 flex-1 truncate">
-        {{ game.gameName }}
-        @if (game.locked) {
-          <ng-icon name="heroLockClosed" class="align-middle text-sm text-qs-muted" aria-label="Locked"></ng-icon>
-        }
-      </span>
-      <span class="whitespace-nowrap text-sm tabular-nums text-qs-muted">{{ game.squares }} sq · {{ game.points }} pts</span>
-      @if (game.locked) {
-        <span class="inline-flex h-11 w-11 items-center justify-center text-qs-muted opacity-60" title="Locked. Remove on the board.">
-          <ng-icon name="heroLockClosed" class="text-sm" aria-hidden="true"></ng-icon>
+<ul class="grid grid-cols-1" [class]="phone() ? 'divide-y divide-qs-line' : 'gap-x-10 md:grid-cols-2 xl:grid-cols-3'">
+  @for (game of games().shown; track game.gameId) {
+    <li [class.border-b]="!phone()" class="border-qs-line">
+      <div class="flex min-h-11 items-center gap-2 py-1">
+        <span class="flex min-w-0 flex-1 gap-x-2" [class]="phone() ? 'flex-col' : 'items-center'">
+          <span translate="no" class="min-w-0 flex-1 truncate">
+            {{ game.gameName }}
+            @if (game.locked) {
+              <ng-icon name="heroLockClosed" class="align-middle text-sm text-qs-muted" aria-label="Locked"></ng-icon>
+            }
+          </span>
+          <span class="whitespace-nowrap text-sm tabular-nums text-qs-muted">{{ game.squares }} sq · {{ game.points }} pts</span>
         </span>
-      } @else {
-        <button type="button" class="qs-btn qs-btn-ghost w-11 px-0 text-qs-muted" title="Remove from this game"
-          [attr.aria-label]="'Remove ' + player().name + ' from ' + game.gameName" (click)="removing.set([game])">
-          <ng-icon name="heroUserMinus" class="text-base" aria-hidden="true"></ng-icon>
-        </button>
-      }
-      <span class="flex w-14 justify-end">
-        @if (game.confirmed) {
-          <ng-icon name="heroCheck" class="text-lg text-qs-ink" [class.qs-check-pop]="popped().has(game.gameId)" aria-label="Confirmed"></ng-icon>
-        } @else if (game.newSquares) {
-          <button type="button" class="qs-badge qs-badge-warn min-h-11 px-2" title="Confirm this game"
-            [attr.aria-label]="'Confirm ' + game.newSquares + ' new on ' + game.gameName" (click)="confirmOne(game)">+{{ game.newSquares }} new</button>
+        @if (game.locked) {
+          <span class="inline-flex h-11 w-11 items-center justify-center text-qs-muted opacity-60" title="Locked. Remove on the board.">
+            <ng-icon name="heroLockClosed" class="text-sm" aria-hidden="true"></ng-icon>
+          </span>
         } @else {
-          <button type="button" class="inline-flex h-11 w-11 items-center justify-center" title="Confirm this game"
-            [attr.aria-label]="'Confirm ' + player().name + ' on ' + game.gameName" (click)="confirmOne(game)">
-            <span class="qs-ring" aria-hidden="true"></span>
+          <button type="button" class="qs-btn qs-btn-ghost w-11 px-0 text-qs-muted" title="Remove from this game"
+            [attr.aria-label]="'Remove ' + player().name + ' from ' + game.gameName" (click)="removing.set([game])">
+            <ng-icon name="heroUserMinus" class="text-base" aria-hidden="true"></ng-icon>
           </button>
         }
-      </span>
+        <span class="flex w-14 justify-end">
+          @if (game.confirmed) {
+            <span class="inline-flex h-11 w-11 items-center justify-center">
+              <ng-icon name="heroCheck" class="text-lg text-qs-ink" [class.qs-check-pop]="popped().has(game.gameId)" aria-label="Confirmed"></ng-icon>
+            </span>
+          } @else if (game.newSquares) {
+            <button type="button" class="qs-badge qs-badge-warn min-h-11 px-2" title="Confirm this game"
+              [attr.aria-label]="'Confirm ' + game.newSquares + ' new on ' + game.gameName" (click)="confirmOne(game)">+{{ game.newSquares }} new</button>
+          } @else {
+            <button type="button" class="inline-flex h-11 w-11 items-center justify-center" title="Confirm this game"
+              [attr.aria-label]="'Confirm ' + player().name + ' on ' + game.gameName" (click)="confirmOne(game)">
+              <span class="qs-ring" aria-hidden="true"></span>
+            </button>
+          }
+        </span>
+      </div>
+      @if (removingInRow() === game.gameId) {
+        <ng-container [ngTemplateOutlet]="question"></ng-container>
+      }
     </li>
   }
 </ul>
 
-<div class="mt-4 flex flex-wrap items-center justify-between gap-4">
+@if (games().hidden) {
+  <button type="button" class="qs-btn qs-btn-ghost mt-1 w-full text-qs-muted" (click)="showAll.set(true)">Show {{ games().hidden }} more (confirmed)</button>
+}
+
+@if (removing() && !removingInRow()) {
+  <div class="mt-4"><ng-container [ngTemplateOutlet]="question"></ng-container></div>
+}
+
+<div class="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
   <div class="min-w-0" aria-live="polite">
-    @if (removing()) {
-      <p class="text-sm">{{ removeQuestion() }}</p>
-    } @else if (showNote()) {
+    @if (showNote()) {
       <p class="text-sm text-qs-muted">
         {{ players.confirmNote()?.text }}
-        <button type="button" class="font-medium text-qs-ink underline underline-offset-2" (click)="players.undoConfirm()">Undo</button>
+        <button type="button" class="min-h-11 font-medium text-qs-ink underline underline-offset-2" (click)="players.undoConfirm()">Undo</button>
       </p>
     }
   </div>
   <div class="flex shrink-0 gap-2">
-    @if (removing()) {
-      <button type="button" class="qs-btn qs-btn-ghost px-3 text-qs-muted" (click)="removing.set(null)">Cancel</button>
-      <button type="button" class="qs-btn qs-btn-danger px-3" (click)="removeNow()">Remove</button>
-    } @else {
-      @if (openGames().length) {
-        <button type="button" class="qs-btn qs-btn-ghost px-3 text-qs-muted" (click)="removing.set(openGames())">
-          <ng-icon name="heroUserMinus" class="text-base" aria-hidden="true"></ng-icon>Remove…
-        </button>
-      }
-      @if (unconfirmed().length) {
-        <button type="button" class="qs-btn qs-btn-secondary px-3" (click)="confirmRest()">Confirm rest</button>
-      }
+    @if (openGames().length) {
+      <button type="button" class="qs-btn qs-btn-ghost px-3 text-qs-muted max-sm:flex-1" (click)="removing.set(openGames())">
+        <ng-icon name="heroUserMinus" class="text-base" aria-hidden="true"></ng-icon>Remove…
+      </button>
+    }
+    @if (unconfirmed().length) {
+      <button type="button" class="qs-btn qs-btn-secondary px-3 max-sm:flex-1" (click)="confirmRest()">Confirm rest</button>
     }
   </div>
 </div>
+
+<!-- Asked before any remove: what goes and what stays -->
+<ng-template #question>
+  <div class="mb-2.5 rounded-inner bg-qs-bad-soft p-3" role="alertdialog" aria-label="Remove player" animate.enter="qs-row-in">
+    <p class="text-sm">{{ removeQuestion() }}</p>
+    <div class="mt-3 flex justify-end gap-2">
+      <button type="button" class="qs-btn qs-btn-ghost px-3 text-qs-muted" (click)="removing.set(null)">Cancel</button>
+      <button type="button" class="qs-btn qs-btn-danger px-3" (click)="removeNow()">Remove</button>
+    </div>
+  </div>
+</ng-template>
