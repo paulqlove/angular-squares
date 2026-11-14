@@ -68,6 +68,8 @@ private get db(): Database {
 
 ## Code Organization
 
+Engineering rules live in two skills: [quarterscore-engineering](.claude/skills/quarterscore-engineering/SKILL.md) for any code change (architecture, size limits, performance, security, tests, definition of done), and [consolidator](.claude/skills/consolidator/SKILL.md), the reviewer run on every PR before Paul sees it.
+
 Follow the section-based structure in `instuctions.md`:
 1. Constructors
 2. Public Properties (alphabetical)
