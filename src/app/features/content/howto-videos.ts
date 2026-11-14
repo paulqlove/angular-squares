@@ -22,5 +22,6 @@ export const HOWTO_VIDEOS = {
   highlightPlayer: { youtubeId: 'PkffVOGg34s', title: 'Highlight a player’s squares', seconds: 15, phoneYoutubeId: 'c5XMGo8ry6M' },
   hitRate: { youtubeId: 'P5nPXXfPrjY', title: 'Use the Hit rate tab', seconds: 19, phoneYoutubeId: '9b_VQOSLFlU' },
   editGame: { youtubeId: 'DXY4T3dyBX8', title: 'Edit your game and add a note', seconds: 25, phoneYoutubeId: 'v_O0Y-y8EMs' },
-  managePlayers: { youtubeId: '-vajIuxNQcE', title: 'Manage players', seconds: 23, phoneYoutubeId: 'J3j5tqJvp58' }
+  managePlayers: { youtubeId: '-vajIuxNQcE', title: 'Manage players', seconds: 23, phoneYoutubeId: 'J3j5tqJvp58' },
+  tvMode: { youtubeId: 'ZlLOcsJjTBo', title: 'Show your board on a TV', seconds: 33, phoneYoutubeId: 'SyOLBzGlN-0' }
 } satisfies Record<string, HowToVideo>;
