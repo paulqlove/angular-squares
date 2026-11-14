@@ -11,7 +11,7 @@
 @if (store.isLoadingGames()) {
   <div class="qs-skel-delay mt-4 grid grid-cols-1 gap-3" data-card-grid [class]="view.cardGridClass()" aria-busy="true">
     @for (i of skeletons; track i) {
-      <!-- Same shape as the board card: a row on a phone, from sm up the navy tile, name, teams and the Share bar -->
+      <!-- Same shape as the board card: a row on a phone and in Compact, in Grid from sm up the navy tile, name, teams and the Share bar -->
       <div class="min-w-0 [container-type:inline-size]">
       <article class="qs-card" aria-hidden="true">
         <div class="flex min-h-[72px] items-center gap-3 p-3 tall:flex-col tall:items-stretch tall:gap-3.5 tall:pb-4">

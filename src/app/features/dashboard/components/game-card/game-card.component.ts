@@ -14,7 +14,7 @@ import { DashboardStore } from '../../services/dashboard.store';
 
 /**
  * One board on the dashboard. Sits on the grid cell (`<div appGameCard>`), so the cell keeps its container query.
- * Phone: a row. From sm up in Grid view: the board on a navy tile.
+ * Compact: a row at every width. Grid: a row on a narrow phone, and the board on a navy tile on a card 28rem wide or from sm up.
  */
 @Component({
   selector: 'div[appGameCard]',
@@ -23,19 +23,20 @@ import { DashboardStore } from '../../services/dashboard.store';
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
     /* Mini board on each card. Filling: open squares carry the one accent, claimed squares are neutral.
-       Locked or full: taken squares are filled and empty ones are left blank. From sm up the board sits on the navy tile. */
+       Locked or full: taken squares are filled and empty ones are left blank. In the tall Grid card the board sits on the navy tile. */
     .qs-mini { background: var(--qs-line); }
     .qs-mini-open { background: color-mix(in srgb, var(--qs-accent) 38%, var(--qs-panel)); }
     .qs-mini-claimed, .qs-mini-taken { background: color-mix(in srgb, var(--qs-line-strong) 40%, var(--qs-panel)); }
     .qs-mini-blank { background: var(--qs-panel); }
+    /* Grid view only, the same two cases as the tall: variant: a card 28rem wide, or from 640px up. Compact stays a row.
+       CSS can't join a container query and a media query in one rule, so the two blocks repeat. */
     @container (min-width: 28rem) {
-      .qs-mini { background: color-mix(in srgb, var(--qs-tile-ink) 10%, var(--qs-tile)); }
-      .qs-mini-open { background: var(--qs-tile-open); }
-      .qs-mini-claimed { background: color-mix(in srgb, var(--qs-tile-ink) 20%, var(--qs-tile)); }
-      .qs-mini-taken { background: color-mix(in srgb, var(--qs-tile-ink) 36%, var(--qs-tile)); }
-      .qs-mini-blank { background: var(--qs-tile); }
+      :host-context(.qs-grid-view) .qs-mini { background: color-mix(in srgb, var(--qs-tile-ink) 10%, var(--qs-tile)); }
+      :host-context(.qs-grid-view) .qs-mini-open { background: var(--qs-tile-open); }
+      :host-context(.qs-grid-view) .qs-mini-claimed { background: color-mix(in srgb, var(--qs-tile-ink) 20%, var(--qs-tile)); }
+      :host-context(.qs-grid-view) .qs-mini-taken { background: color-mix(in srgb, var(--qs-tile-ink) 36%, var(--qs-tile)); }
+      :host-context(.qs-grid-view) .qs-mini-blank { background: var(--qs-tile); }
     }
-    /* Grid view: the tall card from 640px up, whatever the card's width (same as the tall: variant) */
     @media (min-width: 640px) {
       :host-context(.qs-grid-view) .qs-mini { background: color-mix(in srgb, var(--qs-tile-ink) 10%, var(--qs-tile)); }
       :host-context(.qs-grid-view) .qs-mini-open { background: var(--qs-tile-open); }
