@@ -148,9 +148,8 @@ The security checks every change must pass are in [the engineering skill](../.cl
 
 ### Areas for Improvement
 
-1. **Large Files** (sizes as of Nov 13 2026)
-   - `dashboard.component.ts` (~1,640 lines)
-   - Being split now into smaller components and services, in their own PRs (decision D-019). The limits are in [the engineering skill](../.claude/skills/quarterscore-engineering/SKILL.md), section 2.
+1. **Large Files**
+   - The game service, game page and dashboard were split into smaller services and components in #308, #309 and #310 (decision D-019). New files keep to the limits in [the engineering skill](../.claude/skills/quarterscore-engineering/SKILL.md), section 2.
 
 2. **Code Duplication**
    - Board parsing is now one function (`parseGameData` in `core/utils/game-parse.ts`)
@@ -214,7 +213,7 @@ _Updated Nov 13 2026. Approach chosen by Paul: lighter tests (decision D-018)._
 
 ### Medium-term (Maintainability)
 
-7. Split the three large files (in progress, D-019)
+7. Keep files within the size limits (the three large files were split, D-019)
 8. Add tests for services and utilities as they change
 9. Implement centralized logging/error service
 
