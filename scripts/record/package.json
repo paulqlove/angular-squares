@@ -1,0 +1,19 @@
+{
+  "name": "quarterscore-recorder",
+  "private": true,
+  "description": "Films the QuarterScore how-to storyboards with Playwright. Kept out of the app build.",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "setup": "npm install --no-audit --no-fund && playwright install chromium",
+    "start": "npm run setup --silent && node record.mjs",
+    "record": "node record.mjs",
+    "login": "node record.mjs login",
+    "cleanup": "node record.mjs cleanup",
+    "test": "node test/selftest.mjs"
+  },
+  "dependencies": {
+    "ffmpeg-static": "5.2.0",
+    "playwright": "1.56.1"
+  }
+}
