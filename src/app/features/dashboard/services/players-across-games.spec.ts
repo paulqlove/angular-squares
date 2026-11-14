@@ -92,6 +92,19 @@ describe('players across games', () => {
     expect(players.map(player => player.name)).toEqual(['Zed', 'Amy']);
   });
 
+  it('puts players with new squares first, then the most points, then the most squares', () => {
+    const players = playersAcrossGames([
+      board('A', ['Amy', 'Bo', 'Bo', 'Cy', 'Cy', 'Cy', 'Dee', 'Dee'], {
+        playerUserIds: { Amy: 'amy-uid', Bo: 'bo-uid', Cy: 'cy-uid', Dee: 'dee-uid' },
+        paidPlayers: ['Amy'],
+        paidSquares: [0]
+      }),
+      board('B', ['Dee'], { playerUserIds: { Dee: 'dee-uid' }, pricePerSquare: 0 })
+    ]);
+    // Amy added a square after her Confirm, so she leads with the fewest points. Dee and Bo tie on points; Dee has more squares.
+    expect(players.map(player => player.name)).toEqual(['Amy', 'Cy', 'Dee', 'Bo']);
+  });
+
   it('marks squares on a locked board as locked', () => {
     const players = playersAcrossGames([board('A', ['Kim'], { isLocked: true, playerUserIds: { Kim: 'kim-uid' } })]);
     expect(players[0].games[0].locked).toBe(true);
