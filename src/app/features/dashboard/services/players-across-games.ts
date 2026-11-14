@@ -42,7 +42,11 @@ export interface PlayerSummary {
   sameNameIndex: number;
 }
 
-/** Everyone on the given boards, Unconfirmed first, then by name. Boards keep the order given (the tile order). */
+/**
+ * Everyone on the given boards, Unconfirmed first. Within each group, players with new squares (added after the host
+ * confirmed them) come first, then the most points, then the most squares, then by name. Boards keep the order given
+ * (the tile order).
+ */
 export function playersAcrossGames(boards: readonly PlayersBoard[]): PlayerSummary[] {
   const byKey = new Map<string, PlayerGame[]>();
   for (const board of boards) {
@@ -53,7 +57,12 @@ export function playersAcrossGames(boards: readonly PlayersBoard[]): PlayerSumma
   }
   const players = Array.from(byKey, ([key, games]) => summarize(key, games));
   markSameNames(players);
-  return players.sort((a, b) => Number(a.confirmed) - Number(b.confirmed) || a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }) || a.sameNameIndex - b.sameNameIndex);
+  return players.sort((a, b) => Number(a.confirmed) - Number(b.confirmed)
+    || Number(b.newSquares > 0) - Number(a.newSquares > 0)
+    || b.points - a.points
+    || b.squares - a.squares
+    || a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+    || a.sameNameIndex - b.sameNameIndex);
 }
 
 /**
