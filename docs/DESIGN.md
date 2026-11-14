@@ -350,7 +350,7 @@ Centered, radius 10px, `--qs-shadow-pop`, dimmed navy scrim at 60%. On phones mo
 
 Paper white, navy ink, team colors preserved, no gradients, no shadows, no dot grid. Our lockup top left at 96px wide minimum. Host logo in one fixed footer slot, capped at equal visual weight, never over the grid.
 
-The printable page (`/printable-football-squares`) has three sheets from one component (`printable-sheet.component.ts`): blank 100, 25 (digit pairs) and pre-numbered 100. Each has its own PDF and a Print this sheet button that prints only that sheet. Grid lines print as borders, since browsers drop background colors by default. The pre-numbered digits come from a fixed seed (`printable-digits.ts`), and dashed lines mark the header row and column to fold under while people sign. If the seed changes, remake `assets/printable-football-squares-numbered.pdf` from its HTML.
+The printable page (`/printable-football-squares`) prints its grid lines as borders, since browsers drop background colors by default, and prints in light-theme ink even when the page is in dark mode.
 
 ### TV view
 

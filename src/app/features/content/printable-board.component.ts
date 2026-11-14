@@ -1,20 +1,99 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { SeoService } from '../../core/services/seo.service';
 import { PageCta, RelatedLink } from './marketing-pages';
-import { PRE_NUMBERED_SEEDS, seededDigitOrder } from './printable-digits';
-import { PrintableSheetComponent } from './printable-sheet.component';
 import { ReadingEndComponent, ReadingHeaderComponent, ReadingPageComponent, ReadingSectionComponent } from './reading-layout.components';
 
 @Component({
     selector: 'app-printable-board',
-    imports: [ReadingPageComponent, ReadingHeaderComponent, ReadingSectionComponent, ReadingEndComponent, PrintableSheetComponent],
+    imports: [ReadingPageComponent, ReadingHeaderComponent, ReadingSectionComponent, ReadingEndComponent],
     changeDetection: ChangeDetectionStrategy.Eager,
+    styles: `
+      .grid-row {
+        display: grid;
+        grid-template-columns: 2rem repeat(10, 1fr);
+        gap: 1px;
+      }
+      @media (min-width: 640px) {
+        .grid-row {
+          grid-template-columns: 3rem repeat(10, 1fr);
+        }
+      }
+      .cell {
+        aspect-ratio: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.625rem;
+        font-weight: 500;
+        background: white;
+      }
+      @media (min-width: 640px) {
+        .cell {
+          font-size: 0.75rem;
+        }
+      }
+      .axis-top {
+        background: #f1f5f9;
+        color: #94a3b8;
+        aspect-ratio: auto;
+        height: 1.5rem;
+      }
+      @media (min-width: 640px) {
+        .axis-top {
+          height: 2.25rem;
+        }
+      }
+      .axis-side {
+        background: #f1f5f9;
+        color: #94a3b8;
+        aspect-ratio: auto;
+      }
+      .corner {
+        background: #f1f5f9;
+        color: #5b6b81;
+        aspect-ratio: auto;
+        height: 1.5rem;
+        font-size: 0.5rem;
+        flex-direction: column;
+        line-height: 1.2;
+      }
+      @media (min-width: 640px) {
+        .corner {
+          height: 2.25rem;
+          font-size: 0.625rem;
+        }
+      }
+      /* Paper: real borders, because browsers leave out background colors when printing by default. */
+      @media print {
+        /* Light-theme ink, so a dark-theme page doesn't print pale text on white. */
+        .print-sheet {
+          --qs-ink: #0f172a;
+          --qs-muted: #5b6070;
+          --qs-line-strong: #8b909d;
+        }
+        .board {
+          gap: 0;
+          padding: 0;
+          border-radius: 0;
+          background: none;
+          border-top: 1pt solid #000;
+          border-left: 1pt solid #000;
+        }
+        .grid-row {
+          gap: 0;
+        }
+        .cell {
+          border-right: 1pt solid #000;
+          border-bottom: 1pt solid #000;
+        }
+      }
+    `,
     template: `
     <app-reading-page [breadcrumbs]="breadcrumbs">
-      <app-reading-header class="no-print" eyebrow="Free templates" title="Printable football squares"
-        lede="Free football squares sheets to print for any game, plus a Super Bowl squares template for February. Pick a 100-square grid, a 25-square sheet, or a board with the numbers already filled in. Write names first.">
+      <app-reading-header class="no-print" eyebrow="Free grid" title="Printable football squares"
+        lede="A blank 10 by 10 grid with no logos. Print it for the wall, or download the PDF. Write names first. Write the digits only after the draw.">
         <div actions class="mt-8">
-          <a href="assets/printable-football-squares.pdf" download="printable-football-squares.pdf" class="qs-btn qs-btn-primary">Download 100-square PDF</a>
+          <a href="assets/printable-football-squares.pdf" download="printable-football-squares.pdf" class="qs-btn qs-btn-primary">Download PDF</a>
         </div>
       </app-reading-header>
 
@@ -28,22 +107,67 @@ import { ReadingEndComponent, ReadingHeaderComponent, ReadingPageComponent, Read
         <p>Many parties do both: the live board on the TV, and this sheet on the wall.</p>
       </app-reading-section>
 
-      <app-printable-sheet heading="Blank 100-square board" headingId="grid-heading" gridLabel="Blank football squares grid"
-        pdfHref="assets/printable-football-squares.pdf" pdfLabel="Download 100-square PDF"></app-printable-sheet>
+      <section class="print-sheet mt-20 border-t border-qs-line pt-8 print:mt-0 print:border-0 print:pt-0" aria-labelledby="grid-heading">
+        <h2 id="grid-heading" class="no-print mb-6 text-[1.375rem] font-semibold leading-tight tracking-tight text-qs-ink">Blank board</h2>
 
-      <app-printable-sheet heading="25-square sheet" headingId="grid-25-heading" gridLabel="Blank 25-square football squares grid"
-        [size]="5" boxLabel="digit pair box"
-        pdfHref="assets/printable-football-squares-25.pdf" pdfLabel="Download 25-square PDF">
-        <p>Five rows by five columns, for a small group. Each side uses digit pairs (0&#8209;1, 2&#8209;3, 4&#8209;5, 6&#8209;7 and 8&#8209;9), so each square covers four scores.</p>
-        <p>Fill in the names, then put the five pairs in a hat and draw them for each side.</p>
-      </app-printable-sheet>
+        <!-- Print header with branding -->
+        <div class="hidden print:flex items-center justify-between mb-4">
+          <img src="assets/brand/lockup-horizontal.svg" alt="QuarterScore" width="192" height="24" class="h-6 w-auto">
+          <span class="text-xs text-slate-500">quarterscore.com</span>
+        </div>
 
-      <app-printable-sheet heading="Pre-numbered 100-square board" headingId="grid-numbered-heading" gridLabel="Pre-numbered football squares grid"
-        [homeDigits]="homeDigits" [awayDigits]="awayDigits" [foldable]="true"
-        pdfHref="assets/printable-football-squares-numbered.pdf" pdfLabel="Download pre-numbered PDF">
-        <p>The digits 0 through 9 are already printed down the side and across the top, in a random order. Use it when your group would rather skip the draw.</p>
-        <p>It stays fair if names go on first. Fold the top and side under while people sign, then unfold it before kickoff.</p>
-      </app-printable-sheet>
+        <p class="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+          <span class="flex items-center gap-1 font-semibold text-qs-ink">
+            <span class="text-base leading-none text-qs-muted" aria-hidden="true">&#8595;</span>
+            Away team: ____________
+          </span>
+          <span class="text-qs-line-strong" aria-hidden="true">/</span>
+          <span class="flex items-center gap-1 font-semibold text-qs-ink">
+            Home team: ____________
+            <span class="text-base leading-none text-qs-muted" aria-hidden="true">&#8594;</span>
+          </span>
+        </p>
+
+        <!-- Responsive CSS Grid board (full width) -->
+        <div
+          role="grid"
+          aria-label="Blank football squares grid"
+          class="board flex w-full flex-col gap-px overflow-hidden rounded-md bg-qs-line p-px"
+        >
+          <!-- Top row: corner + 10 header cells -->
+          <div class="grid-row" role="row">
+            <div class="cell corner">
+              <span>AWAY &#8595;</span>
+              <span>HOME &#8594;</span>
+            </div>
+            @for (col of columns; track col) {
+              <div class="cell axis-top" role="columnheader">
+                <span class="sr-only">Home digit box {{ col }}</span>
+              </div>
+            }
+          </div>
+
+          <!-- 10 rows: side header + 10 squares -->
+          @for (row of columns; track row) {
+            <div class="grid-row" role="row">
+              <div class="cell axis-side" role="rowheader">
+                <span class="sr-only">Away digit box {{ row }}</span>
+              </div>
+              @for (col of columns; track col) {
+                <div class="cell" role="gridcell"></div>
+              }
+            </div>
+          }
+        </div>
+
+        <p class="mt-4 text-sm leading-relaxed text-qs-ink">
+          <strong>How to read:</strong> Columns are the home team's last digit. Rows are the away team's last digit.
+          Find the square where the row and column meet to see the winner.
+        </p>
+        <p class="mt-2 text-xs text-qs-muted">
+          QuarterScore never collects, holds, or pays out money. quarterscore.com
+        </p>
+      </section>
 
       <app-reading-end class="no-print" [related]="related" [cta]="cta"></app-reading-end>
     </app-reading-page>
@@ -52,12 +176,11 @@ import { ReadingEndComponent, ReadingHeaderComponent, ReadingPageComponent, Read
 export class PrintableBoardComponent {
   private seo = inject(SeoService);
 
-  public readonly awayDigits: readonly number[] = seededDigitOrder(PRE_NUMBERED_SEEDS.away);
-  public readonly homeDigits: readonly number[] = seededDigitOrder(PRE_NUMBERED_SEEDS.home);
+  public readonly columns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
   public readonly related: RelatedLink[] = [
     { path: '/how-to-play', label: 'How to play', text: 'The same rules, on a live board.' },
     { path: '/', label: 'Homepage', text: 'See a sample board and start a game.' },
-    { path: '/super-bowl-squares', label: 'Super Bowl squares', text: 'Make the live board for February 14, 2027.' },
+    { path: '/super-bowl-squares', label: 'Super Bowl squares', text: 'The February 14, 2027 party board.' },
     { path: '/football-squares-on-tv', label: 'Football squares on TV', text: 'Put the live board on a big screen instead.' }
   ];
   public readonly cta: PageCta = {
@@ -72,8 +195,8 @@ export class PrintableBoardComponent {
 
   constructor() {
     this.seo.apply({
-      title: 'Printable Football Squares and Templates — QuarterScore',
-      description: 'Printable football squares and a free Super Bowl squares template: a blank 10 by 10 grid, a 25-square sheet and a pre-numbered board. Print or download.',
+      title: 'Printable Football Squares - Free 10 by 10 Grid - QuarterScore',
+      description: 'Printable football squares: a free blank 10 by 10 grid, a print view, and a PDF download. No logos. Draw the numbers after every name is written.',
       path: '/printable-football-squares',
       headline: 'Printable football squares',
       published: '2026-11-01',
