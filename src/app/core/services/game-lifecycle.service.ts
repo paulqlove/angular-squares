@@ -137,7 +137,8 @@ export class GameLifecycleService {
       playerUserIds: {},
       isRandomized: false,
       isLocked: false,
-      paidPlayers: []
+      paidPlayers: [],
+      paidSquares: {}
     });
     const current = this.records.currentGameValue();
     const ownerId = current?.id === gameId ? current.ownerId : this.authService.currentUser()?.uid;

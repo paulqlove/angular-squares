@@ -9,6 +9,9 @@ export type SportType = 'nfl' | 'nba' | 'ncaaf' | 'ufl' | 'wnba' | 'afl';
 /** Board size: 100 (10x10), 50 (5x10), or 25 (5x5) squares. */
 export type BoardSize = 100 | 50 | 25;
 
+/** Square counts by position in a board's paidPlayers list (an array, or an object with index keys from the database). */
+export type PaidCounts = { [index: number]: number };
+
 /** Get dimensions for a board size: { rows, cols } */
 export function getBoardDimensions(size: BoardSize): { rows: number; cols: number } {
   switch (size) {
@@ -68,6 +71,8 @@ export interface GameData {
   /** Season Pass: most squares one name can claim on this board. */
   maxSquaresPerPlayer?: number;
   paidPlayers?: string[];
+  /** By position in paidPlayers: how many squares that name held when the host confirmed it. A rename keeps the position. */
+  paidSquares?: PaidCounts;
   espnEventId?: string | null;
   espnSport?: SportType | null;
   espnLive?: EspnLiveSnapshot;

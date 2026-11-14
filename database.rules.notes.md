@@ -50,7 +50,9 @@ Owner and co-host (`managerId`) keep full write through the game-level rule. Oth
 - `playerColors/{name}`: add a color for a name that has none (any viewer assigns missing colors), or change your own.
 - `paidPlayers/{i}`: only rename an existing entry from one of your names to another (player rename). Adding, removing, or touching someone else's entry is owner/co-host only.
 
-`GameService.updateGame` writes these four fields as per-key diffs against the current server value, because a whole-object write is checked only at the parent and would be denied.
+- `paidSquares/{index}`: owner/co-host only (no player rule). A whole number from 0 to 100 at the same position as the name in `paidPlayers`: the squares that name held when the host confirmed it. A player's rename keeps the position, so the count stays with it.
+
+`GameService.updateGame` writes these fields as per-key diffs against the current server value, because a whole-object write is checked only at the parent and would be denied.
 
 Gaps: a name with no `playerUserIds` mapping (legacy squares) can be claimed by the first user who registers it. Name ownership is by exact key, so a square whose case differs from its mapping key cannot be cleared or renamed by the player.
 

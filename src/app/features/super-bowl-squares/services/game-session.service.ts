@@ -118,6 +118,7 @@ export class GameSessionService {
     state.calculatePlayerStats();
     this.names.checkDuplicateName();
     this.players.backfillPlayerUserId();
+    this.players.backfillPaidSquares();
 
     // Calculate winners — skip for ESPN-linked games (the server, or syncFromEspn when
     // serverScoring is false, handles period-aware winners)

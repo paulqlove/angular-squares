@@ -57,7 +57,8 @@ export class HostActionsService {
       homeTeam: '',
       awayTeam: '',
       hostNote: '',
-      paidPlayers: []
+      paidPlayers: [],
+      paidSquares: {}
     };
 
     await this.gameService.updateGame(this.state.gameId, defaultGameState);

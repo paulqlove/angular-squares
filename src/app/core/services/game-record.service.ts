@@ -158,6 +158,7 @@ export class GameRecordService {
       ['squares', data.selectedSquares],
       ['playerColors', data.playerColors],
       ['paidPlayers', data.paidPlayers],
+      ['paidSquares', data.paidSquares],
       ['playerUserIds', data.playerUserIds]
     ];
     await Promise.all(maps.filter(([, next]) => next).map(async ([field, next]) => {
