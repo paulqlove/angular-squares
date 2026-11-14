@@ -44,6 +44,7 @@
       <!-- 03 Winners -->
       <section class="px-3" data-walkthrough="winners-payouts" (click)="$event.stopPropagation()">
         <app-winners-and-payouts
+          [boardId]="state.boardOnScreen"
           [winners]="state.winners"
           [quarterPayouts]="state.quarterPayouts"
           [emptyQuarterRule]="state.emptyQuarterRule"

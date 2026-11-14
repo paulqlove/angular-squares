@@ -1,16 +1,27 @@
 import { DecimalPipe } from '@angular/common';
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, OnChanges, SimpleChanges } from '@angular/core';
 import { DEFAULT_EMPTY_QUARTER_RULE, EmptyQuarterRule, effectiveQuarterShares, quarterPoints } from '../../../../core/plans';
 import { quarterLabel } from '../../../../core/utils/quarter-label';
+import { ArrivalTracker } from '../../utils/square-motion.utils';
+import { ValueSwapComponent } from '../../../../components/ui/value-swap/value-swap.component';
 
 /** Per-quarter score tiles: score, points, and the winner. */
 @Component({
     selector: 'app-winners-and-payouts',
-    imports: [DecimalPipe],
+    imports: [DecimalPipe, ValueSwapComponent],
     templateUrl: './winners-and-payouts.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styles: [`
+      /* A quarter won while you watch: the tile fades to emerald over 450ms (docs/DESIGN.md, Quarter winner) */
+      .tile-win-in { animation: tile-win-in var(--qs-t-reveal) var(--qs-ease) backwards; }
+      @keyframes tile-win-in { from { opacity: 0; } }
+    `]
 })
-export class WinnersAndPayoutsComponent {
+export class WinnersAndPayoutsComponent implements OnChanges {
+  private readonly winnerArrivals = new ArrivalTracker();
+
+  /** The board on screen, so switching boards never replays a quarter winner. */
+  @Input() boardId = '';
   @Input() winners: { [key: string]: string } = {};
   @Input() quarterPayouts: { q1: number; q2: number; q3: number; q4: number } = { q1: 0.2, q2: 0.2, q3: 0.2, q4: 0.4 };
   @Input() emptyQuarterRule: EmptyQuarterRule = DEFAULT_EMPTY_QUARTER_RULE;
@@ -29,6 +40,14 @@ export class WinnersAndPayoutsComponent {
   @Output() quarterClick = new EventEmitter<string>();
 
   readonly quarters = ['q1', 'q2', 'q3', 'q4'];
+  /** Quarters won since this board came on screen. */
+  protected arriving: ReadonlySet<string> = new Set();
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (!changes['winners'] && !changes['boardId']) return;
+    const arrived = this.winnerArrivals.next(this.boardId, this.quarters.filter(q => this.winners[q]));
+    if (arrived) this.arriving = new Set(arrived);
+  }
 
   getQuarterLabel(quarter: string): string {
     return quarterLabel(quarter, this.gameOver);

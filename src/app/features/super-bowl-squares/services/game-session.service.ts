@@ -235,6 +235,7 @@ export class GameSessionService {
         this.leaveMissingGame(gameId);
         return;
       }
+      state.boardOnScreen = gameId;
       this.applySnapshot(data);
       if (switching && firstData) this.ui.slideInBoard();
     });

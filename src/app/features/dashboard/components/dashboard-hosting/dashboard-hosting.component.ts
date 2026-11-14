@@ -1,11 +1,14 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { ChangeDetectionStrategy, Component, ElementRef, Injector, PLATFORM_ID, afterNextRender, computed, effect, inject, untracked } from '@angular/core';
 import { NgIconComponent } from '@ng-icons/core';
 
+import { captureLayout, glideToNewLayout } from '../../../../shared/flip-layout';
 import { DashboardDialogsService } from '../../services/dashboard-dialogs.service';
 import { DashboardSearchService } from '../../services/dashboard-search.service';
 import { DashboardViewService } from '../../services/dashboard-view.service';
 import { DashboardStore } from '../../services/dashboard.store';
 import { PlayersViewService } from '../../services/players-view.service';
+import { ValueSwapComponent } from '../../../../components/ui/value-swap/value-swap.component';
 import { DashboardViewToggleComponent } from '../dashboard-view-toggle/dashboard-view-toggle.component';
 import { GameCardComponent } from '../game-card/game-card.component';
 import { PlayersViewComponent } from '../players-view/players-view.component';
@@ -17,7 +20,7 @@ import { PlayersViewComponent } from '../players-view/players-view.component';
  */
 @Component({
   selector: 'section[appDashboardHosting]',
-  imports: [NgIconComponent, DashboardViewToggleComponent, GameCardComponent, PlayersViewComponent],
+  imports: [NgIconComponent, DashboardViewToggleComponent, GameCardComponent, PlayersViewComponent, ValueSwapComponent],
   templateUrl: './dashboard-hosting.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
@@ -30,6 +33,19 @@ import { PlayersViewComponent } from '../players-view/players-view.component';
   `]
 })
 export class DashboardHostingComponent {
+  constructor() {
+    // A board locked from its card glides to Locked and the cards around it reflow, instead of jumping.
+    // A component effect runs before this template refreshes, so the old layout is still on screen to measure.
+    effect(() => {
+      this.store.boardGroups();
+      const moved = untracked(this.store.justLocked);
+      if (!moved.size || !isPlatformBrowser(this.platformId) || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const host = this.host.nativeElement;
+      const before = captureLayout(document, moved, host);
+      afterNextRender(() => glideToNewLayout(document, before, moved), { injector: this.injector });
+    });
+  }
+
   /** "10 games", or "3 of 10 games" while the search narrows the list. The Players view counts co-hosted boards too. */
   public readonly countLabel = computed<string>(() => {
     if (this.players.active()) return `${this.players.boards().length} games`;
@@ -45,4 +61,8 @@ export class DashboardHostingComponent {
   protected readonly search: DashboardSearchService = inject(DashboardSearchService);
   protected readonly store: DashboardStore = inject(DashboardStore);
   protected readonly view: DashboardViewService = inject(DashboardViewService);
+
+  private readonly host: ElementRef<HTMLElement> = inject(ElementRef);
+  private readonly injector: Injector = inject(Injector);
+  private readonly platformId: object = inject(PLATFORM_ID);
 }

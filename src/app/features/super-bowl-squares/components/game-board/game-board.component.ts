@@ -1,5 +1,6 @@
 import { buildInitials } from '../../utils/initials.utils';
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, ChangeDetectorRef, OnChanges, OnDestroy, SimpleChanges, computed, inject } from '@angular/core';
+import { ArrivalTracker, NO_SQUARE_CHANGES, SquareChanges, squareChanges } from '../../utils/square-motion.utils';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BoardSize, getBoardDimensions } from '../../../../core/services/game.service';
 
@@ -10,12 +11,17 @@ import { BoardSize, getBoardDimensions } from '../../../../core/services/game.se
     changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./game-board.component.scss']
 })
-export class GameBoardComponent implements OnChanges, OnDestroy {
-  private cdr = inject(ChangeDetectorRef);
-  private claimed = new Set<string>();
-  private claimTimer: ReturnType<typeof setTimeout> | null = null;
+export class GameBoardComponent implements OnChanges {
+  private arrivingWinners: ReadonlySet<string> = new Set();
+  private changes: SquareChanges = NO_SQUARE_CHANGES;
   private previousSquares: { [key: string]: string } | null = null;
+  private tapped: string | null = null;
+  private readonly winnerArrivals = new ArrivalTracker();
 
+  /** The board on screen, so switching boards never replays a quarter winner. */
+  @Input() boardId = '';
+  /** A locked board: squares can't be picked, so they get no hover or press. */
+  @Input() locked = false;
   @Input() homeTeam!: string;
   @Input() awayTeam!: string;
   /** Team logos from TeamLogoService (our NFL table, or ESPN's logo for other leagues). */
@@ -85,25 +91,32 @@ export class GameBoardComponent implements OnChanges, OnDestroy {
   private initials = new Map<string, string>();
   private initialsSource: { [key: string]: string } | null = null;
 
-  /** A square that was just picked flashes for a moment. Loads, refreshes and conversions (many at once) do not. */
+  /** Squares that change hands and quarter winners that arrive animate once. Loads, refreshes and board switches do not. */
   ngOnChanges(changes: SimpleChanges): void {
+    if (changes['winnerSquares'] || changes['boardId']) {
+      const arrived = this.winnerArrivals.next(this.boardId, this.winnerSquares);
+      if (arrived) this.arrivingWinners = new Set(arrived);
+    }
     if (!changes['selectedSquares']) return;
     const next = this.selectedSquares ?? {};
     const previous = this.previousSquares;
     this.previousSquares = next;
     if (!previous) return;
-    const changed = Object.keys(next).filter(key => previous[key] !== next[key]);
-    if (!changed.length || changed.length > 3) return;
-    this.claimed = new Set(changed);
-    if (this.claimTimer) clearTimeout(this.claimTimer);
-    this.claimTimer = setTimeout(() => {
-      this.claimed = new Set();
-      this.cdr.markForCheck();
-    }, 500);
+    const sorted = changes['boardId'] ? NO_SQUARE_CHANGES : squareChanges(previous, next, this.tapped);
+    if (!sorted) return;
+    this.changes = sorted;
+    this.tapped = null;
   }
 
-  ngOnDestroy(): void {
-    if (this.claimTimer) clearTimeout(this.claimTimer);
+  /** How a square's name comes in: a spring for your own claim, a fade for someone else's. */
+  nameEnter(key: string): string {
+    if (this.changes.own.has(key)) return 'qs-name-own';
+    return this.changes.others.has(key) ? 'qs-name-in' : '';
+  }
+
+  /** A square that was let go: its name fades out. */
+  nameLeave(key: string): string {
+    return this.changes.released.has(key) ? 'qs-name-out' : '';
   }
 
   @Output() squareClick = new EventEmitter<{ row: number; col: number }>();
@@ -125,7 +138,8 @@ export class GameBoardComponent implements OnChanges, OnDestroy {
     }
 
     const leader = !this.highlightedSquare && key === this.currentLeaderSquare ? ' square-leader' + (player ? '' : ' square-leader-empty') + (this.liveScore ? ' square-live' : '') : '';
-    return baseColor + leader + (this.claimed.has(key) ? ' square-claimed' : '');
+    const open = !player && !this.locked ? ' qs-square-open' : '';
+    return baseColor + leader + open + (this.arrivingWinners.has(key) ? ' square-win-in' : '');
   }
 
   get leaderRow(): number | null {
@@ -165,13 +179,14 @@ export class GameBoardComponent implements OnChanges, OnDestroy {
   }
 
   onSquareClick(row: number, col: number): void {
+    this.tapped = `${row}-${col}`;
     this.squareClick.emit({ row, col });
   }
 
   onSquareKeydown(event: KeyboardEvent, row: number, col: number): void {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      this.squareClick.emit({ row, col });
+      this.onSquareClick(row, col);
     }
   }
 } 

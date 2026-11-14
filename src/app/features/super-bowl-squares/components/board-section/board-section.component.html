@@ -43,6 +43,8 @@
         [winnerQuarterLabels]="state.winnerQuarterLabels"
         [liveScore]="state.isLiveGame()"
         [isRandomized]="state.isRandomized"
+        [boardId]="state.boardOnScreen"
+        [locked]="state.isLocked"
         [boardSize]="state.boardSize"
         (squareClick)="squares.onSquareClick($event)">
       </app-game-board>

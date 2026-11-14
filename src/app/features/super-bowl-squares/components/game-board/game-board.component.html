@@ -47,15 +47,19 @@
         </div>
         <!-- Square cells -->
         @for (homeNum of homeNumbers; track $index; let col = $index) {
+          @let key = row + '-' + col;
           <div
-            [ngClass]="[getSquareClass(row, col), 'square-cell hover:bg-qs-accent-soft focus:ring-2 focus:ring-qs-accent focus:outline-none', winnerSquares.includes(row + '-' + col) ? 'square-winner' : '']"
+            [ngClass]="[getSquareClass(row, col), 'square-cell focus:ring-2 focus:ring-qs-accent focus:outline-none', winnerSquares.includes(key) ? 'square-winner' : '']"
             role="gridcell"
             tabindex="0"
             [attr.aria-label]="getSquareAriaLabel(row, col)"
             (click)="onSquareClick(row, col)"
             (keydown)="onSquareKeydown($event, row, col)">
-            <span class="sm:hidden" aria-hidden="true">{{ getSquareInitials(row, col) }}</span><span class="hidden sm:inline">{{ getSquarePlayer(row, col) }}</span>
-            @if (winnerQuarterLabels[row + '-' + col]; as quarters) { <span class="square-tab hidden sm:block" aria-hidden="true">{{ quarters }}</span> }
+            <!-- Keyed by the name, so a claim brings a new one in and a let-go square keeps its old name while it fades out -->
+            @for (name of [getSquarePlayer(row, col)]; track name) {
+              <span class="square-name" [animate.enter]="nameEnter(key)" [animate.leave]="nameLeave(key)"><span class="sm:hidden" aria-hidden="true">{{ getSquareInitials(row, col) }}</span><span class="hidden sm:inline">{{ name }}</span></span>
+            }
+            @if (winnerQuarterLabels[key]; as quarters) { <span class="square-tab hidden sm:block" aria-hidden="true">{{ quarters }}</span> }
           </div>
         }
       </div>

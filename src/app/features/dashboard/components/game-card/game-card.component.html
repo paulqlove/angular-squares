@@ -1,6 +1,6 @@
 <!-- Phone: a row (mini board, name, teams, open count). In Grid view from sm up (or on a card 28rem wide): the board on a navy panel with the open count beside it. Compact stays a row.
      Filling boards get a full-width Share invite bar; locked and full boards go quiet. -->
-<article animate.enter="qs-fade-rise" class="qs-card relative flex h-full min-w-0 flex-col transition-[border-color] duration-150 ease-out has-[a:hover]:border-qs-ink has-[[aria-expanded=true]]:z-20">
+<article [animate.enter]="store.cardEnter()" class="qs-card relative flex h-full min-w-0 flex-col transition-[border-color] duration-150 ease-out has-[a:hover]:border-qs-ink has-[[aria-expanded=true]]:z-20">
   <div class="relative flex flex-1 items-center tall:block">
     <a
       [routerLink]="['/game', game().id]"

@@ -37,6 +37,9 @@ export class GameStateService {
   public confirmedPlayers: Set<string> = new Set();
   /** The name this viewer plays as, sanitized. PlayerNameService owns the rules for changing it. */
   public currentPlayerName: string = '';
+  /** The board whose data is on screen. On a switch gameId moves first and this follows when the new board's data lands,
+   *  so the board and Winners can tell a switch from a quarter won while you watch. */
+  public boardOnScreen: string = '';
   public currentPrice: number = 10;
   public readonly currentUser: Signal<AuthUser | null> = inject(AuthService).currentUser;
   /** Set once the page is torn down, so late async results are dropped. */
