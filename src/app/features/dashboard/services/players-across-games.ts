@@ -56,6 +56,11 @@ export function playersAcrossGames(boards: readonly PlayersBoard[]): PlayerSumma
   return players.sort((a, b) => Number(a.confirmed) - Number(b.confirmed) || a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }) || a.sameNameIndex - b.sameNameIndex);
 }
 
+/** One tile per board, in the boards' order: the player's place on that board, or null where they don't play. */
+export function playerTiles(player: Pick<PlayerSummary, 'games'>, boardIds: readonly string[]): Array<PlayerGame | null> {
+  return boardIds.map(id => player.games.find(game => game.gameId === id) ?? null);
+}
+
 /** Each player on one board with their squares, points and Confirm state. */
 function boardPlayers(board: PlayersBoard): PlayerGame[] {
   const squares = board.selectedSquares ?? {};

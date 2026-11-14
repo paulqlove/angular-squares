@@ -654,6 +654,8 @@ body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
 @keyframes qs-rise-in { from { opacity: 0; transform: translateY(6px); } }
 @keyframes qs-icon-pop { from { opacity: .4; transform: scale(.6); } }
 .qs-fade-rise { animation: qs-rise-in 180ms var(--qs-ease) backwards; }
+/* A row arriving in a list (the Players view: a card opening, a player moving group): fades in, 160ms, no movement. */
+.qs-row-in { animation: qs-fade-in 160ms var(--qs-ease) backwards; }
 .qs-tab-in { animation: qs-rise-in 160ms var(--qs-ease) backwards; }
 /* A field's error message: fades in and rises 4px, 160ms, no shake (docs/DESIGN.md, Form errors). */
 @keyframes qs-error-in { from { opacity: 0; transform: translateY(4px); } }

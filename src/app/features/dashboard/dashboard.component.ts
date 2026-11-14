@@ -39,6 +39,7 @@ import { DashboardSearchService } from './services/dashboard-search.service';
 import { DASHBOARD_TOUR_STEPS, dashboardTourSteps } from './services/dashboard-tour';
 import { DashboardViewService } from './services/dashboard-view.service';
 import { DashboardStore } from './services/dashboard.store';
+import { PlayersViewService } from './services/players-view.service';
 
 /**
  * Your games: the boards you host and joined, the search-or-code field, and the create, edit, share and upgrade dialogs.
@@ -59,6 +60,7 @@ import { DashboardStore } from './services/dashboard.store';
     DashboardEditService,
     DashboardDialogsService,
     DashboardAdminService,
+    PlayersViewService,
     provideIcons({
       heroArrowRight,
       heroBars3,

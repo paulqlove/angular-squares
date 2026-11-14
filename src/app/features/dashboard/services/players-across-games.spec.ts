@@ -1,4 +1,4 @@
-import { PlayersBoard, playersAcrossGames } from './players-across-games';
+import { PlayersBoard, playerTiles, playersAcrossGames } from './players-across-games';
 
 const HOST = 'host-uid';
 
@@ -91,5 +91,10 @@ describe('players across games', () => {
 
   it('has no players for empty boards', () => {
     expect(playersAcrossGames([board('A', [])])).toEqual([]);
+  });
+
+  it('lays out one tile per board, empty where the player is not on it', () => {
+    const [player] = playersAcrossGames([board('A', ['Kim'], { playerUserIds: { Kim: 'kim-uid' } })]);
+    expect(playerTiles(player, ['B', 'A']).map(tile => tile?.gameId ?? null)).toEqual([null, 'A']);
   });
 });
