@@ -89,8 +89,8 @@
     appDashboardPhoneBar
     class="qs-dock qs-dockable no-print fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-[90] sm:hidden"
     appDockAtEnd [dockPaused]="search.searchOpen()"
-    [class.qs-dock-off]="dialogs.barHidden()"
-    [attr.aria-hidden]="dialogs.barHidden() ? 'true' : null"
+    [class.qs-dock-off]="dialogs.barHidden() || players.filterOpen()"
+    [attr.aria-hidden]="dialogs.barHidden() || players.filterOpen() ? 'true' : null"
     [style.transform]="search.searchOpen() && search.keyboardLift() ? 'translateY(-' + search.keyboardLift() + 'px)' : null"
   ></div>
 

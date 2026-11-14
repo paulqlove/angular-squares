@@ -180,10 +180,10 @@ describe('ModalComponent', () => {
     expect(panel.classList).not.toContain('animate-modal-in');
     f.componentInstance.c.set(false);
     f.detectChanges();
-    await new Promise(r => setTimeout(r, 160));
+    await new Promise(r => setTimeout(r, 100));
     f.detectChanges();
     expect(panel.parentElement!.classList).toContain('qs-modal-leave');
-    await new Promise(r => setTimeout(r, 60));
+    await new Promise(r => setTimeout(r, 80));
     f.detectChanges();
     expect(document.querySelector('[aria-labelledby="c-title"]')).toBeNull();
     f.destroy();

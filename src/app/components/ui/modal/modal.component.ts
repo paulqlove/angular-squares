@@ -84,7 +84,7 @@ export class ModalComponent {
       const open = this.open();
       clearTimeout(this.hideTimer);
       if (open) this.shown.set(true);
-      else if (this.shown()) this.hideTimer = setTimeout(() => this.shown.set(false), this.slidesOut() ? 220 : 150);
+      else if (this.shown()) this.hideTimer = setTimeout(() => this.shown.set(false), 150);
     });
     effect(onCleanup => {
       if (!this.open() || typeof document === 'undefined') return;
@@ -136,11 +136,5 @@ export class ModalComponent {
   private initialFocus(): void {
     const preferred = this.host.nativeElement.querySelector<HTMLElement>('[data-autofocus]');
     (preferred ?? this.focusables()[0])?.focus();
-  }
-
-  /** True when the panel leaves by sliding down: a slide sheet, or a docked sheet on a phone-width screen. */
-  private slidesOut(): boolean {
-    if (this.motion() === 'slide') return true;
-    return this.phone() === 'sheet' && typeof matchMedia !== 'undefined' && matchMedia('(max-width: 639.98px)').matches;
   }
 }

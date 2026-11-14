@@ -5,6 +5,7 @@ import { heroCheck, heroChevronDown, heroLockClosed, heroMagnifyingGlass, heroUs
 import { DropdownComponent, DropdownOption } from '../../../../components/ui/dropdown/dropdown.component';
 import { PlayersViewService } from '../../services/players-view.service';
 import { PlayerCardComponent } from './player-card.component';
+import { PlayersFilterSheetComponent } from './players-filter-sheet.component';
 import { PlayerGamesComponent } from './player-games.component';
 
 /** First-load stagger: 30ms between cards, for the first eight, then the flag drops once they're in. */
@@ -19,23 +20,27 @@ const STAGGER_DONE_MS = 500;
  */
 @Component({
   selector: 'div[appPlayersView]',
-  imports: [DropdownComponent, NgIconComponent, PlayerCardComponent, PlayerGamesComponent],
+  imports: [DropdownComponent, NgIconComponent, PlayerCardComponent, PlayerGamesComponent, PlayersFilterSheetComponent],
   providers: [provideIcons({ heroCheck, heroChevronDown, heroLockClosed, heroMagnifyingGlass, heroUserMinus, heroXMark })],
   templateUrl: './players-view.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: [`
     .qs-tile-key { display: inline-block; width: 12px; height: 12px; border-radius: 3px; }
-    /* Phones: the Find a player row sticks to the top, edge to edge, over the cards (page colour at 92% on a 12px blur).
-       The line under it fades in once it's stuck. */
-    @media (max-width: 639.98px) {
-      .qs-find-row {
-        position: sticky; top: 0; z-index: 20; margin-inline: -1rem; padding-inline: 1rem;
+    /* From 640px: Find a player, the game picker and the legend stick to the top, edge to edge across the page's padding,
+       over the cards (page colour at 92% on a 12px blur), under the site header while it's showing. The line under them
+       fades in once they're stuck. */
+    @media (min-width: 640px) {
+      .qs-find-bar {
+        position: sticky; top: var(--qs-headroom-h, 0px); z-index: 20; margin-inline: -2rem; padding: 12px 2rem;
         background: color-mix(in srgb, var(--qs-bg) 92%, transparent);
         -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
         box-shadow: 0 1px 0 transparent;
-        transition: box-shadow var(--qs-t-state) var(--qs-ease);
+        transition: box-shadow var(--qs-t-state) var(--qs-ease), top var(--qs-t-state) var(--qs-ease);
       }
-      .qs-find-row-stuck { box-shadow: 0 1px 0 var(--qs-line); }
+      .qs-find-bar-stuck { box-shadow: 0 1px 0 var(--qs-line); }
+    }
+    @media (min-width: 640px) and (prefers-reduced-motion: reduce) {
+      .qs-find-bar { transition: none; }
     }
   `]
 })
@@ -45,7 +50,7 @@ export class PlayersViewComponent {
     effect(() => {
       if (this.groups().length && this.loading()) setTimeout(() => this.loading.set(false), STAGGER_DONE_MS);
     });
-    // The row counts as stuck once the spot just above it has scrolled off the top.
+    // The bar counts as stuck once the spot just above it has scrolled off the top.
     afterNextRender(() => {
       const sentinel = this.findSentinel()?.nativeElement;
       if (!sentinel || typeof IntersectionObserver === 'undefined') return;
@@ -66,11 +71,16 @@ export class PlayersViewComponent {
     { key: 'unconfirmed', label: 'Unconfirmed', players: this.players.unconfirmed() },
     { key: 'confirmed', label: 'Confirmed', players: this.players.confirmed() }
   ].filter(group => group.players.length));
+  /** The game picked in the filter sheet, for the chip on phones. */
+  public readonly pickedGame = computed<string | null>(() => {
+    const id = this.players.gameFilter();
+    return id ? this.players.boards().find(board => board.id === id)?.name ?? null : null;
+  });
 
   /** True until the first cards have arrived. */
   protected readonly loading = signal<boolean>(true);
   protected readonly players: PlayersViewService = inject(PlayersViewService);
-  /** The Find a player row is stuck to the top (phones). */
+  /** The Find a player bar is stuck to the top (from 640px). */
   protected readonly stuck = signal<boolean>(false);
 
   /**

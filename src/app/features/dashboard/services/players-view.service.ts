@@ -50,6 +50,9 @@ export class PlayersViewService {
   /** The boards in season order (oldest first), so each game keeps one spot in every player's tiles. */
   public readonly boards = computed<GameData[]>(() => [...this.store.runBoards()].sort((a, b) => a.createdAt - b.createdAt));
   public readonly confirmNote = signal<ConfirmNote | null>(null);
+  /** The phone filter sheet is open; `filterFocusSearch` when it opened from the dock's Find a player, keyboard up. */
+  public readonly filterFocusSearch = signal<boolean>(false);
+  public readonly filterOpen = signal<boolean>(false);
   /** Confirmed players. The open card and a card in the "All confirmed" beat keep their spot until they're done. */
   public readonly confirmed = computed<PlayerSummary[]>(() => this.placed('confirmed'));
   /** One game picked from the games menu, or null for all. */
@@ -72,6 +75,12 @@ export class PlayersViewService {
   /** Unconfirmed players, held in place the same way as `confirmed`. */
   public readonly unconfirmed = computed<PlayerSummary[]>(() => this.placed('unconfirmed'));
 
+  /** Clears Find a player and the picked game. */
+  public clearFilters(): void {
+    this.search.set('');
+    this.gameFilter.set(null);
+  }
+
   /** Confirms the player on one game, for the squares they hold there now. */
   public async confirmGame(player: PlayerSummary, gameId: string): Promise<void> {
     const game = player.games.find(g => g.gameId === gameId && !g.confirmed);
@@ -82,6 +91,12 @@ export class PlayersViewService {
   public async confirmRest(player: PlayerSummary): Promise<void> {
     const games = player.games.filter(game => !game.confirmed);
     if (games.length) await this.confirm(player, games, `${player.name} confirmed on every game.`);
+  }
+
+  /** Opens the phone filter sheet, with the keyboard up on Find a player when `focusSearch`. */
+  public openFilter(focusSearch: boolean): void {
+    this.filterFocusSearch.set(focusSearch);
+    this.filterOpen.set(true);
   }
 
   /**

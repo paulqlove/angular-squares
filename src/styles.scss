@@ -536,15 +536,15 @@ body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
 .qs-modal-leave { animation: qs-fade-out 120ms var(--qs-ease-in) both; pointer-events: none; }
 .qs-modal-leave > * { animation: qs-pop-out 120ms var(--qs-ease-in) both; }
 
-/* Bottom sheets that slide (app-modal motion="slide"). Transitions, not keyframes, so a reopen mid-close turns back
-   from wherever the sheet is instead of snapping. */
+/* Bottom sheets that slide (app-modal motion="slide"): 200ms in, 120ms out. Transitions, not keyframes, so a reopen
+   mid-close turns back from wherever the sheet is instead of snapping. */
 .qs-sheet-slide { transition: opacity var(--qs-t-state) var(--qs-ease-decel); }
-.qs-sheet-slide > * { transition: transform var(--qs-t-sheet) var(--qs-ease-decel); }
+.qs-sheet-slide > * { transition: transform var(--qs-t-state) var(--qs-ease-decel); }
 .qs-sheet-slide.qs-modal-enter, .qs-sheet-slide.qs-modal-enter > *,
 .qs-sheet-slide.qs-modal-leave, .qs-sheet-slide.qs-modal-leave > * { animation: none; }
 /* Closing: sheet and scrim leave together on one accelerate curve, so the page never undims before the sheet is gone */
-.qs-sheet-slide.qs-modal-leave { opacity: 0; transition: opacity var(--qs-t-state) var(--qs-ease-sheet-out); }
-.qs-sheet-slide.qs-modal-leave > * { transform: translateY(100%); transition: transform var(--qs-t-state) var(--qs-ease-sheet-out); }
+.qs-sheet-slide.qs-modal-leave { opacity: 0; transition: opacity var(--qs-t-fast) var(--qs-ease-sheet-out); }
+.qs-sheet-slide.qs-modal-leave > * { transform: translateY(100%); transition: transform var(--qs-t-fast) var(--qs-ease-sheet-out); }
 @starting-style {
   .qs-sheet-slide { opacity: 0; }
   .qs-sheet-slide > * { transform: translateY(100%); }
@@ -596,11 +596,11 @@ body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
    From 640px up they stay centred and pop in. Placed after .animate-modal-in so the slide wins on phones. */
 @media (max-width: 639.98px) {
   .qs-sheet-phone { transition: opacity var(--qs-t-state) var(--qs-ease-decel); }
-  .qs-sheet-phone > * { transition: transform var(--qs-t-sheet) var(--qs-ease-decel); }
+  .qs-sheet-phone > * { transition: transform var(--qs-t-state) var(--qs-ease-decel); }
   .qs-sheet-phone.qs-modal-enter, .qs-sheet-phone.qs-modal-enter > *, .qs-sheet-phone > .animate-modal-in,
   .qs-sheet-phone.qs-modal-leave, .qs-sheet-phone.qs-modal-leave > * { animation: none; }
-  .qs-sheet-phone.qs-modal-leave { opacity: 0; transition: opacity var(--qs-t-state) var(--qs-ease-sheet-out); }
-  .qs-sheet-phone.qs-modal-leave > * { transform: translateY(100%); transition: transform var(--qs-t-state) var(--qs-ease-sheet-out); }
+  .qs-sheet-phone.qs-modal-leave { opacity: 0; transition: opacity var(--qs-t-fast) var(--qs-ease-sheet-out); }
+  .qs-sheet-phone.qs-modal-leave > * { transform: translateY(100%); transition: transform var(--qs-t-fast) var(--qs-ease-sheet-out); }
   @starting-style {
     .qs-sheet-phone { opacity: 0; }
     .qs-sheet-phone > * { transform: translateY(100%); }
