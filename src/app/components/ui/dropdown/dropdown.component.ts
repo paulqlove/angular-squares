@@ -7,7 +7,7 @@ export interface DropdownOption<T extends string = string> {
   label: string;
 }
 
-/** A small menu in the site's style, used instead of the browser's own select. */
+/** A small menu in the site's style, used instead of the browser's own select. The picked row is ink (green is for open squares). */
 @Component({
   selector: 'app-dropdown',
   imports: [NgIconComponent],
@@ -17,8 +17,8 @@ export interface DropdownOption<T extends string = string> {
     <div class="relative" [class.inline-block]="!fill()">
       <button
         type="button"
-        class="qs-label inline-flex min-h-9 items-center gap-1.5 rounded-[4px] px-3 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-qs-accent"
-        [class]="fill() ? 'w-full justify-between border border-qs-line-strong bg-qs-panel-2 text-qs-ink' : 'text-qs-muted decoration-qs-accent underline-offset-4 hover:text-qs-ink hover:underline'"
+        class="qs-label inline-flex items-center gap-1.5 rounded-[4px] px-3 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-qs-accent"
+        [class]="fill() ? 'min-h-11 w-full justify-between border bg-qs-panel-2 text-qs-ink ' + (open() ? 'border-qs-ink' : 'border-qs-line-strong') : 'min-h-9 text-qs-muted decoration-qs-accent underline-offset-4 hover:text-qs-ink hover:underline'"
         [class.text-qs-ink]="open()"
         [class.underline]="open() && !fill()"
         aria-haspopup="menu"
@@ -26,24 +26,24 @@ export interface DropdownOption<T extends string = string> {
         [attr.aria-label]="ariaLabel()"
         (click)="open.set(!open())"
       >
-        @if (prefix()) { <span>{{ prefix() }}</span> }{{ currentLabel() }}
-        <ng-icon name="heroChevronDown" class="text-xs transition-transform duration-150" [class.rotate-180]="open()" aria-hidden="true"></ng-icon>
+        <span class="truncate">@if (prefix()) { <span>{{ prefix() }}</span> }{{ currentLabel() }}</span>
+        <ng-icon name="heroChevronDown" class="shrink-0 text-xs transition-transform duration-150" [class.rotate-180]="open()" aria-hidden="true"></ng-icon>
       </button>
       @if (open()) {
-        <div role="menu" animate.enter="qs-menu-enter" animate.leave="qs-menu-leave" class="absolute z-30 mt-1.5 min-w-full w-max overflow-hidden rounded-inner border border-qs-line-strong bg-qs-panel p-1 shadow-pop" [class]="fill() ? 'left-0 origin-top-left' : 'right-0 origin-top-right'">
+        <div role="menu" animate.enter="qs-menu-enter" animate.leave="qs-menu-leave" class="absolute z-30 mt-1.5 max-h-[60vh] min-w-full w-max max-w-[min(300px,calc(100vw-2rem))] overflow-y-auto rounded-inner border border-qs-line-strong bg-qs-panel p-1 shadow-pop" [class]="fill() && align() !== 'end' ? 'left-0 origin-top-left' : 'right-0 origin-top-right'">
           @for (o of options(); track o.value) {
             <button
               type="button"
               role="menuitemradio"
               [attr.aria-checked]="o.value === value()"
               class="qs-label flex min-h-11 w-full items-center gap-2 rounded-[4px] px-3 text-left transition-colors hover:bg-qs-panel-2 focus-visible:bg-qs-panel-2 focus-visible:outline-none"
-              [class]="o.value === value() ? 'text-qs-accent' : 'text-qs-ink'"
+              [class.bg-qs-panel-2]="o.value === value()"
               (click)="pick(o.value)"
             >
               <span class="flex w-4 shrink-0 justify-center">
-                @if (o.value === value()) { <ng-icon name="heroCheck" class="text-base text-qs-accent" aria-hidden="true"></ng-icon> }
+                @if (o.value === value()) { <ng-icon name="heroCheck" class="text-base" aria-hidden="true"></ng-icon> }
               </span>
-              {{ o.label }}
+              <span class="truncate">{{ o.label }}</span>
             </button>
           }
         </div>
@@ -52,6 +52,8 @@ export interface DropdownOption<T extends string = string> {
   `
 })
 export class DropdownComponent {
+  /** 'end' lines the menu up with the button's right edge, for a button at the right of a row. */
+  align = input<'auto' | 'end'>('auto');
   fill = input(false);
   ariaLabel = input<string>('');
   options = input<DropdownOption[]>([]);

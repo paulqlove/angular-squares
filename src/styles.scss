@@ -4,10 +4,14 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Prevent horizontal scroll from wide content */
+/* Prevent horizontal scroll from wide content. Clip where the browser has it: hidden makes body a scroll box of its
+   own, and then nothing inside the page can stick to the top (the Players view's Find a player row). */
 html, body {
   overflow-x: hidden;
   max-width: 100vw;
+}
+@supports (overflow-x: clip) {
+  html, body { overflow-x: clip; }
 }
 
 /* QuarterScore design tokens, v2 (Nov 2026).

@@ -1,5 +1,7 @@
-<div class="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
-  <label class="qs-search w-full sm:w-80">
+<!-- Find a player. On a phone the row sticks to the top as you scroll, with a line under it once it's stuck. -->
+<div #findSentinel aria-hidden="true"></div>
+<div class="qs-find-row mt-2 flex items-center gap-2 py-2 sm:mt-4 sm:gap-3 sm:py-0" [class.qs-find-row-stuck]="stuck()">
+  <label class="qs-search min-w-0 flex-1 sm:w-80 sm:flex-none">
     <ng-icon name="heroMagnifyingGlass" class="qs-search-icon" aria-hidden="true"></ng-icon>
     <input type="search" placeholder="Find a player" aria-label="Find a player" [value]="players.search()" (input)="searchFor($event)" />
     @if (players.search()) {
@@ -8,12 +10,7 @@
       </button>
     }
   </label>
-  <select class="qs-input sm:w-auto sm:max-w-64" aria-label="Game" (change)="pickGame($event)">
-    <option value="" [selected]="!players.gameFilter()">All {{ players.boards().length }} games</option>
-    @for (board of players.boards(); track board.id) {
-      <option [value]="board.id" [selected]="players.gameFilter() === board.id">{{ board.name }}</option>
-    }
-  </select>
+  <app-dropdown class="block min-w-0 max-w-[50%] shrink-0 sm:max-w-64" [fill]="true" align="end" ariaLabel="Game" [options]="gameOptions()" [value]="players.gameFilter() ?? ''" (valueChange)="players.gameFilter.set($event || null)"></app-dropdown>
 </div>
 
 <!-- What the tiles mean. Ink is confirmed: green stays for open squares on the board. -->
@@ -25,7 +22,7 @@
 </div>
 
 @for (group of groups(); track group.key; let first = $first; let g = $index) {
-  <div [class]="first ? 'mt-4' : 'mt-8'" role="group" [attr.aria-label]="group.label">
+  <div [class]="first ? 'mt-2 sm:mt-4' : 'mt-8'" role="group" [attr.aria-label]="group.label">
     <div class="flex items-baseline gap-2 px-0.5">
       <h4 class="qs-label text-qs-muted">{{ group.label }}</h4>
       <span class="qs-label text-qs-muted opacity-70">{{ group.players.length }}</span>
