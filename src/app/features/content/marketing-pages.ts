@@ -10,6 +10,10 @@ export interface PageSection {
   paragraphs: string[];
   bullets?: string[];
   html?: string;
+  /** A how-to clip at the end of the section. */
+  video?: HowToVideo;
+  /** A line shown just above the clip. */
+  videoIntro?: string;
 }
 
 export interface FaqEntry {
@@ -68,8 +72,8 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
   'how-to-play': {
     id: 'how-to-play',
     path: '/how-to-play',
-    title: 'How to Play Football Squares — QuarterScore',
-    description: 'How to play football squares: 100, 50, or 25 squares, numbers drawn after the board fills, and a winner each quarter from the last digit of each score.',
+    title: 'How to Play Football Squares: Rules — QuarterScore',
+    description: 'How to play football squares, with the same rules for Super Bowl squares: 100, 50 or 25 squares, a draw after the board fills, and a winner each quarter.',
     h1: 'How to play football squares',
     eyebrow: 'Rules',
     lede: 'Football squares is a free board for friends and fans. Choose 100, 50, or 25 squares, add two teams, and pick a winner at the end of each quarter. You do not need to know the sport.',
@@ -147,6 +151,13 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
         paragraphs: [
           'Agree on the rules before kickoff. Most groups count overtime in the final score.',
           'If nobody holds a winning square, that quarter has no winner. QuarterScore moves its points using the rule the host picked. If a quarter ends on the same digits as the one before, the same square wins again.'
+        ]
+      },
+      {
+        heading: 'Super Bowl squares rules',
+        paragraphs: [
+          'Super Bowl squares uses these same rules. Same grid, same draw after the board fills, same last digit of each score at the end of each quarter.',
+          'If your party has first-time players, send this page with the board link, and post your overtime and empty-square rules before kickoff.'
         ]
       }
     ],
@@ -248,12 +259,12 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
   'super-bowl-squares': {
     id: 'super-bowl-squares',
     path: '/super-bowl-squares',
-    title: 'Super Bowl Squares for February 14, 2027 — QuarterScore',
-    description: 'Super Bowl squares for Super Bowl LXI on February 14, 2027. Make a free board before the teams are set and share one link with friends.',
+    title: 'Super Bowl Squares 2027: Free Board and Rules — QuarterScore',
+    description: 'Free Super Bowl squares for February 14, 2027. Make the board before the teams are set, share one link, and get the rules, best numbers and a printable.',
     h1: 'Super Bowl squares',
     notice: 'QuarterScore is not affiliated with, endorsed by, or sponsored by the NFL, NBA, or NCAA. Team and event names are used only to describe the games.',
     eyebrow: 'Super Bowl LXI',
-    lede: 'Make the board before either team is known. Add the team names when the matchup is announced and keep the same link.',
+    lede: 'Make the board before either team is known. Add the team names when the matchup is announced and keep the same link. It is free, and players do not need an account.',
     heroHtml: pageFacts([['Date', 'Sunday, February 14, 2027'], ['Kickoff', '6:30 p.m. ET'], ['Venue', 'SoFi Stadium, Inglewood']]),
     published: '2026-11-01',
     sections: [
@@ -262,6 +273,14 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
         paragraphs: [
           'Squares does not need the teams. Friends claim a square by name, then you draw the digits. When the matchup is announced, add the team names and keep the same link.',
           'February 14 is also Valentine’s Day in 2027. One board still works for a party that mixes fans and people who came for the snacks. Nobody has to understand the sport.'
+        ]
+      },
+      {
+        heading: 'How Super Bowl squares works',
+        paragraphs: [
+          'Pick a board: 100 squares for a big party or office, 50 for a medium group, 25 for a small one. Friends claim squares by name. When the board fills, the host locks it and draws the digits 0 through 9 for each team, so nobody can choose a number.',
+          'At the end of each quarter, take the last digit of each team’s score. A score of 24 to 17 lands on the square where 4 and 7 meet. On 50 and 25 square boards, a side uses digit pairs, so one square covers more than one score.',
+          'The suggested split is 20, 20, 20 and 40 percent of the points, with the final quarter worth the most. It is a label for bragging rights, not money.'
         ]
       },
       {
@@ -274,6 +293,28 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
           'Players claim squares without creating an account.',
           'Each quarter, the last digit of each score names the square.',
           'Celebrate moments, not money. Bragging rights are enough.'
+        ],
+        videoIntro: 'Watch a host make a board in 30 seconds.',
+        video: HOWTO_VIDEOS.createBoard
+      },
+      {
+        heading: 'Which numbers come up most',
+        paragraphs: [
+          'In the historical table, 7 and 0 is the most common pair, at about 3.5 percent of final scores either way round. 2 and 2 almost never comes up. An average square is 1 percent.',
+          'The digits are drawn after names go on, so a good pair is luck. [Best numbers](/best-squares-numbers) has the full table.'
+        ]
+      },
+      {
+        heading: 'Print a paper Super Bowl squares board',
+        paragraphs: [
+          'Want paper on the wall too? The [printable page](/printable-football-squares) has a blank 100-square grid to print or download. Write names first, then draw the numbers.'
+        ]
+      },
+      {
+        heading: 'Put the board on the TV',
+        paragraphs: [
+          'On game day, choose **Present on a TV** from your game. The screen shows the board, each quarter’s winner and a QR code guests can scan to follow on their phones. Link the board to the live game and the score and clock show too.',
+          'Try your TV the day before. [Football squares on TV](/football-squares-on-tv) has the steps for casting and mirroring.'
         ]
       },
       {
@@ -284,9 +325,9 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       }
     ],
     related: [
-      { path: '/how-to-play', label: 'How to play', text: 'Grid, draw, and quarter winners.' },
-      { path: '/best-squares-numbers', label: 'Best numbers', text: 'Which digits history shows most often.' },
-      { path: '/printable-football-squares', label: 'Printable board', text: 'A paper grid for the party wall.' },
+      { path: '/how-to-play', label: 'How to play', text: 'The full rules, including overtime and empty squares.' },
+      { path: '/best-squares-numbers', label: 'Best numbers', text: 'Every digit pair, from 7 and 0 down to 2 and 2.' },
+      { path: '/printable-football-squares', label: 'Printable board', text: 'A blank 100-square grid to print or download.' },
       { path: '/faq', label: 'FAQ', text: 'Accounts, privacy, and money.' },
       { path: '/football-squares-on-tv', label: 'Football squares on TV', text: 'Put the board on a big screen.' }
     ],

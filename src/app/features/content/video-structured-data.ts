@@ -10,11 +10,11 @@ export function isoDuration(seconds: number): string {
 
 /**
  * Every clip a page shows, in page order, once each, skipping clips the player would not render.
- * Reads the same places the marketing page template renders a clip: steps, then FAQ answers.
+ * Reads the same places the marketing page template renders a clip: steps, then FAQ answers, then sections.
  * Google only accepts a VideoObject for a video that is visible on the page, so a new place for clips goes in both.
  */
 export function pageVideos(page: MarketingPage): HowToVideo[] {
-  const clips = [...(page.steps ?? []), ...(page.faqs ?? [])].map(part => part.video);
+  const clips = [...(page.steps ?? []), ...(page.faqs ?? []), ...page.sections].map(part => part.video);
   const seen = new Set<string>();
   const videos: HowToVideo[] = [];
   for (const video of clips) {

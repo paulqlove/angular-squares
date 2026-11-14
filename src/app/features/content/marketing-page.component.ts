@@ -6,6 +6,7 @@ import { HowItWorksDemoComponent } from './how-it-works-demo.component';
 import { HowToVideoComponent } from './howto-video.component';
 import { ReadingEndComponent, ReadingHeaderComponent, ReadingPageComponent, ReadingSectionComponent } from './reading-layout.components';
 import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pages';
+import { richText } from './rich-text';
 import { pageVideos, videoObject } from './video-structured-data';
 
 @Component({
@@ -78,6 +79,12 @@ import { pageVideos, videoObject } from './video-structured-data';
           @if (section.html) {
             <div class="pt-2" [innerHTML]="trustHtml(section.html)"></div>
           }
+          @if (section.video) {
+            @if (section.videoIntro) {
+              <p>{{ section.videoIntro }}</p>
+            }
+            <app-howto-video class="max-w-[30rem]" [video]="section.video"></app-howto-video>
+          }
         </app-reading-section>
       }
 
@@ -98,12 +105,11 @@ export class MarketingPageComponent {
   public readonly breadcrumbs = pageBreadcrumbs(this.page);
   private htmlCache = new Map<string, SafeHtml>();
 
-  /** Plain page text with **bold** for button and menu names. Everything else is escaped. */
+  /** Page copy with **bold** and site links (see richText). Safe to trust: richText escapes everything else. */
   public rich(text: string): SafeHtml {
     const key = `rich:${text}`;
     if (!this.htmlCache.has(key)) {
-      const escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      this.htmlCache.set(key, this.sanitizer.bypassSecurityTrustHtml(escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')));
+      this.htmlCache.set(key, this.sanitizer.bypassSecurityTrustHtml(richText(text)));
     }
     return this.htmlCache.get(key)!;
   }
