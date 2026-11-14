@@ -55,14 +55,15 @@ export function paidSquaresFor(squares: Squares, paidPlayers: readonly string[],
   });
 }
 
+/** How many squares each name holds on a board. */
+export function squaresByPlayer(squares: Squares): NameCounts {
+  const held: NameCounts = {};
+  for (const name of Object.values(squares)) held[name] = (held[name] ?? 0) + 1;
+  return held;
+}
+
 /** The database can hand back a gap as a missing key or a null. */
 function countAt(paidSquares: PaidCounts, index: number): number | undefined {
   const count = paidSquares[index];
   return typeof count === 'number' ? count : undefined;
-}
-
-function squaresByPlayer(squares: Squares): NameCounts {
-  const held: NameCounts = {};
-  for (const name of Object.values(squares)) held[name] = (held[name] ?? 0) + 1;
-  return held;
 }
