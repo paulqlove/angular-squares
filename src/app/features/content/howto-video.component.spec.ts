@@ -3,7 +3,7 @@ import { HowToVideoComponent } from './howto-video.component';
 import { HowToVideo } from './howto-videos';
 
 describe('HowToVideoComponent', () => {
-  const clip: HowToVideo = { youtubeId: 'E7pps5O65BM', title: 'Create a board', caption: 'Tap New board', seconds: 30 };
+  const clip: HowToVideo = { youtubeId: 'E7pps5O65BM', title: 'Create a board', seconds: 30 };
   const embed = (id: string) => `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&playsinline=1&fs=1`;
   const realMatchMedia = window.matchMedia;
 
@@ -34,8 +34,16 @@ describe('HowToVideoComponent', () => {
     const { el } = setup(clip);
     const button = el.querySelector('button')!;
     expect(button.getAttribute('aria-label')).toBe('Play video: Create a board, 0:30');
-    expect(el.textContent).toContain('Tap New board');
+    expect(el.querySelector('img')!.getAttribute('src')).toBe('https://i.ytimg.com/vi/E7pps5O65BM/maxresdefault.jpg');
     expect(el.querySelector('iframe')).toBeNull();
+  });
+
+  it('shows the Short\'s thumbnail on phones when there is a Short', () => {
+    const { el } = setup({ ...clip, phoneYoutubeId: 'mw8cVm6KS2g' });
+    const source = el.querySelector('picture source')!;
+    expect(source.getAttribute('media')).toBe('(max-width: 639.98px)');
+    expect(source.getAttribute('srcset')).toBe('https://i.ytimg.com/vi/mw8cVm6KS2g/maxresdefault.jpg');
+    expect(setup(clip).el.querySelector('picture source')).toBeNull();
   });
 
   it('plays the vertical Short in place on a phone, with full screen allowed', async () => {

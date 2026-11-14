@@ -5,11 +5,16 @@ import { HowToVideo } from './howto-videos';
 
 const YOUTUBE_ID = /^[A-Za-z0-9_-]{11}$/;
 
+/** The largest thumbnail YouTube serves for a video. */
+function thumbnailUrl(id: string): string {
+  return `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
+}
+
 /** Phone widths, where the vertical Short plays in place. Keep in step with the media query in the styles below. */
 const PHONE_QUERY = '(max-width: 639.98px)';
 
 /**
- * A how-to clip that costs nothing until it is tapped: a drawn poster first, then the youtube-nocookie player.
+ * A how-to clip that costs nothing until it is tapped: the video's own YouTube thumbnail first, then the youtube-nocookie player.
  * On phones the player opens in the same box, as the vertical Short when the clip has one.
  * On wider screens it opens large in a centered window over the page, since the columns are too narrow to watch in.
  * Renders nothing without a valid ID.
@@ -32,8 +37,12 @@ const PHONE_QUERY = '(max-width: 639.98px)';
               referrerpolicy="strict-origin-when-cross-origin"></iframe>
           } @else {
             <button #poster type="button" (click)="play()" class="howto-poster group absolute inset-0 flex h-full w-full items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus" [attr.aria-label]="'Play video: ' + video().title + ', ' + length()">
-              <span class="absolute left-3 top-3 z-10 max-w-[70%] rounded-inner bg-qs-tile px-2.5 py-1.5 text-left text-xs font-semibold leading-snug text-qs-tile-ink sm:left-4 sm:top-4 sm:text-sm">{{ video().caption }}</span>
-              <span class="howto-sketch" aria-hidden="true"><span class="howto-sketch-bar"></span></span>
+              <picture class="absolute inset-0" aria-hidden="true">
+                @if (hasPhone()) {
+                  <source media="(max-width: 639.98px)" [attr.srcset]="phoneThumbnail()" />
+                }
+                <img [src]="thumbnail()" alt="" width="1280" height="720" loading="lazy" decoding="async" class="h-full w-full object-cover" />
+              </picture>
               <span class="absolute flex h-12 w-12 items-center justify-center rounded-full bg-qs-tile text-qs-tile-ink shadow-pop transition-transform duration-[var(--qs-t-fast)] ease-[var(--qs-ease)] group-hover:scale-105 group-active:scale-95 sm:h-14 sm:w-14" aria-hidden="true">
                 <svg viewBox="0 0 24 24" class="ml-0.5 h-5 w-5 sm:h-6 sm:w-6" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.53.85l10.2-6.5a1 1 0 0 0 0-1.7L9.53 4.65A1 1 0 0 0 8 5.5Z"/></svg>
               </span>
@@ -66,11 +75,9 @@ const PHONE_QUERY = '(max-width: 639.98px)';
     }
   `,
   styles: `
-    :host {
-      container-type: inline-size;
-    }
+    /* The poster is the video's 16:9 YouTube thumbnail. */
     .howto-box {
-      aspect-ratio: 1280 / 872;
+      aspect-ratio: 16 / 9;
     }
     /* Phones play the vertical Short, so the box turns tall, capped so it fits on screen with room around it. Same width as PHONE_QUERY. */
     @media (max-width: 639.98px) {
@@ -86,9 +93,6 @@ const PHONE_QUERY = '(max-width: 639.98px)';
       :host(.has-phone) figcaption {
         text-align: center;
       }
-      :host(.has-phone) .howto-sketch {
-        width: 78%;
-      }
     }
     /* A small lift on hover says the clip opens bigger. To grow on hover instead, scale .howto-box here. */
     @media (hover: hover) and (min-width: 640px) {
@@ -103,32 +107,6 @@ const PHONE_QUERY = '(max-width: 639.98px)';
       .howto-box:has(.howto-poster:hover) {
         transform: translateY(-3px);
       }
-    }
-    .howto-sketch {
-      position: relative;
-      width: 46%;
-      aspect-ratio: 1280 / 872;
-      overflow: hidden;
-      border-radius: var(--qs-r-inner);
-      background-color: var(--qs-panel);
-      background-image:
-        linear-gradient(var(--qs-line) 1px, transparent 1px),
-        linear-gradient(90deg, var(--qs-line) 1px, transparent 1px);
-      background-size: 10% 10%;
-      background-position: 0 16%;
-      box-shadow: var(--qs-shadow);
-    }
-    /* In a narrow column the board drawing would crowd the caption, so the poster keeps only the caption, play button and length. */
-    @container (max-width: 280px) {
-      .howto-sketch {
-        display: none;
-      }
-    }
-    .howto-sketch-bar {
-      position: absolute;
-      inset: 0 0 auto 0;
-      height: 16%;
-      background: var(--qs-tile);
     }
     /* The large player: as wide as the screen allows up to 1100px, and short enough that the title row and player fit in view. */
     .howto-dialog {
@@ -173,6 +151,9 @@ export class HowToVideoComponent {
     return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
   });
 
+  /** The Short's thumbnail for phones. YouTube serves it 16:9 with the 9:16 image in the middle, so the tall box crops to that image. */
+  public readonly phoneThumbnail = computed(() => thumbnailUrl(this.video().phoneYoutubeId ?? ''));
+
   /** The in-place player's address: the Short on a phone when there is one, the desktop clip otherwise. */
   public readonly playerSrc = computed<SafeResourceUrl | null>(() => {
     const video = this.video();
@@ -184,6 +165,9 @@ export class HowToVideoComponent {
 
   /** The desktop clip's player address, or null when the ID is missing or malformed. */
   public readonly src = computed<SafeResourceUrl | null>(() => this.embed(this.video().youtubeId));
+
+  /** The desktop clip's YouTube thumbnail, the poster everywhere except phones with a Short. */
+  public readonly thumbnail = computed(() => thumbnailUrl(this.video().youtubeId));
 
   public readonly video = input.required<HowToVideo>();
 
