@@ -249,7 +249,7 @@ export interface EditGameValues {
 
               <div class="flex flex-col gap-2">
                 <label for="edit-game-note" class="qs-label text-qs-muted">Note from the host <span class="text-qs-muted">· Optional</span></label>
-                <input id="edit-game-note" type="text" [(ngModel)]="draft.hostNote" maxlength="140" placeholder="Rules, deadline, how to send your entry" class="qs-input" />
+                <input id="edit-game-note" type="text" [(ngModel)]="draft.hostNote" maxlength="140" placeholder="Rules, deadline, how to enter" class="qs-input" />
               </div>
 
               @if (showGameFields) {
