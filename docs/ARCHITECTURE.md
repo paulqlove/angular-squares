@@ -71,6 +71,7 @@ private get db(): Database {
 - `providedIn: 'root'` singletons
 - Modern `inject()` function
 - Clear separation: AuthService, GameService, EspnService, ThemeService
+- `GameService` is the one entry point components use for boards. It delegates to smaller services that share one lazy database handle (`GameDatabaseService`): `GameRecordService` (read, subscribe, update), `GameLifecycleService` (create, reset, resize, delete), `BoardSettingsService`, `UserGamesService`, `LiveGameIndexService`, `TvLinkService`, `EntitlementService` and `SeasonPassService`. Parsing lives in `core/utils/game-parse.ts`; the game types live in `core/utils/game-data.ts` and are re-exported from `game.service.ts`.
 
 ### Routing
 
@@ -114,28 +115,23 @@ Scheduled ESPN scoring lives in `functions/` and is deployed by hand. See [FUNCT
 
 ## Security Analysis
 
-### Critical Issues
+_Updated Nov 13 2026._
 
-1. **Missing Firebase Security Rules** - No `database.rules.json` found in repo. Database may be open.
+### In place
 
-### High Priority
+- **Firebase Security Rules:** `database.rules.json` is in the repo, with notes in `database.rules.notes.md`. Rules are tested against the database emulator with `npm run test:rules` (`test/rules/database.rules.test.ts`). CI deploys hosting only, so rules are deployed separately.
+- **Owner checks on writes:** game writes are checked in the rules, not only in the client.
+- **Field validation:** rules validate field types and lengths (for example `hostNote`, max 140).
 
-3. **XSS Risk** - `bypassSecurityTrustHtml` used in dialog component. Ensure only trusted content is passed.
-4. **No Server-side Authorization** - Game updates rely on client-side checks only.
-5. **npm Vulnerabilities** - Run `npm audit` to check for dependency vulnerabilities.
-6. **Game Route Publicly Accessible** - By design for sharing, but Firebase rules needed to prevent unauthorized writes.
+### Still to watch
 
-### Medium Priority
+1. **`bypassSecurityTrust*`:** used only on content the app builds itself (the YouTube embed URL, escaped marketing copy). User-typed text must never reach it.
+2. **npm vulnerabilities:** run `npm audit` whenever dependencies change.
+3. **Firebase API key:** public by design for web apps; keep it restricted to our domains in the GCP Console.
+4. **Predictable guest user IDs:** uses timestamp only; consider adding randomness.
+5. **No rate limiting:** Firebase operations have no throttling. Consider Firebase App Check.
 
-7. **Firebase API Key Exposed** - Normal for client-side apps, but restrict in GCP Console to your domains.
-8. **Predictable Guest User IDs** - Uses timestamp only; consider adding randomness.
-9. **No Rate Limiting** - Firebase operations have no throttling.
-
-### Recommendations
-
-- Deploy Firebase Security Rules immediately
-- Run `npm audit fix`
-- Consider Firebase App Check for additional protection
+The security checks every change must pass are in [the engineering skill](../.claude/skills/quarterscore-engineering/SKILL.md), section 5.
 
 ---
 
@@ -151,14 +147,14 @@ Scheduled ESPN scoring lives in `functions/` and is deployed by hand. See [FUNCT
 
 ### Areas for Improvement
 
-1. **Large Components**
-   - `dashboard.component.ts` (~1096 lines)
-   - `super-bowl-squares.component.ts` (~795 lines)
-   - Consider extracting sub-components
+1. **Large Files** (sizes as of Nov 13 2026)
+   - `super-bowl-squares.component.ts` (~1,850 lines)
+   - `dashboard.component.ts` (~1,640 lines)
+   - Being split now into smaller components and services, in their own PRs (decision D-019). The limits are in [the engineering skill](../.claude/skills/quarterscore-engineering/SKILL.md), section 2.
 
 2. **Code Duplication**
-   - Game data parsing logic duplicated in GameService methods
-   - Could extract to helper functions
+   - Board parsing is now one function (`parseGameData` in `core/utils/game-parse.ts`)
+   - The empty-scores object (`q1` to `q4` at 0) is still written out in ten places across six files
 
 3. **Missing Error Feedback**
    - `console.error` calls without user-facing notifications
@@ -194,15 +190,12 @@ Scheduled ESPN scoring lives in `functions/` and is deployed by hand. See [FUNCT
 
 ## Testing Status
 
-- Minimal test coverage
-- Boilerplate spec files exist but may be outdated
-- No E2E tests
+_Updated Nov 13 2026. Approach chosen by Paul: lighter tests (decision D-018)._
 
-### Recommended Testing Strategy
-
-1. Unit tests for services (especially GameService, AuthService)
-2. Component tests for critical flows (game creation, square selection)
-3. E2E tests for happy paths (sign in, create game, select squares, view winners)
+- **Required:** unit tests for new or changed logic in services and pure utilities (scoring, winners, quarter splits, data shaping). The spec sits next to the file.
+- **Required:** rules tests (`npm run test:rules`) for any change to `database.rules.json`.
+- **UI:** checked with phone and desktop screenshots, light and dark, not component tests.
+- No E2E suite for now.
 
 ---
 
@@ -210,7 +203,7 @@ Scheduled ESPN scoring lives in `functions/` and is deployed by hand. See [FUNCT
 
 ### Immediate (Security)
 
-1. Create and deploy Firebase Security Rules
+1. Keep rules tests passing on every rules change
 2. Fix npm vulnerabilities (`npm audit fix`)
 
 ### Short-term (Quality)
@@ -221,8 +214,8 @@ Scheduled ESPN scoring lives in `functions/` and is deployed by hand. See [FUNCT
 
 ### Medium-term (Maintainability)
 
-7. Split large components (dashboard, game board)
-8. Add comprehensive tests
+7. Split the three large files (in progress, D-019)
+8. Add tests for services and utilities as they change
 9. Implement centralized logging/error service
 
 ---
@@ -230,5 +223,8 @@ Scheduled ESPN scoring lives in `functions/` and is deployed by hand. See [FUNCT
 ## Related Documentation
 
 - [CLAUDE.md](../CLAUDE.md) - Development guidelines
+- [Engineering skill](../.claude/skills/quarterscore-engineering/SKILL.md) - Build rules and definition of done
+- [Consolidator skill](../.claude/skills/consolidator/SKILL.md) - Efficiency reviewer run on every PR
+- [DECISIONS.md](./DECISIONS.md) - Decision log
 - [TODO.md](./TODO.md) - Task tracking
 - [ENHANCEMENT_PLAN.md](../ENHANCEMENT_PLAN.md) - Feature roadmap

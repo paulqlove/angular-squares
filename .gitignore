@@ -36,6 +36,7 @@ yarn-error.log
 /libpeerconnection.log
 testem.log
 /typings
+/scripts/seed/node_modules/
 
 # System files
 .DS_Store
@@ -46,8 +47,9 @@ Thumbs.db
 .env.local
 .env.*.local
 
-# Claude Code
-.claude/
+# Claude Code (skills are shared in the repo; everything else stays local)
+.claude/*
+!.claude/skills/
 
 # Firebase emulator and CLI logs
 .firebase/
