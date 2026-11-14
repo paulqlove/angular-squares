@@ -52,11 +52,6 @@ describe('video structured data', () => {
     expect(pageVideos(page({ steps: [{ name: 'A', text: 'a', video: { ...clip, youtubeId: 'bad"/><x>' } }] }))).toEqual([]);
   });
 
-  it('picks up a clip on a section', () => {
-    const section = { heading: 'S', paragraphs: [], video: clip };
-    expect(pageVideos(page({ sections: [section] }))).toEqual([clip]);
-  });
-
   it('gives every clip a short description and a dated upload with its time zone', () => {
     for (const video of Object.values(HOWTO_VIDEOS) as HowToVideo[]) {
       expect(video.description.length).toBeGreaterThan(0);

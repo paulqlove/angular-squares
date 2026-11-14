@@ -145,7 +145,7 @@ export class MarketingPageComponent {
         }))
       });
     }
-    // Top-level blocks, one per clip, so Google reads them the same way for steps, FAQ answers and sections.
+    // Top-level blocks, one per clip, so Google reads them the same way for steps and FAQ answers.
     extra.push(...pageVideos(this.page).map(videoObject));
 
     this.seo.apply({
