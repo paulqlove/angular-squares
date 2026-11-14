@@ -2,18 +2,19 @@ import { inject, Injectable } from '@angular/core';
 import { AuthService } from '../../../core/services/auth.service';
 import { GameService } from '../../../core/services/game.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { withoutPlayer } from '../../../core/utils/board-players';
 import type { PaidCounts } from '../../../core/utils/game-data';
 import { filledPaidSquares, paidCountsByName, paidSquaresFor } from '../../../core/utils/paid-squares';
-import { nextPlayerColor, withoutEntries } from '../utils/board-math';
+import { nextPlayerColor } from '../utils/board-math';
 import { GamePageUiService } from './game-page-ui.service';
 import { GameStateService } from './game-state.service';
 
 interface PlayersSnapshot {
-  colors: { [key: string]: string };
   paid: Set<string>;
   paidSquares: PaidCounts;
-  squares: { [key: string]: string };
-  userIds: { [name: string]: string };
+  playerColors: { [key: string]: string };
+  playerUserIds: { [name: string]: string };
+  selectedSquares: { [key: string]: string };
   winners: { [key: string]: string };
 }
 
@@ -94,27 +95,20 @@ export class GamePlayersService {
     }
 
     const previous = this.snapshot();
+    const next = withoutPlayer({ ...previous, paidPlayers: Array.from(previous.paid) }, playerName);
 
-    state.selectedSquares = withoutEntries(state.selectedSquares, (_, name) => name === playerName);
-    state.playerColors = withoutEntries(state.playerColors, key => key === playerName);
-    const paidCounts = paidCountsByName(state.paidPlayers, state.paidSquares);
-    state.paidPlayers = new Set([...state.paidPlayers].filter(name => name !== playerName));
-    state.paidSquares = paidSquaresFor(state.selectedSquares, Array.from(state.paidPlayers), paidCounts);
-    state.playerUserIds = withoutEntries(state.playerUserIds, key => key === playerName);
-    state.winners = withoutEntries(state.winners, (_, name) => name === playerName);
+    state.selectedSquares = next.selectedSquares;
+    state.playerColors = next.playerColors;
+    state.paidPlayers = new Set(next.paidPlayers);
+    state.paidSquares = next.paidSquares;
+    state.playerUserIds = next.playerUserIds;
+    state.winners = next.winners;
     if (this.ui.selectedPlayer === playerName) this.ui.selectedPlayer = null;
     state.calculatePlayerStats();
     this.refreshPaymentDialog();
 
     try {
-      await this.gameService.updateGame(state.gameId, {
-        selectedSquares: state.selectedSquares,
-        playerColors: state.playerColors,
-        paidPlayers: Array.from(state.paidPlayers),
-        paidSquares: state.paidSquares,
-        playerUserIds: state.playerUserIds,
-        winners: state.winners
-      });
+      await this.gameService.updateGame(state.gameId, next);
       this.toastService.success(`Removed ${playerName}`);
     } catch {
       this.restore(previous);
@@ -154,11 +148,11 @@ export class GamePlayersService {
   /** Puts back the players a failed removal took off. */
   private restore(previous: PlayersSnapshot): void {
     const state = this.state;
-    state.selectedSquares = previous.squares;
-    state.playerColors = previous.colors;
+    state.selectedSquares = previous.selectedSquares;
+    state.playerColors = previous.playerColors;
     state.paidPlayers = previous.paid;
     state.paidSquares = previous.paidSquares;
-    state.playerUserIds = previous.userIds;
+    state.playerUserIds = previous.playerUserIds;
     state.winners = previous.winners;
     state.calculatePlayerStats();
     this.refreshPaymentDialog();
@@ -168,11 +162,11 @@ export class GamePlayersService {
   private snapshot(): PlayersSnapshot {
     const state = this.state;
     return {
-      squares: state.selectedSquares,
-      colors: state.playerColors,
+      selectedSquares: state.selectedSquares,
+      playerColors: state.playerColors,
       paid: state.paidPlayers,
       paidSquares: state.paidSquares,
-      userIds: state.playerUserIds,
+      playerUserIds: state.playerUserIds,
       winners: state.winners
     };
   }

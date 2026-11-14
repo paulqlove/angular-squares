@@ -88,6 +88,12 @@ export interface GameData {
   emptyQuarterRule?: EmptyQuarterRule;
 }
 
+/** One board's changed fields, for saving several boards at once. */
+export interface GameChange {
+  gameId: string;
+  data: Partial<GameData>;
+}
+
 export interface GameListItem {
   id: string;
   name: string;

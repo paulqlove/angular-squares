@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Entitlement, EmptyQuarterRule, QuarterSplit } from '../plans';
 import type { AutoManageSettings } from '../utils/auto-manage';
-import { BoardSize, GameData, GameListItem, SportType, TvLink } from '../utils/game-data';
+import { BoardSize, GameChange, GameData, SportType, TvLink } from '../utils/game-data';
 import type { OpenBoardRow } from '../utils/open-boards';
 import type { RecentVisit } from '../utils/recent-games';
 import { BoardSettingsService } from './board-settings.service';
@@ -16,7 +16,7 @@ import { UserGamesService } from './user-games.service';
 
 // The game types moved to utils/game-data.ts. Re-exported so every existing import keeps working.
 export { getBoardDimensions } from '../utils/game-data';
-export type { BoardSize, EspnLiveSnapshot, GameData, GameListItem, SportType, TvLink } from '../utils/game-data';
+export type { BoardSize, EspnLiveSnapshot, GameChange, GameData, GameListItem, SportType, TvLink } from '../utils/game-data';
 
 /**
  * The one entry point components use for boards. Each method hands off to the service that owns
@@ -115,9 +115,9 @@ export class GameService {
     return this.seasonPass.getGiftedSeasonPass(email);
   }
 
-  /** Games the user joined (not owned), newest first. */
-  public getJoinedGames(userId: string): Promise<GameListItem[]> {
-    return this.userGames.getJoinedGames(userId);
+  /** Boards the user joined (not owned), newest first. */
+  public getJoinedGameRecords(userId: string): Promise<GameData[]> {
+    return this.userGames.getJoinedGameRecords(userId);
   }
 
   /** The same host's other boards a player on a full board can join. Empty on any error. */
@@ -146,9 +146,9 @@ export class GameService {
     return this.userGames.getUserGameIds(userId);
   }
 
-  /** Games the user hosts, newest first. */
-  public getUserGames(userId: string): Promise<GameListItem[]> {
-    return this.userGames.getUserGames(userId);
+  /** Boards the user hosts, newest first. */
+  public getUserGameRecords(userId: string): Promise<GameData[]> {
+    return this.userGames.getUserGameRecords(userId);
   }
 
   /** Hosted and joined games with when each was created or joined, for the Your Games menu. */
@@ -264,6 +264,11 @@ export class GameService {
 
   public updateGameManager(gameId: string, managerId: string | null, managerEmail: string | null, managerName: string | null = null): Promise<void> {
     return this.lifecycle.updateGameManager(gameId, managerId, managerEmail, managerName);
+  }
+
+  /** Saves several boards in one update: all or none. */
+  public updateGames(changes: ReadonlyArray<GameChange>): Promise<void> {
+    return this.records.updateGames(changes);
   }
 
   /** Live boards and interval for a TV link. null when the link is off or unknown. */

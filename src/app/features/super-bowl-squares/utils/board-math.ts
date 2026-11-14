@@ -184,11 +184,6 @@ export function renamePlayer(data: PlayerData, oldName: string, newName: string)
   };
 }
 
-/** A copy of a map without the entries `drop` picks. */
-export function withoutEntries<T>(map: { [key: string]: T }, drop: (key: string, value: T) => boolean): { [key: string]: T } {
-  return Object.fromEntries(Object.entries(map).filter(([key, value]) => !drop(key, value)));
-}
-
 /** A copy of a map with one key's value moved to a new key, when the old key has a value. */
 function renameKey(map: { [key: string]: string }, oldKey: string, newKey: string): { [key: string]: string } {
   const copy = { ...map };
