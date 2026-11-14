@@ -2,11 +2,27 @@
   <div class="flex min-w-0 items-baseline gap-2.5">
     <h3 id="hosting-heading" class="qs-section-title">Hosting</h3>
     @if (!store.isLoadingGames()) {
-      <span class="qs-label text-qs-muted">{{ countLabel() }}</span>
+      <span class="qs-label whitespace-nowrap text-qs-muted">{{ countLabel() }}</span>
     }
   </div>
-  <div appDashboardViewToggle role="group" aria-label="Card view" class="hidden shrink-0 gap-0.5 sm:flex"></div>
+  <div class="hidden shrink-0 items-center gap-2 sm:flex">
+    @if (players.available()) {
+      <div class="qs-seg" role="group" aria-label="Show">
+        <button type="button" [attr.aria-pressed]="!players.active()" (click)="players.mode.set('boards')">Boards</button>
+        <button type="button" [attr.aria-pressed]="players.active()" (click)="players.mode.set('players')">Players</button>
+      </div>
+    }
+    @if (!players.active()) {
+      <div appDashboardViewToggle role="group" aria-label="Card view" class="flex gap-0.5"></div>
+    }
+  </div>
 </div>
+
+<!-- Players view: desktop for now; phones keep the boards -->
+@if (players.active()) {
+  <div appPlayersView class="hidden sm:block"></div>
+}
+<div [class]="players.active() ? 'sm:hidden' : ''">
 
 @if (store.isLoadingGames()) {
   <div class="qs-skel-delay mt-4 grid grid-cols-1 gap-3" data-card-grid [class]="view.cardGridClass()" aria-busy="true">
@@ -69,3 +85,4 @@
     </div>
   }
 }
+</div>

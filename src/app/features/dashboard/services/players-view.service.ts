@@ -20,6 +20,8 @@ export interface ConfirmNote {
  */
 @Injectable()
 export class PlayersViewService {
+  /** The Players view is on screen. */
+  public readonly active = computed<boolean>(() => this.available() && this.mode() === 'players');
   /** Season Pass hosts with two or more boards they run get the Boards | Players switch. */
   public readonly available = computed<boolean>(() => this.planService.features().playersView && this.boards().length >= 2);
   /** The boards in season order (oldest first), so each game keeps one spot in every player's tiles. */
@@ -28,15 +30,21 @@ export class PlayersViewService {
   public readonly confirmed = computed<PlayerSummary[]>(() => this.players().filter(player => player.confirmed));
   /** One game picked from the games menu, or null for all. */
   public readonly gameFilter = signal<string | null>(null);
+  /** Boards or Players, from the switch in the Hosting heading. */
+  public readonly mode = signal<'boards' | 'players'>('boards');
   /** The player whose card is open. */
   public readonly openKey = signal<string | null>(null);
   public readonly players = computed<PlayerSummary[]>(() => {
-    const filter = this.gameFilter();
-    const boards = this.boards().filter(board => !filter || board.id === filter) as PlayersBoard[];
+    const boards = this.shownBoards() as PlayersBoard[];
     const search = this.search().trim().toLowerCase();
     return playersAcrossGames(boards).filter(player => !search || [player.name, ...player.otherNames].some(name => name.toLowerCase().includes(search)));
   });
   public readonly search = signal<string>('');
+  /** The boards the list covers: all of them, or the one picked from the games menu. Each is one tile column. */
+  public readonly shownBoards = computed<GameData[]>(() => {
+    const filter = this.gameFilter();
+    return this.boards().filter(board => !filter || board.id === filter);
+  });
   public readonly unconfirmed = computed<PlayerSummary[]>(() => this.players().filter(player => !player.confirmed));
 
   /** Confirms the player on one game, for the squares they hold there now. */

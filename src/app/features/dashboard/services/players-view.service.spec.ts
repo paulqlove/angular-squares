@@ -47,6 +47,15 @@ describe('PlayersViewService', () => {
     expect(view.available()).toBe(false);
   });
 
+  it('shows the Players view only once the host switches to it', () => {
+    const view = TestBed.inject(PlayersViewService);
+    expect(view.active()).toBe(false);
+    view.mode.set('players');
+    expect(view.active()).toBe(true);
+    features.set({ playersView: false });
+    expect(view.active()).toBe(false);
+  });
+
   it('puts the boards in season order', () => {
     expect(TestBed.inject(PlayersViewService).boards().map(b => b.id)).toEqual(['A', 'B']);
   });
@@ -101,5 +110,6 @@ describe('PlayersViewService', () => {
     const view = TestBed.inject(PlayersViewService);
     view.gameFilter.set('B');
     expect(view.players().map(player => player.name)).toEqual(['Kim']);
+    expect(view.shownBoards().map(b => b.id)).toEqual(['B']);
   });
 });

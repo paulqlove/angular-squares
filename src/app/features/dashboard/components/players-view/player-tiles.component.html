@@ -1,0 +1,37 @@
+@for (game of tiles(); track $index) {
+  @if (!game) {
+    <span class="qs-tile qs-tile-off" aria-hidden="true"></span>
+  } @else if (game.confirmed) {
+    <span class="qs-tile bg-qs-ink" (mouseenter)="showTip($event, game)" (mouseleave)="hideTip()" aria-hidden="true"></span>
+  } @else {
+    <button
+      type="button"
+      class="qs-tile"
+      [class]="game.newSquares ? 'bg-qs-warn' : 'border-[1.5px] border-qs-line-strong'"
+      [attr.aria-label]="'Confirm ' + game.name + ' on ' + game.gameName"
+      (click)="confirm($event, game)"
+      (mouseenter)="showTip($event, game)"
+      (mouseleave)="hideTip()"
+      (focus)="showTip($event, game)"
+      (blur)="hideTip()"
+    ></button>
+  }
+}
+@if (tip(); as t) {
+  <!-- Fixed, so the card's rounded clip never cuts it off -->
+  <span
+    class="qs-tile-tip pointer-events-none fixed z-50 w-52 -translate-x-1/2 rounded-inner bg-qs-ink px-3 py-2 text-left text-qs-bg shadow-pop"
+    [style.left.px]="t.left"
+    [style.top.px]="t.top"
+    role="tooltip"
+  >
+    <span translate="no" class="block truncate text-sm font-medium">{{ t.game.gameName }}</span>
+    <span class="block text-xs opacity-80">
+      {{ t.game.squares }} sq · {{ t.game.points }} pts ·
+      {{ t.game.confirmed ? 'confirmed' : t.game.newSquares ? '+' + t.game.newSquares + ' new' : 'not confirmed' }}
+    </span>
+    @if (!t.game.confirmed) {
+      <span class="mt-1 block text-xs font-semibold">Click to confirm</span>
+    }
+  </span>
+}
