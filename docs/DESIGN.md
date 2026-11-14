@@ -345,7 +345,7 @@ Season Pass hosts with two or more games (hosted or co-hosted) get a Boards | Pl
 - **Remove asks first:** "Remove Dana from Playoffs? 4 squares open back up. Their other games stay." on the bad-soft fill, Cancel and Remove. Locked games keep their squares.
 - **Confirm rest** shows at once with Undo in the note under the player.
 - **All confirmed:** when a player's last unconfirmed game is confirmed (toggle, tile or Confirm rest), the card stays where it is, its panel fades out (120ms), and the line under the name becomes a check and "All confirmed" in ink, never green (the check fades in and grows from 0.8, 160ms). It holds 900ms, then fades and drops 8px over 200ms (`--qs-ease-in`) and lands in Confirmed with the usual fade-in. Opening the card during the hold stops it, and the card stays put until it closes. A polite live region says "Dana, all games confirmed". Reduced motion: "All confirmed" shows at once, holds 900ms, then a plain 120ms fade.
-- **Motion:** rows and cards fade in (`qs-row-in`, 160ms) and an open panel fades out (`qs-row-out`, 120ms); the confirm toggle slides. Reduced motion turns these off.
+- **Motion:** rows and cards fade in (`qs-row-in`, 160ms) and an open panel fades out (`qs-row-out`, 120ms); the card's arrow turns with its panel, both ways, over 200ms; the confirm toggle slides. On first load the first eight cards arrive 30ms apart and the rest with the eighth, about a quarter second in all. Reduced motion turns these off.
 
 ### Switch and toggle
 
