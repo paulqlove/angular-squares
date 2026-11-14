@@ -305,9 +305,9 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
         ]
       },
       {
-        heading: 'Print a Super Bowl squares template',
+        heading: 'Print a paper Super Bowl squares board',
         paragraphs: [
-          'Want paper on the wall too? The [printable page](/printable-football-squares) has a blank 100-square grid, a 25-square sheet for small groups, and a board with the digits already filled in. Write names first, then the numbers.'
+          'Want paper on the wall too? The [printable page](/printable-football-squares) has a blank 100-square grid to print or download. Write names first, then draw the numbers.'
         ]
       },
       {
@@ -327,7 +327,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     related: [
       { path: '/how-to-play', label: 'How to play', text: 'The full rules, including overtime and empty squares.' },
       { path: '/best-squares-numbers', label: 'Best numbers', text: 'Every digit pair, from 7 and 0 down to 2 and 2.' },
-      { path: '/printable-football-squares', label: 'Printable template', text: 'A blank grid, a 25-square sheet and a pre-numbered board.' },
+      { path: '/printable-football-squares', label: 'Printable board', text: 'A blank 100-square grid to print or download.' },
       { path: '/faq', label: 'FAQ', text: 'Accounts, privacy, and money.' },
       { path: '/football-squares-on-tv', label: 'Football squares on TV', text: 'Put the board on a big screen.' }
     ],
