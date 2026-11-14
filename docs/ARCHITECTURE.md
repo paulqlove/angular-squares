@@ -150,7 +150,6 @@ The security checks every change must pass are in [the engineering skill](../.cl
 1. **Large Files** (sizes as of Nov 13 2026)
    - `super-bowl-squares.component.ts` (~1,850 lines)
    - `dashboard.component.ts` (~1,640 lines)
-   - `game.service.ts` (~1,280 lines)
    - Being split now into smaller components and services, in their own PRs (decision D-019). The limits are in [the engineering skill](../.claude/skills/quarterscore-engineering/SKILL.md), section 2.
 
 2. **Code Duplication**
