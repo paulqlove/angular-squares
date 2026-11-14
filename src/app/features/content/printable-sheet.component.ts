@@ -32,6 +32,8 @@ import { ChangeDetectionStrategy, Component, DOCUMENT, computed, inject, input, 
     }
     /* Paper: real borders, because browsers leave out background colors when printing by default. */
     @media print {
+      /* Light-theme ink on paper, so a dark-theme page doesn't print pale text on white. */
+      :host { --qs-ink: #0f172a; --qs-muted: #5b6070; --qs-line-strong: #8b909d; }
       .board { max-width: none; gap: 0; padding: 0; border-radius: 0; background: none; border-top: 1pt solid #000; border-left: 1pt solid #000; }
       .grid-row { gap: 0; }
       .cell { border-right: 1pt solid #000; border-bottom: 1pt solid #000; }
