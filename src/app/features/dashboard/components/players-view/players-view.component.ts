@@ -3,15 +3,16 @@ import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroCheck, heroChevronDown, heroChevronUp, heroLockClosed, heroMagnifyingGlass, heroUserMinus, heroXMark } from '@ng-icons/heroicons/outline';
 
 import { PlayersViewService } from '../../services/players-view.service';
+import { PlayerCardComponent } from './player-card.component';
 import { PlayerRowComponent } from './player-row.component';
 
 /**
- * The Players view (Season Pass, desktop): find a player, narrow to one game, then the players in two groups,
- * Unconfirmed and Confirmed. Sits in the Hosting section in place of the boards (`<div appPlayersView>`).
+ * The Players view (Season Pass): find a player, narrow to one game, then the players in two groups, Unconfirmed and
+ * Confirmed: a table with a tile per game from 640px up, a card per player on a phone. Sits in the Hosting section in place of the boards (`<div appPlayersView>`).
  */
 @Component({
   selector: 'div[appPlayersView]',
-  imports: [NgIconComponent, PlayerRowComponent],
+  imports: [NgIconComponent, PlayerCardComponent, PlayerRowComponent],
   providers: [provideIcons({ heroCheck, heroChevronDown, heroChevronUp, heroLockClosed, heroMagnifyingGlass, heroUserMinus, heroXMark })],
   templateUrl: './players-view.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
