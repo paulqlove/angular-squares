@@ -155,9 +155,9 @@ function clean(value) {
     .trim();
 }
 
-/** Page copy links other pages as [label](/path); this file is read off the site, so the paths become full URLs. */
+/** Page copy links other pages as [label](/path); this file is read off the site, so the paths become full URLs. Same paths as SITE_LINK in rich-text.ts. */
 function siteLinks(text, origin) {
-  return text.replace(/\]\((\/[^)]*)\)/g, `](${origin}$1)`);
+  return text.replace(/\]\((\/(?!\/)[a-z0-9/-]*)\)/g, `](${origin}$1)`);
 }
 
 /** Bundles the TypeScript page data into a temporary module and imports it. */

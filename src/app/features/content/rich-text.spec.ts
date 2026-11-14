@@ -18,6 +18,7 @@ describe('richText', () => {
   it('leaves links to other sites as plain text', () => {
     expect(richText('[site](https://example.com)')).toBe('[site](https://example.com)');
     expect(richText('[x](javascript:alert(1))')).toBe('[x](javascript:alert(1))');
+    expect(richText('[x](//evil)')).toBe('[x](//evil)');
   });
 
   it('does not let a link label carry markup', () => {
