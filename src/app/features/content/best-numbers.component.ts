@@ -1,6 +1,7 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
-import { SeoService } from '../../core/services/seo.service';
+import { BreadcrumbItem, SeoService } from '../../core/services/seo.service';
 import { SQUARES_PROBABILITIES } from '../super-bowl-squares/utils/probability.utils';
+import { bottomDigitPairs, DigitPair, topDigitPairs } from './digit-pair-ranks';
 import { PageCta, RelatedLink } from './marketing-pages';
 import { ReadingEndComponent, ReadingHeaderComponent, ReadingPageComponent, ReadingSectionComponent } from './reading-layout.components';
 
@@ -11,16 +12,27 @@ import { ReadingEndComponent, ReadingHeaderComponent, ReadingPageComponent, Read
     template: `
     <app-reading-page [breadcrumbs]="breadcrumbs">
       <app-reading-header
-        eyebrow="Historical frequencies"
-        title="Best squares numbers"
-        lede="Some last digits show up more often than others in professional football scores. This is the table behind the Hit rate tab on every board. It describes the past and does not predict your game."
+        eyebrow="Football squares hit rates"
+        title="Best Super Bowl squares numbers"
+        lede="You drew 7 and 0, and someone across the room groans at their 2 and 5. Some last digits do end pro football scores more often than others. This is the table behind the Hit rate tab on every board. It describes the past, not your game."
       ></app-reading-header>
+
+      <app-reading-section heading="The short answer" headingId="answer-heading">
+        <p>
+          The best pair is {{ pairName(bestPairs[0]) }}, at about {{ bestPairs[0].share.toFixed(1) }} percent of past
+          final scores either way round. Next come {{ pairName(bestPairs[1]) }} at {{ bestPairs[1].share.toFixed(1) }}
+          and {{ pairName(bestPairs[2]) }} at about {{ bestPairs[2].share.toFixed(1) }}. The worst is
+          {{ pairName(worstPairs[0]) }}, which rounds to {{ worstPairs[0].share.toFixed(1) }} percent, then
+          {{ pairName(worstPairs[1]) }} at {{ worstPairs[1].share.toFixed(1) }}. An average square is 1 percent.
+        </p>
+      </app-reading-section>
 
       <app-reading-section heading="Why 0, 7, 3, and 4 lead" headingId="why-heading">
         <p>
-          Football scoring clumps: a touchdown with an extra point is 7, a field goal is 3. The away
-          team’s last digit is 0 about {{ awayShare(0) }} of the time and 7 about {{ awayShare(7) }}.
-          Digits 2 and 5 are the least common, near {{ awayShare(2) }} and {{ awayShare(5) }}.
+          Football points come in chunks. A touchdown and extra point make 7, two make 14, and three make 21.
+          A field goal adds 3, and scores like 10, 20 and 30 end in 0. The away team’s last digit is 0 about
+          {{ awayShare(0) }} of the time and 7 about {{ awayShare(7) }}. Digits 2 and 5 take less common mixes
+          of scores, so they sit near {{ awayShare(2) }} and {{ awayShare(5) }}.
         </p>
         <p>A rare square still comes up. The draw is random on purpose.</p>
       </app-reading-section>
@@ -82,9 +94,15 @@ import { ReadingEndComponent, ReadingHeaderComponent, ReadingPageComponent, Read
 
       <app-reading-section heading="Use it for fun" headingId="luck-heading">
         <p>
-          This is one grid for the whole game, because the source does not split it by quarter.
-          Numbers are drawn after the names are on the board, so a good digit is luck. Bring the board for the company.
+          This is one grid for the whole game, because the source does not split it by quarter. Pull it up when
+          someone gloats about their 7, or when the person holding a 5 needs some hope.
         </p>
+        <ul class="list-disc space-y-2 pl-5">
+          <li>Numbers are drawn after the names are on the board, so nobody gets to pick 7 and 0.</li>
+          <li>History is not a promise. One safety or missed extra point can put a 2 or a 5 in play.</li>
+          <li>Even the best pair is under 4 percent, so the winning square is often one nobody talked up.</li>
+          <li>It is a party, not a math test. Bring the board for the company.</li>
+        </ul>
       </app-reading-section>
 
       <app-reading-end [related]="related" [cta]="cta"></app-reading-end>
@@ -92,27 +110,6 @@ import { ReadingEndComponent, ReadingHeaderComponent, ReadingPageComponent, Read
   `
 })
 export class BestNumbersComponent {
-  private seo = inject(SeoService);
-
-  public readonly digits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-  public readonly breadcrumbs = [
-    { name: 'Home', path: '/' },
-    { name: 'Best squares numbers', path: '/best-squares-numbers' }
-  ];
-
-  public readonly related: RelatedLink[] = [
-    { path: '/how-to-play', label: 'How to play', text: 'How the draw and the quarter winner work.' },
-    { path: '/super-bowl-squares', label: 'Super Bowl squares', text: 'The February 14, 2027 board.' },
-    { path: '/', fragment: 'probability-heatmap', label: 'Hit rates on the homepage', text: 'Where the in-game tab is introduced.' }
-  ];
-  public readonly cta: PageCta = {
-    path: '/create',
-    label: 'Create a board',
-    note: 'See the same colors on your own board after the numbers are drawn. QuarterScore never collects, holds, or pays out money.'
-  };
-
-  private readonly awayTotals: number[];
-
   constructor() {
     const away = Array(10).fill(0);
     for (const digit of this.digits) {
@@ -123,18 +120,32 @@ export class BestNumbersComponent {
     this.awayTotals = away;
 
     this.seo.apply({
-      title: 'Best Squares Numbers from Scoring History — QuarterScore',
-      description: 'Best Super Bowl squares numbers, from the same historical digit table as the QuarterScore Hit rate tab. See how often each last-digit pair has shown up.',
+      title: 'Best Super Bowl Squares Numbers — QuarterScore',
+      description: `The best Super Bowl squares numbers are ${this.pairName(this.bestPairs[0])}. The worst pair is ${this.pairName(this.worstPairs[0])}. See how often every last-digit pair has ended a past pro football game.`,
       path: '/best-squares-numbers',
-      headline: 'Best squares numbers',
+      headline: 'Best Super Bowl squares numbers',
       published: '2026-11-01',
       breadcrumbs: this.breadcrumbs
     });
   }
 
-  public share(away: number, home: number): number {
-    return SQUARES_PROBABILITIES[`${away},${home}`] ?? 0;
-  }
+  public readonly bestPairs: DigitPair[] = topDigitPairs(SQUARES_PROBABILITIES, 3);
+  public readonly breadcrumbs: BreadcrumbItem[] = [
+    { name: 'Home', path: '/' },
+    { name: 'Best squares numbers', path: '/best-squares-numbers' }
+  ];
+  public readonly cta: PageCta = {
+    path: '/create',
+    label: 'Create a board',
+    note: 'See the same colors on your own board after the numbers are drawn. QuarterScore never collects, holds, or pays out money.'
+  };
+  public readonly digits: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+  public readonly related: RelatedLink[] = [
+    { path: '/how-to-play', label: 'How to play', text: 'How the draw and the quarter winner work.' },
+    { path: '/super-bowl-squares', label: 'Super Bowl squares', text: 'The February 14, 2027 board.' },
+    { path: '/', fragment: 'probability-heatmap', label: 'Hit rates on the homepage', text: 'Where the in-game tab is introduced.' }
+  ];
+  public readonly worstPairs: DigitPair[] = bottomDigitPairs(SQUARES_PROBABILITIES, 2);
 
   public awayShare(digit: number): string {
     return `${this.awayTotals[digit].toFixed(1)} percent`;
@@ -149,4 +160,14 @@ export class BestNumbersComponent {
     return 'qs-heat-0';
   }
 
+  public pairName(pair: DigitPair): string {
+    return `${pair.away} and ${pair.home}`;
   }
+
+  public share(away: number, home: number): number {
+    return SQUARES_PROBABILITIES[`${away},${home}`] ?? 0;
+  }
+
+  private readonly awayTotals: number[];
+  private readonly seo: SeoService = inject(SeoService);
+}
