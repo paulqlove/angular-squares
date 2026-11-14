@@ -1,5 +1,5 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
-import { SeoService } from '../../core/services/seo.service';
+import { BreadcrumbItem, SeoService } from '../../core/services/seo.service';
 import { SQUARES_PROBABILITIES } from '../super-bowl-squares/utils/probability.utils';
 import { bottomDigitPairs, DigitPair, topDigitPairs } from './digit-pair-ranks';
 import { PageCta, RelatedLink } from './marketing-pages';
@@ -110,29 +110,6 @@ import { ReadingEndComponent, ReadingHeaderComponent, ReadingPageComponent, Read
   `
 })
 export class BestNumbersComponent {
-  private seo = inject(SeoService);
-
-  public readonly bestPairs: DigitPair[] = topDigitPairs(SQUARES_PROBABILITIES, 3);
-  public readonly digits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-  public readonly worstPairs: DigitPair[] = bottomDigitPairs(SQUARES_PROBABILITIES, 2);
-  public readonly breadcrumbs = [
-    { name: 'Home', path: '/' },
-    { name: 'Best squares numbers', path: '/best-squares-numbers' }
-  ];
-
-  public readonly related: RelatedLink[] = [
-    { path: '/how-to-play', label: 'How to play', text: 'How the draw and the quarter winner work.' },
-    { path: '/super-bowl-squares', label: 'Super Bowl squares', text: 'The February 14, 2027 board.' },
-    { path: '/', fragment: 'probability-heatmap', label: 'Hit rates on the homepage', text: 'Where the in-game tab is introduced.' }
-  ];
-  public readonly cta: PageCta = {
-    path: '/create',
-    label: 'Create a board',
-    note: 'See the same colors on your own board after the numbers are drawn. QuarterScore never collects, holds, or pays out money.'
-  };
-
-  private readonly awayTotals: number[];
-
   constructor() {
     const away = Array(10).fill(0);
     for (const digit of this.digits) {
@@ -152,9 +129,23 @@ export class BestNumbersComponent {
     });
   }
 
-  public share(away: number, home: number): number {
-    return SQUARES_PROBABILITIES[`${away},${home}`] ?? 0;
-  }
+  public readonly bestPairs: DigitPair[] = topDigitPairs(SQUARES_PROBABILITIES, 3);
+  public readonly breadcrumbs: BreadcrumbItem[] = [
+    { name: 'Home', path: '/' },
+    { name: 'Best squares numbers', path: '/best-squares-numbers' }
+  ];
+  public readonly cta: PageCta = {
+    path: '/create',
+    label: 'Create a board',
+    note: 'See the same colors on your own board after the numbers are drawn. QuarterScore never collects, holds, or pays out money.'
+  };
+  public readonly digits: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+  public readonly related: RelatedLink[] = [
+    { path: '/how-to-play', label: 'How to play', text: 'How the draw and the quarter winner work.' },
+    { path: '/super-bowl-squares', label: 'Super Bowl squares', text: 'The February 14, 2027 board.' },
+    { path: '/', fragment: 'probability-heatmap', label: 'Hit rates on the homepage', text: 'Where the in-game tab is introduced.' }
+  ];
+  public readonly worstPairs: DigitPair[] = bottomDigitPairs(SQUARES_PROBABILITIES, 2);
 
   public awayShare(digit: number): string {
     return `${this.awayTotals[digit].toFixed(1)} percent`;
@@ -173,4 +164,10 @@ export class BestNumbersComponent {
     return `${pair.away} and ${pair.home}`;
   }
 
+  public share(away: number, home: number): number {
+    return SQUARES_PROBABILITIES[`${away},${home}`] ?? 0;
   }
+
+  private readonly awayTotals: number[];
+  private readonly seo: SeoService = inject(SeoService);
+}
