@@ -68,7 +68,8 @@ private get db(): Database {
 
 ### Service Layer
 
-- `providedIn: 'root'` singletons
+- `providedIn: 'root'` singletons for app-wide data
+- Page-scoped services, provided on a page component so each visit starts fresh. The game page keeps its state in `GameStateService` and its logic in services next to it (`features/super-bowl-squares/services/`). Its section components only display that state.
 - Modern `inject()` function
 - Clear separation: AuthService, GameService, EspnService, ThemeService
 - `GameService` is the one entry point components use for boards. It delegates to smaller services that share one lazy database handle (`GameDatabaseService`): `GameRecordService` (read, subscribe, update), `GameLifecycleService` (create, reset, resize, delete), `BoardSettingsService`, `UserGamesService`, `LiveGameIndexService`, `TvLinkService`, `EntitlementService` and `SeasonPassService`. Parsing lives in `core/utils/game-parse.ts`; the game types live in `core/utils/game-data.ts` and are re-exported from `game.service.ts`.
@@ -148,7 +149,6 @@ The security checks every change must pass are in [the engineering skill](../.cl
 ### Areas for Improvement
 
 1. **Large Files** (sizes as of Nov 13 2026)
-   - `super-bowl-squares.component.ts` (~1,850 lines)
    - `dashboard.component.ts` (~1,640 lines)
    - Being split now into smaller components and services, in their own PRs (decision D-019). The limits are in [the engineering skill](../.claude/skills/quarterscore-engineering/SKILL.md), section 2.
 
