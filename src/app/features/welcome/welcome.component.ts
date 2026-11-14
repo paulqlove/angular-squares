@@ -320,8 +320,8 @@ export class WelcomeComponent implements OnInit {
 
   ngOnInit(): void {
     this.seo.apply({
-      title: 'QuarterScore — Football Squares for Game Day',
-      description: 'Run free football squares online. Make a 100, 50 or 25 square board, share one link, and live scores pick each quarter\'s winner.',
+      title: 'Free Football Squares and Super Bowl Squares — QuarterScore',
+      description: 'Run free football squares online all season and for Super Bowl squares. Make a 100, 50 or 25 square board, share one link, and live scores pick winners.',
       path: '/',
       headline: 'The Ultimate Football Squares Game',
       published: '2026-11-01',

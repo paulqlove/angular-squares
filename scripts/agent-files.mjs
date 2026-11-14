@@ -113,8 +113,8 @@ export async function writeAgentFiles({ root, origin, posts }) {
     }
     for (const section of page.sections) {
       // A paragraph that leads into a diagram or an address shown only on the page points to the page instead.
-      const paragraphs = section.paragraphs.map(clean).filter(Boolean).map(t => (section.html && t.endsWith(':') ? `${t.slice(0, -1)}: shown on ${url(page.path)}.` : t));
-      const bullets = (section.bullets ?? []).map(clean).filter(Boolean);
+      const paragraphs = section.paragraphs.map(clean).filter(Boolean).map(t => (section.html && t.endsWith(':') ? `${t.slice(0, -1)}: shown on ${url(page.path)}.` : t)).map(t => siteLinks(t, origin));
+      const bullets = (section.bullets ?? []).map(clean).filter(Boolean).map(t => siteLinks(t, origin));
       if (!paragraphs.length && !bullets.length) continue;
       full.push(`### ${clean(section.heading)}`, '');
       for (const para of paragraphs) full.push(para, '');
@@ -153,6 +153,11 @@ function clean(value) {
     .replace(/&#39;/g, "'")
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+/** Page copy links other pages as [label](/path); this file is read off the site, so the paths become full URLs. */
+function siteLinks(text, origin) {
+  return text.replace(/\]\((\/[^)]*)\)/g, `](${origin}$1)`);
 }
 
 /** Bundles the TypeScript page data into a temporary module and imports it. */

@@ -71,6 +71,12 @@ Agree on the rules before kickoff. Most groups count overtime in the final score
 
 If nobody holds a winning square, that quarter has no winner. QuarterScore moves its points using the rule the host picked. If a quarter ends on the same digits as the one before, the same square wins again.
 
+### Super Bowl squares rules
+
+Super Bowl squares uses these same rules. Same grid, same draw after the board fills, same last digit of each score at the end of each quarter.
+
+If your party has first-time players, send this page with the board link, and post your overtime and empty-square rules before kickoff.
+
 ## Football squares FAQ
 
 Source: https://quarterscore.com/faq
@@ -135,7 +141,7 @@ No. QuarterScore never collects, holds, or pays out money. Hosts who track who b
 
 Source: https://quarterscore.com/super-bowl-squares
 
-Make the board before either team is known. Add the team names when the matchup is announced and keep the same link.
+Make the board before either team is known. Add the team names when the matchup is announced and keep the same link. It is free, and players do not need an account.
 
 QuarterScore is not affiliated with, endorsed by, or sponsored by the NFL, NBA, or NCAA. Team and event names are used only to describe the games.
 
@@ -145,6 +151,14 @@ Squares does not need the teams. Friends claim a square by name, then you draw t
 
 February 14 is also Valentine’s Day in 2027. One board still works for a party that mixes fans and people who came for the snacks. Nobody has to understand the sport.
 
+### How Super Bowl squares works
+
+Pick a board: 100 squares for a big party or office, 50 for a medium group, 25 for a small one. Friends claim squares by name. When the board fills, the host locks it and draws the digits 0 through 9 for each team, so nobody can choose a number.
+
+At the end of each quarter, take the last digit of each team’s score. A score of 24 to 17 lands on the square where 4 and 7 meet. On 50 and 25 square boards, a side uses digit pairs, so one square covers more than one score.
+
+The suggested split is 20, 20, 20 and 40 percent of the points, with the final quarter worth the most. It is a label for bragging rights, not money.
+
 ### What the host does
 
 Create the board, share the link, and ask people to claim squares in the weeks before the game. On game day, lock the board, draw the numbers where everyone can see the draw, and leave it on a TV.
@@ -153,6 +167,22 @@ Create the board, share the link, and ask people to claim squares in the weeks b
 - Players claim squares without creating an account.
 - Each quarter, the last digit of each score names the square.
 - Celebrate moments, not money. Bragging rights are enough.
+
+### Which numbers come up most
+
+In the historical table, 7 and 0 is the most common pair, at about 3.5 percent of final scores either way round. 2 and 2 almost never comes up. An average square is 1 percent.
+
+The digits are drawn after names go on, so a good pair is luck. [Best numbers](https://quarterscore.com/best-squares-numbers) has the full table.
+
+### Print a Super Bowl squares template
+
+Want paper on the wall too? The [printable page](https://quarterscore.com/printable-football-squares) has a blank 100-square grid, a 25-square sheet for small groups, and a board with the digits already filled in. Write names first, then the numbers.
+
+### Put the board on the TV
+
+On game day, choose **Present on a TV** from your game. The screen shows the board, each quarter’s winner and a QR code guests can scan to follow on their phones. Link the board to the live game and the score and clock show too.
+
+Try your TV the day before. [Football squares on TV](https://quarterscore.com/football-squares-on-tv) has the steps for casting and mirroring.
 
 ### Rules to post early
 
