@@ -19,7 +19,10 @@ export interface PlayerGame {
   squares: number;
   points: number;
   confirmed: boolean;
-  /** Squares added after the host confirmed this player on this board. */
+  /**
+   * Squares added after the host confirmed this player: on this board, or, for a board the host has never confirmed
+   * them on, every square there once they're confirmed on another board.
+   */
   newSquares: number;
   locked: boolean;
 }
@@ -145,7 +148,8 @@ function playerKey(board: PlayersBoard, name: string): string {
   return isHostTyped ? `${uid || board.ownerId}/${name}` : uid;
 }
 
-function summarize(key: string, games: PlayerGame[]): PlayerSummary {
+function summarize(key: string, allGames: PlayerGame[]): PlayerSummary {
+  const games = withNewBoards(allGames);
   const name = mostUsedName(games);
   return {
     key,
@@ -158,4 +162,15 @@ function summarize(key: string, games: PlayerGame[]): PlayerSummary {
     newSquares: games.reduce((sum, game) => sum + game.newSquares, 0),
     sameNameIndex: 0
   };
+}
+
+/**
+ * A player the host has confirmed on any board who picks squares on a board where they were never confirmed (a game
+ * added later, say) has new squares there: all of them. A player never confirmed anywhere just shows Not yet.
+ */
+function withNewBoards(games: PlayerGame[]): PlayerGame[] {
+  // Unconfirmed with no new squares means no Confirm on that board yet: a Confirm leaves either Confirmed or a count.
+  const neverConfirmed = (game: PlayerGame): boolean => !game.confirmed && !game.newSquares;
+  if (games.every(neverConfirmed)) return games;
+  return games.map(game => neverConfirmed(game) ? { ...game, newSquares: game.squares } : game);
 }
