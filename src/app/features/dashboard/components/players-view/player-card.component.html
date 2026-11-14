@@ -2,7 +2,11 @@
   <span class="min-w-0 flex-1">
     <span translate="no" class="block truncate font-medium">{{ player().name }}</span>
     <span class="mt-0.5 block font-semibold tabular-nums sm:hidden">{{ player().points }} pts</span>
-    @if (player().newSquares) {
+    @if (beat()) {
+      <span class="flex items-center gap-1 whitespace-nowrap text-xs font-medium text-qs-ink">
+        <ng-icon name="heroCheck" class="qs-check-in shrink-0 text-sm" aria-hidden="true"></ng-icon>All confirmed
+      </span>
+    } @else if (player().newSquares) {
       <span class="block text-xs tabular-nums text-qs-warn">+{{ player().newSquares }} new {{ player().newSquares === 1 ? 'square' : 'squares' }}</span>
     } @else if (player().sameNameIndex) {
       <span class="block text-xs text-qs-muted">Same name, account {{ player().sameNameIndex }}</span>

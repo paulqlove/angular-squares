@@ -68,7 +68,7 @@ describe('PlayersViewService', () => {
       { gameId: 'A', data: { paidPlayers: ['Dana'], paidSquares: [2] } },
       { gameId: 'B', data: { paidPlayers: ['Dana'], paidSquares: [2] } }
     ]);
-    expect(view.confirmed().length).toBe(1);
+    expect(view.players()[0].confirmed).toBe(true);
     expect(view.confirmNote()?.text).toBe('Dana confirmed on every game.');
 
     await view.undoConfirm();
@@ -77,6 +77,59 @@ describe('PlayersViewService', () => {
       { gameId: 'B', data: { paidPlayers: [], paidSquares: [] } }
     ]);
     expect(view.unconfirmed().length).toBe(1);
+  });
+
+  it('shows All confirmed for a beat when the last game is confirmed, then moves the card to Confirmed', async () => {
+    vi.useFakeTimers();
+    try {
+      const view = TestBed.inject(PlayersViewService);
+      view.toggleOpen('dana-uid');
+      await view.confirmRest(view.players()[0]);
+      expect(view.openKey()).toBeNull();
+      expect(view.unconfirmed().map(p => p.key)).toEqual(['dana-uid']);
+      expect(view.allConfirmed()).toEqual({ key: 'dana-uid', leaving: false });
+      expect(view.announcement()).toBe('Dana, all games confirmed');
+
+      vi.advanceTimersByTime(900);
+      expect(view.allConfirmed()).toEqual({ key: 'dana-uid', leaving: true });
+      expect(view.unconfirmed().length).toBe(1);
+
+      vi.advanceTimersByTime(200);
+      expect(view.allConfirmed()).toBeNull();
+      expect(view.unconfirmed().length).toBe(0);
+      expect(view.confirmed().map(p => p.key)).toEqual(['dana-uid']);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('stops the beat and keeps the card in place when the host opens it during the hold', async () => {
+    vi.useFakeTimers();
+    try {
+      const view = TestBed.inject(PlayersViewService);
+      await view.confirmRest(view.players()[0]);
+      view.toggleOpen('dana-uid');
+      expect(view.allConfirmed()).toBeNull();
+      vi.advanceTimersByTime(2000);
+      expect(view.unconfirmed().map(p => p.key)).toEqual(['dana-uid']);
+
+      view.toggleOpen('dana-uid');
+      expect(view.confirmed().map(p => p.key)).toEqual(['dana-uid']);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('keeps an open card in its group until it closes', async () => {
+    runBoards.update(boards => boards.map(b => ({ ...b, paidPlayers: ['Dana'], paidSquares: [2] })));
+    const view = TestBed.inject(PlayersViewService);
+    view.toggleOpen('dana-uid');
+    await view.toggleGame(view.players()[0], 'A');
+    expect(view.players()[0].confirmed).toBe(false);
+    expect(view.confirmed().map(p => p.key)).toEqual(['dana-uid']);
+
+    view.toggleOpen('dana-uid');
+    expect(view.unconfirmed().map(p => p.key)).toEqual(['dana-uid']);
   });
 
   it('toggles one game on with no Undo note, then back to how it stood', async () => {
