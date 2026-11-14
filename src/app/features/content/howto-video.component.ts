@@ -5,13 +5,13 @@ import { HowToVideo } from './howto-videos';
 
 const YOUTUBE_ID = /^[A-Za-z0-9_-]{11}$/;
 
+/** Phone widths, where the vertical Short plays in place and its thumbnail shows. Keep in step with the media query in the styles below. */
+const PHONE_QUERY = '(max-width: 639.98px)';
+
 /** The largest thumbnail YouTube serves for a video. */
 function thumbnailUrl(id: string): string {
   return `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
 }
-
-/** Phone widths, where the vertical Short plays in place. Keep in step with the media query in the styles below. */
-const PHONE_QUERY = '(max-width: 639.98px)';
 
 /**
  * A how-to clip that costs nothing until it is tapped: the video's own YouTube thumbnail first, then the youtube-nocookie player.
@@ -39,7 +39,7 @@ const PHONE_QUERY = '(max-width: 639.98px)';
             <button #poster type="button" (click)="play()" class="howto-poster group absolute inset-0 flex h-full w-full items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus" [attr.aria-label]="'Play video: ' + video().title + ', ' + length()">
               <picture class="absolute inset-0" aria-hidden="true">
                 @if (hasPhone()) {
-                  <source media="(max-width: 639.98px)" [attr.srcset]="phoneThumbnail()" />
+                  <source [attr.media]="phoneQuery" [attr.srcset]="phoneThumbnail()" />
                 }
                 <img [src]="thumbnail()" alt="" width="1280" height="720" loading="lazy" decoding="async" class="h-full w-full object-cover" />
               </picture>
@@ -227,6 +227,8 @@ export class HowToVideoComponent {
       { injector: this.injector }
     );
   }
+
+  protected readonly phoneQuery = PHONE_QUERY;
 
   private readonly dialog = viewChild<ElementRef<HTMLDialogElement>>('dialog');
   private readonly document = inject(DOCUMENT);
