@@ -3,7 +3,13 @@ import { HowToVideoComponent } from './howto-video.component';
 import { HowToVideo } from './howto-videos';
 
 describe('HowToVideoComponent', () => {
-  const clip: HowToVideo = { youtubeId: 'E7pps5O65BM', title: 'Create a board', seconds: 30 };
+  const clip: HowToVideo = {
+    youtubeId: 'E7pps5O65BM',
+    title: 'Create a board',
+    description: 'A host makes a board.',
+    uploadDate: '2026-11-13T10:01:58-08:00',
+    seconds: 30
+  };
   const embed = (id: string) => `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&playsinline=1&fs=1`;
   const realMatchMedia = window.matchMedia;
 

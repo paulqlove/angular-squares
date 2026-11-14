@@ -350,6 +350,8 @@ Centered, radius 10px, `--qs-shadow-pop`, dimmed navy scrim at 60%. On phones mo
 
 Paper white, navy ink, team colors preserved, no gradients, no shadows, no dot grid. Our lockup top left at 96px wide minimum. Host logo in one fixed footer slot, capped at equal visual weight, never over the grid.
 
+The printable page (`/printable-football-squares`) prints its grid lines as borders, since browsers drop background colors by default, and prints in light-theme ink even when the page is in dark mode.
+
 ### TV view
 
 Navy frame (`--qs-tile`), scores in 96 to 160px tabular sans, the board filling the width with team colors, amber only on the live badge and the clock. White-on-navy lockup bottom right. No hover states, no buttons, auto refresh.
@@ -472,7 +474,7 @@ After each PR: screenshot 375, 768, 1280 and 1440 in light and dark; run the con
 
 ## 11. How-to videos and thumbnails
 
-**Videos.** Simple how-tos with fake data. Bella voiceover (ElevenLabs), warm and calm, no music. Step lines on screen, tight trims, logo end card, no zoom, light box on taps. YouTube: not made for kids, comments off. Landscape 16:9 plus a vertical 9:16 Short of each. Site embeds are tap-to-load, and the poster is the video's own YouTube thumbnail (the Short's on phones), with our play button and length on it; on phones the Short plays.
+**Videos.** Simple how-tos with fake data. Bella voiceover (ElevenLabs), warm and calm, no music. Step lines on screen, tight trims, logo end card, no zoom, light box on taps. YouTube: not made for kids, comments off. Landscape 16:9 plus a vertical 9:16 Short of each. Site embeds are tap-to-load, and the poster is the video's own YouTube thumbnail (the Short's on phones), with our play button and length on it; on phones the Short plays. For search, each page with clips also lists every desktop clip once as a VideoObject in its JSON-LD (`video-structured-data.ts`), so a new clip in `howto-videos.ts` needs a description and its YouTube upload date.
 
 **Thumbnails: style A "Board" (Paul, Nov 13).**
 

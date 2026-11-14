@@ -7,6 +7,7 @@ import { HowToVideoComponent } from './howto-video.component';
 import { ReadingEndComponent, ReadingHeaderComponent, ReadingPageComponent, ReadingSectionComponent } from './reading-layout.components';
 import { MarketingPage, getMarketingPage, pageBreadcrumbs } from './marketing-pages';
 import { richText } from './rich-text';
+import { pageVideos, videoObject } from './video-structured-data';
 
 @Component({
     selector: 'app-marketing-page',
@@ -150,6 +151,8 @@ export class MarketingPageComponent {
         }))
       });
     }
+    // Top-level blocks, one per clip, so Google reads them the same way for steps and FAQ answers.
+    extra.push(...pageVideos(this.page).map(videoObject));
 
     this.seo.apply({
       title: this.page.title,
