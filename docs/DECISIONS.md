@@ -4,6 +4,30 @@ This file records product and design decisions, newest first. To add one, put a 
 
 ---
 
+## D-023 · Players view layout
+
+- **Date:** Nov 13–14 2026
+- **Decision:** The Players view uses tiles only, keeping the round 2 and round 4 look (round 3 was rejected). The Boards | Players switch sits in the Hosting heading row, and Grid / Compact hides in Players. Statuses are Confirmed and Unconfirmed only, with no "5 of 9" counts and no color dot, and "+2 new squares" stays. Desktop tiles wrap at 13. On a phone a closed card shows the name, points and an arrow; Confirm rest sits inside the opened card, with Remove… on the left and Confirm on the right. Desktop closed rows have no Confirm button. Same-name accounts get a "Not the same" dismiss, and merging is manual only. See DESIGN.md, Players view.
+- **Options considered:** five design rounds (files in quarterscore/design/players-view/)
+- **Why:** not recorded
+- **Decided by:** Paul, with creative's design pass
+
+## D-022 · Co-hosted boards count; co-hosts need their own pass
+
+- **Date:** Nov 14 2026
+- **Decision:** Boards a host co-hosts show in the Players view next to the boards they run and count toward the two games it needs. A co-host without a Season Pass doesn't get the Players view.
+- **Options considered:** hosted boards only
+- **Why:** Paul's words: "Season pass only. Let's keep it simple."
+- **Decided by:** Paul
+
+## D-021 · Players view is Season Pass only
+
+- **Date:** Nov 14 2026
+- **Decision:** The Players view (every player across a host's games, with Confirm and Remove) is a Season Pass feature, and shows only with two or more games.
+- **Options considered:** not recorded
+- **Why:** free hosts can host only one game, so they don't need it.
+- **Decided by:** Paul
+
 ## D-020 · Compact stays compact at every width
 
 - **Date:** Nov 14 2026
