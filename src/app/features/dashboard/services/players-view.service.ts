@@ -50,8 +50,7 @@ export class PlayersViewService {
   /** The boards in season order (oldest first), so each game keeps one spot in every player's tiles. */
   public readonly boards = computed<GameData[]>(() => [...this.store.runBoards()].sort((a, b) => a.createdAt - b.createdAt));
   public readonly confirmNote = signal<ConfirmNote | null>(null);
-  /** The phone filter sheet is open; `filterFocusSearch` when it opened from the dock's Find a player, keyboard up. */
-  public readonly filterFocusSearch = signal<boolean>(false);
+  /** The phone filter sheet is open. */
   public readonly filterOpen = signal<boolean>(false);
   /** Confirmed players. The open card and a card in the "All confirmed" beat keep their spot until they're done. */
   public readonly confirmed = computed<PlayerSummary[]>(() => this.placed('confirmed'));
@@ -93,9 +92,8 @@ export class PlayersViewService {
     if (games.length) await this.confirm(player, games, `${player.name} confirmed on every game.`);
   }
 
-  /** Opens the phone filter sheet, with the keyboard up on Find a player when `focusSearch`. */
-  public openFilter(focusSearch: boolean): void {
-    this.filterFocusSearch.set(focusSearch);
+  /** Opens the phone filter sheet, with the keyboard up on Find a player. */
+  public openFilter(): void {
     this.filterOpen.set(true);
   }
 

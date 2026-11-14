@@ -12,7 +12,7 @@ interface GameRow {
 }
 
 /**
- * Phones, Players tab: the filter sheet from the dock's filter button or its Find a player field. Find a player, then
+ * Phones, Players tab: the filter sheet from the dock's Find a player field, keyboard up. Find a player, then
  * the games to pick one from, then Clear and Show players. Picks apply as they're made; Show players closes the sheet.
  */
 @Component({
@@ -33,7 +33,7 @@ interface GameRow {
       <div class="shrink-0 px-4 pt-2">
         <label class="qs-search">
           <ng-icon name="heroMagnifyingGlass" class="qs-search-icon" aria-hidden="true"></ng-icon>
-          <input type="search" placeholder="Find a player" aria-label="Find a player" enterkeyhint="search" [attr.data-autofocus]="players.filterFocusSearch() ? '' : null" [value]="players.search()" (input)="searchFor($event)" (keydown.enter)="close()" />
+          <input type="search" placeholder="Find a player" aria-label="Find a player" enterkeyhint="search" data-autofocus [value]="players.search()" (input)="searchFor($event)" (keydown.enter)="close()" />
           @if (players.search()) {
             <button type="button" class="qs-search-clear" aria-label="Clear search" (click)="players.search.set('')">
               <ng-icon name="heroXMark" class="text-xl" aria-hidden="true"></ng-icon>

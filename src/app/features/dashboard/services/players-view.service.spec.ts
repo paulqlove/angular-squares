@@ -56,12 +56,10 @@ describe('PlayersViewService', () => {
     expect(view.active()).toBe(false);
   });
 
-  it('opens the phone filter sheet, keyboard up only from Find a player, and Clear empties both filters', () => {
+  it('opens the phone filter sheet, and Clear empties both filters', () => {
     const view = TestBed.inject(PlayersViewService);
-    view.openFilter(true);
-    expect([view.filterOpen(), view.filterFocusSearch()]).toEqual([true, true]);
-    view.openFilter(false);
-    expect(view.filterFocusSearch()).toBe(false);
+    view.openFilter();
+    expect(view.filterOpen()).toBe(true);
     view.search.set('da');
     view.gameFilter.set('A');
     view.clearFilters();
