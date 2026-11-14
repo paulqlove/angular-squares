@@ -94,6 +94,8 @@ export class SiteHeaderComponent implements OnInit {
     // Only the headroom bar listens to scrolling, so pages with a static or fixed bar don't re-render on every scroll.
     afterNextRender(() => {
       if (this.position() !== 'headroom') return;
+      this.shareHeight();
+      destroyRef.onDestroy(() => document.documentElement.style.removeProperty('--qs-headroom-h'));
       fromEvent(window, 'scroll', { passive: true }).pipe(takeUntilDestroyed(destroyRef)).subscribe(() => this.onScroll());
     });
   }
@@ -158,5 +160,11 @@ export class SiteHeaderComponent implements OnInit {
     const bar = this.el.nativeElement;
     this.hidden.set(y > this.lastY && y > bar.offsetHeight && !bar.contains(document.activeElement));
     this.lastY = y;
+    this.shareHeight();
+  }
+
+  /** Headroom: how much of the top the bar covers now (--qs-headroom-h), so a bar stuck under it can sit below it. */
+  private shareHeight(): void {
+    document.documentElement.style.setProperty('--qs-headroom-h', this.hidden() ? '0px' : `${this.el.nativeElement.offsetHeight}px`);
   }
 }

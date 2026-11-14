@@ -5,10 +5,27 @@
   }
   <div class="grid grid-cols-1">
   <div class="qs-swap col-start-1 row-start-1 flex items-stretch gap-1" [class.qs-swap-off]="search.searchOpen()" [class.qs-swap-left]="search.searchOpen()" [attr.aria-hidden]="search.searchOpen() ? 'true' : null">
-    <button type="button" (click)="search.openSearch()" class="qs-search min-w-0 flex-1 text-left" data-walkthrough="join-game" aria-label="Search or enter a game code" [attr.tabindex]="search.searchOpen() ? -1 : null">
-      <ng-icon name="heroMagnifyingGlass" class="qs-search-icon" aria-hidden="true"></ng-icon>
-      <span class="truncate text-base text-qs-muted">Search or code</span>
-    </button>
+    @if (players.active()) {
+      <!-- Players tab: Find a player opens the filter sheet with the keyboard up, and the icon opens it on the games. Ink once a game is picked. -->
+      <button type="button" (click)="players.openFilter(true)" class="qs-search min-w-0 flex-1 text-left" aria-label="Find a player" [attr.tabindex]="search.searchOpen() ? -1 : null">
+        <ng-icon name="heroMagnifyingGlass" class="qs-search-icon" aria-hidden="true"></ng-icon>
+        <span class="truncate text-base" [class.text-qs-muted]="!players.search()">{{ players.search() || 'Find a player' }}</span>
+      </button>
+      <button
+        type="button"
+        (click)="players.openFilter(false)"
+        [class]="players.gameFilter() ? 'qs-btn qs-btn-ink w-11 shrink-0 px-0' : 'qs-btn qs-btn-secondary w-11 shrink-0 px-0'"
+        [attr.aria-label]="players.gameFilter() ? 'Filter players, one game picked' : 'Filter players'"
+        [attr.tabindex]="search.searchOpen() ? -1 : null"
+      >
+        <ng-icon name="heroAdjustmentsHorizontal" class="text-xl" aria-hidden="true"></ng-icon>
+      </button>
+    } @else {
+      <button type="button" (click)="search.openSearch()" class="qs-search min-w-0 flex-1 text-left" data-walkthrough="join-game" aria-label="Search or enter a game code" [attr.tabindex]="search.searchOpen() ? -1 : null">
+        <ng-icon name="heroMagnifyingGlass" class="qs-search-icon" aria-hidden="true"></ng-icon>
+        <span class="truncate text-base text-qs-muted">Search or code</span>
+      </button>
+    }
     @if (store.canCreateGame()) {
       <button
         type="button"

@@ -56,6 +56,18 @@ describe('PlayersViewService', () => {
     expect(view.active()).toBe(false);
   });
 
+  it('opens the phone filter sheet, keyboard up only from Find a player, and Clear empties both filters', () => {
+    const view = TestBed.inject(PlayersViewService);
+    view.openFilter(true);
+    expect([view.filterOpen(), view.filterFocusSearch()]).toEqual([true, true]);
+    view.openFilter(false);
+    expect(view.filterFocusSearch()).toBe(false);
+    view.search.set('da');
+    view.gameFilter.set('A');
+    view.clearFilters();
+    expect([view.search(), view.gameFilter()]).toEqual(['', null]);
+  });
+
   it('puts the boards in season order', () => {
     expect(TestBed.inject(PlayersViewService).boards().map(b => b.id)).toEqual(['A', 'B']);
   });
