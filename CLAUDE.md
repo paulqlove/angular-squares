@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+**Facts first:** before writing copy, docs, support answers or marketing, read [docs/FACTS.md](docs/FACTS.md). Never state a fact about QuarterScore that isn't in it, and never state either side of a "Needs Paul's call" item. When you change a fact there, update its source and date.
+
 ## Project Overview
 
 Football Squares (Super Bowl Squares) - A real-time multiplayer game for managing squares pools. Built with Angular 17 (standalone components), Firebase (Auth + Realtime Database), and Tailwind CSS.
