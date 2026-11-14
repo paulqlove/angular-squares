@@ -22,7 +22,12 @@ import { PlayerTilesComponent } from './player-tiles.component';
   },
   templateUrl: './player-card.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styles: [':host.qs-card-open { border-color: var(--qs-ink); box-shadow: inset 0 0 0 0.5px var(--qs-ink); }']
+  styles: [`
+    :host.qs-card-open { border-color: var(--qs-ink); box-shadow: inset 0 0 0 0.5px var(--qs-ink); }
+    /* The arrow turns with the panel, both ways, over 200ms. Reduced motion: it flips at once. */
+    .qs-card-arrow { transition: transform var(--qs-t-state) var(--qs-ease); }
+    .qs-card-arrow-open { transform: rotate(180deg); }
+  `]
 })
 export class PlayerCardComponent {
   /** This card's "All confirmed" beat, when its last game was just confirmed. */

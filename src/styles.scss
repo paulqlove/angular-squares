@@ -856,5 +856,6 @@ button:active:not(:disabled) .turn-icon { transform: rotate(120deg); transition-
 /* Reduced motion keeps the "All confirmed" card's exit as a plain 120ms fade, so it doesn't jump away (see .qs-card-leave). */
 @media (prefers-reduced-motion: reduce) {
   .qs-check-in { animation: none !important; }
+  .qs-row-in { animation-delay: 0s !important; }
   .qs-card-leave { animation: qs-fade-out 120ms linear forwards !important; }
 }

@@ -65,6 +65,19 @@ describe('players across games', () => {
     expect(players[0].newSquares).toBe(0);
   });
 
+  it('counts every square on a newly added game as new for a player the host confirmed on another game', () => {
+    const accounts = { Jo: 'jo-uid', Kim: 'kim-uid' };
+    const players = playersAcrossGames([
+      board('A', ['Jo', 'Jo', 'Kim'], { playerUserIds: accounts, paidPlayers: ['Jo'], paidSquares: [2] }),
+      board('B', ['Kim', 'Kim', 'Jo', 'Jo', 'Jo'], { playerUserIds: accounts })
+    ]);
+    // Jo was confirmed on A, then picked 3 on the new game B: new, and first. Kim was never confirmed: Not yet.
+    expect(players.map(player => player.name)).toEqual(['Jo', 'Kim']);
+    expect(players[0].games.map(game => game.newSquares)).toEqual([0, 3]);
+    expect(players[0].newSquares).toBe(3);
+    expect(players[1].newSquares).toBe(0);
+  });
+
   it('names a player by the name they use most and keeps the others', () => {
     const players = playersAcrossGames([
       board('A', ['Sam'], { playerUserIds: { Sam: 'sam-uid' } }),
