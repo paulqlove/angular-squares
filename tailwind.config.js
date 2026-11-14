@@ -164,7 +164,8 @@ module.exports = {
     'grid-cols-[auto_repeat(10,minmax(0,1fr))]',
   ],
   plugins: [
-    // Dashboard board cards: the tall card. On a card wider than 28rem, or in Grid view from 640px up.
-    ({ addVariant }) => addVariant('tall', ['@container (min-width: 28rem)', '@media (min-width: 640px) { .qs-grid-view & }']),
+    // Dashboard board cards: the tall card, in Grid view only. On a card wider than 28rem, or from 640px up.
+    // Compact always keeps the short row, at every width.
+    ({ addVariant }) => addVariant('tall', ['@container (min-width: 28rem) { .qs-grid-view & }', '@media (min-width: 640px) { .qs-grid-view & }']),
   ],
 };

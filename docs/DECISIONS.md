@@ -4,6 +4,14 @@ This file records product and design decisions, newest first. To add one, put a 
 
 ---
 
+## D-020 · Compact stays compact at every width
+
+- **Date:** Nov 14 2026
+- **Decision:** In Compact view, dashboard cards stay short rows at every window width. Before, a Compact card that ended up 448px wide or more (one column, roughly 480 to 670px windows) turned into the tall Grid card. See DESIGN.md, Cards.
+- **Options considered:** not recorded
+- **Why:** Paul's words: "it flips the cards to um, the regular big card view ... That needs to be fixed."
+- **Decided by:** Paul
+
 ## D-019 · Split the three oversized files now
 
 - **Date:** Nov 13 2026
