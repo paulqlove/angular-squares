@@ -16,6 +16,21 @@ export function withPlayerConfirmed(board: Pick<GameData, 'selectedSquares' | 'p
   return { paidPlayers, paidSquares };
 }
 
+/**
+ * The Confirm marks with one player set back to an earlier mark: confirmed for `count` squares, or off the paid list
+ * when `count` is null. Everyone else keeps theirs.
+ */
+export function withPlayerConfirmCount(board: Pick<GameData, 'selectedSquares' | 'paidPlayers' | 'paidSquares'>, name: string, count: number | null): BoardConfirms {
+  const paid = board.paidPlayers ?? [];
+  const counts = paidCountsByName(paid, board.paidSquares);
+  if (count === null) {
+    const paidPlayers = paid.filter(player => player !== name);
+    return { paidPlayers, paidSquares: paidSquaresFor(board.selectedSquares, paidPlayers, counts) };
+  }
+  const paidPlayers = paid.includes(name) ? [...paid] : [...paid, name];
+  return { paidPlayers, paidSquares: paidSquaresFor(board.selectedSquares, paidPlayers, { ...counts, [name]: count }) };
+}
+
 /** The board with one player taken off: their squares freed and everything tied to their name cleared. */
 export function withoutPlayer(board: BoardPlayers, name: string): Required<Omit<BoardPlayers, 'paidSquares'>> & { paidSquares: number[] } {
   const selectedSquares = without(board.selectedSquares, (_, player) => player === name);

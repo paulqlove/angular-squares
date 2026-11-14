@@ -3,7 +3,8 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { GameChange, GameData, GameService } from '../../../core/services/game.service';
 import { PlanService } from '../../../core/services/plan.service';
 import { ToastService } from '../../../core/services/toast.service';
-import { withPlayerConfirmed, withoutPlayer } from '../../../core/utils/board-players';
+import { withPlayerConfirmCount, withPlayerConfirmed, withoutPlayer } from '../../../core/utils/board-players';
+import { paidCountsByName } from '../../../core/utils/paid-squares';
 import { DashboardStore } from './dashboard.store';
 import { PlayerGame, PlayerSummary, PlayersBoard, playersAcrossGames } from './players-across-games';
 
@@ -75,6 +76,26 @@ export class PlayersViewService {
     }
   }
 
+  /**
+   * The green toggle on one of a player's games. On: confirmed for the squares they hold there now. Off: back to how
+   * that game stood before the host turned it on (unconfirmed, or "+2 new"), or unconfirmed if it was already on.
+   */
+  public async toggleGame(player: PlayerSummary, gameId: string): Promise<void> {
+    const game = player.games.find(g => g.gameId === gameId);
+    if (!game) return;
+    const board = this.boardById(gameId);
+    const key = `${gameId}\n${game.name}`;
+    this.confirmNote.set(null);
+    if (!game.confirmed) {
+      const before = paidCountsByName(board.paidPlayers ?? [], board.paidSquares)[game.name] ?? null;
+      const change = { gameId, data: withPlayerConfirmed(board, game.name) };
+      if (await this.save([change], [board], `Could not confirm ${player.name}. Try again.`)) this.beforeToggle.set(key, before);
+      return;
+    }
+    const change = { gameId, data: withPlayerConfirmCount(board, game.name, this.beforeToggle.get(key) ?? null) };
+    if (await this.save([change], [board], `Could not change ${player.name}. Try again.`)) this.beforeToggle.delete(key);
+  }
+
   public toggleOpen(key: string): void {
     this.openKey.update(open => open === key ? null : key);
     this.confirmNote.set(null);
@@ -89,6 +110,8 @@ export class PlayersViewService {
     await this.save(changes, this.boardsFor(changes), 'Could not undo. Try again.');
   }
 
+  /** Per game and name, the Confirm count from before the host turned the toggle on (null: not on the paid list). */
+  private readonly beforeToggle = new Map<string, number | null>();
   private readonly gameService: GameService = inject(GameService);
   private readonly planService: PlanService = inject(PlanService);
   private readonly store: DashboardStore = inject(DashboardStore);

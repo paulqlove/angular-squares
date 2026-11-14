@@ -6,7 +6,7 @@ import { PlayerGame, PlayerSummary, phoneGames } from '../../services/players-ac
 import { PlayersViewService } from '../../services/players-view.service';
 
 /**
- * An opened player: each of their games with its squares and points, a circle that confirms that game and a remove
+ * An opened player: each of their games with its squares and points, a green toggle that confirms that game and a remove
  * icon (a lock on locked games), then Remove… and Confirm rest. Removing asks first: on a phone under the game's own
  * row, otherwise above the buttons. Phones list unconfirmed games first and fold away confirmed ones past five.
  */
@@ -17,8 +17,11 @@ import { PlayersViewService } from '../../services/players-view.service';
   templateUrl: './player-games.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: [`
-    .qs-ring { width: 18px; height: 18px; border-radius: 999px; border: 1.5px solid var(--qs-line-strong); }
-    .qs-check-pop { animation: qs-icon-pop var(--qs-t-state) var(--qs-ease-spring) backwards; }
+    .qs-switch { position: relative; display: inline-block; width: 44px; height: 26px; border-radius: 999px; background: var(--qs-line-strong); transition: background-color var(--qs-t-state); }
+    .qs-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 999px; background: var(--qs-panel); box-shadow: 0 1px 2px rgb(0 0 0 / 0.2); transition: transform var(--qs-t-state) var(--qs-ease-spring); }
+    .qs-switch-on { background: var(--qs-accent); }
+    .qs-switch-on::after { transform: translateX(18px); }
+    @media (prefers-reduced-motion: reduce) { .qs-switch, .qs-switch::after { transition: none; } }
   `]
 })
 export class PlayerGamesComponent {
@@ -49,13 +52,7 @@ export class PlayerGamesComponent {
   public readonly showNote = computed<boolean>(() => this.players.confirmNote()?.key === this.player().key);
   public readonly unconfirmed = computed<PlayerGame[]>(() => this.player().games.filter(game => !game.confirmed));
 
-  public confirmOne(game: PlayerGame): void {
-    this.popped.set(new Set([game.gameId]));
-    this.players.confirmGame(this.player(), game.gameId);
-  }
-
   public confirmRest(): void {
-    this.popped.set(new Set(this.unconfirmed().map(game => game.gameId)));
     this.players.confirmRest(this.player());
   }
 
@@ -65,7 +62,5 @@ export class PlayerGamesComponent {
     await this.players.removeFromGames(this.player(), games.map(game => game.gameId));
   }
 
-  /** Games whose check just appeared, so only those pop. */
-  protected readonly popped = signal<ReadonlySet<string>>(new Set());
   protected readonly players: PlayersViewService = inject(PlayersViewService);
 }
