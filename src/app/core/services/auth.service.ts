@@ -369,20 +369,13 @@ export class AuthService {
       createdAt: Date.now()
     };
 
-    // Store in cookie (expires in 30 days)
+    // Without a Firebase account the rules refuse every pick, so a refused guest sign-in
+    // (Firebase allows 100 new accounts an hour per network) fails here instead of joining read-only.
+    const result = await this.sdk!.auth.signInAnonymously(this.auth);
     this.setGuestCookie(guestUser);
 
-    // Sign in anonymously with Firebase so we have auth != null for DB writes
-    let uid = `guest_${guestUser.createdAt}`;
-    try {
-      const result = await this.sdk!.auth.signInAnonymously(this.auth);
-      uid = result.user.uid;
-    } catch {
-      // Fall back to cookie-only if anonymous auth fails
-    }
-
     const authUser: AuthUser = {
-      uid,
+      uid: result.user.uid,
       email: null,
       displayName: guestUser.name,
       photoURL: null,
