@@ -4,7 +4,7 @@ import { isPlatformBrowser } from '@angular/common';
 /** Phones only: the floating bottom bars dock from this width down. */
 const PHONE_QUERY = '(max-width: 639.98px)';
 /** On <html> while a bar is docked, so the browser's own strip under the page (Chrome's bottom chin) takes the bar's colour. */
-const ROOT_CLASS = 'qs-bar-docked';
+export const ROOT_CLASS = 'qs-bar-docked';
 /**
  * Docks once the page is this close to its end. A few pixels, because phone scroll positions are fractional and Chrome
  * on Android settles the end of the page a pixel or two short while its toolbars slide in and out.

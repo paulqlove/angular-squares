@@ -23,7 +23,6 @@ import { ShareDialogComponent } from '../../components/ui/share-dialog/share-dia
 import { AuthService } from '../../core/services/auth.service';
 import { PlanService } from '../../core/services/plan.service';
 import { WalkthroughService } from '../../core/services/walkthrough.service';
-import { DockAtEndDirective } from '../../shared/directives/dock-at-end.directive';
 import { CreateGameFormComponent } from '../create/create-game-form.component';
 import { EditGameDialogComponent } from '../super-bowl-squares/components/edit-game-dialog/edit-game-dialog.component';
 import { DashboardAdminPanelComponent } from './components/dashboard-admin-panel/dashboard-admin-panel.component';
@@ -49,7 +48,7 @@ import { PlayersViewService } from './services/players-view.service';
 @Component({
   selector: 'app-dashboard',
   imports: [
-    ModalComponent, NgIconComponent, SiteHeaderComponent, SiteFooterComponent, DockAtEndDirective, ProfileMenuComponent, ShareDialogComponent,
+    ModalComponent, NgIconComponent, SiteHeaderComponent, SiteFooterComponent, ProfileMenuComponent, ShareDialogComponent,
     CreateGameFormComponent, EditGameDialogComponent, UpgradePassDialogComponent, DashboardAdminPanelComponent, DashboardHostingComponent,
     DashboardJoinedComponent, DashboardPhoneBarComponent, DashboardSearchFieldComponent
   ],
