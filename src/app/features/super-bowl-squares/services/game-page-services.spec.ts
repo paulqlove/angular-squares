@@ -2,9 +2,11 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { AuthService } from '../../../core/services/auth.service';
 import { ConfirmService } from '../../../core/services/confirm.service';
+import { EspnService } from '../../../core/services/espn.service';
 import { GameService } from '../../../core/services/game.service';
 import { PlanService } from '../../../core/services/plan.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { EspnSyncService } from './espn-sync.service';
 import { GamePageUiService } from './game-page-ui.service';
 import { GamePlayersService } from './game-players.service';
 import { GameScoringService } from './game-scoring.service';
@@ -20,21 +22,24 @@ const AWAY = [6, 2, 9, 0, 4, 8, 1, 3, 7, 5];
 describe('game page services', () => {
   let user: ReturnType<typeof signal<{ uid: string; displayName: string | null; isGuest: boolean; email: null; photoURL: null } | null>>;
   let updateGame: ReturnType<typeof vi.fn>;
+  let getGame: ReturnType<typeof vi.fn>;
   let toast: { error: ReturnType<typeof vi.fn>; success: ReturnType<typeof vi.fn>; warning: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     user = signal({ uid: 'host-1', displayName: 'Paul', isGuest: false, email: null, photoURL: null });
     updateGame = vi.fn(() => Promise.resolve());
+    getGame = vi.fn();
     toast = { error: vi.fn(), success: vi.fn(), warning: vi.fn() };
     TestBed.configureTestingModule({
       providers: [
-        GamePageUiService, GamePlayersService, GameScoringService, GameStateService, HostActionsService,
+        EspnSyncService, GamePageUiService, GamePlayersService, GameScoringService, GameStateService, HostActionsService,
         NumberDrawService, PlayerNameService, SquarePickerService,
         { provide: AuthService, useValue: { currentUser: user, previewRole: signal('actual'), isPreviewAdmin: signal(false) } },
         { provide: PlanService, useValue: { features: signal({ autoManage: true, activeBoards: 3, adFree: false, customSplits: true, squareLimit: true }), plan: signal('free') } },
         { provide: GameService, useValue: { updateGame, addJoinedGame: vi.fn() } },
         { provide: ToastService, useValue: toast },
-        { provide: ConfirmService, useValue: { ask: () => Promise.resolve(true) } }
+        { provide: ConfirmService, useValue: { ask: () => Promise.resolve(true) } },
+        { provide: EspnService, useValue: { getGame, isEventFinal: () => Promise.resolve(null) } }
       ]
     });
   });
@@ -182,6 +187,55 @@ describe('game page services', () => {
       expect(state.isRandomized).toBe(false);
       expect(state.winners).toEqual({});
       expect(state.homeNumbers).toEqual(Array(10).fill(null));
+    });
+  });
+
+  describe('EspnSyncService', () => {
+    const feed = (status: string): never => ({ id: 'E1', status, period: 2, completed: false, homeScore: 7, awayScore: 3, quarters: [{ home: 7, away: 3 }] }) as never;
+
+    afterEach(() => vi.useRealTimers());
+
+    it('saves the host\'s cumulative scores and polls every 30 seconds while the game is on, until reset', async () => {
+      vi.useFakeTimers();
+      hostedBoard().espnEventId = 'E1';
+      const espn = TestBed.inject(EspnSyncService);
+      getGame.mockResolvedValue(feed('in'));
+      await espn.syncFromEspn();
+      expect(updateGame).toHaveBeenCalledWith('G1', { scores: expect.objectContaining({ q1: { home: 7, away: 3 } }) });
+      await vi.advanceTimersByTimeAsync(30000);
+      expect(getGame).toHaveBeenCalledTimes(2);
+      espn.reset();
+      await vi.advanceTimersByTimeAsync(30000);
+      expect(getGame).toHaveBeenCalledTimes(2);
+    });
+
+    it('writes nothing for a viewer and stops polling once the game is over', async () => {
+      vi.useFakeTimers();
+      hostedBoard().espnEventId = 'E1';
+      user.set({ uid: 'viewer', displayName: 'Kim', isGuest: false, email: null, photoURL: null });
+      const espn = TestBed.inject(EspnSyncService);
+      getGame.mockResolvedValue(feed('in'));
+      await espn.syncFromEspn();
+      getGame.mockResolvedValue(feed('post'));
+      await vi.advanceTimersByTimeAsync(30000);
+      await vi.advanceTimersByTimeAsync(30000);
+      expect(getGame).toHaveBeenCalledTimes(2);
+      expect(updateGame).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('PlayerNameService', () => {
+    it('warns when another account holds the name, and forces a rename when it is their profile name', () => {
+      const state = hostedBoard();
+      state.selectedSquares = { '0-0': 'Paul' };
+      state.playerUserIds = { Paul: 'someone-else' };
+      const names = TestBed.inject(PlayerNameService);
+      names.currentPlayer = 'Paul';
+      expect(names.duplicateNameWarning()).toBe('"Paul" is already in use');
+      expect(TestBed.inject(GamePageUiService).showForceNameChangeModal()).toBe(true);
+      state.playerUserIds = { Paul: 'host-1' };
+      names.checkDuplicateName();
+      expect(names.duplicateNameWarning()).toBeNull();
     });
   });
 });

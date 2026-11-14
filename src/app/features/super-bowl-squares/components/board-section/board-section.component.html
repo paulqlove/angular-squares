@@ -9,7 +9,7 @@
     @if (!(state.isLocked && state.isRandomized)) {
       <span class="qs-badge" [class.qs-badge-ok]="!state.isLocked">{{ state.isLocked ? 'Locked' : 'Open' }}</span>
     }
-    <span class="qs-label text-qs-muted">{{ state.filledCount() }}/{{ state.boardSize }} picked</span>
+    <span class="qs-label text-qs-muted">{{ state.squaresPicked() }}/{{ state.boardSize }} picked</span>
   </span>
 </div>
 <div class="qs-card p-3 sm:p-5">

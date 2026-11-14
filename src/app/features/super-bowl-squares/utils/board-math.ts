@@ -99,10 +99,8 @@ export function quarterWins(board: BoardLayout, scores: BoardScores, winners: { 
   return QUARTERS.flatMap(quarter => {
     const winner = winners[quarter], score = scores[quarter];
     if (!winner || !score) return [];
-    const row = board.awayNumbers.findIndex(n => digitMatchesNumber(score.away % 10, n, board.awayPaired));
-    const col = board.homeNumbers.findIndex(n => digitMatchesNumber(score.home % 10, n, board.homePaired));
-    const key = `${row}-${col}`;
-    return row !== -1 && col !== -1 && board.selectedSquares[key] === winner ? [{ key, quarter }] : [];
+    const key = squareForScore(board, score);
+    return key && board.selectedSquares[key] === winner ? [{ key, quarter }] : [];
   });
 }
 

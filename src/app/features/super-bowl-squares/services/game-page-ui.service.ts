@@ -43,7 +43,6 @@ export class GamePageUiService {
   public readonly skeletonSize: WritableSignal<BoardSize> = signal<BoardSize>(100);
   /** The side the next board slides in from after an arrow-key switch; cleared once it has. */
   public slideFrom: 'left' | 'right' | '' = '';
-  public takenByPlayer: string = '';
   /** True once the viewer has picked a tab, so switching fades the content in but the first paint does not. */
   public tabTouched: boolean = false;
 

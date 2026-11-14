@@ -12,7 +12,7 @@ import { smallerBoardSizes } from '../../../core/utils/shuffle-squares';
 import { squareLimitState } from '../../../core/utils/square-limit';
 import type { OpenBoardRow } from '../../../core/utils/open-boards';
 import { normalizePlayerColors, PLAYER_COLORS } from '../utils/player-colors';
-import { quarterLabels } from '../utils/quarter-labels';
+import { quarterLabels, QuarterWin } from '../utils/quarter-labels';
 import { BoardLayout, BoardScores, emptyScores, lastPlayedQuarter, leaderSquare, playerStatsFor, quarterWins } from '../utils/board-math';
 import type { PlayerStats } from '../types';
 
@@ -117,12 +117,12 @@ export class GameStateService {
 
   /** Tab text for each winning square ("Q1", "FINAL", "Q1 Q3"), keyed by "row-col". */
   public get winnerQuarterLabels(): Record<string, string> {
-    return quarterLabels(this.isRandomized ? quarterWins(this.board, this.scores, this.winners) : []);
+    return quarterLabels(this.drawnQuarterWins);
   }
 
   /** The squares that won a quarter. */
   public get winnerSquares(): string[] {
-    return (this.isRandomized ? quarterWins(this.board, this.scores, this.winners) : []).map(w => w.key);
+    return this.drawnQuarterWins.map(w => w.key);
   }
 
   // Public functions
@@ -194,10 +194,6 @@ export class GameStateService {
     if (this.isGameOver()) return 4;
     if (this.espnEventId) return Math.max(0, Math.min(3, (this.linkedEspnGame()?.period ?? 0) - 1));
     return lastPlayedQuarter(this.scores) + 1;
-  }
-
-  public filledCount(): number {
-    return Object.keys(this.selectedSquares).length;
   }
 
   /** A full board shows a way out to people who hold no square on it (not the host or co-host). */
@@ -274,4 +270,9 @@ export class GameStateService {
   private readonly planService: PlanService = inject(PlanService);
   private readonly sanitizationService: SanitizationService = inject(SanitizationService);
   private readonly teamLogoService: TeamLogoService = inject(TeamLogoService);
+
+  /** Each quarter's winning square, once the numbers are drawn. */
+  private get drawnQuarterWins(): QuarterWin[] {
+    return this.isRandomized ? quarterWins(this.board, this.scores, this.winners) : [];
+  }
 }

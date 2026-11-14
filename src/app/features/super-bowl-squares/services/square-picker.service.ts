@@ -43,8 +43,7 @@ export class SquarePickerService {
       if (state.selectedSquares[key].toLowerCase() === sanitizedPlayer.toLowerCase()) {
         await this.releaseSquare(key);
       } else {
-        this.ui.takenByPlayer = state.selectedSquares[key];
-        this.ui.flashAlert(`Square already taken by ${this.ui.takenByPlayer}`);
+        this.ui.flashAlert(`Square already taken by ${state.selectedSquares[key]}`);
       }
       return;
     }
