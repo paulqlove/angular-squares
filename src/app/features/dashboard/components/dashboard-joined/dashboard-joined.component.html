@@ -1,0 +1,11 @@
+<div class="flex min-h-11 items-center gap-3 border-b border-qs-line pb-2">
+  <div class="flex min-w-0 items-baseline gap-2.5">
+    <h3 id="joined-heading" class="qs-section-title">Joined</h3>
+    <span class="qs-label text-qs-muted">{{ countLabel() }}</span>
+  </div>
+</div>
+<div class="mt-4 grid grid-cols-1 gap-3" data-card-grid [class]="view.cardGridClass()">
+  @for (game of store.joinedGames(); track game.id) {
+    <div appGameCard class="min-w-0 [container-type:inline-size]" [game]="game" [joined]="true"></div>
+  }
+</div>

@@ -1,0 +1,101 @@
+<!-- Phone: a row (mini board, name, teams, open count). From sm up: the board on a navy panel with the open count beside it.
+     Filling boards get a full-width Share invite bar; locked and full boards go quiet. -->
+<article animate.enter="qs-fade-rise" class="qs-card relative flex h-full min-w-0 flex-col transition-[border-color] duration-150 ease-out has-[a:hover]:border-qs-ink has-[[aria-expanded=true]]:z-20">
+  <div class="relative flex flex-1 items-center tall:block">
+    <a
+      [routerLink]="['/game', game().id]"
+      [state]="{ boardSize: game().boardSize }"
+      class="flex min-h-[72px] min-w-0 flex-1 items-center gap-3 self-stretch rounded-tl-card py-3 pl-3 pr-2 transition-colors duration-150 hover:bg-qs-panel-2 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-qs-accent tall:flex-col tall:items-stretch tall:gap-3.5 tall:rounded-tr-card tall:p-3 tall:pb-4"
+      [class]="hasCardBar() ? '' : 'rounded-bl-card tall:rounded-br-card'"
+      [attr.aria-label]="'Open ' + game().name"
+    >
+      <div class="flex shrink-0 flex-col items-center tall:min-h-[152px] tall:flex-row tall:items-end tall:gap-[18px] tall:rounded-inner tall:bg-qs-tile tall:p-[18px]">
+        <!-- A square box, so 25, 50 and 100-square boards give every card the same height -->
+        <div class="flex aspect-square w-14 shrink-0 items-center tall:w-28 tall:items-end" aria-hidden="true">
+          <div [class]="'qs-mini grid w-full gap-px rounded-[3px] p-px ' + miniGridClass()">
+            @for (cellClass of cellClasses(); track $index) {
+              <span class="aspect-square" [class]="cellClass"></span>
+            }
+          </div>
+        </div>
+        <!-- Phone: the state sits centered under the mini board -->
+        <p class="qs-label mt-1.5 flex w-[4.25rem] items-center justify-center gap-1 whitespace-nowrap text-xs tabular-nums tall:hidden" [class]="isFilling() ? 'text-qs-accent' : 'text-qs-muted'">
+          @if (game().isLocked) {
+            <span class="lock-icon is-locked shrink-0" [class.lock-snap]="store.justLocked().has(game().id)" style="font-size: 12px" aria-hidden="true"><ng-icon name="heroLockClosed" class="lock-closed"></ng-icon><ng-icon name="heroLockOpen" class="lock-open"></ng-icon></span>Locked
+          } @else if (!isFilling()) {
+            Full
+          } @else {
+            {{ openCount() }} open
+          }
+        </p>
+        <div class="hidden min-w-0 flex-col gap-1.5 pb-0.5 tall:flex">
+          @if (game().isLocked) {
+            <span class="qs-label inline-flex items-center gap-1.5 text-qs-tile-ink"><span class="lock-icon is-locked" [class.lock-snap]="store.justLocked().has(game().id)" style="font-size: 14px" aria-hidden="true"><ng-icon name="heroLockClosed" class="lock-closed"></ng-icon><ng-icon name="heroLockOpen" class="lock-open"></ng-icon></span>Locked</span>
+          } @else if (!isFilling()) {
+            <span class="qs-label text-qs-tile-ink">Full</span>
+            @if (autoLockText(); as autoLock) {
+              <span class="text-[13px] text-qs-tile-muted">Auto-locks {{ autoLock }}</span>
+            }
+          } @else {
+            <strong class="text-[40px] font-semibold leading-[0.9] tracking-[-0.04em] tabular-nums text-qs-tile-count">{{ openCount() }}</strong>
+            <span class="qs-label text-qs-tile-count">open</span>
+            <span class="text-[13px] tabular-nums text-qs-tile-muted">of {{ game().boardSize || 100 }}</span>
+          }
+        </div>
+      </div>
+      <div class="min-w-0 tall:px-1.5">
+        <h5 translate="no" class="truncate text-base font-semibold leading-tight tracking-tight text-qs-ink tall:text-xl">{{ game().name }}</h5>
+        @if (teams(); as teams) {
+          <div translate="no" class="mt-1.5 flex flex-col gap-1">
+            @for (team of teams; track $index) {
+              <span class="flex min-w-0 items-center gap-2 text-sm">
+                @if (team.logo) {
+                  <img [src]="team.logo" alt="" width="20" height="20" loading="lazy" class="h-5 w-5 shrink-0 object-contain" />
+                }
+                @if (team.code) {
+                  <span class="shrink-0 font-semibold text-qs-ink">{{ team.code }}</span>
+                }
+                @if (team.name) {
+                  <span class="truncate" [class]="team.code ? 'text-qs-muted' : 'text-qs-ink'">{{ team.name }}</span>
+                }
+              </span>
+            }
+          </div>
+        } @else {
+          <p class="mt-0.5 truncate text-sm text-qs-muted">Teams not set</p>
+        }
+        @if (!game().isLocked && !isFilling() && autoLockText(); as autoLock) {
+          <p class="mt-1 truncate text-[13px] text-qs-muted tall:hidden">Auto-locks {{ autoLock }}</p>
+        }
+      </div>
+    </a>
+    <app-card-menu
+      class="shrink-0 pr-1 tall:absolute tall:right-[18px] tall:top-[18px] tall:pr-0"
+      triggerClass="tall:text-qs-tile-muted tall:hover:bg-white/10 tall:hover:text-qs-tile-ink tall:focus-visible:outline-qs-tile-ink"
+      [items]="joined() ? store.joinedMenu : store.hostMenu"
+      [label]="'More actions for ' + game().name"
+      (picked)="onCardMenu($event)"></app-card-menu>
+  </div>
+  @if (isFilling()) {
+    <button
+      type="button"
+      (click)="store.shareGame(game().id)"
+      class="flex min-h-11 w-full items-center justify-center gap-2 rounded-b-card border-t border-qs-line bg-qs-panel text-sm font-medium text-qs-ink transition-colors duration-150 hover:bg-qs-panel-2 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-qs-ink"
+      [attr.aria-label]="'Share invite for ' + game().name"
+    >
+      <ng-icon name="heroShare" class="text-base" aria-hidden="true"></ng-icon>
+      Share invite
+    </button>
+  } @else if (canLock()) {
+    <button
+      type="button"
+      (click)="store.lockNow(game())"
+      [disabled]="store.lockingIds().has(game().id)"
+      class="lock-preview flex min-h-11 w-full items-center justify-center gap-2 rounded-b-card border-t border-qs-line bg-qs-panel text-sm font-medium text-qs-ink transition-colors duration-150 hover:bg-qs-panel-2 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-qs-ink disabled:cursor-wait disabled:text-qs-muted"
+      [attr.aria-label]="'Lock ' + game().name + ' now'"
+    >
+      <span class="lock-icon" [class.is-locked]="store.lockingIds().has(game().id)" aria-hidden="true"><ng-icon name="heroLockClosed" class="lock-closed"></ng-icon><ng-icon name="heroLockOpen" class="lock-open"></ng-icon></span>
+      {{ store.lockingIds().has(game().id) ? 'Locking' : 'Lock now' }}
+    </button>
+  }
+</article>

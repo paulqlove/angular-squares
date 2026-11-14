@@ -1,5 +1,5 @@
 import { WalkthroughStep } from '../../core/services/walkthrough.service';
-import { dashboardTourSteps } from './dashboard.component';
+import { dashboardTourSteps } from './services/dashboard-tour';
 
 describe('dashboardTourSteps', () => {
   const steps: WalkthroughStep[] = [
