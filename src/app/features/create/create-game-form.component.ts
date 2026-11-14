@@ -242,7 +242,7 @@ export interface CreateGameSubmit {
         <div>
           <div>
             <label for="new-game-host-note" class="qs-label mb-2 block text-qs-muted">Note from the host <span class="normal-case tracking-normal">(optional)</span></label>
-            <input id="new-game-host-note" type="text" [(ngModel)]="newGameHostNote" maxlength="140" placeholder="Rules, deadline, how to send your entry" class="qs-input" />
+            <input id="new-game-host-note" type="text" [(ngModel)]="newGameHostNote" maxlength="140" placeholder="Rules, deadline, how to enter" class="qs-input" />
           </div>
           <div class="mt-5">
             <label for="new-game-manager" class="qs-label mb-2 block text-qs-muted">Co-host <span class="normal-case tracking-normal">(optional)</span></label>
