@@ -1,4 +1,4 @@
-import { Injectable, WritableSignal, inject, signal } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { get, onValue, ref, update } from 'firebase/database';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { GameData } from '../utils/game-data';
@@ -62,7 +62,6 @@ export class GameRecordService {
 
     // Reset to null before subscribing to new game
     this._currentGame.next(null);
-    this.currentGameId.set(gameId);
 
     const gameRef = ref(this.database.db, `games/${gameId}`);
 
@@ -80,7 +79,6 @@ export class GameRecordService {
       this.gameSubscription = null;
     }
     this._currentGame.next(null);
-    this.currentGameId.set(null);
   }
 
   // Update game data — uses multi-path updates from root so Firebase evaluates
@@ -177,7 +175,6 @@ export class GameRecordService {
 
   private readonly _currentGame: BehaviorSubject<GameData | null> = new BehaviorSubject<GameData | null>(null);
   private readonly authService: AuthService = inject(AuthService);
-  private readonly currentGameId: WritableSignal<string | null> = signal<string | null>(null);
   private readonly database: GameDatabaseService = inject(GameDatabaseService);
   private gameSubscription: (() => void) | null = null;
   private readonly liveGameIndex: LiveGameIndexService = inject(LiveGameIndexService);

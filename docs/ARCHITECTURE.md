@@ -158,8 +158,8 @@ Scheduled ESPN scoring lives in `functions/` and is deployed by hand. See [FUNCT
    - Consider extracting sub-components
 
 2. **Code Duplication**
-   - Game data parsing logic duplicated in GameService methods
-   - Could extract to helper functions
+   - Board parsing is now one function (`parseGameData` in `core/utils/game-parse.ts`)
+   - The empty-scores object (`q1` to `q4` at 0) is still written out in ten places across six files
 
 3. **Missing Error Feedback**
    - `console.error` calls without user-facing notifications
