@@ -71,6 +71,7 @@ private get db(): Database {
 - `providedIn: 'root'` singletons
 - Modern `inject()` function
 - Clear separation: AuthService, GameService, EspnService, ThemeService
+- `GameService` is the one entry point components use for boards. It delegates to smaller services that share one lazy database handle (`GameDatabaseService`): `GameRecordService` (read, subscribe, update), `GameLifecycleService` (create, reset, resize, delete), `BoardSettingsService`, `UserGamesService`, `LiveGameIndexService`, `TvLinkService`, `EntitlementService` and `SeasonPassService`. Parsing lives in `core/utils/game-parse.ts`; the game types live in `core/utils/game-data.ts` and are re-exported from `game.service.ts`.
 
 ### Routing
 
@@ -149,12 +150,11 @@ The security checks every change must pass are in [the engineering skill](../.cl
 1. **Large Files** (sizes as of Nov 13 2026)
    - `super-bowl-squares.component.ts` (~1,850 lines)
    - `dashboard.component.ts` (~1,640 lines)
-   - `game.service.ts` (~1,280 lines)
    - Being split now into smaller components and services, in their own PRs (decision D-019). The limits are in [the engineering skill](../.claude/skills/quarterscore-engineering/SKILL.md), section 2.
 
 2. **Code Duplication**
-   - Game data parsing logic duplicated in GameService methods
-   - Could extract to helper functions
+   - Board parsing is now one function (`parseGameData` in `core/utils/game-parse.ts`)
+   - The empty-scores object (`q1` to `q4` at 0) is still written out in ten places across six files
 
 3. **Missing Error Feedback**
    - `console.error` calls without user-facing notifications
