@@ -46,7 +46,7 @@ export class DashboardStore {
       try {
         await this.gameService.deleteGame(gameId, user.uid);
         this.myGames.update(games => games.filter(g => g.id !== gameId));
-      } catch (error) {
+      } catch {
         this.toastService.error('Could not delete the game. Try again.');
       }
     }
@@ -71,7 +71,7 @@ export class DashboardStore {
             espnSport: game.espnSport
           }))).catch(() => {});
         }
-      } catch (error) {
+      } catch {
         this.toastService.error('Could not load your games. Try again.');
       } finally {
         this.isLoadingGames.set(false);

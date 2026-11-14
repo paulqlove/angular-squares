@@ -2,7 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { DEFAULT_EMPTY_QUARTER_RULE } from '../../../core/plans';
 import { EspnGame, EspnService, SportType } from '../../../core/services/espn.service';
-import { GameListItem, GameService } from '../../../core/services/game.service';
+import { GameData, GameListItem, GameService } from '../../../core/services/game.service';
 import { PlanService } from '../../../core/services/plan.service';
 import { SanitizationService } from '../../../core/services/sanitization.service';
 import { ToastService } from '../../../core/services/toast.service';
@@ -30,7 +30,7 @@ interface EditedFields {
   pricePerSquare: number;
 }
 
-const zeroScores = (): Record<string, { home: number; away: number }> =>
+const zeroScores = (): GameData['scores'] =>
   ({ q1: { home: 0, away: 0 }, q2: { home: 0, away: 0 }, q3: { home: 0, away: 0 }, q4: { home: 0, away: 0 } });
 
 /** The Edit game dialog opened from a dashboard card: its values, the ESPN games to link, co-host and saving. Provided on the dashboard. */
@@ -63,7 +63,7 @@ export class DashboardEditService {
       await this.gameService.updateGameManager(game.id, player.uid, null, player.name);
       this.editingGame.set({ ...game, managerId: player.uid, managerName: player.name, managerEmail: undefined });
       this.store.updateMyGame(game.id, g => ({ ...g, managerId: player.uid, managerName: player.name, managerEmail: undefined }));
-    } catch (error) {
+    } catch {
       this.toastService.error('Could not assign the co-host. Try again.');
     }
   }
@@ -123,7 +123,7 @@ export class DashboardEditService {
       await this.gameService.updateGameManager(game.id, null, null, null);
       this.editingGame.set({ ...game, managerId: undefined, managerEmail: undefined, managerName: undefined });
       this.store.updateMyGame(game.id, g => ({ ...g, managerId: undefined, managerEmail: undefined, managerName: undefined }));
-    } catch (error) {
+    } catch {
       this.toastService.error('Could not remove the co-host. Try again.');
     }
   }
@@ -148,7 +148,7 @@ export class DashboardEditService {
         espnSport: v.espnGameId && v.sport !== 'custom' ? v.sport : null,
         ...this.editedTeams(game, v)
       };
-      const updates: Record<string, any> = espnChanged ? { ...fields, scores: zeroScores(), winners: {} } : { ...fields };
+      const updates: Partial<GameData> = espnChanged ? { ...fields, scores: zeroScores(), winners: {} } : { ...fields };
       const newSize = v.newBoardSize;
       if (newSize) await this.gameService.resizeBoard(game.id, newSize);
       await this.gameService.updateGame(game.id, updates);
@@ -156,7 +156,7 @@ export class DashboardEditService {
       const saved = { ...applied, ...fields, espnEventId: fields.espnEventId || undefined, espnSport: fields.espnSport || undefined };
       this.store.updateMyGame(game.id, g => ({ ...g, ...(newSize ? { boardSize: newSize } : {}), ...saved, ...(espnChanged ? { scores: zeroScores(), winners: {} } : {}) }));
       this.closeEditModal();
-    } catch (error) {
+    } catch {
       this.toastService.error('Could not save changes. Try again.');
     } finally {
       this.isSavingGame.set(false);

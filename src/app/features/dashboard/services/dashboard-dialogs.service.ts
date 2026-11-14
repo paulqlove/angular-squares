@@ -22,7 +22,7 @@ export class DashboardDialogsService {
   public readonly anyModalOpen = computed<boolean>(() => this.showCreateModal() || this.edit.showEditModal() || this.showUpgradeDialog());
   public readonly autoManageDefault = signal<boolean>(true);
   /** The phone bottom bar steps out of the way while a sheet or dialog is open. */
-  public readonly barHidden = computed<boolean>(() => this.showCreateModal() || this.edit.showEditModal() || this.showUpgradeDialog() || !!this.store.shareModalGameId());
+  public readonly barHidden = computed<boolean>(() => this.anyModalOpen() || !!this.store.shareModalGameId());
   /** The finished board shown in the 'ended' dialog. */
   public readonly endedBoard = signal<GameListItem | null>(null);
   public readonly isCheckingBoardLimit = signal<boolean>(false);
