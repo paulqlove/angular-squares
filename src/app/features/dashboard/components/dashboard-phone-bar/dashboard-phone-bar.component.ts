@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, afterNextRender, inject } from '@angular/core';
 import { NgIconComponent } from '@ng-icons/core';
+
+import { ROOT_CLASS } from '../../../../shared/directives/dock-at-end.directive';
 
 import { DashboardDialogsService } from '../../services/dashboard-dialogs.service';
 import { DashboardSearchService } from '../../services/dashboard-search.service';
@@ -8,8 +10,8 @@ import { PlayersViewService } from '../../services/players-view.service';
 import { DashboardSearchFieldComponent } from '../dashboard-search-field/dashboard-search-field.component';
 
 /**
- * Phone: the search-or-code field and New board in a bar along the bottom, like the game page's host tools. On the
- * Players tab the field reads Find a player and opens the players filter sheet.
+ * Phone: the search-or-code field and New board in a solid bar across the bottom of the screen. On the Players tab the
+ * field reads Players & games and opens the players filter sheet.
  * Tapping the field opens it with Cancel in the same bar. Sits on the dock (`<div appDashboardPhoneBar>`),
  * which the dashboard lifts above the keyboard and hides behind dialogs.
  */
@@ -20,6 +22,14 @@ import { DashboardSearchFieldComponent } from '../dashboard-search-field/dashboa
   changeDetection: ChangeDetectionStrategy.Eager
 })
 export class DashboardPhoneBarComponent {
+  constructor() {
+    // The bar always runs to the screen's edge, so Chrome's strip under the page takes the bar's colour (styles.scss)
+    afterNextRender(() => document.documentElement.classList.add(ROOT_CLASS));
+    inject(DestroyRef).onDestroy(() => {
+      if (typeof document !== 'undefined') document.documentElement.classList.remove(ROOT_CLASS);
+    });
+  }
+
   protected readonly dialogs: DashboardDialogsService = inject(DashboardDialogsService);
   protected readonly players: PlayersViewService = inject(PlayersViewService);
   protected readonly search: DashboardSearchService = inject(DashboardSearchService);
