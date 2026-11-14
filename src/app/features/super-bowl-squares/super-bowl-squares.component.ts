@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroShare } from '@ng-icons/heroicons/outline';
 import { AdSlotComponent } from '../../components/ui/ad-slot/ad-slot.component';
-import { AppHeaderComponent } from '../../components/ui/app-header/app-header.component';
+import { SiteHeaderComponent } from '../../components/ui/site-header/site-header.component';
 import { HelpMenuComponent } from '../../components/ui/help-menu/help-menu.component';
 import { ProfileMenuComponent } from '../../components/ui/profile-menu/profile-menu.component';
 import { YourGamesMenuComponent } from '../../components/ui/your-games-menu/your-games-menu.component';
@@ -36,7 +36,7 @@ import { SquarePickerService } from './services/square-picker.service';
   selector: 'app-super-bowl-squares',
   imports: [
     AdSlotComponent,
-    AppHeaderComponent,
+    SiteHeaderComponent,
     BoardSectionComponent,
     BoardSettingsDialogsComponent,
     DockAtEndDirective,

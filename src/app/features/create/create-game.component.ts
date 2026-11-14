@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, OnInit, effect, inject, signal } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router, RouterLink } from '@angular/router';
-import { AppHeaderComponent } from '../../components/ui/app-header/app-header.component';
+import { SiteHeaderComponent } from '../../components/ui/site-header/site-header.component';
 import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.component';
 import { AuthService } from '../../core/services/auth.service';
 import { clearCreateDraft, isPendingAutoSubmit, loadCreateDraft, saveCreateDraft } from '../../core/utils/create-game-draft';
@@ -13,13 +13,13 @@ import { CreateGameFormComponent, CreateGameSubmit } from './create-game-form.co
  */
 @Component({
   selector: 'app-create-game',
-  imports: [RouterLink, AppHeaderComponent, AuthModalComponent, CreateGameFormComponent],
+  imports: [RouterLink, SiteHeaderComponent, AuthModalComponent, CreateGameFormComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="min-h-screen bg-qs-bg text-qs-ink">
-      <app-shared-header heading="p">
+      <app-site-header heading="p">
         <a routerLink="/" class="qs-btn qs-btn-ghost">Home</a>
-      </app-shared-header>
+      </app-site-header>
 
       <main class="mx-auto w-full max-w-2xl px-4 py-8 max-sm:px-0 max-sm:py-0 sm:py-12">
         <div class="flex h-[min(44rem,calc(100dvh-9rem))] min-h-[28rem] flex-col overflow-hidden rounded-card border border-qs-line bg-qs-panel shadow-pop max-sm:h-[calc(100dvh-4rem)] max-sm:rounded-none max-sm:border-x-0">

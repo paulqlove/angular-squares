@@ -15,7 +15,8 @@ import {
   heroXMark
 } from '@ng-icons/heroicons/outline';
 
-import { AppHeaderComponent } from '../../components/ui/app-header/app-header.component';
+import { SiteHeaderComponent } from '../../components/ui/site-header/site-header.component';
+import { SiteFooterComponent } from '../../shared/site-footer.component';
 import { ModalComponent } from '../../components/ui/modal/modal.component';
 import { ProfileMenuComponent } from '../../components/ui/profile-menu/profile-menu.component';
 import { ShareDialogComponent } from '../../components/ui/share-dialog/share-dialog.component';
@@ -23,7 +24,6 @@ import { AuthService } from '../../core/services/auth.service';
 import { PlanService } from '../../core/services/plan.service';
 import { WalkthroughService } from '../../core/services/walkthrough.service';
 import { DockAtEndDirective } from '../../shared/directives/dock-at-end.directive';
-import { HeadroomDirective } from '../../shared/directives/headroom.directive';
 import { CreateGameFormComponent } from '../create/create-game-form.component';
 import { EditGameDialogComponent } from '../super-bowl-squares/components/edit-game-dialog/edit-game-dialog.component';
 import { DashboardAdminPanelComponent } from './components/dashboard-admin-panel/dashboard-admin-panel.component';
@@ -48,7 +48,7 @@ import { DashboardStore } from './services/dashboard.store';
 @Component({
   selector: 'app-dashboard',
   imports: [
-    ModalComponent, NgIconComponent, AppHeaderComponent, HeadroomDirective, DockAtEndDirective, ProfileMenuComponent, ShareDialogComponent,
+    ModalComponent, NgIconComponent, SiteHeaderComponent, SiteFooterComponent, DockAtEndDirective, ProfileMenuComponent, ShareDialogComponent,
     CreateGameFormComponent, EditGameDialogComponent, UpgradePassDialogComponent, DashboardAdminPanelComponent, DashboardHostingComponent,
     DashboardJoinedComponent, DashboardPhoneBarComponent, DashboardSearchFieldComponent
   ],

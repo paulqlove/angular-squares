@@ -1,13 +1,13 @@
 <!-- Loading State -->
 @if (state.isLoading() || state.gameNotFound()) {
   <!-- Loading: the page's own shape, so moving between boards does not flash a spinner. A missing game keeps it up while the page moves to the landing page or dashboard. -->
-  <app-shared-header variant="fixed" heading="p"></app-shared-header>
+  <app-site-header position="fixed" heading="p"></app-site-header>
   <main class="qs-skel-delay mx-auto max-w-[1600px] px-1 pb-16 pt-2 sm:px-5">
     <app-game-skeleton [size]="ui.skeletonSize()" [fade]="ui.skeletonFade()"></app-game-skeleton>
   </main>
 } @else {
   <!-- Main Game View -->
-  <app-shared-header variant="fixed" heading="p">
+  <app-site-header position="fixed" heading="p">
     <button type="button" (click)="ui.showShareModal.set(true)" data-walkthrough="share" class="flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-btn p-2.5 text-qs-tile-muted transition-colors hover:bg-white/10 hover:text-qs-tile-ink sm:px-3" aria-label="Share">
       <ng-icon name="heroShare" class="text-xl"></ng-icon>
       <span class="qs-label hidden sm:inline">Share</span>
@@ -21,7 +21,7 @@
     } @else {
       <button type="button" (click)="ui.showAuthModal.set(true)" class="qs-btn qs-btn-primary">Sign in</button>
     }
-  </app-shared-header>
+  </app-site-header>
 
   <!-- Host tools: floating bar, bottom center, owner and co-host only -->
   @if (state.isHost()) {
