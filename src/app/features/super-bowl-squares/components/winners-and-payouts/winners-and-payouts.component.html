@@ -7,18 +7,22 @@
   @for (quarter of quarters; track quarter) {
     <button
       type="button"
-      class="flex min-h-36 flex-col rounded-inner p-4 text-left transition-[filter] disabled:cursor-default"
-      [class]="winners[quarter] ? 'bg-qs-tile-ok hover:brightness-110' : 'bg-qs-tile'"
+      class="relative isolate flex min-h-36 flex-col rounded-inner bg-qs-tile p-4 text-left transition-[filter] disabled:cursor-default"
+      [class]="winners[quarter] ? 'hover:brightness-110' : ''"
       [disabled]="!winners[quarter]"
       [attr.aria-label]="getQuarterLabel(quarter) + (winners[quarter] ? ', won by ' + winners[quarter] + '. Show the winning square' : notStarted(quarter) ? ', not started' : isEmpty(quarter) ? ', unclaimed square' : ', no winner yet')"
       (click)="quarterClick.emit(quarter)">
+      @if (winners[quarter]) {
+        <!-- The emerald is an overlay, so a quarter won while you watch fades it in -->
+        <span class="absolute inset-0 -z-10 rounded-inner bg-qs-tile-ok" [class.tile-win-in]="arriving.has(quarter)" aria-hidden="true"></span>
+      }
       <div class="flex items-center justify-between gap-2">
         <span class="qs-label text-qs-tile-muted">{{ getQuarterLabel(quarter) }}</span>
         <span class="qs-label text-qs-tile-muted">{{ getQuarterPoints(quarter) | number: '1.0-2' }} pts</span>
       </div>
       <p translate="no" class="mt-3 text-3xl font-semibold leading-none tabular-nums text-qs-tile-ink sm:text-4xl">
         @if (hasScore(quarter) || winners[quarter]) {
-          {{ scores[quarter].away }}<span class="mx-1 text-qs-tile-muted">–</span>{{ scores[quarter].home }}
+          <app-value-swap [value]="scores[quarter].away" /><span class="mx-1 text-qs-tile-muted">–</span><app-value-swap [value]="scores[quarter].home" />
         } @else {
           <span class="text-qs-tile-muted">–</span>
         }

@@ -1,4 +1,4 @@
-import { Injectable, Signal, computed, inject, signal } from '@angular/core';
+import { Injectable, Injector, Signal, afterNextRender, computed, inject, signal } from '@angular/core';
 
 import { CardMenuItem } from '../../../components/ui/card-menu/card-menu.component';
 import { AuthService, AuthUser } from '../../../core/services/auth.service';
@@ -21,6 +21,8 @@ export class DashboardStore {
   /** Hosted boards grouped by what the host does next. Empty groups are left out. */
   public readonly boardGroups = computed<BoardGroup[]>(() => groupBoards(this.visibleMyGames()));
   public canCreateGame: Signal<boolean> = inject(AuthService).canCreateGame;
+  /** How a card comes in: a 160ms fade when the boards first load, then nothing, so search and Boards | Players feel instant. */
+  public readonly cardEnter = signal<string>('qs-row-in');
   public readonly currentUser: Signal<AuthUser | null> = inject(AuthService).currentUser;
   public readonly hostMenu: CardMenuItem[] = [{ id: 'edit', label: 'Edit game' }, { id: 'delete', label: 'Delete game', danger: true }];
   public readonly isLoadingGames = signal<boolean>(true);
@@ -60,6 +62,7 @@ export class DashboardStore {
     const user = this.currentUser();
     if (user && !user.isGuest) {
       this.isLoadingGames.set(true);
+      this.cardEnter.set('qs-row-in');
       try {
         const [ownedRecords, joinedRecords] = await Promise.all([
           this.gameService.getUserGameRecords(user.uid),
@@ -81,6 +84,7 @@ export class DashboardStore {
         this.toastService.error('Could not load your games. Try again.');
       } finally {
         this.isLoadingGames.set(false);
+        afterNextRender(() => this.cardEnter.set(''), { injector: this.injector });
       }
     } else {
       this.isLoadingGames.set(false);
@@ -153,6 +157,7 @@ export class DashboardStore {
 
   private readonly confirmService: ConfirmService = inject(ConfirmService);
   private readonly gameService: GameService = inject(GameService);
+  private readonly injector: Injector = inject(Injector);
   private readonly search: DashboardSearchService = inject(DashboardSearchService);
   private readonly teamLogos: TeamLogoService = inject(TeamLogoService);
   private readonly toastService: ToastService = inject(ToastService);

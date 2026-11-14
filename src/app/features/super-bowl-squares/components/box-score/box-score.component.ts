@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ValueSwapComponent } from '../../../../components/ui/value-swap/value-swap.component';
 import { EspnGame, SportType, SPORT_CONFIG } from '../../../../core/services/espn.service';
 
 export interface ManualScores {
@@ -12,7 +13,7 @@ export interface ManualScores {
 @Component({
   selector: 'app-box-score',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, ValueSwapComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="bg-qs-tile rounded-inner p-3 text-qs-tile-ink">
@@ -72,11 +73,13 @@ export interface ManualScores {
                   @if (editing) {
                     <input type="number" min="0" inputmode="numeric" [attr.aria-label]="row.name + ' ' + q.toUpperCase()" [(ngModel)]="editScores[q][row.side]" class="qs-input w-11 px-1 text-center" />
                   } @else {
-                    {{ getScore(i, row.side) }}
+                    <app-value-swap [value]="getScore(i, row.side)" />
                   }
                 </td>
               }
-              <td class="py-1 text-center font-bold text-qs-tile-ink">{{ editing ? editScores.q4[row.side] : getTotalScore(row.side) }}</td>
+              <td class="py-1 text-center font-bold text-qs-tile-ink">
+                @if (editing) { {{ editScores.q4[row.side] }} } @else { <app-value-swap [value]="getTotalScore(row.side)" /> }
+              </td>
             </tr>
           }
         </tbody>

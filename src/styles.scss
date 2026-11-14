@@ -682,6 +682,18 @@ body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
 .qs-btn { transition-property: background-color, color, border-color, transform; }
 .qs-btn:active:not(:disabled) { transform: scale(.97); transition-duration: var(--qs-t-press); transition-timing-function: var(--qs-ease-in); }
 
+/* Board squares (game-board). Open squares on an open board: a soft green tint on devices that hover (never sticky
+   after a tap) and a press that answers the finger, scale .94 in 80ms. Taken squares and locked boards get neither.
+   A square changing hands: your own claim springs in (.85 to 1), someone else's fades in, a let-go name fades out. */
+.qs-square-open { transition: background-color var(--qs-t-fast) var(--qs-ease), transform var(--qs-t-fast) var(--qs-ease); }
+.qs-square-open:active { transform: scale(.94); transition-duration: var(--qs-t-press); transition-timing-function: var(--qs-ease-in); }
+@media (hover: hover) { .square-cell.qs-square-open:hover { background-color: var(--qs-accent-soft); } }
+@keyframes qs-name-own { from { opacity: 0; transform: scale(.85); } }
+.qs-name-own { animation: qs-name-own var(--qs-t-state) var(--qs-ease-spring) backwards; }
+.qs-name-in { animation: qs-fade-in var(--qs-t-state) var(--qs-ease) backwards; }
+.qs-name-out { animation: qs-fade-out var(--qs-t-fast) var(--qs-ease-in) forwards; }
+@media (prefers-reduced-motion: reduce) { .qs-square-open:active { transform: none; } }
+
 /* Host bar: the lock turns as it opens or closes, and the clear icon turns when it becomes available */
 .lock-icon { position: relative; display: inline-flex; width: 1em; height: 1em; font-size: 1rem; }
 .lock-icon > ng-icon { position: absolute; inset: 0; font-size: inherit;

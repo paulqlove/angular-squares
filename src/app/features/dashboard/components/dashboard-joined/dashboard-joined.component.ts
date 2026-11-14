@@ -8,6 +8,8 @@ import { GameCardComponent } from '../game-card/game-card.component';
 @Component({
   selector: 'section[appDashboardJoined]',
   imports: [GameCardComponent],
+  // Glides as one block when a lock above it reflows the hosted boards (see DashboardHostingComponent)
+  host: { 'data-flip-id': 'joined' },
   templateUrl: './dashboard-joined.component.html',
   changeDetection: ChangeDetectionStrategy.Eager
 })
