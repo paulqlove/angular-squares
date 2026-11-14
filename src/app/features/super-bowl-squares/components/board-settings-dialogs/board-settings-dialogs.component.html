@@ -1,0 +1,30 @@
+<app-shrink-board-dialog
+  [isOpen]="ui.showShrinkSuggestion()"
+  [boardSize]="state.boardSize"
+  [squaresFilled]="state.squaresPicked()"
+  [sizes]="state.shrinkSizes()"
+  (closed)="ui.showShrinkSuggestion.set(false)"
+  (converted)="host.convertAndLock($event)"
+  (lockAsIs)="host.lockAsIs()"
+></app-shrink-board-dialog>
+
+<app-edit-game-dialog
+  [isOpen]="ui.showSettings()"
+  [isLocked]="state.isLocked"
+  [boardSize]="state.boardSize"
+  [numbersDrawn]="state.isRandomized"
+  [squaresFilled]="state.squaresPicked()"
+  [canShowInOpenBoards]="state.canShowInOpenBoards()"
+  [canAutoManage]="state.canAutoManage()"
+  [canLimitSquares]="state.isGameOwner() && planService.features().squareLimit"
+  [autoRunText]="autoRunLabel(state.linkedEspnGame()?.date)"
+  [values]="{ awayTeam: state.awayTeam, homeTeam: state.homeTeam, pricePerSquare: state.currentPrice, hostNote: state.hostNote, quarterSplit: state.quarterSplit, emptyQuarterRule: state.emptyQuarterRule, newBoardSize: null, showInOpenBoards: state.showInOpenBoards, autoManage: !!state.autoManage, maxSquaresPerPlayer: state.maxSquaresPerPlayer ?? null }"
+  [linkedGameName]="state.espnEventId ? state.awayTeam + ' @ ' + state.homeTeam : ''"
+  [showSplit]="true"
+  [showClear]="true"
+  [canCustomSplit]="planService.features().customSplits"
+  [splitLocked]="state.isRandomized"
+  (closed)="ui.showSettings.set(false)"
+  (saved)="host.onEditGameSaved($event)"
+  (clearGame)="host.onClearGame(true)"
+></app-edit-game-dialog>

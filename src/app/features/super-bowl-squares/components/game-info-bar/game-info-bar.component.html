@@ -1,0 +1,42 @@
+<div class="flex items-center gap-2">
+  <div class="min-w-0">
+    <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+      <h1 translate="no" class="qs-title text-2xl sm:text-3xl">{{ state.gameName }}</h1>
+    </div>
+    <!-- The note row is always one line tall, so switching between boards with and without a note never moves the board.
+         A note longer than the line is cut to it, and More opens it in place. -->
+    <div class="mt-1.5 flex min-h-5 max-w-prose items-start gap-2 text-sm leading-5 text-qs-muted">
+      @if (state.hostNote) {
+        <p #hostNoteEl class="min-w-0 flex-1 break-words" [class.line-clamp-1]="!ui.hostNoteOpen()"><span class="qs-label mr-2 text-qs-ink">Host note</span>{{ state.hostNote }}</p>
+        @if (ui.hostNoteClamped() || ui.hostNoteOpen()) {
+          <button type="button" class="shrink-0 font-medium text-qs-ink underline underline-offset-2 hover:text-qs-accent" [attr.aria-expanded]="ui.hostNoteOpen()" (click)="ui.toggleHostNote()">{{ ui.hostNoteOpen() ? 'Less' : 'More' }}</button>
+        }
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Player Display / Input -->
+<div class="w-full sm:w-auto" data-walkthrough="player-name">
+  @if (state.squareCounter(); as counter) {
+    <p class="mb-1.5 text-center sm:text-right"><span class="qs-badge" [class.qs-badge-warn]="counter.full" [class.qs-badge-ok]="!counter.full">{{ counter.held }} of {{ counter.max }} squares</span></p>
+  }
+  @if (state.currentUser()?.isGuest && state.currentUser()?.displayName) {
+    <!-- A guest's name is edited from the profile menu -->
+  } @else if (state.currentUser() && !state.currentUser()?.isGuest) {
+    @if (!state.currentUser()?.displayName) {
+      <button type="button" (click)="names.openNameEditModal()" class="qs-btn qs-btn-secondary px-3">Add your name</button>
+    }
+  } @else {
+    <div class="flex flex-col gap-1">
+      <input type="text" [(ngModel)]="names.currentPlayer"
+        placeholder="Enter your name"
+        [disabled]="state.isLocked"
+        [class.border-qs-bad]="names.duplicateNameWarning()"
+        class="w-full min-h-11 px-3 text-base border rounded-lg bg-qs-panel-2 text-qs-ink text-center sm:text-left focus:outline-none focus:ring-2 focus:ring-qs-accent disabled:opacity-50 disabled:cursor-not-allowed">
+      @if (names.duplicateNameWarning()) {
+        <span class="text-xs text-qs-bad text-center">{{ names.duplicateNameWarning() }}</span>
+      }
+    </div>
+  }
+</div>

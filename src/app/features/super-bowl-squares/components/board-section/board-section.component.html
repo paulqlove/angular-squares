@@ -1,0 +1,87 @@
+@let logos = state.teamLogos();
+<!-- Both section heads are 44px tall whatever they hold, so the Open / Locked badge never makes this one taller than the Players head and the two cards start and end level -->
+<div class="mb-4 flex min-h-11 items-center justify-between gap-3">
+  <h3 id="board-heading" class="qs-section-title">Board</h3>
+  <span class="flex items-center gap-4">
+    @if (state.isLiveGame()) {
+      <span class="qs-label inline-flex items-center gap-1.5 text-qs-ink"><span class="h-1.5 w-1.5 rounded-full bg-qs-accent animate-pulse" aria-hidden="true"></span>Live</span>
+    }
+    @if (!(state.isLocked && state.isRandomized)) {
+      <span class="qs-badge" [class.qs-badge-ok]="!state.isLocked">{{ state.isLocked ? 'Locked' : 'Open' }}</span>
+    }
+    <span class="qs-label text-qs-muted">{{ state.filledCount() }}/{{ state.boardSize }} picked</span>
+  </span>
+</div>
+<div class="qs-card p-3 sm:p-5">
+  <!-- Tabs -->
+  <div class="mb-4 flex flex-wrap gap-2" role="tablist">
+    <button id="tab-board" (click)="ui.selectTab('board')" role="tab" aria-controls="board-tabpanel" [attr.aria-selected]="ui.activeTab === 'board'" class="qs-tab px-3 sm:px-4">Board</button>
+    <button id="tab-probabilities" (click)="ui.selectTab('probabilities')" role="tab" aria-controls="board-tabpanel" [attr.aria-selected]="ui.activeTab === 'probabilities'" class="qs-tab px-3 sm:px-4">Hit rate</button>
+    <button id="tab-boxscore" (click)="ui.selectTab('boxscore')" role="tab" aria-controls="board-tabpanel" [attr.aria-selected]="ui.activeTab === 'boxscore'" class="qs-tab px-3 sm:px-4">Box score</button>
+    @if (state.openBoards().length) {
+      <button id="tab-more" (click)="ui.selectTab('more')" role="tab" aria-controls="board-tabpanel" [attr.aria-selected]="ui.activeTab === 'more'" class="qs-tab px-3 sm:px-4">More</button>
+    }
+  </div>
+
+  <!-- Tab Content. At every width the Board stays in place (hidden while another tab shows) and sets the card's height. The other tabs sit on top of it and scroll inside if they are taller, so switching tabs never moves anything below. -->
+  <div id="board-tabpanel" role="tabpanel" [attr.aria-labelledby]="'tab-' + ui.activeTab" class="relative">
+    <div [class]="ui.activeTab === 'board' ? (ui.tabTouched ? 'qs-tab-in' : '') : 'invisible'" [attr.aria-hidden]="ui.activeTab === 'board' ? null : 'true'">
+      <app-game-board
+        [selectedSquares]="state.selectedSquares"
+        [playerColors]="state.playerColors"
+        [homeNumbers]="draw.displayHomeNumbers()"
+        [awayNumbers]="draw.displayAwayNumbers()"
+        [drawing]="draw.isAnimatingNumbers()"
+        [homeTeam]="state.homeTeam"
+        [awayTeam]="state.awayTeam"
+        [awayLogo]="logos.away"
+        [homeLogo]="logos.home"
+        [selectedPlayer]="ui.selectedPlayer"
+        [highlightedSquare]="ui.highlightedSquare"
+        [currentLeaderSquare]="state.currentLeaderSquare"
+        [winnerSquares]="state.winnerSquares"
+        [winnerQuarterLabels]="state.winnerQuarterLabels"
+        [liveScore]="state.isLiveGame()"
+        [isRandomized]="state.isRandomized"
+        [boardSize]="state.boardSize"
+        (squareClick)="squares.onSquareClick($event)">
+      </app-game-board>
+    </div>
+    @if (ui.activeTab !== 'board') {
+      <div class="absolute inset-0 overflow-y-auto" animate.enter="qs-tab-in">
+        @if (ui.activeTab === 'more') {
+          <app-open-boards-list [rows]="state.openBoards()" (picked)="session.trackOtherBoardJoin()"></app-open-boards-list>
+        } @else if (ui.activeTab === 'probabilities') {
+        @if (state.isRandomized) {
+          <app-probability-heatmap
+            [homeNumbers]="state.homeNumbers"
+            [awayNumbers]="state.awayNumbers"
+            [homeTeam]="state.homeTeam"
+            [awayTeam]="state.awayTeam"
+            [selectedSquares]="state.selectedSquares"
+            [selectedPlayer]="ui.selectedPlayer"
+            [boardSize]="state.boardSize">
+          </app-probability-heatmap>
+        } @else {
+          <div class="flex h-64 items-center justify-center px-4 text-center text-qs-muted">
+            <p>Hit rates appear once the numbers are drawn.</p>
+          </div>
+        }
+
+        } @else {
+        <app-box-score
+          [game]="state.linkedEspnGame()"
+          [espnSport]="state.espnSport"
+          [scores]="{ q1: state.scores.q1, q2: state.scores.q2, q3: state.scores.q3, q4: state.scores.q4 }"
+          [homeTeam]="state.homeTeam"
+          [awayTeam]="state.awayTeam"
+          [awayLogo]="logos.away"
+          [homeLogo]="logos.home"
+          [isOwner]="!state.espnEventId && state.isHost()"
+          (scoresChange)="scoring.onBoxScoreChange($event)">
+        </app-box-score>
+        }
+      </div>
+    }
+  </div>
+</div>

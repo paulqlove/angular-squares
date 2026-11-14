@@ -1,297 +1,72 @@
 <!-- Loading State -->
-@if (isLoading() || gameNotFound()) {
+@if (state.isLoading() || state.gameNotFound()) {
   <!-- Loading: the page's own shape, so moving between boards does not flash a spinner. A missing game keeps it up while the page moves to the landing page or dashboard. -->
   <app-shared-header variant="fixed" heading="p"></app-shared-header>
   <main class="qs-skel-delay mx-auto max-w-[1600px] px-1 pb-16 pt-2 sm:px-5">
-    <app-game-skeleton [size]="skeletonSize()" [fade]="skeletonFade()"></app-game-skeleton>
+    <app-game-skeleton [size]="ui.skeletonSize()" [fade]="ui.skeletonFade()"></app-game-skeleton>
   </main>
 } @else {
   <!-- Main Game View -->
   <app-shared-header variant="fixed" heading="p">
-    <button type="button" (click)="openShareModal()" data-walkthrough="share" class="flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-btn p-2.5 text-qs-tile-muted transition-colors hover:bg-white/10 hover:text-qs-tile-ink sm:px-3" aria-label="Share">
+    <button type="button" (click)="ui.showShareModal.set(true)" data-walkthrough="share" class="flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-btn p-2.5 text-qs-tile-muted transition-colors hover:bg-white/10 hover:text-qs-tile-ink sm:px-3" aria-label="Share">
       <ng-icon name="heroShare" class="text-xl"></ng-icon>
       <span class="qs-label hidden sm:inline">Share</span>
     </button>
-    @if (currentUser()) {
-      <app-your-games-menu [currentGameId]="gameId"></app-your-games-menu>
+    @if (state.currentUser()) {
+      <app-your-games-menu [currentGameId]="state.gameId"></app-your-games-menu>
     }
-    <app-help-menu (tour)="startWalkthrough()"></app-help-menu>
-    @if (currentUser()) {
-      <app-profile-menu [allowNameEdit]="!!currentUser()?.isGuest" [nameEditViaDialog]="true" walkthroughTarget="player-name" (editName)="openNameEditModal()" [presentGameId]="isGameOwner() || isManager() ? gameId : null" (tour)="startWalkthrough()"></app-profile-menu>
+    <app-help-menu (tour)="ui.startWalkthrough()"></app-help-menu>
+    @if (state.currentUser()) {
+      <app-profile-menu [allowNameEdit]="!!state.currentUser()?.isGuest" [nameEditViaDialog]="true" walkthroughTarget="player-name" (editName)="names.openNameEditModal()" [presentGameId]="state.isHost() ? state.gameId : null" (tour)="ui.startWalkthrough()"></app-profile-menu>
     } @else {
-      <button type="button" (click)="showAuthModal.set(true)" class="qs-btn qs-btn-primary">Sign in</button>
+      <button type="button" (click)="ui.showAuthModal.set(true)" class="qs-btn qs-btn-primary">Sign in</button>
     }
   </app-shared-header>
 
   <!-- Host tools: floating bar, bottom center, owner and co-host only -->
-  @if (isGameOwner() || isManager()) {
-    <div class="qs-dockable no-print fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-[90] mx-auto sm:bottom-4 sm:max-w-fit" appDockAtEnd data-walkthrough="host-tools">
-      <div role="toolbar" [attr.aria-label]="isGameOwner() ? 'Host tools' : 'Co-host tools'"
-        class="qs-bar-frame flex items-stretch gap-1 rounded-[12px] p-1.5 sm:items-center sm:gap-2 sm:p-2">
-        <p class="qs-eyebrow qs-eyebrow-bar hidden px-2 lg:block">{{ isGameOwner() ? 'Host tools' : 'Co-host' }}</p>
-        @if (isGameOwner()) {
-          <!-- The next game-day step is the primary button: Lock and draw (one save), then Clear or Draw for a redraw -->
-          <button type="button" (click)="toggleLock()" class="qs-btn host-btn" [class.qs-btn-primary]="!isLocked" [class.qs-btn-secondary]="isLocked" [attr.aria-pressed]="isLocked">
-            <span class="lock-icon" [class.is-locked]="isLocked" aria-hidden="true">
-              <ng-icon name="heroLockClosed" class="lock-closed"></ng-icon>
-              <ng-icon name="heroLockOpen" class="lock-open"></ng-icon>
-            </span>
-            <span class="sm:hidden">{{ isLocked ? 'Unlock' : 'Lock' }}</span><span class="hidden sm:inline">{{ isLocked ? 'Unlock' : isRandomized ? 'Lock board' : 'Lock and draw' }}</span>
-          </button>
-          <button type="button" (click)="randomizeNumbers()" [disabled]="isLocked === isRandomized" class="qs-btn host-btn" [class.qs-btn-primary]="isLocked && !isRandomized" [class.qs-btn-secondary]="!(isLocked && !isRandomized)" [title]="isLocked && isRandomized ? 'Unlock the board to clear numbers' : !isLocked && !isRandomized ? 'Locking the board draws the numbers' : ''">
-            <span class="turn-icon" aria-hidden="true"><ng-icon [name]="isRandomized ? 'heroArrowPath' : 'heroSparkles'" class="text-base"></ng-icon></span>
-            <span class="sm:hidden">{{ isRandomized ? 'Clear' : 'Draw' }}</span><span class="hidden sm:inline">{{ isRandomized ? 'Clear numbers' : 'Draw numbers' }}</span>
-          </button>
-        }
-        <button type="button" (click)="onManagePayments()" class="qs-btn qs-btn-secondary host-btn">
-          <ng-icon name="heroUsers" class="text-base"></ng-icon>
-          <span class="sm:hidden">Players</span><span class="hidden sm:inline">Manage players</span>
-        </button>
-        @if (isGameOwner()) {
-          <button type="button" (click)="showSettings.set(true)" class="qs-btn qs-btn-ghost host-btn">
-            <ng-icon name="heroPencilSquare" class="text-base"></ng-icon>
-            <span class="sm:hidden">Edit</span><span class="hidden sm:inline">Edit game</span>
-          </button>
-        }
-      </div>
-    </div>
+  @if (state.isHost()) {
+    <div appHostToolbar class="qs-dockable no-print fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-[90] mx-auto sm:bottom-4 sm:max-w-fit" appDockAtEnd data-walkthrough="host-tools"></div>
   }
 
-  <app-shrink-board-dialog
-    [isOpen]="showShrinkSuggestion()"
-    [boardSize]="boardSize"
-    [squaresFilled]="squaresPicked()"
-    [sizes]="shrinkSizes()"
-    (closed)="showShrinkSuggestion.set(false)"
-    (converted)="convertAndLock($event)"
-    (lockAsIs)="lockAsIs()"
-  ></app-shrink-board-dialog>
+  <app-board-settings-dialogs></app-board-settings-dialogs>
 
-  <app-edit-game-dialog
-    [isOpen]="showSettings()"
-    [isLocked]="isLocked"
-    [boardSize]="boardSize"
-    [numbersDrawn]="isRandomized"
-    [squaresFilled]="squaresPicked()"
-    [canShowInOpenBoards]="canShowInOpenBoards()"
-    [canAutoManage]="canAutoManage()"
-    [canLimitSquares]="isGameOwner() && planService.features().squareLimit"
-    [autoRunText]="autoRunLabel(linkedEspnGame()?.date)"
-    [values]="{ awayTeam: awayTeam, homeTeam: homeTeam, pricePerSquare: currentPrice, hostNote: hostNote, quarterSplit: quarterSplit, emptyQuarterRule: emptyQuarterRule, newBoardSize: null, showInOpenBoards: showInOpenBoards, autoManage: !!autoManage, maxSquaresPerPlayer: maxSquaresPerPlayer ?? null }"
-    [linkedGameName]="espnEventId ? awayTeam + ' @ ' + homeTeam : ''"
-    [showSplit]="true"
-    [showClear]="true"
-    [canCustomSplit]="planService.features().customSplits"
-    [splitLocked]="isRandomized"
-    (closed)="showSettings.set(false)"
-    (saved)="onEditGameSaved($event)"
-    (clearGame)="onClearGame(true)"
-  ></app-edit-game-dialog>
-
-  <main class="mx-auto max-w-[1600px] px-1 pb-16 pt-2 sm:px-5" [class.pb-32]="isGameOwner() || isManager()" #boardPage>
+  <main class="mx-auto max-w-[1600px] px-1 pb-16 pt-2 sm:px-5" [class.pb-32]="state.isHost()" #boardPage>
     <div class="space-y-6">
       <!-- Game Info Bar -->
-      <div class="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
-        <div class="flex items-center gap-2">
-          <div class="min-w-0">
-            <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
-              <h1 translate="no" class="qs-title text-2xl sm:text-3xl">{{ gameName }}</h1>
-            </div>
-            <!-- The note row is always one line tall, so switching between boards with and without a note never moves the board.
-                 A note longer than the line is cut to it, and More opens it in place. -->
-            <div class="mt-1.5 flex min-h-5 max-w-prose items-start gap-2 text-sm leading-5 text-qs-muted">
-              @if (hostNote) {
-                <p #hostNoteEl class="min-w-0 flex-1 break-words" [class.line-clamp-1]="!hostNoteOpen()"><span class="qs-label mr-2 text-qs-ink">Host note</span>{{ hostNote }}</p>
-                @if (hostNoteClamped() || hostNoteOpen()) {
-                  <button type="button" class="shrink-0 font-medium text-qs-ink underline underline-offset-2 hover:text-qs-accent" [attr.aria-expanded]="hostNoteOpen()" (click)="toggleHostNote()">{{ hostNoteOpen() ? 'Less' : 'More' }}</button>
-                }
-              }
-            </div>
-          </div>
-        </div>
-
-        <!-- Player Display / Input -->
-        <div class="w-full sm:w-auto" data-walkthrough="player-name">
-          @if (squareCounter(); as counter) {
-            <p class="mb-1.5 text-center sm:text-right"><span class="qs-badge" [class.qs-badge-warn]="counter.full" [class.qs-badge-ok]="!counter.full">{{ counter.held }} of {{ counter.max }} squares</span></p>
-          }
-          @if (currentUser()?.isGuest && currentUser()?.displayName) {
-            <!-- A guest's name is edited from the profile menu -->
-          } @else if (currentUser() && !currentUser()?.isGuest) {
-            @if (!currentUser()?.displayName) {
-              <button type="button" (click)="openNameEditModal()" class="qs-btn qs-btn-secondary px-3">Add your name</button>
-            }
-          } @else {
-            <div class="flex flex-col gap-1">
-              <input type="text" [(ngModel)]="currentPlayer"
-                placeholder="Enter your name"
-                [disabled]="isLocked"
-                [class.border-qs-bad]="duplicateNameWarning()"
-                class="w-full min-h-11 px-3 text-base border rounded-lg bg-qs-panel-2 text-qs-ink text-center sm:text-left focus:outline-none focus:ring-2 focus:ring-qs-accent disabled:opacity-50 disabled:cursor-not-allowed">
-              @if (duplicateNameWarning()) {
-                <span class="text-xs text-qs-bad text-center">{{ duplicateNameWarning() }}</span>
-              }
-            </div>
-          }
-        </div>
-      </div>
+      <div appGameInfoBar class="flex flex-wrap items-center justify-between gap-2 px-3 py-2"></div>
 
       <!-- Board + players -->
       <div class="grid grid-cols-1 gap-8 px-3 lg:grid-cols-12">
-        <!-- Board -->
-        <section class="lg:col-span-7" data-walkthrough="game-board" aria-labelledby="board-heading">
-          <!-- Both section heads are 44px tall whatever they hold, so the Open / Locked badge never makes this one taller than the Players head and the two cards start and end level -->
-          <div class="mb-4 flex min-h-11 items-center justify-between gap-3">
-            <h3 id="board-heading" class="qs-section-title">Board</h3>
-            <span class="flex items-center gap-4">
-              @if (isLiveGame()) {
-                <span class="qs-label inline-flex items-center gap-1.5 text-qs-ink"><span class="h-1.5 w-1.5 rounded-full bg-qs-accent animate-pulse" aria-hidden="true"></span>Live</span>
-              }
-              @if (!(isLocked && isRandomized)) {
-                <span class="qs-badge" [class.qs-badge-ok]="!isLocked">{{ isLocked ? 'Locked' : 'Open' }}</span>
-              }
-              <span class="qs-label text-qs-muted">{{ filledCount() }}/{{ boardSize }} picked</span>
-            </span>
-          </div>
-          <div class="qs-card p-3 sm:p-5">
-            <!-- Tabs -->
-            <div class="mb-4 flex flex-wrap gap-2" role="tablist">
-              <button id="tab-board" (click)="selectTab('board')" role="tab" aria-controls="board-tabpanel" [attr.aria-selected]="activeTab === 'board'" class="qs-tab px-3 sm:px-4">Board</button>
-              <button id="tab-probabilities" (click)="selectTab('probabilities')" role="tab" aria-controls="board-tabpanel" [attr.aria-selected]="activeTab === 'probabilities'" class="qs-tab px-3 sm:px-4">Hit rate</button>
-              <button id="tab-boxscore" (click)="selectTab('boxscore')" role="tab" aria-controls="board-tabpanel" [attr.aria-selected]="activeTab === 'boxscore'" class="qs-tab px-3 sm:px-4">Box score</button>
-              @if (openBoards().length) {
-                <button id="tab-more" (click)="selectTab('more')" role="tab" aria-controls="board-tabpanel" [attr.aria-selected]="activeTab === 'more'" class="qs-tab px-3 sm:px-4">More</button>
-              }
-            </div>
-
-            <!-- Tab Content. At every width the Board stays in place (hidden while another tab shows) and sets the card's height. The other tabs sit on top of it and scroll inside if they are taller, so switching tabs never moves anything below. -->
-            <div id="board-tabpanel" role="tabpanel" [attr.aria-labelledby]="'tab-' + activeTab" class="relative">
-              <div [class]="activeTab === 'board' ? (tabTouched ? 'qs-tab-in' : '') : 'invisible'" [attr.aria-hidden]="activeTab === 'board' ? null : 'true'">
-                <app-game-board
-                  [selectedSquares]="selectedSquares"
-                  [playerColors]="playerColors"
-                  [homeNumbers]="displayHomeNumbers()"
-                  [awayNumbers]="displayAwayNumbers()"
-                  [drawing]="isAnimatingNumbers()"
-                  [homeTeam]="homeTeam"
-                  [awayTeam]="awayTeam"
-                  [awayLogo]="teamLogos().away"
-                  [homeLogo]="teamLogos().home"
-                  [selectedPlayer]="selectedPlayer"
-                  [highlightedSquare]="highlightedSquare"
-                  [currentLeaderSquare]="currentLeaderSquare"
-                  [winnerSquares]="winnerSquares"
-                  [winnerQuarterLabels]="winnerQuarterLabels"
-                  [liveScore]="isLiveGame()"
-                  [isRandomized]="isRandomized"
-                  [boardSize]="boardSize"
-                  (squareClick)="onSquareClick($event)">
-                </app-game-board>
-              </div>
-              @if (activeTab !== 'board') {
-                <div class="absolute inset-0 overflow-y-auto" animate.enter="qs-tab-in">
-                  @if (activeTab === 'more') {
-                    <app-open-boards-list [rows]="openBoards()" (picked)="trackOtherBoardJoin()"></app-open-boards-list>
-                  } @else if (activeTab === 'probabilities') {
-                  @if (isRandomized) {
-                    <app-probability-heatmap
-                      [homeNumbers]="homeNumbers"
-                      [awayNumbers]="awayNumbers"
-                      [homeTeam]="homeTeam"
-                      [awayTeam]="awayTeam"
-                      [selectedSquares]="selectedSquares"
-                      [selectedPlayer]="selectedPlayer"
-                      [boardSize]="boardSize">
-                    </app-probability-heatmap>
-                  } @else {
-                    <div class="flex h-64 items-center justify-center px-4 text-center text-qs-muted">
-                      <p>Hit rates appear once the numbers are drawn.</p>
-                    </div>
-                  }
-
-                  } @else {
-                  <app-box-score
-                    [game]="linkedEspnGame()"
-                    [espnSport]="espnSport"
-                    [scores]="{ q1: scores.q1, q2: scores.q2, q3: scores.q3, q4: scores.q4 }"
-                    [homeTeam]="homeTeam"
-                    [awayTeam]="awayTeam"
-                    [awayLogo]="teamLogos().away"
-                    [homeLogo]="teamLogos().home"
-                    [isOwner]="!espnEventId && (isGameOwner() || isManager())"
-                    (scoresChange)="onBoxScoreChange($event)">
-                  </app-box-score>
-                  }
-                </div>
-              }
-            </div>
-          </div>
-        </section>
-
-        <!-- Players -->
-        <section class="lg:relative lg:col-span-5" data-walkthrough="players-list" aria-labelledby="players-heading">
-          <!-- On desktop the column is pinned to the board's height; the list scrolls inside -->
-          <div class="flex flex-col lg:absolute lg:inset-0">
-          <div class="mb-4 flex min-h-11 items-center justify-between gap-3">
-            <h3 id="players-heading" class="qs-section-title">Players</h3>
-            <button
-              type="button"
-              (click)="isPlayersListVisible = !isPlayersListVisible"
-              [attr.aria-expanded]="isPlayersListVisible"
-              class="qs-label flex min-h-11 items-center gap-1 px-1 text-qs-muted hover:text-qs-ink lg:hidden">
-              {{ isPlayersListVisible ? 'Hide' : 'Show ' + playerCount + (playerCount === 1 ? ' player' : ' players') }}
-              <ng-icon name="heroChevronDown" [class.rotate-180]="isPlayersListVisible" class="text-base transition-transform"></ng-icon>
-            </button>
-          </div>
-          <div class="qs-card flex min-h-0 flex-1 flex-col overflow-hidden">
-            <app-game-status class="shrink-0"
-              [boardSize]="boardSize"
-              [selectedSquares]="selectedSquares"
-              [playerStats]="playerStats"
-              [paidPlayers]="paidPlayers">
-            </app-game-status>
-            <div [class.hidden]="!isPlayersListVisible" class="min-h-0 flex-1 overflow-y-auto border-t border-qs-line lg:block">
-              <app-players-list
-                [playerStats]="playerStats"
-                [playerColors]="playerColors"
-                [paidPlayers]="paidPlayers"
-                [homeNumbers]="homeNumbers"
-                [awayNumbers]="awayNumbers"
-                [selectedSquares]="selectedSquares"
-                (playerSelected)="onPlayerSelected($event)">
-              </app-players-list>
-            </div>
-          </div>
-          </div>
-        </section>
+        <section appBoardSection class="lg:col-span-7" data-walkthrough="game-board" aria-labelledby="board-heading"></section>
+        <section appPlayersSection class="lg:relative lg:col-span-5" data-walkthrough="players-list" aria-labelledby="players-heading"></section>
       </div>
 
       <!-- 03 Winners -->
       <section class="px-3" data-walkthrough="winners-payouts" (click)="$event.stopPropagation()">
         <app-winners-and-payouts
-          [winners]="winners"
-          [quarterPayouts]="quarterPayouts"
-          [emptyQuarterRule]="emptyQuarterRule"
-          [completedQuarters]="completedQuarterCount()"
-          [playerColors]="playerColors"
-          [totalPot]="totalPot"
-          [scores]="scores"
-          [homeTeam]="homeTeam"
-          [awayTeam]="awayTeam"
-          [gameOver]="isGameOver()"
-          [startedQuarters]="startedQuarterCount()"
-          (quarterClick)="onQuarterClick($event)">
+          [winners]="state.winners"
+          [quarterPayouts]="state.quarterPayouts"
+          [emptyQuarterRule]="state.emptyQuarterRule"
+          [completedQuarters]="state.completedQuarterCount()"
+          [playerColors]="state.playerColors"
+          [totalPot]="state.totalPot"
+          [scores]="state.scores"
+          [homeTeam]="state.homeTeam"
+          [awayTeam]="state.awayTeam"
+          [gameOver]="state.isGameOver()"
+          [startedQuarters]="state.startedQuarterCount()"
+          (quarterClick)="ui.toggleQuarterHighlight($event)">
         </app-winners-and-payouts>
       </section>
 
-      @if (showAd()) {
+      @if (state.showAd()) {
         <section class="px-3">
           <app-ad-slot></app-ad-slot>
         </section>
       }
 
       <!-- Alert notifications -->
-      @if (showAlert) {
+      @if (ui.showAlert) {
         <div
           class="fixed p-4 -translate-x-1/2 border border-qs-line rounded-card shadow-pop bottom-40 left-1/2 w-72 bg-qs-bad-soft text-qs-bad"
           role="alert">
@@ -303,7 +78,7 @@
             </div>
             <div class="ml-3">
               <p class="text-sm text-qs-bad">
-                {{ alertMessage }}
+                {{ ui.alertMessage }}
               </p>
             </div>
           </div>
@@ -312,60 +87,11 @@
 
       <app-payment-dialog
         #paymentDialog
-        (onPaidStatusChange)="onPaidPlayersChange($event)"
-        (playerRemoved)="onPlayerRemoved($event)">
+        (onPaidStatusChange)="players.onPaidPlayersChange($event)"
+        (playerRemoved)="players.onPlayerRemoved($event)">
       </app-payment-dialog>
     </div>
   </main>
 
-  <!-- Share Modal -->
-  <app-share-dialog [isOpen]="showShareModal()" [gameId]="gameId" (closed)="closeShareModal()"></app-share-dialog>
-
-  <!-- Name Edit Modal -->
-  <app-modal [open]="showNameEditModal()" labelledBy="edit-name-title" size="sm" (dismissed)="showNameEditModal.set(false)">
-    <div class="p-6">
-      <div class="flex items-start justify-between gap-4">
-        <h3 id="edit-name-title" class="qs-title text-2xl">Edit name</h3>
-        <button type="button" (click)="showNameEditModal.set(false)" class="qs-btn qs-btn-ghost -mr-2 -mt-1 w-11 px-0 text-qs-muted hover:text-qs-ink" aria-label="Close">
-          <ng-icon name="heroXMark" class="text-xl"></ng-icon>
-        </button>
-      </div>
-      <label for="edit-name-input" class="qs-label mt-4 block text-qs-muted">Your name</label>
-      <input id="edit-name-input" type="text" data-autofocus autocomplete="name" [(ngModel)]="editingName" class="qs-input mt-1.5 w-full" placeholder="Shown on your squares" (keyup.enter)="saveNameEdit()" />
-      @if (isEditingNameTaken()) {
-        <p class="mt-2 text-sm text-qs-bad">This name is already in use. Please choose a different name.</p>
-      }
-      <div class="mt-6 flex justify-end gap-3">
-        <button type="button" (click)="showNameEditModal.set(false)" class="qs-btn qs-btn-ghost text-qs-muted">Cancel</button>
-        <button type="button" (click)="saveNameEdit()" [disabled]="isSavingName() || !editingName.trim()" class="qs-btn qs-btn-primary">
-          {{ isSavingName() ? 'Saving…' : 'Save' }}
-        </button>
-      </div>
-    </div>
-  </app-modal>
-
-  <!-- Auth Modal (for unauthenticated square clicks) -->
-  <app-auth-modal
-    [isOpen]="showAuthModal()"
-    (authenticated)="onAuthModalAuthenticated()"
-    (closed)="onAuthModalClosed()">
-  </app-auth-modal>
-
-  <!-- Forced Name Change Modal (non-dismissable) -->
-  <app-modal [open]="showForceNameChangeModal()" labelledBy="force-name-title" size="sm" [escapeCloses]="false" [backdropCloses]="false">
-    <div class="p-6">
-      <h3 id="force-name-title" class="qs-title text-2xl">Name already taken</h3>
-      <p class="mt-3 text-qs-muted">Another player named "{{ currentUser()?.displayName }}" is already in this game. Please choose a different name.</p>
-      <label for="force-name-input" class="qs-label mt-4 block text-qs-muted">New name</label>
-      <input id="force-name-input" type="text" data-autofocus autocomplete="name" [(ngModel)]="forceNameValue" class="qs-input mt-1.5 w-full" placeholder="Shown on your squares" (keyup.enter)="saveForceNameChange()" />
-      @if (isForceNameTaken()) {
-        <p class="mt-2 text-sm text-qs-bad">This name is already in use. Please choose a different name.</p>
-      }
-      <div class="mt-6 flex justify-end">
-        <button type="button" (click)="saveForceNameChange()" [disabled]="isSavingForceName() || !forceNameValue.trim() || isForceNameTaken()" class="qs-btn qs-btn-primary">
-          {{ isSavingForceName() ? 'Saving…' : 'Save' }}
-        </button>
-      </div>
-    </div>
-  </app-modal>
+  <app-game-page-dialogs></app-game-page-dialogs>
 }
