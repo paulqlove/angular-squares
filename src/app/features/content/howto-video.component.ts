@@ -1,17 +1,10 @@
 import { DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ElementRef, Injector, afterNextRender, computed, inject, input, signal, viewChild } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { HowToVideo } from './howto-videos';
-
-const YOUTUBE_ID = /^[A-Za-z0-9_-]{11}$/;
+import { HowToVideo, YOUTUBE_ID, youtubeThumbnail } from './howto-videos';
 
 /** Phone widths, where the vertical Short plays in place and its thumbnail shows. Keep in step with the media query in the styles below. */
 const PHONE_QUERY = '(max-width: 639.98px)';
-
-/** The largest thumbnail YouTube serves for a video. */
-function thumbnailUrl(id: string): string {
-  return `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
-}
 
 /**
  * A how-to clip that costs nothing until it is tapped: the video's own YouTube thumbnail first, then the youtube-nocookie player.
@@ -152,7 +145,7 @@ export class HowToVideoComponent {
   });
 
   /** The Short's thumbnail for phones. YouTube serves it 16:9 with the 9:16 image in the middle, so the tall box crops to that image. */
-  public readonly phoneThumbnail = computed(() => thumbnailUrl(this.video().phoneYoutubeId ?? ''));
+  public readonly phoneThumbnail = computed(() => youtubeThumbnail(this.video().phoneYoutubeId ?? ''));
 
   /** The in-place player's address: the Short on a phone when there is one, the desktop clip otherwise. */
   public readonly playerSrc = computed<SafeResourceUrl | null>(() => {
@@ -167,7 +160,7 @@ export class HowToVideoComponent {
   public readonly src = computed<SafeResourceUrl | null>(() => this.embed(this.video().youtubeId));
 
   /** The desktop clip's YouTube thumbnail, the poster everywhere except phones with a Short. */
-  public readonly thumbnail = computed(() => thumbnailUrl(this.video().youtubeId));
+  public readonly thumbnail = computed(() => youtubeThumbnail(this.video().youtubeId));
 
   public readonly video = input.required<HowToVideo>();
 
