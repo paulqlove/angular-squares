@@ -30,9 +30,9 @@
       <h4 class="qs-label text-qs-muted">{{ group.label }}</h4>
       <span class="qs-label text-qs-muted opacity-70">{{ group.players.length }}</span>
     </div>
-    <!-- A card per player: two a row on a phone, three from 1024px. Dense flow lets the cards after an open one
+    <!-- A card per player: two a row on a phone; from 1024px three for Confirmed, four for Unconfirmed. Dense flow lets the cards after an open one
          fill its row, so its games open in a full-width panel right under that row. -->
-    <div class="mt-3 grid grid-flow-row-dense grid-cols-2 gap-3 lg:grid-cols-3">
+    <div [class]="group.key === 'unconfirmed' ? 'mt-3 grid grid-flow-row-dense grid-cols-2 gap-3 lg:grid-cols-4' : 'mt-3 grid grid-flow-row-dense grid-cols-2 gap-3 lg:grid-cols-3'">
       @for (player of group.players; track player.key) {
         <article appPlayerCard [player]="player" [boardIds]="boardIds()" animate.enter="qs-row-in"></article>
         @if (players.openKey() === player.key) {
