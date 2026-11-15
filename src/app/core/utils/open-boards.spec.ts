@@ -11,24 +11,24 @@ const game = (id: string, over: Partial<GameData> = {}, picks = 10): GameData =>
 
 describe('openBoardRows', () => {
   it('lists opted-in boards with open squares, most open first, with totals', () => {
-    const rows = openBoardRows([game('a', {}, 40), game('b', {}, 10)], 'x');
+    const rows = openBoardRows([game('a', {}, 40), game('b', {}, 10)], 'x', 'o');
     expect(rows.map(r => r.id)).toEqual(['b', 'a']);
     expect(rows[0]).toMatchObject({ taken: 10, size: 100, open: 90, pricePerSquare: 100, totalPoints: 10000 });
   });
 
-  it('skips the current board, boards not opted in, locked, full or missing', () => {
+  it('skips the current board, another host\'s boards, boards not opted in, locked, full or missing', () => {
     const rows = openBoardRows([
       game('here'), game('off', { showInOpenBoards: false }), game('locked', { isLocked: true }),
-      game('full', {}, 100), null, game('ok')
-    ], 'here');
+      game('full', {}, 100), null, game('other host', { ownerId: 'someone-else' }), game('ok')
+    ], 'here', 'o');
     expect(rows.map(r => r.id)).toEqual(['ok']);
   });
 
   it('keeps an unlocked board with open squares even when its numbers are drawn', () => {
-    expect(openBoardRows([game('drawn', { isRandomized: true })], 'x').map(r => r.id)).toEqual(['drawn']);
+    expect(openBoardRows([game('drawn', { isRandomized: true })], 'x', 'o').map(r => r.id)).toEqual(['drawn']);
   });
 
   it('uses the board size for 25 and 50 square boards', () => {
-    expect(openBoardRows([game('s', { boardSize: 25 }, 5)], 'x')[0]).toMatchObject({ size: 25, open: 20, totalPoints: 2500 });
+    expect(openBoardRows([game('s', { boardSize: 25 }, 5)], 'x', 'o')[0]).toMatchObject({ size: 25, open: 20, totalPoints: 2500 });
   });
 });

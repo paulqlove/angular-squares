@@ -198,7 +198,9 @@ Oct 31, 2026 lab pass on quarterscore.com. Mobile Lighthouse 69 / 80 / 100 / 91 
 
 **Read it Nov 29 and Jan 15:** `otherBoardJoins` against `fullBoardViewsWithOpenBoards`. If it never fires, the build was cheap and stays quiet.
 
-## Board groups for the More tab (requested Nov 10, 2026, decided, not built)
+## Board groups for the More tab (requested Nov 10, 2026; rescoped and building Nov 15)
+
+**Nov 15 scope (Paul, via Creative's mockups, supersedes the Nov 10 notes below where they differ):** no "open for all groups". A board is in one group or No group; No group boards list each other as before. Deleting a group moves its boards to No group. Co-hosts can file a board into one of the owner's groups. Data: `games/{id}/openListId` points at `openLists/{listId}` (a group id or the owner's No group key), replacing the per-owner `openBoards/{ownerId}` list that anyone with one link could read. Rules notes: database.rules.notes.md "Game groups". One-time move: `node scripts/migrate-open-lists.mjs`.
 
 **Why:** a host with a work group and a friends group should not show the work crowd the friends' boards. Today every board switched on under **Show in my open boards** appears in every other board's More tab.
 

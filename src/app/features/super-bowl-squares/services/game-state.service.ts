@@ -93,6 +93,8 @@ export class GameStateService {
   public scores: BoardScores = emptyScores();
   public selectedSquares: { [key: string]: string } = {};
   public showInOpenBoards: boolean = false;
+  /** This board's More list (its group, or the host's No group). Missing on boards from before groups. */
+  public openListId: string | undefined = undefined;
   public totalPot: number = 0;
   public winners: { [key: string]: string } = {};
 
@@ -154,6 +156,7 @@ export class GameStateService {
     this.isRandomized = data.isRandomized || false;
     this.isLocked = data.isLocked || false;
     this.showInOpenBoards = !!data.showInOpenBoards;
+    this.openListId = data.openListId;
     this.autoManage = data.autoManage;
     this.maxSquaresPerPlayer = data.maxSquaresPerPlayer;
   }
