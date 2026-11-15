@@ -85,4 +85,30 @@ describe('CreateGameFormComponent', () => {
     expect(create.disabled).toBe(true);
     expect(fixture.nativeElement.textContent).toContain('Name your game to create it.');
   });
+
+  it('shows the Group picker on Details only for Season Pass hosts, starting on No group', () => {
+    const fixture = TestBed.createComponent(CreateGameFormComponent);
+    fixture.componentInstance.step.set(4);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('app-group-picker')).toBeNull();
+    fixture.componentRef.setInput('groupsAllowed', true);
+    fixture.componentRef.setInput('groups', [{ id: 'ChurchGroupKey000001', name: 'Church', createdAt: 1 }]);
+    fixture.detectChanges();
+    const picker = fixture.nativeElement.querySelector('app-group-picker') as HTMLElement;
+    expect(picker).not.toBeNull();
+    expect(picker.querySelector('button')?.textContent).toContain('No group');
+  });
+
+  it('sends the picked group with Create, and nothing when the picker is not offered', () => {
+    const c = setup();
+    const sent: unknown[] = [];
+    c.submitted.subscribe(s => sent.push(s.group));
+    c.newGameName = 'Party';
+    c.submit();
+    c.groupsAllowed = true;
+    c.submit();
+    c.newGameGroup = { groupId: null, newName: 'Gym' };
+    c.submit();
+    expect(sent).toEqual([undefined, { groupId: null }, { groupId: null, newName: 'Gym' }]);
+  });
 });

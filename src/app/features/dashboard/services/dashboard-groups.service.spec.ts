@@ -13,9 +13,10 @@ const NONE = 'NoGroupKey0000000001';
 
 describe('DashboardGroupsService', () => {
   let service: DashboardGroupsService;
-  let api: { getGroups: ReturnType<typeof vi.fn>; createGroup: ReturnType<typeof vi.fn>; renameGroup: ReturnType<typeof vi.fn>; deleteGroup: ReturnType<typeof vi.fn> };
+  let api: { getGroups: ReturnType<typeof vi.fn>; createGroup: ReturnType<typeof vi.fn>; renameGroup: ReturnType<typeof vi.fn>; deleteGroup: ReturnType<typeof vi.fn>; saveChoice: ReturnType<typeof vi.fn> };
   let ask: ReturnType<typeof vi.fn>;
   let toastError: ReturnType<typeof vi.fn>;
+  let toastWarning: ReturnType<typeof vi.fn>;
   const features = signal({ gameGroups: true });
   const boards = [
     { id: 'a', ownerId: 'o', openListId: CHURCH },
@@ -28,10 +29,12 @@ describe('DashboardGroupsService', () => {
       getGroups: vi.fn().mockResolvedValue([{ id: CHURCH, name: 'Church', createdAt: 1 }, { id: WORK, name: 'Work', createdAt: 2 }]),
       createGroup: vi.fn().mockResolvedValue({ id: 'NewGroupKey000000001', name: 'Gym', createdAt: 3 }),
       renameGroup: vi.fn().mockResolvedValue(undefined),
-      deleteGroup: vi.fn().mockResolvedValue(NONE)
+      deleteGroup: vi.fn().mockResolvedValue(NONE),
+      saveChoice: vi.fn().mockResolvedValue({ listId: CHURCH })
     };
     ask = vi.fn().mockResolvedValue(true);
     toastError = vi.fn();
+    toastWarning = vi.fn();
     features.set({ gameGroups: true });
     TestBed.configureTestingModule({
       providers: [
@@ -39,7 +42,7 @@ describe('DashboardGroupsService', () => {
         { provide: GameGroupsService, useValue: api },
         { provide: ConfirmService, useValue: { ask } },
         { provide: PlanService, useValue: { features } },
-        { provide: ToastService, useValue: { error: toastError } }
+        { provide: ToastService, useValue: { error: toastError, warning: toastWarning } }
       ]
     });
     service = TestBed.inject(DashboardGroupsService);
@@ -89,5 +92,32 @@ describe('DashboardGroupsService', () => {
     expect(await service.remove('o', service.groups()[0], boards)).toBeNull();
     expect(toastError).toHaveBeenCalledWith('Could not delete the group. Try again.');
     expect(service.groups()).toHaveLength(2);
+  });
+
+  describe('filing a board Create game just made', () => {
+    const made = { id: 'new', ownerId: 'o', openListId: NONE, showInOpenBoards: true };
+
+    it('files it into the picked group, and adds a group named in the picker', async () => {
+      expect(await service.fileNewBoard(made, { groupId: CHURCH })).toBe(true);
+      expect(api.saveChoice).toHaveBeenCalledWith(made, { groupId: CHURCH });
+      api.saveChoice.mockResolvedValueOnce({ listId: 'NewGroupKey000000001', created: { id: 'NewGroupKey000000001', name: 'Gym', createdAt: 3 } });
+      await service.fileNewBoard(made, { groupId: null, newName: 'Gym' });
+      expect(service.groups().map(g => g.name)).toEqual(['Church', 'Work', 'Gym']);
+    });
+
+    it('writes nothing for No group, a blank new name, no picker or no Season Pass', async () => {
+      await service.fileNewBoard(made, { groupId: null });
+      await service.fileNewBoard(made, { groupId: null, newName: '  ' });
+      await service.fileNewBoard(made, undefined);
+      features.set({ gameGroups: false });
+      await service.fileNewBoard(made, { groupId: CHURCH });
+      expect(api.saveChoice).not.toHaveBeenCalled();
+    });
+
+    it('warns and keeps going when the group could not be set', async () => {
+      api.saveChoice.mockRejectedValueOnce(new Error('permission_denied'));
+      expect(await service.fileNewBoard(made, { groupId: WORK })).toBe(false);
+      expect(toastWarning).toHaveBeenCalledWith('Board created, but its group could not be set. Try again in Edit.');
+    });
   });
 });

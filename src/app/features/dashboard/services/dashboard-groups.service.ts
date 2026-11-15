@@ -4,7 +4,7 @@ import { ConfirmService } from '../../../core/services/confirm.service';
 import { GameGroupsService } from '../../../core/services/game-groups.service';
 import { PlanService } from '../../../core/services/plan.service';
 import { ToastService } from '../../../core/services/toast.service';
-import { GameGroup, GroupedBoard, cleanGroupName, deleteGroupMessage, groupCounts, groupOf } from '../../../core/utils/game-groups';
+import { GameGroup, GroupChoice, GroupedBoard, cleanGroupName, deleteGroupMessage, groupChanged, groupCounts, groupOf } from '../../../core/utils/game-groups';
 
 /** A group with how many of the owner's games are filed in it, for the Groups row and sheet. */
 export interface GroupRow extends GameGroup {
@@ -29,6 +29,22 @@ export class DashboardGroupsService {
   /** Loads the owner's groups. A failed read leaves the list empty; More keeps working either way. */
   public async load(ownerId: string): Promise<void> {
     this.groups.set(await this.gameGroups.getGroups(ownerId));
+  }
+
+  /**
+   * Files a board Create game just made where its Group picker was left. No group needs no write.
+   * Returns false, after a warning, when it could not be filed; the board itself is already made.
+   */
+  public async fileNewBoard(board: GroupedBoard, choice: GroupChoice | undefined): Promise<boolean> {
+    if (!choice || !this.canEdit() || !groupChanged(this.groups(), undefined, choice)) return true;
+    try {
+      const { created } = await this.gameGroups.saveChoice(board, choice);
+      if (created) this.groups.update(groups => [...groups, created]);
+      return true;
+    } catch {
+      this.toastService.warning('Board created, but its group could not be set. Try again in Edit.');
+      return false;
+    }
   }
 
   /** The group name shown on a hosted game's card, or undefined for No group. */
