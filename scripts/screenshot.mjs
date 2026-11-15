@@ -3,9 +3,17 @@
 // Writes <out-prefix>-phone.png and <out-prefix>-desktop.png.
 // Drives Chromium over the DevTools protocol with Node's built-in WebSocket,
 // so it needs no driver package. Never imported by the app or functions.
+// @sparticuz/chromium is installed on demand, not kept in package.json,
+// so CI and deploys never download it.
 import { spawn } from 'node:child_process';
 import { writeFile } from 'node:fs/promises';
-import chromium from '@sparticuz/chromium';
+
+const chromium = await import('@sparticuz/chromium')
+  .then((module) => module.default)
+  .catch(() => {
+    console.error('Chromium is not installed. Run: npm i --no-save @sparticuz/chromium');
+    process.exit(1);
+  });
 
 const SIZES = {
   phone: { width: 412, height: 915, deviceScaleFactor: 2, mobile: true },

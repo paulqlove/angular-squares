@@ -44,7 +44,6 @@
     "@firebase/rules-unit-testing": "^6.0.0",
     "@fontsource/jetbrains-mono": "^5.3.0",
     "@fontsource/space-grotesk": "^5.3.0",
-    "@sparticuz/chromium": "^153.0.0",
     "@types/express": "^4.17.17",
     "@types/node": "^24.19.2",
     "@types/qrcode": "^1.5.6",
