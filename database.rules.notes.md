@@ -46,7 +46,7 @@ A host presses **Copy office link** in TV mode. The client creates a random toke
 Owner and co-host (`managerId`) keep full write through the game-level rule. Other signed-in users (including anonymous guests) get per-key rules only, so they can never write or wipe a whole node:
 
 - `squares/{r-c}`: claim an empty square only under a name that `playerUserIds` maps to `auth.uid` after the write (the claim can register the name in the same update). Clear only a square whose name maps to `auth.uid`. Claim and clear are denied while `isLocked`. Renaming one of your own squares to another of your names is allowed even when locked.
-- `playerUserIds/{name}`: add a name mapped to `auth.uid`, or delete your own mapping. Never change someone else's.
+- `playerUserIds/{name}`: add a name mapped to `auth.uid`, or delete your own mapping. Never change someone else's. A player can only add a name that has no color yet. Every name on the board gets a color (any viewer assigns missing ones), so a name with a color is already on the board, for example one the host typed in. Linking it to your account would hand you its squares and paid mark, so only the owner or co-host can link it. A brand-new name gets its color after the first square is claimed, and a rename moves the color in the same write, so neither is affected. When the host removes a player, the color goes with them and the name is free again.
 - `playerColors/{name}`: add a color for a name that has none (any viewer assigns missing colors), or change your own.
 - `paidPlayers/{i}`: only rename an existing entry from one of your names to another (player rename). Adding, removing, or touching someone else's entry is owner/co-host only.
 
@@ -54,7 +54,7 @@ Owner and co-host (`managerId`) keep full write through the game-level rule. Oth
 
 `GameService.updateGame` writes these fields as per-key diffs against the current server value, because a whole-object write is checked only at the parent and would be denied.
 
-Gaps: a name with no `playerUserIds` mapping (legacy squares) can be claimed by the first user who registers it. Name ownership is by exact key, so a square whose case differs from its mapping key cannot be cleared or renamed by the player.
+Gaps: a name with squares but no `playerUserIds` mapping and no color yet (a board nobody has opened since it was written) can still be claimed by the first user who registers it. A player on an old board whose name was never linked can't link it themselves any more; the host can. Anyone can still register a name that isn't on the board yet; if the host later picks squares for that name, they go to that account (as before). Name ownership is by exact key, so a square whose case differs from its mapping key cannot be cleared or renamed by the player.
 
 ## Paid plans (entitlements, adFreeUntil, quarterSplit)
 

@@ -61,7 +61,7 @@
         },
         "playerUserIds": {
           "$player": {
-            ".write": "auth != null && ((!data.exists() && newData.val() == auth.uid) || (data.val() == auth.uid && !newData.exists()))",
+            ".write": "auth != null && ((!data.exists() && newData.val() == auth.uid && !root.child('games').child($gameId).child('playerColors').child($player).exists()) || (data.val() == auth.uid && !newData.exists()))",
             ".validate": "newData.isString() && newData.val().length <= 128"
           }
         },
