@@ -41,6 +41,16 @@ export function groupCounts(boards: OpenListTarget[]): Map<string, number> {
   return counts;
 }
 
+/** "1 game", "2 games": a group's size in the Groups sheets. */
+export function gameCountLabel(count: number): string {
+  return `${count} ${count === 1 ? 'game' : 'games'}`;
+}
+
+/** The boards filed in one group, or every board when no group is picked. */
+export function gamesInGroup<T extends OpenListTarget>(boards: T[], groupId: string | null | undefined): T[] {
+  return groupId ? boards.filter(board => board.openListId === groupId) : boards;
+}
+
 /** The group a board is filed in, or undefined for No group. */
 export function groupOf(groups: GameGroup[], board: OpenListTarget): GameGroup | undefined {
   return board.openListId ? groups.find(g => g.id === board.openListId) : undefined;
@@ -61,7 +71,7 @@ export function deleteGroupUpdates(ownerId: string, groupId: string, ungroupedKe
 /** "1 game will…" or "3 games will…": the delete confirm, worded as Creative's spec. */
 export function deleteGroupMessage(count: number): string {
   if (count === 0) return 'No games are in this group.';
-  return `${count} ${count === 1 ? 'game' : 'games'} will show alongside your other ungrouped games.`;
+  return `${gameCountLabel(count)} will show alongside your other ungrouped games.`;
 }
 
 /** What the Group picker in Edit game was left on: a group, No group (null), or a new group's name. */

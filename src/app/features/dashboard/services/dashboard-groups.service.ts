@@ -6,13 +6,14 @@ import { PlanService } from '../../../core/services/plan.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { GameGroup, GroupChoice, GroupedBoard, cleanGroupName, deleteGroupMessage, groupChanged, groupCounts, groupOf } from '../../../core/utils/game-groups';
 
-/** A group with how many of the owner's games are filed in it, for the Groups row and sheet. */
+/** A group with how many of the owner's games are filed in it, for the group pickers and the Groups sheet. */
 export interface GroupRow extends GameGroup {
   count: number;
 }
 
 /**
- * The owner's game groups on the dashboard: the list, the Groups sheet, and making, renaming and deleting a group.
+ * The owner's game groups on the dashboard: the list, which group Hosting is narrowed to, the Groups sheets, and making,
+ * renaming and deleting a group.
  * Season Pass owners can change groups; without the pass they stay as filed (frozen) and only show.
  * Provided on the dashboard. It never reads the board list itself: callers pass the owner's boards in.
  */
@@ -23,7 +24,16 @@ export class DashboardGroupsService {
   /** In the Groups sheet: 'new' while naming a new group, a group id while renaming it, else null. */
   public readonly editing = signal<string | null>(null);
   public readonly groups = signal<GameGroup[]>([]);
+  /** The group Hosting is narrowed to, or undefined for All groups. A group deleted while picked falls back to All groups. */
+  public readonly picked = computed<GameGroup | undefined>(() => this.groups().find(g => g.id === this.pickedId()));
+  /** The id picked in the group picker, or null for All groups. */
+  public readonly pickedId = signal<string | null>(null);
+  /** What the pickers say: the picked group's name, or All groups. */
+  public readonly pickedName = computed<string>(() => this.picked()?.name ?? 'All groups');
+  /** The phone's short Groups sheet, for picking a group. */
+  public readonly pickSheetOpen = signal<boolean>(false);
   public readonly saving = signal<boolean>(false);
+  /** The Groups sheet, for making, renaming and deleting groups. */
   public readonly sheetOpen = signal<boolean>(false);
 
   /** Loads the owner's groups. A failed read leaves the list empty; More keeps working either way. */
@@ -45,6 +55,12 @@ export class DashboardGroupsService {
       this.toastService.warning('Board created, but its group could not be set. Try again in Edit.');
       return false;
     }
+  }
+
+  /** Manage groups, from the picker: the phone's pick sheet makes way for the Groups sheet. */
+  public openManage(): void {
+    this.pickSheetOpen.set(false);
+    this.sheetOpen.set(true);
   }
 
   /** The group name shown on a hosted game's card, or undefined for No group. */
