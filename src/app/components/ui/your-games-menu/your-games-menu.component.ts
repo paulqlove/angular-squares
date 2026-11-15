@@ -55,7 +55,10 @@ const CLOSE_MS = 220;
       >
         <ng-icon name="heroSquares2x2" class="text-xl"></ng-icon>
         <span class="qs-label hidden sm:inline">Your games</span>
-        <ng-icon name="heroChevronDown" class="yg-chevron hidden text-sm sm:inline" [class.rotate-180]="open()"></ng-icon>
+        <!-- The wrapper hides the arrow on phones: ng-icon's own display: inline-block beats a hidden class on the icon. -->
+        <span class="hidden sm:inline-flex" aria-hidden="true">
+          <ng-icon name="heroChevronDown" class="yg-chevron text-sm" [class.rotate-180]="open()"></ng-icon>
+        </span>
       </button>
 
       @if ((open() || closing()) && !phone()) {
