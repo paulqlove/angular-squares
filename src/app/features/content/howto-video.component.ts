@@ -1,10 +1,9 @@
 import { DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ElementRef, Injector, afterNextRender, computed, inject, input, signal, viewChild } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { PHONE_QUERY } from '../../shared/media-queries';
 import { HowToVideo, YOUTUBE_ID, youtubeThumbnail } from './howto-videos';
 
-/** Phone widths, where the vertical Short plays in place and its thumbnail shows. Keep in step with the media query in the styles below. */
-const PHONE_QUERY = '(max-width: 639.98px)';
 
 /**
  * A how-to clip that costs nothing until it is tapped: the video's own YouTube thumbnail first, then the youtube-nocookie player.

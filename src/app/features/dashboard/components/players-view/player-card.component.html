@@ -1,4 +1,4 @@
-<button type="button" class="flex w-full items-start gap-2 text-left focus-visible:outline-none" [attr.aria-expanded]="isOpen()">
+<button #toggle type="button" class="flex w-full items-start gap-2 text-left focus-visible:outline-none" [attr.aria-expanded]="isOpen()">
   <span class="min-w-0 flex-1">
     <span translate="no" class="block truncate font-medium">{{ player().name }}</span>
     <span class="mt-0.5 block font-semibold tabular-nums sm:hidden">{{ player().points }} pts</span>
@@ -25,3 +25,10 @@
   <div appPlayerTiles [player]="player()" [boardIds]="boardIds()"></div>
   <span class="whitespace-nowrap text-sm tabular-nums text-qs-muted">{{ player().games.length }} {{ player().games.length === 1 ? 'game' : 'games' }}</span>
 </div>
+<!-- From 640px: the games float over the cards below, under this card's arrow. -->
+@if (isOpen()) {
+  <div class="qs-card qs-panel hidden sm:block" [class.qs-panel-wide]="wide()" [class.qs-panel-grow-right]="growsRight()" role="region"
+    [attr.aria-label]="player().name + '’s games'" animate.enter="qs-panel-in" animate.leave="qs-panel-out">
+    <div appPlayerGames [player]="player()"></div>
+  </div>
+}

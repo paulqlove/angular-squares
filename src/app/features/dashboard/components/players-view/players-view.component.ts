@@ -15,8 +15,8 @@ const STAGGER_DONE_MS = 500;
 
 /**
  * The Players view (Season Pass): find a player, narrow to one game, then the players in two groups, Unconfirmed and
- * Confirmed: a card per player, opening into a full-width panel of their games. Sits in the Hosting section in place
- * of the boards (`<div appPlayersView>`).
+ * Confirmed: a card per player, opening their games in a panel that floats over the cards below (full width in the list
+ * on phones). Sits in the Hosting section in place of the boards (`<div appPlayersView>`).
  */
 @Component({
   selector: 'div[appPlayersView]',

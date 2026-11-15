@@ -1,4 +1,4 @@
-import { PlayersBoard, phoneGames, phoneLayout, playerTiles, playersAcrossGames } from './players-across-games';
+import { PlayersBoard, panelRows, phoneGames, phoneLayout, playerTiles, playersAcrossGames } from './players-across-games';
 
 const HOST = 'host-uid';
 
@@ -159,5 +159,10 @@ describe('players across games', () => {
     expect(shown.shown.map(game => game.gameId)).toEqual(names);
     expect(shown.shown.slice(0, 2).map(game => game.confirmed)).toEqual([true, true]);
     expect(shown.hidden).toBe(0);
+  });
+
+  it('lays the desktop panel out in one column up to three games, then two columns read top to bottom', () => {
+    expect([1, 2, 3].map(panelRows)).toEqual([1, 2, 3]);
+    expect([4, 5, 7, 8, 11].map(panelRows)).toEqual([2, 3, 4, 4, 6]);
   });
 });

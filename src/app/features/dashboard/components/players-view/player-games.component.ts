@@ -2,22 +2,24 @@ import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { NgIconComponent } from '@ng-icons/core';
 
-import { PhoneLayout, PlayerGame, PlayerSummary, phoneGames, phoneLayout } from '../../services/players-across-games';
+import { PhoneLayout, PlayerGame, PlayerSummary, panelRows, phoneGames, phoneLayout } from '../../services/players-across-games';
 import { PlayersViewService } from '../../services/players-view.service';
 
 /**
  * An opened player: each of their games with its squares and points, a green toggle that confirms that game and a remove
  * icon (a lock on locked games), then Remove… and Confirm all. Removing asks first: on a phone under the game's own
  * row, otherwise above the buttons. Phones list unconfirmed games first and fold away confirmed ones past five, in the order they had when the card
- * opened.
+ * opened. From 640px it fills the card's floating panel: one column up to three games, then two read top to bottom.
  */
 @Component({
   selector: 'div[appPlayerGames]',
   imports: [NgIconComponent, NgTemplateOutlet],
-  host: { '[class]': "phone() ? 'px-3.5 pb-3.5 pt-1' : 'px-5 pb-4 pt-1'" },
+  host: { '[class]': "phone() ? 'px-3.5 pb-3.5 pt-1' : 'block px-4 pb-3 pt-1'" },
   templateUrl: './player-games.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: [`
+    .qs-game-cols { position: relative; display: grid; grid-auto-flow: column; grid-template-rows: repeat(var(--qs-rows), auto); grid-auto-columns: minmax(0, 1fr); column-gap: 1.75rem; }
+    .qs-game-cols-2::before { content: ''; position: absolute; top: 8px; bottom: 8px; left: 50%; width: 1px; background: var(--qs-line); }
     .qs-switch { position: relative; display: inline-block; width: 44px; height: 26px; border-radius: 999px; background: var(--qs-line-strong); transition: background-color var(--qs-t-state); }
     .qs-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 999px; background: var(--qs-panel); box-shadow: 0 1px 2px rgb(0 0 0 / 0.2); transition: transform var(--qs-t-state) var(--qs-ease-spring); }
     .qs-switch-on { background: var(--qs-accent); }
@@ -55,7 +57,17 @@ export class PlayerGamesComponent {
     const games = this.removing();
     return this.phone() && games?.length === 1 ? games[0].gameId : null;
   });
+  /** Rows in each column from 640px. */
+  public readonly rows = computed<number>(() => panelRows(this.player().games.length));
   public readonly showAll = signal<boolean>(false);
+  /**
+   * Confirm all: on a phone with any game unconfirmed; from 640px only with two or more, since the toggle does one.
+   * The phone keeps its own rule until creative says otherwise.
+   */
+  public readonly showConfirmAll = computed<boolean>(() => this.unconfirmed().length >= (this.phone() ? 1 : 2));
+  /** From 640px the footer shows only with something in it: Remove…, Confirm all, the Undo note or a remove question. */
+  public readonly showFooter = computed<boolean>(() =>
+    this.phone() || this.showConfirmAll() || this.openGames().length > 0 || this.showNote() || (!!this.removing() && !this.removingInRow()));
   public readonly showNote = computed<boolean>(() => this.players.confirmNote()?.key === this.player().key);
   public readonly unconfirmed = computed<PlayerGame[]>(() => this.player().games.filter(game => !game.confirmed));
 

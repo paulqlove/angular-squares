@@ -74,6 +74,14 @@ export function playersAcrossGames(boards: readonly PlayersBoard[]): PlayerSumma
     || a.sameNameIndex - b.sameNameIndex);
 }
 
+/** From this many games, an opened card's desktop panel is two cards wide with the games in two columns. */
+export const WIDE_PANEL_GAMES = 4;
+
+/** Rows in each column of an opened card's desktop panel: one column up to three games, then two read top to bottom. */
+export function panelRows(gameCount: number): number {
+  return gameCount >= WIDE_PANEL_GAMES ? Math.ceil(gameCount / 2) : gameCount;
+}
+
 /**
  * A player's games on a phone: unconfirmed first, then confirmed, in the boards' order within each.
  * Until shown in full, every unconfirmed game and enough confirmed ones to make five; the rest are all confirmed.

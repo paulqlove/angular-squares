@@ -1,15 +1,22 @@
-<ul class="grid grid-cols-1" [class]="phone() ? 'divide-y divide-qs-line' : 'gap-x-10 md:grid-cols-2 xl:grid-cols-3'">
-  @for (game of games().shown; track game.gameId) {
-    <li [class.border-b]="!phone()" class="border-qs-line">
-      <div class="flex min-h-11 items-center gap-2 py-1">
-        <span class="flex min-w-0 flex-1 gap-x-2" [class]="phone() ? 'flex-col' : 'items-center'">
-          <span translate="no" class="min-w-0 flex-1 truncate">
+<!-- Phone: one per row. From 640px: a column, or from four games two columns read top to bottom with a line between them. -->
+<ul [class]="phone() ? 'grid grid-cols-1 divide-y divide-qs-line' : 'qs-game-cols'" [class.qs-game-cols-2]="!phone() && rows() < player().games.length"
+  [style.--qs-rows]="phone() ? null : rows()">
+  @for (game of games().shown; track game.gameId; let i = $index) {
+    <li class="border-qs-line" [class.border-t]="!phone() && i % rows() !== 0">
+      <div class="flex min-h-11 items-center gap-2" [class]="phone() ? 'py-1' : 'py-2'">
+        <span class="flex min-w-0 flex-1 flex-col">
+          <span translate="no" class="min-w-0 truncate">
             {{ game.gameName }}
             @if (game.locked) {
               <ng-icon name="heroLockClosed" class="align-middle text-sm text-qs-muted" aria-label="Locked"></ng-icon>
             }
           </span>
-          <span class="whitespace-nowrap text-sm tabular-nums text-qs-muted">{{ game.squares }} sq · {{ game.points }} pts</span>
+          <span class="flex items-center gap-2">
+            <span class="whitespace-nowrap text-sm tabular-nums text-qs-muted">{{ game.squares }} sq · {{ game.points }} pts</span>
+            @if (!phone() && game.newSquares && !game.confirmed) {
+              <span class="qs-badge qs-badge-warn whitespace-nowrap px-1.5 py-0.5 text-[11px]">+{{ game.newSquares }} new</span>
+            }
+          </span>
         </span>
         @if (game.locked) {
           <span class="inline-flex h-11 w-11 items-center justify-center text-qs-muted opacity-60" title="Locked. Remove on the board.">
@@ -21,7 +28,7 @@
             <ng-icon name="heroUserMinus" class="text-base" aria-hidden="true"></ng-icon>
           </button>
         }
-        @if (game.newSquares && !game.confirmed) {
+        @if (phone() && game.newSquares && !game.confirmed) {
           <span class="qs-badge qs-badge-warn whitespace-nowrap">+{{ game.newSquares }} new</span>
         }
         <!-- Green toggle: on is confirmed, off puts the game back how it was -->
@@ -42,30 +49,35 @@
   <button type="button" class="qs-btn qs-btn-ghost mt-1 w-full text-qs-muted" (click)="showAll.set(true)">Show {{ games().hidden }} more (confirmed)</button>
 }
 
-@if (removing() && !removingInRow()) {
-  <div class="mt-4"><ng-container [ngTemplateOutlet]="question"></ng-container></div>
-}
+<!-- From 640px the footer runs across the panel under a line, and only when it has something in it -->
+@if (showFooter()) {
+  <div [class]="phone() ? '' : '-mx-4 mt-1 border-t border-qs-line px-4 pt-3'">
+    @if (removing() && !removingInRow()) {
+      <div [class.mt-4]="phone()"><ng-container [ngTemplateOutlet]="question"></ng-container></div>
+    }
 
-<div class="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-  <div class="min-w-0" aria-live="polite">
-    @if (showNote()) {
-      <p class="text-sm text-qs-muted">
-        {{ players.confirmNote()?.text }}
-        <button type="button" class="min-h-11 font-medium text-qs-ink underline underline-offset-2" (click)="players.undoConfirm()">Undo</button>
-      </p>
-    }
+    <div [class]="phone() ? 'mt-4 flex flex-col gap-2' : 'flex items-center justify-between gap-4'">
+      <div class="min-w-0" aria-live="polite">
+        @if (showNote()) {
+          <p class="text-sm text-qs-muted">
+            {{ players.confirmNote()?.text }}
+            <button type="button" class="min-h-11 font-medium text-qs-ink underline underline-offset-2" (click)="players.undoConfirm()">Undo</button>
+          </p>
+        }
+      </div>
+      <div class="flex shrink-0 gap-2">
+        @if (openGames().length) {
+          <button type="button" class="qs-btn qs-btn-ghost px-3 text-qs-muted max-sm:flex-1" (click)="removing.set(openGames())">
+            <ng-icon name="heroUserMinus" class="text-base" aria-hidden="true"></ng-icon>Remove…
+          </button>
+        }
+        @if (showConfirmAll()) {
+          <button type="button" class="qs-btn qs-btn-secondary px-3 max-sm:flex-1" (click)="confirmRest()">Confirm all</button>
+        }
+      </div>
+    </div>
   </div>
-  <div class="flex shrink-0 gap-2">
-    @if (openGames().length) {
-      <button type="button" class="qs-btn qs-btn-ghost px-3 text-qs-muted max-sm:flex-1" (click)="removing.set(openGames())">
-        <ng-icon name="heroUserMinus" class="text-base" aria-hidden="true"></ng-icon>Remove…
-      </button>
-    }
-    @if (unconfirmed().length) {
-      <button type="button" class="qs-btn qs-btn-secondary px-3 max-sm:flex-1" (click)="confirmRest()">Confirm all</button>
-    }
-  </div>
-</div>
+}
 
 <!-- Asked before any remove: what goes and what stays -->
 <ng-template #question>
