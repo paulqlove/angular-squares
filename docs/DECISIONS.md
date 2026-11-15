@@ -4,6 +4,30 @@ This file records product and design decisions, newest first. To add one, put a 
 
 ---
 
+## D-026 · No Bar/Venue tier
+
+- **Date:** Nov 14 2026
+- **Decision:** The Bar/Venue tier ($49 to $99 a season) is dropped from FUTURE.md. The only plans are Free and the $5.99 Season Pass.
+- **Options considered:** drop it; keep it as a later idea
+- **Why:** Paul's words: "no tiers, free or $5.99"
+- **Decided by:** Paul
+
+## D-025 · Live scores stay free
+
+- **Date:** Nov 14 2026
+- **Decision:** Live scores (ESPN auto-sync) stay free on every plan. The plan to make them Season Pass only once checkout ships is dropped, and the upgrade dialog no longer lists them.
+- **Options considered:** keep them free; make them Season Pass only when checkout ships
+- **Why:** Paul's words: "We're going to keep the free people having the automatic scoring or live board."
+- **Decided by:** Paul
+
+## D-024 · No ads for now, maybe later
+
+- **Date:** Nov 14 2026
+- **Decision:** No ads for now. Ads may come to free boards later if QuarterScore gets popular enough. This replaces the Nov 5 "no ads" line in FUTURE.md.
+- **Options considered:** no ads ever; keep ads possible for later
+- **Why:** Paul's words: "we eventually will have ads if it is popular enough ... for right now we're not going to worry about ads."
+- **Decided by:** Paul
+
 ## D-023 · Players view layout
 
 - **Date:** Nov 13–14 2026
