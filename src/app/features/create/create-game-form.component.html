@@ -167,7 +167,7 @@
           [autoManage]="newGameAutoManage"
           [autoRunText]="autoRunText()"
           (openBoardsChanged)="newGameShowInOpenBoards = $event"
-          (groupChanged)="newGameGroup = $event"
+          (groupChanged)="pickGroup($event)"
           (autoManageChanged)="newGameAutoManage = $event; autoManageTouched = true"
         ></app-create-game-options>
       }

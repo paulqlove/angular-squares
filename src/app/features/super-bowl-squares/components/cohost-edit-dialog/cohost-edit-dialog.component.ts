@@ -5,7 +5,7 @@ import { heroXMark } from '@ng-icons/heroicons/outline';
 import { GroupPickerComponent } from '../../../../components/ui/group-picker/group-picker.component';
 import { ModalComponent } from '../../../../components/ui/modal/modal.component';
 import { ToggleComponent } from '../../../../components/ui/toggle/toggle.component';
-import { GroupChoice } from '../../../../core/utils/game-groups';
+import { GroupChoice, showsWhenPicked } from '../../../../core/utils/game-groups';
 import { GamePageGroupsService } from '../../services/game-page-groups.service';
 import { GameStateService } from '../../services/game-state.service';
 
@@ -36,7 +36,7 @@ import { GameStateService } from '../../services/game-state.service';
             <app-toggle [checked]="shown()" (onChange)="shown.set($event)"></app-toggle>
           </div>
         }
-        <app-group-picker [groups]="groups.groups()" [value]="choice()?.groupId ?? null" (changed)="choice.set($event)"></app-group-picker>
+        <app-group-picker [groups]="groups.groups()" [value]="choice()?.groupId ?? null" (changed)="pickGroup($event)"></app-group-picker>
       </div>
       <div class="flex gap-2 border-t border-qs-line px-5 pb-5 pt-3">
         <button type="button" class="qs-btn qs-btn-secondary w-28 shrink-0" (click)="close()">Cancel</button>
@@ -66,6 +66,11 @@ export class CoHostEditDialogComponent {
 
   protected close(): void {
     this.groups.coHostEditOpen.set(false);
+  }
+
+  protected pickGroup(choice: GroupChoice): void {
+    if (showsWhenPicked(this.choice(), choice)) this.shown.set(true);
+    this.choice.set(choice);
   }
 
   protected save(): void {

@@ -13,7 +13,7 @@ import { autoRunLabel } from '../../../../core/utils/auto-manage';
 import { ToggleComponent } from '../../../../components/ui/toggle/toggle.component';
 import { EmptyQuarterRuleComponent } from '../../../../components/ui/empty-quarter-rule/empty-quarter-rule.component';
 import { GroupPickerComponent } from '../../../../components/ui/group-picker/group-picker.component';
-import type { GameGroup, GroupChoice } from '../../../../core/utils/game-groups';
+import { GameGroup, GroupChoice, showsWhenPicked } from '../../../../core/utils/game-groups';
 import { CoHostCandidate, EditGameCoHostComponent } from './edit-game-cohost.component';
 import { EditGameEspnPickComponent } from './edit-game-espn-pick.component';
 import { EditGameSplitComponent } from './edit-game-split.component';
@@ -190,7 +190,7 @@ export interface EditGameValues {
               }
 
               @if (draft.group && groupsShown) {
-                <app-group-picker [groups]="groups" [value]="draft.group.groupId" [allowNew]="canNewGroup" (changed)="draft.group = $event"></app-group-picker>
+                <app-group-picker [groups]="groups" [value]="draft.group.groupId" [allowNew]="canNewGroup" (changed)="pickGroup($event)"></app-group-picker>
               }
 
               <div class="flex flex-col gap-2">
@@ -324,6 +324,11 @@ export class EditGameDialogComponent implements OnChanges {
     }
     this.clearGame.emit();
     this.close();
+  }
+
+  pickGroup(choice: GroupChoice): void {
+    if (showsWhenPicked(this.draft.group, choice)) this.draft.showInOpenBoards = true;
+    this.draft.group = choice;
   }
 
   save(): void {

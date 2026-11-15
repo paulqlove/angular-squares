@@ -111,4 +111,11 @@ describe('CreateGameFormComponent', () => {
     c.submit();
     expect(sent).toEqual([undefined, { groupId: null }, { groupId: null, newName: 'Gym' }]);
   });
+
+  it('turns Show in my open boards on when a group is picked', () => {
+    const c = setup();
+    c.pickGroup({ groupId: null, newName: 'Gym' });
+    expect(c.newGameShowInOpenBoards).toBe(true);
+    expect(c.newGameGroup).toEqual({ groupId: null, newName: 'Gym' });
+  });
 });

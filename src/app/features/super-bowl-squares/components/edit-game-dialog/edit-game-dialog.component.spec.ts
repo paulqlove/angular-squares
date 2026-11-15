@@ -38,4 +38,15 @@ describe('EditGameDialogComponent', () => {
     expect((saved as { name: string }).name).toBe('Party');
     expect(closed).toBe(false);
   });
+
+  it('turns Show in my open boards on when a group is picked, and lets the host turn it back off', () => {
+    const f = open({ values: { awayTeam: '', homeTeam: '', pricePerSquare: 1, hostNote: '', quarterSplit: null, emptyQuarterRule: 'final', newBoardSize: null, showInOpenBoards: false, autoManage: false, maxSquaresPerPlayer: null, group: { groupId: null } } });
+    const c = f.componentInstance;
+    c.pickGroup({ groupId: 'ChurchGroupKey000001' });
+    expect(c.draft.showInOpenBoards).toBe(true);
+    c.draft.showInOpenBoards = false;
+    c.pickGroup({ groupId: null });
+    expect(c.draft.showInOpenBoards).toBe(false);
+    expect(c.draft.group).toEqual({ groupId: null });
+  });
 });

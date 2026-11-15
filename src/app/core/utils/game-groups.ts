@@ -79,3 +79,18 @@ export function pickerValue(groups: GameGroup[], openListId: string | undefined)
 export function groupChanged(groups: GameGroup[], openListId: string | undefined, choice: GroupChoice): boolean {
   return !!cleanGroupName(choice.newName ?? '') || pickerValue(groups, openListId) !== choice.groupId;
 }
+
+/**
+ * Putting a game in a group shows it in that group's More tab (Paul, Nov 15), so the picker turns
+ * Show in my open boards on when it moves to a group or starts naming a new one. No group leaves the switch alone.
+ */
+export function showsWhenPicked(previous: GroupChoice | undefined, next: GroupChoice): boolean {
+  const group = pickedGroup(next);
+  return group !== null && group !== pickedGroup(previous);
+}
+
+/** The group a choice files into: its id, a marker for a new group being named, or null for No group. */
+function pickedGroup(choice: GroupChoice | undefined): string | null {
+  if (cleanGroupName(choice?.newName ?? '')) return '+new';
+  return choice?.groupId ?? null;
+}
