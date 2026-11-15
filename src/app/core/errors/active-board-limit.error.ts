@@ -1,7 +1,9 @@
-/** Thrown when a free host already has an active board. The UI shows the upgrade dialog. */
+import type { BoardLimitDialog } from '../utils/board-activity';
+
+/** Thrown when a host is at their active-board limit. dialog says which version of the limit dialog the UI shows. */
 export class ActiveBoardLimitError extends Error {
-  constructor() {
-    super('Free hosting includes one active board.');
+  constructor(public readonly dialog: BoardLimitDialog) {
+    super('Active board limit reached.');
     this.name = 'ActiveBoardLimitError';
   }
 }

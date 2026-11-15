@@ -8,6 +8,7 @@ import {
   NOTIFY_EMAIL_MAX_LENGTH,
   NOTIFY_EMAIL_PATTERN,
   NOTIFY_SOURCE_MAX_LENGTH,
+  boardLimitDialog,
   hasLinkedGame,
   isBoardActive
 } from '../utils/board-activity';
@@ -48,9 +49,8 @@ export class EntitlementService {
     }
     const limit = await this.boardLimit(ownerId);
     if (limit === Number.POSITIVE_INFINITY) return;
-    if ((await this.activeBoardCount(ownerId)) >= limit) {
-      throw new ActiveBoardLimitError();
-    }
+    const dialog = boardLimitDialog(await this.activeBoardCount(ownerId), limit);
+    if (dialog) throw new ActiveBoardLimitError(dialog);
   }
 
   /** Write-only notifyMe/{pushId} entry. Callers must already be signed in. */

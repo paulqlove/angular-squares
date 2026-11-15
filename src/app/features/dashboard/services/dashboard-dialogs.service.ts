@@ -9,13 +9,13 @@ import { PlanService } from '../../../core/services/plan.service';
 import { SanitizationService } from '../../../core/services/sanitization.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { buildCreateGameValues, clearCreateDraft, isPendingAutoSubmit, loadCreateDraft, saveCreateDraft } from '../../../core/utils/create-game-draft';
+import { asksAboutEndedBoard } from '../../../core/utils/board-activity';
 import type { GroupChoice } from '../../../core/utils/game-groups';
 import { CreateGameSubmit } from '../../create/create-game-form.component';
+import type { UpgradeTrigger } from '../components/upgrade-pass-dialog/upgrade-pass-dialog.component';
 import { DashboardEditService } from './dashboard-edit.service';
 import { DashboardGroupsService } from './dashboard-groups.service';
 import { DashboardStore } from './dashboard.store';
-
-type UpgradeTrigger = 'limit' | 'pass' | 'ended';
 
 /** New board and Season Pass: the create form, the board-limit check, and the upgrade dialog. Provided on the dashboard. */
 @Injectable()
@@ -68,7 +68,7 @@ export class DashboardDialogsService {
       saveCreateDraft({ ...draft, autoSubmit: false });
       if (error instanceof ActiveBoardLimitError) {
         this.showCreateModal.set(false);
-        this.openUpgradeDialog('limit');
+        this.openUpgradeDialog(error.dialog);
       } else {
         console.error('[Dashboard] Create game failed', (error as { code?: string })?.code ?? error);
         this.toastService.error('Could not create the game. Try again.');
@@ -124,7 +124,7 @@ export class DashboardDialogsService {
       this.showCreateModal.set(true);
     } catch (error) {
       if (error instanceof ActiveBoardLimitError) {
-        this.openUpgradeDialog('limit');
+        this.openUpgradeDialog(error.dialog);
       } else {
         this.toastService.error('Could not check your boards. Try again.');
       }
@@ -239,7 +239,7 @@ export class DashboardDialogsService {
       this.showCreateModal.set(true);
     } catch (error) {
       if (error instanceof ActiveBoardLimitError) {
-        this.openUpgradeDialog('limit');
+        this.openUpgradeDialog(error.dialog);
       } else {
         // Never fail silently: say so, and open the form with the saved entries.
         console.error('[Dashboard] Could not finish the create', (error as { code?: string })?.code ?? error);
@@ -258,11 +258,11 @@ export class DashboardDialogsService {
 
   /**
    * A free host whose only board has ended: ask them to reset or delete it before starting another.
-   * Returns true when the dialog was opened. Paid plans with room, and admins, are not affected.
+   * Returns true when the dialog was opened. Paid plans and admins are not affected.
    */
   private showEndedBoardDialog(): boolean {
     const owned = this.store.myGames();
-    if (owned.length === 0 || owned.length < this.planService.features().activeBoards) return false;
+    if (!asksAboutEndedBoard(owned.length, this.planService.features().activeBoards)) return false;
     this.endedBoard.set(owned[0]);
     this.openUpgradeDialog('ended');
     return true;

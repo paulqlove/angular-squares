@@ -4,6 +4,20 @@ export const UNLINKED_BOARD_ACTIVE_MS = 48 * 60 * 60 * 1000;
 /** Free hosts can have this many active boards at once. */
 export const FREE_ACTIVE_BOARD_LIMIT = 1;
 
+/** What a host at their active-board limit sees: the free upgrade offer, or a plain note on a paid plan. */
+export type BoardLimitDialog = 'limit' | 'cap';
+
+/** The dialog for a host with this many active boards under this limit, or null while there is room. */
+export function boardLimitDialog(activeBoards: number, limit: number): BoardLimitDialog | null {
+  if (activeBoards < limit) return null;
+  return limit > FREE_ACTIVE_BOARD_LIMIT ? 'cap' : 'limit';
+}
+
+/** Free hosts at their limit are asked to reset or delete the ended board first. Bigger plans go by active boards only. */
+export function asksAboutEndedBoard(ownedBoards: number, limit: number): boolean {
+  return limit <= FREE_ACTIVE_BOARD_LIMIT && ownedBoards > 0 && ownedBoards >= limit;
+}
+
 export const NOTIFY_EMAIL_MAX_LENGTH = 254;
 export const NOTIFY_SOURCE_MAX_LENGTH = 64;
 export const NOTIFY_SOURCE = 'upgrade_dialog';

@@ -17,23 +17,30 @@ import { ModalComponent } from '../../../../components/ui/modal/modal.component'
 import { AnalyticsService } from '../../../../core/services/analytics.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { GameService } from '../../../../core/services/game.service';
+import { PLANS } from '../../../../core/plans';
 import {
+  BoardLimitDialog,
   NOTIFY_EMAIL_MAX_LENGTH,
   NOTIFY_EMAIL_PATTERN,
   NOTIFY_SOURCE,
   UPGRADE_NOTIFY_EVENT
 } from '../../../../core/utils/board-activity';
 
+/** Which version of the dialog shows: the free limit, the paid cap, the See Season Pass button, or the free board that ended. */
+export type UpgradeTrigger = BoardLimitDialog | 'pass' | 'ended';
+
 @Component({
     selector: 'app-upgrade-pass-dialog',
     imports: [ModalComponent, FormsModule],
     template: `
-    <app-modal [open]="true" labelledBy="upgrade-title" describedBy="upgrade-summary" [level]="2" phone="center" extraClass="max-h-[calc(100dvh-2rem)] overflow-y-auto p-5 text-qs-ink sm:p-7" (dismissed)="dismiss()">
+    <app-modal [open]="true" labelledBy="upgrade-title" [describedBy]="trigger === 'cap' ? null : 'upgrade-summary'" [level]="2" phone="center" extraClass="max-h-[calc(100dvh-2rem)] overflow-y-auto p-5 text-qs-ink sm:p-7" (dismissed)="dismiss()">
       <div class="flex items-start justify-between gap-3">
-        <p class="qs-eyebrow qs-eyebrow-bar">{{ trigger === 'ended' ? 'Free board' : 'Season Pass / Coming soon' }}</p>
+        @if (trigger !== 'cap') {
+          <p class="qs-eyebrow qs-eyebrow-bar">{{ trigger === 'ended' ? 'Free board' : 'Season Pass / Coming soon' }}</p>
+        }
         <button
           type="button"
-          class="-mr-2 -mt-2 inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-btn text-qs-muted hover:bg-qs-panel-2 hover:text-qs-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-qs-accent"
+          class="-mr-2 -mt-2 ml-auto inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-btn text-qs-muted hover:bg-qs-panel-2 hover:text-qs-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-qs-accent"
           (click)="dismiss()"
           aria-label="Close"
         >
@@ -46,6 +53,8 @@ import {
       <h2 id="upgrade-title" class="qs-title mt-3 text-3xl sm:text-4xl">
         @if (trigger === 'ended') {
           Your last game is <span class="text-qs-accent">over</span>.
+        } @else if (trigger === 'cap') {
+          You're at your {{ seasonBoards }}-board <span class="text-qs-accent">limit</span>
         } @else if (trigger === 'limit') {
           Board 1 is live. Want a <span class="text-qs-accent">second</span>?
         } @else {
@@ -61,6 +70,10 @@ import {
           <button type="button" class="qs-btn qs-btn-primary w-full sm:flex-1" (click)="resetOld.emit()">Reset old game</button>
           <button type="button" class="qs-btn qs-btn-secondary w-full sm:flex-1" (click)="deleteOld.emit()">Delete old game</button>
         </div>
+      } @else if (trigger === 'cap') {
+        <div class="mt-6 flex justify-end">
+          <button type="button" class="qs-btn qs-btn-primary min-w-28" (click)="dismiss()">Done</button>
+        </div>
       } @else {
         <p class="mt-6 font-mono text-4xl font-semibold tabular-nums">$5.99</p>
         <p id="upgrade-summary" class="qs-label mt-3 text-qs-muted">One time · through June 30, 2027</p>
@@ -75,6 +88,7 @@ import {
         </ul>
       }
 
+      @if (trigger !== 'cap') {
       <div class="mt-6 border-t border-qs-line pt-5">
         @if (trigger === 'ended') {
           <p class="mb-3 text-base text-qs-ink">Want more active boards? Leave your email.</p>
@@ -120,13 +134,14 @@ import {
           </form>
         }
       </div>
+      }
     </app-modal>
   `,
     changeDetection: ChangeDetectionStrategy.Eager
 })
 export class UpgradePassDialogComponent implements AfterViewInit {
-  /** What opened the dialog: the one-board limit, or the 'See Season Pass' button. */
-  @Input() trigger: 'limit' | 'pass' | 'ended' = 'limit';
+  /** What opened the dialog: the free one-board limit, the Season Pass cap, or the 'See Season Pass' button. */
+  @Input() trigger: UpgradeTrigger = 'limit';
   /** Name of the finished board, for the 'ended' version. */
   @Input() boardName = '';
   @Output() dismissed = new EventEmitter<void>();
@@ -139,6 +154,9 @@ export class UpgradePassDialogComponent implements AfterViewInit {
   emailError = signal<string | null>(null);
   isSubmitting = signal(false);
   submitted = signal(false);
+
+  /** The cap named in the 'cap' version. Season Pass is the only plan with a cap above Free. */
+  protected readonly seasonBoards: number = PLANS.season.activeBoards;
 
   private analytics = inject(AnalyticsService);
   private authService = inject(AuthService);
@@ -159,7 +177,7 @@ export class UpgradePassDialogComponent implements AfterViewInit {
       return;
     }
     const user = this.authService.realUser();
-    if (this.trigger !== 'ended' && user && !user.isGuest && !this.authService.isPreviewAdmin()) {
+    if ((this.trigger === 'limit' || this.trigger === 'pass') && user && !user.isGuest && !this.authService.isPreviewAdmin()) {
       void this.gameService.recordUpgradeView(user.uid, this.trigger);
     }
   }
