@@ -311,6 +311,10 @@ describe('game page services', () => {
       ui.trackYourGamesToDashboard('trigger');
       expect(track).toHaveBeenLastCalledWith('game_to_dashboard', { from: 'header' });
     });
+
+    it('does nothing from the host bar when the header has no Your games menu', () => {
+      expect(() => TestBed.inject(GamePageUiService).openYourGames()).not.toThrow();
+    });
   });
 
   describe('EspnSyncService', () => {
