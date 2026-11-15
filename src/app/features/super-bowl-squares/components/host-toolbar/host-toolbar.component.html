@@ -1,11 +1,12 @@
 <div role="toolbar" [attr.aria-label]="state.isGameOwner() ? 'Host tools' : 'Co-host tools'"
   class="qs-bar-frame flex items-stretch gap-1 rounded-[12px] p-1.5 sm:items-center sm:gap-2 sm:p-2">
   <p class="qs-eyebrow qs-eyebrow-bar hidden px-2 lg:block">{{ state.isGameOwner() ? 'Host tools' : 'Co-host' }}</p>
-  <!-- Phones: the way back to the dashboard sits in thumb reach, first and away from Lock. Larger screens use the header. -->
-  <a routerLink="/dashboard" (click)="ui.trackToDashboard('host_bar')" class="qs-btn qs-btn-ghost host-btn sm:hidden">
+  <!-- Phones: Your games (other games, Join with a code, My dashboard) in thumb reach, first and away from Lock. It
+       replaces the header's button for hosts and co-hosts on phones. Larger screens use the header. -->
+  <button type="button" (click)="ui.openYourGames()" aria-haspopup="dialog" class="qs-btn qs-btn-ghost host-btn sm:hidden">
     <ng-icon name="heroSquares2x2" class="text-base"></ng-icon>
-    <span>Dashboard</span>
-  </a>
+    <span>Games</span>
+  </button>
   @if (state.isGameOwner()) {
     <!-- Phones: one next-step button. Clear and redraw live in Edit game. -->
     <button type="button" (click)="host.runNextStep()" class="qs-btn host-btn sm:hidden" [class.qs-btn-primary]="nextStep !== 'unlock'" [class.qs-btn-secondary]="nextStep === 'unlock'">

@@ -13,7 +13,7 @@
       <span class="qs-label hidden sm:inline">Share</span>
     </button>
     @if (state.currentUser()) {
-      <app-your-games-menu [currentGameId]="state.gameId" (dashboardClick)="ui.trackToDashboard('header')"></app-your-games-menu>
+      <app-your-games-menu [currentGameId]="state.gameId" [phoneTrigger]="!state.isHost()" (dashboardClick)="ui.trackYourGamesToDashboard($event)"></app-your-games-menu>
     }
     <app-help-menu (tour)="ui.startWalkthrough()"></app-help-menu>
     @if (state.currentUser()) {

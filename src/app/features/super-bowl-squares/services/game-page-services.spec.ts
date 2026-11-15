@@ -299,6 +299,18 @@ describe('game page services', () => {
       TestBed.inject(GamePageUiService).trackToDashboard('header');
       expect(track).not.toHaveBeenCalled();
     });
+
+    it('opens the header\'s Your games from the host bar and counts its My dashboard as the host bar\'s', () => {
+      const ui = TestBed.inject(GamePageUiService);
+      const toggle = vi.fn();
+      ui.yourGamesMenu = { toggle } as never;
+      ui.openYourGames();
+      expect(toggle).toHaveBeenCalledWith('external');
+      ui.trackYourGamesToDashboard('external');
+      expect(track).toHaveBeenLastCalledWith('game_to_dashboard', { from: 'host_bar' });
+      ui.trackYourGamesToDashboard('trigger');
+      expect(track).toHaveBeenLastCalledWith('game_to_dashboard', { from: 'header' });
+    });
   });
 
   describe('EspnSyncService', () => {

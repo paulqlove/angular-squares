@@ -187,4 +187,23 @@ describe('YourGamesMenuComponent', () => {
     expect(document.activeElement?.getAttribute('aria-label')).toBe('Your games');
     el.remove();
   });
+  it('hides its header button on phones when another control opens it, and says what opened it on My dashboard', async () => {
+    const fixture = await setup();
+    const menu = fixture.componentInstance;
+    const opened: string[] = [];
+    menu.dashboardClick.subscribe(by => opened.push(by));
+    const el: HTMLElement = fixture.nativeElement;
+    // A ctrl-click runs the menu's handler but not the router, which has no dashboard route here
+    const tapDashboard = () => [...el.querySelectorAll('a')].find(a => a.textContent?.includes('My dashboard'))!
+      .dispatchEvent(new MouseEvent('click', { bubbles: true, ctrlKey: true }));
+    expect(el.querySelector('button[aria-label="Your games"]')!.classList).not.toContain('max-sm:hidden');
+    tapDashboard();
+    fixture.componentRef.setInput('phoneTrigger', false);
+    menu.toggle('external');
+    await new Promise(r => setTimeout(r));
+    fixture.detectChanges();
+    expect(el.querySelector('button[aria-label="Your games"]')!.classList).toContain('max-sm:hidden');
+    tapDashboard();
+    expect(opened).toEqual(['trigger', 'external']);
+  });
 });

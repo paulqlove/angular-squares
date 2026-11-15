@@ -11,6 +11,9 @@ import { YourGameRow, forgetRecentVisit, pickYourGameIds, readRecentVisits, toYo
 import { PHONE_QUERY } from '../../../shared/media-queries';
 import { ModalComponent } from '../modal/modal.component';
 
+/** What opened Your games: its own header button, or another control on the page. */
+export type YourGamesOpener = 'trigger' | 'external';
+
 /** How many games the menu lists. */
 const SHOWN = 5;
 /** Extra ids read in case some of the newest were deleted since. */
@@ -20,7 +23,8 @@ const CLOSE_MS = 220;
 
 /**
  * Your Games, in the game page header: the five most recent games for hosts, players and guests alike, the one on screen
- * marked, then Join with a code and My dashboard. A popover on desktop and a bottom sheet on phones.
+ * marked, then Join with a code and My dashboard. A popover on desktop and a bottom sheet on phones. Another control on the
+ * page can open it with `toggle('external')`, as the game page's phone host bar does in place of the header button.
  */
 @Component({
   selector: 'app-your-games-menu',
@@ -46,6 +50,7 @@ const CLOSE_MS = 220;
         aria-controls="your-games-menu"
         class="flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-btn p-2.5 text-qs-tile-muted transition-colors hover:bg-white/10 hover:text-qs-tile-ink sm:px-3"
         [class.text-qs-tile-ink]="open()"
+        [class.max-sm:hidden]="!phoneTrigger()"
         aria-label="Your games"
       >
         <ng-icon name="heroSquares2x2" class="text-xl"></ng-icon>
@@ -178,7 +183,7 @@ const CLOSE_MS = 220;
             <span>Create a game</span>
           </a>
         }
-        <a routerLink="/dashboard" (click)="close(); dashboardClick.emit()" class="flex min-h-11 items-center gap-3 rounded-btn px-3 text-sm transition-colors hover:bg-qs-panel-2">
+        <a routerLink="/dashboard" (click)="close(); dashboardClick.emit(openedBy)" class="flex min-h-11 items-center gap-3 rounded-btn px-3 text-sm transition-colors hover:bg-qs-panel-2">
           <ng-icon name="heroSquares2x2" class="shrink-0 text-lg text-qs-muted"></ng-icon>
           <span>My dashboard</span>
           <ng-icon name="heroChevronRight" class="ml-auto shrink-0 text-base text-qs-muted"></ng-icon>
@@ -190,8 +195,10 @@ const CLOSE_MS = 220;
 export class YourGamesMenuComponent {
   /** The game on screen, listed first and marked Viewing. */
   currentGameId = input.required<string>();
-  /** My dashboard was tapped. */
-  dashboardClick = output<void>();
+  /** False hides the header button on phones, where another control opens the menu instead. */
+  phoneTrigger = input(true);
+  /** My dashboard was tapped, with what opened the menu: its own button, or another control on the page. */
+  dashboardClick = output<YourGamesOpener>();
 
   /** Closes the menu. Focus goes back to the button unless the close came from a click somewhere else on the page. */
   close(returnFocus = true): void {
@@ -224,11 +231,12 @@ export class YourGamesMenuComponent {
     if (this.open() && !this.phone()) this.close();
   }
 
-  toggle(): void {
+  toggle(openedBy: YourGamesOpener = 'trigger'): void {
     if (this.open()) {
       this.close();
       return;
     }
+    this.openedBy = openedBy;
     // Reopened mid-close: the panel turns back from where it is, and the reset that waited for the exit is dropped
     clearTimeout(this.closeTimer);
     this.closing.set(false);
@@ -309,6 +317,7 @@ export class YourGamesMenuComponent {
   private host = inject<ElementRef<HTMLElement>>(ElementRef);
   /** Bumped on each open, so an older load that finishes late doesn't overwrite a newer one. */
   private loadId = 0;
+  private openedBy: YourGamesOpener = 'trigger';
   private router = inject(Router);
   private trigger = viewChild<ElementRef<HTMLButtonElement>>('trigger');
 

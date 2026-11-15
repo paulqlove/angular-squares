@@ -124,6 +124,12 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   }
 
   protected readonly players: GamePlayersService = inject(GamePlayersService);
+  /** Your games, in the header. On phones the host bar's Games button opens it for hosts and co-hosts. */
+  @ViewChild(YourGamesMenuComponent)
+  protected set yourGames(menu: YourGamesMenuComponent | undefined) {
+    this.ui.yourGamesMenu = menu;
+  }
+
   /** The board's state. Read by the template and by dev tools (`ng.getComponent(...).state`). */
   protected readonly state: GameStateService = inject(GameStateService);
   protected readonly ui: GamePageUiService = inject(GamePageUiService);
