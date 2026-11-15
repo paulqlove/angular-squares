@@ -28,7 +28,7 @@ const browser = spawn(await chromium.executablePath(), [
   '--hide-scrollbars',
   '--remote-debugging-port=0',
   'about:blank',
-]);
+], { stdio: ['ignore', 'ignore', 'pipe'] });
 
 let socket;
 try {
@@ -46,8 +46,11 @@ try {
 function devtoolsUrl(child) {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error('Chromium did not start')), TIMEOUT_MS);
+    let output = '';
+    child.once('exit', () => reject(new Error('Chromium exited before it started')));
     child.stderr.on('data', (chunk) => {
-      const match = /DevTools listening on (ws:\S+)/.exec(chunk.toString());
+      output += chunk;
+      const match = /DevTools listening on (ws:\S+)/.exec(output);
       if (!match) return;
       clearTimeout(timer);
       resolve(match[1]);
@@ -75,6 +78,7 @@ async function connect(wsUrl) {
     const index = waiters.findIndex((w) => w.method === message.method);
     if (index >= 0) waiters.splice(index, 1)[0].resolve();
   };
+  ws.onclose = () => pending.forEach((call) => call.reject(new Error('Chromium closed the connection')));
   const send = (method, params = {}, sessionId) => {
     const id = ++nextId;
     ws.send(JSON.stringify({ id, method, params, sessionId }));
@@ -92,7 +96,8 @@ async function capture({ send, once }, size) {
   const scheme = dark ? 'dark' : 'light';
   await send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-color-scheme', value: scheme }] }, sessionId);
   const loaded = once('Page.loadEventFired');
-  await send('Page.navigate', { url }, sessionId);
+  const { errorText } = await send('Page.navigate', { url }, sessionId);
+  if (errorText) throw new Error(`Could not open ${url}: ${errorText}`);
   await Promise.race([loaded, new Promise((resolve) => setTimeout(resolve, TIMEOUT_MS).unref())]);
   await new Promise((resolve) => setTimeout(resolve, SETTLE_MS));
   const { data } = await send('Page.captureScreenshot', { format: 'png' }, sessionId);
