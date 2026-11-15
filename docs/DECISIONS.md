@@ -4,6 +4,22 @@ This file records product and design decisions, newest first. To add one, put a 
 
 ---
 
+## D-028 · Bottom-sheet dim may fade by color
+
+- **Date:** Nov 14 2026
+- **Decision:** On a phone, while a bottom sheet is swiped down, the dim behind it fades by its background color instead of its opacity. This is an exception to DESIGN.md's rule that motion uses only transform and opacity. Shipped in #353.
+- **Options considered:** fading the dim's opacity, which would also fade the sheet, because the dim layer holds the sheet
+- **Why:** it looks the same, and the dim layer holds the sheet. Paul's words: "Keep it."
+- **Decided by:** Paul
+
+## D-027 · No swipe left or right to change games on phones
+
+- **Date:** Nov 14 2026
+- **Decision:** No swipe left or right on the game page to move between games, on the board or on the game title row.
+- **Options considered:** swiping anywhere on the board; swiping only on the game title row
+- **Why:** people drag a little while picking squares, so a swipe on the board would switch games mid-pick, and it clashes with the phone's edge back-swipe. A title-row-only swipe is safe but few would find it, and the games dropdown already does the job. Paul's words: "Skip it."
+- **Decided by:** Paul, on Engineering's advice
+
 ## D-023 · Players view layout
 
 - **Date:** Nov 13–14 2026
