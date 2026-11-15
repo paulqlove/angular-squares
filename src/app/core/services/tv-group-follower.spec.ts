@@ -1,31 +1,26 @@
 import { TvLink } from '../utils/game-data';
-import { FollowerReads, TvGroupFollower } from './tv-group-follower';
-
-const listeners = new Map<string, (value: unknown) => void>();
-const unsubscribed: string[] = [];
-const owners: Record<string, string> = { AAAAA1: 'host', BBBBB2: 'host' };
-const reads: FollowerReads = {
-  watch: (path, next) => {
-    listeners.set(path, next);
-    return () => unsubscribed.push(path);
-  },
-  read: async path => owners[path.split('/')[1]] ?? null
-};
+import { TvGroupFollower, WatchPath } from './tv-group-follower';
 
 const WORK = 'WorkGroupKey00000001';
 const HOME = 'HomeGroupKey00000001';
-const push = (path: string, value: unknown): void => listeners.get(path)?.(value);
-const flush = (): Promise<void> => new Promise(resolve => setTimeout(resolve));
 
 describe('TvGroupFollower', () => {
+  let listeners: Map<string, (value: unknown) => void>;
+  let stopped: string[];
   let sent: (TvLink | null)[];
   let follower: TvGroupFollower;
+  const push = (path: string, value: unknown): void => listeners.get(path)?.(value);
+  const following = (group: string, boards: string[]): TvLink => ({ boards, interval: 20, follow: { group, owner: 'host' } });
 
   beforeEach(() => {
-    listeners.clear();
-    unsubscribed.length = 0;
+    listeners = new Map();
+    stopped = [];
     sent = [];
-    follower = new TvGroupFollower(reads, link => sent.push(link));
+    const watch: WatchPath = (path, next) => {
+      listeners.set(path, next);
+      return () => void stopped.push(path);
+    };
+    follower = new TvGroupFollower(watch, link => sent.push(link));
   });
 
   it('passes a link without a group through and watches nothing', () => {
@@ -34,26 +29,42 @@ describe('TvGroupFollower', () => {
     expect(listeners.size).toBe(0);
   });
 
-  it('shows boards added to the followed group', async () => {
-    follower.link({ boards: ['AAAAA1', 'BBBBB2'], interval: 20, group: WORK });
-    push(`openLists/${WORK}`, { AAAAA1: 'host', BBBBB2: 'host', CCCCC3: 'host' });
-    await flush();
-    expect(sent.at(-1)?.boards).toEqual(['AAAAA1', 'BBBBB2', 'CCCCC3']);
+  it('shows the saved boards until the list arrives, then the group as it is now', () => {
+    follower.link(following(WORK, ['AAAAA1', 'BBBBB2']));
+    expect(sent.at(-1)?.boards).toEqual(['AAAAA1', 'BBBBB2']);
+    push(`openLists/${WORK}`, { AAAAA1: 'host', CCCCC3: 'host', ZZZZZ9: 'stranger' });
+    expect(sent.at(-1)?.boards).toEqual(['AAAAA1', 'CCCCC3']);
   });
 
-  it('finds the owner from a saved board when none of the saved boards is left in the group', async () => {
-    follower.link({ boards: ['AAAAA1'], interval: 20, group: WORK });
-    await flush();
-    push(`openLists/${WORK}`, { DDDDD4: 'host', EEEEE5: 'stranger' });
-    expect(sent.at(-1)?.boards).toEqual(['DDDDD4']);
+  it('keeps the saved boards when the list cannot be read', () => {
+    follower.link(following(WORK, ['AAAAA1']));
+    push(`openLists/${WORK}`, null);
+    expect(sent.at(-1)?.boards).toEqual(['AAAAA1']);
+  });
+
+  it('keeps one watch while only the boards or time change', () => {
+    follower.link(following(WORK, ['AAAAA1']));
+    follower.link({ ...following(WORK, ['AAAAA1']), interval: 60 });
+    expect(stopped).toEqual([]);
+    expect(sent.at(-1)?.interval).toBe(60);
   });
 
   it('moves the watch when the group changes, and stops it when the link turns off', () => {
-    follower.link({ boards: ['AAAAA1'], interval: 20, group: WORK });
-    follower.link({ boards: ['BBBBB2'], interval: 20, group: HOME });
-    expect(unsubscribed).toEqual([`openLists/${WORK}`]);
+    follower.link(following(WORK, ['AAAAA1']));
+    follower.link(following(HOME, ['BBBBB2']));
+    expect(stopped).toEqual([`openLists/${WORK}`]);
+    push(`openLists/${HOME}`, { BBBBB2: 'host' });
     follower.link(null);
-    expect(unsubscribed).toEqual([`openLists/${WORK}`, `openLists/${HOME}`]);
+    expect(stopped).toEqual([`openLists/${WORK}`, `openLists/${HOME}`]);
     expect(sent.at(-1)).toBeNull();
+  });
+
+  it('sends nothing more after it stops, even if the old list fires', () => {
+    follower.link(following(WORK, ['AAAAA1']));
+    const fire = listeners.get(`openLists/${WORK}`);
+    follower.link(null);
+    const count = sent.length;
+    fire?.({ AAAAA1: 'host', DDDDD4: 'host' });
+    expect(sent.length).toBe(count);
   });
 });

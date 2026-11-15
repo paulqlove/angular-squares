@@ -1,15 +1,4 @@
-import { followedBoards, followedOwner } from './tv-follow';
-
-describe('followedOwner', () => {
-  it('reads the owner from a saved board still in the group', () => {
-    expect(followedOwner(['GONE01', 'AAAAA1'], { AAAAA1: 'host', ZZZZZ9: 'other' })).toBe('host');
-  });
-
-  it('is null when no saved board is in the group or there is no list', () => {
-    expect(followedOwner(['AAAAA1'], { BBBBB2: 'host' })).toBeNull();
-    expect(followedOwner(['AAAAA1'], null)).toBeNull();
-  });
-});
+import { followedBoards } from './tv-follow';
 
 describe('followedBoards', () => {
   const saved = ['AAAAA1', 'BBBBB2', 'CCCCC3'];
@@ -18,8 +7,9 @@ describe('followedBoards', () => {
     expect(followedBoards(saved, { CCCCC3: 'host', AAAAA1: 'host', BBBBB2: 'host', DDDDD4: 'host' }, 'host')).toEqual(['AAAAA1', 'BBBBB2', 'CCCCC3', 'DDDDD4']);
   });
 
-  it('drops boards taken out of the group', () => {
+  it('drops boards taken out of the group or deleted, and shows the new ones', () => {
     expect(followedBoards(saved, { AAAAA1: 'host', CCCCC3: 'host' }, 'host')).toEqual(['AAAAA1', 'CCCCC3']);
+    expect(followedBoards(saved, { NEWNE1: 'host', NEWNE2: 'host' }, 'host')).toEqual(['NEWNE1', 'NEWNE2']);
   });
 
   it('ignores boards in the list that the host does not own', () => {
@@ -31,8 +21,7 @@ describe('followedBoards', () => {
     expect(followedBoards([], list, 'host')).toHaveLength(20);
   });
 
-  it('falls back to the saved boards when the owner is unknown, the list is missing, or none of the host boards is in it', () => {
-    expect(followedBoards(saved, { AAAAA1: 'host' }, null)).toEqual(saved);
+  it('keeps the saved boards while the list is missing or has none of the host boards', () => {
     expect(followedBoards(saved, null, 'host')).toEqual(saved);
     expect(followedBoards(saved, { EEEEE5: 'stranger' }, 'host')).toEqual(saved);
     expect(followedBoards(saved, {}, 'host')).toEqual(saved);

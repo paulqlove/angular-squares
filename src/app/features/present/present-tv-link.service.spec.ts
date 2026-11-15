@@ -28,7 +28,7 @@ describe('PresentTvLinkService', () => {
     await service.copyRotationLink('u', { boardIds: ['a', 'b', 'c', 'd'], group: { id: 'WorkGroupKey00000001', name: 'Work' }, seconds: 10 });
     expect(games.saveTvLink).toHaveBeenCalledWith('u', ['a', 'b', 'c', 'd'], 10, 'WorkGroupKey00000001');
     expect(writeText).toHaveBeenCalledWith('https://x/tv/tok');
-    expect(toast.success.mock.calls[0][0]).toBe('TV link copied: Work, 4 boards, 10s each.');
+    expect(toast.success.mock.calls[0][0]).toBe('TV link copied: Work, 4 boards, 10s each. Press it again after you change the time.');
     expect(service.hasRotationLink()).toBe(true);
   });
 

@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 
 import { GameService } from '../../core/services/game.service';
-import { MAX_TV_BOARDS } from '../../core/services/tv-link.service';
+import { MAX_TV_BOARDS } from '../../core/utils/tv-follow';
 import { ToastService } from '../../core/services/toast.service';
 import { tvLinkCopiedMessage } from './tv-link-message';
 

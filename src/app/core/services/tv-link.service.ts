@@ -3,17 +3,15 @@ import { get, onValue, ref, remove, set, update } from 'firebase/database';
 import { Observable } from 'rxjs';
 import { TvLink } from '../utils/game-data';
 import { readTvLink } from '../utils/game-parse';
+import { MAX_TV_BOARDS } from '../utils/tv-follow';
 import { AuthService } from './auth.service';
 import { GameDatabaseService } from './game-database.service';
-import { FollowerReads, TvGroupFollower } from './tv-group-follower';
+import { TvGroupFollower } from './tv-group-follower';
 
 /**
  * Share and TV links: the board link, the single-board TV link, and the rotating TV link
  * published under a random token. GameService delegates here.
  */
-/** The most boards one TV link holds (the database rules cap it). */
-export const MAX_TV_BOARDS = 20;
-
 @Injectable({
   providedIn: 'root'
 })
@@ -67,7 +65,7 @@ export class TvLinkService {
       boards: boardIds.slice(0, MAX_TV_BOARDS).join(','),
       interval,
       updatedAt: Date.now(),
-      ...(group ? { group } : {})
+      ...(group ? { group, owner: userId } : {})
     });
     return token;
   }
@@ -82,11 +80,15 @@ export class TvLinkService {
         subscriber.next(null);
         return undefined;
       }
-      const follow = new TvGroupFollower(this.followerReads(), link => subscriber.next(link));
+      const db = this.database.db;
+      const follow = new TvGroupFollower(
+        (path, next) => onValue(ref(db, path), snapshot => next(snapshot.val()), () => next(null)),
+        link => subscriber.next(link)
+      );
       const off = onValue(
         ref(this.database.db, `tvLinks/${token}`),
         snapshot => follow.link(readTvLink(snapshot.val())),
-        () => subscriber.next(null)
+        () => follow.link(null)
       );
       return () => {
         off();
@@ -97,15 +99,6 @@ export class TvLinkService {
 
   private readonly authService: AuthService = inject(AuthService);
   private readonly database: GameDatabaseService = inject(GameDatabaseService);
-
-  /** Live and one-time reads for a TV link's group follower. A list the TV can't read counts as no list. */
-  private followerReads(): FollowerReads {
-    const db = this.database.db;
-    return {
-      watch: (path, next) => onValue(ref(db, path), snapshot => next(snapshot.val()), () => next(null)),
-      read: async path => (await get(ref(db, path))).val()
-    };
-  }
 
   private appBaseUrl(): string {
     const basePath = window.location.pathname.includes('/angular-squares')

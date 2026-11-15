@@ -1,11 +1,8 @@
 import { TvLink } from '../utils/game-data';
-import { followedBoards, followedOwner } from '../utils/tv-follow';
+import { followedBoards } from '../utils/tv-follow';
 
-/** The database reads the follower needs: a live watch on a path, and a one-time read. */
-export interface FollowerReads {
-  watch: (path: string, next: (value: unknown) => void) => () => void;
-  read: (path: string) => Promise<unknown>;
-}
+/** A live watch on a database path. Returns the function that stops it. */
+export type WatchPath = (path: string, next: (value: unknown) => void) => () => void;
 
 /**
  * Behind a TV link that follows a group: keeps one watch on that group's More-tab list (`openLists/{group}`, readable
@@ -14,22 +11,21 @@ export interface FollowerReads {
 export class TvGroupFollower {
   private current: TvLink | null = null;
   private list: Record<string, unknown> | null = null;
-  private owner: string | null = null;
   private watching: string | null = null;
   private listOff: (() => void) | null = null;
 
   public constructor(
-    private readonly reads: FollowerReads,
+    private readonly watch: WatchPath,
     private readonly send: (link: TvLink | null) => void
   ) {}
 
-  /** The TV link changed (or turned off). Starts, swaps or stops the group watch to match. */
+  /** The TV link changed (or turned off). Starts, swaps or stops the group watch to match, then sends the link on. */
   public link(link: TvLink | null): void {
     this.current = link;
-    const group = link?.group ?? null;
+    const group = link?.follow?.group ?? null;
     if (group !== this.watching) {
       this.stop();
-      if (group && link) this.watch(group, link.boards[0]);
+      if (group) this.start(group);
     }
     this.emit();
   }
@@ -38,18 +34,13 @@ export class TvGroupFollower {
     this.listOff?.();
     this.listOff = null;
     this.list = null;
-    this.owner = null;
     this.watching = null;
   }
 
-  private watch(group: string, firstBoard: string): void {
+  private start(group: string): void {
     this.watching = group;
-    void this.boardOwner(firstBoard).then(owner => {
+    this.listOff = this.watch(`openLists/${group}`, value => {
       if (this.watching !== group) return;
-      this.owner = owner;
-      this.emit();
-    });
-    this.listOff = this.reads.watch(`openLists/${group}`, value => {
       this.list = value && typeof value === 'object' ? (value as Record<string, unknown>) : null;
       this.emit();
     });
@@ -57,21 +48,6 @@ export class TvGroupFollower {
 
   private emit(): void {
     const link = this.current;
-    if (!link?.group) {
-      this.send(link);
-      return;
-    }
-    const owner = followedOwner(link.boards, this.list) ?? this.owner;
-    this.send({ ...link, boards: followedBoards(link.boards, this.list, owner) });
-  }
-
-  /** A board's owner (public on the board). Used when none of the saved boards is in the group any more. */
-  private async boardOwner(boardId: string): Promise<string | null> {
-    try {
-      const value = await this.reads.read(`games/${boardId}/ownerId`);
-      return typeof value === 'string' ? value : null;
-    } catch {
-      return null;
-    }
+    this.send(link?.follow ? { ...link, boards: followedBoards(link.boards, this.list, link.follow.owner) } : link);
   }
 }
