@@ -15,13 +15,12 @@ describe('group co-host', () => {
     { id: 'd', name: 'Office', openListId: WORK }
   ];
 
-  it('reads a group\'s co-host and skips a bad one', () => {
-    const groups = parseGroups({
-      [CHURCH]: { name: 'Church', createdAt: 1, coHost: { email: 'dana@email.com' } },
-      [WORK]: { name: 'Work', createdAt: 2, coHost: { email: 42 } }
-    });
+  it('reads a group\'s co-host from the owner-only list and skips a bad one', () => {
+    const raw = { [CHURCH]: { name: 'Church', createdAt: 1, coHost: { email: 'old@email.com' } }, [WORK]: { name: 'Work', createdAt: 2 } };
+    const groups = parseGroups(raw, { [CHURCH]: { email: 'dana@email.com' }, [WORK]: { email: 42 } });
     expect(groups[0].coHost).toEqual({ email: 'dana@email.com' });
     expect('coHost' in groups[1]).toBe(false);
+    expect(parseGroups(raw).some(g => 'coHost' in g)).toBe(false);
   });
 
   it('cleans and checks emails', () => {
@@ -60,10 +59,10 @@ describe('group co-host', () => {
 
   it('writes the group and its games in one update', () => {
     expect(groupCoHostUpdates('o', CHURCH, { email: 'dana@email.com' }, { addTo: ['a'], clearFrom: ['c'] })).toEqual({
-      [`groupLists/o/groups/${CHURCH}/coHost`]: { email: 'dana@email.com' },
+      [`groupCoHosts/o/${CHURCH}`]: { email: 'dana@email.com' },
       'games/a/managerId': '', 'games/a/managerEmail': 'dana@email.com', 'games/a/managerName': '',
       'games/c/managerId': '', 'games/c/managerEmail': '', 'games/c/managerName': ''
     });
-    expect(groupCoHostUpdates('o', CHURCH, null, { addTo: [], clearFrom: [] })).toEqual({ [`groupLists/o/groups/${CHURCH}/coHost`]: null });
+    expect(groupCoHostUpdates('o', CHURCH, null, { addTo: [], clearFrom: [] })).toEqual({ [`groupCoHosts/o/${CHURCH}`]: null });
   });
 });

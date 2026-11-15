@@ -15,11 +15,19 @@ import { GameDatabaseService } from './game-database.service';
   providedIn: 'root'
 })
 export class GameGroupsService {
-  /** The owner's groups, oldest first. Empty on any error or for a reader the rules turn away. */
+  /**
+   * The owner's groups, oldest first. Empty on any error or for a reader the rules turn away. Each group's co-host
+   * is read only for the owner: co-hosts get the groups without them, as the rules allow.
+   */
   public async getGroups(ownerId: string): Promise<GameGroup[]> {
     if (!this.database.isBrowser || !ownerId) return [];
     try {
-      return parseGroups(await this.read(`groupLists/${ownerId}/groups`));
+      const isOwner = this.authService.currentUser()?.uid === ownerId;
+      const [groups, coHosts] = await Promise.all([
+        this.read(`groupLists/${ownerId}/groups`),
+        isOwner ? this.read(`groupCoHosts/${ownerId}`).catch(() => null) : null
+      ]);
+      return parseGroups(groups, coHosts);
     } catch {
       return [];
     }

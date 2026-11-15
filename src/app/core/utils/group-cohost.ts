@@ -1,8 +1,8 @@
 import { gameCountLabel } from './game-groups';
 
 /**
- * A group's co-host (Season Pass): one per group, stored by email at `groupLists/{ownerId}/groups/{groupId}/coHost`,
- * the same way Create game stores a co-host typed by email. Games in the group that have no co-host get it;
+ * A group's co-host (Season Pass): one per group, stored by email at `groupCoHosts/{ownerId}/{groupId}`, the same way
+ * Create game stores a co-host typed by email. Only the owner can read it, not their co-hosts (Paul, Nov 15: "Only me"). Games in the group that have no co-host get it;
  * a game's own co-host is never replaced. Paul approved Creative's design (Nov 15).
  */
 
@@ -71,7 +71,7 @@ export function gamesWithCoHost(boards: CoHostedBoard[], groupId: string, email:
 
 /** One write: the group's co-host (null removes it), given to `addTo` and cleared from `clearFrom`, the way Edit game clears one. */
 export function groupCoHostUpdates(ownerId: string, groupId: string, coHost: GroupCoHost | null, games: { addTo: string[]; clearFrom: string[] }): Record<string, unknown> {
-  const updates: Record<string, unknown> = { [`groupLists/${ownerId}/groups/${groupId}/coHost`]: coHost };
+  const updates: Record<string, unknown> = { [`groupCoHosts/${ownerId}/${groupId}`]: coHost };
   for (const id of games.addTo) {
     Object.assign(updates, managerUpdates(id, coHost?.email ?? ''));
   }
