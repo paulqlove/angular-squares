@@ -19,6 +19,7 @@ import { PlayersSectionComponent } from './components/players-section/players-se
 import { WinnersAndPayoutsComponent } from './components/winners-and-payouts/winners-and-payouts.component';
 import { EspnSyncService } from './services/espn-sync.service';
 import { GamePageUiService } from './services/game-page-ui.service';
+import { GamePageGroupsService } from './services/game-page-groups.service';
 import { GamePlayersService } from './services/game-players.service';
 import { GameScoringService } from './services/game-scoring.service';
 import { GameSessionService } from './services/game-session.service';
@@ -55,6 +56,7 @@ import { SquarePickerService } from './services/square-picker.service';
   providers: [
     provideIcons({ heroShare }),
     EspnSyncService,
+    GamePageGroupsService,
     GamePageUiService,
     GamePlayersService,
     GameScoringService,

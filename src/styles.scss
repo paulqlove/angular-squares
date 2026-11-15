@@ -658,10 +658,16 @@ body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
 @keyframes qs-rise-in { from { opacity: 0; transform: translateY(6px); } }
 @keyframes qs-icon-pop { from { opacity: .4; transform: scale(.6); } }
 .qs-fade-rise { animation: qs-rise-in 180ms var(--qs-ease) backwards; }
-/* A row arriving in a list (the Players view: a card opening, a player moving group): fades in, 160ms, no movement. */
+/* A row arriving in a list (the Players view: a player moving group): fades in, 160ms, no movement. */
 .qs-row-in { animation: qs-fade-in 160ms var(--qs-ease) backwards; }
-/* A Players card's games panel closing: fades out, 120ms. */
-.qs-row-out { animation: qs-fade-out 120ms var(--qs-ease-exit) forwards; }
+/* Players card panel from 640px (player-card): it drops in and lifts away like the Your games popover (.qs-menu-enter,
+   .qs-menu-leave), from its notch. Opened straight from another card, it skips the drop: the new panel fades in over
+   120ms while the old one fades out. A closing panel stays above the cards below until it's gone. */
+@media (min-width: 640px) {
+  .qs-card-switch > .qs-panel.qs-menu-enter { animation: qs-fade-in var(--qs-t-fast) var(--qs-ease-decel) both; }
+  .qs-card-switch > .qs-panel.qs-menu-leave { animation: qs-fade-out var(--qs-t-fast) var(--qs-ease-exit) both; }
+  [appPlayerCard]:has(> .qs-panel.qs-menu-leave) { z-index: 10; }
+}
 /* "All confirmed" on a Players card: the check grows in from 0.8 over 160ms, then after a 900ms hold the card fades and
    drops 8px over 200ms before it lands in Confirmed. Reduced motion: no scale or drop, a plain 120ms fade (end of file). */
 @keyframes qs-check-in { from { opacity: 0; transform: scale(.8); } }
@@ -859,6 +865,8 @@ button:active:not(:disabled) .turn-icon { transform: rotate(120deg); transition-
 
 /* Reduced motion keeps the "All confirmed" card's exit as a plain 120ms fade, so it doesn't jump away (see .qs-card-leave). */
 @media (prefers-reduced-motion: reduce) {
+  [appPlayerCard] > .qs-panel.qs-menu-enter { animation: qs-fade-in 120ms linear both !important; }
+  [appPlayerCard] > .qs-panel.qs-menu-leave { animation: qs-fade-out 120ms linear both !important; }
   .qs-check-in { animation: none !important; }
   .qs-row-in { animation-delay: 0s !important; }
   .qs-card-leave { animation: qs-fade-out 120ms linear forwards !important; }

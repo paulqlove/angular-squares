@@ -10,6 +10,7 @@ import { BoardGroup, groupBoards } from '../../../core/utils/board-groups';
 import { drawBoardNumbers } from '../../../core/utils/draw-numbers';
 import { toGameListItem } from '../../../core/utils/game-parse';
 import { filterHostedGames } from './dashboard-filters';
+import { DashboardGroupsService } from './dashboard-groups.service';
 import { DashboardSearchService } from './dashboard-search.service';
 
 /**
@@ -39,7 +40,10 @@ export class DashboardStore {
   /** Hosted boards matching the search, newest first. */
   public readonly visibleMyGames = computed<GameListItem[]>(() => {
     const search = this.search;
-    return filterHostedGames(this.myGames(), search.gameSearch(), !!search.codeMatch() || search.showCodeError(), g => this.teamLogos.teams(g));
+    return filterHostedGames(this.myGames(), search.gameSearch(), !!search.codeMatch() || search.showCodeError(), {
+      teamsOf: g => this.teamLogos.teams(g),
+      groupNameOf: g => this.groups.nameOf(g)
+    });
   });
 
   public async deleteGame(gameId: string): Promise<void> {
@@ -66,7 +70,8 @@ export class DashboardStore {
       try {
         const [ownedRecords, joinedRecords] = await Promise.all([
           this.gameService.getUserGameRecords(user.uid),
-          this.gameService.getJoinedGameRecords(user.uid)
+          this.gameService.getJoinedGameRecords(user.uid),
+          this.groups.load(user.uid)
         ]);
         const owned = ownedRecords.map(game => toGameListItem(game.id as string, game, true));
         this.myGames.set(owned);
@@ -157,6 +162,7 @@ export class DashboardStore {
 
   private readonly confirmService: ConfirmService = inject(ConfirmService);
   private readonly gameService: GameService = inject(GameService);
+  private readonly groups: DashboardGroupsService = inject(DashboardGroupsService);
   private readonly injector: Injector = inject(Injector);
   private readonly search: DashboardSearchService = inject(DashboardSearchService);
   private readonly teamLogos: TeamLogoService = inject(TeamLogoService);

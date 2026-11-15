@@ -8,6 +8,7 @@ import { splitFractions } from '../../../core/plans';
 import { drawBoardNumbers } from '../../../core/utils/draw-numbers';
 import type { EditGameValues } from '../components/edit-game-dialog/edit-game-dialog.component';
 import { emptyScores } from '../utils/board-math';
+import { GamePageGroupsService } from './game-page-groups.service';
 import { GamePageUiService } from './game-page-ui.service';
 import { GameStateService } from './game-state.service';
 import { NumberDrawService } from './number-draw.service';
@@ -146,6 +147,7 @@ export class HostActionsService {
   private readonly confirmService: ConfirmService = inject(ConfirmService);
   private readonly draw: NumberDrawService = inject(NumberDrawService);
   private readonly gameService: GameService = inject(GameService);
+  private readonly groups: GamePageGroupsService = inject(GamePageGroupsService);
   private readonly planService: PlanService = inject(PlanService);
   private readonly sanitizationService: SanitizationService = inject(SanitizationService);
   private readonly state: GameStateService = inject(GameStateService);
@@ -183,13 +185,14 @@ export class HostActionsService {
     const state = this.state;
     if (values.showInOpenBoards !== state.showInOpenBoards) {
       try {
-        await this.gameService.setShowInOpenBoards(state.gameId, state.gameOwnerId, values.showInOpenBoards);
+        state.openListId = await this.gameService.setShowInOpenBoards({ id: state.gameId, ownerId: state.gameOwnerId, openListId: state.openListId }, values.showInOpenBoards);
         state.showInOpenBoards = values.showInOpenBoards;
       } catch {
         this.toastService.warning('Saved, but Show in my open boards could not be changed. Try again in a moment.');
         return false;
       }
     }
+    if (!await this.groups.saveChoice(values.group)) return false;
     if (state.isGameOwner() && this.planService.features().squareLimit && (values.maxSquaresPerPlayer ?? undefined) !== state.maxSquaresPerPlayer) {
       try {
         await this.gameService.setSquareLimit(state.gameId, values.maxSquaresPerPlayer);

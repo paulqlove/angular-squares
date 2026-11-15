@@ -3,8 +3,10 @@ import { get, increment, ref, remove, set, update } from 'firebase/database';
 import { DEFAULT_EMPTY_QUARTER_RULE, EmptyQuarterRule, QuarterSplit } from '../plans';
 import { BoardSize, GameData, SportType, getBoardDimensions } from '../utils/game-data';
 import { generateGameId, isLinkableEspnId } from '../utils/game-parse';
+import { isListKey } from '../utils/open-lists';
 import { shuffleSquares, smallerBoardSizes } from '../utils/shuffle-squares';
 import { AuthService } from './auth.service';
+import { BoardSettingsService } from './board-settings.service';
 import { EntitlementService } from './entitlement.service';
 import { GameDatabaseService } from './game-database.service';
 import { GameRecordService } from './game-record.service';
@@ -42,6 +44,7 @@ export class GameLifecycleService {
     await remove(ref(this.database.db, `users/${ownerId}/activeBoardId`));
     const gameId = generateGameId();
 
+    const openListId = await this.boardSettings.ungroupedKey(ownerId).catch(() => undefined);
     const size: BoardSize = boardSize || 100;
     const { rows, cols } = getBoardDimensions(size);
 
@@ -75,7 +78,8 @@ export class GameLifecycleService {
       emptyQuarterRule: emptyQuarterRule || DEFAULT_EMPTY_QUARTER_RULE,
       ...(espnEventId ? { espnEventId } : {}),
       ...(espnSport ? { espnSport } : {}),
-      ...(managerEmail ? { managerEmail } : {})
+      ...(managerEmail ? { managerEmail } : {}),
+      ...(openListId ? { openListId } : {})
     };
 
     const gameRef = ref(this.database.db, `games/${gameId}`);
@@ -110,12 +114,17 @@ export class GameLifecycleService {
   public async deleteGame(gameId: string, ownerId: string): Promise<void> {
     if (!this.database.isBrowser) return;
     if (this.authService.blockPreviewWrite()) throw new Error('Preview only');
-    const espnSnap = await get(ref(this.database.db, `games/${gameId}/espnEventId`));
+    const [espnSnap, listSnap] = await Promise.all([
+      get(ref(this.database.db, `games/${gameId}/espnEventId`)),
+      get(ref(this.database.db, `games/${gameId}/openListId`))
+    ]);
     const updates: Record<string, unknown> = {
       [`games/${gameId}`]: null,
       [`users/${ownerId}/games/${gameId}`]: null,
       [`openBoards/${ownerId}/${gameId}`]: null,
     };
+    const listId = listSnap.val();
+    if (isListKey(listId)) updates[`openLists/${listId}/${gameId}`] = null;
     const espnId = espnSnap.exists() ? espnSnap.val() : null;
     if (typeof espnId === 'string' && isLinkableEspnId(espnId)) {
       updates[`liveGames/${espnId}/${gameId}`] = null;
@@ -182,6 +191,7 @@ export class GameLifecycleService {
   }
 
   private readonly authService: AuthService = inject(AuthService);
+  private readonly boardSettings: BoardSettingsService = inject(BoardSettingsService);
   private readonly database: GameDatabaseService = inject(GameDatabaseService);
   private readonly entitlements: EntitlementService = inject(EntitlementService);
   private readonly liveGameIndex: LiveGameIndexService = inject(LiveGameIndexService);

@@ -963,3 +963,161 @@ describe('a guest who signs in', () => {
     await assertFails(write(replacedGuest(), { [`${G}/squares/5-5`]: 'Guesty' }));
   });
 });
+
+describe('game groups (groupLists, coHosts, openLists)', () => {
+  const UNGROUPED = 'ungroupedKey0000000001';
+  const CHURCH = 'churchGroupKey00000001';
+  const WORK = 'workGroupKey0000000001';
+  const OTHER = 'strangerGroup000000001';
+  const stranger = () => env.authenticatedContext('stranger');
+  const pass = { plan: 'season', expiresAt: Date.now() + HOUR, updatedAt: Date.now() };
+  const group = (name: string) => ({ name, createdAt: Date.now() });
+
+  beforeEach(async () => {
+    await seed({
+      'entitlements/owner': pass,
+      'groupLists/owner': { ungrouped: UNGROUPED, groups: { [CHURCH]: group('Church'), [WORK]: group('Work') } },
+      'groupLists/stranger': { ungrouped: 'strangerUngrouped00001', groups: { [OTHER]: group('Mine') } },
+      'coHosts/owner/cohost': true,
+      [`${G}/openListId`]: CHURCH
+    });
+  });
+
+  describe('groupLists', () => {
+    it('the owner and their co-hosts can read the group names', async () => {
+      await assertSucceeds(read(owner(), 'groupLists/owner'));
+      await assertSucceeds(read(cohost(), 'groupLists/owner'));
+    });
+
+    it('players, guests, visitors and other hosts cannot read them', async () => {
+      await assertFails(read(player(), 'groupLists/owner'));
+      await assertFails(read(guest(), 'groupLists/owner'));
+      await assertFails(read(visitor(), 'groupLists/owner'));
+      await assertFails(read(stranger(), 'groupLists/owner'));
+      await assertFails(read(owner(), 'groupLists'));
+    });
+
+    it('a Season Pass owner can create, rename and delete a group', async () => {
+      const id = 'newGroupKey00000000001';
+      await assertSucceeds(set(owner(), `groupLists/owner/groups/${id}`, group('Family')));
+      await assertSucceeds(set(owner(), `groupLists/owner/groups/${id}/name`, 'Fam'));
+      await assertSucceeds(set(owner(), `groupLists/owner/groups/${id}`, null));
+    });
+
+    it('groups freeze when the owner has no Season Pass', async () => {
+      await seed({ 'entitlements/owner': null });
+      await assertFails(set(owner(), 'groupLists/owner/groups/newGroupKey00000000001', group('Family')));
+      await assertFails(set(owner(), `groupLists/owner/groups/${CHURCH}/name`, 'Chapel'));
+      await assertFails(set(owner(), `groupLists/owner/groups/${CHURCH}`, null));
+    });
+
+    it('rejects empty or long names, extra fields and odd ids', async () => {
+      await assertFails(set(owner(), 'groupLists/owner/groups/newGroupKey00000000001', group(' ')));
+      await assertFails(set(owner(), 'groupLists/owner/groups/newGroupKey00000000001', group('x'.repeat(31))));
+      await assertFails(set(owner(), 'groupLists/owner/groups/newGroupKey00000000001', { ...group('A'), color: 'red' }));
+      await assertFails(set(owner(), 'groupLists/owner/groups/short', group('A')));
+      await assertFails(set(owner(), 'groupLists/owner/other', 'x'));
+    });
+
+    it('co-hosts and strangers cannot change the owner\'s groups', async () => {
+      await assertFails(set(cohost(), 'groupLists/owner/groups/newGroupKey00000000001', group('Mine')));
+      await assertFails(set(cohost(), `groupLists/owner/groups/${CHURCH}/name`, 'Mine'));
+      await assertFails(set(stranger(), `groupLists/owner/groups/${CHURCH}`, null));
+    });
+
+    it('the ungrouped key is written once by the owner and never changed', async () => {
+      await seed({ 'groupLists/owner/ungrouped': null });
+      await assertFails(set(stranger(), 'groupLists/owner/ungrouped', 'freshUngroupedKey00001'));
+      await assertFails(set(owner(), 'groupLists/owner/ungrouped', 'bad key'));
+      await assertSucceeds(set(owner(), 'groupLists/owner/ungrouped', 'freshUngroupedKey00001'));
+      await assertFails(set(owner(), 'groupLists/owner/ungrouped', 'otherUngroupedKey00001'));
+      await assertFails(set(owner(), 'groupLists/owner/ungrouped', null));
+    });
+  });
+
+  describe('coHosts', () => {
+    it('only the owner can add or remove a co-host entry', async () => {
+      await assertSucceeds(set(owner(), 'coHosts/owner/bob', true));
+      await assertSucceeds(set(owner(), 'coHosts/owner/bob', null));
+      await assertFails(set(stranger(), 'coHosts/owner/stranger', true));
+      await assertFails(set(cohost(), 'coHosts/owner/alice', true));
+      await assertFails(set(owner(), 'coHosts/owner/bob', 'yes'));
+    });
+
+    it('only the owner can read the list', async () => {
+      await assertSucceeds(read(owner(), 'coHosts/owner'));
+      await assertFails(read(cohost(), 'coHosts/owner'));
+    });
+  });
+
+  describe('games/openListId', () => {
+    it('the owner can file a game into one of their groups or No group', async () => {
+      await assertSucceeds(set(owner(), `${G}/openListId`, WORK));
+      await assertSucceeds(set(owner(), `${G}/openListId`, UNGROUPED));
+    });
+
+    it('a co-host can file the game into one of the owner\'s groups', async () => {
+      await assertSucceeds(set(cohost(), `${G}/openListId`, WORK));
+    });
+
+    it('a game cannot point at a list that is not its owner\'s', async () => {
+      await assertFails(set(owner(), `${G}/openListId`, OTHER));
+      await assertFails(set(cohost(), `${G}/openListId`, 'madeUpGroupKey00000001'));
+      await assertFails(set(owner(), `${G}/openListId`, 'bad key'));
+    });
+
+    it('a player cannot move a game', async () => {
+      await assertFails(set(player(), `${G}/openListId`, WORK));
+    });
+
+    it('deleting a group moves its games to No group in one update', async () => {
+      await assertSucceeds(write(owner(), {
+        [`groupLists/owner/groups/${CHURCH}`]: null,
+        [`${G}/openListId`]: UNGROUPED,
+        [`openLists/${CHURCH}/${GAME}`]: null,
+        [`openLists/${UNGROUPED}/${GAME}`]: 'owner'
+      }));
+    });
+  });
+
+  describe('openLists', () => {
+    it('the owner or co-host lists the game in its own list', async () => {
+      await assertSucceeds(set(owner(), `openLists/${CHURCH}/${GAME}`, 'owner'));
+      await assertSucceeds(set(cohost(), `openLists/${CHURCH}/${GAME}`, null));
+      await assertSucceeds(set(cohost(), `openLists/${CHURCH}/${GAME}`, 'owner'));
+    });
+
+    it('a game cannot be listed in another group\'s list', async () => {
+      await assertFails(set(owner(), `openLists/${WORK}/${GAME}`, 'owner'));
+      await assertFails(set(owner(), `openLists/${OTHER}/${GAME}`, 'owner'));
+    });
+
+    it('the entry must name the game\'s owner', async () => {
+      await assertFails(set(owner(), `openLists/${CHURCH}/${GAME}`, true));
+      await assertFails(set(owner(), `openLists/${CHURCH}/${GAME}`, 'stranger'));
+    });
+
+    it('players and strangers cannot add or remove entries', async () => {
+      await seed({ [`openLists/${CHURCH}/${GAME}`]: 'owner' });
+      await assertFails(set(player(), `openLists/${CHURCH}/${GAME}`, null));
+      await assertFails(set(stranger(), `openLists/${CHURCH}/${GAME}`, null));
+      await assertFails(set(stranger(), `openLists/${OTHER}/${GAME}`, 'owner'));
+    });
+
+    it('anyone can read one list by its key, nobody can list them all', async () => {
+      await seed({ [`openLists/${CHURCH}/${GAME}`]: 'owner' });
+      await assertSucceeds(read(visitor(), `openLists/${CHURCH}`));
+      await assertFails(read(visitor(), 'openLists'));
+      await assertFails(read(owner(), 'openLists'));
+    });
+
+    it('moving a game to another group moves its entry in one update', async () => {
+      await seed({ [`openLists/${CHURCH}/${GAME}`]: 'owner' });
+      await assertSucceeds(write(cohost(), {
+        [`${G}/openListId`]: WORK,
+        [`openLists/${CHURCH}/${GAME}`]: null,
+        [`openLists/${WORK}/${GAME}`]: 'owner'
+      }));
+    });
+  });
+});

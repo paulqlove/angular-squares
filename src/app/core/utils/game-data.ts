@@ -65,6 +65,8 @@ export interface GameData {
   hostNote?: string;
   /** The host lets players on one of their full boards see and join this one. */
   showInOpenBoards?: boolean;
+  /** The More list this board belongs to: one of the owner's groups or their No group key. */
+  openListId?: string;
   /** Lock and draw before kickoff (Season Pass). The server does the work. */
   autoManage?: AutoManageSettings;
   autoManageResult?: AutoManageResult;
@@ -97,6 +99,7 @@ export interface GameChange {
 export interface GameListItem {
   id: string;
   name: string;
+  ownerId: string;
   ownerName: string;
   homeTeam: string;
   awayTeam: string;
@@ -116,6 +119,7 @@ export interface GameListItem {
   espnSport?: SportType;
   hostNote?: string;
   showInOpenBoards?: boolean;
+  openListId?: string;
   autoManage?: AutoManageSettings;
   maxSquaresPerPlayer?: number;
   emptyQuarterRule?: EmptyQuarterRule;

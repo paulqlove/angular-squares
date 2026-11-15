@@ -1,6 +1,7 @@
 import { isEmptyQuarterRule } from '../plans';
 import type { RecentVisit } from './recent-games';
 import { readAutoManage, readAutoManageResult } from './auto-manage';
+import { isListKey } from './open-lists';
 import { confirmedPlayers } from './paid-squares';
 import { readSquareLimit } from './square-limit';
 import { BoardSize, EspnLiveSnapshot, GameData, GameListItem, SportType, TvLink, getBoardDimensions } from './game-data';
@@ -84,6 +85,7 @@ export function parseGameData(gameId: string, rawData: any, now: number = Date.n
     awayTeam: rawData.awayTeam || '',
     hostNote: rawData.hostNote || '',
     showInOpenBoards: !!rawData.showInOpenBoards,
+    openListId: isListKey(rawData.openListId) ? rawData.openListId : undefined,
     autoManage: readAutoManage(rawData.autoManage),
     autoManageResult: readAutoManageResult(rawData.autoManageResult),
     maxSquaresPerPlayer: readSquareLimit(rawData.maxSquaresPerPlayer),
@@ -214,6 +216,7 @@ export function toGameListItem(gameId: string, game: GameData, includeHostSettin
   return {
     id: gameId,
     name: game.name,
+    ownerId: game.ownerId,
     ownerName: game.ownerName,
     homeTeam: game.homeTeam,
     awayTeam: game.awayTeam,
@@ -233,6 +236,7 @@ export function toGameListItem(gameId: string, game: GameData, includeHostSettin
     ...(includeHostSettings
       ? {
           showInOpenBoards: game.showInOpenBoards,
+          openListId: game.openListId,
           autoManage: game.autoManage,
           maxSquaresPerPlayer: game.maxSquaresPerPlayer,
           emptyQuarterRule: isEmptyQuarterRule(game.emptyQuarterRule) ? game.emptyQuarterRule : undefined

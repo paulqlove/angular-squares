@@ -12,8 +12,8 @@
     }
     @if (players.available()) {
       <div class="qs-seg" role="group" aria-label="Show">
-        <button type="button" [attr.aria-pressed]="!players.active()" (click)="players.mode.set('boards')">Boards</button>
-        <button type="button" [attr.aria-pressed]="players.active()" (click)="players.mode.set('players')">Players</button>
+        <button type="button" [attr.aria-pressed]="!players.active()" (click)="players.showView('boards')">Boards</button>
+        <button type="button" [attr.aria-pressed]="players.active()" (click)="players.showView('players')">Players</button>
       </div>
     }
   </div>
@@ -22,6 +22,8 @@
 @if (players.active()) {
   <div appPlayersView></div>
 } @else {
+
+<app-dashboard-groups></app-dashboard-groups>
 
 @if (store.isLoadingGames()) {
   <div class="qs-skel-delay mt-4 grid grid-cols-1 gap-3" data-card-grid [class]="view.cardGridClass()" aria-busy="true">

@@ -1,4 +1,6 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, HostListener, computed, effect, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, HostListener, computed, effect, inject, input, output, signal, untracked, viewChild } from '@angular/core';
+
+import { SheetDragDirective } from './sheet-drag.directive';
 
 /** Open modals, oldest first. Only the last one answers Esc, so a confirm on top of a dialog closes alone. */
 const openModals: ModalComponent[] = [];
@@ -26,13 +28,14 @@ const FOCUSABLE = 'button, input, select, textarea, summary, [href], [tabindex]:
  */
 @Component({
   selector: 'app-modal',
+  imports: [SheetDragDirective],
   changeDetection: ChangeDetectionStrategy.Eager,
   // A static role="alertdialog" on <app-modal> also lands on the host as an attribute, which would make the host an
   // unnamed dialog for screen readers and AI agents. The role belongs on the panel only.
   host: { '[attr.role]': 'null' },
   template: `
     @if (shown()) {
-      <div animate.enter="qs-modal-enter" [class]="overlayClass()" [class.qs-modal-leave]="!open()" (click)="onBackdrop()">
+      <div #backdrop animate.enter="qs-modal-enter" [class]="overlayClass()" [class.qs-modal-leave]="!open()" (click)="onBackdrop()">
         <div
           [attr.role]="role()"
           aria-modal="true"
@@ -42,7 +45,13 @@ const FOCUSABLE = 'button, input, select, textarea, summary, [href], [tabindex]:
           (keydown.tab)="trapTab($event, false)"
           (keydown.shift.tab)="trapTab($event, true)"
           (click)="$event.stopPropagation()"
+          [appSheetDrag]="swipeCloses()"
+          [sheetBackdrop]="backdrop"
+          (swipeClosed)="onSwipeClosed()"
         >
+          @if (swipeCloses()) {
+            <div class="mx-auto mt-2 h-1 w-9 shrink-0 touch-none rounded-full bg-qs-line-strong sm:hidden" aria-hidden="true"></div>
+          }
           <ng-content></ng-content>
         </div>
       </div>
@@ -69,11 +78,14 @@ export class ModalComponent {
   dismissed = output<void>();
 
   protected overlayClass = computed(() => `fixed inset-0 flex justify-center bg-black/60 backdrop-blur-sm ${LEVEL[this.level()]} ${PHONE[this.phone()].overlay}${this.motion() === 'slide' ? ' qs-sheet-slide' : this.phone() === 'sheet' ? ' qs-sheet-phone' : ''}`);
+  /** Phone sheets a backdrop tap may close also close with a swipe down, and show the grabber that hints at it. */
+  protected swipeCloses = computed(() => this.phone() === 'sheet' && this.backdropCloses());
   protected panelClass = computed(() => `${this.motion() === 'slide' ? '' : 'animate-modal-in '}w-full border border-qs-line bg-qs-panel shadow-pop ${(this.phone() === 'center' ? SIZE : SIZE_FROM_SM)[this.size()]} ${PHONE[this.phone()].panel} ${this.extraClass()}`.trim());
 
   /** Stays true for the length of the exit fade, then drops on a timer. Not on animationend: a missed event would leave an invisible full-screen layer over the page. */
   protected shown = signal(false);
   private destroyRef = inject(DestroyRef);
+  private drag = viewChild(SheetDragDirective);
   private hideTimer: ReturnType<typeof setTimeout> | undefined;
   private host = inject<ElementRef<HTMLElement>>(ElementRef);
   private returnFocus: HTMLElement | null = null;
@@ -83,7 +95,11 @@ export class ModalComponent {
     effect(() => {
       const open = this.open();
       clearTimeout(this.hideTimer);
-      if (open) this.shown.set(true);
+      if (open) {
+        this.shown.set(true);
+        // Reopened before a swipe-close finished: the same panel is still here, parked off-screen.
+        untracked(() => this.drag()?.reset());
+      }
       else if (this.shown()) this.hideTimer = setTimeout(() => this.shown.set(false), 150);
     });
     effect(onCleanup => {
@@ -116,6 +132,12 @@ export class ModalComponent {
 
   protected onBackdrop(): void {
     if (this.backdropCloses()) this.dismissed.emit();
+  }
+
+  /** A swipe asks to close, the same as Esc or a backdrop tap. If the owner keeps the sheet open (a guard), it slides back. */
+  protected onSwipeClosed(): void {
+    this.dismissed.emit();
+    setTimeout(() => { if (this.open()) this.drag()?.snapBack(); });
   }
 
   protected trapTab(event: Event, back: boolean): void {

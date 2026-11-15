@@ -1,7 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
+import { afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, ElementRef, inject, input, signal } from '@angular/core';
 
 import { PlayerGame, PlayerSummary, playerTiles } from '../../services/players-across-games';
 import { PlayersViewService } from '../../services/players-view.service';
+import { WidthObserverService } from '../../services/width-observer.service';
+import { newestTiles, TILE_PX, TileLayout, tileLayout } from '../../utils/player-tiles-layout';
 
 /** Where the tile's tooltip shows: centered under the tile, in screen coordinates. */
 interface TileTip {
@@ -11,13 +13,14 @@ interface TileTip {
 }
 
 /**
- * A player's games as small tiles, one column per board in season order, 13 to a row, so a game sits in the same
- * spot on every row. Ink is confirmed, an outline is not yet, amber has new squares, faint is not playing.
- * A tile that isn't confirmed is a button that confirms that game; hover or keyboard focus shows what it is.
+ * A player's games as small tiles, one per board in season order, then the game count. As many tiles a line as the card
+ * fits, two lines at most; past that the newest games show and the oldest drop, the same on every card. Every game stays
+ * in the card's panel. Ink is confirmed, an outline is not yet, amber has new squares, faint is not playing. A tile that
+ * isn't confirmed is a button that confirms that game; hover or keyboard focus shows what it is.
  */
 @Component({
   selector: 'div[appPlayerTiles]',
-  host: { class: 'grid shrink-0 gap-1', '[style.grid-template-columns]': 'columns()' },
+  host: { class: 'hidden flex-wrap items-center gap-x-4 gap-y-1 sm:flex' },
   templateUrl: './player-tiles.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: [`
@@ -27,10 +30,18 @@ interface TileTip {
   `]
 })
 export class PlayerTilesComponent {
+  constructor() {
+    afterNextRender(() => {
+      const stop = this.widths.observe(this.host.nativeElement, width => this.width.set(width));
+      this.destroyRef.onDestroy(stop);
+    });
+  }
+
   public readonly boardIds = input.required<string[]>();
-  public readonly columns = computed<string>(() => `repeat(${Math.min(this.boardIds().length, 13)}, 14px)`);
+  public readonly columns = computed<string>(() => `repeat(${this.layout().columns}, ${TILE_PX}px)`);
+  public readonly layout = computed<TileLayout>(() => tileLayout(this.width(), this.boardIds().length));
   public readonly player = input.required<PlayerSummary>();
-  public readonly tiles = computed<Array<PlayerGame | null>>(() => playerTiles(this.player(), this.boardIds()));
+  public readonly tiles = computed<Array<PlayerGame | null>>(() => playerTiles(this.player(), newestTiles(this.boardIds(), this.layout().shown)));
   public readonly tip = signal<TileTip | null>(null);
 
   public confirm(event: Event, game: PlayerGame): void {
@@ -49,4 +60,10 @@ export class PlayerTilesComponent {
   }
 
   protected readonly players: PlayersViewService = inject(PlayersViewService);
+
+  private readonly destroyRef: DestroyRef = inject(DestroyRef);
+  private readonly host: ElementRef<HTMLElement> = inject(ElementRef);
+  /** The row's width; 0 on phones, where the row is hidden. */
+  private readonly width = signal<number>(0);
+  private readonly widths: WidthObserverService = inject(WidthObserverService);
 }

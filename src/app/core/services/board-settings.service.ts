@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { get, increment, ref, update } from 'firebase/database';
+import { get, increment, ref, set, update } from 'firebase/database';
 import { AUTO_MANAGE_DELAY_MS, AutoManageSettings } from '../utils/auto-manage';
 import { normalizeSport } from '../utils/game-parse';
 import { OpenBoardRow, openBoardRows } from '../utils/open-boards';
+import { OpenListTarget, fileBoardUpdates, isListKey, listedBoardIds, newListKey } from '../utils/open-lists';
 import { AuthService } from './auth.service';
 import { EspnService } from './espn.service';
 import { GameDatabaseService } from './game-database.service';
@@ -26,13 +27,17 @@ export class BoardSettingsService {
     }
   }
 
-  /** The same host's other boards a player on a full board can join. Empty on any error. */
-  public async getOpenBoards(ownerId: string, excludeId: string): Promise<OpenBoardRow[]> {
-    if (!this.database.isBrowser || !ownerId) return [];
+  /**
+   * The other boards in this board's More list (its group, or the host's No group boards). A board
+   * from before groups has no list yet and reads the host's older list. Empty on any error.
+   */
+  public async getOpenBoards(board: OpenListTarget): Promise<OpenBoardRow[]> {
+    if (!this.database.isBrowser || !board.ownerId) return [];
     try {
-      const snap = await get(ref(this.database.db, `openBoards/${ownerId}`));
-      const ids = Object.keys(snap.val() || {}).filter(id => id !== excludeId).slice(0, 10);
-      return openBoardRows(await Promise.all(ids.map(id => this.records.getGame(id))), excludeId);
+      const path = board.openListId ? `openLists/${board.openListId}` : `openBoards/${board.ownerId}`;
+      const snap = await get(ref(this.database.db, path));
+      const ids = listedBoardIds(snap.val(), board.ownerId, board.id);
+      return openBoardRows(await Promise.all(ids.map(id => this.records.getGame(id))), board.id, board.ownerId);
     } catch {
       return [];
     }
@@ -87,14 +92,35 @@ export class BoardSettingsService {
     await update(ref(this.database.db), { [`users/${uid}/autoManageOff`]: on ? null : true });
   }
 
-  /** The host turns "Show in my open boards" on or off for one board. */
-  public async setShowInOpenBoards(gameId: string, ownerId: string, on: boolean): Promise<void> {
-    if (!this.database.isBrowser) return;
+  /**
+   * The host or co-host turns "Show in my open boards" on or off. A board from before groups is
+   * filed into No group on the way, and the owner's older list entry is cleared. Returns the board's list.
+   */
+  public async setShowInOpenBoards(board: OpenListTarget, on: boolean): Promise<string> {
+    if (!this.database.isBrowser) throw new Error('Cannot save on server');
     if (this.authService.blockPreviewWrite()) throw new Error('Preview only');
-    await update(ref(this.database.db), {
-      [`games/${gameId}/showInOpenBoards`]: on ? true : null,
-      [`openBoards/${ownerId}/${gameId}`]: on ? true : null
-    });
+    const listId = board.openListId || await this.ungroupedKey(board.ownerId);
+    const updates = fileBoardUpdates(board, listId, on);
+    if (this.authService.currentUser()?.uid === board.ownerId) updates[`openBoards/${board.ownerId}/${board.id}`] = null;
+    await update(ref(this.database.db), updates);
+    return listId;
+  }
+
+  /** The owner's No group key, made on first use. Only the owner can make it; a co-host only reads it. */
+  public async ungroupedKey(ownerId: string): Promise<string> {
+    const keyRef = ref(this.database.db, `groupLists/${ownerId}/ungrouped`);
+    const existing = (await get(keyRef)).val();
+    if (isListKey(existing)) return existing;
+    const key = newListKey();
+    try {
+      await set(keyRef, key);
+      return key;
+    } catch (error) {
+      // Another tab may have made it first: the rule lets it be written only once
+      const again = (await get(keyRef)).val();
+      if (isListKey(again)) return again;
+      throw error;
+    }
   }
 
   /** Sets or clears the most squares one name can claim on a board (Season Pass; the database rule checks the pass). */
