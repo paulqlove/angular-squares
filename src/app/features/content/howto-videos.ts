@@ -51,7 +51,7 @@ export const HOWTO_VIDEOS = {
     description: 'After the squares are claimed, the host locks the board and draws the digits 0 through 9 for each team.',
     uploadDate: '2026-11-13T10:12:29-08:00',
     seconds: 17,
-    phoneYoutubeId: 'WPZ1O8n-83I'
+    phoneYoutubeId: 'Itsiu86caPQ'
   },
   highlightPlayer: {
     youtubeId: 'PkffVOGg34s',
@@ -75,7 +75,7 @@ export const HOWTO_VIDEOS = {
     description: 'The host taps Edit game to change the name, teams or points, adds a note for players under More options, and saves the changes.',
     uploadDate: '2026-11-13T10:15:31-08:00',
     seconds: 25,
-    phoneYoutubeId: 'v_O0Y-y8EMs'
+    phoneYoutubeId: '7deGLV52auE'
   },
   managePlayers: {
     youtubeId: '-vajIuxNQcE',
