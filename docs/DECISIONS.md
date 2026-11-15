@@ -7,7 +7,7 @@ This file records product and design decisions, newest first. To add one, put a 
 ## D-031 · Phone host bar: Dashboard in the bar, one next-step button
 
 - **Date:** Nov 15 2026
-- **Decision:** On a phone the game page's host bar is Dashboard · Lock · Players · Edit (co-host: Dashboard · Players). Draw/Clear numbers leaves the phone bar; Lock becomes the next step (Lock and draw, Draw if locked without numbers, Unlock once drawn), and Clear and redraw move to a Numbers row at the top of Edit game. Desktop is unchanged. Both ways back to the dashboard are tracked as `game_to_dashboard` (`from: host_bar | header`).
+- **Decision:** On a phone the game page's host bar is Dashboard · Lock · Players · Edit (co-host: Dashboard · Players). Draw/Clear numbers leaves the phone bar; Lock becomes the next step (Lock and draw, Draw if locked without numbers, Unlock once drawn), and Clear and redraw move to a Numbers row at the top of Edit game. Clear stays disabled while the board is locked, as on desktop (Paul, relayed: "currently clear is disabled if the board is locked"). Desktop is unchanged. Both ways back to the dashboard are tracked as `game_to_dashboard` (`from: host_bar | header`).
 - **Options considered:** not recorded (Creative's mockups d1 to d3)
 - **Why:** reaching the header to get back to the dashboard is a chore on a phone. Paul's words, relayed: "the mock-ups look good and are a go for everything."
 - **Decided by:** Paul
