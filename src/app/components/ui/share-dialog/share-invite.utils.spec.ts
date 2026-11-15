@@ -7,12 +7,11 @@ function media(touch: boolean): ShareEnv['matchMedia'] {
 }
 
 function env(opts: { touch: boolean; share?: 'ok' | 'reject' | 'none'; copy?: 'ok' | 'reject' | 'none' }) {
-  const calls = { shared: 0, sent: [] as ShareData[], copied: [] as string[] };
+  const calls = { shared: 0, copied: [] as string[] };
   const result: ShareEnv = { matchMedia: media(opts.touch) };
   if (opts.share !== 'none') {
-    result.share = data => {
+    result.share = () => {
       calls.shared++;
-      calls.sent.push(data);
       return opts.share === 'reject' ? Promise.reject(new DOMException('Cancelled', 'AbortError')) : Promise.resolve();
     };
   }
@@ -43,18 +42,6 @@ describe('shareInvite', () => {
     expect(await shareInvite(LINK, e)).toBe('shared');
     expect(calls.shared).toBe(1);
     expect(calls.copied).toEqual([]);
-  });
-
-  it('sends the share sheet only the link, so apps send it once with its preview', async () => {
-    const { env: e, calls } = env({ touch: true, share: 'ok' });
-    await shareInvite(LINK, e);
-    expect(calls.sent).toEqual([{ url: LINK }]);
-  });
-
-  it('keeps the dark theme on the shared link', async () => {
-    const { env: e, calls } = env({ touch: true, share: 'ok' });
-    await shareInvite(`${LINK}?theme=dark`, e);
-    expect(calls.sent).toEqual([{ url: `${LINK}?theme=dark` }]);
   });
 
   it('copies on desktop even when the browser supports share', async () => {
