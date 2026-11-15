@@ -3,16 +3,20 @@ import { ChangeDetectionStrategy, Component, ElementRef, Injector, afterNextRend
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { PHONE_QUERY } from '../../shared/media-queries';
 import { HowToVideo, YOUTUBE_ID, youtubeThumbnail } from './howto-videos';
+import { VideoPlaybackDirective } from './video-playback.directive';
+import { PLAYER_ORIGIN } from './video-playback.service';
 
 
 /**
  * A how-to clip that costs nothing until it is tapped: the video's own YouTube thumbnail first, then the youtube-nocookie player.
  * On phones the player opens in the same box, as the vertical Short when the clip has one.
  * On wider screens it opens large in a centered window over the page, since the columns are too narrow to watch in.
+ * Only one clip plays at a time: starting one pauses any other on the page.
  * Renders nothing without a valid ID.
  */
 @Component({
   selector: 'app-howto-video',
+  imports: [VideoPlaybackDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block', '[class.has-phone]': 'hasPhone()' },
   template: `
@@ -21,6 +25,7 @@ import { HowToVideo, YOUTUBE_ID, youtubeThumbnail } from './howto-videos';
         <div class="howto-box relative overflow-hidden rounded-card border border-qs-line bg-qs-canvas">
           @if (playing()) {
             <iframe
+              appVideoPlayback
               class="absolute inset-0 h-full w-full"
               [src]="playerSrc()"
               [title]="video().title"
@@ -55,6 +60,7 @@ import { HowToVideo, YOUTUBE_ID, youtubeThumbnail } from './howto-videos';
           </div>
           <div class="relative overflow-hidden rounded-card bg-black" style="aspect-ratio: 1280 / 872">
             <iframe
+              appVideoPlayback
               class="absolute inset-0 h-full w-full"
               [src]="url"
               [title]="video().title"
@@ -235,6 +241,8 @@ export class HowToVideoComponent {
     if (!YOUTUBE_ID.test(id)) {
       return null;
     }
-    return this.sanitizer.bypassSecurityTrustResourceUrl(`https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&playsinline=1&fs=1`);
+    // enablejsapi lets the page pause a clip when another starts; origin is our own address, as YouTube asks for that.
+    const origin = encodeURIComponent(this.document.location?.origin ?? '');
+    return this.sanitizer.bypassSecurityTrustResourceUrl(`${PLAYER_ORIGIN}/embed/${id}?autoplay=1&rel=0&playsinline=1&fs=1&enablejsapi=1&origin=${origin}`);
   }
 }
