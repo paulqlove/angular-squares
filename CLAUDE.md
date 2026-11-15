@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+**Before any UI work (design or build), read [docs/ux-rules.md](docs/ux-rules.md) and [docs/DESIGN.md](docs/DESIGN.md).**
+
 ## Project Overview
 
 Football Squares (Super Bowl Squares) - A real-time multiplayer game for managing squares pools. Built with Angular 17 (standalone components), Firebase (Auth + Realtime Database), and Tailwind CSS.
