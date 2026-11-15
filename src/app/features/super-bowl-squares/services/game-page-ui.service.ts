@@ -1,10 +1,12 @@
 import { afterNextRender, ElementRef, inject, Injectable, Injector, PLATFORM_ID, signal, WritableSignal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { AnalyticsService } from '../../../core/services/analytics.service';
 import { BoardSize } from '../../../core/services/game.service';
 import { WalkthroughService } from '../../../core/services/walkthrough.service';
 import { walkthroughStepsFor } from '../utils/game-walkthrough';
 import { squareForScore } from '../utils/board-math';
 import type { PaymentDialogComponent } from '../components/payment-dialog/payment-dialog.component';
+import type { YourGamesMenuComponent, YourGamesOpener } from '../../../components/ui/your-games-menu/your-games-menu.component';
 import { GameStateService } from './game-state.service';
 
 type GameTab = 'board' | 'probabilities' | 'boxscore' | 'more';
@@ -29,6 +31,8 @@ export class GamePageUiService {
   public isPlayersListVisible: boolean = !(typeof window !== 'undefined' && window.matchMedia?.('(max-width: 1023px)').matches);
   /** Manage players; an imperative dialog, set by the page. */
   public paymentDialog: PaymentDialogComponent | undefined;
+  /** The header's Your games menu. The phone host bar's Games button opens it. */
+  public yourGamesMenu: YourGamesMenuComponent | undefined;
   /** The square a signed-out visitor tapped, claimed once they sign in. */
   public pendingSquare: { row: number; col: number } | null = null;
   public selectedPlayer: string | null = null;
@@ -131,8 +135,25 @@ export class GamePageUiService {
     this.highlightedSquare = this.highlightedSquare === key ? null : key;
   }
 
+  /** Counts a way back to the dashboard. Signed-out visitors don't have one, so they aren't counted. */
+  public trackToDashboard(from: 'host_bar' | 'header'): void {
+    if (!this.state.currentUser()) return;
+    this.analytics.track('game_to_dashboard', { from });
+  }
+
+  /** My dashboard in Your games counts as the host bar's way back when the bar's Games button opened the sheet. */
+  public trackYourGamesToDashboard(openedBy: YourGamesOpener): void {
+    this.trackToDashboard(openedBy === 'external' ? 'host_bar' : 'header');
+  }
+
+  /** The phone host bar's Games button: the header's Your games sheet, which hosts don't get a header button for on phones. */
+  public openYourGames(): void {
+    this.yourGamesMenu?.toggle('external');
+  }
+
   // Private properties
 
+  private readonly analytics: AnalyticsService = inject(AnalyticsService);
   private readonly injector: Injector = inject(Injector);
   private readonly platformId: object = inject(PLATFORM_ID);
   private readonly state: GameStateService = inject(GameStateService);

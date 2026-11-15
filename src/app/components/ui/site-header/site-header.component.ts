@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, OnInit, afterNextRender, computed, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, OnInit, afterNextRender, computed, inject, input, output, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
@@ -77,7 +77,7 @@ type SiteHeaderPosition = 'static' | 'headroom' | 'fixed';
     }
 
     <ng-template #logo>
-      <a routerLink="/" aria-label="QuarterScore home" class="flex min-h-11 items-center rounded-md">
+      <a routerLink="/" (click)="logoClick.emit()" aria-label="QuarterScore home" class="flex min-h-11 items-center rounded-md">
         <img src="assets/brand/lockup-horizontal-reversed.svg" alt="" width="192" height="24" class="hidden h-6 w-auto sm:block">
         <img src="assets/brand/mark-reversed.svg" alt="" width="32" height="32" class="h-8 w-8 sm:hidden">
       </a>
@@ -109,6 +109,8 @@ export class SiteHeaderComponent implements OnInit {
   ];
   /** Pages with their own `<h1>` pass `p`, so each page keeps a single h1. */
   public readonly heading = input<'h1' | 'p'>('h1');
+  /** The logo was tapped. Signed-in visitors land on their dashboard. */
+  public readonly logoClick = output<void>();
   public readonly menuOpen = signal(false);
   public readonly nav = input<'none' | 'guides'>('none');
   public readonly position = input<SiteHeaderPosition>('static');

@@ -61,6 +61,7 @@ export interface EditGameValues {
 
       <div class="min-h-0 flex-1 overflow-y-auto px-6 py-5 [scrollbar-gutter:stable]">
         <div class="flex flex-col gap-10">
+          <ng-content select="[editGameTop]"></ng-content>
 
           <section class="flex flex-col gap-5">
             <h4 class="qs-eyebrow qs-eyebrow-bar !flex border-b border-qs-line pb-2.5 text-[13px] font-semibold text-qs-ink">Game</h4>

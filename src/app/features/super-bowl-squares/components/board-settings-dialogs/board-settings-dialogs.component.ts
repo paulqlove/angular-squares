@@ -3,6 +3,7 @@ import { PlanService } from '../../../../core/services/plan.service';
 import { autoRunLabel } from '../../../../core/utils/auto-manage';
 import { CoHostEditDialogComponent } from '../cohost-edit-dialog/cohost-edit-dialog.component';
 import { EditGameDialogComponent } from '../edit-game-dialog/edit-game-dialog.component';
+import { EditGameNumbersComponent } from '../edit-game-numbers/edit-game-numbers.component';
 import { GamePageGroupsService } from '../../services/game-page-groups.service';
 import { ShrinkBoardDialogComponent } from '../shrink-board-dialog/shrink-board-dialog.component';
 import { GamePageUiService } from '../../services/game-page-ui.service';
@@ -12,7 +13,7 @@ import { HostActionsService } from '../../services/host-actions.service';
 /** The host's board dialogs: the smaller-board suggestion on lock, Edit game, and the co-host's Edit game. The host box adds no layout. */
 @Component({
   selector: 'app-board-settings-dialogs',
-  imports: [CoHostEditDialogComponent, EditGameDialogComponent, ShrinkBoardDialogComponent],
+  imports: [CoHostEditDialogComponent, EditGameDialogComponent, EditGameNumbersComponent, ShrinkBoardDialogComponent],
   host: { style: 'display: contents' },
   templateUrl: './board-settings-dialogs.component.html',
   changeDetection: ChangeDetectionStrategy.Eager

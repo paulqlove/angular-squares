@@ -29,6 +29,8 @@
   (closed)="ui.showSettings.set(false)"
   (saved)="host.onEditGameSaved($event)"
   (clearGame)="host.onClearGame(true)"
-></app-edit-game-dialog>
+>
+  <section appEditGameNumbers editGameTop></section>
+</app-edit-game-dialog>
 
 <app-cohost-edit-dialog></app-cohost-edit-dialog>
