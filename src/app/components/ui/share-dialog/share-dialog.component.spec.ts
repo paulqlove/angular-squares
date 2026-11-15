@@ -1,18 +1,29 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { ThemeService } from '../../../core/services/theme.service';
 import { ShareDialogComponent } from './share-dialog.component';
 
 describe('ShareDialogComponent', () => {
-  function open(winnersImage: (() => Promise<Blob>) | null = null) {
+  const theme = signal<'light' | 'dark'>('light');
+
+  function create(winnersImage: (() => Promise<Blob>) | null = null) {
     const fixture = TestBed.createComponent(ShareDialogComponent);
     fixture.componentRef.setInput('isOpen', true);
     fixture.componentRef.setInput('gameId', 'ABC123');
     fixture.componentRef.setInput('winnersImage', winnersImage);
     fixture.detectChanges();
-    return fixture.nativeElement as HTMLElement;
+    return fixture;
   }
+  const open = (winnersImage: (() => Promise<Blob>) | null = null) => create(winnersImage).nativeElement as HTMLElement;
   const buttonsNamed = (el: HTMLElement, label: string) => Array.from(el.querySelectorAll('button')).filter(b => b.textContent?.includes(label));
 
-  beforeEach(() => TestBed.configureTestingModule({ imports: [ShareDialogComponent] }));
+  beforeEach(() => {
+    theme.set('light');
+    TestBed.configureTestingModule({
+      imports: [ShareDialogComponent],
+      providers: [{ provide: ThemeService, useValue: { effectiveTheme: theme } }]
+    });
+  });
 
   it('shows one Share invite button and no separate link field', () => {
     const el = open();
@@ -39,5 +50,11 @@ describe('ShareDialogComponent', () => {
     expect(el.querySelector('#share-title')?.textContent?.replace(/\s+/g, ' ').trim()).toBe('Share winners');
     expect(el.textContent).not.toContain('Invite players');
     expect(draws).toBe(1);
+  });
+
+  it('adds ?theme=dark to the invite link for a sharer on the dark theme, so the link preview matches', () => {
+    expect(create().componentInstance.link).not.toContain('theme=');
+    theme.set('dark');
+    expect(create().componentInstance.link).toMatch(/\/game\/ABC123\?theme=dark$/);
   });
 });

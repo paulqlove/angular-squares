@@ -3,7 +3,9 @@ import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroXMark, heroClipboard, heroCheck, heroShare } from '@ng-icons/heroicons/outline';
 import { ModalComponent } from '../modal/modal.component';
 import { GameService } from '../../../core/services/game.service';
+import { ThemeService } from '../../../core/services/theme.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { shareLinkWithTheme } from '../../../core/utils/share-link';
 import { browserShareEnv, copyText, shareInvite } from './share-invite.utils';
 import { browserWinnersEnv, shareButtonLabel, shareWinners as sharePicture, winnersFileName } from './share-winners.utils';
 
@@ -83,6 +85,7 @@ export class ShareDialogComponent implements OnChanges {
 
   private readonly gameService = inject(GameService);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly theme = inject(ThemeService);
   private readonly toast = inject(ToastService);
   private resetTimer: ReturnType<typeof setTimeout> | undefined;
   private picture: Promise<Blob> | null = null;
@@ -94,8 +97,9 @@ export class ShareDialogComponent implements OnChanges {
     inject(DestroyRef).onDestroy(() => clearTimeout(this.resetTimer));
   }
 
+  /** The invite link, with ?theme=dark for a dark-mode sharer so the link preview picture matches. */
   get link(): string {
-    return this.gameService.getShareableLink(this.gameId);
+    return shareLinkWithTheme(this.gameService.getShareableLink(this.gameId), this.theme.effectiveTheme());
   }
 
   get tvLink(): string {

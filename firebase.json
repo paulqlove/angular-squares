@@ -39,7 +39,17 @@
       },
       {
         "source": "/game/**",
-        "destination": "/game.html"
+        "function": {
+          "functionId": "gamePage",
+          "region": "us-central1"
+        }
+      },
+      {
+        "source": "/og/game/**",
+        "function": {
+          "functionId": "gamePreviewImage",
+          "region": "us-central1"
+        }
       },
       {
         "source": "!/@(.well-known|skills)/**",
