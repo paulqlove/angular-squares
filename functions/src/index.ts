@@ -2,7 +2,7 @@ import { initializeApp } from "firebase-admin/app";
 import { getDatabase } from "firebase-admin/database";
 import { logger } from "firebase-functions";
 import { onSchedule } from "firebase-functions/v2/scheduler";
-import { HttpsError, onCall } from "firebase-functions/v2/https";
+import { HttpsError, onCall, onRequest } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
 import { getAuth } from "firebase-admin/auth";
 import { createHash } from "node:crypto";
@@ -10,6 +10,7 @@ import { continueUrl, directLink, isValidEmail, renderEmail, withAccountHint } f
 import { fetchScoreboard } from "./espn";
 import { syncLiveScores } from "./sync";
 import { runDueAutoManage } from "./auto-manage-run";
+import { PREVIEW_PATHS, PreviewFields, previewFields } from "./preview-card";
 
 const DEFAULT_DATABASE_URL = "https://squares-4e4f7-default-rtdb.firebaseio.com";
 
@@ -129,5 +130,25 @@ export const sendSignInLink = onCall(
     }
     await throttle.set(Date.now());
     return { sent: true };
+  }
+);
+
+/** Reads only the board fields a link preview shows, in parallel, never the whole board. */
+async function readPreviewFields(gameId: string): Promise<PreviewFields | null> {
+  const db = getDatabase();
+  const values = await Promise.all(PREVIEW_PATHS.map(path => db.ref(`games/${gameId}/${path}`).get()));
+  return previewFields(Object.fromEntries(PREVIEW_PATHS.map((path, i) => [path, values[i].val()])));
+}
+
+/**
+ * The link-preview picture for one board, the dashboard card at 1200x630 (docs/FUNCTIONS.md, Link previews).
+ * The renderer is loaded on first use so the score jobs' cold starts stay light.
+ * Deploy by hand: firebase deploy --only functions:gamePreviewImage
+ */
+export const gamePreviewImage = onRequest(
+  { region: "us-central1", memory: "512MiB", timeoutSeconds: 20, maxInstances: 5, invoker: "public" },
+  async (req, res) => {
+    const { servePreviewImage } = await import("./preview-http");
+    await servePreviewImage(req, res, readPreviewFields, (message, details) => logger.warn(message, details));
   }
 );
