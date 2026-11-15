@@ -190,11 +190,11 @@ export function readGameIndexVisits(value: unknown, field: 'createdAt' | 'joined
 
 /** Reads a tvLinks/{token} value. null when the link is off or lists no boards. */
 export function readTvLink(value: unknown): TvLink | null {
-  const link = value as { boards?: unknown; interval?: unknown } | null;
+  const link = value as { boards?: unknown; interval?: unknown; group?: unknown } | null;
   const boards = typeof link?.boards === 'string' ? link.boards.split(',').filter(Boolean) : [];
   if (!link || !boards.length) return null;
   const interval = TV_INTERVALS.includes(Number(link.interval)) ? Number(link.interval) : 30;
-  return { boards, interval };
+  return isListKey(link.group) ? { boards, interval, group: link.group } : { boards, interval };
 }
 
 /** Board ids from a users/{uid}/games value, newest first (same order as the dashboard). */

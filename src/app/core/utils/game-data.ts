@@ -24,6 +24,8 @@ export function getBoardDimensions(size: BoardSize): { rows: number; cols: numbe
 export interface TvLink {
   boards: string[];
   interval: number;
+  /** The host's group the TV follows (its More-tab list key). Missing on links that show a fixed set of boards. */
+  group?: string;
 }
 
 export interface EspnLiveSnapshot {

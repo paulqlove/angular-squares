@@ -5,10 +5,13 @@ import { MAX_TV_BOARDS } from '../../core/services/tv-link.service';
 import { ToastService } from '../../core/services/toast.service';
 import { tvLinkCopiedMessage } from './tv-link-message';
 
-/** What a rotating TV link publishes: the boards, the seconds per board, and the group's name for the toast (null for All groups). */
+/**
+ * What a rotating TV link publishes: the boards, the seconds per board, and the picked group (null for All groups).
+ * With a group, the TV follows it, so boards added to the group later show up on their own.
+ */
 export interface RotationLink {
   boardIds: string[];
-  groupName: string | null;
+  group: { id: string; name: string } | null;
   seconds: number;
 }
 
@@ -30,7 +33,7 @@ export class PresentTvLinkService {
   public async copyRotationLink(userId: string, link: RotationLink): Promise<void> {
     let url: string;
     try {
-      const token = await this.gameService.saveTvLink(userId, link.boardIds, link.seconds);
+      const token = await this.gameService.saveTvLink(userId, link.boardIds, link.seconds, link.group?.id ?? null);
       this.hasRotationLink.set(true);
       url = this.gameService.getRotationTvLink(token);
     } catch (error) {
@@ -39,7 +42,7 @@ export class PresentTvLinkService {
       return;
     }
     const boards = Math.min(link.boardIds.length, MAX_TV_BOARDS);
-    await this.copy(url, tvLinkCopiedMessage(link.groupName, boards, link.seconds), `Could not copy. The link is ${url}`);
+    await this.copy(url, tvLinkCopiedMessage(link.group?.name ?? null, boards, link.seconds), `Could not copy. The link is ${url}`);
   }
 
   public async load(userId: string): Promise<void> {

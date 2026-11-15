@@ -229,6 +229,7 @@
         "boards": { ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9]{6}(,[A-Za-z0-9]{6}){0,19}$/)" },
         "interval": { ".validate": "newData.isNumber() && (newData.val() == 10 || newData.val() == 20 || newData.val() == 30 || newData.val() == 60)" },
         "updatedAt": { ".validate": "newData.isNumber() && newData.val() > 0" },
+        "group": { ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9_-]{16,40}$/) && root.child('groupLists').child(auth.uid).child('groups').child(newData.val()).exists()" },
         "$other": { ".validate": false }
       }
     },
