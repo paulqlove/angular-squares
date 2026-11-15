@@ -124,33 +124,13 @@ export class DashboardEditService {
     await this.loadPlayers(game.id);
   }
 
-  public async removeManager(): Promise<void> {
-    const game = this.editingGame();
-    if (!game) return;
-
-    try {
-      await this.gameService.updateGameManager(game.id, null, null, null);
-      if (game.managerId) this.markCoHost(game, game.managerId, false);
-      this.editingGame.set({ ...game, managerId: undefined, managerEmail: undefined, managerName: undefined });
-      this.store.updateMyGame(game.id, g => ({ ...g, managerId: undefined, managerEmail: undefined, managerName: undefined }));
-    } catch {
-      this.toastService.error('Could not remove the co-host. Try again.');
-    }
+  public removeManager(): Promise<void> {
+    return this.swapCoHost(null, 'Could not remove the co-host. Try again.');
   }
 
   /** Edit game's "Use" (K4): the group's co-host, by email, replaces this game's own. Saves at once, like picking a player. */
-  public async useGroupCoHost(email: string): Promise<void> {
-    const game = this.editingGame();
-    if (!game) return;
-    const changed = { managerId: undefined, managerEmail: email, managerName: undefined };
-    try {
-      await this.gameService.updateGameManager(game.id, null, email, null);
-      if (game.managerId) this.markCoHost(game, game.managerId, false);
-      this.editingGame.set({ ...game, ...changed });
-      this.store.updateMyGame(game.id, g => ({ ...g, ...changed }));
-    } catch {
-      this.toastService.error('Could not change the co-host. Try again.');
-    }
+  public useGroupCoHost(email: string): Promise<void> {
+    return this.swapCoHost(email, 'Could not change the co-host. Try again.');
   }
 
   public async saveGameEdits(v: EditGameValues): Promise<void> {
@@ -279,6 +259,21 @@ export class DashboardEditService {
   }
 
   /** Keeps the owner's co-host list in step, so a co-host can read group names. Dropped only when they co-host no other game. Best effort. */
+  /** Replaces the game's co-host with one known only by email, or with none (null), and unmarks the old one. */
+  private async swapCoHost(email: string | null, failed: string): Promise<void> {
+    const game = this.editingGame();
+    if (!game) return;
+    const changed = { managerId: undefined, managerEmail: email ?? undefined, managerName: undefined };
+    try {
+      await this.gameService.updateGameManager(game.id, null, email, null);
+      if (game.managerId) this.markCoHost(game, game.managerId, false);
+      this.editingGame.set({ ...game, ...changed });
+      this.store.updateMyGame(game.id, g => ({ ...g, ...changed }));
+    } catch {
+      this.toastService.error(failed);
+    }
+  }
+
   private markCoHost(game: GameListItem, uid: string, on: boolean): void {
     if (!on && this.store.myGames().some(g => g.id !== game.id && g.managerId === uid)) return;
     this.gameGroups.setCoHost(game.ownerId, uid, on).catch(() => undefined);

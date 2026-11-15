@@ -1,7 +1,7 @@
 import { parseGroups } from './game-groups';
 import {
   cleanCoHostEmail, coHostLabel, emailShortName, fillCoHost, coHostPlan, coHostPlanLines, coHostSaveLabel, gamesWithCoHost, groupCoHostUpdates, hasCoHost, looksLikeEmail,
-  removeCoHostQuestion
+  removeCoHostQuestion, validCoHost
 } from './group-cohost';
 
 const CHURCH = 'ChurchGroupKey000001';
@@ -73,5 +73,12 @@ describe('group co-host', () => {
     expect(fillCoHost('dana@email.com', 'dana@email.com', undefined)).toEqual({ value: '', filled: null });
     expect(fillCoHost('sam@email.com', null, 'dana@email.com')).toEqual({ value: 'sam@email.com', filled: null });
     expect(emailShortName('dana@email.com')).toBe('dana');
+  });
+
+  it('keeps only an email that looks like one', () => {
+    expect(validCoHost(' lee@email.com ')).toBe('lee@email.com');
+    expect(validCoHost('lee')).toBeUndefined();
+    expect(validCoHost('')).toBeUndefined();
+    expect(validCoHost(undefined)).toBeUndefined();
   });
 });

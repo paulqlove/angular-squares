@@ -40,6 +40,12 @@ export function looksLikeEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+/** The typed email, cleaned, when it looks like an email; otherwise undefined (a bad one is never saved). */
+export function validCoHost(typed: string | undefined): string | undefined {
+  const email = cleanCoHostEmail(typed ?? '');
+  return looksLikeEmail(email) ? email : undefined;
+}
+
 /** True when the game has a co-host, picked from its players (uid) or typed by email. */
 export function hasCoHost(board: Pick<CoHostedBoard, 'managerId' | 'managerEmail'>): boolean {
   return !!board.managerId || !!board.managerEmail;

@@ -11,7 +11,7 @@ import {
   CreateGameDraft, CreateGameValues, buildCreateGameValues, emptyDraft, loadCreateDraft, splitToTenths
 } from '../../core/utils/create-game-draft';
 import { GameGroup, GroupChoice, inGroup } from '../../core/utils/game-groups';
-import { fillCoHost } from '../../core/utils/group-cohost';
+import { fillCoHost, validCoHost } from '../../core/utils/group-cohost';
 import { CreateGameCoHostComponent } from './create-game-cohost.component';
 import { SPLIT_QUARTERS, splitLabel, splitPresetId, splitRemaining } from '../../core/utils/split-edit';
 import { CreateGameFooterComponent } from './create-game-footer.component';
@@ -179,7 +179,7 @@ export class CreateGameFormComponent implements OnChanges, OnInit {
     const group = choice.groupId ? this.groups.find(g => g.id === choice.groupId) : undefined;
     const source = group
       ? { email: group.coHost?.email, name: group.name }
-      : { email: choice.newCoHost?.trim() || undefined, name: choice.newName?.trim() || 'your new group' };
+      : { email: validCoHost(choice.newCoHost), name: choice.newName?.trim() || 'your new group' };
     const next = fillCoHost(this.newGamePaymentManager, this.coHostFill?.email ?? null, source.email);
     this.newGamePaymentManager = next.value;
     this.coHostFill = next.filled ? { email: next.filled, group: source.name } : null;

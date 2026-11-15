@@ -138,7 +138,8 @@ describe('CreateGameFormComponent', () => {
 
   it('a new group\'s co-host fills an empty Co-host as it is typed', () => {
     const c = setup();
-    c.pickGroup({ groupId: null, newName: 'Gym', newCoHost: 'l' });
+    c.pickGroup({ groupId: null, newName: 'Gym', newCoHost: 'lee' });
+    expect(c.newGamePaymentManager).toBe('');
     c.pickGroup({ groupId: null, newName: 'Gym', newCoHost: 'lee@email.com' });
     expect(c.newGamePaymentManager).toBe('lee@email.com');
     expect(c.coHostHint()).toBe('From Gym. Change it for just this game.');

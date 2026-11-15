@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { get, ref, set, update } from 'firebase/database';
 import { GameGroup, GroupChoice, GroupedBoard, cleanGroupName, deleteGroupUpdates, parseGroups } from '../utils/game-groups';
-import { GroupCoHost, cleanCoHostEmail, groupCoHostUpdates, looksLikeEmail } from '../utils/group-cohost';
+import { GroupCoHost, groupCoHostUpdates, validCoHost } from '../utils/group-cohost';
 import { fileBoardUpdates, newListKey } from '../utils/open-lists';
 import { AuthService } from './auth.service';
 import { BoardSettingsService } from './board-settings.service';
@@ -74,8 +74,8 @@ export class GameGroupsService {
    */
   public async saveChoice(board: GroupedBoard, choice: GroupChoice): Promise<{ listId: string; created?: GameGroup }> {
     const name = cleanGroupName(choice.newName ?? '');
-    const email = cleanCoHostEmail(choice.newCoHost ?? '');
-    const created = name ? await this.createGroup(board.ownerId, name, looksLikeEmail(email) ? { email } : undefined) : undefined;
+    const email = validCoHost(choice.newCoHost);
+    const created = name ? await this.createGroup(board.ownerId, name, email ? { email } : undefined) : undefined;
     const listId = await this.fileBoard(board, created?.id ?? choice.groupId);
     return { listId, created };
   }

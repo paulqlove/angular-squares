@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 
 import { GROUP_NAME_MAX, GameGroup, GroupChoice } from '../../../core/utils/game-groups';
-import { COHOST_EMAIL_MAX } from '../../../core/utils/group-cohost';
+import { COHOST_EMAIL_MAX, cleanCoHostEmail, looksLikeEmail } from '../../../core/utils/group-cohost';
 import { DropdownComponent, DropdownOption } from '../dropdown/dropdown.component';
 
 const NO_GROUP = '';
@@ -39,10 +39,17 @@ const NEW_GROUP = '+new';
             placeholder="their@email.com"
             autocomplete="off"
             [attr.maxlength]="maxEmail"
+            [class.qs-input-error]="badCoHost()"
+            [attr.aria-invalid]="badCoHost()"
             [value]="newCoHost()"
             (input)="typeCoHost($event)"
+            (blur)="leftCoHost.set(true)"
           />
-          <p class="text-xs text-qs-muted">Filled in on every new game in this group.</p>
+          @if (badCoHost()) {
+            <p class="text-xs text-qs-bad">Enter an email address, or clear the field for no co-host.</p>
+          } @else {
+            <p class="text-xs text-qs-muted">Filled in on every new game in this group.</p>
+          }
         }
       }
     </div>
@@ -59,6 +66,12 @@ export class GroupPickerComponent {
   /** The group the board is in now, or null for No group. */
   public readonly value = input<string | null>(null);
 
+  /** Shown once the host leaves the field, so it doesn't complain mid-typing. A bad email is never saved on the group. */
+  protected readonly badCoHost = computed<boolean>(() => {
+    const email = cleanCoHostEmail(this.newCoHost());
+    return this.leftCoHost() && !!email && !looksLikeEmail(email);
+  });
+  protected readonly leftCoHost = signal<boolean>(false);
   protected readonly maxEmail = COHOST_EMAIL_MAX;
   protected readonly maxName = GROUP_NAME_MAX;
   protected readonly newCoHost = signal<string>('');
