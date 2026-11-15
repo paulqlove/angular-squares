@@ -3,6 +3,8 @@ import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroXMark, heroClipboard, heroCheck, heroShare } from '@ng-icons/heroicons/outline';
 import { ModalComponent } from '../modal/modal.component';
 import { GameService } from '../../../core/services/game.service';
+import { ThemeService } from '../../../core/services/theme.service';
+import { shareLinkWithTheme } from '../../../core/utils/share-link';
 
 /** Share popup: game code and link, each with a copy button. Used by the dashboard and game page. */
 @Component({
@@ -81,6 +83,7 @@ export class ShareDialogComponent {
   @Output() closed = new EventEmitter<void>();
 
   private readonly gameService = inject(GameService);
+  private readonly theme = inject(ThemeService);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   copied = signal<'code' | 'link' | 'tv' | null>(null);
@@ -90,7 +93,7 @@ export class ShareDialogComponent {
   }
 
   get link(): string {
-    return this.gameService.getShareableLink(this.gameId);
+    return shareLinkWithTheme(this.gameService.getShareableLink(this.gameId), this.theme.effectiveTheme());
   }
 
   get tvLink(): string {
