@@ -6,6 +6,7 @@ import { ToastService } from '../../../core/services/toast.service';
 import { REDUCED_MOTION_QUERY } from '../../../shared/media-queries';
 import { withPlayerConfirmCount, withPlayerConfirmed, withoutPlayer } from '../../../core/utils/board-players';
 import { paidCountsByName } from '../../../core/utils/paid-squares';
+import { DashboardSearchService } from './dashboard-search.service';
 import { DashboardStore } from './dashboard.store';
 import { PlayerGame, PlayerSummary, PlayersBoard, playersAcrossGames } from './players-across-games';
 
@@ -117,6 +118,15 @@ export class PlayersViewService {
   }
 
   /**
+   * Boards or Players, from the switch. An open phone search for games and codes closes first, as its Cancel does, so the
+   * bar shows the new tab's own search.
+   */
+  public showView(mode: 'boards' | 'players'): void {
+    if (this.gameSearch.searchOpen()) this.gameSearch.closeSearch();
+    this.mode.set(mode);
+  }
+
+  /**
    * The green toggle on one of a player's games. On: confirmed for the squares they hold there now. Off: back to how
    * that game stood before the host turned it on (unconfirmed, or "+2 new"), or unconfirmed if it was already on.
    */
@@ -168,6 +178,8 @@ export class PlayersViewService {
   private readonly beatPin = signal<PlayerPin | null>(null);
   /** Per game and name, the Confirm count from before the host turned the toggle on (null: not on the paid list). */
   private readonly beforeToggle = new Map<string, number | null>();
+  /** The dashboard's games and codes search. */
+  private readonly gameSearch: DashboardSearchService = inject(DashboardSearchService);
   private readonly gameService: GameService = inject(GameService);
   /** The open card, held where it was when it opened. */
   private readonly openPin = signal<PlayerPin | null>(null);
