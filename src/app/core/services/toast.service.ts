@@ -3,7 +3,7 @@ import { Injectable, signal } from '@angular/core';
 export interface Toast {
   id: string;
   message: string;
-  type: 'success' | 'error' | 'warning';
+  type: 'success' | 'error' | 'warning' | 'info';
 }
 
 @Injectable({ providedIn: 'root' })
@@ -28,6 +28,12 @@ export class ToastService {
   error(message: string): void {
     if (Date.now() < this.mutedUntil) return;
     this.addToast(message, 'error', 6000);
+  }
+
+  /** A neutral note, like why a control is off. Tapping the same thing again doesn't stack a second copy. */
+  info(message: string): void {
+    if (this._toasts().some(t => t.message === message)) return;
+    this.addToast(message, 'info', 4000);
   }
 
   warning(message: string): void {
