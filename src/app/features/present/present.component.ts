@@ -187,10 +187,6 @@ export class PresentComponent implements OnInit, OnDestroy {
     return Object.keys(this.game()?.selectedSquares ?? {}).length;
   }
 
-  protected copyLink(): void {
-    void this.tvLink.copyBoardLink(this.gameId());
-  }
-
   protected exit(): void {
     this.router.navigate([this.gameId() && !this.rotating() ? '/game/' + this.gameId() : '/dashboard']);
   }
@@ -293,10 +289,10 @@ export class PresentComponent implements OnInit, OnDestroy {
     this.startTimer();
   }
 
-  protected copyRotationLink(): void {
+  protected copyTvLink(): void {
     const user = this.auth.currentUser();
-    if (!user || user.isGuest) return;
-    void this.tvLink.copyRotationLink(user.uid, { boardIds: this.boardIds, group: this.presentGroups.picked(), seconds: this.interval() });
+    const view = { boardIds: this.boardIds, group: this.presentGroups.picked(), seconds: this.interval() };
+    void this.tvLink.copyTvLink(user && !user.isGuest ? user.uid : null, this.gameId(), view, this.rotating());
   }
 
   protected turnOffRotationLink(): void {
