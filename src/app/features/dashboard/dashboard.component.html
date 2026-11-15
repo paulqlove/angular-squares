@@ -151,11 +151,13 @@
     [canLimitSquares]="planService.features().squareLimit && !!edit.editingGame()"
     [players]="edit.editGamePlayers()"
     [coHostName]="edit.coHostName()"
+    [coHostEmail]="edit.editingGame()?.managerEmail ?? ''"
     (closed)="edit.closeEditModal()"
     (saved)="edit.saveGameEdits($event)"
     (sportChange)="edit.fetchEditEspnGames($event)"
     (coHostAssign)="edit.assignManagerFromPlayer($event)"
     (coHostRemove)="edit.removeManager()"
+    (coHostUseGroup)="edit.useGroupCoHost($event)"
   ></app-edit-game-dialog>
 
 </div>

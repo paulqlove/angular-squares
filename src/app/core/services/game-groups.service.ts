@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { get, ref, set, update } from 'firebase/database';
 import { GameGroup, GroupChoice, GroupedBoard, cleanGroupName, deleteGroupUpdates, parseGroups } from '../utils/game-groups';
-import { GroupCoHost, groupCoHostUpdates } from '../utils/group-cohost';
+import { GroupCoHost, cleanCoHostEmail, groupCoHostUpdates, looksLikeEmail } from '../utils/group-cohost';
 import { fileBoardUpdates, newListKey } from '../utils/open-lists';
 import { AuthService } from './auth.service';
 import { BoardSettingsService } from './board-settings.service';
@@ -25,10 +25,12 @@ export class GameGroupsService {
     }
   }
 
-  public async createGroup(ownerId: string, name: string): Promise<GameGroup> {
+  /** Makes a group, with its co-host when one is given (Create game's new group). */
+  public async createGroup(ownerId: string, name: string, coHost?: GroupCoHost): Promise<GameGroup> {
     this.guardWrite();
-    const group: GameGroup = { id: newListKey(), name, createdAt: Date.now() };
-    await this.save(`groupLists/${ownerId}/groups/${group.id}`, { name: group.name, createdAt: group.createdAt });
+    const group: GameGroup = { id: newListKey(), name, createdAt: Date.now(), ...(coHost ? { coHost } : {}) };
+    const { id, ...stored } = group;
+    await this.save(`groupLists/${ownerId}/groups/${id}`, stored);
     return group;
   }
 
@@ -72,7 +74,8 @@ export class GameGroupsService {
    */
   public async saveChoice(board: GroupedBoard, choice: GroupChoice): Promise<{ listId: string; created?: GameGroup }> {
     const name = cleanGroupName(choice.newName ?? '');
-    const created = name ? await this.createGroup(board.ownerId, name) : undefined;
+    const email = cleanCoHostEmail(choice.newCoHost ?? '');
+    const created = name ? await this.createGroup(board.ownerId, name, looksLikeEmail(email) ? { email } : undefined) : undefined;
     const listId = await this.fileBoard(board, created?.id ?? choice.groupId);
     return { listId, created };
   }

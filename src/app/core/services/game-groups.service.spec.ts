@@ -109,4 +109,12 @@ describe('GameGroupsService', () => {
     preview = true;
     await expect(service.setGroupCoHost('o', CHURCH, null, { addTo: [], clearFrom: [] })).rejects.toThrow('Preview only');
   });
+
+  it('a new group from Create game can carry its co-host; a bad email is left off', async () => {
+    const result = await service.saveChoice({ id: 'a', ownerId: 'o', openListId: NONE }, { groupId: null, newName: 'Gym', newCoHost: ' lee@email.com ' });
+    expect(result.created?.coHost).toEqual({ email: 'lee@email.com' });
+    expect(db.save).toHaveBeenCalledWith(`groupLists/o/groups/${result.created?.id}`, { name: 'Gym', createdAt: result.created?.createdAt, coHost: { email: 'lee@email.com' } });
+    const plain = await service.saveChoice({ id: 'b', ownerId: 'o', openListId: NONE }, { groupId: null, newName: 'Run', newCoHost: 'lee' });
+    expect(plain.created?.coHost).toBeUndefined();
+  });
 });

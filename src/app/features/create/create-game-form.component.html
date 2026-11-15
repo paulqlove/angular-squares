@@ -146,29 +146,21 @@
             <label for="new-game-host-note" class="qs-label mb-2 block text-qs-muted">Note from the host <span class="normal-case tracking-normal">(optional)</span></label>
             <input id="new-game-host-note" type="text" [(ngModel)]="newGameHostNote" maxlength="140" placeholder="Rules, deadline, how to enter" class="qs-input" />
           </div>
-          <div class="mt-5">
-            <label for="new-game-manager" class="qs-label mb-2 block text-qs-muted">Co-host <span class="normal-case tracking-normal">(optional)</span></label>
-            <input id="new-game-manager" type="email" [(ngModel)]="newGamePaymentManager" placeholder="their@email.com" class="qs-input" />
-            <p class="mt-2 text-xs text-qs-muted">A co-host can help manage players.</p>
-          </div>
+          <app-create-game-cohost [groupsAllowed]="groupsAllowed" [groups]="groups" [groupId]="newGameGroup.groupId" [coHost]="newGamePaymentManager" [hint]="coHostHint()" (groupChanged)="pickGroup($event)" (coHostChanged)="newGamePaymentManager = $event"></app-create-game-cohost>
         </div>
             </div>
           </section>
-      @if (openBoardsAllowed || groupsAllowed || schedulePicked()) {
+      @if (openBoardsAllowed || schedulePicked()) {
         <app-create-game-options
           [openBoardsAllowed]="openBoardsAllowed"
           [showInOpenBoards]="newGameShowInOpenBoards"
           [grouped]="grouped()"
           [openBoardPreview]="openBoardPreviewLine()"
-          [groupsAllowed]="groupsAllowed"
-          [groups]="groups"
-          [groupId]="newGameGroup.groupId"
           [gamePicked]="schedulePicked()"
           [autoManageAllowed]="autoManageAllowed"
           [autoManage]="newGameAutoManage"
           [autoRunText]="autoRunText()"
           (openBoardsChanged)="newGameShowInOpenBoards = $event"
-          (groupChanged)="pickGroup($event)"
           (autoManageChanged)="newGameAutoManage = $event; autoManageTouched = true"
         ></app-create-game-options>
       }

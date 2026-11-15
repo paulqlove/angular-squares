@@ -9,6 +9,7 @@ import { ToastService } from '../../../core/services/toast.service';
 import { EditGameValues } from '../../super-bowl-squares/components/edit-game-dialog/edit-game-dialog.component';
 import { GameGroupsService } from '../../../core/services/game-groups.service';
 import { groupChanged, pickerValue } from '../../../core/utils/game-groups';
+import { coHostLabel, hasCoHost } from '../../../core/utils/group-cohost';
 import { DashboardGroupsService } from './dashboard-groups.service';
 import { DashboardStore } from './dashboard.store';
 
@@ -20,6 +21,8 @@ interface AppliedExtras {
   maxSquaresPerPlayer: GameListItem['maxSquaresPerPlayer'];
   showInOpenBoards: boolean;
   openListId: GameListItem['openListId'];
+  /** Set when the picked group's co-host went on the game. */
+  managerEmail?: string;
 }
 
 /** The fields the main save writes, sanitized. */
@@ -48,7 +51,7 @@ export class DashboardEditService {
   /** The co-host line in the dialog: their name, else their email, else Assigned; empty with no co-host. */
   public readonly coHostName = computed<string>(() => {
     const game = this.editingGame();
-    return game?.managerId ? (game.managerName || game.managerEmail || 'Assigned') : '';
+    return game && hasCoHost(game) ? (coHostLabel(game) || 'Assigned') : '';
   });
   public readonly editBoardRandomized = signal<boolean>(false);
   public readonly editEspnGames = signal<EspnGame[]>([]);
@@ -132,6 +135,21 @@ export class DashboardEditService {
       this.store.updateMyGame(game.id, g => ({ ...g, managerId: undefined, managerEmail: undefined, managerName: undefined }));
     } catch {
       this.toastService.error('Could not remove the co-host. Try again.');
+    }
+  }
+
+  /** Edit game's "Use" (K4): the group's co-host, by email, replaces this game's own. Saves at once, like picking a player. */
+  public async useGroupCoHost(email: string): Promise<void> {
+    const game = this.editingGame();
+    if (!game) return;
+    const changed = { managerId: undefined, managerEmail: email, managerName: undefined };
+    try {
+      await this.gameService.updateGameManager(game.id, null, email, null);
+      if (game.managerId) this.markCoHost(game, game.managerId, false);
+      this.editingGame.set({ ...game, ...changed });
+      this.store.updateMyGame(game.id, g => ({ ...g, ...changed }));
+    } catch {
+      this.toastService.error('Could not change the co-host. Try again.');
     }
   }
 
@@ -227,9 +245,10 @@ export class DashboardEditService {
   /** The open-boards switch, the squares limit and Auto-lock and draw save on their own, so a failure never loses the other edits. */
   private async saveExtras(game: GameListItem, v: EditGameValues, espnChanged: boolean): Promise<AppliedExtras> {
     const shown = await this.saveGroup({ ...game, ...await this.saveShowInOpenBoards(game, v) }, v);
+    const coHost = await this.saveGroupCoHost(game, v, shown.openListId);
     const maxSquaresPerPlayer = await this.saveSquareLimit(game, v);
     const autoManage = await this.saveAutoManage(game, v, espnChanged);
-    return { ...shown, autoManage, maxSquaresPerPlayer };
+    return { ...shown, ...coHost, autoManage, maxSquaresPerPlayer };
   }
 
   /** The Group picker saves after the open-boards switch, so it files the board with the switch as saved. */
@@ -243,6 +262,19 @@ export class DashboardEditService {
     } catch {
       this.toastService.warning('Saved, but the group could not be changed. Try again in a moment.');
       return kept;
+    }
+  }
+
+  /** A game with no co-host, filed in a group that has one, gets it when the dialog showed it (K4). Best effort. */
+  private async saveGroupCoHost(game: GameListItem, v: EditGameValues, listId: string | undefined): Promise<Pick<AppliedExtras, 'managerEmail'>> {
+    const email = listId ? this.groups.groups().find(g => g.id === listId)?.coHost?.email : undefined;
+    if (!v.coHostFromGroup || !email || hasCoHost(game)) return {};
+    try {
+      await this.gameService.updateGameManager(game.id, null, email, null);
+      return { managerEmail: email };
+    } catch {
+      this.toastService.warning('Saved, but the group\'s co-host could not be added. Try again in a moment.');
+      return {};
     }
   }
 

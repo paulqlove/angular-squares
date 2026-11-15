@@ -35,6 +35,8 @@ export interface EditGameValues {
   maxSquaresPerPlayer: number | null;
   /** Where the Group picker was left; set by the caller to the board's group when the picker shows. */
   group?: GroupChoice;
+  /** The picked group's co-host goes on this game (it had none) when saved. */
+  coHostFromGroup?: boolean;
   /** Only used with showGameFields (the dashboard). */
   name?: string;
   sport?: SportType | 'custom';
@@ -199,7 +201,7 @@ export interface EditGameValues {
               </div>
 
               @if (showGameFields) {
-                <app-edit-game-cohost [players]="players" [coHostName]="coHostName" (assigned)="coHostAssign.emit($event)" (removed)="coHostRemove.emit()"></app-edit-game-cohost>
+                <app-edit-game-cohost [players]="players" [coHostName]="coHostName" [coHostEmail]="coHostEmail" [group]="pickedGroup()" [(fillFromGroup)]="draft.coHostFromGroup" (assigned)="coHostAssign.emit($event)" (removed)="coHostRemove.emit()" (useGroup)="coHostUseGroup.emit($event)"></app-edit-game-cohost>
               }
             </div>
           </details>
@@ -260,6 +262,8 @@ export class EditGameDialogComponent implements OnChanges {
   @Input() players: CoHostCandidate[] = [];
   /** Current co-host, empty for none. */
   @Input() coHostName = '';
+  /** Current co-host's email, when they were typed by email. */
+  @Input() coHostEmail = '';
   @Input() values: EditGameValues = { awayTeam: '', homeTeam: '', pricePerSquare: 10, hostNote: '', quarterSplit: null, emptyQuarterRule: DEFAULT_EMPTY_QUARTER_RULE, newBoardSize: null, showInOpenBoards: false, autoManage: false, maxSquaresPerPlayer: null };
 
   @Output() closed = new EventEmitter<void>();
@@ -268,6 +272,7 @@ export class EditGameDialogComponent implements OnChanges {
   @Output() sportChange = new EventEmitter<SportType | 'custom'>();
   @Output() coHostAssign = new EventEmitter<CoHostCandidate>();
   @Output() coHostRemove = new EventEmitter<void>();
+  @Output() coHostUseGroup = new EventEmitter<string>();
 
   confirmingClear = false;
   /** Split being edited, in percent (20 = 20%). */
@@ -337,6 +342,12 @@ export class EditGameDialogComponent implements OnChanges {
   pickGroup(choice: GroupChoice): void {
     if (inGroup(choice)) this.draft.showInOpenBoards = true;
     this.draft.group = choice;
+    this.draft.coHostFromGroup = !this.coHostName && !!this.pickedGroup()?.coHost;
+  }
+
+  /** The group the picker is on, if it is one of the owner's groups. */
+  pickedGroup(): GameGroup | undefined {
+    return this.groups.find(g => g.id === this.draft.group?.groupId);
   }
 
   save(): void {
