@@ -152,3 +152,25 @@ export const gamePreviewImage = onRequest(
     await servePreviewImage(req, res, readPreviewFields, (message, details) => logger.warn(message, details));
   }
 );
+
+/**
+ * Every /game/{id} page: Hosting's game.html with that board's title and preview picture in its link tags,
+ * so a shared link shows the board instead of the site's generic picture. Fetches the game page shell (Hosting serves game.html at /game) from the same site
+ * on each request, so a Hosting deploy is picked up at once.
+ * Deploy by hand: firebase deploy --only functions:gamePage
+ */
+export const gamePage = onRequest(
+  { region: "us-central1", memory: "256MiB", timeoutSeconds: 10, maxInstances: 10, invoker: "public" },
+  async (req, res) => {
+    const { serveGamePage } = await import("./preview-page");
+    await serveGamePage(req, res, {
+      readPreview: readPreviewFields,
+      fetchShell: async (origin) => {
+        const response = await fetch(`${origin}/game`, { signal: AbortSignal.timeout(3000) });
+        if (!response.ok) throw new Error(`game shell ${response.status}`);
+        return response.text();
+      },
+      log: (message, details) => logger.warn(message, details),
+    });
+  }
+);
