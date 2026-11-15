@@ -11,9 +11,10 @@ import {
   CreateGameDraft, CreateGameValues, buildCreateGameValues, emptyDraft, loadCreateDraft, splitToTenths
 } from '../../core/utils/create-game-draft';
 import type { GameGroup, GroupChoice } from '../../core/utils/game-groups';
+import { SPLIT_QUARTERS, splitLabel, splitPresetId, splitRemaining } from '../../core/utils/split-edit';
 import { CreateGameFooterComponent } from './create-game-footer.component';
 import {
-  BOARD_SIZE_OPTIONS, PRICE_PRESETS, QUARTERS, activeSplitPreset, matchup, openBoardPreview, splitRemaining, splitText, stubGame, summaryLine
+  BOARD_SIZE_OPTIONS, PRICE_PRESETS, matchup, openBoardPreview, stubGame, formatSummaryLine
 } from './create-game-form.utils';
 import { CreateGameOptionsComponent } from './create-game-options.component';
 import { CreateGamePickComponent } from './create-game-pick.component';
@@ -84,7 +85,7 @@ export class CreateGameFormComponent implements OnChanges, OnInit {
   newGameSplitCustomOpen = false;
   newGameSplitPct: QuarterSplit = { q1: 20, q2: 20, q3: 20, q4: 40 };
   readonly pricePresets = PRICE_PRESETS;
-  readonly quarters = QUARTERS;
+  readonly quarters = SPLIT_QUARTERS;
   selectedEspnGameId = '';
   selectedSport: SportType | 'custom' = 'nfl';
   readonly splitPresets = SPLIT_PRESETS;
@@ -122,7 +123,7 @@ export class CreateGameFormComponent implements OnChanges, OnInit {
   }
 
   newGameActivePreset(): string {
-    return activeSplitPreset(this.newGameSplitPct);
+    return splitPresetId(this.newGameSplitPct);
   }
 
   newGameSplitRemaining(): string {
@@ -130,7 +131,7 @@ export class CreateGameFormComponent implements OnChanges, OnInit {
   }
 
   newGameSplitText(): string {
-    return splitText(this.newGameSplitPct);
+    return splitLabel(this.newGameSplitPct);
   }
 
   newGameSplitValid(): boolean {
@@ -211,7 +212,7 @@ export class CreateGameFormComponent implements OnChanges, OnInit {
     const teams = this.selectedSport === 'custom'
       ? matchup(this.customAwayTeam, this.customHomeTeam)
       : game ? `${game.awayTeam} @ ${game.homeTeam}` : '';
-    return summaryLine({ matchup: teams, boardSize: this.newGameBoardSize, price: this.newGamePrice });
+    return formatSummaryLine({ matchup: teams, boardSize: this.newGameBoardSize, price: this.newGamePrice });
   }
 
   submit(): void {

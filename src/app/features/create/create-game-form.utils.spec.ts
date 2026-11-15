@@ -1,6 +1,6 @@
 import type { EspnGame } from '../../core/services/espn.service';
 import {
-  activeSplitPreset, filterGames, matchup, openBoardPreview, splitRemaining, splitText, stubGame, summaryLine
+  filterGames, matchup, openBoardPreview, stubGame, formatSummaryLine
 } from './create-game-form.utils';
 
 const game = (id: string, away: string, home: string, awayFull = away, homeFull = home) =>
@@ -15,20 +15,9 @@ describe('create game form utils', () => {
     expect(filterGames(games, 'zz')).toEqual([]);
   });
 
-  it('names the matching split preset, or custom', () => {
-    expect(activeSplitPreset({ q1: 20, q2: 20, q3: 20, q4: 40 })).not.toBe('custom');
-    expect(activeSplitPreset({ q1: 10, q2: 10, q3: 10, q4: 70 })).toBe('custom');
-  });
-
-  it('reads out a split and what is left to reach 100%', () => {
-    expect(splitText({ q1: 20, q2: 20, q3: 20, q4: 30 })).toBe('20 / 20 / 20 / 30');
-    expect(splitRemaining({ q1: 20, q2: 20, q3: 20, q4: 30 })).toBe('10%');
-    expect(splitRemaining({ q1: 25.5, q2: 25, q3: 25, q4: 25 })).toBe('-0.5%');
-  });
-
   it('builds the summary line, skipping teams not chosen yet', () => {
-    expect(summaryLine({ matchup: 'SF @ KC', boardSize: 100, price: 10 })).toBe('SF @ KC · 100 squares · 10 pts');
-    expect(summaryLine({ matchup: '', boardSize: 25, price: 0 })).toBe('25 squares · No points');
+    expect(formatSummaryLine({ matchup: 'SF @ KC', boardSize: 100, price: 10 })).toBe('SF @ KC · 100 squares · 10 pts');
+    expect(formatSummaryLine({ matchup: '', boardSize: 25, price: 0 })).toBe('25 squares · No points');
     expect(matchup(' Lincoln ', '')).toBe('Lincoln');
     expect(matchup('A', 'B')).toBe('A @ B');
   });

@@ -1,7 +1,5 @@
-import { SPLIT_PRESETS, type QuarterSplit } from '../../core/plans';
 import type { EspnGame, SportType } from '../../core/services/espn.service';
 import type { BoardSize } from '../../core/services/game.service';
-import { splitToTenths } from '../../core/utils/create-game-draft';
 
 export const BOARD_SIZE_OPTIONS: readonly { value: BoardSize; label: string; description: string }[] = [
   { value: 100, label: '100 squares', description: '10×10 grid (classic)' },
@@ -21,10 +19,6 @@ export const SPORT_OPTIONS: readonly { value: SportType | 'custom'; label: strin
 
 export const PRICE_PRESETS: readonly number[] = [0, 5, 10, 20, 50];
 
-export const QUARTERS: readonly { key: keyof QuarterSplit; label: string }[] = [
-  { key: 'q1', label: 'Q1' }, { key: 'q2', label: 'Q2' }, { key: 'q3', label: 'Q3' }, { key: 'q4', label: 'Q4' }
-];
-
 /** Games whose short or full team names contain the search, ignoring case. */
 export function filterGames(games: EspnGame[], search: string): EspnGame[] {
   const query = search.toLowerCase().trim();
@@ -37,24 +31,6 @@ export function filterGames(games: EspnGame[], search: string): EspnGame[] {
   );
 }
 
-/** The preset the split matches, or 'custom'. The split is in percent. */
-export function activeSplitPreset(splitPct: QuarterSplit): string {
-  const t = splitToTenths(splitPct);
-  return SPLIT_PRESETS.find(p => t && p.split.q1 === t.q1 && p.split.q2 === t.q2 && p.split.q3 === t.q3 && p.split.q4 === t.q4)?.id ?? 'custom';
-}
-
-/** What is left to reach 100%, for example "40%". */
-export function splitRemaining(splitPct: QuarterSplit): string {
-  const total = QUARTERS.reduce((sum, q) => sum + (Number(splitPct[q.key]) || 0), 0);
-  return (Math.round((100 - total) * 10) / 10).toString() + '%';
-}
-
-/** The split as typed, for example "20 / 20 / 20 / 30". */
-export function splitText(splitPct: QuarterSplit): string {
-  const fmt = (v: number) => (Math.round(Number(v) * 10) / 10).toString();
-  return QUARTERS.map(q => fmt(splitPct[q.key])).join(' / ');
-}
-
 export interface SummaryParts {
   /** "SF @ KC" for a picked game or custom teams; empty when there are none yet. */
   matchup: string;
@@ -63,7 +39,7 @@ export interface SummaryParts {
 }
 
 /** One line of context above the optional steps, for example "SF @ KC · 100 squares · 10 pts". */
-export function summaryLine(parts: SummaryParts): string {
+export function formatSummaryLine(parts: SummaryParts): string {
   return [parts.matchup, `${parts.boardSize} squares`, parts.price === 0 ? 'No points' : `${parts.price} pts`].filter(Boolean).join(' · ');
 }
 

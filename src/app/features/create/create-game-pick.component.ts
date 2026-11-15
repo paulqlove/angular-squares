@@ -25,7 +25,7 @@ import { SPORT_OPTIONS, filterGames } from './create-game-form.utils';
         type="button"
         class="qs-tab"
         [attr.aria-pressed]="sport() === option.value"
-        (click)="pickSport(option.value)"
+        (click)="sportSelected.emit(option.value)"
       >
         {{ option.label }}
       </button>
@@ -54,7 +54,7 @@ import { SPORT_OPTIONS, filterGames } from './create-game-form.utils';
     </div>
   } @else if (games().length === 0) {
     <p class="mt-2 rounded-inner border border-dashed border-qs-line-strong p-4 text-sm text-qs-muted">Games coming soon.</p>
-    <button type="button" class="qs-btn qs-btn-secondary mt-3" (click)="pickSport('custom')">Use custom teams</button>
+    <button type="button" class="qs-btn qs-btn-secondary mt-3" (click)="sportSelected.emit('custom')">Use custom teams</button>
   } @else if (!listOpen() && selectedGame(); as game) {
     <!-- Picked: collapse to the choice so the rest of the form is right there -->
     <div class="mt-2 rounded-inner border border-qs-accent bg-qs-panel p-3 outline outline-2 -outline-offset-2 outline-qs-accent">
@@ -114,8 +114,4 @@ export class CreateGamePickComponent {
   protected readonly sportOptions = SPORT_OPTIONS;
   protected readonly selectedGame = computed(() => this.games().find(g => g.id === this.selectedGameId()));
   protected readonly filteredGames = computed(() => filterGames(this.games(), this.search()));
-
-  protected pickSport(sport: SportType | 'custom'): void {
-    this.sportSelected.emit(sport);
-  }
 }
