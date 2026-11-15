@@ -24,12 +24,12 @@ export class PresentGroupsService {
   }
 
   /**
-   * Loads the host's groups and, only when there is at least one, which group each board is in. Starts on the group
+   * Loads the host's groups (while the board ids load) and, only when there is at least one, which group each board is in. Starts on the group
    * the dashboard last showed when it has boards here, unless `mustShow` (the board opened by link) is not in it.
    */
-  public async load(ownerId: string, boardIds: string[], mustShow?: string): Promise<void> {
+  public async load(ownerId: string, boardIdsLoading: Promise<string[]>, mustShow?: string): Promise<void> {
+    const [boardIds, groups] = await Promise.all([boardIdsLoading, this.gameGroups.getGroups(ownerId)]);
     this.boards.set(boardIds.map(id => ({ id, ownerId })));
-    const groups = await this.gameGroups.getGroups(ownerId);
     if (!groups.length) return;
     const listIds = await this.gameGroups.listIdsOf(boardIds);
     this.boards.set(boardIds.map(id => ({ id, ownerId, openListId: listIds.get(id) })));

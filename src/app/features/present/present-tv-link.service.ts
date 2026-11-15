@@ -1,6 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 
 import { GameService } from '../../core/services/game.service';
+import { MAX_TV_BOARDS } from '../../core/services/tv-link.service';
 import { ToastService } from '../../core/services/toast.service';
 import { tvLinkCopiedMessage } from './tv-link-message';
 
@@ -10,9 +11,6 @@ export interface RotationLink {
   groupName: string | null;
   seconds: number;
 }
-
-/** The most boards one TV link holds (the database rules cap it). */
-const MAX_TV_BOARDS = 20;
 
 /**
  * TV mode's link buttons: Copy TV link for one board, and the host's rotating TV link (copy and turn off).

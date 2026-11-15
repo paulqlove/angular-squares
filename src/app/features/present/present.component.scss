@@ -1,4 +1,4 @@
-/* TV sizing: cells fill the board card's own height (so a taller header or a help panel never pushes the board off screen), names wrap instead of truncating */
+/* TV sizing: cells fill the board card's own height (so a taller header never pushes the board off screen), names wrap instead of truncating */
 .present-board {
   container-type: size;
   /* Caption and axis font sizes grow with the screen, and so do the rows they sit in. The cell height reads the same values, so the board always fits. */

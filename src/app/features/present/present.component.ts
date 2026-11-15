@@ -132,10 +132,9 @@ export class PresentComponent implements OnInit, OnDestroy {
       if (!id) this.router.navigate(['/']);
       return;
     }
-    await this.presentGroups.load(user.uid, await this.gameService.getUserGameIds(user.uid), id ?? undefined);
+    await Promise.all([this.presentGroups.load(user.uid, this.gameService.getUserGameIds(user.uid), id ?? undefined), this.tvLink.load(user.uid)]);
     this.boardIds = this.presentGroups.boardIds();
     this.boardCount.set(this.boardIds.length);
-    await this.tvLink.load(user.uid);
     if (id) {
       this.index = this.boardIds.indexOf(id);
       return;
@@ -144,8 +143,9 @@ export class PresentComponent implements OnInit, OnDestroy {
       this.router.navigate(['/dashboard']);
       return;
     }
-    this.rotating.set(true);
     this.open(this.boardIds[0]);
+    if (this.boardIds.length < 2) return this.location.replaceState('/present/' + this.boardIds[0]);
+    this.rotating.set(true);
     this.startTimer();
   }
 
@@ -429,7 +429,7 @@ export class PresentComponent implements OnInit, OnDestroy {
 
   private measuredTitleFont(): string | null {
     const el = this.titleRef()?.nativeElement;
-    return el ? getComputedStyle(el).fontSize : null;
+    return el && this.game() ? getComputedStyle(el).fontSize : null;
   }
 
   private open(id: string): void {
