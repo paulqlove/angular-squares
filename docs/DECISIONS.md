@@ -4,6 +4,14 @@ This file records product and design decisions, newest first. To add one, put a 
 
 ---
 
+## D-037 · Groups stays in place, switched off, on the Players tab
+
+- **Date:** Nov 15 2026
+- **Decision:** On the dashboard's Players tab the group picker (the desktop dropdown and the phone folder button) stays where it is but switched off, so Search and the phone's field don't move between tabs. Hovering it on desktop shows "Groups filter your boards"; tapping it on a phone shows the same words as a toast. On the Boards tab it works as before. Grid / Compact keeps hiding on Players, since Boards | Players is pinned to the right edge and nothing moves. Creative's pick; Paul's word, relayed: "Build it".
+- **Options considered:** hide Groups on Players (moves Search 212px on desktop and grows the phone field 52px); disable it in place
+- **Why:** a control that disappears shifts the row; switched off, the row stays still
+- **Decided by:** Paul
+
 ## D-036 · A game in a group always shows in that group's More tab
 
 - **Date:** Nov 15 2026

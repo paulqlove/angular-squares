@@ -21,8 +21,9 @@
           }
         </div>
 
-        @if (!players.active() && store.groupPickerShows()) {
-          <app-group-menu></app-group-menu>
+        <!-- On the Players tab the picker stays put but switched off, so Search doesn't slide over -->
+        @if (store.groupPickerShows()) {
+          <app-group-menu [off]="players.active()"></app-group-menu>
         }
 
         @if (store.canCreateGame()) {
