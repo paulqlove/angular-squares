@@ -1,4 +1,4 @@
-import { isCoHostInvite, sameEmail } from './cohost-claim';
+import { isCoHostInvite, mayBeCoHostInvite, sameEmail } from './cohost-claim';
 
 const dana = { uid: 'dana', email: 'dana@example.com', isGuest: false };
 const invited = { ownerId: 'owner', managerEmail: 'Dana@Example.com' };
@@ -22,6 +22,18 @@ describe('isCoHostInvite', () => {
     expect(isCoHostInvite(invited, { ...dana, email: null })).toBe(false);
     expect(isCoHostInvite(invited, null)).toBe(false);
     expect(isCoHostInvite({ ...invited, ownerId: 'dana' }, dana)).toBe(false);
+  });
+});
+
+describe('mayBeCoHostInvite', () => {
+  it('is a signed-in, non-owner viewer with an email on a game with no co-host by uid: the only ones worth a read', () => {
+    expect(mayBeCoHostInvite({ ownerId: 'owner' }, dana)).toBe(true);
+    expect(mayBeCoHostInvite({ ownerId: 'owner', managerId: '' }, dana)).toBe(true);
+    expect(mayBeCoHostInvite({ ownerId: 'owner', managerId: 'kim' }, dana)).toBe(false);
+    expect(mayBeCoHostInvite({ ownerId: 'dana' }, dana)).toBe(false);
+    expect(mayBeCoHostInvite({}, dana)).toBe(false);
+    expect(mayBeCoHostInvite({ ownerId: 'owner' }, { uid: 'g', email: null, isGuest: true })).toBe(false);
+    expect(mayBeCoHostInvite({ ownerId: 'owner' }, null)).toBe(false);
   });
 });
 

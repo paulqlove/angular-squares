@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Entitlement, EmptyQuarterRule, QuarterSplit } from '../plans';
 import type { AutoManageSettings } from '../utils/auto-manage';
+import type { GameManager } from '../utils/group-cohost';
 import { BoardSize, GameChange, GameData, SportType, TvLink } from '../utils/game-data';
 import type { OpenBoardRow } from '../utils/open-boards';
 import type { OpenListTarget } from '../utils/open-lists';
@@ -263,8 +264,9 @@ export class GameService {
     return this.records.updateGame(gameId, data);
   }
 
-  public updateGameManager(gameId: string, managerId: string | null, managerEmail: string | null, managerName: string | null = null): Promise<void> {
-    return this.lifecycle.updateGameManager(gameId, managerId, managerEmail, managerName);
+  /** Sets a game's co-host, or clears it when every field is empty. The owner's uid is where an email is kept. */
+  public updateGameManager(gameId: string, ownerId: string, manager: GameManager): Promise<void> {
+    return this.lifecycle.updateGameManager(gameId, ownerId, manager);
   }
 
   /** Saves several boards in one update: all or none. */

@@ -1,7 +1,7 @@
 import { parseGroups } from './game-groups';
 import {
-  cleanCoHostEmail, coHostLabel, emailShortName, fillCoHost, coHostPlan, coHostPlanLines, coHostSaveLabel, gamesWithCoHost, groupCoHostUpdates, hasCoHost, looksLikeEmail,
-  removeCoHostQuestion, validCoHost
+  cleanCoHostEmail, coHostLabel, coHostWrites, emailShortName, fillCoHost, coHostPlan, coHostPlanLines, coHostSaveLabel, gamesWithCoHost, groupCoHostUpdates, hasCoHost, looksLikeEmail,
+  removeCoHostQuestion, validCoHost, withCoHostEmails
 } from './group-cohost';
 
 const CHURCH = 'ChurchGroupKey000001';
@@ -60,10 +60,25 @@ describe('group co-host', () => {
   it('writes the group and its games in one update', () => {
     expect(groupCoHostUpdates('o', CHURCH, { email: 'dana@email.com' }, { addTo: ['a'], clearFrom: ['c'] })).toEqual({
       [`groupCoHosts/o/${CHURCH}`]: { email: 'dana@email.com' },
-      'games/a/managerId': '', 'games/a/managerEmail': 'dana@email.com', 'games/a/managerName': '',
-      'games/c/managerId': '', 'games/c/managerEmail': '', 'games/c/managerName': ''
+      'games/a/managerId': '', 'games/a/managerName': '', 'games/a/managerEmail': null, 'gameCoHosts/o/a': 'dana@email.com',
+      'games/c/managerId': '', 'games/c/managerName': '', 'games/c/managerEmail': null, 'gameCoHosts/o/c': null
     });
     expect(groupCoHostUpdates('o', CHURCH, null, { addTo: [], clearFrom: [] })).toEqual({ [`groupCoHosts/o/${CHURCH}`]: null });
+  });
+
+  it('keeps a co-host\'s email off the game, in the owner-only spot, and clears the old public copy', () => {
+    expect(coHostWrites('o', 'g1', { managerEmail: 'dana@email.com' })).toEqual({
+      'games/g1/managerId': '', 'games/g1/managerName': '', 'games/g1/managerEmail': null, 'gameCoHosts/o/g1': 'dana@email.com'
+    });
+    expect(coHostWrites('o', 'g1', { managerId: 'u1', managerName: 'Dana' })).toEqual({
+      'games/g1/managerId': 'u1', 'games/g1/managerName': 'Dana', 'games/g1/managerEmail': null, 'gameCoHosts/o/g1': null
+    });
+  });
+
+  it('puts the owner\'s co-host emails back on their games for the dashboard', () => {
+    const boards = [{ id: 'g1' }, { id: 'g2', managerEmail: 'old@email.com' }, null];
+    expect(withCoHostEmails(boards, { g1: 'dana@email.com', g3: 'x@email.com', g2: 5 })).toEqual([{ id: 'g1', managerEmail: 'dana@email.com' }, boards[1], null]);
+    expect(withCoHostEmails(boards, null)).toBe(boards);
   });
 
   it('fills Create game\'s Co-host from a group unless the host typed their own', () => {

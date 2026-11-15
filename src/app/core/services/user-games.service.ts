@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { get, ref, remove, set } from 'firebase/database';
 import { GameData, GameListItem } from '../utils/game-data';
 import { readGameIndexVisits, renamePlayerInGame, sortGameIdsNewestFirst, toGameListItem } from '../utils/game-parse';
+import { withCoHostEmails } from '../utils/group-cohost';
 import type { RecentVisit } from '../utils/recent-games';
 import { AuthService } from './auth.service';
 import { GameDatabaseService } from './game-database.service';
@@ -54,7 +55,10 @@ export class UserGamesService {
   /** Boards the user hosts, newest first, read in parallel. A deleted board's leftover entry is dropped from their list. */
   public async getUserGameRecords(userId: string): Promise<GameData[]> {
     if (!this.database.isBrowser) return [];
-    const snapshot = await get(ref(this.database.db, `users/${userId}/games`));
+    const [snapshot, coHostEmails] = await Promise.all([
+      get(ref(this.database.db, `users/${userId}/games`)),
+      this.coHostEmails(userId)
+    ]);
     if (!snapshot.exists()) return [];
     const games = await Promise.all(Object.keys(snapshot.val()).map(async gameId => {
       const game = await this.records.getGame(gameId);
@@ -64,7 +68,7 @@ export class UserGamesService {
       }
       return game;
     }));
-    return newestFirst(games);
+    return newestFirst(withCoHostEmails(games, coHostEmails));
   }
 
   public async getUserGames(userId: string): Promise<GameListItem[]> {
@@ -114,6 +118,15 @@ export class UserGamesService {
   private readonly authService: AuthService = inject(AuthService);
   private readonly database: GameDatabaseService = inject(GameDatabaseService);
   private readonly records: GameRecordService = inject(GameRecordService);
+
+  /** The owner's co-host emails by game, which only they can read. Empty if the read fails, so the list still loads. */
+  private async coHostEmails(userId: string): Promise<unknown> {
+    try {
+      return (await get(ref(this.database.db, `gameCoHosts/${userId}`))).val();
+    } catch {
+      return null;
+    }
+  }
 }
 
 /** The boards that still exist, newest first. */

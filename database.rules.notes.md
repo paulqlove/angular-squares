@@ -77,7 +77,7 @@ A Season Pass host can sort boards into groups (Church, Work). A board's **More*
 
 - `groupLists/{ownerId}` = `{ ungrouped, groups/{groupId}: { name, createdAt } }`. `ungrouped` is a random key (16 to 40 of `A-Za-z0-9_-`) the owner writes once and can never change or delete, because boards point at it. Groups need a live Season Pass (or admin) to create, rename or delete, so they freeze when the pass ends. Names 1 to 30 characters. Readable by the owner, their co-hosts and admins only, so players never see a group name.
 - `coHosts/{ownerId}/{uid}: true`, written by the owner when they make someone a co-host, so co-hosts can read the owner's group names for the Edit game picker. Only the owner reads or writes it.
-- `groupCoHosts/{ownerId}/{groupId}` = `{ email }`: a group's co-host (Nov 2026). Only the owner can read it, not their co-hosts or admins (Paul: "Only me"). Written with the same Season Pass rule as the group, only while the group exists; deleting a group clears it in the same update. Saving it may also set `managerEmail` on the group's games, which, like any game field, anyone can read.
+- `groupCoHosts/{ownerId}/{groupId}` = `{ email }`: a group's co-host (Nov 2026). Only the owner can read it, not their co-hosts or admins (Paul: "Only me"). Written with the same Season Pass rule as the group, only while the group exists; deleting a group clears it in the same update. Saving it may also give the email to the group's games, in `gameCoHosts` (below), not on the games.
 - `games/{id}/openListId`: the list this board belongs to, either one of its owner's group ids or the owner's `ungrouped` key. The rule checks it against the owner's `groupLists` as they stand after the write, so deleting a group and moving its boards to No group can go in one update.
 - `openLists/{listId}/{boardId}` = the board's ownerId, present while **Show in my open boards** is on. Anyone can read one list if they know its key (a board link shows only its own key), nobody can list `openLists`. Only the board's owner or co-host can add or remove the entry, and only in the list the board points at. The value must be the board's owner, so the app can drop entries a stranger copied into a list.
 - Why: `openBoards/{ownerId}` was readable by anyone holding one board link, because every board shows its ownerId. That exposed every open board of the host. `openBoards` stays for now so older app builds keep working; it is removed after the one-time move (see `scripts/migrate-open-lists.mjs`).
@@ -88,10 +88,20 @@ Deploy these rules before the app that writes them.
 
 ## A co-host added by email (games/{id}/managerId claim)
 
-Co-host powers follow `games/{id}/managerId`. A co-host picked from the players gets it at once. One typed by email (Create game's Co-host field, or a group's co-host) is stored as `managerEmail` only, so they had no powers. Now, when that person opens the game signed in, the app writes their own uid as `managerId`.
+Co-host powers follow `games/{id}/managerId`. A co-host picked from the players gets it at once. One typed by email (Create game's or Edit game's Co-host, or a group's co-host) is stored by email only, so they had no powers. Now, when that person opens the game signed in, the app writes their own uid as `managerId`.
 
-- `games/{id}/managerId` (claim): a signed-in user may set it to their own uid only while it is empty or `''`, the game's `managerEmail` is a string, and it equals `auth.token.email` ignoring case, with `auth.token.email_verified == true`. Google and the emailed sign-in link both give a verified email; an email typed without proving it never matches. `managerEmail` is kept, so a group co-host change still finds the game.
+- `games/{id}/managerId` (claim): a signed-in user may set it to their own uid only while it is empty or `''`, the game's `gameCoHosts/{ownerId}/{id}` is a string, and it equals `auth.token.email` ignoring case, with `auth.token.email_verified == true`. Google and the emailed sign-in link both give a verified email; an email typed without proving it never matches. The email is kept, so a group co-host change still finds the game.
 - `coHosts/{ownerId}/{uid}`: besides the owner's `true`, the co-host may write their own entry as the id of a game of that owner where they are `managerId`, written in the same update as the claim. It can never replace the owner's `true`. `groupLists/{ownerId}` reads with it only while that game's `managerId` is still them, so removing the co-host also ends the read.
 - Not used: `emailIndex`. Any signed-in user can write any email there, so it can't prove who owns an address.
 
 Deploy these rules before the app that writes them. An older app never claims; the claim simply waits for the new one.
+
+## A game's co-host email is hidden (gameCoHosts)
+
+Paul, Nov 15: "Hide them". A co-host's email used to sit on the game (`games/{id}/managerEmail`), which anyone who can open the game can read.
+
+- `gameCoHosts/{ownerId}/{gameId}` = the email (text, 1 to 254 characters). The owner reads all of theirs. One entry is also readable by the person it names, signed in with a verified email that matches ignoring case, so the app can check their invite before the claim. Players, guests, other co-hosts, strangers and signed-out visitors can't read it.
+- Only the owner writes it, and only for a game whose `ownerId` is them (checked on the data after the write, so a new game and its email go in one update). Deleting the game clears it in the same update.
+- Every co-host save writes `games/{id}/managerEmail: null`, so the old public copy goes away. `scripts/move-cohost-emails.mjs` moves the existing ones (dry run, then `--apply`).
+- `games/{id}/managerEmail` still accepts writes for now, so a phone still running an older app can create a game. Its email stays public and can't be claimed until the script runs again. Once old apps are gone, its `.validate` can be set to refuse anything but null.
+

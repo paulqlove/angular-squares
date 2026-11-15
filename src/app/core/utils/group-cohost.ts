@@ -79,10 +79,10 @@ export function gamesWithCoHost(boards: CoHostedBoard[], groupId: string, email:
 export function groupCoHostUpdates(ownerId: string, groupId: string, coHost: GroupCoHost | null, games: { addTo: string[]; clearFrom: string[] }): Record<string, unknown> {
   const updates: Record<string, unknown> = { [`groupCoHosts/${ownerId}/${groupId}`]: coHost };
   for (const id of games.addTo) {
-    Object.assign(updates, managerUpdates(id, coHost?.email ?? ''));
+    Object.assign(updates, coHostWrites(ownerId, id, { managerEmail: coHost?.email ?? null }));
   }
   for (const id of games.clearFrom) {
-    Object.assign(updates, managerUpdates(id, ''));
+    Object.assign(updates, coHostWrites(ownerId, id, {}));
   }
   return updates;
 }
@@ -127,10 +127,33 @@ export function fillCoHost(typed: string, filled: string | null, groupEmail: str
   return groupEmail ? { value: groupEmail, filled: groupEmail } : { value: '', filled: null };
 }
 
-function managerUpdates(gameId: string, email: string): Record<string, string> {
+/** A game's co-host: picked from its players (uid and name) or added by email. Leave all empty for none. */
+export interface GameManager {
+  managerId?: string | null;
+  managerEmail?: string | null;
+  managerName?: string | null;
+}
+
+/**
+ * The writes that set a game's co-host. The uid and name stay on the game, which everyone in it can read. An email
+ * goes to `gameCoHosts/{ownerId}/{gameId}`, which only the owner and that email's own signed-in account can read
+ * (Paul, Nov 15: "Hide them"). The game's old public `managerEmail` is cleared on every save.
+ */
+export function coHostWrites(ownerId: string, gameId: string, manager: GameManager): Record<string, string | null> {
   return {
-    [`games/${gameId}/managerId`]: '',
-    [`games/${gameId}/managerEmail`]: email,
-    [`games/${gameId}/managerName`]: ''
+    [`games/${gameId}/managerId`]: manager.managerId || '',
+    [`games/${gameId}/managerName`]: manager.managerName || '',
+    [`games/${gameId}/managerEmail`]: null,
+    [`gameCoHosts/${ownerId}/${gameId}`]: manager.managerEmail || null
   };
+}
+
+/** The owner's games with each one's co-host email (from `gameCoHosts/{ownerId}`) put back on, for the dashboard. */
+export function withCoHostEmails<T extends { id?: string; managerEmail?: string } | null>(games: T[], emails: unknown): T[] {
+  if (!emails || typeof emails !== 'object') return games;
+  const byGame = emails as Record<string, unknown>;
+  return games.map(game => {
+    const email = game?.id ? byGame[game.id] : undefined;
+    return game && typeof email === 'string' && email ? { ...game, managerEmail: email } : game;
+  });
 }

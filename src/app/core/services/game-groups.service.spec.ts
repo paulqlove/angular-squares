@@ -124,7 +124,7 @@ describe('GameGroupsService', () => {
     await service.setGroupCoHost('o', CHURCH, { email: 'dana@email.com' }, { addTo: ['a'], clearFrom: [] });
     expect(db.patch).toHaveBeenCalledWith({
       [`groupCoHosts/o/${CHURCH}`]: { email: 'dana@email.com' },
-      'games/a/managerId': '', 'games/a/managerEmail': 'dana@email.com', 'games/a/managerName': ''
+      'games/a/managerId': '', 'games/a/managerName': '', 'games/a/managerEmail': null, 'gameCoHosts/o/a': 'dana@email.com'
     });
     preview = true;
     await expect(service.setGroupCoHost('o', CHURCH, null, { addTo: [], clearFrom: [] })).rejects.toThrow('Preview only');

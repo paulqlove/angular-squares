@@ -79,6 +79,7 @@ export interface GameData {
   espnSport?: SportType | null;
   espnLive?: EspnLiveSnapshot;
   managerId?: string;
+  /** A co-host added by email. Never on the game itself: the owner's dashboard reads it from `gameCoHosts/{ownerId}`. */
   managerEmail?: string;
   managerName?: string;
   playerUserIds?: { [name: string]: string };
@@ -113,6 +114,7 @@ export interface GameListItem {
   /** Board size: 100 (10x10), 50 (5x10), or 25 (5x5). Defaults to 100. */
   boardSize: BoardSize;
   managerId?: string;
+  /** A co-host added by email. Never on the game itself: the owner's dashboard reads it from `gameCoHosts/{ownerId}`. */
   managerEmail?: string;
   managerName?: string;
   espnEventId?: string;
