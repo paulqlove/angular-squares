@@ -1080,6 +1080,14 @@ describe('game groups (groupLists, coHosts, openLists)', () => {
     });
   });
 
+  describe('the old shared list (openBoards)', () => {
+    it('is closed: nobody can read or write it', async () => {
+      await assertFails(read(visitor(), 'openBoards/owner'));
+      await assertFails(read(owner(), 'openBoards/owner'));
+      await assertFails(set(owner(), `openBoards/owner/${GAME}`, true));
+    });
+  });
+
   describe('openLists', () => {
     it('the owner or co-host lists the game in its own list', async () => {
       await assertSucceeds(set(owner(), `openLists/${CHURCH}/${GAME}`, 'owner'));

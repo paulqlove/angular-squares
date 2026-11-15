@@ -28,14 +28,13 @@ export class BoardSettingsService {
   }
 
   /**
-   * The other boards in this board's More list (its group, or the host's No group boards). A board
-   * from before groups has no list yet and reads the host's older list. Empty on any error.
+   * The other boards in this board's More list (its group, or the host's No group boards).
+   * Empty for a board with no list and on any error.
    */
   public async getOpenBoards(board: OpenListTarget): Promise<OpenBoardRow[]> {
-    if (!this.database.isBrowser || !board.ownerId) return [];
+    if (!this.database.isBrowser || !board.ownerId || !board.openListId) return [];
     try {
-      const path = board.openListId ? `openLists/${board.openListId}` : `openBoards/${board.ownerId}`;
-      const snap = await get(ref(this.database.db, path));
+      const snap = await get(ref(this.database.db, `openLists/${board.openListId}`));
       const ids = listedBoardIds(snap.val(), board.ownerId, board.id);
       return openBoardRows(await Promise.all(ids.map(id => this.records.getGame(id))), board.id, board.ownerId);
     } catch {
@@ -93,15 +92,14 @@ export class BoardSettingsService {
   }
 
   /**
-   * The host or co-host turns "Show in my open boards" on or off. A board from before groups is
-   * filed into No group on the way, and the owner's older list entry is cleared. Returns the board's list.
+   * The host or co-host turns "Show in my open boards" on or off. A board with no list yet is
+   * filed into No group on the way. Returns the board's list.
    */
   public async setShowInOpenBoards(board: OpenListTarget, on: boolean): Promise<string> {
     if (!this.database.isBrowser) throw new Error('Cannot save on server');
     if (this.authService.blockPreviewWrite()) throw new Error('Preview only');
     const listId = board.openListId || await this.ungroupedKey(board.ownerId);
     const updates = fileBoardUpdates(board, listId, on);
-    if (this.authService.currentUser()?.uid === board.ownerId) updates[`openBoards/${board.ownerId}/${board.id}`] = null;
     await update(ref(this.database.db), updates);
     return listId;
   }

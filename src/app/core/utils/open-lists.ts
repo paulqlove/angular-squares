@@ -29,12 +29,12 @@ export function isListKey(value: unknown): value is string {
 }
 
 /**
- * Board ids in a list that belong to this owner, without the board on screen. `true` is the
- * older per-owner list's value; anything else (another host's uid copied into a list) is dropped.
+ * Board ids in a list that belong to this owner, without the board on screen. Anything else
+ * (another host's uid copied into a list) is dropped.
  */
 export function listedBoardIds(list: Record<string, unknown> | null, ownerId: string, excludeId: string): string[] {
   return Object.entries(list ?? {})
-    .filter(([id, value]) => id !== excludeId && (value === ownerId || value === true))
+    .filter(([id, value]) => id !== excludeId && value === ownerId)
     .map(([id]) => id)
     .slice(0, MAX_OPEN_BOARDS);
 }

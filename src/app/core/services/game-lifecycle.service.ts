@@ -121,7 +121,6 @@ export class GameLifecycleService {
     const updates: Record<string, unknown> = {
       [`games/${gameId}`]: null,
       [`users/${ownerId}/games/${gameId}`]: null,
-      [`openBoards/${ownerId}/${gameId}`]: null,
     };
     const listId = listSnap.val();
     if (isListKey(listId)) updates[`openLists/${listId}/${gameId}`] = null;

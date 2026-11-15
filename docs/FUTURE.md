@@ -192,7 +192,7 @@ Oct 31, 2026 lab pass on quarterscore.com. Mobile Lighthouse 69 / 80 / 100 / 91 
 - A fourth tab, **More**, beside Board, Hit rate and Box score. It shows only when the same host has at least one other board switched on with open squares. Opening a board from it lands on that board's squares.
 - Each card is compact: a squares thumbnail, the board name (two lines), teams, "N open", "taken/size taken · N pts per square". Two across on desktop, one on a phone. Most open squares first, six shown then See all. Points only, never dollars, no total line.
 - The host switch **Show in my open boards** (create form, dashboard Edit Game, game page Edit) is off by default, previews exactly what players see, and shows only for hosts whose plan allows more than one board while the board is open and unlocked.
-- Data: `openBoards/{ownerId}/{boardId}: true` (readable per owner only, never listable; written only by that owner), `games/{id}/showInOpenBoards`, counters at `boardStats/{boardId}` (fullBoardViews, fullBoardViewsWithOpenBoards, otherBoardJoins; increment-only, owner or admin can read). Rules deployed Nov 7.
+- Data (before game groups): `openBoards/{ownerId}/{boardId}: true` (readable per owner only, never listable; written only by that owner; replaced by `openLists`, see below), `games/{id}/showInOpenBoards`, counters at `boardStats/{boardId}` (fullBoardViews, fullBoardViewsWithOpenBoards, otherBoardJoins; increment-only, owner or admin can read). Rules deployed Nov 7.
 - Terms and Privacy say links are secret by default and say what a listed board shows.
 - Desktop: every tab keeps the Board's height so Players and Winners never move; phones are unchanged.
 
