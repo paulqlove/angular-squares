@@ -9,8 +9,10 @@ import { PlanService } from '../../../core/services/plan.service';
 import { SanitizationService } from '../../../core/services/sanitization.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { buildCreateGameValues, clearCreateDraft, isPendingAutoSubmit, loadCreateDraft, saveCreateDraft } from '../../../core/utils/create-game-draft';
+import type { GroupChoice } from '../../../core/utils/game-groups';
 import { CreateGameSubmit } from '../../create/create-game-form.component';
 import { DashboardEditService } from './dashboard-edit.service';
+import { DashboardGroupsService } from './dashboard-groups.service';
 import { DashboardStore } from './dashboard.store';
 
 type UpgradeTrigger = 'limit' | 'pass' | 'ended';
@@ -57,7 +59,7 @@ export class DashboardDialogsService {
         user.uid, user.displayName || 'Unknown', values.name, values.espnEventId, values.homeTeam, values.awayTeam, values.price,
         values.espnSport, values.manager, values.hostNote, values.boardSize, values.quarterSplit, values.emptyQuarterRule
       );
-      await this.applyCreateExtras(gameId, user.uid, values);
+      await this.applyCreateExtras(gameId, user.uid, values, submit.group);
       this.showCreateModal.set(false);
       clearCreateDraft();
       this.router.navigate(['/game', gameId]);
@@ -175,6 +177,7 @@ export class DashboardDialogsService {
   private readonly confirmService: ConfirmService = inject(ConfirmService);
   private readonly edit: DashboardEditService = inject(DashboardEditService);
   private readonly gameService: GameService = inject(GameService);
+  private readonly groups: DashboardGroupsService = inject(DashboardGroupsService);
   private readonly planService: PlanService = inject(PlanService);
   private readonly router: Router = inject(Router);
   private readonly sanitizationService: SanitizationService = inject(SanitizationService);
@@ -183,14 +186,17 @@ export class DashboardDialogsService {
   private upgradeReturnFocus: HTMLElement | null = null;
 
   /** The settings saved after the board exists. Each one failing only warns: the board is already made. */
-  private async applyCreateExtras(gameId: string, uid: string, values: CreateGameSubmit['values']): Promise<void> {
+  private async applyCreateExtras(gameId: string, uid: string, values: CreateGameSubmit['values'], group?: GroupChoice): Promise<void> {
+    let shownIn: string | undefined;
     if (values.showInOpenBoards) {
       try {
-        await this.gameService.setShowInOpenBoards({ id: gameId, ownerId: uid }, true);
+        shownIn = await this.gameService.setShowInOpenBoards({ id: gameId, ownerId: uid }, true);
       } catch {
         this.toastService.warning('Board created, but Show in my open boards could not be turned on. Try again in Edit.');
       }
     }
+    // After the switch, so the board moves its More entry from No group into the group
+    await this.groups.fileNewBoard({ id: gameId, ownerId: uid, openListId: shownIn, showInOpenBoards: !!shownIn }, group);
     if (values.maxSquaresPerPlayer && this.planService.features().squareLimit) {
       try {
         await this.gameService.setSquareLimit(gameId, values.maxSquaresPerPlayer);

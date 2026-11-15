@@ -117,6 +117,8 @@
       [autoManageAllowed]="planService.features().autoManage"
       [autoManageDefault]="dialogs.autoManageDefault()"
       [squareLimitAllowed]="planService.features().squareLimit"
+      [groupsAllowed]="planService.features().gameGroups"
+      [groups]="groups.groups()"
       [isCreating]="dialogs.isCreating()"
       (cancelled)="dialogs.closeCreateModal()"
       (submitted)="dialogs.createGame($event)"

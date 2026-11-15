@@ -14,10 +14,14 @@ import {
   CreateGameDraft, CreateGameValues, buildCreateGameValues, emptyDraft, loadCreateDraft, splitToTenths
 } from '../../core/utils/create-game-draft';
 import { GamePickCardComponent } from '../../shared/game-pick-card.component';
+import { GroupPickerComponent } from '../../components/ui/group-picker/group-picker.component';
+import type { GameGroup, GroupChoice } from '../../core/utils/game-groups';
 
 export interface CreateGameSubmit {
   draft: CreateGameDraft;
   values: CreateGameValues;
+  /** Where the Group picker was left (Season Pass). Missing when the picker didn't show. */
+  group?: GroupChoice;
 }
 
 /**
@@ -26,7 +30,7 @@ export interface CreateGameSubmit {
  */
 @Component({
   selector: 'app-create-game-form',
-  imports: [MaxSquaresFieldComponent, FormsModule, NgIconComponent, EmptyQuarterRuleComponent, ToggleComponent, GamePickCardComponent],
+  imports: [MaxSquaresFieldComponent, FormsModule, NgIconComponent, EmptyQuarterRuleComponent, ToggleComponent, GamePickCardComponent, GroupPickerComponent],
   providers: [provideIcons({ heroMagnifyingGlass })],
   host: { class: 'contents' },
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -252,7 +256,7 @@ export interface CreateGameSubmit {
         </div>
             </div>
           </section>
-      @if (openBoardsAllowed || (selectedSport !== 'custom' && selectedEspnGame())) {
+      @if (openBoardsAllowed || groupsAllowed || (selectedSport !== 'custom' && selectedEspnGame())) {
       <div class="divide-y divide-qs-line border-t border-qs-line">
       @if (openBoardsAllowed) {
         <div class="flex items-start justify-between gap-4 py-5 first:pt-5">
@@ -263,6 +267,9 @@ export interface CreateGameSubmit {
           </div>
           <app-toggle [checked]="newGameShowInOpenBoards" (onChange)="newGameShowInOpenBoards = $event"></app-toggle>
         </div>
+      }
+      @if (groupsAllowed) {
+        <app-group-picker class="block py-5" [groups]="groups" [value]="newGameGroup.groupId" [allowNew]="true" (changed)="newGameGroup = $event"></app-group-picker>
       }
 
   @if (selectedSport !== 'custom' && selectedEspnGame()) {
@@ -332,6 +339,9 @@ export class CreateGameFormComponent implements OnChanges, OnInit {
   @Input() autoManageDefault = true;
   /** Season Pass hosts can limit squares per player. */
   @Input() squareLimitAllowed = false;
+  /** Season Pass hosts get the Group picker on Details, with their groups. */
+  @Input() groupsAllowed = false;
+  @Input() groups: GameGroup[] = [];
   @Output() cancelled = new EventEmitter<void>();
   @Output() submitted = new EventEmitter<CreateGameSubmit>();
 
@@ -359,6 +369,8 @@ export class CreateGameFormComponent implements OnChanges, OnInit {
   /** Once the host flips the switch, the plan and profile default stop moving it. */
   autoManageTouched = false;
   newGameMaxSquares: number | null = null;
+  /** Starts on No group. Creating before Details files the board in No group. */
+  newGameGroup: GroupChoice = { groupId: null };
   newGameName = '';
   newGamePaymentManager = '';
   newGamePrice = 10;
@@ -525,7 +537,7 @@ export class CreateGameFormComponent implements OnChanges, OnInit {
       return;
     }
     this.gameNameError.set(false);
-    this.submitted.emit({ draft, values: result.values });
+    this.submitted.emit({ draft, values: result.values, ...(this.groupsAllowed ? { group: this.newGameGroup } : {}) });
   }
 
   /** The field with the error can be far below the Create button: bring it into view and put the cursor there. */
