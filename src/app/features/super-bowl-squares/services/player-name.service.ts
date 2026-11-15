@@ -102,12 +102,11 @@ export class PlayerNameService {
       }
 
       // Record new name in playerUserIds
-      this.state.playerUserIds[sanitized] = user.uid;
-      await this.gameService.updateGame(this.state.gameId, { playerUserIds: this.state.playerUserIds });
+      const playerUserIds = { ...this.state.playerUserIds, [sanitized]: user.uid };
+      await this.gameService.updateGame(this.state.gameId, { playerUserIds });
+      this.state.playerUserIds = playerUserIds;
 
-      this.state.currentPlayerName = sanitized;
-      this.ui.showForceNameChangeModal.set(false);
-      this.duplicateNameWarning.set(null);
+      this.currentPlayer = sanitized;
     } catch (error) {
       this.toastService.error('Could not save your name. Try again.');
     } finally {
@@ -137,13 +136,15 @@ export class PlayerNameService {
         await this.authService.updateDisplayName(this.editingName);
       }
 
-      // Propagate name change across all game data
+      // Carry the old name's squares over, when they are this viewer's to move. A name another account holds (the
+      // one that was refused) stays where it is: renaming it would be refused too and leave the page on the old name.
       const oldName = currentUserName;
-      if (oldName && oldName !== sanitizedName) {
+      if (oldName && oldName !== sanitizedName && this.ownsName(oldName)) {
         await this.gameService.updateGame(state.gameId, renamePlayer(state, oldName, sanitizedName));
       }
 
-      state.currentPlayerName = this.editingName.trim();
+      // Through the setter, so the "already in use" warning is checked against the new name
+      this.currentPlayer = this.editingName.trim();
       this.ui.showNameEditModal.set(false);
     } catch (error) {
       this.toastService.error('Could not save your name. Try again.');
@@ -184,6 +185,12 @@ export class PlayerNameService {
   private clearDuplicate(): void {
     this.duplicateNameWarning.set(null);
     this.ui.showForceNameChangeModal.set(false);
+  }
+
+  /** The host can rename anyone; a player only a name linked to their own account. */
+  private ownsName(name: string): boolean {
+    const uid = this.authService.currentUser()?.uid;
+    return this.state.isHost() || (!!uid && this.state.playerUserIds[name] === uid);
   }
 
   /** The name is on this board and is not the viewer's own auth name. */

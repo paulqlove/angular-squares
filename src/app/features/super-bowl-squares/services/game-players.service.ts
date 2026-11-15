@@ -38,8 +38,9 @@ export class GamePlayersService {
     const me = state.currentPlayerName;
     const hasSquares = Object.values(state.selectedSquares).some(p => p.toLowerCase() === me.toLowerCase());
     if (hasSquares && !state.playerUserIds[me]) {
-      state.playerUserIds[me] = currentUser.uid;
-      this.gameService.updateGame(state.gameId, { playerUserIds: state.playerUserIds }).catch(() => {});
+      // Kept locally only once saved: a refused link (a name the host typed) would ride along in every later write
+      const playerUserIds = { ...state.playerUserIds, [me]: currentUser.uid };
+      this.gameService.updateGame(state.gameId, { playerUserIds }).then(() => (state.playerUserIds = playerUserIds)).catch(() => {});
     }
   }
 

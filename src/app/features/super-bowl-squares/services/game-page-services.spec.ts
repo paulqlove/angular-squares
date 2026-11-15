@@ -38,7 +38,16 @@ describe('game page services', () => {
       providers: [
         EspnSyncService, GamePageGroupsService, GamePageUiService, GamePlayersService, GameScoringService, GameStateService, HostActionsService,
         NumberDrawService, PlayerNameService, SquarePickerService,
-        { provide: AuthService, useValue: { currentUser: user, previewRole: signal('actual'), isPreviewAdmin: signal(false) } },
+        {
+          provide: AuthService,
+          useValue: {
+            currentUser: user,
+            previewRole: signal('actual'),
+            isPreviewAdmin: signal(false),
+            updateGuestName: (name: string) => user.set({ ...user()!, displayName: name }),
+            updateDisplayName: (name: string) => Promise.resolve(user.set({ ...user()!, displayName: name }))
+          }
+        },
         { provide: PlanService, useValue: { features: signal({ autoManage: true, activeBoards: 3, adFree: false, customSplits: true, squareLimit: true }), plan: signal('free') } },
         { provide: GameService, useValue: { updateGame, addJoinedGame: vi.fn() } },
         { provide: ToastService, useValue: toast },
@@ -140,6 +149,7 @@ describe('game page services', () => {
       updateGame.mockReturnValueOnce(Promise.reject(new Error('denied')));
       await TestBed.inject(SquarePickerService).onSquareClick({ row: 0, col: 0 });
       expect(state.selectedSquares).toEqual({});
+      expect(state.playerUserIds).toEqual({});
       expect(toast.error).toHaveBeenCalled();
     });
   });
@@ -364,6 +374,52 @@ describe('game page services', () => {
       state.playerUserIds = { Paul: 'host-1' };
       names.checkDuplicateName();
       expect(names.duplicateNameWarning()).toBeNull();
+    });
+
+    it("lets a guest who was refused a name switch to a new one at once, leaving the host's squares where they are", async () => {
+      const state = hostedBoard();
+      user.set({ uid: 'guest-1', displayName: 'Carl', isGuest: true, email: null, photoURL: null });
+      state.selectedSquares = { '0-0': 'Carl' };
+      state.playerColors = { Carl: 'qs-p-sky' };
+      state.playerUserIds = { Carl: 'host-1' };
+      const names = TestBed.inject(PlayerNameService);
+      names.currentPlayer = 'Carl';
+      expect(names.duplicateNameWarning()).toBe('"Carl" is already in use');
+      names.editingName = 'Dana';
+      await names.saveNameEdit();
+      expect(updateGame).not.toHaveBeenCalled();
+      expect(state.selectedSquares).toEqual({ '0-0': 'Carl' });
+      expect(state.currentPlayerName).toBe('Dana');
+      expect(names.duplicateNameWarning()).toBeNull();
+      expect(toast.error).not.toHaveBeenCalled();
+    });
+
+    it('carries a player’s own squares over to their new name', async () => {
+      const state = hostedBoard();
+      user.set({ uid: 'guest-1', displayName: 'Carl', isGuest: true, email: null, photoURL: null });
+      state.selectedSquares = { '0-0': 'Carl' };
+      state.playerUserIds = { Carl: 'guest-1' };
+      const names = TestBed.inject(PlayerNameService);
+      names.currentPlayer = 'Carl';
+      names.editingName = 'Dana';
+      await names.saveNameEdit();
+      expect(updateGame).toHaveBeenCalledWith('G1', expect.objectContaining({ selectedSquares: { '0-0': 'Dana' }, playerUserIds: { Dana: 'guest-1' } }));
+      expect(state.currentPlayerName).toBe('Dana');
+    });
+  });
+
+  describe('GamePlayersService name link', () => {
+    it('keeps a refused name link out of the page, so it does not ride along in later saves', async () => {
+      const state = hostedBoard();
+      user.set({ uid: 'guest-1', displayName: 'Carl', isGuest: true, email: null, photoURL: null });
+      state.selectedSquares = { '0-0': 'Carl' };
+      state.currentPlayerName = 'Carl';
+      updateGame.mockReturnValueOnce(Promise.reject(new Error('denied')));
+      TestBed.inject(GamePlayersService).backfillPlayerUserId();
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(updateGame).toHaveBeenCalledWith('G1', { playerUserIds: { Carl: 'guest-1' } });
+      expect(state.playerUserIds).toEqual({});
     });
   });
 });
