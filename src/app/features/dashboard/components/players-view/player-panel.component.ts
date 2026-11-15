@@ -5,8 +5,9 @@ import { PlayerSummary } from '../../services/players-across-games';
 import { revealScroll } from '../../utils/player-panel-motion';
 import { PlayerGamesComponent } from './player-games.component';
 
-/** The open grows over --qs-t-state; the reveal scroll waits for it. A switch eases the height over the same time. */
-const OPEN_MS = 200;
+/** The open grows over --qs-t-state; the reveal scroll waits for it. A switch eases the height over the same time.
+ * WAAPI and timers can't read CSS tokens, so these mirror --qs-t-state and --qs-ease-decel; keep them in step. */
+const OPEN_MS = 200; // --qs-t-state
 const EASE_DECEL = 'cubic-bezier(.2,0,0,1)'; // --qs-ease-decel
 
 /**
@@ -15,13 +16,13 @@ const EASE_DECEL = 'cubic-bezier(.2,0,0,1)'; // --qs-ease-decel
  * 200ms and the cards below glide down; its games fade in 40ms in, rising 4px. Closing, they fade in 80ms while it
  * folds away over 160ms. Switching to the other card in the row keeps the panel: the games crossfade and only the
  * difference in height eases. Once open, if its bottom is under the bottom bar or off screen, the page scrolls it into
- * view once. The height moves on purpose here (docs/DECISIONS.md, D-029). Reduced motion: the height changes at once
+ * view once. The height moves on purpose here (docs/DECISIONS.md, D-030). Reduced motion: the height changes at once
  * and the games fade over 120ms.
  */
 @Component({
   selector: 'div[appPlayerPanel]',
   imports: [PlayerGamesComponent],
-  host: { class: 'qs-player-panel col-span-full grid sm:hidden', role: 'region', '[attr.aria-label]': "player().name + '’s games'" },
+  host: { class: 'col-span-full grid sm:hidden', role: 'region', '[attr.aria-label]': "player().name + '’s games'" },
   template: `
     <div class="qs-panel-clip">
       <div class="pb-3">

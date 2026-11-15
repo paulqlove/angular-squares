@@ -66,9 +66,10 @@ export class PlayerCardComponent {
       const phone = window.matchMedia(PHONE_QUERY);
       // The close waits for the click to finish, so a click on another card opens that card straight from this one
       // (its panel swaps in) and this one is no longer open by then.
+      let closing: ReturnType<typeof setTimeout> | undefined;
       const close = (event: Event) => {
         if (phone.matches || !this.isOpen() || this.host.nativeElement.contains(event.target as Node)) return;
-        setTimeout(() => { if (this.isOpen()) this.players.toggleOpen(this.player().key); });
+        closing = setTimeout(() => { if (this.isOpen()) this.players.toggleOpen(this.player().key); });
       };
       const onEscape = (event: KeyboardEvent) => {
         if (event.key !== 'Escape' || phone.matches || !this.isOpen()) return;
@@ -79,6 +80,7 @@ export class PlayerCardComponent {
       this.document.addEventListener('click', close, true);
       this.document.addEventListener('keydown', onEscape);
       onCleanup(() => {
+        clearTimeout(closing);
         this.document.removeEventListener('click', close, true);
         this.document.removeEventListener('keydown', onEscape);
       });

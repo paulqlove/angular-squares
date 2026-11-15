@@ -3,6 +3,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { GameChange, GameData, GameService } from '../../../core/services/game.service';
 import { PlanService } from '../../../core/services/plan.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { REDUCED_MOTION_QUERY } from '../../../shared/media-queries';
 import { withPlayerConfirmCount, withPlayerConfirmed, withoutPlayer } from '../../../core/utils/board-players';
 import { paidCountsByName } from '../../../core/utils/paid-squares';
 import { DashboardStore } from './dashboard.store';
@@ -280,5 +281,5 @@ export class PlayersViewService {
 }
 
 function reducedMotion(): boolean {
-  return typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  return typeof matchMedia === 'function' && matchMedia(REDUCED_MOTION_QUERY).matches;
 }
