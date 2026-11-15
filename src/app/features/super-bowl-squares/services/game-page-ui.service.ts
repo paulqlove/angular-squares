@@ -1,5 +1,6 @@
 import { afterNextRender, ElementRef, inject, Injectable, Injector, PLATFORM_ID, signal, WritableSignal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { AnalyticsService } from '../../../core/services/analytics.service';
 import { BoardSize } from '../../../core/services/game.service';
 import { WalkthroughService } from '../../../core/services/walkthrough.service';
 import { walkthroughStepsFor } from '../utils/game-walkthrough';
@@ -131,8 +132,15 @@ export class GamePageUiService {
     this.highlightedSquare = this.highlightedSquare === key ? null : key;
   }
 
+  /** Counts a way back to the dashboard. Signed-out visitors don't have one, so they aren't counted. */
+  public trackToDashboard(from: 'host_bar' | 'header'): void {
+    if (!this.state.currentUser()) return;
+    this.analytics.track('game_to_dashboard', { from });
+  }
+
   // Private properties
 
+  private readonly analytics: AnalyticsService = inject(AnalyticsService);
   private readonly injector: Injector = inject(Injector);
   private readonly platformId: object = inject(PLATFORM_ID);
   private readonly state: GameStateService = inject(GameStateService);

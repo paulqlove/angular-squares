@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, HostListener, computed, inject, input, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, HostListener, computed, inject, input, output, signal, viewChild } from '@angular/core';
 import { isGameCode, normalizeCodeInput } from '../../../core/utils/game-code';
 import { NgTemplateOutlet } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
@@ -178,7 +178,7 @@ const CLOSE_MS = 220;
             <span>Create a game</span>
           </a>
         }
-        <a routerLink="/dashboard" (click)="close()" class="flex min-h-11 items-center gap-3 rounded-btn px-3 text-sm transition-colors hover:bg-qs-panel-2">
+        <a routerLink="/dashboard" (click)="close(); dashboardClick.emit()" class="flex min-h-11 items-center gap-3 rounded-btn px-3 text-sm transition-colors hover:bg-qs-panel-2">
           <ng-icon name="heroSquares2x2" class="shrink-0 text-lg text-qs-muted"></ng-icon>
           <span>My dashboard</span>
           <ng-icon name="heroChevronRight" class="ml-auto shrink-0 text-base text-qs-muted"></ng-icon>
@@ -190,6 +190,8 @@ const CLOSE_MS = 220;
 export class YourGamesMenuComponent {
   /** The game on screen, listed first and marked Viewing. */
   currentGameId = input.required<string>();
+  /** My dashboard was tapped. */
+  dashboardClick = output<void>();
 
   /** Closes the menu. Focus goes back to the button unless the close came from a click somewhere else on the page. */
   close(returnFocus = true): void {

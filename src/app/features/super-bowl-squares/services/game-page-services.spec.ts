@@ -1,5 +1,6 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { AnalyticsService } from '../../../core/services/analytics.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ConfirmService } from '../../../core/services/confirm.service';
 import { EspnService } from '../../../core/services/espn.service';
@@ -23,6 +24,7 @@ describe('game page services', () => {
   let user: ReturnType<typeof signal<{ uid: string; displayName: string | null; isGuest: boolean; email: null; photoURL: null } | null>>;
   let updateGame: ReturnType<typeof vi.fn>;
   let getGame: ReturnType<typeof vi.fn>;
+  let track: ReturnType<typeof vi.fn>;
   let toast: { error: ReturnType<typeof vi.fn>; success: ReturnType<typeof vi.fn>; warning: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
@@ -30,6 +32,7 @@ describe('game page services', () => {
     updateGame = vi.fn(() => Promise.resolve());
     getGame = vi.fn();
     toast = { error: vi.fn(), success: vi.fn(), warning: vi.fn() };
+    track = vi.fn();
     TestBed.configureTestingModule({
       providers: [
         EspnSyncService, GamePageUiService, GamePlayersService, GameScoringService, GameStateService, HostActionsService,
@@ -38,6 +41,7 @@ describe('game page services', () => {
         { provide: PlanService, useValue: { features: signal({ autoManage: true, activeBoards: 3, adFree: false, customSplits: true, squareLimit: true }), plan: signal('free') } },
         { provide: GameService, useValue: { updateGame, addJoinedGame: vi.fn() } },
         { provide: ToastService, useValue: toast },
+        { provide: AnalyticsService, useValue: { track } },
         { provide: ConfirmService, useValue: { ask: () => Promise.resolve(true) } },
         { provide: EspnService, useValue: { getGame, isEventFinal: () => Promise.resolve(null) } }
       ]
@@ -254,6 +258,26 @@ describe('game page services', () => {
       expect(state.isLocked).toBe(false);
     });
 
+    it('draws from the next-step button on a board locked without numbers', async () => {
+      const state = hostedBoard();
+      state.isLocked = true;
+      state.isRandomized = false;
+      vi.spyOn(TestBed.inject(NumberDrawService), 'playNumberRevealAnimation').mockImplementation(() => undefined);
+      await TestBed.inject(HostActionsService).runNextStep();
+      expect(state.isLocked).toBe(true);
+      expect(state.isRandomized).toBe(true);
+      expect(state.homeNumbers.slice().sort()).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    });
+
+    it('unlocks from the next-step button once the numbers are drawn', async () => {
+      const state = hostedBoard();
+      state.isLocked = true;
+      await TestBed.inject(HostActionsService).runNextStep();
+      expect(state.isLocked).toBe(false);
+      expect(state.isRandomized).toBe(true);
+      expect(updateGame).toHaveBeenCalledWith('G1', { isLocked: false });
+    });
+
     it('clears drawn numbers and their winners', async () => {
       const state = hostedBoard();
       state.winners = { q1: 'Kim' };
@@ -261,6 +285,19 @@ describe('game page services', () => {
       expect(state.isRandomized).toBe(false);
       expect(state.winners).toEqual({});
       expect(state.homeNumbers).toEqual(Array(10).fill(null));
+    });
+  });
+
+  describe('GamePageUiService', () => {
+    it('counts the way back to the dashboard and where it was tapped', () => {
+      TestBed.inject(GamePageUiService).trackToDashboard('host_bar');
+      expect(track).toHaveBeenCalledWith('game_to_dashboard', { from: 'host_bar' });
+    });
+
+    it('does not count a signed-out visitor, whose logo tap goes to the home page', () => {
+      user.set(null);
+      TestBed.inject(GamePageUiService).trackToDashboard('header');
+      expect(track).not.toHaveBeenCalled();
     });
   });
 

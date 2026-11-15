@@ -8,6 +8,7 @@ import { splitFractions } from '../../../core/plans';
 import { drawBoardNumbers } from '../../../core/utils/draw-numbers';
 import type { EditGameValues } from '../components/edit-game-dialog/edit-game-dialog.component';
 import { emptyScores } from '../utils/board-math';
+import { hostNextStep } from '../utils/host-next-step';
 import { GamePageUiService } from './game-page-ui.service';
 import { GameStateService } from './game-state.service';
 import { NumberDrawService } from './number-draw.service';
@@ -129,6 +130,15 @@ export class HostActionsService {
 
     // Trigger the reveal animation
     this.draw.playNumberRevealAnimation(state.homeNumbers, state.awayNumbers);
+  }
+
+  /** The phone bar's one game-day button: lock (and draw), draw a locked board's numbers, or unlock. */
+  public async runNextStep(): Promise<void> {
+    if (hostNextStep(this.state.isLocked, this.state.isRandomized) === 'draw') {
+      await this.randomizeNumbers();
+      return;
+    }
+    await this.toggleLock();
   }
 
   /** Owner only. Locking a board that could shrink suggests a smaller size first. */
