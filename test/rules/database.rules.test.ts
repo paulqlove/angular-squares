@@ -270,6 +270,40 @@ describe('player maps', () => {
     await assertFails(write(guest(), { [`${G}/playerUserIds/Alice`]: null }));
   });
 
+  describe('a name the host put on the board with no account linked', () => {
+    beforeEach(async () => {
+      await seed({
+        [`${G}/squares/0-3`]: 'Carl',
+        [`${G}/playerColors/Carl`]: 'bg-amber-200',
+        [`${G}/paidPlayers/2`]: 'Carl'
+      });
+    });
+
+    it('a guest cannot link it to themselves', async () => {
+      await assertFails(write(guest(), { [`${G}/playerUserIds/Carl`]: 'guest' }));
+    });
+
+    it('a guest cannot link it and then move its squares and paid mark to their own name', async () => {
+      await assertFails(write(guest(), { [`${G}/playerUserIds/Carl`]: 'guest' }));
+      await assertFails(write(guest(), { [`${G}/squares/0-3`]: 'Guesty', [`${G}/paidPlayers/2`]: 'Guesty' }));
+    });
+
+    it('a guest cannot take it while the game is locked either', async () => {
+      await seed({ [`${G}/isLocked`]: true });
+      await assertFails(write(guest(), { [`${G}/playerUserIds/Carl`]: 'guest' }));
+      await assertFails(write(guest(), { [`${G}/squares/0-3`]: 'Guesty', [`${G}/paidPlayers/2`]: 'Guesty' }));
+    });
+
+    it('the host can still link it to a player', async () => {
+      await assertSucceeds(write(owner(), { [`${G}/playerUserIds/Carl`]: 'guest' }));
+    });
+
+    it('once the host removes the player, anyone can use the name fresh', async () => {
+      await seed({ [`${G}/squares/0-3`]: null, [`${G}/playerColors/Carl`]: null, [`${G}/paidPlayers/2`]: null });
+      await assertSucceeds(write(guest(), { [`${G}/squares/5-5`]: 'Carl', [`${G}/playerUserIds/Carl`]: 'guest' }));
+    });
+  });
+
   it('a player cannot wipe the whole name mapping node', async () => {
     await assertFails(set(player(), `${G}/playerUserIds`, null));
   });
