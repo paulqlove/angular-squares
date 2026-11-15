@@ -17,14 +17,16 @@
         <span class="truncate text-base text-qs-muted">Games &amp; codes</span>
       </button>
     }
-    @if (!players.active() && store.groupPickerShows()) {
+    <!-- On the Players tab the folder stays put but switched off, so the field doesn't grow; a tap says why -->
+    @if (store.groupPickerShows()) {
       <button
         type="button"
-        (click)="groups.pickSheetOpen.set(true)"
+        (click)="tapGroups()"
         class="flex w-12 shrink-0 items-center justify-center rounded-btn border transition-colors"
-        [class]="groups.picked() ? 'border-qs-ink bg-qs-ink text-qs-bg' : 'border-qs-line-strong bg-qs-panel text-qs-ink'"
-        [attr.aria-label]="'Groups: ' + groups.pickedName()"
-        aria-haspopup="dialog"
+        [class]="folderClass()"
+        [attr.aria-disabled]="players.active() ? 'true' : null"
+        [attr.aria-label]="players.active() ? hint : 'Groups: ' + groups.pickedName()"
+        [attr.aria-haspopup]="players.active() ? null : 'dialog'"
         [attr.tabindex]="search.searchOpen() ? -1 : null"
       >
         <ng-icon name="heroFolder" class="text-xl" aria-hidden="true"></ng-icon>
