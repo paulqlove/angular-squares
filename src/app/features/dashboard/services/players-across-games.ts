@@ -74,6 +74,10 @@ export function playersAcrossGames(boards: readonly PlayersBoard[]): PlayerSumma
     || a.sameNameIndex - b.sameNameIndex);
 }
 
+/** Confirm all shows in an opened card from two unconfirmed games, on phones and desktop alike; one game's toggle does it. */
+export function showsConfirmAll(unconfirmedGames: number): boolean {
+  return unconfirmedGames >= 2;
+}
 /** From this many games, an opened card's desktop panel is two cards wide with the games in two columns. */
 export const WIDE_PANEL_GAMES = 4;
 
