@@ -67,7 +67,7 @@ export class DashboardEditService {
     if (!game) return;
 
     try {
-      await this.gameService.updateGameManager(game.id, player.uid, null, player.name);
+      await this.gameService.updateGameManager(game.id, game.ownerId, { managerId: player.uid, managerName: player.name });
       this.markCoHost(game, player.uid, true);
       this.editingGame.set({ ...game, managerId: player.uid, managerName: player.name, managerEmail: undefined });
       this.store.updateMyGame(game.id, g => ({ ...g, managerId: player.uid, managerName: player.name, managerEmail: undefined }));
@@ -250,7 +250,7 @@ export class DashboardEditService {
     const email = listId ? this.groups.groups().find(g => g.id === listId)?.coHost?.email : undefined;
     if (!v.coHostFromGroup || !email || hasCoHost(game)) return {};
     try {
-      await this.gameService.updateGameManager(game.id, null, email, null);
+      await this.gameService.updateGameManager(game.id, game.ownerId, { managerEmail: email });
       return { managerEmail: email };
     } catch {
       this.toastService.warning('Saved, but the group\'s co-host could not be added. Try again in a moment.');
@@ -265,7 +265,7 @@ export class DashboardEditService {
     if (!game) return;
     const changed = { managerId: undefined, managerEmail: email ?? undefined, managerName: undefined };
     try {
-      await this.gameService.updateGameManager(game.id, null, email, null);
+      await this.gameService.updateGameManager(game.id, game.ownerId, { managerEmail: email });
       if (game.managerId) this.markCoHost(game, game.managerId, false);
       this.editingGame.set({ ...game, ...changed });
       this.store.updateMyGame(game.id, g => ({ ...g, ...changed }));

@@ -3,6 +3,7 @@ import { get, increment, ref, remove, set, update } from 'firebase/database';
 import { DEFAULT_EMPTY_QUARTER_RULE, EmptyQuarterRule, QuarterSplit } from '../plans';
 import { BoardSize, GameData, SportType, getBoardDimensions } from '../utils/game-data';
 import { generateGameId, isLinkableEspnId } from '../utils/game-parse';
+import { GameManager, coHostWrites } from '../utils/group-cohost';
 import { isListKey } from '../utils/open-lists';
 import { shuffleSquares, smallerBoardSizes } from '../utils/shuffle-squares';
 import { AuthService } from './auth.service';
@@ -78,12 +79,15 @@ export class GameLifecycleService {
       emptyQuarterRule: emptyQuarterRule || DEFAULT_EMPTY_QUARTER_RULE,
       ...(espnEventId ? { espnEventId } : {}),
       ...(espnSport ? { espnSport } : {}),
-      ...(managerEmail ? { managerEmail } : {}),
       ...(openListId ? { openListId } : {})
     };
 
-    const gameRef = ref(this.database.db, `games/${gameId}`);
-    await set(gameRef, defaultGameData);
+    // A co-host's email is saved where only the owner (and that email's account) can read it, in the same write.
+    const email = managerEmail?.trim();
+    await update(ref(this.database.db), {
+      [`games/${gameId}`]: defaultGameData,
+      ...(email ? { [`gameCoHosts/${ownerId}/${gameId}`]: email } : {})
+    });
 
     // Also add to user's games list
     const userGameRef = ref(this.database.db, `users/${ownerId}/games/${gameId}`);
@@ -122,6 +126,7 @@ export class GameLifecycleService {
       [`games/${gameId}`]: null,
       [`users/${ownerId}/games/${gameId}`]: null,
       [`openBoards/${ownerId}/${gameId}`]: null,
+      [`gameCoHosts/${ownerId}/${gameId}`]: null,
     };
     const listId = listSnap.val();
     if (isListKey(listId)) updates[`openLists/${listId}/${gameId}`] = null;
@@ -179,15 +184,11 @@ export class GameLifecycleService {
     return smallerBoardSizes(boardSize, squaresFilled, isRandomized);
   }
 
-  // Update game manager
-  public async updateGameManager(gameId: string, managerId: string | null, managerEmail: string | null, managerName: string | null = null): Promise<void> {
+  /** Sets a game's co-host (all empty for none). Only the owner can: the email is saved under their uid. */
+  public async updateGameManager(gameId: string, ownerId: string, manager: GameManager): Promise<void> {
     if (!this.database.isBrowser) return;
     if (this.authService.blockPreviewWrite()) throw new Error('Preview only');
-    await update(ref(this.database.db), {
-      [`games/${gameId}/managerId`]: managerId || '',
-      [`games/${gameId}/managerEmail`]: managerEmail || '',
-      [`games/${gameId}/managerName`]: managerName || ''
-    });
+    await update(ref(this.database.db), coHostWrites(ownerId, gameId, manager));
   }
 
   private readonly authService: AuthService = inject(AuthService);

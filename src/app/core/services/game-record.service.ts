@@ -165,9 +165,6 @@ export class GameRecordService {
     if (data.managerId !== undefined) {
       updates[`${prefix}/managerId`] = data.managerId;
     }
-    if (data.managerEmail !== undefined) {
-      updates[`${prefix}/managerEmail`] = data.managerEmail;
-    }
     if (data.managerName !== undefined) {
       updates[`${prefix}/managerName`] = data.managerName;
     }

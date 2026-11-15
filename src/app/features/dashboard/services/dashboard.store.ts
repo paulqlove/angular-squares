@@ -159,7 +159,8 @@ export class DashboardStore {
   public setRunBoard(board: GameData): void {
     this.runBoards.update(boards => boards.map(b => b.id === board.id ? board : b));
     const item = (joined: boolean) => toGameListItem(board.id as string, board, !joined);
-    this.myGames.update(games => games.map(g => g.id === board.id ? item(false) : g));
+    // The co-host's email isn't on the board itself (only the owner can read it), so the card keeps the one it has.
+    this.myGames.update(games => games.map(g => g.id === board.id ? { ...item(false), managerEmail: g.managerEmail } : g));
     this.joinedGames.update(games => games.map(g => g.id === board.id ? item(true) : g));
   }
 

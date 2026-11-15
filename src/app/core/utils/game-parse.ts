@@ -95,7 +95,6 @@ export function parseGameData(gameId: string, rawData: any, now: number = Date.n
     espnSport: rawData.espnSport || undefined,
     espnLive: readEspnLive(rawData.espnLive),
     managerId: rawData.managerId || undefined,
-    managerEmail: rawData.managerEmail || undefined,
     managerName: rawData.managerName || undefined,
     adFreeUntil: rawData.adFreeUntil || 0,
     quarterSplit: rawData.quarterSplit || null,

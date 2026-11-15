@@ -1093,8 +1093,9 @@ describe('game groups (groupLists, groupCoHosts, coHosts, openLists)', () => {
       await assertSucceeds(write(owner(), {
         [path]: { email: 'lee@email.com' },
         [`${G}/managerId`]: '',
-        [`${G}/managerEmail`]: 'lee@email.com',
-        [`${G}/managerName`]: ''
+        [`${G}/managerEmail`]: null,
+        [`${G}/managerName`]: '',
+        [`gameCoHosts/owner/${GAME}`]: 'lee@email.com'
       }));
       await assertSucceeds(set(owner(), path, null));
     });
@@ -1212,8 +1213,8 @@ describe('a co-host added by email', () => {
   const claim = (ctx: RulesTestContext, uid = 'dana') => set(ctx, `${I}/managerId`, uid);
 
   beforeEach(async () => {
-    const { managerId: _none, ...game } = baseGame({ managerEmail: 'Dana@Example.com' });
-    await seed({ [I]: game, 'groupLists/owner': { ungrouped: 'ungroupedKey0000000001' }, 'games/other1': baseGame({ ownerId: 'stranger', managerId: 'dana' }) });
+    const { managerId: _none, ...game } = baseGame();
+    await seed({ [I]: game, [`gameCoHosts/owner/${INVITED}`]: 'Dana@Example.com', 'groupLists/owner': { ungrouped: 'ungroupedKey0000000001' }, 'games/other1': baseGame({ ownerId: 'stranger', managerId: 'dana' }) });
   });
 
   it('the person who signs in with that verified email becomes the co-host, ignoring case', async () => {
@@ -1239,10 +1240,15 @@ describe('a co-host added by email', () => {
     await assertFails(claim(dana()));
   });
 
-  it('a game with no co-host email cannot be claimed', async () => {
-    await seed({ [`${I}/managerEmail`]: '' });
+  it('a game with no co-host email cannot be claimed, and the old public field no longer counts', async () => {
+    await seed({ [`gameCoHosts/owner/${INVITED}`]: null });
     await assertFails(claim(dana()));
-    await seed({ [`${I}/managerEmail`]: null });
+    await seed({ [`${I}/managerEmail`]: 'dana@example.com' });
+    await assertFails(claim(dana()));
+  });
+
+  it('an email saved for another owner\'s game id does not count', async () => {
+    await seed({ [`gameCoHosts/owner/${INVITED}`]: null, [`gameCoHosts/stranger/${INVITED}`]: 'dana@example.com' });
     await assertFails(claim(dana()));
   });
 
@@ -1264,5 +1270,65 @@ describe('a co-host added by email', () => {
     await assertFails(read(dana(), 'groupLists/owner'));
     await seed({ [`${I}/managerId`]: 'dana', 'coHosts/owner/dana': true });
     await assertFails(set(dana(), 'coHosts/owner/dana', INVITED));
+  });
+});
+
+describe('gameCoHosts: a game\'s co-host email, hidden from everyone but the owner and that person', () => {
+  const path = `gameCoHosts/owner/${GAME}`;
+  const dana = (verified = true, email = 'dana@example.com') => env.authenticatedContext('dana', { email, email_verified: verified });
+  const stranger = () => env.authenticatedContext('stranger');
+
+  beforeEach(async () => {
+    await seed({ [path]: 'Dana@Example.com', 'gameCoHosts/owner/game09': 'lee@example.com' });
+  });
+
+  it('the owner can read every game\'s co-host email, one or all', async () => {
+    await assertSucceeds(read(owner(), 'gameCoHosts/owner'));
+    await assertSucceeds(read(owner(), path));
+  });
+
+  it('a player, a guest, a co-host, a stranger and a signed-out visitor cannot read it', async () => {
+    for (const ctx of [player(), guest(), cohost(), stranger(), visitor()]) {
+      await assertFails(read(ctx, path));
+      await assertFails(read(ctx, 'gameCoHosts/owner'));
+    }
+    await assertFails(read(owner(), 'gameCoHosts'));
+  });
+
+  it('the person it names can read only their own invite, with a verified email, ignoring case', async () => {
+    await assertSucceeds(read(dana(), path));
+    await assertFails(read(dana(), 'gameCoHosts/owner/game09'));
+    await assertFails(read(dana(), 'gameCoHosts/owner'));
+    await assertFails(read(dana(false), path));
+    await assertFails(read(dana(true, 'eve@example.com'), path));
+  });
+
+  it('the game no longer shows the email to anyone reading it', async () => {
+    const game = await read(visitor(), G);
+    expect(game.val().managerEmail).toBeUndefined();
+  });
+
+  it('only the owner can set, change or clear it, and only on their own game', async () => {
+    await assertSucceeds(set(owner(), path, 'kim@example.com'));
+    await assertSucceeds(write(owner(), { [path]: null, [`${G}/managerId`]: 'cohost', [`${G}/managerName`]: 'Cory' }));
+    for (const ctx of [cohost(), player(), stranger(), dana(), visitor()]) {
+      await assertFails(set(ctx, path, 'eve@example.com'));
+    }
+    await seed({ 'games/theirs': baseGame({ ownerId: 'stranger' }) });
+    await assertFails(set(owner(), 'gameCoHosts/owner/theirs', 'kim@example.com'));
+    await assertFails(set(owner(), 'gameCoHosts/owner/nogame', 'kim@example.com'));
+  });
+
+  it('must be text of 1 to 254 characters', async () => {
+    await assertFails(set(owner(), path, ''));
+    await assertFails(set(owner(), path, `${'x'.repeat(250)}@a.co`));
+    await assertFails(set(owner(), path, { email: 'kim@example.com' }));
+  });
+
+  it('a new game and its co-host email go in one write, and deleting the game clears it in one write', async () => {
+    await seed({ 'entitlements/owner': null });
+    const fresh = { ...baseGame({ managerId: '' }), squares: {}, playerUserIds: {}, playerColors: {}, paidPlayers: [] };
+    await assertSucceeds(write(owner(), { 'games/game05': fresh, 'gameCoHosts/owner/game05': 'kim@example.com' }));
+    await assertSucceeds(write(owner(), { 'games/game05': null, 'gameCoHosts/owner/game05': null }));
   });
 });

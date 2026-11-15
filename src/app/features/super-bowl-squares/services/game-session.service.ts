@@ -29,7 +29,7 @@ export class GameSessionService {
   constructor() {
     // A co-host added by email gets the role when the board loads with them signed in, or when they sign in on it
     effect(() => {
-      const invite = { ownerId: this.state.ownerId(), managerId: this.state.managerId() ?? undefined, managerEmail: this.state.managerEmail() ?? undefined };
+      const invite = { ownerId: this.state.ownerId(), managerId: this.state.managerId() ?? undefined };
       if (!this.state.currentUser()) return;
       untracked(() => this.claimCoHostInvite(invite));
     });
@@ -108,7 +108,7 @@ export class GameSessionService {
   // Private functions
 
   /** Only for the board whose data is on screen: on a switch the id moves before the new board's data lands. */
-  private claimCoHostInvite(invite: CoHostInviteGame): void {
+  private claimCoHostInvite(invite: Omit<CoHostInviteGame, 'managerEmail'>): void {
     const state = this.state;
     if (!state.gameId || state.boardOnScreen !== state.gameId) return;
     void this.coHostClaim.claimIfInvited(state.gameId, { ...invite, name: state.gameName });
