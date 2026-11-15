@@ -22,7 +22,6 @@ interface GameRow {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-modal [open]="players.filterOpen()" labelledBy="players-filter-title" phone="sheet" extraClass="flex max-h-[85dvh] flex-col text-qs-ink" (dismissed)="close()">
-      <div class="mx-auto mt-2 h-1 w-9 shrink-0 rounded-full bg-qs-line-strong sm:hidden" aria-hidden="true"></div>
       <div class="flex shrink-0 items-center justify-between gap-3 px-4 pt-2">
         <h3 id="players-filter-title" class="text-xl font-semibold">Filter players</h3>
         <button type="button" class="qs-btn qs-btn-ghost -mr-2 w-11 px-0 text-qs-muted hover:text-qs-ink" aria-label="Close" (click)="close()">

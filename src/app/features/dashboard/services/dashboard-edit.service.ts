@@ -7,6 +7,9 @@ import { PlanService } from '../../../core/services/plan.service';
 import { SanitizationService } from '../../../core/services/sanitization.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { EditGameValues } from '../../super-bowl-squares/components/edit-game-dialog/edit-game-dialog.component';
+import { GameGroupsService } from '../../../core/services/game-groups.service';
+import { groupChanged, pickerValue } from '../../../core/utils/game-groups';
+import { DashboardGroupsService } from './dashboard-groups.service';
 import { DashboardStore } from './dashboard.store';
 
 type EditablePlayer = { name: string; uid: string };
@@ -16,6 +19,7 @@ interface AppliedExtras {
   autoManage: GameListItem['autoManage'];
   maxSquaresPerPlayer: GameListItem['maxSquaresPerPlayer'];
   showInOpenBoards: boolean;
+  openListId: GameListItem['openListId'];
 }
 
 /** The fields the main save writes, sanitized. */
@@ -61,6 +65,7 @@ export class DashboardEditService {
 
     try {
       await this.gameService.updateGameManager(game.id, player.uid, null, player.name);
+      this.markCoHost(game, player.uid, true);
       this.editingGame.set({ ...game, managerId: player.uid, managerName: player.name, managerEmail: undefined });
       this.store.updateMyGame(game.id, g => ({ ...g, managerId: player.uid, managerName: player.name, managerEmail: undefined }));
     } catch {
@@ -105,7 +110,8 @@ export class DashboardEditService {
       newBoardSize: null,
       showInOpenBoards: !!game.showInOpenBoards,
       autoManage: !!game.autoManage,
-      maxSquaresPerPlayer: game.maxSquaresPerPlayer ?? null
+      maxSquaresPerPlayer: game.maxSquaresPerPlayer ?? null,
+      ...(this.groups.canEdit() ? { group: { groupId: pickerValue(this.groups.groups(), game.openListId) } } : {})
     });
     this.editBoardRandomized.set(false);
     this.showEditModal.set(true);
@@ -121,6 +127,7 @@ export class DashboardEditService {
 
     try {
       await this.gameService.updateGameManager(game.id, null, null, null);
+      if (game.managerId) this.markCoHost(game, game.managerId, false);
       this.editingGame.set({ ...game, managerId: undefined, managerEmail: undefined, managerName: undefined });
       this.store.updateMyGame(game.id, g => ({ ...g, managerId: undefined, managerEmail: undefined, managerName: undefined }));
     } catch {
@@ -164,7 +171,9 @@ export class DashboardEditService {
   }
 
   private readonly espnService: EspnService = inject(EspnService);
+  private readonly gameGroups: GameGroupsService = inject(GameGroupsService);
   private readonly gameService: GameService = inject(GameService);
+  private readonly groups: DashboardGroupsService = inject(DashboardGroupsService);
   private readonly planService: PlanService = inject(PlanService);
   private readonly sanitizationService: SanitizationService = inject(SanitizationService);
   private readonly store: DashboardStore = inject(DashboardStore);
@@ -217,22 +226,41 @@ export class DashboardEditService {
 
   /** The open-boards switch, the squares limit and Auto-lock and draw save on their own, so a failure never loses the other edits. */
   private async saveExtras(game: GameListItem, v: EditGameValues, espnChanged: boolean): Promise<AppliedExtras> {
-    const showInOpenBoards = await this.saveShowInOpenBoards(game, v);
+    const shown = await this.saveGroup({ ...game, ...await this.saveShowInOpenBoards(game, v) }, v);
     const maxSquaresPerPlayer = await this.saveSquareLimit(game, v);
     const autoManage = await this.saveAutoManage(game, v, espnChanged);
-    return { showInOpenBoards, autoManage, maxSquaresPerPlayer };
+    return { ...shown, autoManage, maxSquaresPerPlayer };
   }
 
-  private async saveShowInOpenBoards(game: GameListItem, v: EditGameValues): Promise<boolean> {
-    const showApplied = !!game.showInOpenBoards;
-    const uid = this.store.currentUser()?.uid;
-    if (!uid || v.showInOpenBoards === showApplied) return showApplied;
+  /** The Group picker saves after the open-boards switch, so it files the board with the switch as saved. */
+  private async saveGroup(game: GameListItem, v: EditGameValues): Promise<Pick<AppliedExtras, 'showInOpenBoards' | 'openListId'>> {
+    const kept = { showInOpenBoards: !!game.showInOpenBoards, openListId: game.openListId };
+    if (!v.group || !groupChanged(this.groups.groups(), game.openListId, v.group)) return kept;
     try {
-      await this.gameService.setShowInOpenBoards(game.id, uid, v.showInOpenBoards);
-      return v.showInOpenBoards;
+      const { listId, created } = await this.gameGroups.saveChoice(game, v.group);
+      if (created) this.groups.groups.update(groups => [...groups, created]);
+      return { ...kept, openListId: listId };
+    } catch {
+      this.toastService.warning('Saved, but the group could not be changed. Try again in a moment.');
+      return kept;
+    }
+  }
+
+  /** Keeps the owner's co-host list in step, so a co-host can read group names. Dropped only when they co-host no other game. Best effort. */
+  private markCoHost(game: GameListItem, uid: string, on: boolean): void {
+    if (!on && this.store.myGames().some(g => g.id !== game.id && g.managerId === uid)) return;
+    this.gameGroups.setCoHost(game.ownerId, uid, on).catch(() => undefined);
+  }
+
+  private async saveShowInOpenBoards(game: GameListItem, v: EditGameValues): Promise<Pick<AppliedExtras, 'showInOpenBoards' | 'openListId'>> {
+    const unchanged = { showInOpenBoards: !!game.showInOpenBoards, openListId: game.openListId };
+    if (v.showInOpenBoards === unchanged.showInOpenBoards) return unchanged;
+    try {
+      const openListId = await this.gameService.setShowInOpenBoards(game, v.showInOpenBoards);
+      return { showInOpenBoards: v.showInOpenBoards, openListId };
     } catch {
       this.toastService.warning('Saved, but Show in my open boards could not be changed. Try again in a moment.');
-      return showApplied;
+      return unchanged;
     }
   }
 

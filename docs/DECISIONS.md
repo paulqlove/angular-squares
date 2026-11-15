@@ -4,6 +4,46 @@ This file records product and design decisions, newest first. To add one, put a 
 
 ---
 
+## D-031 · Game groups decide each game's More tab
+
+- **Date:** Nov 15 2026
+- **Decision:** Season Pass owners can put each game in one group (Church, Work) or No group. A game's More tab lists only the other open games in its own group; No group games show each other as before. Any game link still joins its game: no members-only games, approvals or forced sign-in. Players and guests never see group names. Co-hosts can file a game into one of the owner's groups but can't make, rename or delete groups. Deleting a group moves its games to No group. Without a Season Pass, groups stay as filed and can't be changed. Mockups g1 to g5 from Creative. Paul's words: "if you have a link you should be able to join... should only be linked. To that game's group." and "the mock-ups look good and are a go for everything."
+- **Options considered:** members-only groups with approvals (dropped by Paul, Nov 15)
+- **Why:** a link to one game used to expose every open game the host runs (church and work together)
+- **Decided by:** Paul
+
+## D-030 · Players card panel may animate its height on phones
+
+- **Date:** Nov 15 2026
+- **Decision:** On a phone, a player card's panel grows and folds its height (a grid row from 0fr to 1fr, 200ms open, 160ms close) so the cards below glide instead of jumping. This is an exception to DESIGN.md's rule that motion uses only transform and opacity, like D-028. From 640px the panel floats over the cards and keeps to transform and opacity. Motion spec from Creative.
+- **Options considered:** not recorded
+- **Why:** not recorded. Paul's words, relayed: "Build both."
+- **Decided by:** Paul
+
+## D-029 · Share winners on finished games
+
+- **Date:** Nov 14 2026
+- **Decision:** On a finished game, the Share dialog's Share invite button becomes Share winners and shares only the 1080 by 1080 winners picture from #294, with no link or text: the share sheet on touch phones, a clipboard copy on desktop (Image copied for 2 seconds), a download where neither works. Creative added a small quarterscore.com wordmark beside the logo in the picture's footer. The results card on the page stays removed (D-010). Paul's words: "it should just change to share winners. And it should be that beautiful graphic that you made with the winners and the final score. And it's just an image and it's copied. No link, just copied. The image."
+- **Options considered:** not recorded
+- **Why:** not recorded
+- **Decided by:** Paul
+
+## D-028 · Bottom-sheet dim may fade by color
+
+- **Date:** Nov 14 2026
+- **Decision:** On a phone, while a bottom sheet is swiped down, the dim behind it fades by its background color instead of its opacity. This is an exception to DESIGN.md's rule that motion uses only transform and opacity. Shipped in #353.
+- **Options considered:** fading the dim's opacity, which would also fade the sheet, because the dim layer holds the sheet
+- **Why:** it looks the same, and the dim layer holds the sheet. Paul's words: "Keep it."
+- **Decided by:** Paul
+
+## D-027 · No swipe left or right to change games on phones
+
+- **Date:** Nov 14 2026
+- **Decision:** No swipe left or right on the game page to move between games, on the board or on the game title row.
+- **Options considered:** swiping anywhere on the board; swiping only on the game title row
+- **Why:** people drag a little while picking squares, so a swipe on the board would switch games mid-pick, and it clashes with the phone's edge back-swipe. A title-row-only swipe is safe but few would find it, and the games dropdown already does the job. Paul's words: "Skip it."
+- **Decided by:** Paul, on Engineering's advice
+
 ## D-023 · Players view layout
 
 - **Date:** Nov 13–14 2026

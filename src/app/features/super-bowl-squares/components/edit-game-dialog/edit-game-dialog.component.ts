@@ -3,15 +3,20 @@ import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, Chang
 import { ModalComponent } from '../../../../components/ui/modal/modal.component';
 import { FormsModule } from '@angular/forms';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { heroXMark, heroTrash, heroLockClosed, heroMagnifyingGlass } from '@ng-icons/heroicons/outline';
-import { DEFAULT_EMPTY_QUARTER_RULE, DEFAULT_SPLIT, EmptyQuarterRule, QuarterSplit, SPLIT_PRESETS, isValidSplit } from '../../../../core/plans';
+import { heroXMark, heroTrash } from '@ng-icons/heroicons/outline';
+import { DEFAULT_EMPTY_QUARTER_RULE, EmptyQuarterRule, QuarterSplit, isValidSplit } from '../../../../core/plans';
+import { SplitPercents, splitPercents, splitTenths, splitToSave } from '../../../../core/utils/split-edit';
 import type { BoardSize } from '../../../../core/services/game.service';
 import type { EspnGame, SportType } from '../../../../core/services/espn.service';
 import { smallerBoardSizes } from '../../../../core/utils/shuffle-squares';
 import { autoRunLabel } from '../../../../core/utils/auto-manage';
-import { GamePickCardComponent } from '../../../../shared/game-pick-card.component';
 import { ToggleComponent } from '../../../../components/ui/toggle/toggle.component';
 import { EmptyQuarterRuleComponent } from '../../../../components/ui/empty-quarter-rule/empty-quarter-rule.component';
+import { GroupPickerComponent } from '../../../../components/ui/group-picker/group-picker.component';
+import type { GameGroup, GroupChoice } from '../../../../core/utils/game-groups';
+import { CoHostCandidate, EditGameCoHostComponent } from './edit-game-cohost.component';
+import { EditGameEspnPickComponent } from './edit-game-espn-pick.component';
+import { EditGameSplitComponent } from './edit-game-split.component';
 
 export interface EditGameValues {
   awayTeam: string;
@@ -28,6 +33,8 @@ export interface EditGameValues {
   autoManage: boolean;
   /** Season Pass: most squares one name can claim, or null for no limit. */
   maxSquaresPerPlayer: number | null;
+  /** Where the Group picker was left; set by the caller to the board's group when the picker shows. */
+  group?: GroupChoice;
   /** Only used with showGameFields (the dashboard). */
   name?: string;
   sport?: SportType | 'custom';
@@ -37,8 +44,8 @@ export interface EditGameValues {
 /** Owner-only "Edit game" popup, shared by the dashboard and the game page. Edits a draft and saves once. */
 @Component({
   selector: 'app-edit-game-dialog',
-  imports: [ModalComponent, MaxSquaresFieldComponent, FormsModule, NgIconComponent, EmptyQuarterRuleComponent, ToggleComponent, GamePickCardComponent],
-  providers: [provideIcons({ heroXMark, heroTrash, heroLockClosed, heroMagnifyingGlass })],
+  imports: [ModalComponent, MaxSquaresFieldComponent, FormsModule, NgIconComponent, EmptyQuarterRuleComponent, ToggleComponent, EditGameEspnPickComponent, EditGameSplitComponent, EditGameCoHostComponent, GroupPickerComponent],
+  providers: [provideIcons({ heroXMark, heroTrash })],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <app-modal [open]="isOpen" labelledBy="edit-game-title" size="xl" phone="full" extraClass="flex h-[min(44rem,calc(100dvh-2rem))] flex-col overflow-hidden" (dismissed)="close()">
@@ -93,42 +100,7 @@ export interface EditGameValues {
                 }
               </div>
             } @else {
-              <div class="flex flex-col gap-2">
-                <span class="qs-label text-qs-muted">ESPN game</span>
-                @if (loadingEspnGames) {
-                  <div class="h-[60px] animate-pulse rounded-inner bg-qs-panel-2"></div>
-                } @else if (draft.espnGameId && !changingGame) {
-                  <div class="rounded-inner border border-qs-accent bg-qs-panel p-3">
-                    @if (selectedEspnGame(); as sel) {
-                      <app-game-pick-card [game]="sel" [sport]="draft.sport"></app-game-pick-card>
-                    } @else {
-                      <p class="truncate text-sm font-semibold text-qs-ink">Linked game</p>
-                    }
-                    <button type="button" class="qs-btn qs-btn-secondary mt-3 w-full" (click)="changingGame = true">Change game</button>
-                  </div>
-                } @else {
-                  @if (espnGames.length > 10) {
-                    <div class="qs-search">
-                      <ng-icon name="heroMagnifyingGlass" class="qs-search-icon" aria-hidden="true"></ng-icon>
-                      <input type="search" [(ngModel)]="espnGameSearch" placeholder="Search teams" aria-label="Search teams" autocomplete="off" (keydown.enter)="$event.preventDefault()" />
-                    </div>
-                  }
-                  <div class="grid max-h-72 grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2">
-                    @for (game of filteredEspnGames(); track game.id) {
-                      <button
-                        type="button"
-                        (click)="draft.espnGameId = game.id; changingGame = false"
-                        [attr.aria-pressed]="draft.espnGameId === game.id"
-                        [attr.aria-label]="game.awayTeamFull + ' at ' + game.homeTeamFull"
-                        class="rounded-inner border bg-qs-panel px-3 pb-3 pt-2.5 text-left transition-colors"
-                        [class]="draft.espnGameId === game.id ? 'border-qs-accent outline outline-2 -outline-offset-2 outline-qs-accent' : 'border-qs-line hover:border-qs-line-strong'"
-                      >
-                        <app-game-pick-card [game]="game" [sport]="draft.sport"></app-game-pick-card>
-                      </button>
-                    }
-                  </div>
-                }
-              </div>
+              <app-edit-game-espn-pick [(gameId)]="draft.espnGameId" [games]="espnGames" [loading]="loadingEspnGames" [sport]="draft.sport"></app-edit-game-espn-pick>
             }
           </section>
 
@@ -176,38 +148,7 @@ export interface EditGameValues {
             <h4 class="qs-eyebrow qs-eyebrow-bar !flex border-b border-qs-line pb-2.5 text-[13px] font-semibold text-qs-ink">Scoring</h4>
 
             @if (showSplit) {
-              <div class="flex flex-col gap-2">
-                <span class="qs-label text-qs-muted">Quarter split</span>
-                @if (!canCustomSplit || splitLocked) {
-                  <div class="flex items-center justify-between gap-3 rounded-inner border border-qs-line bg-qs-panel-2 px-3 py-2.5">
-                    <span class="font-mono text-sm tabular-nums text-qs-ink">{{ splitText() }}</span>
-                    <ng-icon name="heroLockClosed" class="text-base text-qs-muted"></ng-icon>
-                  </div>
-                  <p class="text-xs text-qs-muted">
-                    {{ !canCustomSplit ? 'Custom splits come with the Season Pass.' : 'The split locks once numbers are drawn.' }}
-                  </p>
-                } @else {
-                  <div class="flex flex-wrap gap-2" role="group" aria-label="Quarter split">
-                    @for (preset of presets; track preset.id) {
-                      <button type="button" class="qs-tab" [attr.aria-pressed]="activePreset() === preset.id" (click)="applyPreset(preset.split)">{{ preset.label }}</button>
-                    }
-                    <button type="button" class="qs-tab" [attr.aria-pressed]="activePreset() === 'custom'" (click)="customOpen = true">Custom</button>
-                  </div>
-                  @if (customOpen || activePreset() === 'custom') {
-                    <div class="mt-1.5 grid grid-cols-4 gap-2">
-                      @for (q of quarters; track q.key) {
-                        <div class="flex flex-col gap-2">
-                          <label [for]="'split-' + q.key" class="qs-label text-xs text-qs-muted">{{ q.label }}</label>
-                          <input [id]="'split-' + q.key" type="number" min="0" max="100" step="0.5" [(ngModel)]="pct[q.key]" class="qs-input px-2 text-center tabular-nums" />
-                        </div>
-                      }
-                    </div>
-                  }
-                  <p class="text-xs tabular-nums" [class]="splitValid() ? 'text-qs-muted' : 'text-qs-bad'">
-                    {{ splitText() }} · {{ splitValid() ? 'Totals 100%' : 'Must total 100% (' + remaining() + ' left), one decimal at most' }}
-                  </p>
-                }
-              </div>
+              <app-edit-game-split [(pct)]="pct" [canCustomSplit]="canCustomSplit" [splitLocked]="splitLocked"></app-edit-game-split>
             }
 
             <app-empty-quarter-rule class="block [&_.qs-label]:text-qs-muted" name="edit-empty-quarter-rule" [(value)]="draft.emptyQuarterRule"></app-empty-quarter-rule>
@@ -247,53 +188,17 @@ export interface EditGameValues {
                 </div>
               }
 
+              @if (draft.group && groupsShown) {
+                <app-group-picker [groups]="groups" [value]="draft.group.groupId" [allowNew]="canNewGroup" (changed)="draft.group = $event"></app-group-picker>
+              }
+
               <div class="flex flex-col gap-2">
                 <label for="edit-game-note" class="qs-label text-qs-muted">Note from the host <span class="text-qs-muted">· Optional</span></label>
                 <input id="edit-game-note" type="text" [(ngModel)]="draft.hostNote" maxlength="140" placeholder="Rules, deadline, how to enter" class="qs-input" />
               </div>
 
               @if (showGameFields) {
-                <div class="flex flex-col gap-2">
-                  <label for="edit-game-cohost" class="qs-label text-qs-muted">Co-host <span class="text-qs-muted">· Optional</span></label>
-                  @if (coHostName) {
-                    <div class="flex items-center gap-2 rounded-inner border border-qs-accent bg-qs-panel p-3">
-                      <span class="flex-1 truncate font-semibold text-qs-ink">{{ coHostName }}</span>
-                      <button type="button" (click)="coHostRemove.emit()" class="qs-btn qs-btn-secondary">Remove</button>
-                    </div>
-                  } @else if (players.length > 0) {
-                    <div class="relative">
-                      <div class="qs-search">
-                        <ng-icon name="heroMagnifyingGlass" class="qs-search-icon" aria-hidden="true"></ng-icon>
-                        <input
-                          id="edit-game-cohost"
-                          type="text"
-                          [(ngModel)]="coHostQuery"
-                          (input)="showResults = true; coHostIndex = -1"
-                          (focus)="showResults = true"
-                          (keydown)="onCoHostKeydown($event)"
-                          placeholder="Search players"
-                          autocomplete="off"
-                        />
-                      </div>
-                      @if (showResults && coHostResults().length > 0) {
-                        <div class="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-inner border border-qs-line bg-qs-panel shadow-pop">
-                          @for (player of coHostResults(); track player.uid; let i = $index) {
-                            <button
-                              type="button"
-                              (mousedown)="assignCoHost(player)"
-                              (mouseenter)="coHostIndex = i"
-                              class="min-h-11 w-full px-4 py-2 text-left text-qs-ink transition-colors"
-                              [class]="i === coHostIndex ? 'bg-qs-accent-soft' : 'hover:bg-qs-panel-2'"
-                            >{{ player.name }}</button>
-                          }
-                        </div>
-                      }
-                    </div>
-                    <p class="text-xs text-qs-muted">A co-host can help manage players.</p>
-                  } @else {
-                    <p class="text-xs text-qs-muted">No players have joined yet. A co-host can help manage players.</p>
-                  }
-                </div>
+                <app-edit-game-cohost [players]="players" [coHostName]="coHostName" (assigned)="coHostAssign.emit($event)" (removed)="coHostRemove.emit()"></app-edit-game-cohost>
               }
             </div>
           </details>
@@ -326,6 +231,10 @@ export class EditGameDialogComponent implements OnChanges {
   @Input() isLocked = false;
   @Input() boardSize: BoardSize = 100;
   @Input() canShowInOpenBoards = false;
+  /** Season Pass groups: the owner's groups for the Group picker. The picker shows when values.group is set. */
+  @Input() groups: GameGroup[] = [];
+  /** The owner can name a new group from the picker; a co-host can't. */
+  @Input() canNewGroup = false;
   @Input() canAutoManage = false;
   @Input() canLimitSquares = false;
   /** "Sun, Nov 8 at 7:25 PM": when auto-lock-and-draw would run. */
@@ -347,7 +256,7 @@ export class EditGameDialogComponent implements OnChanges {
   @Input() espnGames: EspnGame[] = [];
   @Input() loadingEspnGames = false;
   /** Players the host can pick as co-host. */
-  @Input() players: { name: string; uid: string }[] = [];
+  @Input() players: CoHostCandidate[] = [];
   /** Current co-host, empty for none. */
   @Input() coHostName = '';
   @Input() values: EditGameValues = { awayTeam: '', homeTeam: '', pricePerSquare: 10, hostNote: '', quarterSplit: null, emptyQuarterRule: DEFAULT_EMPTY_QUARTER_RULE, newBoardSize: null, showInOpenBoards: false, autoManage: false, maxSquaresPerPlayer: null };
@@ -356,19 +265,12 @@ export class EditGameDialogComponent implements OnChanges {
   @Output() saved = new EventEmitter<EditGameValues>();
   @Output() clearGame = new EventEmitter<void>();
   @Output() sportChange = new EventEmitter<SportType | 'custom'>();
-  @Output() coHostAssign = new EventEmitter<{ name: string; uid: string }>();
+  @Output() coHostAssign = new EventEmitter<CoHostCandidate>();
   @Output() coHostRemove = new EventEmitter<void>();
 
-  changingGame = false;
-  coHostIndex = -1;
-  coHostQuery = '';
   confirmingClear = false;
-  customOpen = false;
-  espnGameSearch = '';
   /** Split being edited, in percent (20 = 20%). */
-  pct: { [k in keyof QuarterSplit]: number } = { q1: 20, q2: 20, q3: 20, q4: 40 };
-  showResults = false;
-  readonly presets = SPLIT_PRESETS;
+  pct: SplitPercents = splitPercents(null);
   readonly smallerSizes: BoardSize[] = [50, 25];
   readonly sportOptions: { value: SportType | 'custom'; label: string }[] = [
     { value: 'nfl', label: 'NFL' },
@@ -379,40 +281,19 @@ export class EditGameDialogComponent implements OnChanges {
     { value: 'afl', label: 'AFL' },
     { value: 'custom', label: 'Custom' }
   ];
-  readonly quarters: { key: keyof QuarterSplit; label: string }[] = [
-    { key: 'q1', label: 'Q1' }, { key: 'q2', label: 'Q2' }, { key: 'q3', label: 'Q3' }, { key: 'q4', label: 'Q4' }
-  ];
   draft: EditGameValues = { ...this.values };
+
+  /** The picker needs something to pick: a group, or New group... */
+  get groupsShown(): boolean {
+    return this.groups.length > 0 || this.canNewGroup;
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['isOpen']?.currentValue) {
       this.draft = { ...this.values };
       this.confirmingClear = false;
-      this.customOpen = false;
-      this.changingGame = false;
-      this.espnGameSearch = '';
-      this.coHostQuery = '';
-      this.showResults = false;
-      this.coHostIndex = -1;
-      const split = isValidSplit(this.values.quarterSplit) ? this.values.quarterSplit : DEFAULT_SPLIT;
-      this.pct = { q1: split.q1 / 10, q2: split.q2 / 10, q3: split.q3 / 10, q4: split.q4 / 10 };
+      this.pct = splitPercents(this.values.quarterSplit);
     }
-  }
-
-  activePreset(): string {
-    const t = this.tenths();
-    return this.presets.find(p => t && p.split.q1 === t.q1 && p.split.q2 === t.q2 && p.split.q3 === t.q3 && p.split.q4 === t.q4)?.id ?? 'custom';
-  }
-
-  applyPreset(split: QuarterSplit): void {
-    this.pct = { q1: split.q1 / 10, q2: split.q2 / 10, q3: split.q3 / 10, q4: split.q4 / 10 };
-    this.customOpen = false;
-  }
-
-  assignCoHost(player: { name: string; uid: string }): void {
-    this.coHostQuery = '';
-    this.showResults = false;
-    this.coHostAssign.emit(player);
   }
 
   autoAvailable(): boolean {
@@ -435,22 +316,6 @@ export class EditGameDialogComponent implements OnChanges {
     this.closed.emit();
   }
 
-  coHostResults(): { name: string; uid: string }[] {
-    const query = this.coHostQuery.toLowerCase().trim();
-    return query ? this.players.filter(p => p.name.toLowerCase().includes(query)) : this.players;
-  }
-
-  filteredEspnGames(): EspnGame[] {
-    const query = this.espnGameSearch.toLowerCase().trim();
-    if (!query) return this.espnGames;
-    return this.espnGames.filter(g =>
-      g.homeTeam.toLowerCase().includes(query) ||
-      g.awayTeam.toLowerCase().includes(query) ||
-      g.homeTeamFull.toLowerCase().includes(query) ||
-      g.awayTeamFull.toLowerCase().includes(query)
-    );
-  }
-
   onClearClick(): void {
     if (!this.confirmingClear) {
       this.confirmingClear = true;
@@ -460,34 +325,8 @@ export class EditGameDialogComponent implements OnChanges {
     this.close();
   }
 
-  onCoHostKeydown(event: KeyboardEvent): void {
-    const results = this.coHostResults();
-    if (event.key === 'Escape') {
-      if (this.showResults) event.stopPropagation();
-      this.showResults = false;
-    } else if (!results.length) {
-      return;
-    } else if (event.key === 'ArrowDown') {
-      event.preventDefault();
-      this.coHostIndex = Math.min(this.coHostIndex + 1, results.length - 1);
-    } else if (event.key === 'ArrowUp') {
-      event.preventDefault();
-      this.coHostIndex = Math.max(this.coHostIndex - 1, 0);
-    } else if (event.key === 'Enter') {
-      event.preventDefault();
-      if (this.coHostIndex >= 0 && this.coHostIndex < results.length) this.assignCoHost(results[this.coHostIndex]);
-    }
-  }
-
-  remaining(): string {
-    const total = this.quarters.reduce((sum, q) => sum + (Number(this.pct[q.key]) || 0), 0);
-    return (Math.round((100 - total) * 10) / 10).toString() + '%';
-  }
-
   save(): void {
-    const split = this.tenths();
-    const isDefault = split && split.q1 === 200 && split.q2 === 200 && split.q3 === 200 && split.q4 === 400;
-    this.saved.emit({ ...this.draft, quarterSplit: isDefault ? null : split });
+    this.saved.emit({ ...this.draft, quarterSplit: splitToSave(this.pct) });
     if (this.closeOnSave) this.close();
   }
 
@@ -498,7 +337,6 @@ export class EditGameDialogComponent implements OnChanges {
   selectSport(sport: SportType | 'custom'): void {
     this.draft.sport = sport;
     this.draft.espnGameId = '';
-    this.espnGameSearch = '';
     this.sportChange.emit(sport);
   }
 
@@ -506,19 +344,7 @@ export class EditGameDialogComponent implements OnChanges {
     return smallerBoardSizes(this.boardSize, this.squaresFilled, this.numbersDrawn);
   }
 
-  splitText(): string {
-    const fmt = (v: number) => (Math.round(Number(v) * 10) / 10).toString();
-    return [this.pct.q1, this.pct.q2, this.pct.q3, this.pct.q4].map(fmt).join(' / ');
-  }
-
   splitValid(): boolean {
-    return isValidSplit(this.tenths());
-  }
-
-  /** The edited split in tenths of a percent, or null if it isn't a whole-tenths split. */
-  tenths(): QuarterSplit | null {
-    const t = (v: number) => Math.round(Number(v) * 10);
-    const ok = this.quarters.every(q => Number.isFinite(Number(this.pct[q.key])) && Math.abs(Number(this.pct[q.key]) * 10 - t(this.pct[q.key])) < 1e-6);
-    return ok ? { q1: t(this.pct.q1), q2: t(this.pct.q2), q3: t(this.pct.q3), q4: t(this.pct.q4) } : null;
+    return isValidSplit(splitTenths(this.pct));
   }
 }

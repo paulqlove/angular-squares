@@ -140,6 +140,8 @@
     [loadingEspnGames]="edit.isLoadingEditEspnGames()"
     [canAutoManage]="planService.features().autoManage && !edit.editingGame()?.isLocked"
     [canShowInOpenBoards]="edit.canEditShowInOpenBoards()"
+    [groups]="groups.groups()"
+    [canNewGroup]="groups.canEdit()"
     [canLimitSquares]="planService.features().squareLimit && !!edit.editingGame()"
     [players]="edit.editGamePlayers()"
     [coHostName]="edit.coHostName()"

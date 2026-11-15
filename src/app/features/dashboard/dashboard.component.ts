@@ -35,6 +35,7 @@ import { UpgradePassDialogComponent } from './components/upgrade-pass-dialog/upg
 import { DashboardAdminService } from './services/dashboard-admin.service';
 import { DashboardDialogsService } from './services/dashboard-dialogs.service';
 import { DashboardEditService } from './services/dashboard-edit.service';
+import { DashboardGroupsService } from './services/dashboard-groups.service';
 import { DashboardSearchService } from './services/dashboard-search.service';
 import { DASHBOARD_TOUR_STEPS, dashboardTourSteps } from './services/dashboard-tour';
 import { DashboardViewService } from './services/dashboard-view.service';
@@ -55,6 +56,7 @@ import { PlayersViewService } from './services/players-view.service';
   ],
   providers: [
     DashboardStore,
+    DashboardGroupsService,
     DashboardSearchService,
     DashboardViewService,
     DashboardEditService,
@@ -121,6 +123,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   protected readonly admin: DashboardAdminService = inject(DashboardAdminService);
   protected readonly dialogs: DashboardDialogsService = inject(DashboardDialogsService);
   protected readonly edit: DashboardEditService = inject(DashboardEditService);
+  protected readonly groups: DashboardGroupsService = inject(DashboardGroupsService);
   protected readonly planService: PlanService = inject(PlanService);
   protected readonly players: PlayersViewService = inject(PlayersViewService);
   protected readonly search: DashboardSearchService = inject(DashboardSearchService);

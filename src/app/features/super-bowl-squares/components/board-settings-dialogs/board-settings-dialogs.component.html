@@ -15,10 +15,12 @@
   [numbersDrawn]="state.isRandomized"
   [squaresFilled]="state.squaresPicked()"
   [canShowInOpenBoards]="state.canShowInOpenBoards()"
+  [groups]="groups.groups()"
+  [canNewGroup]="groups.canNewGroup()"
   [canAutoManage]="state.canAutoManage()"
   [canLimitSquares]="state.isGameOwner() && planService.features().squareLimit"
   [autoRunText]="autoRunLabel(state.linkedEspnGame()?.date)"
-  [values]="{ awayTeam: state.awayTeam, homeTeam: state.homeTeam, pricePerSquare: state.currentPrice, hostNote: state.hostNote, quarterSplit: state.quarterSplit, emptyQuarterRule: state.emptyQuarterRule, newBoardSize: null, showInOpenBoards: state.showInOpenBoards, autoManage: !!state.autoManage, maxSquaresPerPlayer: state.maxSquaresPerPlayer ?? null }"
+  [values]="{ awayTeam: state.awayTeam, homeTeam: state.homeTeam, pricePerSquare: state.currentPrice, hostNote: state.hostNote, quarterSplit: state.quarterSplit, emptyQuarterRule: state.emptyQuarterRule, newBoardSize: null, showInOpenBoards: state.showInOpenBoards, autoManage: !!state.autoManage, maxSquaresPerPlayer: state.maxSquaresPerPlayer ?? null, group: groups.choice() }"
   [linkedGameName]="state.espnEventId ? state.awayTeam + ' @ ' + state.homeTeam : ''"
   [showSplit]="true"
   [showClear]="true"
@@ -28,3 +30,5 @@
   (saved)="host.onEditGameSaved($event)"
   (clearGame)="host.onClearGame(true)"
 ></app-edit-game-dialog>
+
+<app-cohost-edit-dialog></app-cohost-edit-dialog>

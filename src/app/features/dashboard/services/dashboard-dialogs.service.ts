@@ -186,7 +186,7 @@ export class DashboardDialogsService {
   private async applyCreateExtras(gameId: string, uid: string, values: CreateGameSubmit['values']): Promise<void> {
     if (values.showInOpenBoards) {
       try {
-        await this.gameService.setShowInOpenBoards(gameId, uid, true);
+        await this.gameService.setShowInOpenBoards({ id: gameId, ownerId: uid }, true);
       } catch {
         this.toastService.warning('Board created, but Show in my open boards could not be turned on. Try again in Edit.');
       }

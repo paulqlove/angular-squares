@@ -67,7 +67,7 @@ import {
 
         <ul class="mt-5 flex flex-wrap gap-2" aria-label="Included">
           <li class="qs-badge qs-badge-ok">Live scores</li>
-          <li class="qs-badge qs-badge-ok">Up to 25 active boards</li>
+          <li class="qs-badge qs-badge-ok">Up to 25 boards at a time</li>
           <li class="qs-badge qs-badge-ok">Custom splits</li>
           <li class="qs-badge qs-badge-ok">Auto-lock and draw</li>
           <li class="qs-badge qs-badge-ok">Open boards list</li>

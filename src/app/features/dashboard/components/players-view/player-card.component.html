@@ -20,15 +20,12 @@
   </span>
   <ng-icon name="heroChevronDown" class="qs-card-arrow shrink-0 text-xl text-qs-muted" [class.qs-card-arrow-open]="isOpen()" aria-hidden="true"></ng-icon>
 </button>
-<!-- Desktop: a tile per game, so a game sits in the same spot on every card -->
-<div class="mt-3 hidden flex-wrap items-center gap-x-4 gap-y-1 sm:flex">
-  <div appPlayerTiles [player]="player()" [boardIds]="boardIds()"></div>
-  <span class="whitespace-nowrap text-sm tabular-nums text-qs-muted">{{ player().games.length }} {{ player().games.length === 1 ? 'game' : 'games' }}</span>
-</div>
+<!-- From 640px: a tile per game, two lines at most, the same on every card in the list -->
+<div appPlayerTiles class="mt-3" [player]="player()" [boardIds]="boardIds()"></div>
 <!-- From 640px: the games float over the cards below, under this card's arrow. -->
 @if (isOpen()) {
   <div class="qs-card qs-panel hidden sm:block" [class.qs-panel-wide]="wide()" [class.qs-panel-grow-right]="growsRight()" role="region"
-    [attr.aria-label]="player().name + '’s games'" animate.enter="qs-panel-in" animate.leave="qs-panel-out">
+    [attr.aria-label]="player().name + '’s games'" animate.enter="qs-menu-enter" animate.leave="qs-menu-leave">
     <div appPlayerGames [player]="player()"></div>
   </div>
 }

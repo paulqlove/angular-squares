@@ -3,8 +3,10 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { GameChange, GameData, GameService } from '../../../core/services/game.service';
 import { PlanService } from '../../../core/services/plan.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { REDUCED_MOTION_QUERY } from '../../../shared/media-queries';
 import { withPlayerConfirmCount, withPlayerConfirmed, withoutPlayer } from '../../../core/utils/board-players';
 import { paidCountsByName } from '../../../core/utils/paid-squares';
+import { DashboardSearchService } from './dashboard-search.service';
 import { DashboardStore } from './dashboard.store';
 import { PlayerGame, PlayerSummary, PlayersBoard, playersAcrossGames } from './players-across-games';
 
@@ -60,6 +62,8 @@ export class PlayersViewService {
   public readonly mode = signal<'boards' | 'players'>('boards');
   /** The player whose card is open. */
   public readonly openKey = signal<string | null>(null);
+  /** The open card was opened straight from another open card, so its panel swaps in place of the other's. */
+  public readonly panelSwitch = signal<boolean>(false);
   public readonly players = computed<PlayerSummary[]>(() => {
     const boards = this.shownBoards() as PlayersBoard[];
     const search = this.search().trim().toLowerCase();
@@ -114,6 +118,15 @@ export class PlayersViewService {
   }
 
   /**
+   * Boards or Players, from the switch. An open phone search for games and codes closes first, as its Cancel does, so the
+   * bar shows the new tab's own search.
+   */
+  public showView(mode: 'boards' | 'players'): void {
+    if (this.gameSearch.searchOpen()) this.gameSearch.closeSearch();
+    this.mode.set(mode);
+  }
+
+  /**
    * The green toggle on one of a player's games. On: confirmed for the squares they hold there now. Off: back to how
    * that game stood before the host turned it on (unconfirmed, or "+2 new"), or unconfirmed if it was already on.
    */
@@ -145,6 +158,7 @@ export class PlayersViewService {
     this.confirmNote.set(null);
     if (this.allConfirmed()?.key === key) this.stopBeat();
     const pin = opening ? this.pinFor(key) : null;
+    this.panelSwitch.set(opening && this.openKey() !== null);
     this.openKey.set(opening ? key : null);
     this.openPin.set(pin);
     if (this.beatPin()?.key === key) this.beatPin.set(null);
@@ -164,6 +178,8 @@ export class PlayersViewService {
   private readonly beatPin = signal<PlayerPin | null>(null);
   /** Per game and name, the Confirm count from before the host turned the toggle on (null: not on the paid list). */
   private readonly beforeToggle = new Map<string, number | null>();
+  /** The dashboard's games and codes search. */
+  private readonly gameSearch: DashboardSearchService = inject(DashboardSearchService);
   private readonly gameService: GameService = inject(GameService);
   /** The open card, held where it was when it opened. */
   private readonly openPin = signal<PlayerPin | null>(null);
@@ -257,6 +273,7 @@ export class PlayersViewService {
     if (this.openKey() === player.key) {
       this.openKey.set(null);
       this.openPin.set(null);
+      this.panelSwitch.set(false);
     }
     this.allConfirmed.set({ key: player.key, leaving: false });
     this.announcement.set(`${player.name}, all games confirmed`);
@@ -276,5 +293,5 @@ export class PlayersViewService {
 }
 
 function reducedMotion(): boolean {
-  return typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  return typeof matchMedia === 'function' && matchMedia(REDUCED_MOTION_QUERY).matches;
 }

@@ -1,8 +1,10 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { GameData, GameService } from '../../../core/services/game.service';
 import { PlanService } from '../../../core/services/plan.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { DashboardSearchService } from './dashboard-search.service';
 import { DashboardStore } from './dashboard.store';
 import { PlayersViewService } from './players-view.service';
 
@@ -29,6 +31,8 @@ describe('PlayersViewService', () => {
     TestBed.configureTestingModule({
       providers: [
         PlayersViewService,
+        DashboardSearchService,
+        provideRouter([]),
         { provide: DashboardStore, useValue: { runBoards, setRunBoard } },
         { provide: GameService, useValue: { updateGames } },
         { provide: PlanService, useValue: { features } },
@@ -54,6 +58,30 @@ describe('PlayersViewService', () => {
     expect(view.active()).toBe(true);
     features.set({ playersView: false });
     expect(view.active()).toBe(false);
+  });
+
+  it('switching tabs closes the open phone games search, as its Cancel does', () => {
+    const view = TestBed.inject(PlayersViewService);
+    const search = TestBed.inject(DashboardSearchService);
+    search.openSearch();
+    search.onSearchInput('dana');
+    view.showView('players');
+    expect(search.searchOpen()).toBe(false);
+    expect(search.gameSearch()).toBe('');
+    expect(view.active()).toBe(true);
+    search.openSearch();
+    view.showView('boards');
+    expect(search.searchOpen()).toBe(false);
+    expect(view.active()).toBe(false);
+  });
+
+  it('switching tabs keeps the desktop search text, which has no open state', () => {
+    const view = TestBed.inject(PlayersViewService);
+    const search = TestBed.inject(DashboardSearchService);
+    search.onSearchInput('dana');
+    view.showView('players');
+    expect(search.gameSearch()).toBe('dana');
+    expect(view.active()).toBe(true);
   });
 
   it('opens the phone filter sheet, and Clear empties both filters', () => {
@@ -128,6 +156,17 @@ describe('PlayersViewService', () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it('marks a panel opened straight from another open card as a switch, and a fresh open or a close as none', () => {
+    const view = TestBed.inject(PlayersViewService);
+    view.toggleOpen('dana-uid');
+    expect(view.panelSwitch()).toBe(false);
+    view.toggleOpen('other-uid');
+    expect(view.panelSwitch()).toBe(true);
+    view.toggleOpen('other-uid');
+    expect(view.openKey()).toBeNull();
+    expect(view.panelSwitch()).toBe(false);
   });
 
   it('keeps an open card in its group until it closes', async () => {
