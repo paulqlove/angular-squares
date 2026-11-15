@@ -23,6 +23,8 @@
   <div appPlayersView></div>
 } @else {
 
+<app-dashboard-groups></app-dashboard-groups>
+
 @if (store.isLoadingGames()) {
   <div class="qs-skel-delay mt-4 grid grid-cols-1 gap-3" data-card-grid [class]="view.cardGridClass()" aria-busy="true">
     @for (i of skeletons; track i) {

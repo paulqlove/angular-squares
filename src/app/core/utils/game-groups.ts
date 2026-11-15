@@ -1,0 +1,65 @@
+import { OpenListTarget, fileBoardUpdates, isListKey } from './open-lists';
+
+/**
+ * Game groups (Season Pass): the owner's labels, such as Church or Work, that decide which games share a
+ * More tab. Stored at `groupLists/{ownerId}`. Players and guests never read them. See database.rules.notes.md.
+ */
+
+export const GROUP_NAME_MAX = 30;
+
+export interface GameGroup {
+  id: string;
+  name: string;
+  createdAt: number;
+}
+
+/** A board as the group writes see it: its list and whether it is shown in More. */
+export interface GroupedBoard extends OpenListTarget {
+  showInOpenBoards?: boolean;
+}
+
+/** The owner's groups, oldest first, from the raw `groupLists/{ownerId}/groups` value. Bad entries are skipped. */
+export function parseGroups(raw: unknown): GameGroup[] {
+  if (!raw || typeof raw !== 'object') return [];
+  return Object.entries(raw as Record<string, { name?: unknown; createdAt?: unknown }>)
+    .filter(([id, g]) => isListKey(id) && typeof g?.name === 'string' && typeof g?.createdAt === 'number')
+    .map(([id, g]) => ({ id, name: g.name as string, createdAt: g.createdAt as number }))
+    .sort((a, b) => a.createdAt - b.createdAt);
+}
+
+/** The name as saved: spaces at the ends dropped, cut to 30 characters. Empty when nothing is left. */
+export function cleanGroupName(name: string): string {
+  return name.trim().slice(0, GROUP_NAME_MAX).trim();
+}
+
+/** How many of these boards are filed in each group, by group id. */
+export function groupCounts(boards: OpenListTarget[]): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const board of boards) {
+    if (board.openListId) counts.set(board.openListId, (counts.get(board.openListId) ?? 0) + 1);
+  }
+  return counts;
+}
+
+/** The group a board is filed in, or undefined for No group. */
+export function groupOf(groups: GameGroup[], board: OpenListTarget): GameGroup | undefined {
+  return board.openListId ? groups.find(g => g.id === board.openListId) : undefined;
+}
+
+/**
+ * One write that deletes a group and moves its boards to No group, each keeping its More switch.
+ * The games and their list entries move in the same write, so no board is ever left pointing at a missing group.
+ */
+export function deleteGroupUpdates(ownerId: string, groupId: string, ungroupedKey: string, boards: GroupedBoard[]): Record<string, unknown> {
+  const updates: Record<string, unknown> = { [`groupLists/${ownerId}/groups/${groupId}`]: null };
+  for (const board of boards.filter(b => b.openListId === groupId)) {
+    Object.assign(updates, fileBoardUpdates(board, ungroupedKey, !!board.showInOpenBoards));
+  }
+  return updates;
+}
+
+/** "1 game will…" or "3 games will…": the delete confirm, worded as Creative's spec. */
+export function deleteGroupMessage(count: number): string {
+  if (count === 0) return 'No games are in this group.';
+  return `${count} ${count === 1 ? 'game' : 'games'} will show alongside your other ungrouped games.`;
+}

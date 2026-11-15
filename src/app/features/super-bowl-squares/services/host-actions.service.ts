@@ -193,7 +193,7 @@ export class HostActionsService {
     const state = this.state;
     if (values.showInOpenBoards !== state.showInOpenBoards) {
       try {
-        await this.gameService.setShowInOpenBoards(state.gameId, state.gameOwnerId, values.showInOpenBoards);
+        state.openListId = await this.gameService.setShowInOpenBoards({ id: state.gameId, ownerId: state.gameOwnerId, openListId: state.openListId }, values.showInOpenBoards);
         state.showInOpenBoards = values.showInOpenBoards;
       } catch {
         this.toastService.warning('Saved, but Show in my open boards could not be changed. Try again in a moment.');

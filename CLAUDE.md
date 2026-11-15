@@ -101,8 +101,14 @@ games/{gameId}/
   espnEventId: string (optional - links to ESPN game for live scores)
   espnLive: clock, period, status, per-quarter linescores (written by Cloud Functions)
 
+  openListId (the board's More list: one of the owner's groups or their No group key)
+
 users/{userId}/games/{gameId}/
   createdAt, name
+
+groupLists/{ownerId}/  ungrouped (write-once key), groups/{groupId}: { name, createdAt }  (owner + co-hosts read)
+coHosts/{ownerId}/{uid}: true  (owner writes when assigning a co-host)
+openLists/{listId}/{boardId}: ownerId  (shown boards; read one list by key, never listable)
 
 liveGames/{espnId}/{boardId}/
   sport

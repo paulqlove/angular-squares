@@ -4,12 +4,20 @@ This file records product and design decisions, newest first. To add one, put a 
 
 ---
 
-## D-031 · Phone host bar: Games in the bar, one next-step button
+## D-032 · Phone host bar: Games in the bar, one next-step button
 
 - **Date:** Nov 15 2026
 - **Decision:** On a phone the game page's host bar is Games · Lock · Players · Edit (co-host: Games · Players). Games opens the existing Your games sheet (other games, Join with a code, My dashboard), and on phones hosts and co-hosts get no header Your games button; players and guests keep it. This replaces the first pick, a Dashboard button in the bar (Creative's d2, superseded by d4 and d5; Paul, relayed: "Yes, go with creatives pick on the host bar and players and guests."). Draw/Clear numbers leaves the phone bar; Lock becomes the next step (Lock and draw, Draw if locked without numbers, Unlock once drawn), and Clear and redraw move to a Numbers row at the top of Edit game. Clear stays disabled while the board is locked, as on desktop (Paul, relayed: "currently clear is disabled if the board is locked"). Desktop is unchanged. Both ways back to the dashboard are tracked as `game_to_dashboard`: `host_bar` for My dashboard in the sheet the bar opened, `header` otherwise.
 - **Options considered:** a Dashboard button in the bar (d2) and one Games button in the bar (d4, d5); Creative picked d4
 - **Why:** reaching the header to get back to the dashboard is a chore on a phone. Paul's words, relayed: "the mock-ups look good and are a go for everything."
+- **Decided by:** Paul
+
+## D-031 · Game groups decide each game's More tab
+
+- **Date:** Nov 15 2026
+- **Decision:** Season Pass owners can put each game in one group (Church, Work) or No group. A game's More tab lists only the other open games in its own group; No group games show each other as before. Any game link still joins its game: no members-only games, approvals or forced sign-in. Players and guests never see group names. Co-hosts can file a game into one of the owner's groups but can't make, rename or delete groups. Deleting a group moves its games to No group. Without a Season Pass, groups stay as filed and can't be changed. Mockups g1 to g5 from Creative. Paul's words: "if you have a link you should be able to join... should only be linked. To that game's group." and "the mock-ups look good and are a go for everything."
+- **Options considered:** members-only groups with approvals (dropped by Paul, Nov 15)
+- **Why:** a link to one game used to expose every open game the host runs (church and work together)
 - **Decided by:** Paul
 
 ## D-030 · Players card panel may animate its height on phones
