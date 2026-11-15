@@ -1,4 +1,4 @@
-import { afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, effect, ElementRef, inject, signal, viewChild } from '@angular/core';
+import { afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, effect, ElementRef, inject, Injector, signal, viewChild } from '@angular/core';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroCheck, heroChevronDown, heroLockClosed, heroMagnifyingGlass, heroUserMinus, heroXMark } from '@ng-icons/heroicons/outline';
 
@@ -58,6 +58,15 @@ export class PlayersViewComponent {
       observer.observe(sentinel);
       this.destroyRef.onDestroy(() => observer.disconnect());
     });
+    // A new search or game can shorten the list a lot, and the browser then leaves the page down in the footer.
+    // So once the new list is drawn, bring its top back to just under the bar.
+    let first = true;
+    effect(() => {
+      this.players.search();
+      this.players.gameFilter();
+      if (first) { first = false; return; }
+      afterNextRender(() => this.showListTop(), { injector: this.injector });
+    });
   }
 
   /** One tile column per board the list covers. */
@@ -99,4 +108,19 @@ export class PlayersViewComponent {
 
   private readonly destroyRef: DestroyRef = inject(DestroyRef);
   private readonly findSentinel = viewChild<ElementRef<HTMLElement>>('findSentinel');
+  private readonly injector: Injector = inject(Injector);
+
+  /**
+   * If the top of the list has scrolled up under the site header, scrolls back up so it sits just under the header,
+   * with the Find a player bar back in its place above the first card. Scrolling up brings the header back, so this
+   * leaves room for all of it even while it's slid away.
+   */
+  private showListTop(): void {
+    const sentinel = this.findSentinel()?.nativeElement;
+    if (!sentinel) return;
+    const header = document.querySelector<HTMLElement>('app-site-header')?.offsetHeight ?? 0;
+    const top = sentinel.getBoundingClientRect().top;
+    if (top >= header) return;
+    window.scrollTo({ top: window.scrollY + top - header, behavior: 'instant' });
+  }
 }
