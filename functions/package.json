@@ -11,8 +11,10 @@
     "test": "tsc && node --test lib/*.test.js"
   },
   "dependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "firebase-admin": "^13.5.0",
-    "firebase-functions": "^6.4.0"
+    "firebase-functions": "^6.4.0",
+    "satori": "^0.63.2"
   },
   "devDependencies": {
     "@types/node": "^20.17.0",
