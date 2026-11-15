@@ -70,10 +70,10 @@ import { DashboardStore } from '../../services/dashboard.store';
   `
 })
 export class GroupsSheetComponent {
+  protected readonly countLabel = gameCountLabel;
   protected readonly groups: DashboardGroupsService = inject(DashboardGroupsService);
   protected readonly maxName = GROUP_NAME_MAX;
   protected readonly menu: CardMenuItem[] = [{ id: 'rename', label: 'Rename' }, { id: 'delete', label: 'Delete', danger: true }];
-  protected readonly countLabel = gameCountLabel;
   protected readonly store: DashboardStore = inject(DashboardStore);
   private readonly host: ElementRef<HTMLElement> = inject(ElementRef);
   private readonly uid = computed<string>(() => this.store.currentUser()?.uid ?? '');

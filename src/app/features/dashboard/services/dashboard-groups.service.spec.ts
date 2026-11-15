@@ -57,8 +57,10 @@ describe('DashboardGroupsService', () => {
 
   it('picks a group for Hosting, and falls back to All groups once that group is deleted', async () => {
     expect(service.picked()).toBeUndefined();
+    expect(service.pickedName()).toBe('All groups');
     service.pickedId.set(CHURCH);
     expect(service.picked()?.name).toBe('Church');
+    expect(service.pickedName()).toBe('Church');
     await service.remove('o', service.groups()[0], boards);
     expect(service.picked()).toBeUndefined();
   });

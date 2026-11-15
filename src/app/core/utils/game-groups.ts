@@ -71,7 +71,7 @@ export function deleteGroupUpdates(ownerId: string, groupId: string, ungroupedKe
 /** "1 game will…" or "3 games will…": the delete confirm, worded as Creative's spec. */
 export function deleteGroupMessage(count: number): string {
   if (count === 0) return 'No games are in this group.';
-  return `${count} ${count === 1 ? 'game' : 'games'} will show alongside your other ungrouped games.`;
+  return `${gameCountLabel(count)} will show alongside your other ungrouped games.`;
 }
 
 /** What the Group picker in Edit game was left on: a group, No group (null), or a new group's name. */

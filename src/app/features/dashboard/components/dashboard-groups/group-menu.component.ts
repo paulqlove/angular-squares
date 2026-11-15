@@ -23,11 +23,11 @@ import { DashboardStore } from '../../services/dashboard.store';
         [class]="open() ? 'border-qs-ink' : 'border-qs-line-strong'"
         aria-haspopup="menu"
         [attr.aria-expanded]="open()"
-        [attr.aria-label]="'Groups: ' + (groups.picked()?.name ?? 'All groups')"
+        [attr.aria-label]="'Groups: ' + groups.pickedName()"
         (click)="toggle()"
       >
         <ng-icon name="heroFolder" class="shrink-0 text-xl" aria-hidden="true"></ng-icon>
-        <span class="min-w-0 flex-1 truncate text-left">{{ groups.picked()?.name ?? 'All groups' }}</span>
+        <span class="min-w-0 flex-1 truncate text-left">{{ groups.pickedName() }}</span>
         <ng-icon name="heroChevronDown" class="shrink-0 text-base transition-transform duration-150" [class.rotate-180]="open()" aria-hidden="true"></ng-icon>
       </button>
       @if (open()) {

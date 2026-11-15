@@ -6,7 +6,7 @@ import { PlanService } from '../../../core/services/plan.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { GameGroup, GroupChoice, GroupedBoard, cleanGroupName, deleteGroupMessage, groupChanged, groupCounts, groupOf } from '../../../core/utils/game-groups';
 
-/** A group with how many of the owner's games are filed in it, for the Groups row and sheet. */
+/** A group with how many of the owner's games are filed in it, for the group pickers and the Groups sheet. */
 export interface GroupRow extends GameGroup {
   count: number;
 }
@@ -28,6 +28,8 @@ export class DashboardGroupsService {
   public readonly picked = computed<GameGroup | undefined>(() => this.groups().find(g => g.id === this.pickedId()));
   /** The id picked in the group picker, or null for All groups. */
   public readonly pickedId = signal<string | null>(null);
+  /** What the pickers say: the picked group's name, or All groups. */
+  public readonly pickedName = computed<string>(() => this.picked()?.name ?? 'All groups');
   /** The phone's short Groups sheet, for picking a group. */
   public readonly pickSheetOpen = signal<boolean>(false);
   public readonly saving = signal<boolean>(false);
