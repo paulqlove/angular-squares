@@ -1,4 +1,4 @@
-import { fileBoardUpdates, isListKey, listedBoardIds, newListKey } from './open-lists';
+import { MAX_OPEN_BOARDS, fileBoardUpdates, isListKey, listedBoardIds, newListKey } from './open-lists';
 
 describe('open-lists', () => {
   it('makes 20-character keys the rules accept', () => {
@@ -17,12 +17,12 @@ describe('open-lists', () => {
     expect(isListKey(undefined)).toBe(false);
   });
 
-  it('keeps only the owner\'s boards, never the one on screen, at most ten', () => {
+  it('keeps only the owner\'s boards, never the one on screen, at most thirty', () => {
     const list: Record<string, unknown> = { here: 'owner', a: 'owner', legacy: true, intruder: 'someone-else' };
     expect(listedBoardIds(list, 'owner', 'here')).toEqual(['a', 'legacy']);
     expect(listedBoardIds(null, 'owner', 'here')).toEqual([]);
-    const many = Object.fromEntries(Array.from({ length: 15 }, (_, i) => [`b${i}`, 'owner']));
-    expect(listedBoardIds(many, 'owner', 'x').length).toBe(10);
+    const many = Object.fromEntries(Array.from({ length: 35 }, (_, i) => [`b${i}`, 'owner']));
+    expect(listedBoardIds(many, 'owner', 'x').length).toBe(MAX_OPEN_BOARDS);
   });
 
   it('files a shown board into a new list and takes it out of the old one', () => {
