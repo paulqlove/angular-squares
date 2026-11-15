@@ -9,6 +9,7 @@ import { drawBoardNumbers } from '../../../core/utils/draw-numbers';
 import type { EditGameValues } from '../components/edit-game-dialog/edit-game-dialog.component';
 import { emptyScores } from '../utils/board-math';
 import { hostNextStep } from '../utils/host-next-step';
+import { GamePageGroupsService } from './game-page-groups.service';
 import { GamePageUiService } from './game-page-ui.service';
 import { GameStateService } from './game-state.service';
 import { NumberDrawService } from './number-draw.service';
@@ -156,6 +157,7 @@ export class HostActionsService {
   private readonly confirmService: ConfirmService = inject(ConfirmService);
   private readonly draw: NumberDrawService = inject(NumberDrawService);
   private readonly gameService: GameService = inject(GameService);
+  private readonly groups: GamePageGroupsService = inject(GamePageGroupsService);
   private readonly planService: PlanService = inject(PlanService);
   private readonly sanitizationService: SanitizationService = inject(SanitizationService);
   private readonly state: GameStateService = inject(GameStateService);
@@ -200,6 +202,7 @@ export class HostActionsService {
         return false;
       }
     }
+    if (!await this.groups.saveChoice(values.group)) return false;
     if (state.isGameOwner() && this.planService.features().squareLimit && (values.maxSquaresPerPlayer ?? undefined) !== state.maxSquaresPerPlayer) {
       try {
         await this.gameService.setSquareLimit(state.gameId, values.maxSquaresPerPlayer);

@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { get, ref, set, update } from 'firebase/database';
-import { GameGroup, GroupedBoard, deleteGroupUpdates, parseGroups } from '../utils/game-groups';
+import { GameGroup, GroupChoice, GroupedBoard, cleanGroupName, deleteGroupUpdates, parseGroups } from '../utils/game-groups';
 import { fileBoardUpdates, newListKey } from '../utils/open-lists';
 import { AuthService } from './auth.service';
 import { BoardSettingsService } from './board-settings.service';
@@ -51,6 +51,26 @@ export class GameGroupsService {
     const listId = groupId ?? await this.boardSettings.ungroupedKey(board.ownerId);
     await this.patch(fileBoardUpdates(board, listId, !!board.showInOpenBoards));
     return listId;
+  }
+
+  /**
+   * Saves the Edit game picker: makes the new group first when one was named (owner only), then files the board.
+   * Returns the board's new list id and the group it made, if any.
+   */
+  public async saveChoice(board: GroupedBoard, choice: GroupChoice): Promise<{ listId: string; created?: GameGroup }> {
+    const name = cleanGroupName(choice.newName ?? '');
+    const created = name ? await this.createGroup(board.ownerId, name) : undefined;
+    const listId = await this.fileBoard(board, created?.id ?? choice.groupId);
+    return { listId, created };
+  }
+
+  /**
+   * Marks a player as one of the owner's co-hosts, or not, so they can read the owner's group names
+   * to file a game they co-host. Only the owner writes it.
+   */
+  public async setCoHost(ownerId: string, uid: string, on: boolean): Promise<void> {
+    this.guardWrite();
+    await this.save(`coHosts/${ownerId}/${uid}`, on ? true : null);
   }
 
   /** The three database calls, kept apart so the tests can stand in for the database. */

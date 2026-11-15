@@ -37,8 +37,9 @@
     <ng-icon name="heroUsers" class="text-base"></ng-icon>
     <span class="sm:hidden">Players</span><span class="hidden sm:inline">Manage players</span>
   </button>
-  @if (state.isGameOwner()) {
-    <button type="button" (click)="ui.showSettings.set(true)" class="qs-btn qs-btn-ghost host-btn">
+  @if (state.isGameOwner() || groups.canPick()) {
+    <!-- A co-host gets Edit game once the owner has a group: Show in my open boards and Group only -->
+    <button type="button" (click)="state.isGameOwner() ? ui.showSettings.set(true) : groups.coHostEditOpen.set(true)" class="qs-btn qs-btn-ghost host-btn">
       <ng-icon name="heroPencilSquare" class="text-base"></ng-icon>
       <span class="sm:hidden">Edit</span><span class="hidden sm:inline">Edit game</span>
     </button>

@@ -123,6 +123,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   protected readonly admin: DashboardAdminService = inject(DashboardAdminService);
   protected readonly dialogs: DashboardDialogsService = inject(DashboardDialogsService);
   protected readonly edit: DashboardEditService = inject(DashboardEditService);
+  protected readonly groups: DashboardGroupsService = inject(DashboardGroupsService);
   protected readonly planService: PlanService = inject(PlanService);
   protected readonly players: PlayersViewService = inject(PlayersViewService);
   protected readonly search: DashboardSearchService = inject(DashboardSearchService);

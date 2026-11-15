@@ -63,3 +63,19 @@ export function deleteGroupMessage(count: number): string {
   if (count === 0) return 'No games are in this group.';
   return `${count} ${count === 1 ? 'game' : 'games'} will show alongside your other ungrouped games.`;
 }
+
+/** What the Group picker in Edit game was left on: a group, No group (null), or a new group's name. */
+export interface GroupChoice {
+  groupId: string | null;
+  newName?: string;
+}
+
+/** The picker's starting value: the board's group, or null for No group (also for a group that was deleted). */
+export function pickerValue(groups: GameGroup[], openListId: string | undefined): string | null {
+  return groups.some(g => g.id === openListId) ? openListId as string : null;
+}
+
+/** True when saving this choice files the board somewhere new. */
+export function groupChanged(groups: GameGroup[], openListId: string | undefined, choice: GroupChoice): boolean {
+  return !!cleanGroupName(choice.newName ?? '') || pickerValue(groups, openListId) !== choice.groupId;
+}

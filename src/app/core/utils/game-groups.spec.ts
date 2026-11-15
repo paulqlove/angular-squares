@@ -1,4 +1,4 @@
-import { cleanGroupName, deleteGroupMessage, deleteGroupUpdates, groupCounts, groupOf, parseGroups } from './game-groups';
+import { cleanGroupName, deleteGroupMessage, deleteGroupUpdates, groupChanged, groupCounts, groupOf, parseGroups, pickerValue } from './game-groups';
 
 const CHURCH = 'ChurchGroupKey000001';
 const WORK = 'WorkGroupKey00000001';
@@ -56,5 +56,24 @@ describe('game groups', () => {
     expect(deleteGroupMessage(3)).toBe('3 games will show alongside your other ungrouped games.');
     expect(deleteGroupMessage(1)).toBe('1 game will show alongside your other ungrouped games.');
     expect(deleteGroupMessage(0)).toBe('No games are in this group.');
+  });
+});
+
+describe('group picker', () => {
+  const groups = [{ id: CHURCH, name: 'Church', createdAt: 1 }];
+
+  it('starts on the board\'s group, or No group for a board in no group or a deleted one', () => {
+    expect(pickerValue(groups, CHURCH)).toBe(CHURCH);
+    expect(pickerValue(groups, NONE)).toBeNull();
+    expect(pickerValue(groups, WORK)).toBeNull();
+    expect(pickerValue(groups, undefined)).toBeNull();
+  });
+
+  it('saves only when the choice moves the board', () => {
+    expect(groupChanged(groups, CHURCH, { groupId: CHURCH })).toBe(false);
+    expect(groupChanged(groups, NONE, { groupId: null })).toBe(false);
+    expect(groupChanged(groups, NONE, { groupId: CHURCH })).toBe(true);
+    expect(groupChanged(groups, CHURCH, { groupId: null })).toBe(true);
+    expect(groupChanged(groups, NONE, { groupId: null, newName: 'Gym' })).toBe(true);
   });
 });

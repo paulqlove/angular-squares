@@ -12,6 +12,7 @@ import { GamePageUiService } from './game-page-ui.service';
 import { GamePlayersService } from './game-players.service';
 import { GameScoringService } from './game-scoring.service';
 import { GameStateService } from './game-state.service';
+import { GamePageGroupsService } from './game-page-groups.service';
 import { HostActionsService } from './host-actions.service';
 import { NumberDrawService } from './number-draw.service';
 import { PlayerNameService } from './player-name.service';
@@ -35,7 +36,7 @@ describe('game page services', () => {
     track = vi.fn();
     TestBed.configureTestingModule({
       providers: [
-        EspnSyncService, GamePageUiService, GamePlayersService, GameScoringService, GameStateService, HostActionsService,
+        EspnSyncService, GamePageGroupsService, GamePageUiService, GamePlayersService, GameScoringService, GameStateService, HostActionsService,
         NumberDrawService, PlayerNameService, SquarePickerService,
         { provide: AuthService, useValue: { currentUser: user, previewRole: signal('actual'), isPreviewAdmin: signal(false) } },
         { provide: PlanService, useValue: { features: signal({ autoManage: true, activeBoards: 3, adFree: false, customSplits: true, squareLimit: true }), plan: signal('free') } },

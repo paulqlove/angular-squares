@@ -1,3 +1,5 @@
+import { escapeHtml } from "./html";
+
 /** Pure helpers for the branded sign-in email. The Cloud Function in index.ts wires them up. */
 
 export const SITE = "https://quarterscore.com";
@@ -37,10 +39,6 @@ export function directLink(generated: string, landing: string): string {
     if (value) out.searchParams.set(key, value);
   }
   return out.toString();
-}
-
-function escapeHtml(text: string): string {
-  return text.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 }
 
 export function renderEmail(link: string, email: string): { subject: string; html: string; text: string } {
