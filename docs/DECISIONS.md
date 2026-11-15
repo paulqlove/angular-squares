@@ -4,6 +4,14 @@ This file records product and design decisions, newest first. To add one, put a 
 
 ---
 
+## D-029 · Share winners on finished games
+
+- **Date:** Nov 14 2026
+- **Decision:** On a finished game, the Share dialog's Share invite button becomes Share winners and shares only the 1080 by 1080 winners picture from #294, with no link or text: the share sheet on touch phones, a clipboard copy on desktop (Image copied for 2 seconds), a download where neither works. Creative added a small quarterscore.com wordmark beside the logo in the picture's footer. The results card on the page stays removed (D-010). Paul's words: "it should just change to share winners. And it should be that beautiful graphic that you made with the winners and the final score. And it's just an image and it's copied. No link, just copied. The image."
+- **Options considered:** not recorded
+- **Why:** not recorded
+- **Decided by:** Paul
+
 ## D-028 · Bottom-sheet dim may fade by color
 
 - **Date:** Nov 14 2026

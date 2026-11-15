@@ -9,6 +9,7 @@ import { GamePageUiService } from '../../services/game-page-ui.service';
 import { GameStateService } from '../../services/game-state.service';
 import { PlayerNameService } from '../../services/player-name.service';
 import { SquarePickerService } from '../../services/square-picker.service';
+import { drawResultsImage } from '../../utils/results-image';
 
 /** The page's own dialogs: Share, Edit name, sign-in from a square tap, and the forced rename. The host box adds no layout. */
 @Component({
@@ -22,6 +23,8 @@ import { SquarePickerService } from '../../services/square-picker.service';
 export class GamePageDialogsComponent {
   // Protected properties
 
+  /** Share winners' picture, drawn from the board as it is when Share opens. One function for the page's life, so the dialog sees no change. */
+  protected readonly drawWinners = (): Promise<Blob> => drawResultsImage(this.state.resultsSummary());
   protected readonly names: PlayerNameService = inject(PlayerNameService);
   protected readonly squares: SquarePickerService = inject(SquarePickerService);
   protected readonly state: GameStateService = inject(GameStateService);

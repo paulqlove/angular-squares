@@ -1,5 +1,5 @@
 <!-- Share Modal -->
-<app-share-dialog [isOpen]="ui.showShareModal()" [gameId]="state.gameId" (closed)="ui.showShareModal.set(false)"></app-share-dialog>
+<app-share-dialog [isOpen]="ui.showShareModal()" [gameId]="state.gameId" [winnersImage]="state.isGameOver() ? drawWinners : null" (closed)="ui.showShareModal.set(false)"></app-share-dialog>
 
 <!-- Name Edit Modal -->
 <app-modal [open]="ui.showNameEditModal()" labelledBy="edit-name-title" size="sm" (dismissed)="ui.showNameEditModal.set(false)">
