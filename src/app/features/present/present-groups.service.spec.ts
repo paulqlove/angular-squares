@@ -31,14 +31,14 @@ describe('PresentGroupsService', () => {
     await service.load('o', Promise.resolve(['a', 'b', 'c', 'd']));
     expect(service.rows().map(r => [r.name, r.count])).toEqual([['Work', 2], ['Home', 1], ['Empty', 0]]);
     expect(service.pickedId()).toBeNull();
-    expect(service.pickedName()).toBeNull();
+    expect(service.picked()).toBeNull();
     expect(service.boardIds()).toEqual(['a', 'b', 'c', 'd']);
   });
 
   it('gives only the picked group\'s boards', async () => {
     await service.load('o', Promise.resolve(['a', 'b', 'c', 'd']));
     service.pickedId.set(WORK);
-    expect(service.pickedName()).toBe('Work');
+    expect(service.picked()).toEqual({ id: WORK, name: 'Work' });
     expect(service.boardIds()).toEqual(['a', 'c']);
   });
 

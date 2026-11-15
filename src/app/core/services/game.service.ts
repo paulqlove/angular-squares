@@ -216,9 +216,9 @@ export class GameService {
     return this.seasonPass.revokeSeasonPass(email);
   }
 
-  /** Publish the boards and interval under the host's TV token, creating it if needed. */
-  public saveTvLink(userId: string, boardIds: string[], interval: number): Promise<string> {
-    return this.tvLinks.saveTvLink(userId, boardIds, interval);
+  /** Publish the boards and interval (and the group to follow, if any) under the host's TV token, creating it if needed. */
+  public saveTvLink(userId: string, boardIds: string[], interval: number, group: string | null = null): Promise<string> {
+    return this.tvLinks.saveTvLink(userId, boardIds, interval, group);
   }
 
   /** The host turns auto-manage on or off. The server runs the board 5 minutes after kickoff. */

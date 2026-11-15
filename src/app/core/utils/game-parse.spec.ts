@@ -125,6 +125,9 @@ describe('game parse helpers', () => {
     expect(readTvLink({ boards: '', interval: 10 })).toBeNull();
     expect(readTvLink({ boards: 'A,,B', interval: 20 })).toEqual({ boards: ['A', 'B'], interval: 20 });
     expect(readTvLink({ boards: 'A', interval: 15 })).toEqual({ boards: ['A'], interval: 30 });
+    expect(readTvLink({ boards: 'A', interval: 10, group: 'WorkGroupKey00000001', owner: 'host' })).toEqual({ boards: ['A'], interval: 10, follow: { group: 'WorkGroupKey00000001', owner: 'host' } });
+    expect(readTvLink({ boards: 'A', interval: 10, group: 'bad key!', owner: 'host' })).toEqual({ boards: ['A'], interval: 10 });
+    expect(readTvLink({ boards: 'A', interval: 10, group: 'WorkGroupKey00000001' })).toEqual({ boards: ['A'], interval: 10 });
   });
 
   describe('renamePlayerInGame', () => {

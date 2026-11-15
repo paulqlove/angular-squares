@@ -296,7 +296,7 @@ export class PresentComponent implements OnInit, OnDestroy {
   protected copyRotationLink(): void {
     const user = this.auth.currentUser();
     if (!user || user.isGuest) return;
-    void this.tvLink.copyRotationLink(user.uid, { boardIds: this.boardIds, groupName: this.presentGroups.pickedName(), seconds: this.interval() });
+    void this.tvLink.copyRotationLink(user.uid, { boardIds: this.boardIds, group: this.presentGroups.picked(), seconds: this.interval() });
   }
 
   protected turnOffRotationLink(): void {

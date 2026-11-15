@@ -967,6 +967,33 @@ describe('tvLinks (office TV link)', () => {
     await assertFails(set(player(), `tvLinks/${TOKEN}`, link({ extra: 1 })));
   });
 
+  it('a link can follow one of the owner\'s own groups, and only that', async () => {
+    const WORK = 'WorkGroupKey00000001';
+    await seed({ ...claim, [`groupLists/alice/groups/${WORK}`]: { name: 'Work', createdAt: 1 }, [`groupLists/bob/groups/BobsGroupKey00000001`]: { name: 'Bob', createdAt: 1 } });
+    await assertSucceeds(set(player(), `tvLinks/${TOKEN}`, link({ group: WORK, owner: 'alice' })));
+    await assertFails(set(player(), `tvLinks/${TOKEN}`, link({ group: WORK })));
+    await assertFails(set(player(), `tvLinks/${TOKEN}`, link({ group: WORK, owner: 'bob' })));
+    await assertFails(set(player(), `tvLinks/${TOKEN}`, link({ group: 'BobsGroupKey00000001', owner: 'alice' })));
+    await assertFails(set(player(), `tvLinks/${TOKEN}`, link({ group: 'MissingGroupKey00001', owner: 'alice' })));
+    await assertFails(set(player(), `tvLinks/${TOKEN}`, link({ group: 'bad key!', owner: 'alice' })));
+    await assertFails(set(player(), `tvLinks/${TOKEN}`, link({ group: 12, owner: 'alice' })));
+  });
+
+  it('a signed-out TV following a group reads its link and the group\'s board list, but not the group\'s name or co-hosts', async () => {
+    const WORK = 'WorkGroupKey00000001';
+    await seed({
+      ...claim,
+      [`tvLinks/${TOKEN}`]: link({ group: WORK, owner: 'alice' }),
+      [`groupLists/alice/groups/${WORK}`]: { name: 'Work', createdAt: 1 },
+      [`groupCoHosts/alice/${WORK}`]: { email: 'cohost@example.com' },
+      [`openLists/${WORK}/AAAAAA`]: 'alice'
+    });
+    await assertSucceeds(read(visitor(), `tvLinks/${TOKEN}`));
+    await assertSucceeds(read(visitor(), `openLists/${WORK}`));
+    await assertFails(read(visitor(), `groupLists/alice/groups/${WORK}`));
+    await assertFails(read(visitor(), 'groupCoHosts/alice'));
+  });
+
   it('rejects a short or odd token', async () => {
     await assertFails(set(player(), 'users/alice/tvToken', 'short'));
     await assertFails(set(player(), 'users/alice/tvToken', 'has spaces and symbols!!!'));

@@ -13,8 +13,11 @@ import { OpenListTarget } from '../../core/utils/open-lists';
 export class PresentGroupsService {
   /** The picked group's id, or null for All groups. */
   public readonly pickedId = signal<string | null>(null);
-  /** The picked group's name, or null for All groups. */
-  public readonly pickedName = computed<string | null>(() => this.rows().find(row => row.id === this.pickedId())?.name ?? null);
+  /** The picked group's id and name, or null for All groups. */
+  public readonly picked = computed<{ id: string; name: string } | null>(() => {
+    const row = this.rows().find(group => group.id === this.pickedId());
+    return row ? { id: row.id, name: row.name } : null;
+  });
   /** Each of the host's groups with how many of their boards are in it. Empty when the host has no groups. */
   public readonly rows = computed<GroupRow[]>(() => groupRows(this.groups(), this.boards()));
 
