@@ -4,6 +4,14 @@ This file records product and design decisions, newest first. To add one, put a 
 
 ---
 
+## D-031 · Game groups decide each game's More tab
+
+- **Date:** Nov 15 2026
+- **Decision:** Season Pass owners can put each game in one group (Church, Work) or No group. A game's More tab lists only the other open games in its own group; No group games show each other as before. Any game link still joins its game: no members-only games, approvals or forced sign-in. Players and guests never see group names. Co-hosts can file a game into one of the owner's groups but can't make, rename or delete groups. Deleting a group moves its games to No group. Without a Season Pass, groups stay as filed and can't be changed. Mockups g1 to g5 from Creative. Paul's words: "if you have a link you should be able to join... should only be linked. To that game's group." and "the mock-ups look good and are a go for everything."
+- **Options considered:** members-only groups with approvals (dropped by Paul, Nov 15)
+- **Why:** a link to one game used to expose every open game the host runs (church and work together)
+- **Decided by:** Paul
+
 ## D-030 · Players card panel may animate its height on phones
 
 - **Date:** Nov 15 2026

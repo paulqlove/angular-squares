@@ -35,6 +35,7 @@ import { UpgradePassDialogComponent } from './components/upgrade-pass-dialog/upg
 import { DashboardAdminService } from './services/dashboard-admin.service';
 import { DashboardDialogsService } from './services/dashboard-dialogs.service';
 import { DashboardEditService } from './services/dashboard-edit.service';
+import { DashboardGroupsService } from './services/dashboard-groups.service';
 import { DashboardSearchService } from './services/dashboard-search.service';
 import { DASHBOARD_TOUR_STEPS, dashboardTourSteps } from './services/dashboard-tour';
 import { DashboardViewService } from './services/dashboard-view.service';
@@ -55,6 +56,7 @@ import { PlayersViewService } from './services/players-view.service';
   ],
   providers: [
     DashboardStore,
+    DashboardGroupsService,
     DashboardSearchService,
     DashboardViewService,
     DashboardEditService,

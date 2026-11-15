@@ -17,26 +17,32 @@ describe('filterHostedGames', () => {
   ];
 
   it('lists every board newest first with no search', () => {
-    expect(filterHostedGames(games, '', false, noTeams).map(g => g.id)).toEqual(['BBB222', 'CCC333', 'AAA111']);
+    expect(filterHostedGames(games, '', false, { teamsOf: noTeams }).map(g => g.id)).toEqual(['BBB222', 'CCC333', 'AAA111']);
   });
 
   it('matches the name, the code and the teams, ignoring case and spaces', () => {
-    expect(filterHostedGames(games, '  office ', false, noTeams).map(g => g.id)).toEqual(['AAA111']);
-    expect(filterHostedGames(games, 'bbb2', false, noTeams).map(g => g.id)).toEqual(['BBB222']);
-    expect(filterHostedGames(games, 'riverside', false, noTeams).map(g => g.id)).toEqual(['CCC333']);
-    expect(filterHostedGames(games, 'kc', false, noTeams).map(g => g.id)).toEqual(['AAA111']);
+    expect(filterHostedGames(games, '  office ', false, { teamsOf: noTeams }).map(g => g.id)).toEqual(['AAA111']);
+    expect(filterHostedGames(games, 'bbb2', false, { teamsOf: noTeams }).map(g => g.id)).toEqual(['BBB222']);
+    expect(filterHostedGames(games, 'riverside', false, { teamsOf: noTeams }).map(g => g.id)).toEqual(['CCC333']);
+    expect(filterHostedGames(games, 'kc', false, { teamsOf: noTeams }).map(g => g.id)).toEqual(['AAA111']);
   });
 
   it('leaves the list whole while the field holds a game code', () => {
-    expect(filterHostedGames(games, 'ZZZ999', true, noTeams)).toHaveLength(3);
+    expect(filterHostedGames(games, 'ZZZ999', true, { teamsOf: noTeams })).toHaveLength(3);
+  });
+
+  it('matches the owner\'s group name when a lookup is given', () => {
+    const groupNameOf = (g: GameListItem): string | undefined => g.id === 'CCC333' ? 'Church' : undefined;
+    expect(filterHostedGames(games, 'church', false, { teamsOf: noTeams, groupNameOf }).map(g => g.id)).toEqual(['CCC333']);
+    expect(filterHostedGames(games, 'church', false, { teamsOf: noTeams })).toEqual([]);
   });
 
   it('returns nothing when no board matches', () => {
-    expect(filterHostedGames(games, 'qqqq', false, noTeams)).toEqual([]);
+    expect(filterHostedGames(games, 'qqqq', false, { teamsOf: noTeams })).toEqual([]);
   });
 
   it('does not reorder the list it was given', () => {
-    filterHostedGames(games, '', false, noTeams);
+    filterHostedGames(games, '', false, { teamsOf: noTeams });
     expect(games.map(g => g.id)).toEqual(['AAA111', 'BBB222', 'CCC333']);
   });
 });
@@ -48,12 +54,12 @@ describe('dashboard grouping', () => {
       board('b', 'Half board', { squaresFilled: 50, createdAt: 2 }),
       board('c', 'Locked board', { squaresFilled: 100, isLocked: true, createdAt: 1 })
     ];
-    expect(groupBoards(filterHostedGames(games, '', false, noTeams)).map(g => [g.label, g.games.map(x => x.id)])).toEqual([
+    expect(groupBoards(filterHostedGames(games, '', false, { teamsOf: noTeams })).map(g => [g.label, g.games.map(x => x.id)])).toEqual([
       ['Ready to lock', ['a']],
       ['Filling', ['b']],
       ['Locked', ['c']]
     ]);
-    expect(groupBoards(filterHostedGames(games, 'half', false, noTeams)).map(g => g.key)).toEqual(['filling']);
+    expect(groupBoards(filterHostedGames(games, 'half', false, { teamsOf: noTeams })).map(g => g.key)).toEqual(['filling']);
   });
 });
 
