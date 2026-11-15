@@ -8,12 +8,14 @@ import { ToastService } from '../../../core/services/toast.service';
 import { shareLinkWithTheme } from '../../../core/utils/share-link';
 import { browserShareEnv, copyText, shareInvite } from './share-invite.utils';
 import { browserWinnersEnv, shareButtonLabel, shareWinners as sharePicture, winnersFileName } from './share-winners.utils';
+import { browserObjectUrls, WinnersPreview, WinnersPreviewState } from './winners-preview';
 
 type CopyTarget = 'code' | 'image' | 'link' | 'tv';
 
 /**
  * Share popup: one Share invite button (share sheet on phones, copy on desktop), the game code and the TV link. On a finished
- * game the heading and button read Share winners, and the button shares the winners picture instead. Used by the dashboard and game page.
+ * game the heading and button read Share winners, the dialog shows the winners picture in place of the code and TV link,
+ * and the button shares that picture. Used by the dashboard and game page.
  */
 @Component({
   selector: 'app-share-dialog',
@@ -37,36 +39,51 @@ type CopyTarget = 'code' | 'image' | 'link' | 'tv';
       </div>
 
       <div class="space-y-5 px-6 py-6">
+        @if (winnersImage) {
+          <div class="aspect-square w-full overflow-hidden rounded-inner border border-qs-line bg-qs-panel-2">
+            @let state = preview();
+            @if (state.status === 'ready') {
+              <img [src]="state.url" [alt]="'Winners picture for ' + gameTitle" width="1080" height="1080" class="block h-full w-full" />
+            } @else {
+              <p class="flex h-full items-center justify-center px-6 text-center text-sm text-qs-muted">
+                {{ state.status === 'failed' ? "Couldn't make the picture. Tap Share winners to try again." : 'Drawing the picture…' }}
+              </p>
+            }
+          </div>
+        }
+
         <button type="button" (click)="winnersImage ? shareWinners() : shareLink()" class="qs-btn qs-btn-primary w-full">
           <ng-icon [name]="shareCopied ? 'heroCheck' : 'heroShare'" [class.icon-pop]="shareCopied" class="text-base"></ng-icon>
           {{ shareLabel }}
         </button>
 
-        <div>
-          <p class="qs-label mb-1.5 text-qs-muted">Game code</p>
-          <div class="flex items-stretch gap-2">
-            <code translate="no" id="share-code" class="flex flex-1 items-center justify-center rounded-btn border border-qs-line bg-qs-panel-2 py-3 font-mono text-2xl font-semibold tracking-[0.3em] text-qs-ink">{{ gameId }}</code>
-            <button type="button" (click)="copy(gameId, 'code')" class="qs-btn qs-btn-primary min-w-28" aria-label="Copy game code">
-              <ng-icon [name]="copied() === 'code' ? 'heroCheck' : 'heroClipboard'" [class.icon-pop]="copied() === 'code'" class="text-base"></ng-icon>
-              {{ copied() === 'code' ? 'Copied' : 'Copy' }}
-            </button>
-          </div>
-          <p class="mt-1.5 text-xs text-qs-muted">Players enter this on the dashboard to join.</p>
-        </div>
-
-        <details class="rounded-inner border border-qs-line">
-          <summary class="qs-label flex min-h-11 cursor-pointer items-center px-4 text-qs-ink">TV link</summary>
-          <div class="border-t border-qs-line p-4">
+        @if (!winnersImage) {
+          <div>
+            <p class="qs-label mb-1.5 text-qs-muted">Game code</p>
             <div class="flex items-stretch gap-2">
-              <input id="share-tv-link" type="text" [value]="tvLink" readonly aria-label="TV link" class="qs-input min-w-0 flex-1 truncate text-sm text-qs-muted" (focus)="$any($event.target).select()" />
-              <button type="button" (click)="copy(tvLink, 'tv')" class="qs-btn qs-btn-primary min-w-28" aria-label="Copy TV link">
-                <ng-icon [name]="copied() === 'tv' ? 'heroCheck' : 'heroClipboard'" [class.icon-pop]="copied() === 'tv'" class="text-base"></ng-icon>
-                {{ copied() === 'tv' ? 'Copied' : 'Copy' }}
+              <code translate="no" id="share-code" class="flex flex-1 items-center justify-center rounded-btn border border-qs-line bg-qs-panel-2 py-3 font-mono text-2xl font-semibold tracking-[0.3em] text-qs-ink">{{ gameId }}</code>
+              <button type="button" (click)="copy(gameId, 'code')" class="qs-btn qs-btn-primary min-w-28" aria-label="Copy game code">
+                <ng-icon [name]="copied() === 'code' ? 'heroCheck' : 'heroClipboard'" [class.icon-pop]="copied() === 'code'" class="text-base"></ng-icon>
+                {{ copied() === 'code' ? 'Copied' : 'Copy' }}
               </button>
             </div>
-            <p class="mt-1.5 text-xs text-qs-muted">Show the live board on any screen. No sign-in.</p>
+            <p class="mt-1.5 text-xs text-qs-muted">Players enter this on the dashboard to join.</p>
           </div>
-        </details>
+
+          <details class="rounded-inner border border-qs-line">
+            <summary class="qs-label flex min-h-11 cursor-pointer items-center px-4 text-qs-ink">TV link</summary>
+            <div class="border-t border-qs-line p-4">
+              <div class="flex items-stretch gap-2">
+                <input id="share-tv-link" type="text" [value]="tvLink" readonly aria-label="TV link" class="qs-input min-w-0 flex-1 truncate text-sm text-qs-muted" (focus)="$any($event.target).select()" />
+                <button type="button" (click)="copy(tvLink, 'tv')" class="qs-btn qs-btn-primary min-w-28" aria-label="Copy TV link">
+                  <ng-icon [name]="copied() === 'tv' ? 'heroCheck' : 'heroClipboard'" [class.icon-pop]="copied() === 'tv'" class="text-base"></ng-icon>
+                  {{ copied() === 'tv' ? 'Copied' : 'Copy' }}
+                </button>
+              </div>
+              <p class="mt-1.5 text-xs text-qs-muted">Show the live board on any screen. No sign-in.</p>
+            </div>
+          </details>
+        }
         <p class="sr-only" aria-live="polite">{{ copied() ? 'Copied to clipboard' : '' }}</p>
       </div>
 
@@ -81,6 +98,8 @@ export class ShareDialogComponent implements OnChanges {
   @Input() gameId = '';
   /** Finished games only: draws the winners picture. The page passes the same function each time, so the picture is drawn once per open. */
   @Input() winnersImage: (() => Promise<Blob>) | null = null;
+  /** For the winners picture's alt text. */
+  @Input() gameTitle = '';
   @Output() closed = new EventEmitter<void>();
 
   private readonly gameService = inject(GameService);
@@ -88,13 +107,16 @@ export class ShareDialogComponent implements OnChanges {
   private readonly theme = inject(ThemeService);
   private readonly toast = inject(ToastService);
   private resetTimer: ReturnType<typeof setTimeout> | undefined;
-  private picture: Promise<Blob> | null = null;
-  private pictureReady: Blob | null = null;
 
   copied = signal<CopyTarget | null>(null);
+  protected readonly preview = signal<WinnersPreviewState>({ status: 'drawing' });
+  private readonly picture = new WinnersPreview(browserObjectUrls(), state => this.preview.set(state));
 
   constructor() {
-    inject(DestroyRef).onDestroy(() => clearTimeout(this.resetTimer));
+    inject(DestroyRef).onDestroy(() => {
+      clearTimeout(this.resetTimer);
+      this.picture.clear();
+    });
   }
 
   /** The invite link, with ?theme=dark for a dark-mode sharer so the link preview picture matches. */
@@ -130,11 +152,10 @@ export class ShareDialogComponent implements OnChanges {
   /** Starts drawing the winners picture as the dialog opens, so a phone's share sheet can open straight from the tap. */
   ngOnChanges(): void {
     if (this.isOpen && this.winnersImage) {
-      if (!this.picture) this.drawPicture();
+      if (!this.picture.image) this.drawPicture();
       return;
     }
-    this.picture = null;
-    this.pictureReady = null;
+    this.picture.clear();
   }
 
   async shareLink(): Promise<void> {
@@ -145,21 +166,15 @@ export class ShareDialogComponent implements OnChanges {
 
   /** No await before sharePicture: on desktop the clipboard write has to start inside the tap. */
   async shareWinners(): Promise<void> {
-    const image = this.picture ?? this.drawPicture();
-    const result = await sharePicture({ image, ready: this.pictureReady, fileName: winnersFileName(this.gameId) }, browserWinnersEnv());
+    const image = this.picture.image ?? this.drawPicture();
+    const result = await sharePicture({ image, ready: this.picture.ready, fileName: winnersFileName(this.gameId) }, browserWinnersEnv());
     if (result === 'copied') this.flashCopied('image');
     if (result === 'failed') this.toast.error("Couldn't make the winners picture. Try again.");
   }
 
   private drawPicture(): Promise<Blob> {
     const image = this.winnersImage ? this.winnersImage() : Promise.reject(new Error('Not a finished game'));
-    this.picture = image;
-    this.pictureReady = null;
-    // A failed draw is reported when Share winners is tapped; clearing it here lets that tap draw again.
-    image.then(
-      blob => { if (this.picture === image) this.pictureReady = blob; },
-      () => { if (this.picture === image) this.picture = null; }
-    );
+    this.picture.track(image);
     return image;
   }
 

@@ -4,12 +4,20 @@ This file records product and design decisions, newest first. To add one, put a 
 
 ---
 
-## D-033 · Season Pass hosts at the cap get a plain limit note
+## D-034 · Season Pass hosts at the cap get a plain limit note
 
 - **Date:** Nov 15 2026
 - **Decision:** A Season Pass host (or an admin previewing Season Pass) with 25 active boards who tries to make another sees "You're at your 25-board limit" and a Done button: no price, no upgrade offer, no email signup, and no upgrade-view count. Free hosts at their one-board limit keep the "Board 1 is live" upgrade dialog exactly as before. The "Your last game is over" reset-or-delete dialog is now free-only too, so a Season Pass host who owns 25 or more boards but has fewer than 25 active can make a new one. The 25 cap is unchanged. Paul's words, relayed: "Yes, fix it".
 - **Options considered:** not recorded
 - **Why:** the free plan's upgrade offer made no sense to someone who already has the Season Pass
+- **Decided by:** Paul
+
+## D-033 · Share winners shows the picture, not the code or TV link
+
+- **Date:** Nov 15 2026
+- **Decision:** On a finished game the Share dialog drops the Game code block and the TV link, and shows the winners picture itself in their place: square at full dialog width, 8px radius, 1px line border, above the Share winners button. While it draws, a same-size panel reads "Drawing the picture…"; if the draw fails it reads "Couldn't make the picture. Tap Share winners to try again." Share game on live games is unchanged.
+- **Options considered:** Creative's s1 (picture preview) with s2 (drawing state)
+- **Why:** the code and TV link don't matter once a game is over. Paul's words, relayed: "On games that are completed where it says share winners, I think the TV link in game codes are irrelevant and not needed. Maybe it would be a good opportunity to just go ahead and show an image of what the winner's image will look like." Approved: "Build it".
 - **Decided by:** Paul
 
 ## D-032 · Phone host bar: Games in the bar, one next-step button

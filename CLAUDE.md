@@ -14,6 +14,8 @@ npm run build      # Production build to dist/angular-squares/
 npm test           # Run Karma + Jasmine tests
 ```
 
+**PR screenshots (dev only, Linux):** `node scripts/screenshot.mjs <url> <out-prefix> [--dark]` saves `<out-prefix>-phone.png` (412 px wide) and `<out-prefix>-desktop.png` (1440 px). Install Chromium first with `npm i --no-save @sparticuz/chromium` (kept out of package.json so CI never downloads it). The script drives it over Chromium's DevTools protocol, with no driver package, so it takes a still of a page as it loads: no taps, scrolling or sign-in. Point it at a local build (`npm run build`, then serve `dist/angular-squares/browser`) or a PR preview. Previews use the live database, so only open pages; never script writes.
+
 ## Architecture
 
 ### Directory Structure

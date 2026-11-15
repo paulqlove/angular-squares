@@ -73,6 +73,7 @@ export class SquarePickerService {
   private async claimSquare(key: string, player: string): Promise<void> {
     const state = this.state;
     const previousSquares = { ...state.selectedSquares };
+    const previousUserIds = { ...state.playerUserIds };
     const newSelectedSquares = { ...state.selectedSquares, [key]: player };
     state.selectedSquares = newSelectedSquares;
     state.calculatePlayerStats();
@@ -91,6 +92,7 @@ export class SquarePickerService {
     } catch {
       // Rollback on failure
       state.selectedSquares = previousSquares;
+      state.playerUserIds = previousUserIds;
       state.calculatePlayerStats();
       this.toastService.error('Could not claim the square. Try again.');
       return;
@@ -135,6 +137,7 @@ export class SquarePickerService {
   private async releaseSquare(key: string): Promise<void> {
     const state = this.state;
     const previousSquares = { ...state.selectedSquares };
+    const previousUserIds = { ...state.playerUserIds };
     const newSelectedSquares = { ...state.selectedSquares };
     delete newSelectedSquares[key];
     state.selectedSquares = newSelectedSquares;
@@ -147,6 +150,7 @@ export class SquarePickerService {
     } catch {
       // Rollback on failure
       state.selectedSquares = previousSquares;
+      state.playerUserIds = previousUserIds;
       state.calculatePlayerStats();
       this.toastService.error('Could not update the square. Try again.');
     }
