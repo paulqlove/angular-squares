@@ -85,3 +85,13 @@ A Season Pass host can sort boards into groups (Church, Work). A board's **More*
 - A host could create a group id equal to someone else's (ids are not globally claimed). The `openLists` value check plus the app's owner filter keep such entries out of another host's More tab.
 
 Deploy these rules before the app that writes them.
+
+## A co-host added by email (games/{id}/managerId claim)
+
+Co-host powers follow `games/{id}/managerId`. A co-host picked from the players gets it at once. One typed by email (Create game's Co-host field, or a group's co-host) is stored as `managerEmail` only, so they had no powers. Now, when that person opens the game signed in, the app writes their own uid as `managerId`.
+
+- `games/{id}/managerId` (claim): a signed-in user may set it to their own uid only while it is empty or `''`, the game's `managerEmail` is a string, and it equals `auth.token.email` ignoring case, with `auth.token.email_verified == true`. Google and the emailed sign-in link both give a verified email; an email typed without proving it never matches. `managerEmail` is kept, so a group co-host change still finds the game.
+- `coHosts/{ownerId}/{uid}`: besides the owner's `true`, the co-host may write their own entry as the id of a game of that owner where they are `managerId`, written in the same update as the claim. It can never replace the owner's `true`. `groupLists/{ownerId}` reads with it only while that game's `managerId` is still them, so removing the co-host also ends the read.
+- Not used: `emailIndex`. Any signed-in user can write any email there, so it can't prove who owns an address.
+
+Deploy these rules before the app that writes them. An older app never claims; the claim simply waits for the new one.

@@ -88,6 +88,7 @@
           ".validate": "newData.isString() && newData.val().length <= 100"
         },
         "managerId": {
+          ".write": "auth != null && auth.token.email_verified == true && newData.val() == auth.uid && (!data.exists() || data.val() == '') && root.child('games').child($gameId).child('managerEmail').isString() && root.child('games').child($gameId).child('managerEmail').val().toLowerCase() == auth.token.email.toLowerCase()",
           ".validate": "(newData.val() == null) || (newData.isString() && newData.val().length <= 128)"
         },
         "managerEmail": {
@@ -233,7 +234,7 @@
     },
     "groupLists": {
       "$ownerId": {
-        ".read": "auth != null && (auth.uid == $ownerId || root.child('coHosts').child($ownerId).child(auth.uid).val() == true || root.child('admins').child(auth.uid).val() == true)",
+        ".read": "auth != null && (auth.uid == $ownerId || root.child('coHosts').child($ownerId).child(auth.uid).val() == true || (root.child('coHosts').child($ownerId).child(auth.uid).isString() && root.child('games').child(root.child('coHosts').child($ownerId).child(auth.uid).val()).child('managerId').val() == auth.uid) || root.child('admins').child(auth.uid).val() == true)",
         "ungrouped": {
           ".write": "auth != null && auth.uid == $ownerId && !data.exists()",
           ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9_-]{16,40}$/)"
@@ -265,8 +266,8 @@
       "$ownerId": {
         ".read": "auth != null && auth.uid == $ownerId",
         "$uid": {
-          ".write": "auth != null && auth.uid == $ownerId",
-          ".validate": "newData.val() == true && $uid.length <= 128"
+          ".write": "auth != null && (auth.uid == $ownerId || ($uid == auth.uid && (!data.exists() || data.isString()) && newData.isString() && newData.parent().parent().parent().child('games').child(newData.val()).child('ownerId').val() == $ownerId && newData.parent().parent().parent().child('games').child(newData.val()).child('managerId').val() == auth.uid))",
+          ".validate": "$uid.length <= 128 && (newData.val() == true || (newData.isString() && newData.val().matches(/^[A-Za-z0-9]{6}$/)))"
         }
       }
     },
