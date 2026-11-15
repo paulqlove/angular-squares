@@ -142,4 +142,16 @@ describe('GameGroupsService', () => {
     expect(plain.created?.coHost).toBeUndefined();
     expect(db.save).toHaveBeenCalledWith(`groupLists/o/groups/${plain.created?.id}`, { name: 'Run', createdAt: plain.created?.createdAt });
   });
+
+  it('reads each board\'s list id together, leaving out boards with none, a bad value or a failed read', async () => {
+    db.read = vi.fn((path: string) => {
+      if (path === 'games/a/openListId') return Promise.resolve(CHURCH);
+      if (path === 'games/b/openListId') return Promise.resolve(null);
+      if (path === 'games/c/openListId') return Promise.resolve('not a key!');
+      return Promise.reject(new Error('denied'));
+    });
+    const ids = await service.listIdsOf(['a', 'b', 'c', 'd']);
+    expect([...ids]).toEqual([['a', CHURCH]]);
+    expect(db.read).toHaveBeenCalledTimes(4);
+  });
 });

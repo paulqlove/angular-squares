@@ -8,10 +8,10 @@ import { TeamLogoService } from '../../../core/services/team-logo.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { BoardGroup, groupBoards } from '../../../core/utils/board-groups';
 import { drawBoardNumbers } from '../../../core/utils/draw-numbers';
-import { gamesInGroup } from '../../../core/utils/game-groups';
+import { GroupRow, gamesInGroup } from '../../../core/utils/game-groups';
 import { toGameListItem } from '../../../core/utils/game-parse';
 import { filterHostedGames } from './dashboard-filters';
-import { DashboardGroupsService, GroupRow } from './dashboard-groups.service';
+import { DashboardGroupsService } from './dashboard-groups.service';
 import { DashboardSearchService } from './dashboard-search.service';
 
 /**

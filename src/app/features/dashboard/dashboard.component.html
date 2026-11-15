@@ -23,7 +23,8 @@
 
         <!-- On the Players tab the picker stays put but switched off, so Search doesn't slide over -->
         @if (store.groupPickerShows()) {
-          <app-group-menu [off]="players.active()"></app-group-menu>
+          <app-group-menu [off]="players.active()" [rows]="store.groupRows()" [pickedId]="groups.pickedId()" [canManage]="groups.canEdit()"
+            (groupPicked)="groups.pickedId.set($event)" (manageGroups)="groups.openManage()"></app-group-menu>
         }
 
         @if (store.canCreateGame()) {

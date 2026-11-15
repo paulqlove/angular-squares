@@ -14,7 +14,11 @@ import { confirmedPlayers } from '../../core/utils/paid-squares';
 import { TeamLogoService } from '../../core/services/team-logo.service';
 import { GameBoardComponent } from '../super-bowl-squares/components/game-board/game-board.component';
 import { PLAYER_COLORS, normalizePlayerColors } from '../super-bowl-squares/utils/player-colors';
-import { quarterLabels, QuarterWin } from '../super-bowl-squares/utils/quarter-labels';
+import { BoardLayout, nextPlayerColor, quarterWins, squareForScore } from '../super-bowl-squares/utils/board-math';
+import { QuarterWin, quarterLabels } from '../super-bowl-squares/utils/quarter-labels';
+import { GroupMenuComponent } from '../dashboard/components/dashboard-groups/group-menu.component';
+import { PresentGroupsService } from './present-groups.service';
+import { PresentTvLinkService } from './present-tv-link.service';
 
 const PIN_MS = 30000;
 /** Phones and portrait tablets: the TV layout is not built for them. Landscape phones top out near 930px. */
@@ -23,8 +27,8 @@ const QUARTERS = ['q1', 'q2', 'q3', 'q4'] as const;
 
 @Component({
   selector: 'app-present',
-  imports: [GameBoardComponent, NgIconComponent],
-  providers: [provideIcons({ heroClock })],
+  imports: [GameBoardComponent, GroupMenuComponent, NgIconComponent],
+  providers: [PresentGroupsService, PresentTvLinkService, provideIcons({ heroClock })],
   templateUrl: './present.component.html',
   styleUrl: './present.component.scss',
   encapsulation: ViewEncapsulation.None
@@ -46,6 +50,8 @@ export class PresentComponent implements OnInit, OnDestroy {
   private readonly gameService = inject(GameService);
   private readonly location = inject(Location);
   private readonly platformId = inject(PLATFORM_ID);
+  protected readonly presentGroups = inject(PresentGroupsService);
+  protected readonly tvLink = inject(PresentTvLinkService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly teamLogoService = inject(TeamLogoService);
@@ -62,9 +68,7 @@ export class PresentComponent implements OnInit, OnDestroy {
     if (!g) return {};
     const colors = normalizePlayerColors(g.playerColors ?? {});
     for (const name of Object.values(g.selectedSquares ?? {})) {
-      if (colors[name]) continue;
-      const used = Object.values(colors);
-      colors[name] = PLAYER_COLORS.find(c => !used.includes(c)) ?? PLAYER_COLORS[used.length % PLAYER_COLORS.length];
+      if (!colors[name]) colors[name] = nextPlayerColor(colors, PLAYER_COLORS);
     }
     return colors;
   });
@@ -76,7 +80,8 @@ export class PresentComponent implements OnInit, OnDestroy {
   protected readonly interval = signal<number>(20);
   protected readonly qr = signal<string>('');
   protected readonly rotating = signal<boolean>(false);
-  protected readonly showHelp = signal<boolean>(false);
+  /** The group menu is open: the host controls stay on screen meanwhile. */
+  protected readonly groupMenuOpen = signal<boolean>(false);
   protected readonly showTimer = signal<boolean>(false);
   /** Host buttons show on any movement, then fade after a few seconds. */
   protected readonly controlsVisible = signal<boolean>(true);
@@ -85,13 +90,15 @@ export class PresentComponent implements OnInit, OnDestroy {
   /** True on /tv/:token: a TV with no sign-in, rotating the boards the host chose, at the speed the host chose. */
   protected readonly kiosk = signal<boolean>(false);
   protected readonly kioskOff = signal<boolean>(false);
-  protected readonly hasRotationLink = signal<boolean>(false);
   protected readonly tooSmall = signal<boolean>(false);
   /** How many boards the signed-in host has: rotation needs two or more. */
   protected readonly boardCount = signal<number>(0);
   protected readonly slideDir = signal<'left' | 'right'>('right');
 
   private readonly controlsRef = viewChild<ElementRef<HTMLElement>>('controls');
+  private readonly titleRef = viewChild<ElementRef<HTMLElement>>('title');
+  /** The title's font size when the timer opened, kept while it is open so the title truncates instead of shrinking. */
+  private titleFontWhileTimerOpen: string | null = null;
   private boardIds: string[] = [];
   private index = 0;
   private lastScore = '';
@@ -125,9 +132,10 @@ export class PresentComponent implements OnInit, OnDestroy {
       if (!id) this.router.navigate(['/']);
       return;
     }
-    this.boardIds = await this.gameService.getUserGameIds(user.uid);
+    await this.presentGroups.load(user.uid, await this.gameService.getUserGameIds(user.uid), id ?? undefined);
+    this.boardIds = this.presentGroups.boardIds();
     this.boardCount.set(this.boardIds.length);
-    this.hasRotationLink.set(!!(await this.gameService.getTvToken(user.uid)));
+    await this.tvLink.load(user.uid);
     if (id) {
       this.index = this.boardIds.indexOf(id);
       return;
@@ -148,7 +156,7 @@ export class PresentComponent implements OnInit, OnDestroy {
     this.controlsVisible.set(true);
     if (this.hideControlsTimer) clearTimeout(this.hideControlsTimer);
     this.hideControlsTimer = setTimeout(() => {
-      if (!this.showTimer() && !this.showHelp()) this.controlsVisible.set(false);
+      if (!this.showTimer() && !this.groupMenuOpen()) this.controlsVisible.set(false);
     }, 5000);
   }
 
@@ -175,22 +183,12 @@ export class PresentComponent implements OnInit, OnDestroy {
     return { away: t.away.logo, home: t.home.logo };
   }
 
-  protected boardRows(g: GameData): number {
-    return this.rows(g);
-  }
-
   protected claimed(): number {
     return Object.keys(this.game()?.selectedSquares ?? {}).length;
   }
 
-  protected async copyLink(): Promise<void> {
-    const url = this.gameService.getTvLink(this.gameId());
-    try {
-      await navigator.clipboard.writeText(url);
-      this.toast.success('TV link copied');
-    } catch {
-      this.toast.error('Could not copy. Open the board and copy the address bar.');
-    }
+  protected copyLink(): void {
+    void this.tvLink.copyBoardLink(this.gameId());
   }
 
   protected exit(): void {
@@ -199,7 +197,7 @@ export class PresentComponent implements OnInit, OnDestroy {
 
   protected leaderSquare(): string | null {
     const g = this.game();
-    return g?.isRandomized ? this.squareFor(g, this.latestScore(g)) : null;
+    return g?.isRandomized ? squareForScore(this.layout(g), this.latestScore(g)) : null;
   }
 
   protected winnerSquares(): string[] {
@@ -213,12 +211,7 @@ export class PresentComponent implements OnInit, OnDestroy {
 
   private quarterWins(): QuarterWin[] {
     const g = this.game();
-    if (!g?.isRandomized) return [];
-    return QUARTERS.flatMap(quarter => {
-      const winner = g.winners?.[quarter];
-      const key = winner && g.scores?.[quarter] ? this.squareFor(g, g.scores[quarter]) : null;
-      return key && g.selectedSquares?.[key] === winner ? [{ key, quarter }] : [];
-    });
+    return g?.isRandomized && g.scores ? quarterWins(this.layout(g), g.scores, g.winners ?? {}) : [];
   }
 
   /** Same rule as the game page: see isGameOver in core/utils/quarter-label.ts. */
@@ -300,40 +293,15 @@ export class PresentComponent implements OnInit, OnDestroy {
     this.startTimer();
   }
 
-  /** Publish the boards and the chosen interval under the host's private token, and copy the address. */
-  protected async copyRotationLink(): Promise<void> {
+  protected copyRotationLink(): void {
     const user = this.auth.currentUser();
     if (!user || user.isGuest) return;
-    let url: string;
-    try {
-      const token = await this.gameService.saveTvLink(user.uid, this.boardIds, this.interval());
-      this.hasRotationLink.set(true);
-      url = this.gameService.getRotationTvLink(token);
-    } catch (error) {
-      console.error('[Present] Could not save the rotating TV link', (error as { code?: string })?.code ?? error);
-      this.toast.error('Could not make the TV link. Try again.');
-      return;
-    }
-    const boards = Math.min(this.boardIds.length, 20);
-    try {
-      await navigator.clipboard.writeText(url);
-      this.toast.success(`TV link copied: ${boards} boards, ${this.interval()}s each. Press it again after you change boards or the time.`);
-    } catch {
-      this.toast.error(`Could not copy. The link is ${url}`);
-    }
+    void this.tvLink.copyRotationLink(user.uid, { boardIds: this.boardIds, groupName: this.presentGroups.pickedName(), seconds: this.interval() });
   }
 
-  /** The old address stops working and the next link gets a new token. */
-  protected async turnOffRotationLink(): Promise<void> {
+  protected turnOffRotationLink(): void {
     const user = this.auth.currentUser();
-    if (!user || user.isGuest) return;
-    try {
-      await this.gameService.removeTvLink(user.uid);
-      this.hasRotationLink.set(false);
-      this.toast.success('TV link turned off.');
-    } catch {
-      this.toast.error('Could not turn the link off. Try again.');
-    }
+    if (user && !user.isGuest) void this.tvLink.turnOff(user.uid);
   }
 
   /** The clock button: show the interval buttons, or say why rotation is not available. */
@@ -342,7 +310,33 @@ export class PresentComponent implements OnInit, OnDestroy {
       this.toast.warning('Rotation needs two or more boards.');
       return;
     }
+    if (!this.showTimer()) this.titleFontWhileTimerOpen = this.measuredTitleFont();
     this.showTimer.set(!this.showTimer());
+  }
+
+  /**
+   * Shows one group's boards, or all of them: jumps to the group's first board and keeps the interval, rotating
+   * within the group when rotation is on. A group with one board stops rotation (it needs two or more).
+   */
+  protected pickGroup(groupId: string | null): void {
+    const row = this.presentGroups.rows().find(r => r.id === groupId);
+    if (row && !row.count) {
+      this.toast.warning(`${row.name} has no boards yet.`);
+      return;
+    }
+    this.presentGroups.pickedId.set(groupId);
+    this.boardIds = this.presentGroups.boardIds();
+    this.boardCount.set(this.boardIds.length);
+    if (this.boardIds.length < 2) {
+      this.showTimer.set(false);
+      this.stopRotation();
+    }
+    this.index = 0;
+    this.skips = 0;
+    this.slideDir.set('right');
+    this.open(this.boardIds[0]);
+    if (this.rotating()) this.startTimer();
+    else this.location.replaceState('/present/' + this.boardIds[0]);
   }
 
   /** Stop rotating and stay on the board that is showing. */
@@ -351,11 +345,16 @@ export class PresentComponent implements OnInit, OnDestroy {
     this.rotating.set(false);
   }
 
-  /** Long game names shrink to fit the title space (never above the normal size). */
+  /** Long game names shrink to fit the title space (never above the normal size). While the timer is open the size holds. */
   protected titleFont(): string | null {
+    if (this.showTimer() && this.titleFontWhileTimerOpen) return this.titleFontWhileTimerOpen;
     const length = (this.game()?.name ?? '').length;
     if (!length) return null;
     return `min(2.25rem, max(1.1rem, ${(182 / length).toFixed(1)}cqw))`;
+  }
+
+  protected rows(g: GameData): number {
+    return getBoardDimensions(g.boardSize ?? 100).rows;
   }
 
   protected setInterval(seconds: number): void {
@@ -428,9 +427,9 @@ export class PresentComponent implements OnInit, OnDestroy {
     return { home: 0, away: 0 };
   }
 
-  private matches(score: number, stored: number | null, paired: boolean): boolean {
-    const digit = score % 10;
-    return paired ? Math.floor(digit / 2) === stored : digit === stored;
+  private measuredTitleFont(): string | null {
+    const el = this.titleRef()?.nativeElement;
+    return el ? getComputedStyle(el).fontSize : null;
   }
 
   private open(id: string): void {
@@ -474,14 +473,15 @@ export class PresentComponent implements OnInit, OnDestroy {
       .catch(() => {});
   }
 
-  private rows(g: GameData): number {
-    return getBoardDimensions(g.boardSize ?? 100).rows;
-  }
-
-  private squareFor(g: GameData, s: { home: number; away: number }): string | null {
-    const row = g.awayNumbers.findIndex(n => this.matches(s.away, n, this.rows(g) === 5));
-    const col = g.homeNumbers.findIndex(n => this.matches(s.home, n, this.cols(g) === 5));
-    return row === -1 || col === -1 ? null : `${row}-${col}`;
+  /** The board as the shared winner math reads it (5-row or 5-column boards pair their digits). */
+  private layout(g: GameData): BoardLayout {
+    return {
+      awayNumbers: g.awayNumbers,
+      awayPaired: this.rows(g) === 5,
+      homeNumbers: g.homeNumbers,
+      homePaired: this.cols(g) === 5,
+      selectedSquares: g.selectedSquares ?? {}
+    };
   }
 
   private step(dir: number): void {

@@ -1,10 +1,11 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, computed, effect, inject, signal } from '@angular/core';
 
 import { ConfirmService } from '../../../core/services/confirm.service';
 import { GameGroupsService } from '../../../core/services/game-groups.service';
+import { LastGroupService } from '../../../core/services/last-group.service';
 import { PlanService } from '../../../core/services/plan.service';
 import { ToastService } from '../../../core/services/toast.service';
-import { GameGroup, GroupChoice, GroupedBoard, cleanGroupName, deleteGroupMessage, groupChanged, groupCounts, groupOf } from '../../../core/utils/game-groups';
+import { GameGroup, GroupChoice, GroupRow, GroupedBoard, cleanGroupName, deleteGroupMessage, groupChanged, groupCounts, groupOf, groupRows } from '../../../core/utils/game-groups';
 import { CoHostedBoard, cleanCoHostEmail, coHostPlan, gamesWithCoHost, removeCoHostQuestion } from '../../../core/utils/group-cohost';
 
 /** What saving a group's co-host did to the owner's games, so the caller can update its list. */
@@ -12,11 +13,6 @@ export interface CoHostSaved {
   email: string;
   addTo: string[];
   clearFrom: string[];
-}
-
-/** A group with how many of the owner's games are filed in it, for the group pickers and the Groups sheet. */
-export interface GroupRow extends GameGroup {
-  count: number;
 }
 
 /**
@@ -27,6 +23,11 @@ export interface GroupRow extends GameGroup {
  */
 @Injectable()
 export class DashboardGroupsService {
+  constructor() {
+    // TV mode opens on the group Hosting shows (Creative's tv-group, Nov 15).
+    effect(() => this.lastGroup.id.set(this.picked()?.id ?? null));
+  }
+
   /** True when this owner may make, rename or delete groups. */
   public readonly canEdit = computed<boolean>(() => this.planService.features().gameGroups);
   /** In the Groups sheet: 'new' while naming a new group, a group id while renaming it, else null. */
@@ -79,8 +80,7 @@ export class DashboardGroupsService {
   }
 
   public rows(boards: GroupedBoard[]): GroupRow[] {
-    const counts = groupCounts(boards);
-    return this.groups().map(group => ({ ...group, count: counts.get(group.id) ?? 0 }));
+    return groupRows(this.groups(), boards);
   }
 
   /** Saves the name being edited: a new group, or a rename. Returns false when the name is empty or the save failed. */
@@ -162,6 +162,7 @@ export class DashboardGroupsService {
 
   private readonly confirmService: ConfirmService = inject(ConfirmService);
   private readonly gameGroups: GameGroupsService = inject(GameGroupsService);
+  private readonly lastGroup: LastGroupService = inject(LastGroupService);
   private readonly planService: PlanService = inject(PlanService);
   private readonly toastService: ToastService = inject(ToastService);
 }

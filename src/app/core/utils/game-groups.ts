@@ -40,6 +40,17 @@ export function cleanGroupName(name: string): string {
   return name.trim().slice(0, GROUP_NAME_MAX).trim();
 }
 
+/** A group with how many of the owner's boards are filed in it, for the group menus and the Groups sheet. */
+export interface GroupRow extends GameGroup {
+  count: number;
+}
+
+/** Each group, in order, with its board count. */
+export function groupRows(groups: GameGroup[], boards: OpenListTarget[]): GroupRow[] {
+  const counts = groupCounts(boards);
+  return groups.map(group => ({ ...group, count: counts.get(group.id) ?? 0 }));
+}
+
 /** How many of these boards are filed in each group, by group id. */
 export function groupCounts(boards: OpenListTarget[]): Map<string, number> {
   const counts = new Map<string, number>();
