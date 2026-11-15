@@ -3,15 +3,24 @@ import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroCheck, heroChevronDown, heroLockClosed, heroMagnifyingGlass, heroUserMinus, heroXMark } from '@ng-icons/heroicons/outline';
 
 import { DropdownComponent, DropdownOption } from '../../../../components/ui/dropdown/dropdown.component';
+import { PlayerSummary } from '../../services/players-across-games';
 import { PlayersViewService } from '../../services/players-view.service';
+import { phonePanelSlot } from '../../utils/player-panel-motion';
 import { PlayerCardComponent } from './player-card.component';
+import { PlayerPanelComponent } from './player-panel.component';
 import { PlayersFilterSheetComponent } from './players-filter-sheet.component';
-import { PlayerGamesComponent } from './player-games.component';
 
 /** First-load stagger: 30ms between cards, for the first eight, then the flag drops once they're in. */
 const STAGGER_CARDS = 8;
 const STAGGER_MS = 30;
 const STAGGER_DONE_MS = 500;
+
+/** Where the phone panel goes: in which group, after which card, and whose games it shows. */
+interface PhonePanel {
+  group: string;
+  after: number;
+  player: PlayerSummary;
+}
 
 /**
  * The Players view (Season Pass): find a player, narrow to one game, then the players in two groups, Unconfirmed and
@@ -20,7 +29,7 @@ const STAGGER_DONE_MS = 500;
  */
 @Component({
   selector: 'div[appPlayersView]',
-  imports: [DropdownComponent, NgIconComponent, PlayerCardComponent, PlayerGamesComponent, PlayersFilterSheetComponent],
+  imports: [DropdownComponent, NgIconComponent, PlayerCardComponent, PlayerPanelComponent, PlayersFilterSheetComponent],
   providers: [provideIcons({ heroCheck, heroChevronDown, heroLockClosed, heroMagnifyingGlass, heroUserMinus, heroXMark })],
   templateUrl: './players-view.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -88,6 +97,15 @@ export class PlayersViewComponent {
 
   /** True until the first cards have arrived. */
   protected readonly loading = signal<boolean>(true);
+  /** The open card's phone panel, after the last card in its row. */
+  protected readonly phonePanel = computed<PhonePanel | null>(() => {
+    const key = this.players.openKey();
+    for (const group of this.groups()) {
+      const index = group.players.findIndex(player => player.key === key);
+      if (index >= 0) return { group: group.key, after: phonePanelSlot(index, group.players.length), player: group.players[index] };
+    }
+    return null;
+  });
   protected readonly players: PlayersViewService = inject(PlayersViewService);
   /** The Find a player bar is stuck to the top (from 640px). */
   protected readonly stuck = signal<boolean>(false);

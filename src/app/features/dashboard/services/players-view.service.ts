@@ -60,6 +60,8 @@ export class PlayersViewService {
   public readonly mode = signal<'boards' | 'players'>('boards');
   /** The player whose card is open. */
   public readonly openKey = signal<string | null>(null);
+  /** The open card was opened straight from another open card, so its panel swaps in place of the other's. */
+  public readonly panelSwitch = signal<boolean>(false);
   public readonly players = computed<PlayerSummary[]>(() => {
     const boards = this.shownBoards() as PlayersBoard[];
     const search = this.search().trim().toLowerCase();
@@ -145,6 +147,7 @@ export class PlayersViewService {
     this.confirmNote.set(null);
     if (this.allConfirmed()?.key === key) this.stopBeat();
     const pin = opening ? this.pinFor(key) : null;
+    this.panelSwitch.set(opening && this.openKey() !== null);
     this.openKey.set(opening ? key : null);
     this.openPin.set(pin);
     if (this.beatPin()?.key === key) this.beatPin.set(null);
@@ -257,6 +260,7 @@ export class PlayersViewService {
     if (this.openKey() === player.key) {
       this.openKey.set(null);
       this.openPin.set(null);
+      this.panelSwitch.set(false);
     }
     this.allConfirmed.set({ key: player.key, leaving: false });
     this.announcement.set(`${player.name}, all games confirmed`);

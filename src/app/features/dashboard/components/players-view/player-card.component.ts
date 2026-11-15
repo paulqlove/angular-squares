@@ -13,7 +13,9 @@ import { PlayerTilesComponent } from './player-tiles.component';
  * "Same name, account 2" or "also Sammy" when they apply. From 640px up it adds squares and a tile per game.
  * Clicking it opens their games (`<article appPlayerCard>`); an open card gets an ink border. From 640px the games
  * float in a panel over the cards below it, so nothing on the page moves, and it closes on a click outside, Esc or the
- * card itself. When their last game is confirmed it shows "All confirmed" for a beat, then fades and drops into Confirmed.
+ * card itself. The panel drops in like the Your games popover; opened straight from another card it fades in place of
+ * that card's panel (styles.scss, Players card panel). When their last game is confirmed it shows "All confirmed" for a
+ * beat, then fades and drops into Confirmed.
  */
 @Component({
   selector: 'article[appPlayerCard]',
@@ -22,31 +24,37 @@ import { PlayerTilesComponent } from './player-tiles.component';
     class: 'qs-card relative block cursor-pointer p-3.5 sm:p-4 has-[>button:focus-visible]:ring-2 has-[>button:focus-visible]:ring-focus',
     '[class.qs-card-open]': 'isOpen()',
     '[class.qs-card-leave]': '!!beat()?.leaving',
+    '[class.qs-card-switch]': 'players.panelSwitch()',
     '(click)': 'onClick($event)'
   },
   templateUrl: './player-card.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: [`
     :host.qs-card-open { z-index: 10; border-color: var(--qs-ink); box-shadow: inset 0 0 0 0.5px var(--qs-ink); }
-    /* The arrow turns with the panel, both ways, over 200ms. Reduced motion: it flips at once. */
+    /* The arrow turns with the panel, both ways, over 200ms on a phone. From 640px the arrow turns in 150ms open and
+       120ms close, and the border eases to ink and back over 120ms, with the popover's curves. */
     .qs-card-arrow { transition: transform var(--qs-t-state) var(--qs-ease); }
     .qs-card-arrow-open { transform: rotate(180deg); }
+    @media (min-width: 640px) {
+      :host { transition: border-color var(--qs-t-fast) var(--qs-ease-exit), box-shadow var(--qs-t-fast) var(--qs-ease-exit); }
+      .qs-card-arrow { transition: transform var(--qs-t-fast) var(--qs-ease-exit); }
+      :host.qs-card-open { transition-timing-function: var(--qs-ease-decel); }
+      .qs-card-arrow-open { transition-duration: var(--qs-t-menu); transition-timing-function: var(--qs-ease-decel); }
+    }
     /* The panel: 8px under the card, edge to edge with it, or two cards and the grid's 12px gap wide from four games.
-       Offsets are from the card's padding box, inside its 1px border. */
+       Offsets are from the card's padding box, inside its 1px border. It drops from its notch. */
     .qs-panel {
       position: absolute; top: calc(100% + 9px); left: -1px; right: -1px; cursor: auto;
-      border-color: var(--qs-line-strong); box-shadow: var(--qs-shadow-pop);
+      border-color: var(--qs-line-strong); box-shadow: var(--qs-shadow-pop); transform-origin: calc(100% - 27px) 0;
     }
     .qs-panel-wide { width: calc(200% + 4px + 0.75rem); left: auto; }
-    .qs-panel-wide.qs-panel-grow-right { left: -1px; right: auto; }
+    .qs-panel-wide.qs-panel-grow-right { left: -1px; right: auto; transform-origin: calc(50% - 33px) 0; }
     /* The notch, centred under the arrow: 27px in from the card's right edge, or a card and a gap further in when the panel grows right */
     .qs-panel::before {
       content: ''; position: absolute; top: -6px; right: 21px; width: 10px; height: 10px; transform: rotate(45deg);
       background: var(--qs-panel); border-top: 1px solid var(--qs-line-strong); border-left: 1px solid var(--qs-line-strong);
     }
     .qs-panel-wide.qs-panel-grow-right::before { right: calc(50% + 28px); }
-    .qs-panel-in { animation: qs-fade-in var(--qs-t-state) var(--qs-ease) backwards; }
-    .qs-panel-out { animation: qs-fade-out var(--qs-t-fast) var(--qs-ease-in) forwards; }
   `]
 })
 export class PlayerCardComponent {
@@ -56,8 +64,11 @@ export class PlayerCardComponent {
     effect(onCleanup => {
       if (!this.isOpen() || typeof window === 'undefined') return;
       const phone = window.matchMedia(PHONE_QUERY);
+      // The close waits for the click to finish, so a click on another card opens that card straight from this one
+      // (its panel swaps in) and this one is no longer open by then.
       const close = (event: Event) => {
-        if (!phone.matches && this.isOpen() && !this.host.nativeElement.contains(event.target as Node)) this.players.toggleOpen(this.player().key);
+        if (phone.matches || !this.isOpen() || this.host.nativeElement.contains(event.target as Node)) return;
+        setTimeout(() => { if (this.isOpen()) this.players.toggleOpen(this.player().key); });
       };
       const onEscape = (event: KeyboardEvent) => {
         if (event.key !== 'Escape' || phone.matches || !this.isOpen()) return;
