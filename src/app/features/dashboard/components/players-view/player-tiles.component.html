@@ -1,22 +1,25 @@
-@for (game of tiles(); track $index) {
-  @if (!game) {
-    <span class="qs-tile qs-tile-off" aria-hidden="true"></span>
-  } @else if (game.confirmed) {
-    <span class="qs-tile bg-qs-ink" (mouseenter)="showTip($event, game)" (mouseleave)="hideTip()" aria-hidden="true"></span>
-  } @else {
-    <button
-      type="button"
-      class="qs-tile"
-      [class]="game.newSquares ? 'bg-qs-warn' : 'border-[1.5px] border-qs-line-strong'"
-      [attr.aria-label]="'Confirm ' + game.name + ' on ' + game.gameName"
-      (click)="confirm($event, game)"
-      (mouseenter)="showTip($event, game)"
-      (mouseleave)="hideTip()"
-      (focus)="showTip($event, game)"
-      (blur)="hideTip()"
-    ></button>
+<div class="grid gap-1" [style.grid-template-columns]="columns()">
+  @for (game of tiles(); track $index) {
+    @if (!game) {
+      <span class="qs-tile qs-tile-off" aria-hidden="true"></span>
+    } @else if (game.confirmed) {
+      <span class="qs-tile bg-qs-ink" (mouseenter)="showTip($event, game)" (mouseleave)="hideTip()" aria-hidden="true"></span>
+    } @else {
+      <button
+        type="button"
+        class="qs-tile"
+        [class]="game.newSquares ? 'bg-qs-warn' : 'border-[1.5px] border-qs-line-strong'"
+        [attr.aria-label]="'Confirm ' + game.name + ' on ' + game.gameName"
+        (click)="confirm($event, game)"
+        (mouseenter)="showTip($event, game)"
+        (mouseleave)="hideTip()"
+        (focus)="showTip($event, game)"
+        (blur)="hideTip()"
+      ></button>
+    }
   }
-}
+</div>
+<span class="whitespace-nowrap text-sm tabular-nums text-qs-muted" [class.basis-full]="!layout().countBeside">{{ player().games.length }} {{ player().games.length === 1 ? 'game' : 'games' }}</span>
 @if (tip(); as t) {
   <!-- Fixed, so the card's rounded clip never cuts it off -->
   <span
