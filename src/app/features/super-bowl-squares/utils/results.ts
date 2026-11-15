@@ -1,4 +1,5 @@
 import type { BoardScores } from './board-math';
+import { NFL_TEAMS } from '../../content/teams-data';
 import { buildInitials } from './initials.utils';
 
 type Quarter = keyof BoardScores;
@@ -45,6 +46,18 @@ export function resultsDate(value: string | number | null | undefined): string {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase();
 }
 
+/**
+ * The team's short name for the picture. Linked boards already store ESPN's code ("KC"), which passes through. A custom
+ * board where the host typed an NFL team in full ("Kansas City Chiefs") gets its code from our team table. Anything else,
+ * a nickname alone included ("Eagles" may be a school), keeps the name as typed, and the picture cuts it to fit.
+ */
+export function shortTeamName(team: string): string {
+  const typed = team.trim();
+  const key = typed.toLowerCase().replace(/\s+/g, ' ');
+  const nfl = NFL_TEAMS.find(t => key === `${t.city} ${t.name}`.toLowerCase());
+  return nfl?.abbreviation ?? typed;
+}
+
 /** The winners picture's content from the board's final scores (each quarter's running total) and its winners. */
 export function buildResults(game: {
   name: string;
@@ -60,8 +73,8 @@ export function buildResults(game: {
   return {
     title: game.name.trim() || 'Football Squares',
     date: resultsDate(game.date),
-    awayTeam: game.awayTeam.trim() || 'Away team',
-    homeTeam: game.homeTeam.trim() || 'Home team',
+    awayTeam: shortTeamName(game.awayTeam) || 'Away team',
+    homeTeam: shortTeamName(game.homeTeam) || 'Home team',
     away: final.away,
     home: final.home,
     rows: QUARTERS.map(({ key, label }) => {

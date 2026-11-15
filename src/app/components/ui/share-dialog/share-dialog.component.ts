@@ -11,7 +11,7 @@ type CopyTarget = 'code' | 'image' | 'link' | 'tv';
 
 /**
  * Share popup: one Share invite button (share sheet on phones, copy on desktop), the game code and the TV link. On a finished
- * game the button reads Share winners and shares the winners picture instead. Used by the dashboard and game page.
+ * game the heading and button read Share winners, and the button shares the winners picture instead. Used by the dashboard and game page.
  */
 @Component({
   selector: 'app-share-dialog',
@@ -22,8 +22,12 @@ type CopyTarget = 'code' | 'image' | 'link' | 'tv';
     <app-modal [open]="isOpen" labelledBy="share-title" extraClass="overflow-hidden" (dismissed)="close()">
       <div class="flex items-start justify-between gap-4 border-b border-qs-line px-6 pb-5 pt-6">
         <div>
-          <p class="qs-eyebrow">Invite players</p>
-          <h3 id="share-title" class="qs-title mt-2 text-3xl">Share <span class="text-qs-accent">game</span></h3>
+          @if (winnersImage) {
+            <h3 id="share-title" class="qs-title text-3xl">Share <span class="text-qs-accent">winners</span></h3>
+          } @else {
+            <p class="qs-eyebrow">Invite players</p>
+            <h3 id="share-title" class="qs-title mt-2 text-3xl">Share <span class="text-qs-accent">game</span></h3>
+          }
         </div>
         <button type="button" (click)="close()" class="qs-btn qs-btn-ghost -mr-2 w-11 px-0 text-qs-muted hover:text-qs-ink" aria-label="Close">
           <ng-icon name="heroXMark" class="text-xl"></ng-icon>

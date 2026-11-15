@@ -18,6 +18,7 @@ describe('ShareDialogComponent', () => {
     const el = open();
     expect(buttonsNamed(el, 'Share invite').length).toBe(1);
     expect(el.querySelector('#share-link')).toBeNull();
+    expect(el.querySelector('#share-title')?.textContent?.replace(/\s+/g, ' ').trim()).toBe('Share game');
   });
 
   it('puts Share invite before the game code, and the TV link inside a disclosure', () => {
@@ -35,6 +36,8 @@ describe('ShareDialogComponent', () => {
     });
     expect(buttonsNamed(el, 'Share winners').length).toBe(1);
     expect(buttonsNamed(el, 'Share invite').length).toBe(0);
+    expect(el.querySelector('#share-title')?.textContent?.replace(/\s+/g, ' ').trim()).toBe('Share winners');
+    expect(el.textContent).not.toContain('Invite players');
     expect(draws).toBe(1);
   });
 });

@@ -1,4 +1,4 @@
-import { buildResults, resultsDate } from './results';
+import { buildResults, resultsDate, shortTeamName } from './results';
 
 const scores = {
   q1: { away: 7, home: 3 },
@@ -49,5 +49,28 @@ describe('resultsDate', () => {
     expect(resultsDate(new Date(2026, 10, 26, 12).getTime())).toBe('NOV 26');
     expect(resultsDate('not a date')).toBe('');
     expect(resultsDate(undefined)).toBe('');
+  });
+});
+
+describe('shortTeamName', () => {
+  it('keeps the code a linked board stores', () => {
+    expect(shortTeamName('KC')).toBe('KC');
+    expect(shortTeamName(' PHI ')).toBe('PHI');
+  });
+
+  it('shortens an NFL team typed in full to its code', () => {
+    expect(shortTeamName('Kansas City Chiefs')).toBe('KC');
+    expect(shortTeamName('philadelphia  eagles')).toBe('PHI');
+  });
+
+  it('falls back to the name as typed when the app has no short name for it', () => {
+    expect(shortTeamName('Riverside Community Wolverines')).toBe('Riverside Community Wolverines');
+    expect(shortTeamName('Harbor')).toBe('Harbor');
+    expect(shortTeamName('Eagles')).toBe('Eagles');
+  });
+
+  it('gives the picture short names, and full names it cannot shorten', () => {
+    const r = buildResults({ name: 'Pool', awayTeam: 'Kansas City Chiefs', homeTeam: 'Riverside Community Wolverines', date: null, scores, winners: {} });
+    expect([r.awayTeam, r.homeTeam]).toEqual(['KC', 'Riverside Community Wolverines']);
   });
 });
