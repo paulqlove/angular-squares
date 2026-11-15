@@ -28,15 +28,11 @@ export async function copyText(text: string, env: ShareEnv): Promise<boolean> {
   }
 }
 
-/**
- * On a phone, a share sheet that's missing, fails or is dismissed falls back to copying the link.
- * Only the link goes to the sheet: Android Chrome joins title and text into the message with the link, so apps sent the
- * link twice, once in the text and once as its preview. The link preview already shows the board's name and picture.
- */
+/** On a phone, a share sheet that's missing, fails or is dismissed falls back to copying the link. */
 export async function shareInvite(link: string, env: ShareEnv): Promise<ShareInviteResult> {
   if (env.share && isTouchDevice(env)) {
     try {
-      await env.share({ url: link });
+      await env.share({ title: 'QuarterScore squares', text: 'Pick your squares', url: link });
       return 'shared';
     } catch {
       // iOS can refuse the copy once the sheet has used up the tap, so a refusal here isn't an error.
