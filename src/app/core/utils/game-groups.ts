@@ -3,7 +3,8 @@ import { OpenListTarget, fileBoardUpdates, isListKey } from './open-lists';
 
 /**
  * Game groups (Season Pass): the owner's labels, such as Church or Work, that decide which games share a
- * More tab. Stored at `groupLists/{ownerId}`. Players and guests never read them. See database.rules.notes.md.
+ * More tab. Stored at `groupLists/{ownerId}`; each group's co-host email at `groupCoHosts/{ownerId}`, which only the
+ * owner reads. Players and guests never read either. See database.rules.notes.md.
  */
 
 export const GROUP_NAME_MAX = 30;
@@ -21,12 +22,16 @@ export interface GroupedBoard extends OpenListTarget {
   showInOpenBoards?: boolean;
 }
 
-/** The owner's groups, oldest first, from the raw `groupLists/{ownerId}/groups` value. Bad entries are skipped. */
-export function parseGroups(raw: unknown): GameGroup[] {
+/**
+ * The owner's groups, oldest first, from the raw `groupLists/{ownerId}/groups` value. Bad entries are skipped.
+ * `coHosts` is the raw `groupCoHosts/{ownerId}` value, which only the owner can read (Paul, Nov 15: "Only me").
+ */
+export function parseGroups(raw: unknown, coHosts?: unknown): GameGroup[] {
   if (!raw || typeof raw !== 'object') return [];
-  return Object.entries(raw as Record<string, { name?: unknown; createdAt?: unknown; coHost?: { email?: unknown } }>)
+  const emails = (coHosts && typeof coHosts === 'object' ? coHosts : {}) as Record<string, { email?: unknown } | undefined>;
+  return Object.entries(raw as Record<string, { name?: unknown; createdAt?: unknown }>)
     .filter(([id, g]) => isListKey(id) && typeof g?.name === 'string' && typeof g?.createdAt === 'number')
-    .map(([id, g]) => ({ id, name: g.name as string, createdAt: g.createdAt as number, ...coHostOf(g.coHost) }))
+    .map(([id, g]) => ({ id, name: g.name as string, createdAt: g.createdAt as number, ...coHostOf(emails[id]) }))
     .sort((a, b) => a.createdAt - b.createdAt);
 }
 
@@ -64,7 +69,7 @@ export function groupOf(groups: GameGroup[], board: OpenListTarget): GameGroup |
  * The games and their list entries move in the same write, so no board is ever left pointing at a missing group.
  */
 export function deleteGroupUpdates(ownerId: string, groupId: string, ungroupedKey: string, boards: GroupedBoard[]): Record<string, unknown> {
-  const updates: Record<string, unknown> = { [`groupLists/${ownerId}/groups/${groupId}`]: null };
+  const updates: Record<string, unknown> = { [`groupLists/${ownerId}/groups/${groupId}`]: null, [`groupCoHosts/${ownerId}/${groupId}`]: null };
   for (const board of boards.filter(b => b.openListId === groupId)) {
     Object.assign(updates, fileBoardUpdates(board, ungroupedKey, !!board.showInOpenBoards));
   }

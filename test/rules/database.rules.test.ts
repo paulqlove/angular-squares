@@ -998,7 +998,7 @@ describe('a guest who signs in', () => {
   });
 });
 
-describe('game groups (groupLists, coHosts, openLists)', () => {
+describe('game groups (groupLists, groupCoHosts, coHosts, openLists)', () => {
   const UNGROUPED = 'ungroupedKey0000000001';
   const CHURCH = 'churchGroupKey00000001';
   const WORK = 'workGroupKey0000000001';
@@ -1053,25 +1053,7 @@ describe('game groups (groupLists, coHosts, openLists)', () => {
       await assertFails(set(owner(), 'groupLists/owner/other', 'x'));
     });
 
-    it('a Season Pass owner can set and remove a group\'s co-host, and give it to games in one write', async () => {
-      await assertSucceeds(set(owner(), `groupLists/owner/groups/${CHURCH}/coHost`, { email: 'dana@email.com' }));
-      await assertSucceeds(write(owner(), {
-        [`groupLists/owner/groups/${CHURCH}/coHost`]: { email: 'lee@email.com' },
-        [`${G}/managerId`]: '',
-        [`${G}/managerEmail`]: 'lee@email.com',
-        [`${G}/managerName`]: ''
-      }));
-      await assertSucceeds(set(owner(), `groupLists/owner/groups/${CHURCH}/coHost`, null));
-      await assertSucceeds(set(owner(), 'groupLists/owner/groups/newGroupKey00000000001', { ...group('Family'), coHost: { email: 'dana@email.com' } }));
-    });
-
-    it('a group\'s co-host needs a Season Pass, the owner, and an email', async () => {
-      await assertFails(set(cohost(), `groupLists/owner/groups/${CHURCH}/coHost`, { email: 'dana@email.com' }));
-      await assertFails(set(owner(), `groupLists/owner/groups/${CHURCH}/coHost`, { email: 'not an email' }));
-      await assertFails(set(owner(), `groupLists/owner/groups/${CHURCH}/coHost`, { email: `${'x'.repeat(250)}@a.co` }));
-      await assertFails(set(owner(), `groupLists/owner/groups/${CHURCH}/coHost`, { email: 'dana@email.com', uid: 'x' }));
-      await assertFails(set(owner(), `groupLists/owner/groups/${CHURCH}/coHost`, 'dana@email.com'));
-      await seed({ 'entitlements/owner': null });
+    it('a group no longer holds its co-host', async () => {
       await assertFails(set(owner(), `groupLists/owner/groups/${CHURCH}/coHost`, { email: 'dana@email.com' }));
     });
 
@@ -1088,6 +1070,51 @@ describe('game groups (groupLists, coHosts, openLists)', () => {
       await assertSucceeds(set(owner(), 'groupLists/owner/ungrouped', 'freshUngroupedKey00001'));
       await assertFails(set(owner(), 'groupLists/owner/ungrouped', 'otherUngroupedKey00001'));
       await assertFails(set(owner(), 'groupLists/owner/ungrouped', null));
+    });
+  });
+
+  describe('groupCoHosts', () => {
+    const path = `groupCoHosts/owner/${CHURCH}`;
+
+    it('only the owner can read a group\'s co-host: not their co-hosts, players or strangers', async () => {
+      await seed({ [path]: { email: 'dana@email.com' } });
+      await assertSucceeds(read(owner(), 'groupCoHosts/owner'));
+      await assertSucceeds(read(owner(), path));
+      await assertFails(read(cohost(), 'groupCoHosts/owner'));
+      await assertFails(read(cohost(), path));
+      await assertFails(read(stranger(), path));
+      await assertFails(read(player(), path));
+      await assertFails(read(visitor(), path));
+      await assertFails(read(owner(), 'groupCoHosts'));
+    });
+
+    it('a Season Pass owner can set and remove a group\'s co-host, and give it to games in one write', async () => {
+      await assertSucceeds(set(owner(), path, { email: 'dana@email.com' }));
+      await assertSucceeds(write(owner(), {
+        [path]: { email: 'lee@email.com' },
+        [`${G}/managerId`]: '',
+        [`${G}/managerEmail`]: 'lee@email.com',
+        [`${G}/managerName`]: ''
+      }));
+      await assertSucceeds(set(owner(), path, null));
+    });
+
+    it('a new group and its co-host go in one write; deleting the group clears it in one write', async () => {
+      const id = 'newGroupKey00000000001';
+      await assertSucceeds(write(owner(), { [`groupLists/owner/groups/${id}`]: group('Family'), [`groupCoHosts/owner/${id}`]: { email: 'dana@email.com' } }));
+      await assertSucceeds(write(owner(), { [`groupLists/owner/groups/${id}`]: null, [`groupCoHosts/owner/${id}`]: null }));
+    });
+
+    it('needs the owner, a Season Pass, an existing group and an email', async () => {
+      await assertFails(set(cohost(), path, { email: 'dana@email.com' }));
+      await assertFails(set(stranger(), path, { email: 'dana@email.com' }));
+      await assertFails(set(owner(), 'groupCoHosts/owner/missingGroupKey000001', { email: 'dana@email.com' }));
+      await assertFails(set(owner(), path, { email: 'not an email' }));
+      await assertFails(set(owner(), path, { email: `${'x'.repeat(250)}@a.co` }));
+      await assertFails(set(owner(), path, { email: 'dana@email.com', uid: 'x' }));
+      await assertFails(set(owner(), path, 'dana@email.com'));
+      await seed({ 'entitlements/owner': null });
+      await assertFails(set(owner(), path, { email: 'dana@email.com' }));
     });
   });
 

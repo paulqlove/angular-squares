@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, HostListener, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, HostListener, computed, inject, input, signal } from '@angular/core';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroCheck, heroChevronDown, heroFolder } from '@ng-icons/heroicons/outline';
 
@@ -6,9 +6,13 @@ import { gameCountLabel } from '../../../../core/utils/game-groups';
 import { DashboardGroupsService } from '../../services/dashboard-groups.service';
 import { DashboardStore } from '../../services/dashboard.store';
 
+/** Why the group picker is off on the Players tab: desktop hover and a phone tap both say it. */
+export const GROUPS_OFF_HINT = 'Groups filter your boards';
+
 /**
  * Desktop group picker (Creative's groups-row w1, w2), between Search and New board: the folder button names the group
  * Hosting shows, and its menu picks All groups or one group, with Manage groups for Season Pass owners.
+ * On the Players tab it stays in its spot but `off` (aria-disabled, so hovering it still explains why).
  */
 @Component({
   selector: 'app-group-menu',
@@ -19,18 +23,20 @@ import { DashboardStore } from '../../services/dashboard.store';
     <div class="relative">
       <button
         type="button"
-        class="flex h-11 w-[200px] items-center gap-2 rounded-btn border bg-qs-panel px-3 text-base text-qs-ink transition-colors hover:border-qs-ink"
-        [class]="open() ? 'border-qs-ink' : 'border-qs-line-strong'"
-        aria-haspopup="menu"
-        [attr.aria-expanded]="open()"
-        [attr.aria-label]="'Groups: ' + groups.pickedName()"
+        class="flex h-11 w-[200px] items-center gap-2 rounded-btn border px-3 text-base transition-colors"
+        [class]="buttonClass()"
+        [attr.aria-disabled]="off() ? 'true' : null"
+        [attr.aria-haspopup]="off() ? null : 'menu'"
+        [attr.aria-expanded]="off() ? null : open()"
+        [attr.aria-label]="off() ? hint : 'Groups: ' + groups.pickedName()"
+        [attr.title]="off() ? hint : null"
         (click)="toggle()"
       >
         <ng-icon name="heroFolder" class="shrink-0 text-xl" aria-hidden="true"></ng-icon>
         <span class="min-w-0 flex-1 truncate text-left">{{ groups.pickedName() }}</span>
         <ng-icon name="heroChevronDown" class="shrink-0 text-base transition-transform duration-150" [class.rotate-180]="open()" aria-hidden="true"></ng-icon>
       </button>
-      @if (open()) {
+      @if (open() && !off()) {
         <div role="menu" aria-label="Groups" animate.enter="qs-menu-enter" animate.leave="qs-menu-leave" class="absolute left-0 top-full z-30 mt-1.5 max-h-[60vh] w-[240px] origin-top-left overflow-y-auto rounded-inner border border-qs-line-strong bg-qs-panel p-1 shadow-pop">
           <button type="button" role="menuitemradio" [attr.aria-checked]="!groups.picked()" class="qs-group-item" (click)="pick(null)">
             <span class="min-w-0 flex-1 truncate">All groups</span>
@@ -62,8 +68,15 @@ import { DashboardStore } from '../../services/dashboard.store';
   `]
 })
 export class GroupMenuComponent {
+  /** Switched off in place: the Players tab has nothing for a group to filter. */
+  public readonly off = input<boolean>(false);
+
+  protected readonly buttonClass = computed<string>(() => this.off()
+    ? 'qs-ctrl-off'
+    : `${this.open() ? 'border-qs-ink' : 'border-qs-line-strong'} bg-qs-panel text-qs-ink hover:border-qs-ink`);
   protected readonly countLabel = gameCountLabel;
   protected readonly groups: DashboardGroupsService = inject(DashboardGroupsService);
+  protected readonly hint = GROUPS_OFF_HINT;
   protected readonly open = signal<boolean>(false);
   protected readonly store: DashboardStore = inject(DashboardStore);
   private readonly host: ElementRef<HTMLElement> = inject(ElementRef);
@@ -91,6 +104,7 @@ export class GroupMenuComponent {
   }
 
   protected toggle(): void {
+    if (this.off()) return;
     this.open.update(v => !v);
     if (this.open()) setTimeout(() => this.host.nativeElement.querySelector<HTMLElement>('[role^="menuitem"]')?.focus());
   }

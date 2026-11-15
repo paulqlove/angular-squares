@@ -327,6 +327,8 @@ html, body {
   .qs-btn-ghost { background: transparent; color: inherit; }
   .qs-btn-ghost:hover:not(:disabled) { background: color-mix(in srgb, currentColor 10%, transparent); }
   .qs-btn-danger { background: var(--qs-bad-soft); color: var(--qs-bad); }
+  /* A control kept in its spot but off in this view. Set with aria-disabled, not disabled, so hover and tap can still say why. */
+  .qs-ctrl-off { background: var(--qs-panel); border-color: var(--qs-line); color: color-mix(in srgb, var(--qs-ink) 40%, var(--qs-panel)); cursor: not-allowed; }
 
   .qs-tab {
     @apply qs-btn;

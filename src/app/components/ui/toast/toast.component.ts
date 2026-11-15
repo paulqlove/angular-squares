@@ -19,6 +19,7 @@ import { ToastService, Toast } from '../../../core/services/toast.service';
             [class.bg-qs-ok]="toast.type === 'success'"
             [class.bg-qs-bad]="toast.type === 'error'"
             [class.bg-qs-warn]="toast.type === 'warning'"
+            [class.bg-qs-muted]="toast.type === 'info'"
             aria-hidden="true"
           ></span>
           <span class="text-sm flex-1">{{ toast.message }}</span>

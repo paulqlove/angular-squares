@@ -18,21 +18,41 @@ describe('GameGroupsService', () => {
   let service: GameGroupsService;
   let db: Db;
   let preview: boolean;
+  let me: string;
 
   beforeEach(() => {
     preview = false;
+    me = 'o';
     TestBed.configureTestingModule({
       providers: [
         { provide: GameDatabaseService, useValue: { isBrowser: true } },
-        { provide: AuthService, useValue: { blockPreviewWrite: () => preview } },
+        { provide: AuthService, useValue: { blockPreviewWrite: () => preview, currentUser: () => ({ uid: me }) } },
         { provide: BoardSettingsService, useValue: { ungroupedKey: vi.fn().mockResolvedValue(NONE) } }
       ]
     });
     service = TestBed.inject(GameGroupsService);
     db = service as unknown as Db;
-    db.read = vi.fn();
+    db.read = vi.fn().mockResolvedValue(undefined);
     db.save = vi.fn().mockResolvedValue(undefined);
     db.patch = vi.fn().mockResolvedValue(undefined);
+  });
+
+  it('reads each group\'s co-host only for the owner; a co-host gets the groups without them', async () => {
+    const groups = { [CHURCH]: { name: 'Church', createdAt: 1 } };
+    db.read.mockImplementation(async (path: string) => path === 'groupLists/o/groups' ? groups : { [CHURCH]: { email: 'dana@email.com' } });
+    expect(await service.getGroups('o')).toEqual([{ id: CHURCH, name: 'Church', createdAt: 1, coHost: { email: 'dana@email.com' } }]);
+    me = 'cohost';
+    db.read.mockClear();
+    expect(await service.getGroups('o')).toEqual([{ id: CHURCH, name: 'Church', createdAt: 1 }]);
+    expect(db.read.mock.calls).toEqual([['groupLists/o/groups']]);
+  });
+
+  it('still reads the groups when the owner\'s co-host read fails', async () => {
+    db.read.mockImplementation(async (path: string) => {
+      if (path === 'groupLists/o/groups') return { [CHURCH]: { name: 'Church', createdAt: 1 } };
+      throw new Error('permission_denied');
+    });
+    expect(await service.getGroups('o')).toEqual([{ id: CHURCH, name: 'Church', createdAt: 1 }]);
   });
 
   it('reads the owner\'s groups, and none when the read is turned away', async () => {
@@ -103,7 +123,7 @@ describe('GameGroupsService', () => {
   it('sets a group\'s co-host and its games in one write', async () => {
     await service.setGroupCoHost('o', CHURCH, { email: 'dana@email.com' }, { addTo: ['a'], clearFrom: [] });
     expect(db.patch).toHaveBeenCalledWith({
-      [`groupLists/o/groups/${CHURCH}/coHost`]: { email: 'dana@email.com' },
+      [`groupCoHosts/o/${CHURCH}`]: { email: 'dana@email.com' },
       'games/a/managerId': '', 'games/a/managerEmail': 'dana@email.com', 'games/a/managerName': ''
     });
     preview = true;
