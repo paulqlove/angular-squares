@@ -39,14 +39,25 @@ describe('EditGameDialogComponent', () => {
     expect(closed).toBe(false);
   });
 
-  it('turns Show in my open boards on when a group is picked, and lets the host turn it back off', () => {
-    const f = open({ values: { awayTeam: '', homeTeam: '', pricePerSquare: 1, hostNote: '', quarterSplit: null, emptyQuarterRule: 'final', newBoardSize: null, showInOpenBoards: false, autoManage: false, maxSquaresPerPlayer: null, group: { groupId: null } } });
+  const base = { awayTeam: '', homeTeam: '', pricePerSquare: 1, hostNote: '', quarterSplit: null, emptyQuarterRule: 'final' as const, newBoardSize: null, autoManage: false, maxSquaresPerPlayer: null };
+
+  it('locks Show in my open boards on while a group is picked, and unlocks it on No group', () => {
+    const f = open({ canShowInOpenBoards: true, groups: [{ id: 'ChurchGroupKey000001', name: 'Church', createdAt: 1 }], values: { ...base, showInOpenBoards: false, group: { groupId: null } } });
     const c = f.componentInstance;
+    const toggle = () => (f.nativeElement as HTMLElement).querySelector('button[role="switch"]') as HTMLButtonElement;
     c.pickGroup({ groupId: 'ChurchGroupKey000001' });
+    f.detectChanges();
     expect(c.draft.showInOpenBoards).toBe(true);
-    c.draft.showInOpenBoards = false;
+    expect(toggle().disabled).toBe(true);
+    expect(text(f)).toContain('Games in a group always show in open boards.');
     c.pickGroup({ groupId: null });
-    expect(c.draft.showInOpenBoards).toBe(false);
-    expect(c.draft.group).toEqual({ groupId: null });
+    f.detectChanges();
+    expect(c.draft.showInOpenBoards).toBe(true);
+    expect(toggle().disabled).toBe(false);
+  });
+
+  it('opens a game already in a group with the switch on', () => {
+    const c = open({ values: { ...base, showInOpenBoards: false, group: { groupId: 'ChurchGroupKey000001' } } }).componentInstance;
+    expect(c.draft.showInOpenBoards).toBe(true);
   });
 });

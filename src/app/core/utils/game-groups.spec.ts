@@ -1,4 +1,4 @@
-import { cleanGroupName, deleteGroupMessage, deleteGroupUpdates, groupChanged, groupCounts, groupOf, parseGroups, pickerValue, showsWhenPicked } from './game-groups';
+import { cleanGroupName, deleteGroupMessage, deleteGroupUpdates, groupChanged, groupCounts, groupOf, parseGroups, inGroup, pickerValue } from './game-groups';
 
 const CHURCH = 'ChurchGroupKey000001';
 const WORK = 'WorkGroupKey00000001';
@@ -78,22 +78,15 @@ describe('group picker', () => {
   });
 });
 
-describe('showsWhenPicked', () => {
-  it('turns the switch on when the picker moves to a group', () => {
-    expect(showsWhenPicked({ groupId: null }, { groupId: CHURCH })).toBe(true);
-    expect(showsWhenPicked(undefined, { groupId: CHURCH })).toBe(true);
-    expect(showsWhenPicked({ groupId: CHURCH }, { groupId: WORK })).toBe(true);
+describe('inGroup', () => {
+  it('is true on a group, or on a new group once it has a name', () => {
+    expect(inGroup({ groupId: CHURCH })).toBe(true);
+    expect(inGroup({ groupId: null, newName: 'Gym' })).toBe(true);
   });
 
-  it('turns it on once a new group gets a name, not on every letter', () => {
-    expect(showsWhenPicked({ groupId: null }, { groupId: null, newName: '' })).toBe(false);
-    expect(showsWhenPicked({ groupId: null, newName: '' }, { groupId: null, newName: 'G' })).toBe(true);
-    expect(showsWhenPicked({ groupId: null, newName: 'G' }, { groupId: null, newName: 'Gy' })).toBe(false);
-  });
-
-  it('leaves the switch alone for No group or the same group', () => {
-    expect(showsWhenPicked({ groupId: CHURCH }, { groupId: null })).toBe(false);
-    expect(showsWhenPicked({ groupId: CHURCH }, { groupId: CHURCH })).toBe(false);
-    expect(showsWhenPicked({ groupId: null, newName: 'Gym' }, { groupId: null, newName: '  ' })).toBe(false);
+  it('is false on No group, a new group with no name yet, or no picker', () => {
+    expect(inGroup({ groupId: null })).toBe(false);
+    expect(inGroup({ groupId: null, newName: '  ' })).toBe(false);
+    expect(inGroup(undefined)).toBe(false);
   });
 });

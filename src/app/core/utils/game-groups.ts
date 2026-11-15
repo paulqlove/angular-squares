@@ -80,17 +80,13 @@ export function groupChanged(groups: GameGroup[], openListId: string | undefined
   return !!cleanGroupName(choice.newName ?? '') || pickerValue(groups, openListId) !== choice.groupId;
 }
 
-/**
- * Putting a game in a group shows it in that group's More tab (Paul, Nov 15), so the picker turns
- * Show in my open boards on when it moves to a group or starts naming a new one. No group leaves the switch alone.
- */
-export function showsWhenPicked(previous: GroupChoice | undefined, next: GroupChoice): boolean {
-  const group = pickedGroup(next);
-  return group !== null && group !== pickedGroup(previous);
-}
+/** The hint under the locked switch. */
+export const GROUPED_SHOWN_HINT = 'Games in a group always show in open boards.';
 
-/** The group a choice files into: its id, a marker for a new group being named, or null for No group. */
-function pickedGroup(choice: GroupChoice | undefined): string | null {
-  if (cleanGroupName(choice?.newName ?? '')) return '+new';
-  return choice?.groupId ?? null;
+/**
+ * True when the picker is on a group, or on a new group that has a name. A game in a group always shows in
+ * that group's More tab (Paul, Nov 15: "Lock it on"), so Show in my open boards stays on and can't be turned off.
+ */
+export function inGroup(choice: GroupChoice | undefined): boolean {
+  return !!choice?.groupId || !!cleanGroupName(choice?.newName ?? '');
 }
