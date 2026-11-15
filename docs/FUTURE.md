@@ -17,20 +17,20 @@ Direction: Free plus one $5.99 pass. The price stays $5.99; the wording and term
 | | Free | Pass ($5.99) |
 |---|---|---|
 | Active boards | 1 at a time, no lifetime cap | 25 at a time (decided Nov 7, 2026) |
-| Live scoring (ESPN auto-sync) | Manual scores | Yes |
+| Live scoring (ESPN auto-sync) | Yes (stays free, Paul, Nov 14, 2026) | Yes |
 | Presentation / TV mode | **Yes** (QR and quarterscore.com always on screen) | Yes |
 | Probability heat map | Yes, all accounts | Yes |
 | Custom quarter split | No | Yes |
 | Auto-lock and draw (5 min after kickoff, shrinks a half-empty board) | No | Yes (added Nov 8, 2026) |
 | Open boards list (More tab: a host's other open boards) | No | Yes (added Nov 8, 2026) |
 | Limit squares per player (per board, counted by typed name; a friendly limit, not a lock) | No | Yes (added Nov 8, 2026; the board voted 7-0 for free, Paul decided Season Pass) |
-| Ads | None | None |
+| Ads | None for now (may come later if QuarterScore gets popular) | None |
 
 Free hosts keep one board (Paul, Nov 5, 2026): once its game has ended, New game opens a dialog to reset the old game (clears it and opens its settings to pick the next game) or delete it, with an email box for anyone who wants more active boards (saved with source `ended_board_dialog`, kept out of the Jan 15 read). Paid plans with room and admins are unaffected. This supersedes the weekly-host reading of 'active' for free accounts; the 7-day unlinked rule only matters for paid hosts.
 
-Decided Nov 5, 2026: no ads (adFree is not sold as a perk), no lifetime cap, presentation mode and the heat map moved from the pass to Free (a guest who sees a free board on a party TV is the funnel). The upgrade dialog lists only live scores, more boards and custom splits, in points and never money. Fake-door test story changed on this date: read it Jan 15, 2027 with at least 15 clicks AND at least 150 unique hosts shown (fewer shown means inconclusive, not "nobody pays").
+Decided Nov 5, 2026: no lifetime cap, presentation mode and the heat map moved from the pass to Free (a guest who sees a free board on a party TV is the funnel). Fake-door test story changed on this date: read it Jan 15, 2027 with at least 15 clicks AND at least 150 unique hosts shown (fewer shown means inconclusive, not "nobody pays").
 
-Ship together, only once a pass can be bought (about 3 evenings): the live-scoring gate (plan flag, hide the ESPN link, stop the browser poller, skip free owners in `syncEspnScores`, rules for new links), undo on manual scoring, and unlinked boards counting for 7 days from creation (today 48 hours, too short for a Thursday board for a Sunday game). Boards already linked to ESPN keep working until final.
+Changed Nov 14, 2026 (Paul): no ads for now, and ads may come to free boards later if QuarterScore gets popular enough. Live scores stay free on every plan, so the upgrade dialog doesn't list them. The Bar/Venue tier is dropped: the only plans are Free and the $5.99 Season Pass.
 
 **The Season Pass (decided Nov 5, 2026):**
 - **Name and price:** "Season Pass", $5.99 one time. The price is always shown at checkout; the no-money rule is Stripe's restricted-business rule, so copy never uses prize, pot, payout or entry-fee words about squares. Avoid "paid" in the UI. Guests always join and play for free; only hosts buy.
@@ -42,47 +42,18 @@ Ship together, only once a pass can be bought (about 3 evenings): the live-scori
 - **Still for a lawyer or CPA before launch:** is "refundable until used" enforceable in Texas and the buyers' states; exact checkout and Terms wording; state digital-goods refund disclosure; EU/UK handling if ever sold there; sales tax on a $5.99 digital pass (Stripe Tax?); revenue recognition and the tax set-aside; whether an LLC changes dispute liability; read Stripe's restricted-business list at signup.
 - **Dialog count:** `upgradeViews/{uid}` records each signed-in host's first and last view and count of the upgrade dialog, for the Jan 15 read (at least 15 clicks AND at least 150 unique hosts shown). Admins read it in the Firebase console. The rule is in `database.rules.json` and needs a database rules deploy.
 
-Why $5.99: it brings back the one-party Super Bowl host as a buyer (live scoring plus TV presentation is what they want) and fits "simple and low". Operating cost is low and mostly independent of paying users: the live-score function hits ESPN once per league per minute.
+Why $5.99: it brings back the one-party Super Bowl host as a buyer (more boards and the pass tools are what they want) and fits "simple and low". Operating cost is low and mostly independent of paying users: the live-score function hits ESPN once per league per minute.
 
 Input from the CFO and skeptic reviews:
 - **CFO:** Stripe nets $5.52 on $5.99 (7.8% fees). Break-even is about 54 passes if costs are around $300/yr (assumption: confirm real Firebase and domain bills). Before launch: sales tax on digital goods (Stripe Tax or a CPA), Stripe keeps its $0.30 on refunds (short refund window), set aside income tax.
 - **Skeptic:** TEST-SMALL. Payers are hosts who hit the limits; the paid perks must feel worth it; sell the pass as "2026 Season Pass, through June 2027" because a 365-day year is mostly dead time. Biggest risk is that nobody pays at any price.
-- **Test before building checkout:** fake-door on the dashboard when a host hits the 1-board limit or tries live scoring or presentation: "Season Pass $5.99 · Notify me" (reuse notify-me signups). Run Nov 5, 2026 to Jan 15, 2027. Success is at least 10% click-through and at least 15 clicks; under 5% means don't build checkout.
-- **Open:** gating live scoring is the biggest bet (best hook, but free becomes manual scoring); exact board count; changing plans is a one-line edit in `plans.ts`.
-
-### Bar/Venue Tier ($49-99/season)
-
-A separate B2B offering for sports bars and venues:
-
-- **Customer email capture** (players sign up with email to join)
-- Unlimited boards per season
-- Free game mode (prizes are coupons, gift cards, etc. — no cash, no gambling concerns)
-- Custom branding/theming (colors, logo)
-- Branded QR codes (low chance of happening)
-- Subdomain support (later: joes-bar.quarterscore.com)
-
-**Value prop for bars**: "Capture 50-100 customer emails per season" is worth $200+ in Facebook ad equivalent. The game is free entertainment that brings people back weekly.
-
-**Bar/Venue pricing rationale**: $10 is too cheap for B2B — signals "toy" not "tool." Bars spend $500/month on Untappd, $200 on trivia nights. Price at $49-99/season so serious buyers take it seriously.
-
-### Bar Outreach Strategy
-
-**Market size**: ~60,000 bars in the US, 10-15k are true sports bars showing NFL. Most do paper squares or nothing. Cold outreach converts 1-3%, so realistically hundreds of sign-ups in year one, not thousands.
-
-**Outreach approach**: Use AI (Grok, etc.) to identify and reach sports bars. Pitch the email capture angle: "Run free squares games during Sunday football. Capture customer emails. Give away coupons instead of cash — no gambling, just engagement."
-
-**Pricing options to test**:
-- $49/season (impulse buy, still signals value)
-- $99/year (covers NFL + college)
-- $29/month during season (recurring, Sept-Feb only)
+- **Test before building checkout:** fake-door on the dashboard when a host hits the 1-board limit: "Season Pass $5.99 · Notify me" (reuse notify-me signups). Run Nov 5, 2026 to Jan 15, 2027. Success is at least 10% click-through and at least 15 clicks; under 5% means don't build checkout.
+- **Open:** exact board count; changing plans is a one-line edit in `plans.ts`.
 
 ## Feature Details
 
 ### QR Code Generator
 ✓ Done for the TV screen: presentation mode shows a QR to the game page ("Scan to join", or "Scan to follow along" once the board is full). A printable, branded QR for bars is a low chance of happening.
-
-### Bar Branding
-In-app theme picker first (colors, logo upload). Subdomains later (joes-bar.quarterscore.com).
 
 ### Multi-Board TV Display
 ✓ Done, single-board and rotating (Nov 2026): `/present/:gameId` fills the screen with the player-colored board, live score and clock, Q1-Q4 winners (chips in the winner's color, winning squares ringed, current leader glowing), claimed/open/players-verified stats and a QR. `/present` rotates through the host's boards every 10/20/30/60s, pins a board for 30s after its score changes and skips finished games. Left/right arrow keys switch between hosted boards on the game page and in presentation mode, and the new board slides in. Casting relies on Chrome/Edge Cast, Safari AirPlay or HDMI; a real Cast receiver app is not planned.
@@ -136,7 +107,7 @@ P1. Unfurlers do not run JS, so a shared game has no per-game title or image. A 
 ✓ Done.
 
 ### Board sizes and season boards
-~~P2. Grids of 100, 50, and 25.~~ ✓ Done — board size selection (100/50/25) added to game creation. ✓ Number reveal animation and a Half & Final only split preset are done. Still open: optional four number sets and reverse winners. Reusable weekly boards with standings. Fundraiser prizes stay the Bar-tier free-game mode.
+~~P2. Grids of 100, 50, and 25.~~ ✓ Done — board size selection (100/50/25) added to game creation. ✓ Number reveal animation and a Half & Final only split preset are done. Still open: optional four number sets and reverse winners. Reusable weekly boards with standings.
 
 ### PWA
 Manifest, add to home screen, and an offline board for game day.

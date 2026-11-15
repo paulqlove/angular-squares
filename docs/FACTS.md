@@ -17,21 +17,8 @@ The true, dated things about QuarterScore that agents and channels may say. Read
    - Paul and CFO: unlimited boards until June 30 (D-013 in DECISIONS.md, Nov 13; Paul in the CFO channel, Nov 13: "It's for unlimited boards until June 30th"; the CFO's price check used "unlimited boards").
    - Options: keep 25 and correct D-013 and the CFO notes, or make it unlimited (a one-line change in `plans.ts` plus the dialog copy, in its own PR).
    - Safe to say now: "more active boards".
-2. **Ads on free boards.**
-   - FUTURE.md (decided Nov 5, 2026): no ads on any plan, and ad-free is not sold as a perk.
-   - Code: free hosts' boards keep an ad slot, switched off by `environment.adsEnabled: false`, and the Season Pass carries `adFree: true` (`plans.ts`, `environment.prod.ts`).
-   - Options: no ads ever (the slot can go later), or ads possible on free boards later.
-   - Safe to say now: "no ads".
-3. **Live scores: free or Season Pass.**
-   - Today every board can follow a live game, free (`liveScoring` is "not enforced yet" in `plans.ts`). FAQ, `llms.txt` and the agent skill describe live scores without a plan.
-   - The upgrade dialog lists "Live scores" as a Season Pass perk, and FUTURE.md plans to make them pass-only once checkout ships ("the biggest bet").
-   - Options: keep live scores free, or make them pass-only when checkout ships (FAQ, `llms.txt` and the skill change in that PR).
-   - Safe to say now: live scores work on every board today.
-4. **Bar/Venue tier.**
-   - FUTURE.md still describes a Bar/Venue tier at $49 to $99 a season.
-   - Paul, Nov 14: "no tiers, free or $5.99" (main channel notes).
-   - Options: drop the Bar tier from FUTURE.md, or keep it as a later idea, apart from today's pricing.
-   - Safe to say now: nothing about a Bar tier.
+
+Settled on Nov 14, 2026: ads (D-024), live scores (D-025) and the Bar/Venue tier (D-026).
 
 ---
 
@@ -46,7 +33,7 @@ The true, dated things about QuarterScore that agents and channels may say. Read
 - Quarter winners come from the last digit of each team's score. *Source: CLAUDE.md, Game Logic; checked 2026-11-14.*
 - Points split 20/20/20/40 across the quarters by default. They are points, never money. *Source: `plans.ts` `DEFAULT_SPLIT`; checked 2026-11-14.*
 - An empty winning square's points roll into Q4 or are shared across the other quarters, the host's choice (default: roll into Q4). *Source: `plans.ts` `EMPTY_QUARTER_RULES`; checked 2026-11-14.*
-- Live score and clock come from ESPN for NFL, NCAA football, UFL, NBA, WNBA and AFL. Any other game works as a custom board. *Source: `functions/src/espn.ts` `SPORT_TYPES`; checked 2026-11-14.*
+- Live score and clock come from ESPN for NFL, NCAA football, UFL, NBA, WNBA and AFL, free on every plan. Any other game works as a custom board. *Source: `functions/src/espn.ts` `SPORT_TYPES`, `plans.ts`, D-025; checked 2026-11-14.*
 - TV mode shows the board, live score, quarter winners and a join QR code, can rotate boards every 10 to 60 seconds, and Copy TV link opens it on any screen with no sign-in. Free on every plan. *Source: `scripts/agent-files.mjs`, FUTURE.md (Nov 5); checked 2026-11-14.*
 - The probability heat map ("Hit rate" tab) and the Best numbers page show historical last-digit frequency. Free on every plan. *Source: FUTURE.md (Nov 5), `scripts/agent-files.mjs`; checked 2026-11-14.*
 - A printable blank 10 by 10 grid and PDF are free. Printables are the regular 100-square board only. *Source: `scripts/agent-files.mjs`; main channel notes; checked 2026-11-14.*
@@ -55,12 +42,13 @@ The true, dated things about QuarterScore that agents and channels may say. Read
 
 ## Plans and pricing
 
-- Two plans: Free, or a Season Pass at $5.99, one time. No other tiers. *Source: `plans.ts`, FUTURE.md (decided Nov 5, 2026), D-013; Paul, Nov 14: "free or $5.99"; checked 2026-11-14.*
+- Two plans: Free, or a Season Pass at $5.99, one time. No other tiers, and no Bar/Venue tier. *Source: `plans.ts`, FUTURE.md (decided Nov 5, 2026), D-013, D-026; checked 2026-11-14.*
 - Only hosts buy. Players always join and play free. *Source: FUTURE.md, The Season Pass; checked 2026-11-14.*
 - The Season Pass never auto-renews. This first season it runs from purchase to June 30, 2027. *Source: FUTURE.md (term changed Nov 6, 2026); upgrade dialog "One time · through June 30, 2027"; checked 2026-11-14.*
 - Free hosts get 1 active board at a time, with no lifetime cap. When its game ends, they reset or delete it to start the next one. *Source: `FREE_ACTIVE_BOARD_LIMIT = 1` in `core/utils/board-activity.ts`, `database.rules.json`, FUTURE.md; checked 2026-11-14.*
 - A board with no ESPN game linked stops counting as active 48 hours after it was created. *Source: `database.rules.json` (172800000 ms); checked 2026-11-14.*
 - Season Pass features in the code: more active boards (see Needs Paul's call 1), custom quarter splits, auto-lock and draw after kickoff, limit squares per player, open boards list, and the Players view. *Source: `plans.ts` `PLANS.season`, upgrade dialog; checked 2026-11-14.*
+- No ads on any board today. Ads may come to free boards later if QuarterScore gets popular enough; don't promise "no ads" or "ad-free" as lasting. *Source: D-024, `environment.adsEnabled: false`; checked 2026-11-14.*
 - The Players view lists every player across a host's boards, including co-hosted ones, and shows only with two or more games. A co-host needs their own pass. *Source: D-021, D-022, `players-view.service.ts`; checked 2026-11-14.*
 - The free-plan limits are enforced today in the app and the database rules, for everyone without a pass. *Source: `plan.service.ts`, `database.rules.json`; checked 2026-11-14.*
 - Refunds (planned): refundable until the pass is used, final after. Not live; wording still needs a lawyer or CPA. *Source: FUTURE.md, The Season Pass; checked 2026-11-14.*
@@ -92,5 +80,5 @@ The true, dated things about QuarterScore that agents and channels may say. Read
 
 The code wins on behaviour. These lines are out of date; fix them when the doc is next touched.
 
-- FUTURE.md: "Until checkout exists, everything stays free for everyone." Only live scores stay free; the other pass features and the 1-board limit are enforced today. *Checked 2026-11-14.*
+- FUTURE.md: "Until checkout exists, everything stays free for everyone." The pass features and the 1-board limit are enforced today; live scores are free by decision (D-025). *Checked 2026-11-14.*
 - D-013: "It is planned, not built." The plan limits and pass features are built; checkout isn't. *Checked 2026-11-14.*
