@@ -10,6 +10,7 @@ import { CardTeam, cardTeams } from '../../../../core/utils/card-teams';
 import { miniCellClass, miniGridCells, miniGridClass } from '../../../../core/utils/mini-grid';
 import { autoLockText, canLockFromCard, hasCardBar, isBoardQuiet, openCount } from '../../services/board-card';
 import { DashboardEditService } from '../../services/dashboard-edit.service';
+import { DashboardGroupsService } from '../../services/dashboard-groups.service';
 import { DashboardStore } from '../../services/dashboard.store';
 
 /**
@@ -55,6 +56,8 @@ export class GameCardComponent {
     return miniGridCells(game.boardSize).map(i => miniCellClass(i, game.squaresFilled, quiet));
   });
   public readonly game = input.required<GameListItem>();
+  /** The owner's group for a hosted board; joined boards never show one (players never see group names). */
+  public readonly groupName = computed<string | undefined>(() => this.joined() ? undefined : this.groups.nameOf(this.game()));
   public readonly hasCardBar = computed<boolean>(() => hasCardBar(this.game(), this.joined()));
   /** True while a board is unlocked and still has open squares, so Share is worth offering. */
   public readonly isFilling = computed<boolean>(() => isBoardFilling(this.game()));
@@ -81,6 +84,7 @@ export class GameCardComponent {
   }
 
   protected readonly store: DashboardStore = inject(DashboardStore);
+  private readonly groups: DashboardGroupsService = inject(DashboardGroupsService);
 
   private readonly edit: DashboardEditService = inject(DashboardEditService);
   private readonly teamLogos: TeamLogoService = inject(TeamLogoService);

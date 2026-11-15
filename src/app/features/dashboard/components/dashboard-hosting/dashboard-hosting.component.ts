@@ -9,6 +9,7 @@ import { DashboardViewService } from '../../services/dashboard-view.service';
 import { DashboardStore } from '../../services/dashboard.store';
 import { PlayersViewService } from '../../services/players-view.service';
 import { ValueSwapComponent } from '../../../../components/ui/value-swap/value-swap.component';
+import { DashboardGroupsComponent } from '../dashboard-groups/dashboard-groups.component';
 import { DashboardViewToggleComponent } from '../dashboard-view-toggle/dashboard-view-toggle.component';
 import { GameCardComponent } from '../game-card/game-card.component';
 import { PlayersViewComponent } from '../players-view/players-view.component';
@@ -20,7 +21,7 @@ import { PlayersViewComponent } from '../players-view/players-view.component';
  */
 @Component({
   selector: 'section[appDashboardHosting]',
-  imports: [NgIconComponent, DashboardViewToggleComponent, GameCardComponent, PlayersViewComponent, ValueSwapComponent],
+  imports: [NgIconComponent, DashboardGroupsComponent, DashboardViewToggleComponent, GameCardComponent, PlayersViewComponent, ValueSwapComponent],
   templateUrl: './dashboard-hosting.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
