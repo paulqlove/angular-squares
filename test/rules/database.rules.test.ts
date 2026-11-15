@@ -888,6 +888,49 @@ describe('users/usage counters', () => {
   });
 });
 
+describe('seasonGames (free games per season)', () => {
+  const ENTRY = `seasonGames/owner/2026/${GAME}_1790000000000`;
+
+  it('the owner can save a game toward their season, and save it again', async () => {
+    await assertSucceeds(set(owner(), ENTRY, true));
+    await assertSucceeds(set(owner(), ENTRY, true));
+  });
+
+  it('the owner cannot remove or change a saved game, so deleting a board does not free a slot', async () => {
+    await seed({ [ENTRY]: true });
+    await assertFails(set(owner(), ENTRY, null));
+    await assertFails(set(owner(), 'seasonGames/owner/2026', null));
+    await assertFails(set(owner(), 'seasonGames/owner', null));
+    await assertFails(set(owner(), ENTRY, false));
+  });
+
+  it('nobody else can add to or read a host\'s season', async () => {
+    await assertFails(set(player(), ENTRY, true));
+    await assertFails(read(player(), 'seasonGames/owner/2026'));
+    await assertFails(read(visitor(), 'seasonGames/owner/2026'));
+    await assertSucceeds(read(owner(), 'seasonGames/owner/2026'));
+  });
+
+  it('an admin can read and remove entries', async () => {
+    await seed({ [ENTRY]: true, 'admins/boss': true });
+    const admin = env.authenticatedContext('boss');
+    await assertSucceeds(read(admin, 'seasonGames/owner/2026'));
+    await assertSucceeds(set(admin, ENTRY, null));
+  });
+
+  it('rejects a bad season, a bad key or a value other than true', async () => {
+    await assertFails(set(owner(), `seasonGames/owner/26/${GAME}_1790000000000`, true));
+    await assertFails(set(owner(), 'seasonGames/owner/2026/not a key', true));
+    await assertFails(set(owner(), `seasonGames/owner/2026/${GAME}_1790000000000`, 1));
+  });
+
+  it('games/startedAt takes a positive number from the owner', async () => {
+    await assertSucceeds(set(owner(), `${G}/startedAt`, Date.now()));
+    await assertFails(set(owner(), `${G}/startedAt`, 'today'));
+    await assertFails(set(player(), `${G}/startedAt`, Date.now()));
+  });
+});
+
 describe('users/firstTouch', () => {
   it('a user can save their own first touch', async () => {
     await assertSucceeds(set(player(), 'users/alice/firstTouch', { at: Date.now(), path: '/team/chiefs', ref: 'google.com' }));

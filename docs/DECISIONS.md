@@ -4,6 +4,14 @@ This file records product and design decisions, newest first. To add one, put a 
 
 ---
 
+## D-038 · Free hosts: one game at a time and 3 games a season
+
+- **Date:** Nov 15 2026
+- **Decision:** Free hosts keep one game open at a time and can run 3 games per season. A game counts once anyone has claimed a square on it, and the count is saved on the server, so deleting a game with players doesn't free a slot and an empty game never takes one. Delete stays allowed. A reset (or Clear game) starts a new game on the same board under the same rule; the game before it already counted if it had players. A board that's already running is never locked or blocked: the cap only stops a new board or a reset. Season Pass and Admin are unchanged. Copy is Creative's (free-limit spec, mockups l1 to l3). Built behind `SEASON_LIMIT_ON` in `core/utils/season-games.ts`, off until Paul turns it on; the season runs July 1 to June 30 (Engineering's default, for Paul to confirm). Paul's words, relayed: "I actually agree with you on setting a max number of games for a free user and only being able to host one game at a time." Then: "3 per season". On a deleted game nobody joined: "Yes, don't count it".
+- **Options considered:** counting every game made, deleted or not; not counting empty games (picked)
+- **Why:** empty test boards shouldn't use up a free host's season
+- **Decided by:** Paul
+
 ## D-037 · Groups stays in place, switched off, on the Players tab
 
 - **Date:** Nov 15 2026

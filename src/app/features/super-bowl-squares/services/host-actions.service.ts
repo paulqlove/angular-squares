@@ -3,6 +3,7 @@ import { BoardSize, GameData, GameService, getBoardDimensions } from '../../../c
 import { ConfirmService } from '../../../core/services/confirm.service';
 import { PlanService } from '../../../core/services/plan.service';
 import { SanitizationService } from '../../../core/services/sanitization.service';
+import { SeasonGamesService } from '../../../core/services/season-games.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { splitFractions } from '../../../core/plans';
 import { drawBoardNumbers } from '../../../core/utils/draw-numbers';
@@ -46,6 +47,8 @@ export class HostActionsService {
 
     const { rows, cols } = getBoardDimensions(this.state.boardSize);
     const defaultGameState: Partial<GameData> = {
+      // A cleared board is a new game toward the season; the old one stays counted if it had players.
+      startedAt: Date.now(),
       selectedSquares: {},
       homeNumbers: Array(cols).fill(null),
       awayNumbers: Array(rows).fill(null),
@@ -63,6 +66,7 @@ export class HostActionsService {
       paidSquares: {}
     };
 
+    await this.seasonGames.recordBoard(this.state.gameId);
     await this.gameService.updateGame(this.state.gameId, defaultGameState);
   }
 
@@ -160,6 +164,7 @@ export class HostActionsService {
   private readonly groups: GamePageGroupsService = inject(GamePageGroupsService);
   private readonly planService: PlanService = inject(PlanService);
   private readonly sanitizationService: SanitizationService = inject(SanitizationService);
+  private readonly seasonGames: SeasonGamesService = inject(SeasonGamesService);
   private readonly state: GameStateService = inject(GameStateService);
   private readonly toastService: ToastService = inject(ToastService);
   private readonly ui: GamePageUiService = inject(GamePageUiService);

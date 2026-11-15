@@ -129,6 +129,9 @@ export class GameRecordService {
     if (data.isRandomized !== undefined) {
       updates[`${prefix}/isRandomized`] = data.isRandomized;
     }
+    if (data.startedAt !== undefined) {
+      updates[`${prefix}/startedAt`] = data.startedAt;
+    }
     if (data.isLocked !== undefined) {
       updates[`${prefix}/isLocked`] = data.isLocked;
     }

@@ -4,12 +4,15 @@ import { CardMenuItem } from '../../../components/ui/card-menu/card-menu.compone
 import { AuthService, AuthUser } from '../../../core/services/auth.service';
 import { ConfirmService } from '../../../core/services/confirm.service';
 import { GameData, GameListItem, GameService } from '../../../core/services/game.service';
+import { PlanService } from '../../../core/services/plan.service';
+import { SeasonGamesService } from '../../../core/services/season-games.service';
 import { TeamLogoService } from '../../../core/services/team-logo.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { BoardGroup, groupBoards } from '../../../core/utils/board-groups';
 import { drawBoardNumbers } from '../../../core/utils/draw-numbers';
 import { GroupRow, gamesInGroup } from '../../../core/utils/game-groups';
 import { toGameListItem } from '../../../core/utils/game-parse';
+import { deleteCountNote, gamesLeft, seasonLimitApplies } from '../../../core/utils/season-games';
 import { filterHostedGames } from './dashboard-filters';
 import { DashboardGroupsService } from './dashboard-groups.service';
 import { DashboardSearchService } from './dashboard-search.service';
@@ -45,6 +48,12 @@ export class DashboardStore {
   /** Every board this user hosts or co-hosts, in full, for the Players view. Newest first, hosted ones first. */
   public readonly runBoards = signal<GameData[]>([]);
   public readonly shareModalGameId = signal<string | null>(null);
+  /** "N of 3 free games left this season" for a free host while the season cap is on, else null. */
+  public readonly seasonGamesLeft = computed<number | null>(() => {
+    const cap = this.planService.features().seasonGames;
+    const used = this.seasonGames.used();
+    return seasonLimitApplies(cap) && used !== null ? gamesLeft(cap, used) : null;
+  });
   /** Hosted boards in the picked group matching the search, newest first. */
   public readonly visibleMyGames = computed<GameListItem[]>(() => {
     const search = this.search;
@@ -58,12 +67,14 @@ export class DashboardStore {
     const user = this.currentUser();
     if (!user) return;
 
-    const name = this.myGames().find(g => g.id === gameId)?.name ?? 'This game';
-    if (await this.confirmService.ask({ title: 'Delete this game?', message: `${name} will be removed for everyone. This cannot be undone.`, confirmLabel: 'Delete game' })) {
+    const game = this.myGames().find(g => g.id === gameId);
+    const message = `${game?.name ?? 'This game'} will be removed for everyone. This cannot be undone.${game ? this.seasonDeleteNote(game) : ''}`;
+    if (await this.confirmService.ask({ title: 'Delete this game?', message, confirmLabel: 'Delete game' })) {
       try {
         await this.gameService.deleteGame(gameId, user.uid);
         this.myGames.update(games => games.filter(g => g.id !== gameId));
         this.runBoards.update(boards => boards.filter(b => b.id !== gameId));
+        this.refreshSeasonCount();
       } catch {
         this.toastService.error('Could not delete the game. Try again.');
       }
@@ -85,6 +96,7 @@ export class DashboardStore {
         this.myGames.set(owned);
         this.joinedGames.set(joinedRecords.map(game => toGameListItem(game.id as string, game, false)));
         this.runBoards.set([...ownedRecords, ...joinedRecords.filter(game => game.managerId === user.uid)]);
+        this.refreshSeasonCount();
         const linked = owned.filter(game => !!game.espnEventId);
         if (linked.length > 0) {
           this.gameService.ensureLiveGameIndexes(linked.map(game => ({
@@ -151,6 +163,20 @@ export class DashboardStore {
     }
   }
 
+  /** Re-reads how many games this host has used this season, for the plan card and the limit dialogs. */
+  public refreshSeasonCount(): void {
+    const user = this.currentUser();
+    if (!user || user.isGuest || !seasonLimitApplies(this.planService.features().seasonGames)) return;
+    // A failed read hides the "games left" line rather than showing a wrong number.
+    this.seasonGames.usedThisSeason(user.uid, this.myGames()).catch(() => this.seasonGames.used.set(null));
+  }
+
+  /** The extra delete-confirm sentence for a game with players that keeps counting this season, or ''. */
+  public seasonDeleteNote(game: GameListItem): string {
+    const note = deleteCountNote(game, this.planService.features().seasonGames, Date.now());
+    return note ? ` ${note}` : '';
+  }
+
   public shareGame(gameId: string): void {
     this.shareModalGameId.set(gameId);
   }
@@ -173,7 +199,9 @@ export class DashboardStore {
   private readonly gameService: GameService = inject(GameService);
   private readonly groups: DashboardGroupsService = inject(DashboardGroupsService);
   private readonly injector: Injector = inject(Injector);
+  private readonly planService: PlanService = inject(PlanService);
   private readonly search: DashboardSearchService = inject(DashboardSearchService);
+  private readonly seasonGames: SeasonGamesService = inject(SeasonGamesService);
   private readonly teamLogos: TeamLogoService = inject(TeamLogoService);
   private readonly toastService: ToastService = inject(ToastService);
 }

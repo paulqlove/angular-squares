@@ -1,10 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { get, push, ref, set } from 'firebase/database';
 import { ActiveBoardLimitError } from '../errors/active-board-limit.error';
-import { Entitlement, PLANS, isActive } from '../plans';
+import { Entitlement, PLANS, PlanId, isActive } from '../plans';
 import {
   BoardActivity,
-  FREE_ACTIVE_BOARD_LIMIT,
   NOTIFY_EMAIL_MAX_LENGTH,
   NOTIFY_EMAIL_PATTERN,
   NOTIFY_SOURCE_MAX_LENGTH,
@@ -12,12 +11,19 @@ import {
   hasLinkedGame,
   isBoardActive
 } from '../utils/board-activity';
-import { normalizeSport } from '../utils/game-parse';
+import { normalizeSport, toSeasonGame } from '../utils/game-parse';
+import { seasonLimitApplies, SeasonGame } from '../utils/season-games';
 import { AuthService } from './auth.service';
 import { EspnService } from './espn.service';
 import { GameDatabaseService } from './game-database.service';
 import { RolePreviewService } from './role-preview.service';
+import { SeasonGamesService } from './season-games.service';
 import { SeasonPassService } from './season-pass.service';
+
+interface OwnedBoard {
+  activity: BoardActivity;
+  game: SeasonGame;
+}
 
 /**
  * Plans and board limits: admin status, paid and gifted passes, the active-board cap,
@@ -30,7 +36,7 @@ export class EntitlementService {
   /** Boards this host has active right now (counted against their plan). */
   public async activeBoardCount(ownerId: string): Promise<number> {
     const now = Date.now();
-    return (await this.loadOwnedBoardActivity(ownerId)).filter(board => isBoardActive(board, now)).length;
+    return (await this.loadOwnedBoards(ownerId)).filter(board => isBoardActive(board.activity, now)).length;
   }
 
   /** How long a new or opened board stays ad-free for this host (0 = ads). Rules cap it at the real pass. */
@@ -47,9 +53,15 @@ export class EntitlementService {
     if (!this.database.isBrowser) {
       throw new Error('Cannot check boards on server');
     }
-    const limit = await this.boardLimit(ownerId);
-    if (limit === Number.POSITIVE_INFINITY) return;
-    const dialog = boardLimitDialog(await this.activeBoardCount(ownerId), limit);
+    const plan = PLANS[await this.planFor(ownerId)];
+    if (plan.activeBoards === Number.POSITIVE_INFINITY) return;
+    const owned = await this.loadOwnedBoards(ownerId);
+    // The season cap comes first: a host who has used it sees that, not the one-at-a-time or ended-board versions.
+    if (seasonLimitApplies(plan.seasonGames) && await this.seasonGames.usedThisSeason(ownerId, owned.map(b => b.game)) >= plan.seasonGames) {
+      throw new ActiveBoardLimitError('season');
+    }
+    const now = Date.now();
+    const dialog = boardLimitDialog(owned.filter(b => isBoardActive(b.activity, now)).length, plan.activeBoards);
     if (dialog) throw new ActiveBoardLimitError(dialog);
   }
 
@@ -129,6 +141,7 @@ export class EntitlementService {
   private readonly database: GameDatabaseService = inject(GameDatabaseService);
   private readonly espnService: EspnService = inject(EspnService);
   private readonly rolePreview: RolePreviewService = inject(RolePreviewService);
+  private readonly seasonGames: SeasonGamesService = inject(SeasonGamesService);
   private readonly seasonPass: SeasonPassService = inject(SeasonPassService);
 
   /** The host's active pass, paid or gifted (whichever lasts longer), or null. */
@@ -138,26 +151,24 @@ export class EntitlementService {
     return [paid, gifted].filter(e => isActive(e)).sort((a, b) => b!.expiresAt - a!.expiresAt)[0] ?? null;
   }
 
-  /** Active boards allowed for this host: admin unlimited, else the active plan's limit, else Free. */
-  private async boardLimit(uid: string): Promise<number> {
+  /** The plan whose limits apply to this host: Admin, else an active pass, else Free. */
+  private async planFor(uid: string): Promise<PlanId> {
     if (await this.isAdmin(uid)) {
       // The admin can preview a plan's limits from the View-as switcher.
       const preview = this.rolePreview.plan();
-      return preview === 'actual' ? PLANS.admin.activeBoards : PLANS[preview].activeBoards;
+      return preview === 'actual' ? 'admin' : preview;
     }
-    const entitlement = await this.bestEntitlement(uid);
-    return entitlement ? PLANS.season.activeBoards : FREE_ACTIVE_BOARD_LIMIT;
+    return (await this.bestEntitlement(uid)) ? 'season' : 'free';
   }
 
-  private async loadOwnedBoardActivity(ownerId: string): Promise<BoardActivity[]> {
-    const userGamesRef = ref(this.database.db, `users/${ownerId}/games`);
-    const snapshot = await get(userGamesRef);
+  /** Each board this host owns, read once: when it stops being active, and its game for the season count. */
+  private async loadOwnedBoards(ownerId: string): Promise<OwnedBoard[]> {
+    const snapshot = await get(ref(this.database.db, `users/${ownerId}/games`));
     if (!snapshot.exists()) {
       return [];
     }
 
-    const gameIds = Object.keys(snapshot.val());
-    const boards = await Promise.all(gameIds.map(async (gameId) => {
+    const boards = await Promise.all(Object.keys(snapshot.val()).map(async (gameId): Promise<OwnedBoard | null> => {
       const gameSnap = await get(ref(this.database.db, `games/${gameId}`));
       if (!gameSnap.exists()) {
         return null;
@@ -167,14 +178,10 @@ export class EntitlementService {
       const linkedGameFinal = hasLinkedGame(espnEventId)
         ? await this.espnService.isEventFinal(espnEventId as string, normalizeSport(raw.espnSport))
         : null;
-      const board: BoardActivity = {
-        createdAt: typeof raw.createdAt === 'number' ? raw.createdAt : null,
-        espnEventId,
-        linkedGameFinal
-      };
-      return board;
+      const game = toSeasonGame(gameId, raw);
+      return { activity: { createdAt: game.createdAt || null, espnEventId, linkedGameFinal }, game };
     }));
 
-    return boards.filter((board): board is BoardActivity => board !== null);
+    return boards.filter((board): board is OwnedBoard => board !== null);
   }
 }

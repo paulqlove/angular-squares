@@ -12,6 +12,7 @@ import { EntitlementService } from './entitlement.service';
 import { GameDatabaseService } from './game-database.service';
 import { GameRecordService } from './game-record.service';
 import { LiveGameIndexService } from './live-game-index.service';
+import { SeasonGamesService } from './season-games.service';
 
 /**
  * A board's life: create, reset, resize, hand to a manager, and delete,
@@ -118,6 +119,7 @@ export class GameLifecycleService {
   public async deleteGame(gameId: string, ownerId: string): Promise<void> {
     if (!this.database.isBrowser) return;
     if (this.authService.blockPreviewWrite()) throw new Error('Preview only');
+    await this.seasonGames.recordBoard(gameId);
     const [espnSnap, listSnap] = await Promise.all([
       get(ref(this.database.db, `games/${gameId}/espnEventId`)),
       get(ref(this.database.db, `games/${gameId}/openListId`))
@@ -138,10 +140,15 @@ export class GameLifecycleService {
     await this.bumpUsage(ownerId, 'deletes');
   }
 
-  /** Clears a board for reuse (same as the Clear game button in the game settings). Keeps name, owner and any linked game. */
+  /**
+   * Clears a board for reuse (same as the Clear game button in the game settings). Keeps name, owner and any linked game.
+   * The cleared board is a new game toward the season (startedAt), and the old one stays counted if it had players.
+   */
   public async resetGame(gameId: string, boardSize: BoardSize): Promise<void> {
     const { rows, cols } = getBoardDimensions(boardSize);
+    await this.seasonGames.recordBoard(gameId);
     await this.records.updateGame(gameId, {
+      startedAt: Date.now(),
       selectedSquares: {},
       homeNumbers: Array(cols).fill(null),
       awayNumbers: Array(rows).fill(null),
@@ -197,6 +204,7 @@ export class GameLifecycleService {
   private readonly entitlements: EntitlementService = inject(EntitlementService);
   private readonly liveGameIndex: LiveGameIndexService = inject(LiveGameIndexService);
   private readonly records: GameRecordService = inject(GameRecordService);
+  private readonly seasonGames: SeasonGamesService = inject(SeasonGamesService);
 
   // Lifetime counters per host, read in the console to see who reuses or churns boards.
   // Best effort: a failed write never blocks the create, reset or delete.

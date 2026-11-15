@@ -55,6 +55,8 @@ export type UpgradeTrigger = BoardLimitDialog | 'pass' | 'ended';
           Your last game is <span class="text-qs-accent">over</span>.
         } @else if (trigger === 'cap') {
           You're at your {{ seasonBoards }}-board <span class="text-qs-accent">limit</span>
+        } @else if (trigger === 'season') {
+          You've used your {{ freeSeasonGames }} free games this <span class="text-qs-accent">season</span>
         } @else if (trigger === 'limit') {
           Board 1 is live. Want a <span class="text-qs-accent">second</span>?
         } @else {
@@ -64,7 +66,15 @@ export type UpgradeTrigger = BoardLimitDialog | 'pass' | 'ended';
 
       @if (trigger === 'ended') {
         <p id="upgrade-summary" class="mt-4 text-base text-qs-muted">
-          Free accounts keep one board. Reset {{ boardName ? '"' + boardName + '"' : 'it' }} for your next game, or delete it to start fresh.
+          @if (gamesLeft === null) {
+            Free accounts keep one board.
+          } @else {
+            Free hosts run one game at a time.
+            @if (gamesLeft < freeSeasonGames) {
+              You have {{ gamesLeft }} of {{ freeSeasonGames }} free games left this season.
+            }
+          }
+          Reset {{ boardName ? '"' + boardName + '"' : 'it' }} for your next game, or delete it to start fresh.
         </p>
         <div class="mt-5 flex flex-col gap-2 sm:flex-row">
           <button type="button" class="qs-btn qs-btn-primary w-full sm:flex-1" (click)="resetOld.emit()">Reset old game</button>
@@ -75,11 +85,24 @@ export type UpgradeTrigger = BoardLimitDialog | 'pass' | 'ended';
           <button type="button" class="qs-btn qs-btn-primary min-w-28" (click)="dismiss()">Done</button>
         </div>
       } @else {
+        @if (trigger === 'season') {
+          <p id="upgrade-summary" class="mt-4 text-base text-qs-muted">Free hosts get {{ freeSeasonGames }} games a season. The Season Pass runs as many as you want.</p>
+        } @else if (trigger === 'limit' && gamesLeft !== null) {
+          <p id="upgrade-summary" class="mt-4 text-base text-qs-muted">
+            Free hosts run one game at a time.
+            @if (gamesLeft > 0) {
+              You have {{ gamesLeft }} of {{ freeSeasonGames }} free games left this season.
+            }
+          </p>
+        }
         <p class="mt-6 font-mono text-4xl font-semibold tabular-nums">$5.99</p>
-        <p id="upgrade-summary" class="qs-label mt-3 text-qs-muted">One time · through June 30, 2027</p>
+        <p [attr.id]="seasonCopy ? null : 'upgrade-summary'" class="qs-label mt-3 text-qs-muted">One time · through June 30, 2027</p>
 
         <ul class="mt-5 flex flex-wrap gap-2" aria-label="Included">
           <li class="qs-badge qs-badge-ok">Live scores</li>
+          @if (seasonCopy) {
+            <li class="qs-badge qs-badge-ok">No season game limit</li>
+          }
           <li class="qs-badge qs-badge-ok">Up to 25 boards at a time</li>
           <li class="qs-badge qs-badge-ok">Custom splits</li>
           <li class="qs-badge qs-badge-ok">Auto-lock and draw</li>
@@ -133,6 +156,9 @@ export type UpgradeTrigger = BoardLimitDialog | 'pass' | 'ended';
             <p id="upgrade-pass-note" class="qs-label mt-3 normal-case tracking-normal text-qs-muted">One email when it's ready. Nothing else.</p>
           </form>
         }
+        @if (trigger === 'season') {
+          <p class="qs-label mt-2 normal-case leading-snug tracking-normal text-qs-muted">Games you delete before anyone joins don't count.</p>
+        }
       </div>
       }
     </app-modal>
@@ -144,6 +170,8 @@ export class UpgradePassDialogComponent implements AfterViewInit {
   @Input() trigger: UpgradeTrigger = 'limit';
   /** Name of the finished board, for the 'ended' version. */
   @Input() boardName = '';
+  /** Free games left this season while the season cap is on, else null (no season copy shows). */
+  @Input() gamesLeft: number | null = null;
   @Output() dismissed = new EventEmitter<void>();
   @Output() resetOld = new EventEmitter<void>();
   @Output() deleteOld = new EventEmitter<void>();
@@ -157,6 +185,13 @@ export class UpgradePassDialogComponent implements AfterViewInit {
 
   /** The cap named in the 'cap' version. Season Pass is the only plan with a cap above Free. */
   protected readonly seasonBoards: number = PLANS.season.activeBoards;
+  /** The free plan's games per season, named in the season copy. */
+  protected readonly freeSeasonGames: number = PLANS.free.seasonGames;
+
+  /** The season versions: the cap was hit, or the one-at-a-time limit while the cap is on. */
+  protected get seasonCopy(): boolean {
+    return this.trigger === 'season' || (this.trigger === 'limit' && this.gamesLeft !== null);
+  }
 
   private analytics = inject(AnalyticsService);
   private authService = inject(AuthService);
@@ -177,8 +212,9 @@ export class UpgradePassDialogComponent implements AfterViewInit {
       return;
     }
     const user = this.authService.realUser();
-    if ((this.trigger === 'limit' || this.trigger === 'pass') && user && !user.isGuest && !this.authService.isPreviewAdmin()) {
-      void this.gameService.recordUpgradeView(user.uid, this.trigger);
+    if (this.trigger !== 'ended' && this.trigger !== 'cap' && user && !user.isGuest && !this.authService.isPreviewAdmin()) {
+      // The season cap is a limit view too, so the fake-door read counts it with 'limit'.
+      void this.gameService.recordUpgradeView(user.uid, this.trigger === 'pass' ? 'pass' : 'limit');
     }
   }
 

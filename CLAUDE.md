@@ -106,6 +106,7 @@ games/{gameId}/
   espnLive: clock, period, status, per-quarter linescores (written by Cloud Functions)
 
   openListId (the board's More list: one of the owner's groups or their No group key)
+  startedAt (when the board was last reset or cleared; a new game toward the season)
 
 users/{userId}/games/{gameId}/
   createdAt, name
@@ -113,6 +114,8 @@ users/{userId}/games/{gameId}/
 groupLists/{ownerId}/  ungrouped (write-once key), groups/{groupId}: { name, createdAt }  (owner + co-hosts read)
 coHosts/{ownerId}/{uid}: true  (owner writes when assigning a co-host)
 openLists/{listId}/{boardId}: ownerId  (shown boards; read one list by key, never listable)
+
+seasonGames/{ownerId}/{season}/{gameId}_{startedAt}: true  (free host's games with players this season; owner adds, never removes)
 
 liveGames/{espnId}/{boardId}/
   sport

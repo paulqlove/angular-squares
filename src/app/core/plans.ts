@@ -12,6 +12,8 @@ export interface PlanFeatures {
   priceUsd: number;
   /** Boards a host can have active at once. */
   activeBoards: number;
+  /** Games a host can run per season (see core/utils/season-games.ts for what counts and the on/off switch). */
+  seasonGames: number;
   /** Change the per-quarter points split (free hosts keep 20/20/20/40). */
   customSplits: boolean;
   /** No ads on this host's boards. */
@@ -31,9 +33,9 @@ export interface PlanFeatures {
 export const DAY_MS = 86_400_000;
 
 export const PLANS: Record<PlanId, PlanFeatures> = {
-  free: { label: 'Free', priceUsd: 0, activeBoards: 1, customSplits: false, adFree: false, liveScoring: false, autoManage: false, squareLimit: false, playersView: false, gameGroups: false },
-  season: { label: 'Season Pass', priceUsd: 5.99, activeBoards: 25, customSplits: true, adFree: true, liveScoring: true, autoManage: true, squareLimit: true, playersView: true, gameGroups: true },
-  admin: { label: 'Admin', priceUsd: 0, activeBoards: Number.POSITIVE_INFINITY, customSplits: true, adFree: true, liveScoring: true, autoManage: true, squareLimit: true, playersView: true, gameGroups: true }
+  free: { label: 'Free', priceUsd: 0, activeBoards: 1, seasonGames: 3, customSplits: false, adFree: false, liveScoring: false, autoManage: false, squareLimit: false, playersView: false, gameGroups: false },
+  season: { label: 'Season Pass', priceUsd: 5.99, activeBoards: 25, seasonGames: Number.POSITIVE_INFINITY, customSplits: true, adFree: true, liveScoring: true, autoManage: true, squareLimit: true, playersView: true, gameGroups: true },
+  admin: { label: 'Admin', priceUsd: 0, activeBoards: Number.POSITIVE_INFINITY, seasonGames: Number.POSITIVE_INFINITY, customSplits: true, adFree: true, liveScoring: true, autoManage: true, squareLimit: true, playersView: true, gameGroups: true }
 };
 
 export interface Entitlement {
