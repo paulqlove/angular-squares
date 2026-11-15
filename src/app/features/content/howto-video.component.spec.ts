@@ -10,7 +10,8 @@ describe('HowToVideoComponent', () => {
     uploadDate: '2026-11-13T10:01:58-08:00',
     seconds: 30
   };
-  const embed = (id: string) => `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&playsinline=1&fs=1`;
+  const embed = (id: string) =>
+    `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&playsinline=1&fs=1&enablejsapi=1&origin=${encodeURIComponent(location.origin)}`;
   const realMatchMedia = window.matchMedia;
 
   /** Stands in for the phone-width media query: true acts like a phone. */
@@ -21,6 +22,7 @@ describe('HowToVideoComponent', () => {
   afterEach(() => {
     window.matchMedia = realMatchMedia;
     document.documentElement.style.overflow = '';
+    document.querySelectorAll('body > *').forEach((node) => node.tagName !== 'SCRIPT' && node.remove());
   });
 
   const setup = (video: HowToVideo) => {
@@ -72,6 +74,17 @@ describe('HowToVideoComponent', () => {
     expect(el.classList).not.toContain('has-phone');
     await tap(fixture, el);
     expect(el.querySelector('.howto-box iframe')!.getAttribute('src')).toBe(embed('E7pps5O65BM'));
+  });
+
+  it('pauses a clip playing in place when another one starts', async () => {
+    screenIs(true);
+    const first = setup(clip);
+    const second = setup({ ...clip, youtubeId: '5PjS38Sehr0' });
+    document.body.append(first.el, second.el); // An iframe has a window only once it is on the page.
+    await tap(first.fixture, first.el);
+    const post = vi.spyOn(first.el.querySelector('iframe')!.contentWindow!, 'postMessage').mockImplementation(() => undefined);
+    await tap(second.fixture, second.el);
+    expect(post).toHaveBeenCalledWith(expect.stringContaining('"func":"pauseVideo"'), 'https://www.youtube-nocookie.com');
   });
 
   it('opens the desktop clip large over the page on wider screens, and closes it again', async () => {
