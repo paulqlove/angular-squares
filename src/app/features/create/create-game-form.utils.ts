@@ -19,18 +19,6 @@ export const SPORT_OPTIONS: readonly { value: SportType | 'custom'; label: strin
 
 export const PRICE_PRESETS: readonly number[] = [0, 5, 10, 20, 50];
 
-/** Games whose short or full team names contain the search, ignoring case. */
-export function filterGames(games: EspnGame[], search: string): EspnGame[] {
-  const query = search.toLowerCase().trim();
-  if (!query) return games;
-  return games.filter(g =>
-    g.homeTeam.toLowerCase().includes(query) ||
-    g.awayTeam.toLowerCase().includes(query) ||
-    g.homeTeamFull.toLowerCase().includes(query) ||
-    g.awayTeamFull.toLowerCase().includes(query)
-  );
-}
-
 export interface SummaryParts {
   /** "SF @ KC" for a picked game or custom teams; empty when there are none yet. */
   matchup: string;
