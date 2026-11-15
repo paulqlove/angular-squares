@@ -196,7 +196,8 @@ export class TeamPageComponent implements OnInit {
   public readonly related: RelatedLink[] = [
     { path: '/teams', label: 'All NFL teams', text: 'Pick any team and run a board for its next game.' },
     { path: '/how-to-play', label: 'How to play', text: 'The full rules for football squares.' },
-    { path: '/best-squares-numbers', label: 'Best numbers', text: 'Which squares hit most often in past games.' }
+    { path: '/best-squares-numbers', label: 'Best numbers', text: 'Which squares hit most often in past games.' },
+    { path: '/super-bowl-squares', label: 'Super Bowl squares', text: 'The free board, rules and TV mode for the big game.' }
   ];
   /** The four rules steps, with the team's name in the example. */
   public readonly steps = computed(() => {
