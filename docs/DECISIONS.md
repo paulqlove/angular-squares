@@ -4,6 +4,14 @@ This file records product and design decisions, newest first. To add one, put a 
 
 ---
 
+## D-033 · Share winners shows the picture, not the code or TV link
+
+- **Date:** Nov 15 2026
+- **Decision:** On a finished game the Share dialog drops the Game code block and the TV link, and shows the winners picture itself in their place: square at full dialog width, 8px radius, 1px line border, above the Share winners button. While it draws, a same-size panel reads "Drawing the picture…"; if the draw fails it reads "Couldn't make the picture. Tap Share winners to try again." Share game on live games is unchanged.
+- **Options considered:** Creative's s1 (picture preview) with s2 (drawing state)
+- **Why:** the code and TV link don't matter once a game is over. Paul's words, relayed: "On games that are completed where it says share winners, I think the TV link in game codes are irrelevant and not needed. Maybe it would be a good opportunity to just go ahead and show an image of what the winner's image will look like." Approved: "Build it".
+- **Decided by:** Paul
+
 ## D-032 · Phone host bar: Games in the bar, one next-step button
 
 - **Date:** Nov 15 2026
