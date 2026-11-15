@@ -4,6 +4,14 @@ This file records product and design decisions, newest first. To add one, put a 
 
 ---
 
+## D-030 · Players card panel may animate its height on phones
+
+- **Date:** Nov 15 2026
+- **Decision:** On a phone, a player card's panel grows and folds its height (a grid row from 0fr to 1fr, 200ms open, 160ms close) so the cards below glide instead of jumping. This is an exception to DESIGN.md's rule that motion uses only transform and opacity, like D-028. From 640px the panel floats over the cards and keeps to transform and opacity. Motion spec from Creative.
+- **Options considered:** not recorded
+- **Why:** not recorded. Paul's words, relayed: "Build both."
+- **Decided by:** Paul
+
 ## D-029 · Share winners on finished games
 
 - **Date:** Nov 14 2026

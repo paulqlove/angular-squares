@@ -50,10 +50,8 @@ const EASE_DECEL = 'cubic-bezier(.2,0,0,1)'; // --qs-ease-decel
     .qs-games-out { position: absolute; inset: 0 0 auto; animation: qs-fade-out 80ms var(--qs-ease-exit) forwards; pointer-events: none; }
     :host(.qs-panel-close) .qs-panel-games { position: static; animation: qs-fade-out 80ms var(--qs-ease-in) forwards; }
     @keyframes qs-games-rise { from { opacity: 0; transform: translateY(4px); } }
+    /* Reduced motion: the global rule cuts the grow and fold to nothing, so only the games' fade is left */
     @media (prefers-reduced-motion: reduce) {
-      :host(.qs-panel-open) { animation: none !important; }
-      :host(.qs-panel-close) { animation: qs-fade-out 120ms linear forwards !important; }
-      :host(.qs-panel-close) .qs-panel-games { animation: none !important; }
       .qs-games-open, .qs-games-swap { animation: qs-fade-in 120ms linear backwards !important; }
       .qs-games-out { animation: qs-fade-out 120ms linear forwards !important; }
     }
