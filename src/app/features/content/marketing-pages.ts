@@ -329,7 +329,8 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       { path: '/best-squares-numbers', label: 'Best numbers', text: 'Every digit pair, from 7 and 0 down to 2 and 2.' },
       { path: '/printable-football-squares', label: 'Printable board', text: 'A blank 100-square grid to print or download.' },
       { path: '/faq', label: 'FAQ', text: 'Accounts, privacy, and money.' },
-      { path: '/football-squares-on-tv', label: 'Football squares on TV', text: 'Put the board on a big screen.' }
+      { path: '/football-squares-on-tv', label: 'Football squares on TV', text: 'Put the board on a big screen.' },
+      { path: '/football-squares-fundraiser', label: 'Donation squares', text: 'Running the board as a fundraiser? Formats where the cause wins.' }
     ],
     cta: {
       path: '/create',
