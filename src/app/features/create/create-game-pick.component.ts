@@ -4,7 +4,8 @@ import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroMagnifyingGlass } from '@ng-icons/heroicons/outline';
 import type { EspnGame, SportType } from '../../core/services/espn.service';
 import { GamePickCardComponent } from '../../shared/game-pick-card.component';
-import { SPORT_OPTIONS, filterGames } from './create-game-form.utils';
+import { filterGames } from '../../core/utils/espn-game-search';
+import { SPORT_OPTIONS } from './create-game-form.utils';
 
 /**
  * Create game's first step: the sport, then a game from the schedule or two custom teams.

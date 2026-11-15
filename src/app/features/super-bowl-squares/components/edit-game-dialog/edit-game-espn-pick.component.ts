@@ -3,6 +3,7 @@ import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroMagnifyingGlass } from '@ng-icons/heroicons/outline';
 
 import type { EspnGame, SportType } from '../../../../core/services/espn.service';
+import { filterGames } from '../../../../core/utils/espn-game-search';
 import { GamePickCardComponent } from '../../../../shared/game-pick-card.component';
 
 /** Edit game's ESPN game on the dashboard: the linked game with Change game, or the sport's games to pick from. */
@@ -66,16 +67,7 @@ export class EditGameEspnPickComponent {
 
   protected readonly changing = signal<boolean>(false);
   protected readonly search = signal<string>('');
-  protected readonly filtered = computed<EspnGame[]>(() => {
-    const query = this.search().toLowerCase().trim();
-    if (!query) return this.games();
-    return this.games().filter(g =>
-      g.homeTeam.toLowerCase().includes(query) ||
-      g.awayTeam.toLowerCase().includes(query) ||
-      g.homeTeamFull.toLowerCase().includes(query) ||
-      g.awayTeamFull.toLowerCase().includes(query)
-    );
-  });
+  protected readonly filtered = computed<EspnGame[]>(() => filterGames(this.games(), this.search()));
   protected readonly selected = computed<EspnGame | undefined>(() => this.games().find(g => g.id === this.gameId()));
 
   protected onSearch(event: Event): void {
