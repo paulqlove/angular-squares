@@ -1,4 +1,4 @@
-import { FREE_ACTIVE_BOARD_LIMIT, NOTIFY_EMAIL_PATTERN, UNLINKED_BOARD_ACTIVE_MS, isBoardActive, isEspnStatusFinal } from './board-activity';
+import { FREE_ACTIVE_BOARD_LIMIT, NOTIFY_EMAIL_PATTERN, boardLimitDialog, UNLINKED_BOARD_ACTIVE_MS, isBoardActive, isEspnStatusFinal } from './board-activity';
 
 describe('isBoardActive', () => {
     const now = Date.UTC(2026, 10, 1, 18, 0, 0);
@@ -74,5 +74,23 @@ describe('NOTIFY_EMAIL_PATTERN', () => {
         expect(NOTIFY_EMAIL_PATTERN.test('a@b')).toBe(false);
         expect(NOTIFY_EMAIL_PATTERN.test('a@b.c')).toBe(false);
         expect(NOTIFY_EMAIL_PATTERN.test('')).toBe(false);
+    });
+});
+
+describe('boardLimitDialog', () => {
+    it('gives a Season Pass host at the 25-board cap the plain limit note', () => {
+        expect(boardLimitDialog(25, 25)).toBe('cap');
+        expect(boardLimitDialog(26, 25)).toBe('cap');
+    });
+
+    it('keeps the upgrade dialog for a free host at the limit', () => {
+        expect(boardLimitDialog(1, FREE_ACTIVE_BOARD_LIMIT)).toBe('limit');
+        expect(boardLimitDialog(2, FREE_ACTIVE_BOARD_LIMIT)).toBe('limit');
+    });
+
+    it('shows no dialog while there is room', () => {
+        expect(boardLimitDialog(24, 25)).toBeNull();
+        expect(boardLimitDialog(0, FREE_ACTIVE_BOARD_LIMIT)).toBeNull();
+        expect(boardLimitDialog(500, Number.POSITIVE_INFINITY)).toBeNull();
     });
 });

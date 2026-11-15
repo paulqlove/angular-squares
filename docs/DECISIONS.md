@@ -4,6 +4,14 @@ This file records product and design decisions, newest first. To add one, put a 
 
 ---
 
+## D-033 · Season Pass hosts at the cap get a plain limit note
+
+- **Date:** Nov 15 2026
+- **Decision:** A Season Pass host (or an admin previewing Season Pass) with 25 active boards who tries to make another sees "You're at your 25-board limit" and a Done button: no price, no upgrade offer, no email signup, and no upgrade-view count. Free hosts at their one-board limit keep the "Board 1 is live" upgrade dialog exactly as before. The 25 cap is unchanged. Paul's words, relayed: "Yes, fix it".
+- **Options considered:** not recorded
+- **Why:** the free plan's upgrade offer made no sense to someone who already has the Season Pass
+- **Decided by:** Paul
+
 ## D-032 · Phone host bar: Games in the bar, one next-step button
 
 - **Date:** Nov 15 2026
