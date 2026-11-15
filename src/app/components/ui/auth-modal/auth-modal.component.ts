@@ -3,6 +3,7 @@ import { Component, Input, Output, EventEmitter, inject, OnChanges, SimpleChange
 import { FormsModule } from '@angular/forms';
 import { ModalComponent } from '../modal/modal.component';
 import { AuthService } from '../../../core/services/auth.service';
+import { prefilledName } from './prefill-name.utils';
 
 @Component({
     selector: 'app-auth-modal',
@@ -122,6 +123,8 @@ export class AuthModalComponent implements OnChanges {
   @Input() isOpen = false;
   /** 'host': creating a game needs an account, so guest mode is hidden. */
   @Input() mode: 'join' | 'host' = 'join';
+  /** The name already typed on the page (the board's name field), filled into the name fields as the dialog opens. */
+  @Input() suggestedName = '';
   @Output() authenticated = new EventEmitter<void>();
   @Output() closed = new EventEmitter<void>();
 
@@ -137,6 +140,7 @@ export class AuthModalComponent implements OnChanges {
   emailError = signal<string | null>(null);
   googleError = signal(false);
   guestError = signal(false);
+  private lastSuggestedName = '';
 
   validEmail(): boolean {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.linkEmail.trim());
@@ -159,11 +163,20 @@ export class AuthModalComponent implements OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['isOpen']?.currentValue === true) void this.prepareAuth();
+    if (changes['isOpen']?.currentValue !== true) return;
+    this.fillSuggestedName();
+    void this.prepareAuth();
   }
 
   close(): void {
     this.closed.emit();
+  }
+
+  private fillSuggestedName(): void {
+    const name = (this.suggestedName ?? '').trim();
+    this.guestName = prefilledName(this.guestName, this.lastSuggestedName, name);
+    this.linkName = prefilledName(this.linkName, this.lastSuggestedName, name);
+    this.lastSuggestedName = name;
   }
 
   private async prepareAuth(): Promise<void> {

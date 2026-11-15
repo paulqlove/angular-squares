@@ -27,6 +27,7 @@
 <!-- Auth Modal (for unauthenticated square clicks) -->
 <app-auth-modal
   [isOpen]="ui.showAuthModal()"
+  [suggestedName]="names.currentPlayer"
   (authenticated)="squares.onAuthModalAuthenticated()"
   (closed)="squares.onAuthModalClosed()">
 </app-auth-modal>
