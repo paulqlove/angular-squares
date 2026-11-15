@@ -33,13 +33,17 @@ export class GameGroupsService {
     }
   }
 
-  /** Makes a group, with its co-host when one is given (Create game's new group). */
+  /** Makes a group, with its co-host when one is given (Create game's new group), in one write. */
   public async createGroup(ownerId: string, name: string, coHost?: GroupCoHost): Promise<GameGroup> {
     this.guardWrite();
-    const group: GameGroup = { id: newListKey(), name, createdAt: Date.now(), ...(coHost ? { coHost } : {}) };
-    const { id, ...stored } = group;
-    await this.save(`groupLists/${ownerId}/groups/${id}`, stored);
-    return group;
+    const group: GameGroup = { id: newListKey(), name, createdAt: Date.now() };
+    const stored = { name: group.name, createdAt: group.createdAt };
+    if (!coHost) {
+      await this.save(`groupLists/${ownerId}/groups/${group.id}`, stored);
+      return group;
+    }
+    await this.patch({ [`groupLists/${ownerId}/groups/${group.id}`]: stored, [`groupCoHosts/${ownerId}/${group.id}`]: coHost });
+    return { ...group, coHost };
   }
 
   /** Renames in place: every board in the group keeps pointing at the same id, so nothing else changes. */
