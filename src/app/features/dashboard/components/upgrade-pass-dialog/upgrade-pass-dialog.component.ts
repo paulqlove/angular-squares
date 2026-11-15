@@ -19,11 +19,15 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { GameService } from '../../../../core/services/game.service';
 import { PLANS } from '../../../../core/plans';
 import {
+  BoardLimitDialog,
   NOTIFY_EMAIL_MAX_LENGTH,
   NOTIFY_EMAIL_PATTERN,
   NOTIFY_SOURCE,
   UPGRADE_NOTIFY_EVENT
 } from '../../../../core/utils/board-activity';
+
+/** Which version of the dialog shows: the free limit, the paid cap, the See Season Pass button, or the free board that ended. */
+export type UpgradeTrigger = BoardLimitDialog | 'pass' | 'ended';
 
 @Component({
     selector: 'app-upgrade-pass-dialog',
@@ -137,7 +141,7 @@ import {
 })
 export class UpgradePassDialogComponent implements AfterViewInit {
   /** What opened the dialog: the free one-board limit, the Season Pass cap, or the 'See Season Pass' button. */
-  @Input() trigger: 'limit' | 'cap' | 'pass' | 'ended' = 'limit';
+  @Input() trigger: UpgradeTrigger = 'limit';
   /** Name of the finished board, for the 'ended' version. */
   @Input() boardName = '';
   @Output() dismissed = new EventEmitter<void>();
@@ -151,7 +155,7 @@ export class UpgradePassDialogComponent implements AfterViewInit {
   isSubmitting = signal(false);
   submitted = signal(false);
 
-  /** The Season Pass cap, named in the 'cap' version. */
+  /** The cap named in the 'cap' version. Season Pass is the only plan with a cap above Free. */
   protected readonly seasonBoards: number = PLANS.season.activeBoards;
 
   private analytics = inject(AnalyticsService);

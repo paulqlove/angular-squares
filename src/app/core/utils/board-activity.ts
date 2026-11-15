@@ -13,6 +13,11 @@ export function boardLimitDialog(activeBoards: number, limit: number): BoardLimi
   return limit > FREE_ACTIVE_BOARD_LIMIT ? 'cap' : 'limit';
 }
 
+/** Free hosts at their limit are asked to reset or delete the ended board first. Bigger plans go by active boards only. */
+export function asksAboutEndedBoard(ownedBoards: number, limit: number): boolean {
+  return limit <= FREE_ACTIVE_BOARD_LIMIT && ownedBoards > 0 && ownedBoards >= limit;
+}
+
 export const NOTIFY_EMAIL_MAX_LENGTH = 254;
 export const NOTIFY_SOURCE_MAX_LENGTH = 64;
 export const NOTIFY_SOURCE = 'upgrade_dialog';
