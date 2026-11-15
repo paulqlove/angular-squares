@@ -7,7 +7,7 @@
  * The on/off switch for the per-season cap. Off: nothing counts, nothing is saved, and no copy about it shows.
  * Turn it on only after the seasonGames rules are deployed, or deletes and resets will fail.
  */
-export const SEASON_LIMIT_ON = false;
+export const SEASON_LIMIT_ON = true;
 
 /** A season starts on July 1 (UTC) and runs to June 30, the same window as the Season Pass. 6 is July (months count from 0). */
 export const SEASON_START_MONTH = 6;

@@ -91,7 +91,7 @@ The rules page walks through the grid, the draw, and how a quarter winner is cho
 
 **Does QuarterScore cost money?**
 
-No. Creating a board and claiming squares is free. QuarterScore never collects, holds, or pays out money.
+No. Hosting is free: one game at a time and 3 games a season. Claiming squares is always free. QuarterScore never collects, holds, or pays out money.
 
 **Do players need an account?**
 
@@ -221,7 +221,7 @@ Create a board and choose NFL. Add the two teams and send the link. Friends type
 
 ### A board you can run every week
 
-Some groups play one game a week all season. Each game gets its own board and link, so old scores stay put.
+Some groups play one game a week all season. Each game gets its own board and link, so old scores stay put. Free hosts get 3 games a season. The Season Pass is for groups that play every week.
 
 - No account for the people claiming squares.
 - A code for anyone standing in the room.
