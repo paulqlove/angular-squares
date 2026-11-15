@@ -45,11 +45,14 @@ export class GameGroupsService {
     return ungrouped;
   }
 
-  /** Files a board into a group, or into No group when `groupId` is null. Returns the board's new list id. */
+  /**
+   * Files a board into a group, or into No group when `groupId` is null. A board in a group is always shown in
+   * its More tab; No group keeps the board's switch. Returns the board's new list id.
+   */
   public async fileBoard(board: GroupedBoard, groupId: string | null): Promise<string> {
     this.guardWrite();
     const listId = groupId ?? await this.boardSettings.ungroupedKey(board.ownerId);
-    await this.patch(fileBoardUpdates(board, listId, !!board.showInOpenBoards));
+    await this.patch(fileBoardUpdates(board, listId, !!groupId || !!board.showInOpenBoards));
     return listId;
   }
 

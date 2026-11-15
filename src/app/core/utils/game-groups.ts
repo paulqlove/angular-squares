@@ -89,3 +89,14 @@ export function pickerValue(groups: GameGroup[], openListId: string | undefined)
 export function groupChanged(groups: GameGroup[], openListId: string | undefined, choice: GroupChoice): boolean {
   return !!cleanGroupName(choice.newName ?? '') || pickerValue(groups, openListId) !== choice.groupId;
 }
+
+/** The hint under the locked switch. */
+export const GROUPED_SHOWN_HINT = 'Games in a group always show in open boards.';
+
+/**
+ * True when the picker is on a group, or on a new group that has a name. A game in a group always shows in
+ * that group's More tab (Paul, Nov 15: "Lock it on"), so Show in my open boards stays on and can't be turned off.
+ */
+export function inGroup(choice: GroupChoice | undefined): boolean {
+  return !!choice?.groupId || !!cleanGroupName(choice?.newName ?? '');
+}

@@ -1,11 +1,11 @@
-import { ChangeDetectionStrategy, Component, effect, inject, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroXMark } from '@ng-icons/heroicons/outline';
 
 import { GroupPickerComponent } from '../../../../components/ui/group-picker/group-picker.component';
 import { ModalComponent } from '../../../../components/ui/modal/modal.component';
 import { ToggleComponent } from '../../../../components/ui/toggle/toggle.component';
-import { GroupChoice } from '../../../../core/utils/game-groups';
+import { GROUPED_SHOWN_HINT, GroupChoice, inGroup } from '../../../../core/utils/game-groups';
 import { GamePageGroupsService } from '../../services/game-page-groups.service';
 import { GameStateService } from '../../services/game-state.service';
 
@@ -31,12 +31,12 @@ import { GameStateService } from '../../services/game-state.service';
           <div class="flex min-h-11 items-start justify-between gap-4">
             <div class="min-w-0">
               <p class="qs-label text-qs-ink">Show in my open boards</p>
-              <p class="mt-1.5 text-xs text-qs-muted">Players on your other games can see and join this one.</p>
+              <p class="mt-1.5 text-xs text-qs-muted">{{ grouped() ? groupedHint : 'Players on your other games can see and join this one.' }}</p>
             </div>
-            <app-toggle [checked]="shown()" (onChange)="shown.set($event)"></app-toggle>
+            <app-toggle [checked]="shown()" [disabled]="grouped()" (onChange)="shown.set($event)"></app-toggle>
           </div>
         }
-        <app-group-picker [groups]="groups.groups()" [value]="choice()?.groupId ?? null" (changed)="choice.set($event)"></app-group-picker>
+        <app-group-picker [groups]="groups.groups()" [value]="choice()?.groupId ?? null" (changed)="pickGroup($event)"></app-group-picker>
       </div>
       <div class="flex gap-2 border-t border-qs-line px-5 pb-5 pt-3">
         <button type="button" class="qs-btn qs-btn-secondary w-28 shrink-0" (click)="close()">Cancel</button>
@@ -53,19 +53,28 @@ export class CoHostEditDialogComponent {
     effect(() => {
       if (!this.groups.coHostEditOpen()) return;
       untracked(() => {
-        this.shown.set(this.state.showInOpenBoards);
         this.choice.set(this.groups.choice());
+        // A game filed in a group before the switch was locked on shows (and saves) as on
+        this.shown.set(this.state.showInOpenBoards || inGroup(this.choice()));
       });
     });
   }
 
   protected readonly choice = signal<GroupChoice | undefined>(undefined);
+  /** The picker is on a group, so Show in my open boards is locked on. */
+  protected readonly grouped = computed<boolean>(() => inGroup(this.choice()));
+  protected readonly groupedHint = GROUPED_SHOWN_HINT;
   protected readonly groups: GamePageGroupsService = inject(GamePageGroupsService);
   protected readonly shown = signal<boolean>(false);
   private readonly state: GameStateService = inject(GameStateService);
 
   protected close(): void {
     this.groups.coHostEditOpen.set(false);
+  }
+
+  protected pickGroup(choice: GroupChoice): void {
+    if (inGroup(choice)) this.shown.set(true);
+    this.choice.set(choice);
   }
 
   protected save(): void {

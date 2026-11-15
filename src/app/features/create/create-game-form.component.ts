@@ -10,7 +10,7 @@ import type { BoardSize } from '../../core/services/game.service';
 import {
   CreateGameDraft, CreateGameValues, buildCreateGameValues, emptyDraft, loadCreateDraft, splitToTenths
 } from '../../core/utils/create-game-draft';
-import type { GameGroup, GroupChoice } from '../../core/utils/game-groups';
+import { GameGroup, GroupChoice, inGroup } from '../../core/utils/game-groups';
 import { SPLIT_QUARTERS, splitLabel, splitPresetId, splitRemaining } from '../../core/utils/split-edit';
 import { CreateGameFooterComponent } from './create-game-footer.component';
 import {
@@ -151,6 +151,17 @@ export class CreateGameFormComponent implements OnChanges, OnInit {
     if (this.customPrice !== null && this.customPrice >= 0) {
       this.newGamePrice = this.customPrice;
     }
+  }
+
+  /** The picker is on a group, so Show in my open boards is locked on. */
+  grouped(): boolean {
+    return inGroup(this.newGameGroup);
+  }
+
+  /** A game in a group always shows in its More tab; No group keeps the switch as it is. */
+  pickGroup(choice: GroupChoice): void {
+    if (inGroup(choice)) this.newGameShowInOpenBoards = true;
+    this.newGameGroup = choice;
   }
 
   /** A schedule game is picked (not custom teams), so Auto-lock and draw applies. */

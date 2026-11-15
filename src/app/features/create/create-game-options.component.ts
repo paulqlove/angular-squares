@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { GroupPickerComponent } from '../../components/ui/group-picker/group-picker.component';
 import { ToggleComponent } from '../../components/ui/toggle/toggle.component';
-import type { GameGroup, GroupChoice } from '../../core/utils/game-groups';
+import { GROUPED_SHOWN_HINT, GameGroup, GroupChoice } from '../../core/utils/game-groups';
 
 /**
  * The switches under Details: Show in my open boards, Group and Auto-lock and draw.
@@ -18,10 +18,10 @@ import type { GameGroup, GroupChoice } from '../../core/utils/game-groups';
     <div class="flex items-start justify-between gap-4 py-5 first:pt-5">
       <div class="min-w-0">
         <p class="qs-label mb-2 text-qs-ink">Show in my open boards</p>
-        <p class="text-xs text-qs-muted">Players on your other boards can join this one.</p>
+        <p class="text-xs text-qs-muted">{{ grouped() ? groupedHint : 'Players on your other boards can join this one.' }}</p>
         <p class="mt-2 truncate rounded-inner border border-qs-line bg-qs-panel-2 px-3 py-2 font-mono text-xs text-qs-ink">{{ openBoardPreview() }}</p>
       </div>
-      <app-toggle [checked]="showInOpenBoards()" (onChange)="openBoardsChanged.emit($event)"></app-toggle>
+      <app-toggle [checked]="showInOpenBoards()" [disabled]="grouped()" (onChange)="openBoardsChanged.emit($event)"></app-toggle>
     </div>
   }
   @if (groupsAllowed()) {
@@ -52,6 +52,8 @@ import type { GameGroup, GroupChoice } from '../../core/utils/game-groups';
 export class CreateGameOptionsComponent {
   public readonly openBoardsAllowed = input(false);
   public readonly showInOpenBoards = input(false);
+  /** The Group picker is on a group, so the switch is locked on. */
+  public readonly grouped = input(false);
   /** How the board will read in the host's open boards. */
   public readonly openBoardPreview = input('');
   public readonly groupsAllowed = input(false);
@@ -65,4 +67,5 @@ export class CreateGameOptionsComponent {
   public readonly openBoardsChanged = output<boolean>();
   public readonly groupChanged = output<GroupChoice>();
   public readonly autoManageChanged = output<boolean>();
+  protected readonly groupedHint = GROUPED_SHOWN_HINT;
 }

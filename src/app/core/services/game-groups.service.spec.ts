@@ -69,6 +69,16 @@ describe('GameGroupsService', () => {
     expect(db.patch).toHaveBeenCalledTimes(2);
   });
 
+  it('always shows a board filed into a group, and keeps the switch for No group', async () => {
+    await service.fileBoard({ id: 'a', ownerId: 'o', openListId: NONE }, CHURCH);
+    await service.fileBoard({ id: 'b', ownerId: 'o', openListId: CHURCH }, null);
+    const [grouped, ungrouped] = db.patch.mock.calls.map(call => call[0] as Record<string, unknown>);
+    expect(grouped['games/a/showInOpenBoards']).toBe(true);
+    expect(grouped[`openLists/${CHURCH}/a`]).toBe('o');
+    expect(ungrouped['games/b/showInOpenBoards']).toBeNull();
+    expect(ungrouped[`openLists/${NONE}/b`]).toBeNull();
+  });
+
   it('makes a named new group before filing the board into it', async () => {
     const result = await service.saveChoice({ id: 'a', ownerId: 'o', openListId: NONE, showInOpenBoards: true }, { groupId: null, newName: ' Gym ' });
     expect(result.created?.name).toBe('Gym');

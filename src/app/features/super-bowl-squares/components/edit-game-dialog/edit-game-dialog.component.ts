@@ -13,7 +13,7 @@ import { autoRunLabel } from '../../../../core/utils/auto-manage';
 import { ToggleComponent } from '../../../../components/ui/toggle/toggle.component';
 import { EmptyQuarterRuleComponent } from '../../../../components/ui/empty-quarter-rule/empty-quarter-rule.component';
 import { GroupPickerComponent } from '../../../../components/ui/group-picker/group-picker.component';
-import type { GameGroup, GroupChoice } from '../../../../core/utils/game-groups';
+import { GROUPED_SHOWN_HINT, GameGroup, GroupChoice, inGroup } from '../../../../core/utils/game-groups';
 import { CoHostCandidate, EditGameCoHostComponent } from './edit-game-cohost.component';
 import { EditGameEspnPickComponent } from './edit-game-espn-pick.component';
 import { EditGameSplitComponent } from './edit-game-split.component';
@@ -183,14 +183,14 @@ export interface EditGameValues {
                 <div class="flex min-h-11 items-start justify-between gap-4">
                   <div class="min-w-0">
                     <p class="qs-label text-qs-ink">Show in my open boards</p>
-                    <p class="mt-1.5 text-xs text-qs-muted">Players on your other boards can see and join this one.</p>
+                    <p class="mt-1.5 text-xs text-qs-muted">{{ grouped ? groupedHint : 'Players on your other boards can see and join this one.' }}</p>
                   </div>
-                  <app-toggle [checked]="draft.showInOpenBoards" (onChange)="draft.showInOpenBoards = $event"></app-toggle>
+                  <app-toggle [checked]="draft.showInOpenBoards" [disabled]="grouped" (onChange)="draft.showInOpenBoards = $event"></app-toggle>
                 </div>
               }
 
               @if (draft.group && groupsShown) {
-                <app-group-picker [groups]="groups" [value]="draft.group.groupId" [allowNew]="canNewGroup" (changed)="draft.group = $event"></app-group-picker>
+                <app-group-picker [groups]="groups" [value]="draft.group.groupId" [allowNew]="canNewGroup" (changed)="pickGroup($event)"></app-group-picker>
               }
 
               <div class="flex flex-col gap-2">
@@ -284,6 +284,13 @@ export class EditGameDialogComponent implements OnChanges {
   ];
   draft: EditGameValues = { ...this.values };
 
+  protected readonly groupedHint = GROUPED_SHOWN_HINT;
+
+  /** The picker is on a group, so Show in my open boards is locked on. */
+  get grouped(): boolean {
+    return inGroup(this.draft.group);
+  }
+
   /** The picker needs something to pick: a group, or New group... */
   get groupsShown(): boolean {
     return this.groups.length > 0 || this.canNewGroup;
@@ -291,7 +298,8 @@ export class EditGameDialogComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['isOpen']?.currentValue) {
-      this.draft = { ...this.values };
+      // A game filed in a group before the switch was locked on shows (and saves) as on
+      this.draft = { ...this.values, showInOpenBoards: this.values.showInOpenBoards || inGroup(this.values.group) };
       this.confirmingClear = false;
       this.pct = splitPercents(this.values.quarterSplit);
     }
@@ -324,6 +332,11 @@ export class EditGameDialogComponent implements OnChanges {
     }
     this.clearGame.emit();
     this.close();
+  }
+
+  pickGroup(choice: GroupChoice): void {
+    if (inGroup(choice)) this.draft.showInOpenBoards = true;
+    this.draft.group = choice;
   }
 
   save(): void {

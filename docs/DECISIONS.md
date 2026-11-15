@@ -4,6 +4,14 @@ This file records product and design decisions, newest first. To add one, put a 
 
 ---
 
+## D-036 · A game in a group always shows in that group's More tab
+
+- **Date:** Nov 15 2026
+- **Decision:** When a host or co-host picks a group for a game (Create game, Edit game on the game page or the dashboard, or the co-host's Edit game), Show in my open boards turns on and stays locked on, with the hint "Games in a group always show in open boards." Picking No group unlocks the switch and keeps it on. Deleting a group moves its games to No group with the switch as it was. A game filed in a group earlier with the switch off opens in Edit game with it on, and saves it on; `scripts/show-grouped-games.mjs` fixes the rest in one go. The app holds this rule (the Group picker and `GameGroupsService.fileBoard`), not the database rules. Builds on D-031. Paul's words, relayed: "If a game is assigned a group then it should automatically be made public. Where it's viewable with other games within that group." and "Lock it on".
+- **Options considered:** switch turns on but stays editable (built first, Nov 15, then replaced by Paul's "Lock it on")
+- **Why:** a grouped game that stays out of More can't be found from the group's other games, which is what the group is for
+- **Decided by:** Paul
+
 ## D-035 · Group picker joins the Search and New board row
 
 - **Date:** Nov 15 2026

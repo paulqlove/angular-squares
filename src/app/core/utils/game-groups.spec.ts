@@ -1,4 +1,4 @@
-import { cleanGroupName, deleteGroupMessage, deleteGroupUpdates, gameCountLabel, gamesInGroup, groupChanged, groupCounts, groupOf, parseGroups, pickerValue } from './game-groups';
+import { cleanGroupName, deleteGroupMessage, deleteGroupUpdates, gameCountLabel, gamesInGroup, groupChanged, groupCounts, groupOf, inGroup, parseGroups, pickerValue } from './game-groups';
 
 const CHURCH = 'ChurchGroupKey000001';
 const WORK = 'WorkGroupKey00000001';
@@ -89,5 +89,18 @@ describe('group picker', () => {
     expect(groupChanged(groups, NONE, { groupId: CHURCH })).toBe(true);
     expect(groupChanged(groups, CHURCH, { groupId: null })).toBe(true);
     expect(groupChanged(groups, NONE, { groupId: null, newName: 'Gym' })).toBe(true);
+  });
+});
+
+describe('inGroup', () => {
+  it('is true on a group, or on a new group once it has a name', () => {
+    expect(inGroup({ groupId: CHURCH })).toBe(true);
+    expect(inGroup({ groupId: null, newName: 'Gym' })).toBe(true);
+  });
+
+  it('is false on No group, a new group with no name yet, or no picker', () => {
+    expect(inGroup({ groupId: null })).toBe(false);
+    expect(inGroup({ groupId: null, newName: '  ' })).toBe(false);
+    expect(inGroup(undefined)).toBe(false);
   });
 });

@@ -80,6 +80,7 @@ A Season Pass host can sort boards into groups (Church, Work). A board's **More*
 - `games/{id}/openListId`: the list this board belongs to, either one of its owner's group ids or the owner's `ungrouped` key. The rule checks it against the owner's `groupLists` as they stand after the write, so deleting a group and moving its boards to No group can go in one update.
 - `openLists/{listId}/{boardId}` = the board's ownerId, present while **Show in my open boards** is on. Anyone can read one list if they know its key (a board link shows only its own key), nobody can list `openLists`. Only the board's owner or co-host can add or remove the entry, and only in the list the board points at. The value must be the board's owner, so the app can drop entries a stranger copied into a list.
 - Why: `openBoards/{ownerId}` was readable by anyone holding one board link, because every board shows its ownerId. That exposed every open board of the host. `openBoards` stays for now so older app builds keep working; it is removed after the one-time move (see `scripts/migrate-open-lists.mjs`).
+- A board in a group is always shown in its More tab (D-036). The app enforces this, not the rules: `.validate` never runs on a delete, so a rule can't stop the switch or the list entry from being cleared.
 - A host could create a group id equal to someone else's (ids are not globally claimed). The `openLists` value check plus the app's owner filter keep such entries out of another host's More tab.
 
 Deploy these rules before the app that writes them.
