@@ -1,5 +1,8 @@
 import type { BoardSize, GameData } from '../services/game.service';
 
+/** The More tab shows at most this many boards. */
+export const OPEN_ROWS_SHOWN = 10;
+
 export interface OpenBoardRow {
   id: string;
   name: string;
@@ -34,4 +37,18 @@ export function openBoardRows(games: (GameData | null)[], excludeId: string, own
     });
   }
   return rows.sort((a, b) => b.open - a.open);
+}
+
+/**
+ * Reads listed boards a page at a time until there are enough to show, so locked, full or
+ * finished boards early in a host's list can't hide the open ones after them.
+ */
+export async function findOpenBoardRows(ids: string[], read: (id: string) => Promise<GameData | null>, excludeId: string, ownerId: string): Promise<OpenBoardRow[]> {
+  const games: (GameData | null)[] = [];
+  let rows: OpenBoardRow[] = [];
+  for (let start = 0; start < ids.length && rows.length < OPEN_ROWS_SHOWN; start += OPEN_ROWS_SHOWN) {
+    games.push(...await Promise.all(ids.slice(start, start + OPEN_ROWS_SHOWN).map(read)));
+    rows = openBoardRows(games, excludeId, ownerId);
+  }
+  return rows.slice(0, OPEN_ROWS_SHOWN);
 }
