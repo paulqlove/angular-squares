@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { get, ref, set, update } from 'firebase/database';
 import { GameGroup, GroupChoice, GroupedBoard, cleanGroupName, deleteGroupUpdates, parseGroups } from '../utils/game-groups';
 import { GroupCoHost, groupCoHostUpdates, validCoHost } from '../utils/group-cohost';
-import { fileBoardUpdates, newListKey } from '../utils/open-lists';
+import { fileBoardUpdates, isListKey, newListKey } from '../utils/open-lists';
 import { AuthService } from './auth.service';
 import { BoardSettingsService } from './board-settings.service';
 import { GameDatabaseService } from './game-database.service';
@@ -31,6 +31,16 @@ export class GameGroupsService {
     } catch {
       return [];
     }
+  }
+
+  /**
+   * Which list each board is filed in (`games/{id}/openListId`: a group or the No group key), one small field per
+   * board, read together. A board with none, or whose read fails, is left out.
+   */
+  public async listIdsOf(boardIds: string[]): Promise<Map<string, string>> {
+    if (!this.database.isBrowser) return new Map();
+    const ids = await Promise.all(boardIds.map(id => this.read(`games/${id}/openListId`).catch(() => null)));
+    return new Map(boardIds.flatMap((id, i) => isListKey(ids[i]) ? [[id, ids[i]] as [string, string]] : []));
   }
 
   /** Makes a group, with its co-host when one is given (Create game's new group), in one write. */

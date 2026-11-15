@@ -5,8 +5,8 @@ import { heroPlus } from '@ng-icons/heroicons/outline';
 
 import { CardMenuComponent, CardMenuItem } from '../../../../components/ui/card-menu/card-menu.component';
 import { ModalComponent } from '../../../../components/ui/modal/modal.component';
-import { GROUP_NAME_MAX, gameCountLabel } from '../../../../core/utils/game-groups';
-import { CoHostSaved, DashboardGroupsService, GroupRow } from '../../services/dashboard-groups.service';
+import { GROUP_NAME_MAX, GroupRow, gameCountLabel } from '../../../../core/utils/game-groups';
+import { CoHostSaved, DashboardGroupsService } from '../../services/dashboard-groups.service';
 import { DashboardStore } from '../../services/dashboard.store';
 import { GroupCoHostFieldComponent } from './group-cohost-field.component';
 

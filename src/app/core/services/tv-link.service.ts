@@ -10,6 +10,9 @@ import { GameDatabaseService } from './game-database.service';
  * Share and TV links: the board link, the single-board TV link, and the rotating TV link
  * published under a random token. GameService delegates here.
  */
+/** The most boards one TV link holds (the database rules cap it). */
+export const MAX_TV_BOARDS = 20;
+
 @Injectable({
   providedIn: 'root'
 })
@@ -57,7 +60,7 @@ export class TvLinkService {
       await update(ref(this.database.db), { [`users/${userId}/tvToken`]: token, [`tvTokenOwners/${token}`]: userId });
     }
     await set(ref(this.database.db, `tvLinks/${token}`), {
-      boards: boardIds.slice(0, 20).join(','),
+      boards: boardIds.slice(0, MAX_TV_BOARDS).join(','),
       interval,
       updatedAt: Date.now()
     });
