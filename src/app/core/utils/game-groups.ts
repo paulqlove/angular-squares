@@ -1,3 +1,4 @@
+import type { GroupCoHost } from './group-cohost';
 import { OpenListTarget, fileBoardUpdates, isListKey } from './open-lists';
 
 /**
@@ -11,6 +12,8 @@ export interface GameGroup {
   id: string;
   name: string;
   createdAt: number;
+  /** The group's co-host, filled in on its games that have none. */
+  coHost?: GroupCoHost;
 }
 
 /** A board as the group writes see it: its list and whether it is shown in More. */
@@ -21,9 +24,9 @@ export interface GroupedBoard extends OpenListTarget {
 /** The owner's groups, oldest first, from the raw `groupLists/{ownerId}/groups` value. Bad entries are skipped. */
 export function parseGroups(raw: unknown): GameGroup[] {
   if (!raw || typeof raw !== 'object') return [];
-  return Object.entries(raw as Record<string, { name?: unknown; createdAt?: unknown }>)
+  return Object.entries(raw as Record<string, { name?: unknown; createdAt?: unknown; coHost?: { email?: unknown } }>)
     .filter(([id, g]) => isListKey(id) && typeof g?.name === 'string' && typeof g?.createdAt === 'number')
-    .map(([id, g]) => ({ id, name: g.name as string, createdAt: g.createdAt as number }))
+    .map(([id, g]) => ({ id, name: g.name as string, createdAt: g.createdAt as number, ...coHostOf(g.coHost) }))
     .sort((a, b) => a.createdAt - b.createdAt);
 }
 
@@ -99,4 +102,9 @@ export const GROUPED_SHOWN_HINT = 'Games in a group always show in open boards.'
  */
 export function inGroup(choice: GroupChoice | undefined): boolean {
   return !!choice?.groupId || !!cleanGroupName(choice?.newName ?? '');
+}
+
+/** The group's co-host, when the stored value has an email. */
+function coHostOf(raw: { email?: unknown } | undefined): { coHost?: GroupCoHost } {
+  return typeof raw?.email === 'string' && raw.email ? { coHost: { email: raw.email } } : {};
 }

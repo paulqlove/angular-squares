@@ -1053,6 +1053,28 @@ describe('game groups (groupLists, coHosts, openLists)', () => {
       await assertFails(set(owner(), 'groupLists/owner/other', 'x'));
     });
 
+    it('a Season Pass owner can set and remove a group\'s co-host, and give it to games in one write', async () => {
+      await assertSucceeds(set(owner(), `groupLists/owner/groups/${CHURCH}/coHost`, { email: 'dana@email.com' }));
+      await assertSucceeds(write(owner(), {
+        [`groupLists/owner/groups/${CHURCH}/coHost`]: { email: 'lee@email.com' },
+        [`${G}/managerId`]: '',
+        [`${G}/managerEmail`]: 'lee@email.com',
+        [`${G}/managerName`]: ''
+      }));
+      await assertSucceeds(set(owner(), `groupLists/owner/groups/${CHURCH}/coHost`, null));
+      await assertSucceeds(set(owner(), 'groupLists/owner/groups/newGroupKey00000000001', { ...group('Family'), coHost: { email: 'dana@email.com' } }));
+    });
+
+    it('a group\'s co-host needs a Season Pass, the owner, and an email', async () => {
+      await assertFails(set(cohost(), `groupLists/owner/groups/${CHURCH}/coHost`, { email: 'dana@email.com' }));
+      await assertFails(set(owner(), `groupLists/owner/groups/${CHURCH}/coHost`, { email: 'not an email' }));
+      await assertFails(set(owner(), `groupLists/owner/groups/${CHURCH}/coHost`, { email: `${'x'.repeat(250)}@a.co` }));
+      await assertFails(set(owner(), `groupLists/owner/groups/${CHURCH}/coHost`, { email: 'dana@email.com', uid: 'x' }));
+      await assertFails(set(owner(), `groupLists/owner/groups/${CHURCH}/coHost`, 'dana@email.com'));
+      await seed({ 'entitlements/owner': null });
+      await assertFails(set(owner(), `groupLists/owner/groups/${CHURCH}/coHost`, { email: 'dana@email.com' }));
+    });
+
     it('co-hosts and strangers cannot change the owner\'s groups', async () => {
       await assertFails(set(cohost(), 'groupLists/owner/groups/newGroupKey00000000001', group('Mine')));
       await assertFails(set(cohost(), `groupLists/owner/groups/${CHURCH}/name`, 'Mine'));

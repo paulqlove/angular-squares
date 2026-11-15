@@ -99,4 +99,14 @@ describe('GameGroupsService', () => {
     await expect(service.createGroup('o', 'Work')).rejects.toThrow('Preview only');
     expect(db.save).not.toHaveBeenCalled();
   });
+
+  it('sets a group\'s co-host and its games in one write', async () => {
+    await service.setGroupCoHost('o', CHURCH, { email: 'dana@email.com' }, { addTo: ['a'], clearFrom: [] });
+    expect(db.patch).toHaveBeenCalledWith({
+      [`groupLists/o/groups/${CHURCH}/coHost`]: { email: 'dana@email.com' },
+      'games/a/managerId': '', 'games/a/managerEmail': 'dana@email.com', 'games/a/managerName': ''
+    });
+    preview = true;
+    await expect(service.setGroupCoHost('o', CHURCH, null, { addTo: [], clearFrom: [] })).rejects.toThrow('Preview only');
+  });
 });

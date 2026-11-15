@@ -244,6 +244,11 @@
             ".validate": "newData.hasChildren(['name', 'createdAt'])",
             "name": { ".validate": "newData.isString() && newData.val().matches(/^ *[^ ]/) && newData.val().length <= 30" },
             "createdAt": { ".validate": "newData.isNumber() && newData.val() > 0" },
+            "coHost": {
+              ".validate": "newData.hasChildren(['email'])",
+              "email": { ".validate": "newData.isString() && newData.val().matches(/^[^ @]+@[^ @]+[.][^ @]+$/) && newData.val().length <= 254" },
+              "$other": { ".validate": false }
+            },
             "$other": { ".validate": false }
           }
         },
