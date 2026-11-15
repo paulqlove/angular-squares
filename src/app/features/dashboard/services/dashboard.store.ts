@@ -8,9 +8,10 @@ import { TeamLogoService } from '../../../core/services/team-logo.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { BoardGroup, groupBoards } from '../../../core/utils/board-groups';
 import { drawBoardNumbers } from '../../../core/utils/draw-numbers';
+import { gamesInGroup } from '../../../core/utils/game-groups';
 import { toGameListItem } from '../../../core/utils/game-parse';
 import { filterHostedGames } from './dashboard-filters';
-import { DashboardGroupsService } from './dashboard-groups.service';
+import { DashboardGroupsService, GroupRow } from './dashboard-groups.service';
 import { DashboardSearchService } from './dashboard-search.service';
 
 /**
@@ -25,6 +26,13 @@ export class DashboardStore {
   /** How a card comes in: a 160ms fade when the boards first load, then nothing, so search and Boards | Players feel instant. */
   public readonly cardEnter = signal<string>('qs-row-in');
   public readonly currentUser: Signal<AuthUser | null> = inject(AuthService).currentUser;
+  /** Hosted boards in the group picked in the group picker, or all of them under All groups. */
+  public readonly groupGames = computed<GameListItem[]>(() => gamesInGroup(this.myGames(), this.groups.picked()?.id));
+  /** The group picker shows once the owner has a group, or has a board and can make a group. */
+  public readonly groupPickerShows = computed<boolean>(() =>
+    !this.isLoadingGames() && (this.groups.groups().length > 0 || (this.groups.canEdit() && this.myGames().length > 0)));
+  /** Each of the owner's groups with how many hosted boards are filed in it. */
+  public readonly groupRows = computed<GroupRow[]>(() => this.groups.rows(this.myGames()));
   public readonly hostMenu: CardMenuItem[] = [{ id: 'edit', label: 'Edit game' }, { id: 'delete', label: 'Delete game', danger: true }];
   public readonly isLoadingGames = signal<boolean>(true);
   public readonly joinedGames = signal<GameListItem[]>([]);
@@ -37,10 +45,10 @@ export class DashboardStore {
   /** Every board this user hosts or co-hosts, in full, for the Players view. Newest first, hosted ones first. */
   public readonly runBoards = signal<GameData[]>([]);
   public readonly shareModalGameId = signal<string | null>(null);
-  /** Hosted boards matching the search, newest first. */
+  /** Hosted boards in the picked group matching the search, newest first. */
   public readonly visibleMyGames = computed<GameListItem[]>(() => {
     const search = this.search;
-    return filterHostedGames(this.myGames(), search.gameSearch(), !!search.codeMatch() || search.showCodeError(), {
+    return filterHostedGames(this.groupGames(), search.gameSearch(), !!search.codeMatch() || search.showCodeError(), {
       teamsOf: g => this.teamLogos.teams(g),
       groupNameOf: g => this.groups.nameOf(g)
     });

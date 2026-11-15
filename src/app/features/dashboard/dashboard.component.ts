@@ -27,6 +27,7 @@ import { DockAtEndDirective } from '../../shared/directives/dock-at-end.directiv
 import { CreateGameFormComponent } from '../create/create-game-form.component';
 import { EditGameDialogComponent } from '../super-bowl-squares/components/edit-game-dialog/edit-game-dialog.component';
 import { DashboardAdminPanelComponent } from './components/dashboard-admin-panel/dashboard-admin-panel.component';
+import { GroupMenuComponent } from './components/dashboard-groups/group-menu.component';
 import { DashboardHostingComponent } from './components/dashboard-hosting/dashboard-hosting.component';
 import { DashboardJoinedComponent } from './components/dashboard-joined/dashboard-joined.component';
 import { DashboardPhoneBarComponent } from './components/dashboard-phone-bar/dashboard-phone-bar.component';
@@ -52,7 +53,7 @@ import { PlayersViewService } from './services/players-view.service';
   imports: [
     ModalComponent, NgIconComponent, SiteHeaderComponent, SiteFooterComponent, DockAtEndDirective, ProfileMenuComponent, ShareDialogComponent,
     CreateGameFormComponent, EditGameDialogComponent, UpgradePassDialogComponent, DashboardAdminPanelComponent, DashboardHostingComponent,
-    DashboardJoinedComponent, DashboardPhoneBarComponent, DashboardSearchFieldComponent
+    DashboardJoinedComponent, DashboardPhoneBarComponent, DashboardSearchFieldComponent, GroupMenuComponent
   ],
   providers: [
     DashboardStore,

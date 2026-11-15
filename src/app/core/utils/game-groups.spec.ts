@@ -1,4 +1,4 @@
-import { cleanGroupName, deleteGroupMessage, deleteGroupUpdates, groupChanged, groupCounts, groupOf, parseGroups, inGroup, pickerValue } from './game-groups';
+import { cleanGroupName, deleteGroupMessage, deleteGroupUpdates, gameCountLabel, gamesInGroup, groupChanged, groupCounts, groupOf, inGroup, parseGroups, pickerValue } from './game-groups';
 
 const CHURCH = 'ChurchGroupKey000001';
 const WORK = 'WorkGroupKey00000001';
@@ -20,6 +20,20 @@ describe('game groups', () => {
     expect(cleanGroupName('  Church  ')).toBe('Church');
     expect(cleanGroupName('   ')).toBe('');
     expect(cleanGroupName('x'.repeat(40)).length).toBe(30);
+  });
+
+  it('narrows boards to the picked group, or keeps them all with no group picked', () => {
+    const boards = [{ id: 'a', ownerId: 'o', openListId: CHURCH }, { id: 'b', ownerId: 'o', openListId: WORK }, { id: 'c', ownerId: 'o' }];
+    expect(gamesInGroup(boards, CHURCH).map(b => b.id)).toEqual(['a']);
+    expect(gamesInGroup(boards, 'GoneGroupKey00000001')).toEqual([]);
+    expect(gamesInGroup(boards, null)).toBe(boards);
+    expect(gamesInGroup(boards, undefined)).toBe(boards);
+  });
+
+  it('labels a group\'s size', () => {
+    expect(gameCountLabel(1)).toBe('1 game');
+    expect(gameCountLabel(0)).toBe('0 games');
+    expect(gameCountLabel(2)).toBe('2 games');
   });
 
   it('counts boards per group and finds a board\'s group', () => {

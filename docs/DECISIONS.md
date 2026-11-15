@@ -4,12 +4,20 @@ This file records product and design decisions, newest first. To add one, put a 
 
 ---
 
-## D-035 · A game in a group always shows in that group's More tab
+## D-036 · A game in a group always shows in that group's More tab
 
 - **Date:** Nov 15 2026
 - **Decision:** When a host or co-host picks a group for a game (Create game, Edit game on the game page or the dashboard, or the co-host's Edit game), Show in my open boards turns on and stays locked on, with the hint "Games in a group always show in open boards." Picking No group unlocks the switch and keeps it on. Deleting a group moves its games to No group with the switch as it was. A game filed in a group earlier with the switch off opens in Edit game with it on, and saves it on; `scripts/show-grouped-games.mjs` fixes the rest in one go. The app holds this rule (the Group picker and `GameGroupsService.fileBoard`), not the database rules. Builds on D-031. Paul's words, relayed: "If a game is assigned a group then it should automatically be made public. Where it's viewable with other games within that group." and "Lock it on".
 - **Options considered:** switch turns on but stays editable (built first, Nov 15, then replaced by Paul's "Lock it on")
 - **Why:** a grouped game that stays out of More can't be found from the group's other games, which is what the group is for
+- **Decided by:** Paul
+
+## D-035 · Group picker joins the Search and New board row
+
+- **Date:** Nov 15 2026
+- **Decision:** The Groups chip row under Hosting (from D-031's dashboard work) goes away. From 640px up a 200px Group dropdown sits between Search and New board: folder icon, the current choice (All groups or the group's name) and a chevron; its menu lists All groups, each group with its game count, then Manage groups (Season Pass only), which opens the Groups sheet. On a phone a 48px icon-only folder button sits in the bottom bar between Games & codes and New board and opens a short Groups sheet with the same rows. A picked group fills the phone button ink, and a chip with the group's name and an x sits by the Hosting heading (just under it when the Boards | Players switch is there). Picking a group filters Hosting for real; search works inside it; Joined is never filtered. The picker shows only when the owner has a group or can make one. Mockups w1, w2, p1 to p3 from Creative. Paul's words, relayed: "The group redesign, I think should be moved in the same section as the search in Newboard on desktop and on mobile. And make it icon only on mobile." Approved: "Yeah, that works. Build that out and give me a preview link."
+- **Options considered:** not recorded
+- **Why:** not recorded beyond Paul's words above
 - **Decided by:** Paul
 
 ## D-034 · Season Pass hosts at the cap get a plain limit note
