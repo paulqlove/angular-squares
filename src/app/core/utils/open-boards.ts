@@ -13,11 +13,11 @@ export interface OpenBoardRow {
   totalPoints: number;
 }
 
-/** A host's boards a player on a full board can join: opted in, open squares, not locked. Most open first. */
-export function openBoardRows(games: (GameData | null)[], excludeId: string): OpenBoardRow[] {
+/** A host's boards a player on a full board can join: the same host, opted in, open squares, not locked. Most open first. */
+export function openBoardRows(games: (GameData | null)[], excludeId: string, ownerId: string): OpenBoardRow[] {
   const rows: OpenBoardRow[] = [];
   for (const g of games) {
-    if (!g || !g.id || g.id === excludeId || !g.showInOpenBoards || g.isLocked) continue;
+    if (!g || !g.id || g.id === excludeId || g.ownerId !== ownerId || !g.showInOpenBoards || g.isLocked) continue;
     const size: BoardSize = g.boardSize ?? 100;
     const taken = Object.keys(g.selectedSquares ?? {}).length;
     if (taken >= size) continue;

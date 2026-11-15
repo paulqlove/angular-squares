@@ -16,6 +16,7 @@ interface AppliedExtras {
   autoManage: GameListItem['autoManage'];
   maxSquaresPerPlayer: GameListItem['maxSquaresPerPlayer'];
   showInOpenBoards: boolean;
+  openListId: GameListItem['openListId'];
 }
 
 /** The fields the main save writes, sanitized. */
@@ -217,22 +218,21 @@ export class DashboardEditService {
 
   /** The open-boards switch, the squares limit and Auto-lock and draw save on their own, so a failure never loses the other edits. */
   private async saveExtras(game: GameListItem, v: EditGameValues, espnChanged: boolean): Promise<AppliedExtras> {
-    const showInOpenBoards = await this.saveShowInOpenBoards(game, v);
+    const shown = await this.saveShowInOpenBoards(game, v);
     const maxSquaresPerPlayer = await this.saveSquareLimit(game, v);
     const autoManage = await this.saveAutoManage(game, v, espnChanged);
-    return { showInOpenBoards, autoManage, maxSquaresPerPlayer };
+    return { ...shown, autoManage, maxSquaresPerPlayer };
   }
 
-  private async saveShowInOpenBoards(game: GameListItem, v: EditGameValues): Promise<boolean> {
-    const showApplied = !!game.showInOpenBoards;
-    const uid = this.store.currentUser()?.uid;
-    if (!uid || v.showInOpenBoards === showApplied) return showApplied;
+  private async saveShowInOpenBoards(game: GameListItem, v: EditGameValues): Promise<Pick<AppliedExtras, 'showInOpenBoards' | 'openListId'>> {
+    const unchanged = { showInOpenBoards: !!game.showInOpenBoards, openListId: game.openListId };
+    if (v.showInOpenBoards === unchanged.showInOpenBoards) return unchanged;
     try {
-      await this.gameService.setShowInOpenBoards(game.id, uid, v.showInOpenBoards);
-      return v.showInOpenBoards;
+      const openListId = await this.gameService.setShowInOpenBoards(game, v.showInOpenBoards);
+      return { showInOpenBoards: v.showInOpenBoards, openListId };
     } catch {
       this.toastService.warning('Saved, but Show in my open boards could not be changed. Try again in a moment.');
-      return showApplied;
+      return unchanged;
     }
   }
 

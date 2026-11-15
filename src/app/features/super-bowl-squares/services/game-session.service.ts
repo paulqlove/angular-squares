@@ -182,7 +182,7 @@ export class GameSessionService {
   private loadOpenBoards(): Promise<OpenBoardRow[]> {
     if (this.openBoardsFor !== this.state.gameId || !this.openBoardsLoad) {
       this.openBoardsFor = this.state.gameId;
-      this.openBoardsLoad = this.gameService.getOpenBoards(this.state.gameOwnerId, this.state.gameId).then(rows => {
+      this.openBoardsLoad = this.gameService.getOpenBoards({ id: this.state.gameId, ownerId: this.state.gameOwnerId, openListId: this.state.openListId }).then(rows => {
         this.state.openBoards.set(rows);
         return rows;
       });

@@ -4,6 +4,7 @@ import { Entitlement, EmptyQuarterRule, QuarterSplit } from '../plans';
 import type { AutoManageSettings } from '../utils/auto-manage';
 import { BoardSize, GameChange, GameData, SportType, TvLink } from '../utils/game-data';
 import type { OpenBoardRow } from '../utils/open-boards';
+import type { OpenListTarget } from '../utils/open-lists';
 import type { RecentVisit } from '../utils/recent-games';
 import { BoardSettingsService } from './board-settings.service';
 import { EntitlementService } from './entitlement.service';
@@ -121,8 +122,8 @@ export class GameService {
   }
 
   /** The same host's other boards a player on a full board can join. Empty on any error. */
-  public getOpenBoards(ownerId: string, excludeId: string): Promise<OpenBoardRow[]> {
-    return this.boardSettings.getOpenBoards(ownerId, excludeId);
+  public getOpenBoards(board: OpenListTarget): Promise<OpenBoardRow[]> {
+    return this.boardSettings.getOpenBoards(board);
   }
 
   public getRotationTvLink(token: string): string {
@@ -232,9 +233,9 @@ export class GameService {
     return this.seasonPass.setSeasonPassNoExpiry(email);
   }
 
-  /** The host turns "Show in my open boards" on or off for one board. */
-  public setShowInOpenBoards(gameId: string, ownerId: string, on: boolean): Promise<void> {
-    return this.boardSettings.setShowInOpenBoards(gameId, ownerId, on);
+  /** The host or co-host turns "Show in my open boards" on or off for one board. Returns the board's More list. */
+  public setShowInOpenBoards(board: OpenListTarget, on: boolean): Promise<string> {
+    return this.boardSettings.setShowInOpenBoards(board, on);
   }
 
   /** Sets or clears the most squares one name can claim on a board (Season Pass). */
