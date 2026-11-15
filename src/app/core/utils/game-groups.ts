@@ -86,6 +86,8 @@ export function deleteGroupMessage(count: number): string {
 export interface GroupChoice {
   groupId: string | null;
   newName?: string;
+  /** Create game: the new group's co-host email, as typed. */
+  newCoHost?: string;
 }
 
 /** The picker's starting value: the board's group, or null for No group (also for a group that was deleted). */

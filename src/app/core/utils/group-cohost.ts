@@ -40,6 +40,12 @@ export function looksLikeEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+/** The typed email, cleaned, when it looks like an email; otherwise undefined (a bad one is never saved). */
+export function validCoHost(typed: string | undefined): string | undefined {
+  const email = cleanCoHostEmail(typed ?? '');
+  return looksLikeEmail(email) ? email : undefined;
+}
+
 /** True when the game has a co-host, picked from its players (uid) or typed by email. */
 export function hasCoHost(board: Pick<CoHostedBoard, 'managerId' | 'managerEmail'>): boolean {
   return !!board.managerId || !!board.managerEmail;
@@ -105,6 +111,20 @@ export function removeCoHostQuestion(who: string, groupName: string, count: numb
     confirmLabel: `Remove from ${count}`,
     cancelLabel: 'Keep on games'
   };
+}
+
+/** "dana" from dana@email.com: the short name on Edit game's Use button. */
+export function emailShortName(email: string): string {
+  return email.split('@')[0] || email;
+}
+
+/**
+ * Create game's Co-host after a group pick (K3): the group's co-host fills the field, unless the host typed their
+ * own first. `filled` is what an earlier pick put there, so switching groups swaps it. Returns the field and what was filled.
+ */
+export function fillCoHost(typed: string, filled: string | null, groupEmail: string | undefined): { value: string; filled: string | null } {
+  if (typed.trim() && typed !== filled) return { value: typed, filled: null };
+  return groupEmail ? { value: groupEmail, filled: groupEmail } : { value: '', filled: null };
 }
 
 function managerUpdates(gameId: string, email: string): Record<string, string> {

@@ -121,4 +121,27 @@ describe('CreateGameFormComponent', () => {
     expect(c.newGameShowInOpenBoards).toBe(true);
     expect(c.grouped()).toBe(false);
   });
+
+  it('fills Co-host from the picked group, keeps one typed first, and says where it came from', () => {
+    const c = setup();
+    c.groups = [{ id: 'ChurchGroupKey000001', name: 'Church', createdAt: 1, coHost: { email: 'dana@email.com' } }, { id: 'WorkGroupKey00000001', name: 'Work', createdAt: 2 }];
+    c.pickGroup({ groupId: 'ChurchGroupKey000001' });
+    expect(c.newGamePaymentManager).toBe('dana@email.com');
+    expect(c.coHostHint()).toBe('From Church. Change it for just this game.');
+    c.pickGroup({ groupId: 'WorkGroupKey00000001' });
+    expect(c.newGamePaymentManager).toBe('');
+    c.newGamePaymentManager = 'sam@email.com';
+    c.pickGroup({ groupId: 'ChurchGroupKey000001' });
+    expect(c.newGamePaymentManager).toBe('sam@email.com');
+    expect(c.coHostHint()).toBe('A co-host can help manage players.');
+  });
+
+  it('a new group\'s co-host fills an empty Co-host as it is typed', () => {
+    const c = setup();
+    c.pickGroup({ groupId: null, newName: 'Gym', newCoHost: 'lee' });
+    expect(c.newGamePaymentManager).toBe('');
+    c.pickGroup({ groupId: null, newName: 'Gym', newCoHost: 'lee@email.com' });
+    expect(c.newGamePaymentManager).toBe('lee@email.com');
+    expect(c.coHostHint()).toBe('From Gym. Change it for just this game.');
+  });
 });

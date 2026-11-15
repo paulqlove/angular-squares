@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { get, ref, set, update } from 'firebase/database';
 import { GameGroup, GroupChoice, GroupedBoard, cleanGroupName, deleteGroupUpdates, parseGroups } from '../utils/game-groups';
-import { GroupCoHost, groupCoHostUpdates } from '../utils/group-cohost';
+import { GroupCoHost, groupCoHostUpdates, validCoHost } from '../utils/group-cohost';
 import { fileBoardUpdates, newListKey } from '../utils/open-lists';
 import { AuthService } from './auth.service';
 import { BoardSettingsService } from './board-settings.service';
@@ -33,11 +33,17 @@ export class GameGroupsService {
     }
   }
 
-  public async createGroup(ownerId: string, name: string): Promise<GameGroup> {
+  /** Makes a group, with its co-host when one is given (Create game's new group), in one write. */
+  public async createGroup(ownerId: string, name: string, coHost?: GroupCoHost): Promise<GameGroup> {
     this.guardWrite();
     const group: GameGroup = { id: newListKey(), name, createdAt: Date.now() };
-    await this.save(`groupLists/${ownerId}/groups/${group.id}`, { name: group.name, createdAt: group.createdAt });
-    return group;
+    const stored = { name: group.name, createdAt: group.createdAt };
+    if (!coHost) {
+      await this.save(`groupLists/${ownerId}/groups/${group.id}`, stored);
+      return group;
+    }
+    await this.patch({ [`groupLists/${ownerId}/groups/${group.id}`]: stored, [`groupCoHosts/${ownerId}/${group.id}`]: coHost });
+    return { ...group, coHost };
   }
 
   /** Renames in place: every board in the group keeps pointing at the same id, so nothing else changes. */
@@ -80,7 +86,8 @@ export class GameGroupsService {
    */
   public async saveChoice(board: GroupedBoard, choice: GroupChoice): Promise<{ listId: string; created?: GameGroup }> {
     const name = cleanGroupName(choice.newName ?? '');
-    const created = name ? await this.createGroup(board.ownerId, name) : undefined;
+    const email = validCoHost(choice.newCoHost);
+    const created = name ? await this.createGroup(board.ownerId, name, email ? { email } : undefined) : undefined;
     const listId = await this.fileBoard(board, created?.id ?? choice.groupId);
     return { listId, created };
   }

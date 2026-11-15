@@ -1,7 +1,7 @@
 import { parseGroups } from './game-groups';
 import {
-  cleanCoHostEmail, coHostLabel, coHostPlan, coHostPlanLines, coHostSaveLabel, gamesWithCoHost, groupCoHostUpdates, hasCoHost, looksLikeEmail,
-  removeCoHostQuestion
+  cleanCoHostEmail, coHostLabel, emailShortName, fillCoHost, coHostPlan, coHostPlanLines, coHostSaveLabel, gamesWithCoHost, groupCoHostUpdates, hasCoHost, looksLikeEmail,
+  removeCoHostQuestion, validCoHost
 } from './group-cohost';
 
 const CHURCH = 'ChurchGroupKey000001';
@@ -64,5 +64,20 @@ describe('group co-host', () => {
       'games/c/managerId': '', 'games/c/managerEmail': '', 'games/c/managerName': ''
     });
     expect(groupCoHostUpdates('o', CHURCH, null, { addTo: [], clearFrom: [] })).toEqual({ [`groupCoHosts/o/${CHURCH}`]: null });
+  });
+
+  it('fills Create game\'s Co-host from a group unless the host typed their own', () => {
+    expect(fillCoHost('', null, 'dana@email.com')).toEqual({ value: 'dana@email.com', filled: 'dana@email.com' });
+    expect(fillCoHost('dana@email.com', 'dana@email.com', 'lee@email.com')).toEqual({ value: 'lee@email.com', filled: 'lee@email.com' });
+    expect(fillCoHost('dana@email.com', 'dana@email.com', undefined)).toEqual({ value: '', filled: null });
+    expect(fillCoHost('sam@email.com', null, 'dana@email.com')).toEqual({ value: 'sam@email.com', filled: null });
+    expect(emailShortName('dana@email.com')).toBe('dana');
+  });
+
+  it('keeps only an email that looks like one', () => {
+    expect(validCoHost(' lee@email.com ')).toBe('lee@email.com');
+    expect(validCoHost('lee')).toBeUndefined();
+    expect(validCoHost('')).toBeUndefined();
+    expect(validCoHost(undefined)).toBeUndefined();
   });
 });
