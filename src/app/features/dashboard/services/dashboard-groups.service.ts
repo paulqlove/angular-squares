@@ -5,6 +5,14 @@ import { GameGroupsService } from '../../../core/services/game-groups.service';
 import { PlanService } from '../../../core/services/plan.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { GameGroup, GroupChoice, GroupedBoard, cleanGroupName, deleteGroupMessage, groupChanged, groupCounts, groupOf } from '../../../core/utils/game-groups';
+import { CoHostedBoard, cleanCoHostEmail, coHostPlan, gamesWithCoHost, removeCoHostQuestion } from '../../../core/utils/group-cohost';
+
+/** What saving a group's co-host did to the owner's games, so the caller can update its list. */
+export interface CoHostSaved {
+  email: string;
+  addTo: string[];
+  clearFrom: string[];
+}
 
 /** A group with how many of the owner's games are filed in it, for the group pickers and the Groups sheet. */
 export interface GroupRow extends GameGroup {
@@ -23,6 +31,8 @@ export class DashboardGroupsService {
   public readonly canEdit = computed<boolean>(() => this.planService.features().gameGroups);
   /** In the Groups sheet: 'new' while naming a new group, a group id while renaming it, else null. */
   public readonly editing = signal<string | null>(null);
+  /** In the Groups sheet: the group whose co-host field is open, else null. */
+  public readonly editingCoHost = signal<string | null>(null);
   public readonly groups = signal<GameGroup[]>([]);
   /** The group Hosting is narrowed to, or undefined for All groups. A group deleted while picked falls back to All groups. */
   public readonly picked = computed<GameGroup | undefined>(() => this.groups().find(g => g.id === this.pickedId()));
@@ -98,6 +108,32 @@ export class DashboardGroupsService {
   }
 
   /**
+   * Saves a group's co-host from the Groups sheet (K2). An email gives it to the group's games with no co-host.
+   * An empty field removes it, and asks whether to clear it from the games that have it. Never replaces a game's own co-host.
+   * Returns what changed, or null when nothing was saved.
+   */
+  public async saveCoHost(ownerId: string, group: GameGroup, typed: string, boards: CoHostedBoard[]): Promise<CoHostSaved | null> {
+    const email = cleanCoHostEmail(typed);
+    if (this.saving() || (!email && !group.coHost)) {
+      this.editingCoHost.set(null);
+      return null;
+    }
+    const games = email ? { addTo: coHostPlan(boards, group.id, email).adds.map(b => b.id), clearFrom: [] } : await this.removeFrom(group, boards);
+    this.saving.set(true);
+    try {
+      await this.gameGroups.setGroupCoHost(ownerId, group.id, email ? { email } : null, games);
+      this.groups.update(groups => groups.map(g => g.id === group.id ? { ...g, coHost: email ? { email } : undefined } : g));
+      this.editingCoHost.set(null);
+      return { email, ...games };
+    } catch {
+      this.toastService.error('Could not save the co-host. Try again.');
+      return null;
+    } finally {
+      this.saving.set(false);
+    }
+  }
+
+  /**
    * Asks, then deletes a group and moves its games to No group. Returns the No group key the games moved to,
    * so the caller can update its list, or null when the owner said no or the delete failed.
    */
@@ -113,6 +149,15 @@ export class DashboardGroupsService {
       this.toastService.error('Could not delete the group. Try again.');
       return null;
     }
+  }
+
+  /** Removing the group's co-host: asks whether to clear it from the games that have it too. No asks clears none. */
+  private async removeFrom(group: GameGroup, boards: CoHostedBoard[]): Promise<{ addTo: string[]; clearFrom: string[] }> {
+    const email = group.coHost?.email ?? '';
+    const having = gamesWithCoHost(boards, group.id, email);
+    if (!having.length) return { addTo: [], clearFrom: [] };
+    const yes = await this.confirmService.ask({ ...removeCoHostQuestion(email, group.name, having.length), tone: 'primary' });
+    return { addTo: [], clearFrom: yes ? having.map(b => b.id) : [] };
   }
 
   private readonly confirmService: ConfirmService = inject(ConfirmService);

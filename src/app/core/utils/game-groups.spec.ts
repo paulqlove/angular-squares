@@ -55,6 +55,7 @@ describe('game groups', () => {
     ]);
     expect(updates).toEqual({
       [`groupLists/o/groups/${CHURCH}`]: null,
+      [`groupCoHosts/o/${CHURCH}`]: null,
       'games/a/openListId': NONE,
       'games/a/showInOpenBoards': true,
       [`openLists/${NONE}/a`]: 'o',

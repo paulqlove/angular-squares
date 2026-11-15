@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { get, ref, set, update } from 'firebase/database';
 import { GameGroup, GroupChoice, GroupedBoard, cleanGroupName, deleteGroupUpdates, parseGroups } from '../utils/game-groups';
+import { GroupCoHost, groupCoHostUpdates } from '../utils/group-cohost';
 import { fileBoardUpdates, newListKey } from '../utils/open-lists';
 import { AuthService } from './auth.service';
 import { BoardSettingsService } from './board-settings.service';
@@ -14,11 +15,19 @@ import { GameDatabaseService } from './game-database.service';
   providedIn: 'root'
 })
 export class GameGroupsService {
-  /** The owner's groups, oldest first. Empty on any error or for a reader the rules turn away. */
+  /**
+   * The owner's groups, oldest first. Empty on any error or for a reader the rules turn away. Each group's co-host
+   * is read only for the owner: co-hosts get the groups without them, as the rules allow.
+   */
   public async getGroups(ownerId: string): Promise<GameGroup[]> {
     if (!this.database.isBrowser || !ownerId) return [];
     try {
-      return parseGroups(await this.read(`groupLists/${ownerId}/groups`));
+      const isOwner = this.authService.currentUser()?.uid === ownerId;
+      const [groups, coHosts] = await Promise.all([
+        this.read(`groupLists/${ownerId}/groups`),
+        isOwner ? this.read(`groupCoHosts/${ownerId}`).catch(() => null) : null
+      ]);
+      return parseGroups(groups, coHosts);
     } catch {
       return [];
     }
@@ -35,6 +44,15 @@ export class GameGroupsService {
   public async renameGroup(ownerId: string, groupId: string, name: string): Promise<void> {
     this.guardWrite();
     await this.save(`groupLists/${ownerId}/groups/${groupId}/name`, name);
+  }
+
+  /**
+   * Sets a group's co-host (null removes it) in one write, giving it to the games in `addTo` and clearing it
+   * from the games in `clearFrom`. The caller picks the games (group-cohost utils), so no game's own co-host is replaced.
+   */
+  public async setGroupCoHost(ownerId: string, groupId: string, coHost: GroupCoHost | null, games: { addTo: string[]; clearFrom: string[] }): Promise<void> {
+    this.guardWrite();
+    await this.patch(groupCoHostUpdates(ownerId, groupId, coHost, games));
   }
 
   /** Deletes a group and moves its boards to No group in one write. `boards` are the owner's boards. Returns the No group key. */
