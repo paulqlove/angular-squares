@@ -5,15 +5,16 @@
       <span class="qs-label whitespace-nowrap text-qs-muted" [class.max-sm:hidden]="players.available()">{{ countLabel() }}</span>
     }
   </div>
+  <!-- Boards | Players stays pinned at the right edge on both tabs; Grid / Compact comes and goes to its left -->
   <div class="flex shrink-0 items-center gap-2">
+    @if (!players.active()) {
+      <div appDashboardViewToggle role="group" aria-label="Card view" class="hidden gap-0.5 sm:flex"></div>
+    }
     @if (players.available()) {
       <div class="qs-seg" role="group" aria-label="Show">
         <button type="button" [attr.aria-pressed]="!players.active()" (click)="players.mode.set('boards')">Boards</button>
         <button type="button" [attr.aria-pressed]="players.active()" (click)="players.mode.set('players')">Players</button>
       </div>
-    }
-    @if (!players.active()) {
-      <div appDashboardViewToggle role="group" aria-label="Card view" class="hidden gap-0.5 sm:flex"></div>
     }
   </div>
 </div>

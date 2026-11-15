@@ -8,6 +8,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { GameService } from '../../../core/services/game.service';
 import { miniCellClass, miniGridCells, miniGridClass } from '../../../core/utils/mini-grid';
 import { YourGameRow, forgetRecentVisit, pickYourGameIds, readRecentVisits, toYourGameRow } from '../../../core/utils/recent-games';
+import { PHONE_QUERY } from '../../../shared/media-queries';
 import { ModalComponent } from '../modal/modal.component';
 
 /** How many games the menu lists. */
@@ -229,7 +230,7 @@ export class YourGamesMenuComponent {
     // Reopened mid-close: the panel turns back from where it is, and the reset that waited for the exit is dropped
     clearTimeout(this.closeTimer);
     this.closing.set(false);
-    this.phone.set(typeof window !== 'undefined' && !!window.matchMedia?.('(max-width: 639.98px)').matches);
+    this.phone.set(typeof window !== 'undefined' && !!window.matchMedia?.(PHONE_QUERY).matches);
     this.originX.set((this.trigger()?.nativeElement.offsetWidth ?? 120) / 2);
     this.open.set(true);
     setTimeout(() => this.focusFirst());

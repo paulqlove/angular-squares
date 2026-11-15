@@ -1,8 +1,8 @@
 import { Directive, OnDestroy, PLATFORM_ID, afterNextRender, effect, inject, input, signal, untracked } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
-/** Phones only: the floating bottom bars dock from this width down. */
-const PHONE_QUERY = '(max-width: 639.98px)';
+import { PHONE_QUERY } from '../media-queries';
+
 /** On <html> while a bar is docked, so the browser's own strip under the page (Chrome's bottom chin) takes the bar's colour. */
 const ROOT_CLASS = 'qs-bar-docked';
 /**
