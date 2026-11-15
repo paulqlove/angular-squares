@@ -25,7 +25,7 @@
 <!-- From 640px: the games float over the cards below, under this card's arrow. -->
 @if (isOpen()) {
   <div class="qs-card qs-panel hidden sm:block" [class.qs-panel-wide]="wide()" [class.qs-panel-grow-right]="growsRight()" role="region"
-    [attr.aria-label]="player().name + '’s games'" animate.enter="qs-panel-in" animate.leave="qs-panel-out">
+    [attr.aria-label]="player().name + '’s games'" animate.enter="qs-menu-enter" animate.leave="qs-menu-leave">
     <div appPlayerGames [player]="player()"></div>
   </div>
 }

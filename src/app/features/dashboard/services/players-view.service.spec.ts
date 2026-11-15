@@ -130,6 +130,17 @@ describe('PlayersViewService', () => {
     }
   });
 
+  it('marks a panel opened straight from another open card as a switch, and a fresh open or a close as none', () => {
+    const view = TestBed.inject(PlayersViewService);
+    view.toggleOpen('dana-uid');
+    expect(view.panelSwitch()).toBe(false);
+    view.toggleOpen('other-uid');
+    expect(view.panelSwitch()).toBe(true);
+    view.toggleOpen('other-uid');
+    expect(view.openKey()).toBeNull();
+    expect(view.panelSwitch()).toBe(false);
+  });
+
   it('keeps an open card in its group until it closes', async () => {
     runBoards.update(boards => boards.map(b => ({ ...b, paidPlayers: ['Dana'], paidSquares: [2] })));
     const view = TestBed.inject(PlayersViewService);
