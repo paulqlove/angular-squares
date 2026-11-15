@@ -187,6 +187,13 @@ describe('YourGamesMenuComponent', () => {
     expect(document.activeElement?.getAttribute('aria-label')).toBe('Your games');
     el.remove();
   });
+  it('keeps the header button\'s arrow off phones by hiding its wrapper, since ng-icon sets its own display', async () => {
+    const fixture = await setup();
+    const arrow = (fixture.nativeElement as HTMLElement).querySelector('button[aria-label="Your games"] ng-icon[name="heroChevronDown"]')!;
+    expect(arrow.classList).not.toContain('hidden');
+    expect(arrow.parentElement!.classList).toContain('hidden');
+    expect(arrow.parentElement!.classList).toContain('sm:inline-flex');
+  });
   it('hides its header button on phones when another control opens it, and says what opened it on My dashboard', async () => {
     const fixture = await setup();
     const menu = fixture.componentInstance;
