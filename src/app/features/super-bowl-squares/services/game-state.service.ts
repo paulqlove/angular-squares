@@ -37,7 +37,7 @@ export class GameStateService {
   /** Paid players who hold no squares beyond what the host confirmed; the page shows these as Confirmed. */
   public confirmedPlayers: Set<string> = new Set();
   /** When the board was made: the winners picture's date for boards not linked to a live game. */
-  public createdAt: number | null = null;
+  public createdAt: number = 0;
   /** The name this viewer plays as, sanitized. PlayerNameService owns the rules for changing it. */
   public currentPlayerName: string = '';
   /** The board whose data is on screen. On a switch gameId moves first and this follows when the new board's data lands,
@@ -142,7 +142,7 @@ export class GameStateService {
   /** First half of a game snapshot: the board itself (squares, numbers, scores, lock state and limits). */
   public applyCoreData(data: GameData): void {
     this.gameName = data.name || 'Football Squares';
-    this.createdAt = typeof data.createdAt === 'number' ? data.createdAt : null;
+    this.createdAt = data.createdAt;
     this.gameOwnerId = data.ownerId || '';
     this.boardSize = data.boardSize || 100;
     const { rows, cols } = getBoardDimensions(this.boardSize);

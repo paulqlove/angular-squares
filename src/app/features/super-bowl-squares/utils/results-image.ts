@@ -7,7 +7,6 @@ import { ResultRow, ResultsSummary } from './results';
  */
 export async function drawResultsImage(summary: ResultsSummary): Promise<Blob> {
   const [, logo] = await Promise.all([loadFonts(), loadLogo()]);
-  cachedLogo = logo;
   const canvas = document.createElement('canvas');
   canvas.width = SIZE;
   canvas.height = SIZE;
@@ -42,6 +41,8 @@ const C = {
 };
 const SANS = '"Space Grotesk", "Segoe UI", system-ui, sans-serif';
 const MONO = '"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace';
+/** Letter spacing of the mono caps labels, in px. */
+const LABEL_SPACING = 3;
 
 let cachedLogo: HTMLImageElement | null = null;
 
@@ -89,7 +90,7 @@ function paintCard(ctx: CanvasRenderingContext2D): void {
 function paintHeader(ctx: CanvasRenderingContext2D, s: ResultsSummary): void {
   const muted: LabelStyle = { color: C.tileMuted, align: 'left', size: 20, weight: '500' };
   label(ctx, s.date, { x: RIGHT, y: CARD.y + 49 }, { ...muted, align: 'right' });
-  const dateW = s.date ? measure(ctx, s.date, `500 20px ${MONO}`, 3) + 24 : 0;
+  const dateW = s.date ? measure(ctx, s.date, `500 20px ${MONO}`, LABEL_SPACING) + 24 : 0;
   label(ctx, `FINAL · ${s.title.toUpperCase()}`, { x: LEFT, y: CARD.y + 49 }, { ...muted, max: RIGHT - LEFT - dateW });
 
   const scoreY = CARD.y + 149;
@@ -188,9 +189,9 @@ function partsWidth(ctx: CanvasRenderingContext2D, parts: Part[], font: string):
 
 /** Mono caps with the site's letter spacing. */
 function label(ctx: CanvasRenderingContext2D, value: string, at: Point, style: LabelStyle): void {
-  setSpacing(ctx, '3px');
+  setSpacing(ctx, `${LABEL_SPACING}px`);
   // Spacing adds a gap after the last letter, so right-aligned labels shift right by one gap to line up with the edge
-  const x = style.align === 'right' ? at.x + 3 : at.x;
+  const x = style.align === 'right' ? at.x + LABEL_SPACING : at.x;
   text(ctx, value, { x, y: at.y }, { font: `${style.weight} ${style.size}px ${MONO}`, color: style.color, align: style.align, max: style.max ?? 900 });
   setSpacing(ctx, '0px');
 }
@@ -255,6 +256,7 @@ async function loadLogo(): Promise<HTMLImageElement | null> {
     const img = new Image();
     img.src = '/assets/brand/lockup-horizontal.svg';
     await img.decode();
+    cachedLogo = img;
     return img;
   } catch {
     return null;

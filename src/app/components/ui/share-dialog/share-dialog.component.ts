@@ -5,7 +5,7 @@ import { ModalComponent } from '../modal/modal.component';
 import { GameService } from '../../../core/services/game.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { browserShareEnv, copyText, shareInvite } from './share-invite.utils';
-import { browserWinnersEnv, shareButtonLabel, shareWinners, winnersFileName } from './share-winners.utils';
+import { browserWinnersEnv, shareButtonLabel, shareWinners as sharePicture, winnersFileName } from './share-winners.utils';
 
 type CopyTarget = 'code' | 'image' | 'link' | 'tv';
 
@@ -135,10 +135,10 @@ export class ShareDialogComponent implements OnChanges {
     if (result === 'failed') this.toast.error(`Couldn't copy. The link is ${this.link}`);
   }
 
-  /** No await before shareWinners: on desktop the clipboard write has to start inside the tap. */
+  /** No await before sharePicture: on desktop the clipboard write has to start inside the tap. */
   async shareWinners(): Promise<void> {
     const image = this.picture ?? this.drawPicture();
-    const result = await shareWinners({ image, ready: this.pictureReady, fileName: winnersFileName(this.gameId) }, browserWinnersEnv());
+    const result = await sharePicture({ image, ready: this.pictureReady, fileName: winnersFileName(this.gameId) }, browserWinnersEnv());
     if (result === 'copied') this.flashCopied('image');
     if (result === 'failed') this.toast.error("Couldn't make the winners picture. Try again.");
   }

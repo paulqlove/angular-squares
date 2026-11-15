@@ -1,7 +1,8 @@
+import type { BoardScores } from './board-math';
 import { buildInitials } from './initials.utils';
 
-type Quarter = 'q1' | 'q2' | 'q3' | 'q4';
-type Score = { home: number; away: number };
+type Quarter = keyof BoardScores;
+type Score = BoardScores[Quarter];
 
 /** One line of the Winners list on the winners picture. */
 export interface ResultRow {
