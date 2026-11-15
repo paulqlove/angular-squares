@@ -16,6 +16,7 @@ import type { OpenBoardRow } from '../../../core/utils/open-boards';
 import { normalizePlayerColors, PLAYER_COLORS } from '../utils/player-colors';
 import { quarterLabels, QuarterWin } from '../utils/quarter-labels';
 import { BoardLayout, BoardScores, emptyScores, lastPlayedQuarter, leaderSquare, playerStatsFor, quarterWins } from '../utils/board-math';
+import { buildResults, ResultsSummary } from '../utils/results';
 import type { PlayerStats } from '../types';
 
 /**
@@ -35,6 +36,8 @@ export class GameStateService {
   public boardSize: BoardSize = 100;
   /** Paid players who hold no squares beyond what the host confirmed; the page shows these as Confirmed. */
   public confirmedPlayers: Set<string> = new Set();
+  /** When the board was made: the winners picture's date for boards not linked to a live game. */
+  public createdAt: number = 0;
   /** The name this viewer plays as, sanitized. PlayerNameService owns the rules for changing it. */
   public currentPlayerName: string = '';
   /** The board whose data is on screen. On a switch gameId moves first and this follows when the new board's data lands,
@@ -139,6 +142,7 @@ export class GameStateService {
   /** First half of a game snapshot: the board itself (squares, numbers, scores, lock state and limits). */
   public applyCoreData(data: GameData): void {
     this.gameName = data.name || 'Football Squares';
+    this.createdAt = data.createdAt;
     this.gameOwnerId = data.ownerId || '';
     this.boardSize = data.boardSize || 100;
     const { rows, cols } = getBoardDimensions(this.boardSize);
@@ -266,6 +270,18 @@ export class GameStateService {
       gameOver: this.isGameOver(),
       linkedStatus: game?.status ?? null,
       period: game?.period ?? null
+    });
+  }
+
+  /** What the Share winners picture shows: the final score and each quarter's winner, square and score. */
+  public resultsSummary(): ResultsSummary {
+    return buildResults({
+      name: this.gameName,
+      awayTeam: this.awayTeam,
+      homeTeam: this.homeTeam,
+      date: this.linkedEspnGame()?.date ?? this.createdAt,
+      scores: this.scores,
+      winners: this.winners
     });
   }
 
