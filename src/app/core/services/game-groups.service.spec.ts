@@ -69,6 +69,21 @@ describe('GameGroupsService', () => {
     expect(db.patch).toHaveBeenCalledTimes(2);
   });
 
+  it('makes a named new group before filing the board into it', async () => {
+    const result = await service.saveChoice({ id: 'a', ownerId: 'o', openListId: NONE, showInOpenBoards: true }, { groupId: null, newName: ' Gym ' });
+    expect(result.created?.name).toBe('Gym');
+    expect(result.listId).toBe(result.created?.id);
+    const updates = db.patch.mock.calls[0][0] as Record<string, unknown>;
+    expect(updates[`openLists/${result.listId}/a`]).toBe('o');
+    expect(updates[`openLists/${NONE}/a`]).toBeNull();
+  });
+
+  it('marks and unmarks a co-host under the owner', async () => {
+    await service.setCoHost('o', 'c', true);
+    await service.setCoHost('o', 'c', false);
+    expect(db.save.mock.calls).toEqual([['coHosts/o/c', true], ['coHosts/o/c', null]]);
+  });
+
   it('writes nothing while the admin previews another role', async () => {
     preview = true;
     await expect(service.createGroup('o', 'Work')).rejects.toThrow('Preview only');

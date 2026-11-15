@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroArrowPath, heroLockClosed, heroLockOpen, heroPencilSquare, heroSparkles, heroUsers } from '@ng-icons/heroicons/outline';
+import { GamePageGroupsService } from '../../services/game-page-groups.service';
 import { GamePageUiService } from '../../services/game-page-ui.service';
 import { GamePlayersService } from '../../services/game-players.service';
 import { GameStateService } from '../../services/game-state.service';
@@ -21,6 +22,7 @@ import { HostActionsService } from '../../services/host-actions.service';
 export class HostToolbarComponent {
   // Protected properties
 
+  protected readonly groups: GamePageGroupsService = inject(GamePageGroupsService);
   protected readonly host: HostActionsService = inject(HostActionsService);
   protected readonly players: GamePlayersService = inject(GamePlayersService);
   protected readonly state: GameStateService = inject(GameStateService);

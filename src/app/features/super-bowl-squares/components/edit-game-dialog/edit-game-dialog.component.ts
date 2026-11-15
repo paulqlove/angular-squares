@@ -12,6 +12,8 @@ import { autoRunLabel } from '../../../../core/utils/auto-manage';
 import { GamePickCardComponent } from '../../../../shared/game-pick-card.component';
 import { ToggleComponent } from '../../../../components/ui/toggle/toggle.component';
 import { EmptyQuarterRuleComponent } from '../../../../components/ui/empty-quarter-rule/empty-quarter-rule.component';
+import { GroupPickerComponent } from '../../../../components/ui/group-picker/group-picker.component';
+import type { GameGroup, GroupChoice } from '../../../../core/utils/game-groups';
 
 export interface EditGameValues {
   awayTeam: string;
@@ -28,6 +30,8 @@ export interface EditGameValues {
   autoManage: boolean;
   /** Season Pass: most squares one name can claim, or null for no limit. */
   maxSquaresPerPlayer: number | null;
+  /** Where the Group picker was left; set by the caller to the board's group when the picker shows. */
+  group?: GroupChoice;
   /** Only used with showGameFields (the dashboard). */
   name?: string;
   sport?: SportType | 'custom';
@@ -37,7 +41,7 @@ export interface EditGameValues {
 /** Owner-only "Edit game" popup, shared by the dashboard and the game page. Edits a draft and saves once. */
 @Component({
   selector: 'app-edit-game-dialog',
-  imports: [ModalComponent, MaxSquaresFieldComponent, FormsModule, NgIconComponent, EmptyQuarterRuleComponent, ToggleComponent, GamePickCardComponent],
+  imports: [ModalComponent, MaxSquaresFieldComponent, FormsModule, NgIconComponent, EmptyQuarterRuleComponent, ToggleComponent, GamePickCardComponent, GroupPickerComponent],
   providers: [provideIcons({ heroXMark, heroTrash, heroLockClosed, heroMagnifyingGlass })],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
@@ -247,6 +251,10 @@ export interface EditGameValues {
                 </div>
               }
 
+              @if (draft.group && groupsShown) {
+                <app-group-picker [groups]="groups" [value]="draft.group.groupId" [allowNew]="canNewGroup" (changed)="draft.group = $event"></app-group-picker>
+              }
+
               <div class="flex flex-col gap-2">
                 <label for="edit-game-note" class="qs-label text-qs-muted">Note from the host <span class="text-qs-muted">· Optional</span></label>
                 <input id="edit-game-note" type="text" [(ngModel)]="draft.hostNote" maxlength="140" placeholder="Rules, deadline, how to enter" class="qs-input" />
@@ -326,6 +334,10 @@ export class EditGameDialogComponent implements OnChanges {
   @Input() isLocked = false;
   @Input() boardSize: BoardSize = 100;
   @Input() canShowInOpenBoards = false;
+  /** Season Pass groups: the owner's groups for the Group picker. The picker shows when values.group is set. */
+  @Input() groups: GameGroup[] = [];
+  /** The owner can name a new group from the picker; a co-host can't. */
+  @Input() canNewGroup = false;
   @Input() canAutoManage = false;
   @Input() canLimitSquares = false;
   /** "Sun, Nov 8 at 7:25 PM": when auto-lock-and-draw would run. */
@@ -383,6 +395,11 @@ export class EditGameDialogComponent implements OnChanges {
     { key: 'q1', label: 'Q1' }, { key: 'q2', label: 'Q2' }, { key: 'q3', label: 'Q3' }, { key: 'q4', label: 'Q4' }
   ];
   draft: EditGameValues = { ...this.values };
+
+  /** The picker needs something to pick: a group, or New group... */
+  get groupsShown(): boolean {
+    return this.groups.length > 0 || this.canNewGroup;
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['isOpen']?.currentValue) {
