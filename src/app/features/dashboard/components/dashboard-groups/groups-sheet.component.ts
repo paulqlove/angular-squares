@@ -5,7 +5,7 @@ import { heroPlus } from '@ng-icons/heroicons/outline';
 
 import { CardMenuComponent, CardMenuItem } from '../../../../components/ui/card-menu/card-menu.component';
 import { ModalComponent } from '../../../../components/ui/modal/modal.component';
-import { GROUP_NAME_MAX } from '../../../../core/utils/game-groups';
+import { GROUP_NAME_MAX, gameCountLabel } from '../../../../core/utils/game-groups';
 import { DashboardGroupsService, GroupRow } from '../../services/dashboard-groups.service';
 import { DashboardStore } from '../../services/dashboard.store';
 
@@ -26,7 +26,7 @@ import { DashboardStore } from '../../services/dashboard.store';
       </div>
 
       <div class="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4">
-        @for (row of rows(); track row.id) {
+        @for (row of store.groupRows(); track row.id) {
           @if (groups.editing() === row.id) {
             <ng-container *ngTemplateOutlet="nameField; context: { $implicit: row.name, label: 'Rename ' + row.name }"></ng-container>
           } @else {
@@ -73,18 +73,14 @@ export class GroupsSheetComponent {
   protected readonly groups: DashboardGroupsService = inject(DashboardGroupsService);
   protected readonly maxName = GROUP_NAME_MAX;
   protected readonly menu: CardMenuItem[] = [{ id: 'rename', label: 'Rename' }, { id: 'delete', label: 'Delete', danger: true }];
-  protected readonly rows = computed<GroupRow[]>(() => this.groups.rows(this.store.myGames()));
-  private readonly store: DashboardStore = inject(DashboardStore);
+  protected readonly countLabel = gameCountLabel;
+  protected readonly store: DashboardStore = inject(DashboardStore);
   private readonly host: ElementRef<HTMLElement> = inject(ElementRef);
   private readonly uid = computed<string>(() => this.store.currentUser()?.uid ?? '');
 
   protected close(): void {
     this.groups.editing.set(null);
     this.groups.sheetOpen.set(false);
-  }
-
-  protected countLabel(count: number): string {
-    return `${count} ${count === 1 ? 'game' : 'games'}`;
   }
 
   protected async onMenu(action: string, row: GroupRow): Promise<void> {

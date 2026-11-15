@@ -6,7 +6,10 @@
     }
   </div>
   <!-- Boards | Players stays pinned at the right edge on both tabs; Grid / Compact comes and goes to its left -->
-  <div class="flex shrink-0 items-center gap-2">
+  <div class="flex min-w-0 items-center gap-2">
+    @if (!players.available()) {
+      <app-group-chip class="flex min-w-0 sm:hidden"></app-group-chip>
+    }
     @if (!players.active()) {
       <div appDashboardViewToggle role="group" aria-label="Card view" class="hidden gap-0.5 sm:flex"></div>
     }
@@ -23,7 +26,12 @@
   <div appPlayersView></div>
 } @else {
 
-<app-dashboard-groups></app-dashboard-groups>
+<!-- Phones with the Boards | Players switch have no room by the heading, so the picked group's chip sits just under it -->
+@if (players.available() && groups.picked()) {
+  <app-group-chip class="mt-3 flex justify-end sm:hidden"></app-group-chip>
+}
+<app-group-pick-sheet></app-group-pick-sheet>
+<app-groups-sheet></app-groups-sheet>
 
 @if (store.isLoadingGames()) {
   <div class="qs-skel-delay mt-4 grid grid-cols-1 gap-3" data-card-grid [class]="view.cardGridClass()" aria-busy="true">
@@ -64,6 +72,11 @@
       <ng-icon name="heroPlus" class="text-base"></ng-icon>
       Create your first board
     </button>
+  </div>
+} @else if (store.groupGames().length === 0) {
+  <div class="qs-card mt-4 p-8 text-center" role="status">
+    <p class="text-qs-muted">No games in {{ groups.picked()?.name }} yet</p>
+    <button type="button" class="qs-btn qs-btn-secondary mt-4" (click)="groups.pickedId.set(null)">Show all groups</button>
   </div>
 } @else if (store.visibleMyGames().length === 0) {
   <div class="qs-card mt-4 p-8 text-center" role="status" animate.enter="qs-row-in">

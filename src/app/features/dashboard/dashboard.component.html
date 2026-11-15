@@ -12,7 +12,7 @@
         <h2 class="qs-title mt-3 text-4xl sm:text-5xl">Your <span class="text-qs-accent">games</span></h2>
       </div>
 
-      <!-- From 640px up: one field that searches your boards or joins with a code, then New board. Phones get the bottom bar instead. -->
+      <!-- From 640px up: one field that searches your boards or joins with a code, the group picker, then New board. Phones get the bottom bar instead. -->
       <div class="hidden items-center gap-3 sm:flex sm:flex-row">
         <div role="search" class="relative w-[400px] min-w-0" data-walkthrough="join-game">
           <div appDashboardSearchField class="qs-search min-w-0 flex-1" [where]="'desk'"></div>
@@ -20,6 +20,10 @@
             <p id="code-error-desk" class="qs-error-in absolute left-0 top-full mt-2 text-sm text-qs-bad" role="alert">Game not found</p>
           }
         </div>
+
+        @if (!players.active() && store.groupPickerShows()) {
+          <app-group-menu></app-group-menu>
+        }
 
         @if (store.canCreateGame()) {
           <button

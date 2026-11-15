@@ -41,6 +41,16 @@ export function groupCounts(boards: OpenListTarget[]): Map<string, number> {
   return counts;
 }
 
+/** "1 game", "2 games": a group's size in the Groups sheets. */
+export function gameCountLabel(count: number): string {
+  return `${count} ${count === 1 ? 'game' : 'games'}`;
+}
+
+/** The boards filed in one group, or every board when no group is picked. */
+export function gamesInGroup<T extends OpenListTarget>(boards: T[], groupId: string | null | undefined): T[] {
+  return groupId ? boards.filter(board => board.openListId === groupId) : boards;
+}
+
 /** The group a board is filed in, or undefined for No group. */
 export function groupOf(groups: GameGroup[], board: OpenListTarget): GameGroup | undefined {
   return board.openListId ? groups.find(g => g.id === board.openListId) : undefined;

@@ -4,12 +4,15 @@ import { NgIconComponent } from '@ng-icons/core';
 
 import { captureLayout, glideToNewLayout } from '../../utils/flip-layout';
 import { DashboardDialogsService } from '../../services/dashboard-dialogs.service';
+import { DashboardGroupsService } from '../../services/dashboard-groups.service';
 import { DashboardSearchService } from '../../services/dashboard-search.service';
 import { DashboardViewService } from '../../services/dashboard-view.service';
 import { DashboardStore } from '../../services/dashboard.store';
 import { PlayersViewService } from '../../services/players-view.service';
 import { ValueSwapComponent } from '../../../../components/ui/value-swap/value-swap.component';
-import { DashboardGroupsComponent } from '../dashboard-groups/dashboard-groups.component';
+import { GroupChipComponent } from '../dashboard-groups/group-chip.component';
+import { GroupPickSheetComponent } from '../dashboard-groups/group-pick-sheet.component';
+import { GroupsSheetComponent } from '../dashboard-groups/groups-sheet.component';
 import { DashboardViewToggleComponent } from '../dashboard-view-toggle/dashboard-view-toggle.component';
 import { GameCardComponent } from '../game-card/game-card.component';
 import { PlayersViewComponent } from '../players-view/players-view.component';
@@ -21,7 +24,10 @@ import { PlayersViewComponent } from '../players-view/players-view.component';
  */
 @Component({
   selector: 'section[appDashboardHosting]',
-  imports: [NgIconComponent, DashboardGroupsComponent, DashboardViewToggleComponent, GameCardComponent, PlayersViewComponent, ValueSwapComponent],
+  imports: [
+    NgIconComponent, DashboardViewToggleComponent, GameCardComponent, GroupChipComponent, GroupPickSheetComponent, GroupsSheetComponent,
+    PlayersViewComponent, ValueSwapComponent
+  ],
   templateUrl: './dashboard-hosting.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
@@ -47,10 +53,13 @@ export class DashboardHostingComponent {
     });
   }
 
-  /** "10 games", or "3 of 10 games" while the search narrows the list. The Players view counts co-hosted boards too. */
+  /**
+   * "10 games", or "3 of 10 games" while the search narrows the list. A picked group counts its own games only.
+   * The Players view counts co-hosted boards too.
+   */
   public readonly countLabel = computed<string>(() => {
     if (this.players.active()) return `${this.players.boards().length} games`;
-    const all = this.store.myGames().length;
+    const all = this.store.groupGames().length;
     const shown = this.store.visibleMyGames().length;
     return `${shown === all ? all : shown + ' of ' + all} ${all === 1 ? 'game' : 'games'}`;
   });
@@ -58,6 +67,7 @@ export class DashboardHostingComponent {
   public readonly skeletons: ReadonlyArray<number> = [0, 1, 2];
 
   protected readonly dialogs: DashboardDialogsService = inject(DashboardDialogsService);
+  protected readonly groups: DashboardGroupsService = inject(DashboardGroupsService);
   protected readonly players: PlayersViewService = inject(PlayersViewService);
   protected readonly search: DashboardSearchService = inject(DashboardSearchService);
   protected readonly store: DashboardStore = inject(DashboardStore);

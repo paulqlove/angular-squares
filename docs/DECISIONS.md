@@ -4,6 +4,14 @@ This file records product and design decisions, newest first. To add one, put a 
 
 ---
 
+## D-035 · Group picker joins the Search and New board row
+
+- **Date:** Nov 15 2026
+- **Decision:** The Groups chip row under Hosting (from D-031's dashboard work) goes away. From 640px up a 200px Group dropdown sits between Search and New board: folder icon, the current choice (All groups or the group's name) and a chevron; its menu lists All groups, each group with its game count, then Manage groups (Season Pass only), which opens the Groups sheet. On a phone a 48px icon-only folder button sits in the bottom bar between Games & codes and New board and opens a short Groups sheet with the same rows. A picked group fills the phone button ink, and a chip with the group's name and an x sits by the Hosting heading (just under it when the Boards | Players switch is there). Picking a group filters Hosting for real; search works inside it; Joined is never filtered. The picker shows only when the owner has a group or can make one. Mockups w1, w2, p1 to p3 from Creative. Paul's words, relayed: "The group redesign, I think should be moved in the same section as the search in Newboard on desktop and on mobile. And make it icon only on mobile." Approved: "Yeah, that works. Build that out and give me a preview link."
+- **Options considered:** not recorded
+- **Why:** not recorded beyond Paul's words above
+- **Decided by:** Paul
+
 ## D-034 · Season Pass hosts at the cap get a plain limit note
 
 - **Date:** Nov 15 2026
