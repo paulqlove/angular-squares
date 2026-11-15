@@ -1,10 +1,14 @@
-import { Component, ElementRef, Input, Output, EventEmitter, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, Input, Output, EventEmitter, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroXMark, heroClipboard, heroCheck, heroShare } from '@ng-icons/heroicons/outline';
 import { ModalComponent } from '../modal/modal.component';
 import { GameService } from '../../../core/services/game.service';
+import { ToastService } from '../../../core/services/toast.service';
+import { browserShareEnv, copyText, shareInvite } from './share-invite.utils';
 
-/** Share popup: game code and link, each with a copy button. Used by the dashboard and game page. */
+type CopyTarget = 'code' | 'link' | 'tv';
+
+/** Share popup: one Share invite button (share sheet on phones, copy on desktop), the game code and the TV link. Used by the dashboard and game page. */
 @Component({
   selector: 'app-share-dialog',
   imports: [NgIconComponent, ModalComponent],
@@ -23,23 +27,10 @@ import { GameService } from '../../../core/services/game.service';
       </div>
 
       <div class="space-y-5 px-6 py-6">
-        @if (canShare) {
-          <button type="button" (click)="share()" class="qs-btn qs-btn-primary w-full">
-            <ng-icon name="heroShare" class="text-base"></ng-icon>
-            Share link
-          </button>
-        }
-
-        <div>
-          <label for="share-link" class="qs-label mb-1.5 block text-qs-muted">Link</label>
-          <div class="flex items-stretch gap-2">
-            <input id="share-link" type="text" [value]="link" readonly class="qs-input min-w-0 flex-1 truncate text-sm text-qs-muted" (focus)="$any($event.target).select()" />
-            <button type="button" (click)="copy(link, 'link')" class="qs-btn qs-btn-primary min-w-28" aria-label="Copy share link">
-              <ng-icon [name]="copied() === 'link' ? 'heroCheck' : 'heroClipboard'" [class.icon-pop]="copied() === 'link'" class="text-base"></ng-icon>
-              {{ copied() === 'link' ? 'Copied' : 'Copy' }}
-            </button>
-          </div>
-        </div>
+        <button type="button" (click)="shareLink()" class="qs-btn qs-btn-primary w-full">
+          <ng-icon [name]="copied() === 'link' ? 'heroCheck' : 'heroShare'" [class.icon-pop]="copied() === 'link'" class="text-base"></ng-icon>
+          {{ copied() === 'link' ? 'Link copied' : 'Share invite' }}
+        </button>
 
         <div>
           <p class="qs-label mb-1.5 text-qs-muted">Game code</p>
@@ -82,11 +73,13 @@ export class ShareDialogComponent {
 
   private readonly gameService = inject(GameService);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly toast = inject(ToastService);
+  private resetTimer: ReturnType<typeof setTimeout> | undefined;
 
-  copied = signal<'code' | 'link' | 'tv' | null>(null);
+  copied = signal<CopyTarget | null>(null);
 
-  get canShare(): boolean {
-    return typeof navigator !== 'undefined' && 'share' in navigator;
+  constructor() {
+    inject(DestroyRef).onDestroy(() => clearTimeout(this.resetTimer));
   }
 
   get link(): string {
@@ -102,26 +95,36 @@ export class ShareDialogComponent {
     this.closed.emit();
   }
 
-  async share(): Promise<void> {
-    try {
-      await navigator.share({ title: 'QuarterScore squares', text: 'Pick your squares', url: this.link });
-    } catch {}
+  async copy(text: string, which: 'code' | 'tv'): Promise<void> {
+    if (await copyText(text, browserShareEnv())) {
+      this.flashCopied(which);
+      return;
+    }
+    this.selectForManualCopy(which === 'code' ? '#share-code' : '#share-tv-link');
   }
 
-  async copy(text: string, which: 'code' | 'link' | 'tv'): Promise<void> {
-    try {
-      await navigator.clipboard.writeText(text);
-      this.copied.set(which);
-      setTimeout(() => this.copied.set(null), 2000);
-    } catch {
-      const el = this.host.nativeElement.querySelector<HTMLElement>(which === 'code' ? '#share-code' : which === 'link' ? '#share-link' : '#share-tv-link');
-      if (el instanceof HTMLInputElement) el.select();
-      else if (el) {
-        const range = document.createRange();
-        range.selectNodeContents(el);
-        window.getSelection()?.removeAllRanges();
-        window.getSelection()?.addRange(range);
-      }
+  async shareLink(): Promise<void> {
+    const result = await shareInvite(this.link, browserShareEnv());
+    if (result === 'copied') this.flashCopied('link');
+    if (result === 'failed') this.toast.error(`Couldn't copy. The link is ${this.link}`);
+  }
+
+  private flashCopied(which: CopyTarget): void {
+    clearTimeout(this.resetTimer);
+    this.copied.set(which);
+    this.resetTimer = setTimeout(() => this.copied.set(null), 2000);
+  }
+
+  private selectForManualCopy(selector: string): void {
+    const el = this.host.nativeElement.querySelector<HTMLElement>(selector);
+    if (el instanceof HTMLInputElement) {
+      el.select();
+      return;
     }
+    if (!el) return;
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    window.getSelection()?.removeAllRanges();
+    window.getSelection()?.addRange(range);
   }
 }
