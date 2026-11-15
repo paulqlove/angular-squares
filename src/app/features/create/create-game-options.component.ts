@@ -1,15 +1,14 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import { GroupPickerComponent } from '../../components/ui/group-picker/group-picker.component';
 import { ToggleComponent } from '../../components/ui/toggle/toggle.component';
-import { GROUPED_SHOWN_HINT, GameGroup, GroupChoice } from '../../core/utils/game-groups';
+import { GROUPED_SHOWN_HINT } from '../../core/utils/game-groups';
 
 /**
- * The switches under Details: Show in my open boards, Group and Auto-lock and draw.
+ * The switches under Details: Show in my open boards and Auto-lock and draw.
  * It only shows each choice and reports changes; the form keeps the state.
  */
 @Component({
   selector: 'app-create-game-options',
-  imports: [GroupPickerComponent, ToggleComponent],
+  imports: [ToggleComponent],
   host: { class: 'contents' },
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -23,9 +22,6 @@ import { GROUPED_SHOWN_HINT, GameGroup, GroupChoice } from '../../core/utils/gam
       </div>
       <app-toggle [checked]="showInOpenBoards()" [disabled]="grouped()" (onChange)="openBoardsChanged.emit($event)"></app-toggle>
     </div>
-  }
-  @if (groupsAllowed()) {
-    <app-group-picker class="block py-5" [groups]="groups()" [value]="groupId()" [allowNew]="true" (changed)="groupChanged.emit($event)"></app-group-picker>
   }
   @if (gamePicked()) {
     @if (autoManageAllowed()) {
@@ -56,16 +52,12 @@ export class CreateGameOptionsComponent {
   public readonly grouped = input(false);
   /** How the board will read in the host's open boards. */
   public readonly openBoardPreview = input('');
-  public readonly groupsAllowed = input(false);
-  public readonly groups = input<GameGroup[]>([]);
-  public readonly groupId = input<string | null>(null);
   /** A schedule game is picked, so Auto-lock and draw applies. */
   public readonly gamePicked = input(false);
   public readonly autoManageAllowed = input(false);
   public readonly autoManage = input(false);
   public readonly autoRunText = input('');
   public readonly openBoardsChanged = output<boolean>();
-  public readonly groupChanged = output<GroupChoice>();
   public readonly autoManageChanged = output<boolean>();
   protected readonly groupedHint = GROUPED_SHOWN_HINT;
 }

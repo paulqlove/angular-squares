@@ -28,7 +28,7 @@ import { ModalComponent } from '../modal/modal.component';
             </label>
           }
           <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:flex-wrap sm:justify-end">
-            <button type="button" class="qs-btn qs-btn-secondary" data-autofocus (click)="no()">Cancel</button>
+            <button type="button" class="qs-btn qs-btn-secondary" data-autofocus (click)="no()">{{ ask.cancelLabel || 'Cancel' }}</button>
             <button type="button" class="qs-btn" [class]="ask.tone === 'primary' ? 'qs-btn-primary' : 'qs-btn-danger'" (click)="yes()">{{ ask.confirmLabel }}</button>
           </div>
         </div>

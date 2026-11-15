@@ -4,6 +4,8 @@ export interface ConfirmOptions {
   title: string;
   message: string;
   confirmLabel: string;
+  /** The other button, Cancel by default. Use it when saying no still goes ahead, such as "Keep on games". */
+  cancelLabel?: string;
   /** danger (default) for deletes and resets; primary for a safe step like locking a board. */
   tone?: 'danger' | 'primary';
   /** Adds a "Never show me this again" checkbox. Once ticked and confirmed, ask() resolves true without showing the dialog (this browser only). */

@@ -11,6 +11,8 @@ import {
   CreateGameDraft, CreateGameValues, buildCreateGameValues, emptyDraft, loadCreateDraft, splitToTenths
 } from '../../core/utils/create-game-draft';
 import { GameGroup, GroupChoice, inGroup } from '../../core/utils/game-groups';
+import { fillCoHost, validCoHost } from '../../core/utils/group-cohost';
+import { CreateGameCoHostComponent } from './create-game-cohost.component';
 import { SPLIT_QUARTERS, splitLabel, splitPresetId, splitRemaining } from '../../core/utils/split-edit';
 import { CreateGameFooterComponent } from './create-game-footer.component';
 import {
@@ -34,7 +36,7 @@ export interface CreateGameSubmit {
   selector: 'app-create-game-form',
   imports: [
     MaxSquaresFieldComponent, FormsModule, EmptyQuarterRuleComponent,
-    CreateGamePickComponent, CreateGameOptionsComponent, CreateGameFooterComponent
+    CreateGamePickComponent, CreateGameOptionsComponent, CreateGameFooterComponent, CreateGameCoHostComponent
   ],
   host: { class: 'contents' },
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -91,6 +93,8 @@ export class CreateGameFormComponent implements OnChanges, OnInit {
   readonly splitPresets = SPLIT_PRESETS;
 
   private autoName = '';
+  /** The co-host a group pick put in the field, and that group's name; null once the host types their own. */
+  private coHostFill: { email: string; group: string } | null = null;
   private espnService = inject(EspnService);
   private sanitizer = inject(SanitizationService);
 
@@ -158,10 +162,27 @@ export class CreateGameFormComponent implements OnChanges, OnInit {
     return inGroup(this.newGameGroup);
   }
 
-  /** A game in a group always shows in its More tab; No group keeps the switch as it is. */
+  /** Under Co-host: where the email came from while a group's co-host is in the field. */
+  coHostHint(): string {
+    return this.coHostFill && this.newGamePaymentManager === this.coHostFill.email
+      ? `From ${this.coHostFill.group}. Change it for just this game.`
+      : 'A co-host can help manage players.';
+  }
+
+  /**
+   * A game in a group always shows in its More tab; No group keeps the switch as it is. The group's co-host (or a new
+   * group's) fills Co-host unless the host typed one first (K3).
+   */
   pickGroup(choice: GroupChoice): void {
     if (inGroup(choice)) this.newGameShowInOpenBoards = true;
     this.newGameGroup = choice;
+    const group = choice.groupId ? this.groups.find(g => g.id === choice.groupId) : undefined;
+    const source = group
+      ? { email: group.coHost?.email, name: group.name }
+      : { email: validCoHost(choice.newCoHost), name: choice.newName?.trim() || 'your new group' };
+    const next = fillCoHost(this.newGamePaymentManager, this.coHostFill?.email ?? null, source.email);
+    this.newGamePaymentManager = next.value;
+    this.coHostFill = next.filled ? { email: next.filled, group: source.name } : null;
   }
 
   /** A schedule game is picked (not custom teams), so Auto-lock and draw applies. */

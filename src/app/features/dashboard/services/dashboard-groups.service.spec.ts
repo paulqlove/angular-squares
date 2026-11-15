@@ -13,7 +13,7 @@ const NONE = 'NoGroupKey0000000001';
 
 describe('DashboardGroupsService', () => {
   let service: DashboardGroupsService;
-  let api: { getGroups: ReturnType<typeof vi.fn>; createGroup: ReturnType<typeof vi.fn>; renameGroup: ReturnType<typeof vi.fn>; deleteGroup: ReturnType<typeof vi.fn>; saveChoice: ReturnType<typeof vi.fn> };
+  let api: { getGroups: ReturnType<typeof vi.fn>; createGroup: ReturnType<typeof vi.fn>; renameGroup: ReturnType<typeof vi.fn>; deleteGroup: ReturnType<typeof vi.fn>; saveChoice: ReturnType<typeof vi.fn>; setGroupCoHost: ReturnType<typeof vi.fn> };
   let ask: ReturnType<typeof vi.fn>;
   let toastError: ReturnType<typeof vi.fn>;
   let toastWarning: ReturnType<typeof vi.fn>;
@@ -30,7 +30,8 @@ describe('DashboardGroupsService', () => {
       createGroup: vi.fn().mockResolvedValue({ id: 'NewGroupKey000000001', name: 'Gym', createdAt: 3 }),
       renameGroup: vi.fn().mockResolvedValue(undefined),
       deleteGroup: vi.fn().mockResolvedValue(NONE),
-      saveChoice: vi.fn().mockResolvedValue({ listId: CHURCH })
+      saveChoice: vi.fn().mockResolvedValue({ listId: CHURCH }),
+      setGroupCoHost: vi.fn().mockResolvedValue(undefined)
     };
     ask = vi.fn().mockResolvedValue(true);
     toastError = vi.fn();
@@ -135,6 +136,50 @@ describe('DashboardGroupsService', () => {
       api.saveChoice.mockRejectedValueOnce(new Error('permission_denied'));
       expect(await service.fileNewBoard(made, { groupId: WORK })).toBe(false);
       expect(toastWarning).toHaveBeenCalledWith('Board created, but its group could not be set. Try again in Edit.');
+    });
+  });
+
+  describe('group co-host', () => {
+    const games = [
+      { id: 'a', name: 'Week 12', openListId: CHURCH },
+      { id: 'b', name: 'Overflow', openListId: CHURCH, managerId: 'sam', managerName: 'Sam Lee' },
+      { id: 'c', name: 'Old', openListId: CHURCH, managerEmail: 'Dana@email.com' },
+      { id: 'd', name: 'Office', openListId: WORK }
+    ];
+    const church = () => service.groups()[0];
+
+    it('saves the co-host and gives it only to the group\'s games with no co-host', async () => {
+      const saved = await service.saveCoHost('o', church(), '  dana@email.com ', games);
+      expect(api.setGroupCoHost).toHaveBeenCalledWith('o', CHURCH, { email: 'dana@email.com' }, { addTo: ['a'], clearFrom: [] });
+      expect(saved).toEqual({ email: 'dana@email.com', addTo: ['a'], clearFrom: [] });
+      expect(church().coHost).toEqual({ email: 'dana@email.com' });
+      expect(ask).not.toHaveBeenCalled();
+    });
+
+    it('removing asks, and clears it only from the games whose co-host it is', async () => {
+      service.groups.update(gs => gs.map(g => g.id === CHURCH ? { ...g, coHost: { email: 'dana@email.com' } } : g));
+      await service.saveCoHost('o', church(), '', games);
+      expect(ask).toHaveBeenCalledWith(expect.objectContaining({ title: 'Also remove dana@email.com from 1 Church game?', cancelLabel: 'Keep on games' }));
+      expect(api.setGroupCoHost).toHaveBeenCalledWith('o', CHURCH, null, { addTo: [], clearFrom: ['c'] });
+      expect(church().coHost).toBeUndefined();
+    });
+
+    it('saying no to the question still removes the group\'s co-host but keeps it on the games', async () => {
+      ask.mockResolvedValueOnce(false);
+      service.groups.update(gs => gs.map(g => g.id === CHURCH ? { ...g, coHost: { email: 'dana@email.com' } } : g));
+      await service.saveCoHost('o', church(), '', games);
+      expect(api.setGroupCoHost).toHaveBeenCalledWith('o', CHURCH, null, { addTo: [], clearFrom: [] });
+    });
+
+    it('an empty field on a group with no co-host just closes, and a failed save says so', async () => {
+      service.editingCoHost.set(CHURCH);
+      expect(await service.saveCoHost('o', church(), ' ', games)).toBeNull();
+      expect(api.setGroupCoHost).not.toHaveBeenCalled();
+      expect(service.editingCoHost()).toBeNull();
+      api.setGroupCoHost.mockRejectedValueOnce(new Error('permission_denied'));
+      expect(await service.saveCoHost('o', church(), 'dana@email.com', games)).toBeNull();
+      expect(toastError).toHaveBeenCalledWith('Could not save the co-host. Try again.');
+      expect(church().coHost).toBeUndefined();
     });
   });
 });
