@@ -2,7 +2,7 @@ import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { NgIconComponent } from '@ng-icons/core';
 
-import { PhoneLayout, PlayerGame, PlayerSummary, panelRows, phoneGames, phoneLayout } from '../../services/players-across-games';
+import { PhoneLayout, PlayerGame, PlayerSummary, panelRows, phoneGames, phoneLayout, showsConfirmAll } from '../../services/players-across-games';
 import { PlayersViewService } from '../../services/players-view.service';
 
 /**
@@ -61,10 +61,10 @@ export class PlayerGamesComponent {
   public readonly rows = computed<number>(() => panelRows(this.player().games.length));
   public readonly showAll = signal<boolean>(false);
   /**
-   * Confirm all: on a phone with any game unconfirmed; from 640px only with two or more, since the toggle does one.
+   * Confirm all: only with two or more games unconfirmed, since the toggle does one.
    * The phone keeps its own rule until creative says otherwise.
    */
-  public readonly showConfirmAll = computed<boolean>(() => this.unconfirmed().length >= (this.phone() ? 1 : 2));
+  public readonly showConfirmAll = computed<boolean>(() => showsConfirmAll(this.unconfirmed().length));
   /** From 640px the footer shows only with something in it: Remove…, Confirm all, the Undo note or a remove question. */
   public readonly showFooter = computed<boolean>(() =>
     this.phone() || this.showConfirmAll() || this.openGames().length > 0 || this.showNote() || (!!this.removing() && !this.removingInRow()));

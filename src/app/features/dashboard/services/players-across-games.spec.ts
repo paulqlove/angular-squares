@@ -1,4 +1,4 @@
-import { PlayersBoard, panelRows, phoneGames, phoneLayout, playerTiles, playersAcrossGames } from './players-across-games';
+import { PlayersBoard, panelRows, phoneGames, phoneLayout, playerTiles, playersAcrossGames, showsConfirmAll } from './players-across-games';
 
 const HOST = 'host-uid';
 
@@ -164,5 +164,9 @@ describe('players across games', () => {
   it('lays the desktop panel out in one column up to three games, then two columns read top to bottom', () => {
     expect([1, 2, 3].map(panelRows)).toEqual([1, 2, 3]);
     expect([4, 5, 7, 8, 11].map(panelRows)).toEqual([2, 3, 4, 4, 6]);
+  });
+
+  it('shows Confirm all only from two unconfirmed games, since one game\'s toggle does it', () => {
+    expect([0, 1, 2, 3, 9].map(showsConfirmAll)).toEqual([false, false, true, true, true]);
   });
 });
