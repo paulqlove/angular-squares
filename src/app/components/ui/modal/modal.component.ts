@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, HostListener, computed, effect, inject, input, output, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, HostListener, computed, effect, inject, input, output, signal, untracked, viewChild } from '@angular/core';
 
 import { SheetDragDirective } from './sheet-drag.directive';
 
@@ -95,7 +95,11 @@ export class ModalComponent {
     effect(() => {
       const open = this.open();
       clearTimeout(this.hideTimer);
-      if (open) this.shown.set(true);
+      if (open) {
+        this.shown.set(true);
+        // Reopened before a swipe-close finished: the same panel is still here, parked off-screen.
+        untracked(() => this.drag()?.reset());
+      }
       else if (this.shown()) this.hideTimer = setTimeout(() => this.shown.set(false), 150);
     });
     effect(onCleanup => {

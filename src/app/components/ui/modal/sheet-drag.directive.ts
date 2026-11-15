@@ -1,12 +1,14 @@
-import { DestroyRef, Directive, ElementRef, inject, input, output } from '@angular/core';
+import { DestroyRef, Directive, ElementRef, effect, inject, input, output } from '@angular/core';
 
 import { PHONE_QUERY } from '../../../shared/media-queries';
 import { DragSample, backdropOpacity, canDragFrom, flickVelocity, isTap, scaleAlpha, sheetOffset, shouldClose } from './sheet-drag.utils';
 
 const BACK_MS = 200;
-const OUT_MS = 120;
+/** Inside content that scrolls, a touch is held from scrolling only once it is clearly heading down by this much. */
+const HOLD_SCROLL_PX = 4;
 /** A press that moved swallows the click it fires; this covers that click and nothing after it. */
 const MOVED_SWALLOW_MS = 100;
+const OUT_MS = 120;
 const REDUCED_MOTION = '(prefers-reduced-motion: reduce)';
 /**
  * After a swipe closes a sheet, every click is swallowed this long: the leaving backdrop stops taking clicks at once
@@ -31,11 +33,13 @@ const SWIPE_SWALLOW_MS = 350;
 export class SheetDragDirective {
   constructor() {
     if (typeof window === 'undefined') return;
-    this.host.addEventListener('touchmove', this.blockScroll, { passive: false });
-    inject(DestroyRef).onDestroy(() => {
-      this.host.removeEventListener('touchmove', this.blockScroll);
-      clearTimeout(this.settleTimer);
+    // Only sheets that drag get a non-passive listener; on any other panel it would hold back scrolling for nothing.
+    effect(onCleanup => {
+      if (!this.appSheetDrag()) return;
+      this.host.addEventListener('touchmove', this.blockScroll, { passive: false });
+      onCleanup(() => this.host.removeEventListener('touchmove', this.blockScroll));
     });
+    inject(DestroyRef).onDestroy(() => clearTimeout(this.settleTimer));
   }
 
   /** On: the panel can be swiped down. */
@@ -44,6 +48,13 @@ export class SheetDragDirective {
   readonly sheetBackdrop = input.required<HTMLElement>();
   /** Swiped far or fast enough. The sheet is already leaving; the owner closes it, or calls snapBack() to keep it. */
   readonly swipeClosed = output<void>();
+
+  /** Drops every style a drag left, so a sheet reopened mid-close shows where it rests. */
+  reset(): void {
+    clearTimeout(this.settleTimer);
+    for (const prop of ['transition', 'transform', 'opacity']) this.host.style.removeProperty(prop);
+    for (const prop of ['transition', 'background-color']) this.sheetBackdrop().style.removeProperty(prop);
+  }
 
   /** Puts the sheet back where it rests: 200ms on --qs-ease, or a plain 120ms fade with reduced motion. */
   snapBack(): void {
@@ -57,17 +68,20 @@ export class SheetDragDirective {
       setStyles(this.host, { transition: `transform ${BACK_MS}ms var(--qs-ease)`, transform: 'translateY(0)' });
       setStyles(backdrop, { transition: `background-color ${BACK_MS}ms var(--qs-ease)`, 'background-color': this.backdropColor });
     }
+    // A sheet that stays open takes taps again at once, apart from the click the drag itself fires.
+    this.swallowUntil = Math.min(this.swallowUntil, performance.now() + MOVED_SWALLOW_MS);
     clearTimeout(this.settleTimer);
-    this.settleTimer = setTimeout(() => this.clearStyles(), BACK_MS);
+    this.settleTimer = setTimeout(() => this.reset(), BACK_MS);
   }
 
   protected cancel(): void {
     if (this.phase === 'dragging') this.snapBack();
     this.phase = 'off';
+    this.pressed = false;
   }
 
   protected move(event: PointerEvent): void {
-    if (this.phase === 'off' || !event.isPrimary) return;
+    if (!this.pressed || !event.isPrimary) return;
     const dx = event.clientX - this.start.x;
     const dy = event.clientY - this.start.y;
     if (!isTap(dx, dy)) this.moved = true;
@@ -77,6 +91,7 @@ export class SheetDragDirective {
 
   protected press(event: PointerEvent): void {
     if (!this.appSheetDrag() || !event.isPrimary || event.pointerType === 'mouse' || !matchMedia(PHONE_QUERY).matches) return;
+    this.pressed = true;
     this.phase = 'pending';
     this.moved = false;
     this.start = { x: event.clientX, y: event.clientY };
@@ -85,31 +100,38 @@ export class SheetDragDirective {
   }
 
   protected release(event: PointerEvent): void {
-    if (this.phase === 'off' || !event.isPrimary) return;
+    if (!this.pressed || !event.isPrimary) return;
+    this.pressed = false;
     const dragged = this.phase === 'dragging';
     this.phase = 'off';
-    if (this.moved) this.swallowClicks(MOVED_SWALLOW_MS);
+    // The lift counts toward the flick, so a drag that stopped before letting go doesn't fling.
+    if (dragged) this.samples.push({ y: event.clientY, t: event.timeStamp });
+    const close = dragged && shouldClose(this.offset, this.height, flickVelocity(this.samples));
+    if (this.moved) this.swallowClicks(close ? SWIPE_SWALLOW_MS : MOVED_SWALLOW_MS);
     if (!dragged) return;
-    if (!shouldClose(this.offset, this.height, flickVelocity(this.samples))) {
+    if (!close) {
       this.snapBack();
       return;
     }
     this.leave();
-    this.swallowClicks(SWIPE_SWALLOW_MS);
     this.swipeClosed.emit();
   }
 
   private backdropColor = '';
   private height = 0;
   private host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  private listening = false;
   private moved = false;
   private offset = 0;
   private originY = 0;
   private phase: 'off' | 'pending' | 'dragging' = 'off';
+  private pressed = false;
   private samples: DragSample[] = [];
   private scrollTops: number[] = [];
   private settleTimer: ReturnType<typeof setTimeout> | undefined;
   private start = { x: 0, y: 0 };
+  private swallowUntil = 0;
+  private unlistenTimer: ReturnType<typeof setTimeout> | undefined;
 
   /** Starts the drag once the finger is past tap distance, going mostly up or down, from somewhere that may drag. */
   private begin(event: PointerEvent, dx: number, dy: number): void {
@@ -129,17 +151,26 @@ export class SheetDragDirective {
     this.follow(event);
   }
 
-  /** Stops the page or the sheet's content scrolling under a drag. Taps are untouched: only touchmove is cancelled. */
+  /**
+   * Stops the page or the sheet's content scrolling under a drag. Where nothing scrolls (grabber, header) that is any
+   * move; inside content that scrolls, only one clearly heading down from its top, since the browser keeps a cancelled
+   * gesture from scrolling to its end. Taps are untouched: only touchmove is cancelled.
+   */
   private blockScroll = (event: TouchEvent): void => {
-    if (!event.cancelable) return;
-    const dy = (event.touches[0]?.clientY ?? this.start.y) - this.start.y;
-    if (this.phase === 'dragging' || (this.phase === 'pending' && canDragFrom(this.scrollTops, dy))) event.preventDefault();
+    const touch = event.touches[0];
+    if (!event.cancelable || !touch) return;
+    const dx = touch.clientX - this.start.x;
+    const dy = touch.clientY - this.start.y;
+    const heldBack = this.phase === 'pending' && (!this.scrollTops.length || (dy >= HOLD_SCROLL_PX && dy > Math.abs(dx) && canDragFrom(this.scrollTops, dy)));
+    if (this.phase === 'dragging' || heldBack) event.preventDefault();
   };
 
-  private clearStyles(): void {
-    for (const prop of ['transition', 'transform', 'opacity']) this.host.style.removeProperty(prop);
-    for (const prop of ['transition', 'background-color']) this.sheetBackdrop().style.removeProperty(prop);
-  }
+  /** Eats every click on the page, in the capture phase so it never reaches the sheet or the board. */
+  private eatClick = (event: MouseEvent): void => {
+    if (performance.now() > this.swallowUntil) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  };
 
   private follow(event: PointerEvent): void {
     this.offset = sheetOffset(event.clientY - this.originY);
@@ -158,16 +189,16 @@ export class SheetDragDirective {
     setStyles(this.sheetBackdrop(), { transition: `background-color ${OUT_MS}ms ${curve}`, 'background-color': scaleAlpha(this.backdropColor, 0) });
   }
 
-  /** Eats every click on the page for `ms`, in the capture phase so it never reaches the sheet or the board. */
+  /** Swallows clicks for `ms`. The listener is window-wide and outlives the sheet, which may be gone before the time is up. */
   private swallowClicks(ms: number): void {
-    const until = performance.now() + ms;
-    const eat = (event: MouseEvent): void => {
-      if (performance.now() > until) return;
-      event.preventDefault();
-      event.stopImmediatePropagation();
-    };
-    window.addEventListener('click', eat, true);
-    setTimeout(() => window.removeEventListener('click', eat, true), ms);
+    this.swallowUntil = performance.now() + ms;
+    if (!this.listening) window.addEventListener('click', this.eatClick, true);
+    this.listening = true;
+    clearTimeout(this.unlistenTimer);
+    this.unlistenTimer = setTimeout(() => {
+      window.removeEventListener('click', this.eatClick, true);
+      this.listening = false;
+    }, ms);
   }
 }
 

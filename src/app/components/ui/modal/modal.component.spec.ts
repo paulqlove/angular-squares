@@ -201,6 +201,7 @@ describe('ModalComponent', () => {
   });
 
   it('asks to close on a swipe down, and slides back when the owner keeps it open', async () => {
+    const realMatchMedia = window.matchMedia;
     window.matchMedia = (query: string) => ({ matches: query.includes('max-width') } as MediaQueryList);
     const f = setup();
     f.componentInstance.a.set(true);
@@ -214,6 +215,7 @@ describe('ModalComponent', () => {
     expect(f.componentInstance.dismissedA).toBe(1);
     await flush(f);
     expect(panel.style.transform).toBe('translateY(0)');
+    window.matchMedia = realMatchMedia;
     await new Promise(r => setTimeout(r, 400));
   });
 });

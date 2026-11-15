@@ -24,6 +24,8 @@ class Host {
 const media = (query: string): MediaQueryList => ({ matches: query.includes('max-width') } as MediaQueryList);
 
 describe('SheetDragDirective', () => {
+  const realMatchMedia = window.matchMedia;
+  let fixtures: { destroy(): void; nativeElement: HTMLElement }[] = [];
   let time = 0;
 
   beforeEach(() => {
@@ -31,10 +33,16 @@ describe('SheetDragDirective', () => {
     window.matchMedia = media;
   });
   // A swipe keeps swallowing clicks for a moment; let it lapse so it can't reach the next test.
-  afterEach(() => new Promise(r => setTimeout(r, 400)));
+  afterEach(async () => {
+    window.matchMedia = realMatchMedia;
+    for (const f of fixtures) { f.nativeElement.remove(); f.destroy(); }
+    fixtures = [];
+    await new Promise(r => setTimeout(r, 400));
+  });
 
   const setup = () => {
     const fixture = TestBed.createComponent(Host);
+    fixtures.push(fixture);
     document.body.appendChild(fixture.nativeElement);
     fixture.detectChanges();
     const el = (id: string) => fixture.nativeElement.querySelector(`#${id}`) as HTMLElement;
@@ -123,5 +131,35 @@ describe('SheetDragDirective', () => {
     pointer(el('inside'), 'pointermove', 175, 100);
     expect(el('sheet').style.transform).toBe('translateY(60px)');
     expect(el('backdrop').style.backgroundColor).toBe('rgba(0, 0, 0, 0.42)');
+  });
+
+  it('snaps back when the finger stops before letting go, however fast the drag was', () => {
+    const { fixture, el } = setup();
+    pointer(el('inside'), 'pointerdown', 100, 0);
+    for (let y = 120; y <= 160; y += 10) pointer(el('inside'), 'pointermove', y, 5);
+    pointer(el('inside'), 'pointerup', 160, 500);
+    expect(fixture.componentInstance.closes).toBe(0);
+  });
+
+  it('snaps back if the browser takes the touch', () => {
+    const { fixture, el } = setup();
+    pointer(el('inside'), 'pointerdown', 100, 0);
+    pointer(el('inside'), 'pointermove', 150, 100);
+    pointer(el('inside'), 'pointercancel', 150, 0);
+    expect(fixture.componentInstance.closes).toBe(0);
+    expect(el('sheet').style.transform).toBe('translateY(0)');
+  });
+
+  it('fades the sheet out in place with reduced motion, still following the finger', () => {
+    window.matchMedia = () => ({ matches: true } as MediaQueryList);
+    const { fixture, el } = setup();
+    pointer(el('inside'), 'pointerdown', 100, 0);
+    pointer(el('inside'), 'pointermove', 120, 100);
+    pointer(el('inside'), 'pointermove', 200, 100);
+    expect(el('sheet').style.transform).toBe('translateY(80px)');
+    pointer(el('inside'), 'pointerup', 300, 100);
+    expect(fixture.componentInstance.closes).toBe(1);
+    expect(el('sheet').style.opacity).toBe('0');
+    expect(el('sheet').style.transform).toBe('translateY(80px)');
   });
 });
