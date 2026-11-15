@@ -1155,3 +1155,65 @@ describe('game groups (groupLists, coHosts, openLists)', () => {
     });
   });
 });
+
+describe('a co-host added by email', () => {
+  const INVITED = 'game02';
+  const I = `games/${INVITED}`;
+  const dana = (verified = true, email = 'dana@example.com') => env.authenticatedContext('dana', { email, email_verified: verified });
+  const claim = (ctx: RulesTestContext, uid = 'dana') => set(ctx, `${I}/managerId`, uid);
+
+  beforeEach(async () => {
+    const { managerId: _none, ...game } = baseGame({ managerEmail: 'Dana@Example.com' });
+    await seed({ [I]: game, 'groupLists/owner': { ungrouped: 'ungroupedKey0000000001' }, 'games/other1': baseGame({ ownerId: 'stranger', managerId: 'dana' }) });
+  });
+
+  it('the person who signs in with that verified email becomes the co-host, ignoring case', async () => {
+    await assertSucceeds(claim(dana()));
+    await assertSucceeds(set(dana(), `${I}/name`, 'Dana runs this'));
+  });
+
+  it('can take an empty co-host slot the app cleared to ""', async () => {
+    await seed({ [`${I}/managerId`]: '' });
+    await assertSucceeds(claim(dana()));
+  });
+
+  it('an unverified email, a different email or a guest cannot claim it', async () => {
+    await assertFails(claim(dana(false)));
+    await assertFails(claim(dana(true, 'eve@example.com')));
+    await assertFails(claim(guest(), 'guest'));
+    await assertFails(claim(player(), 'alice'));
+  });
+
+  it('cannot claim it for another account, or take a slot someone already holds', async () => {
+    await assertFails(claim(dana(), 'eve'));
+    await seed({ [`${I}/managerId`]: 'cohost' });
+    await assertFails(claim(dana()));
+  });
+
+  it('a game with no co-host email cannot be claimed', async () => {
+    await seed({ [`${I}/managerEmail`]: '' });
+    await assertFails(claim(dana()));
+    await seed({ [`${I}/managerEmail`]: null });
+    await assertFails(claim(dana()));
+  });
+
+  it('the claimed co-host can mark themselves to read group names, only through a game they co-host for that owner', async () => {
+    await assertFails(set(dana(), 'coHosts/owner/dana', INVITED));
+    await assertFails(read(dana(), 'groupLists/owner'));
+    await assertSucceeds(claim(dana()));
+    await assertFails(set(dana(), 'coHosts/owner/dana', 'other1'));
+    await assertFails(set(dana(), 'coHosts/owner/dana', true));
+    await assertFails(set(dana(), 'coHosts/owner/eve', INVITED));
+    await assertSucceeds(set(dana(), 'coHosts/owner/dana', INVITED));
+    await assertSucceeds(read(dana(), 'groupLists/owner'));
+  });
+
+  it('the mark stops working once the owner removes them, and never replaces the owner\'s own mark', async () => {
+    await seed({ [`${I}/managerId`]: 'dana', 'coHosts/owner/dana': INVITED });
+    await assertSucceeds(read(dana(), 'groupLists/owner'));
+    await seed({ [`${I}/managerId`]: '' });
+    await assertFails(read(dana(), 'groupLists/owner'));
+    await seed({ [`${I}/managerId`]: 'dana', 'coHosts/owner/dana': true });
+    await assertFails(set(dana(), 'coHosts/owner/dana', INVITED));
+  });
+});
