@@ -188,4 +188,32 @@ describe('ModalComponent', () => {
     expect(document.querySelector('[aria-labelledby="c-title"]')).toBeNull();
     f.destroy();
   });
+
+  it('shows the grabber on a phone sheet a backdrop tap may close, and not otherwise', async () => {
+    const f = setup();
+    f.componentInstance.a.set(true);
+    await flush(f);
+    const panel = () => document.querySelector<HTMLElement>('[aria-labelledby="a-title"]')!;
+    expect(panel().firstElementChild!.classList).toContain('rounded-full');
+    f.componentInstance.backdropA.set(false);
+    await flush(f);
+    expect(panel().firstElementChild!.id).toBe('a-title');
+  });
+
+  it('asks to close on a swipe down, and slides back when the owner keeps it open', async () => {
+    window.matchMedia = (query: string) => ({ matches: query.includes('max-width') } as MediaQueryList);
+    const f = setup();
+    f.componentInstance.a.set(true);
+    await flush(f);
+    const panel = document.querySelector<HTMLElement>('[aria-labelledby="a-title"]')!;
+    panel.getBoundingClientRect = () => ({ height: 400 } as DOMRect);
+    const swipe = (type: string, y: number) => panel.dispatchEvent(new PointerEvent(type, { bubbles: true, clientY: y, isPrimary: true, pointerId: 1, pointerType: 'touch' }));
+    swipe('pointerdown', 100);
+    for (const y of [120, 250, 400]) swipe('pointermove', y);
+    swipe('pointerup', 400);
+    expect(f.componentInstance.dismissedA).toBe(1);
+    await flush(f);
+    expect(panel.style.transform).toBe('translateY(0)');
+    await new Promise(r => setTimeout(r, 400));
+  });
 });
