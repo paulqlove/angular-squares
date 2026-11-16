@@ -6,12 +6,13 @@ import { marked } from 'marked';
 import sanitizeHtml from 'sanitize-html';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import { writeAgentFiles } from './agent-files.mjs';
+import { lastmodFor } from './page-dates.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const origin = 'https://quarterscore.com';
 const blogDir = path.join(root, 'content', 'blog');
 const clientRoutes = new Set(['dashboard', 'create', 'game/:gameId', 'auth/email-link', 'present', 'present/:gameId', 'tv/:token', '**']);
-const pageLastmod = '2026-11-01';
+const pageDates = JSON.parse(fs.readFileSync(path.join(root, 'scripts', 'page-dates.json'), 'utf8'));
 const espnNfl = 'https://site.api.espn.com/apis/site/v2/sports/football/nfl';
 const thanksgivingDates = ['20261125', '20261126', '20261127'];
 
@@ -165,10 +166,10 @@ function writePrerenderRoutes(paths) {
 }
 
 function writeSitemap(paths, posts) {
-  const lastmod = new Map(posts.map(post => [`/blog/${post.slug}`, post.date]));
+  const postDates = new Map(posts.map(post => [`/blog/${post.slug}`, post.date]));
   const urls = paths.map(urlPath => {
     const loc = urlPath === '/' ? `${origin}/` : `${origin}${urlPath}`;
-    const modified = lastmod.get(urlPath) ?? pageLastmod;
+    const modified = lastmodFor(urlPath, pageDates, postDates);
     return `  <url>\n    <loc>${xmlEscape(loc)}</loc>\n    <lastmod>${modified}</lastmod>\n  </url>`;
   });
   const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>\n`;
