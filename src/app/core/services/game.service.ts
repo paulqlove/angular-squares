@@ -54,6 +54,11 @@ export class GameService {
     return this.entitlements.assertUnderFreeBoardLimit(ownerId);
   }
 
+  /** Free games this host has left this season, or null when the season cap doesn't apply. */
+  public seasonGamesLeft(ownerId: string): Promise<number | null> {
+    return this.entitlements.seasonGamesLeft(ownerId);
+  }
+
   public createGame(
     ownerId: string,
     ownerName: string,

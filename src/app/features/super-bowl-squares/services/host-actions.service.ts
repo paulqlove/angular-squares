@@ -1,12 +1,13 @@
-import { inject, Injectable } from '@angular/core';
+import { computed, effect, inject, Injectable, signal, untracked } from '@angular/core';
 import { BoardSize, GameData, GameService, getBoardDimensions } from '../../../core/services/game.service';
 import { ConfirmService } from '../../../core/services/confirm.service';
 import { PlanService } from '../../../core/services/plan.service';
 import { SanitizationService } from '../../../core/services/sanitization.service';
 import { SeasonGamesService } from '../../../core/services/season-games.service';
 import { ToastService } from '../../../core/services/toast.service';
-import { splitFractions } from '../../../core/plans';
+import { PLANS, splitFractions } from '../../../core/plans';
 import { drawBoardNumbers } from '../../../core/utils/draw-numbers';
+import { clearCountNote, clearGameStep } from '../../../core/utils/season-games';
 import type { EditGameValues } from '../components/edit-game-dialog/edit-game-dialog.component';
 import { emptyScores } from '../utils/board-math';
 import { hostNextStep } from '../utils/host-next-step';
@@ -18,6 +19,24 @@ import { NumberDrawService } from './number-draw.service';
 /** The host's game-day steps: lock and draw, clear or redraw the numbers, edit the game, and clear it. */
 @Injectable()
 export class HostActionsService {
+  constructor() {
+    // Opening Edit game reads the season count, so Clear game's extra line and block are ready.
+    effect(() => {
+      if (this.ui.showSettings()) untracked(() => void (this.seasonLoad = this.refreshSeasonGamesLeft()));
+    });
+  }
+
+  // Public properties
+
+  /** Free games the owner has left this season, read when Edit game opens. Null while the season cap is off or doesn't apply. */
+  public readonly seasonGamesLeft = signal<number | null>(null);
+  /** The season dialog, for a Clear game the cap stopped. */
+  public readonly showSeasonLimit = signal(false);
+  /** What Clear game does for this board right now: clear, clear with a line, or open the season dialog. */
+  public readonly clearStep = computed(() => clearGameStep(this.state.squaresPicked(), this.seasonGamesLeft()));
+  /** The extra clear line for a host under the cap, else ''. */
+  public readonly clearNote = computed(() => this.clearStep() === 'note' ? clearCountNote(this.seasonGamesLeft() ?? 0, PLANS.free.seasonGames) : '');
+
   // Public functions
 
   /** Locking a half-empty board: convert to the chosen smaller size, then lock. */
@@ -37,37 +56,25 @@ export class HostActionsService {
     await this.setLocked(true);
   }
 
-  /** Owner only: wipes squares, numbers, scores and settings back to a new board's. */
+  /**
+   * Owner only: wipes squares, numbers, scores and settings back to a new board's.
+   * A free host at the season cap whose board has players gets the season dialog instead, and nothing changes.
+   */
   public async onClearGame(confirmed: boolean = false): Promise<void> {
     if (!this.state.isGameOwner()) return;
+    // Reuse the count read when Edit game opened, so a clear doesn't read every board again.
+    await (this.seasonLoad ?? this.refreshSeasonGamesLeft());
+    if (this.clearStep() === 'blocked') {
+      this.showSeasonLimit.set(true);
+      return;
+    }
 
     if (!confirmed && !await this.confirmService.ask({ title: 'Clear all game data?', message: 'Squares, numbers and scores are removed. This cannot be undone.', confirmLabel: 'Clear game data' })) {
       return;
     }
 
-    const { rows, cols } = getBoardDimensions(this.state.boardSize);
-    const defaultGameState: Partial<GameData> = {
-      // A cleared board is a new game toward the season; the old one stays counted if it had players.
-      startedAt: Date.now(),
-      selectedSquares: {},
-      homeNumbers: Array(cols).fill(null),
-      awayNumbers: Array(rows).fill(null),
-      scores: emptyScores(),
-      winners: {},
-      playerColors: {},
-      playerUserIds: {},
-      pricePerSquare: 10,
-      isRandomized: false,
-      isLocked: false,
-      homeTeam: '',
-      awayTeam: '',
-      hostNote: '',
-      paidPlayers: [],
-      paidSquares: {}
-    };
-
     await this.seasonGames.recordBoard(this.state.gameId);
-    await this.gameService.updateGame(this.state.gameId, defaultGameState);
+    await this.gameService.updateGame(this.state.gameId, this.clearedGame());
   }
 
   /** Saves the Edit game popup in one write, then the settings that have their own calls. */
@@ -159,6 +166,8 @@ export class HostActionsService {
   // Private properties
 
   private readonly confirmService: ConfirmService = inject(ConfirmService);
+  /** The season count read when Edit game last opened, while it's in flight or done. */
+  private seasonLoad: Promise<void> | null = null;
   private readonly draw: NumberDrawService = inject(NumberDrawService);
   private readonly gameService: GameService = inject(GameService);
   private readonly groups: GamePageGroupsService = inject(GamePageGroupsService);
@@ -228,6 +237,39 @@ export class HostActionsService {
       }
     }
     return true;
+  }
+
+  /** A board as Clear game leaves it: a new game with no squares, numbers, scores or settings. */
+  private clearedGame(): Partial<GameData> {
+    const { rows, cols } = getBoardDimensions(this.state.boardSize);
+    return {
+      // A cleared board is a new game toward the season; the old one stays counted if it had players.
+      startedAt: Date.now(),
+      selectedSquares: {},
+      homeNumbers: Array(cols).fill(null),
+      awayNumbers: Array(rows).fill(null),
+      scores: emptyScores(),
+      winners: {},
+      playerColors: {},
+      playerUserIds: {},
+      pricePerSquare: 10,
+      isRandomized: false,
+      isLocked: false,
+      homeTeam: '',
+      awayTeam: '',
+      hostNote: '',
+      paidPlayers: [],
+      paidSquares: {}
+    };
+  }
+
+  /**
+   * Reads how many free games the owner has left this season. Leaves null when the cap is off or doesn't apply.
+   * A failed read also leaves null on purpose: Clear game then works as before rather than blocking a host by mistake.
+   */
+  private async refreshSeasonGamesLeft(): Promise<void> {
+    if (!this.state.isGameOwner()) return;
+    this.seasonGamesLeft.set(await this.gameService.seasonGamesLeft(this.state.ownerId()).catch(() => null));
   }
 
   /**

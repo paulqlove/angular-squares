@@ -12,13 +12,19 @@ import {
   isBoardActive
 } from '../utils/board-activity';
 import { normalizeSport, toSeasonGame } from '../utils/game-parse';
-import { seasonLimitApplies, SeasonGame } from '../utils/season-games';
+import { SEASON_LIMIT_ON, gamesLeft, seasonLimitApplies, SeasonGame } from '../utils/season-games';
 import { AuthService } from './auth.service';
 import { EspnService } from './espn.service';
 import { GameDatabaseService } from './game-database.service';
 import { RolePreviewService } from './role-preview.service';
 import { SeasonGamesService } from './season-games.service';
 import { SeasonPassService } from './season-pass.service';
+
+/** The fields of a saved board that the limits read. */
+interface OwnedGame {
+  gameId: string;
+  raw: { createdAt?: unknown; startedAt?: unknown; squares?: unknown; espnEventId?: unknown; espnSport?: unknown };
+}
 
 interface OwnedBoard {
   activity: BoardActivity;
@@ -63,6 +69,15 @@ export class EntitlementService {
     const now = Date.now();
     const dialog = boardLimitDialog(owned.filter(b => isBoardActive(b.activity, now)).length, plan.activeBoards);
     if (dialog) throw new ActiveBoardLimitError(dialog);
+  }
+
+  /** Free games this host has left this season, or null when the cap doesn't apply (switch off, or a plan with no cap). */
+  public async seasonGamesLeft(ownerId: string): Promise<number | null> {
+    if (!SEASON_LIMIT_ON || !this.database.isBrowser) return null;
+    const cap = PLANS[await this.planFor(ownerId)].seasonGames;
+    if (!seasonLimitApplies(cap)) return null;
+    const games = (await this.loadOwnedGames(ownerId)).map(({ gameId, raw }) => toSeasonGame(gameId, raw));
+    return gamesLeft(cap, await this.seasonGames.usedThisSeason(ownerId, games));
   }
 
   /** Write-only notifyMe/{pushId} entry. Callers must already be signed in. */
@@ -163,17 +178,7 @@ export class EntitlementService {
 
   /** Each board this host owns, read once: when it stops being active, and its game for the season count. */
   private async loadOwnedBoards(ownerId: string): Promise<OwnedBoard[]> {
-    const snapshot = await get(ref(this.database.db, `users/${ownerId}/games`));
-    if (!snapshot.exists()) {
-      return [];
-    }
-
-    const boards = await Promise.all(Object.keys(snapshot.val()).map(async (gameId): Promise<OwnedBoard | null> => {
-      const gameSnap = await get(ref(this.database.db, `games/${gameId}`));
-      if (!gameSnap.exists()) {
-        return null;
-      }
-      const raw = gameSnap.val() || {};
+    return Promise.all((await this.loadOwnedGames(ownerId)).map(async ({ gameId, raw }): Promise<OwnedBoard> => {
       const espnEventId = typeof raw.espnEventId === 'string' ? raw.espnEventId : null;
       const linkedGameFinal = hasLinkedGame(espnEventId)
         ? await this.espnService.isEventFinal(espnEventId as string, normalizeSport(raw.espnSport))
@@ -181,7 +186,18 @@ export class EntitlementService {
       const game = toSeasonGame(gameId, raw);
       return { activity: { createdAt: game.createdAt || null, espnEventId, linkedGameFinal }, game };
     }));
+  }
 
-    return boards.filter((board): board is OwnedBoard => board !== null);
+  /** Each board this host owns, as saved. Boards that no longer exist are left out. */
+  private async loadOwnedGames(ownerId: string): Promise<OwnedGame[]> {
+    const snapshot = await get(ref(this.database.db, `users/${ownerId}/games`));
+    if (!snapshot.exists()) {
+      return [];
+    }
+    const games = await Promise.all(Object.keys(snapshot.val()).map(async (gameId): Promise<OwnedGame | null> => {
+      const gameSnap = await get(ref(this.database.db, `games/${gameId}`));
+      return gameSnap.exists() ? { gameId, raw: gameSnap.val() || {} } : null;
+    }));
+    return games.filter((game): game is OwnedGame => game !== null);
   }
 }

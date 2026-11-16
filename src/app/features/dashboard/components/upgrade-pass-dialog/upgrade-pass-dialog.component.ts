@@ -100,10 +100,10 @@ export type UpgradeTrigger = BoardLimitDialog | 'pass' | 'ended';
 
         <ul class="mt-5 flex flex-wrap gap-2" aria-label="Included">
           <li class="qs-badge qs-badge-ok">Live scores</li>
+          <li class="qs-badge qs-badge-ok">Up to 25 boards at a time</li>
           @if (seasonCopy) {
             <li class="qs-badge qs-badge-ok">No season game limit</li>
           }
-          <li class="qs-badge qs-badge-ok">Up to 25 boards at a time</li>
           <li class="qs-badge qs-badge-ok">Custom splits</li>
           <li class="qs-badge qs-badge-ok">Auto-lock and draw</li>
           <li class="qs-badge qs-badge-ok">Open boards list</li>
@@ -159,6 +159,9 @@ export type UpgradeTrigger = BoardLimitDialog | 'pass' | 'ended';
         @if (trigger === 'season') {
           <p class="qs-label mt-2 normal-case leading-snug tracking-normal text-qs-muted">Games you delete before anyone joins don't count.</p>
         }
+        @if (keepLabel) {
+          <button type="button" class="qs-btn qs-btn-secondary mt-4 w-full" (click)="dismiss()">{{ keepLabel }}</button>
+        }
       </div>
       }
     </app-modal>
@@ -172,6 +175,8 @@ export class UpgradePassDialogComponent implements AfterViewInit {
   @Input() boardName = '';
   /** Free games left this season while the season cap is on, else null (no season copy shows). */
   @Input() gamesLeft: number | null = null;
+  /** A second button that only closes the dialog, such as "Keep this game" when Clear game hits the season cap. */
+  @Input() keepLabel = '';
   @Output() dismissed = new EventEmitter<void>();
   @Output() resetOld = new EventEmitter<void>();
   @Output() deleteOld = new EventEmitter<void>();

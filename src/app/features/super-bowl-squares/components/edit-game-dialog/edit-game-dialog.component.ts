@@ -210,6 +210,9 @@ export interface EditGameValues {
             <div class="rounded-inner border border-qs-line p-4">
               <p class="qs-label text-qs-bad">Danger zone</p>
               <p class="mt-1 text-sm text-qs-muted">Clears squares, numbers, scores and settings. This can't be undone.</p>
+              @if (clearNote) {
+                <p class="mt-1 text-sm text-qs-muted">{{ clearNote }}</p>
+              }
               <button type="button" (click)="onClearClick()" class="qs-btn qs-btn-danger mt-3">
                 <ng-icon name="heroTrash" class="text-base"></ng-icon>
                 {{ confirmingClear ? 'Tap again to clear' : 'Clear game' }}
@@ -253,6 +256,10 @@ export class EditGameDialogComponent implements OnChanges {
   @Input() linkedGameName = '';
   @Input() showSplit = false;
   @Input() showClear = false;
+  /** One more line under the clear warning, such as how many free games are left this season. */
+  @Input() clearNote = '';
+  /** Clear game can't go ahead (season cap): the first tap goes straight to the host, who shows why, and Edit game closes. */
+  @Input() clearBlocked = false;
   /** False keeps the dialog open until the host closes it (the dashboard closes after a good save). */
   @Input() closeOnSave = true;
   @Input() saving = false;
@@ -331,6 +338,11 @@ export class EditGameDialogComponent implements OnChanges {
   }
 
   onClearClick(): void {
+    if (this.clearBlocked) {
+      this.clearGame.emit();
+      this.close();
+      return;
+    }
     if (!this.confirmingClear) {
       this.confirmingClear = true;
       return;
