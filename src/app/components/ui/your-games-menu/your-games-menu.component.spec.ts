@@ -225,11 +225,31 @@ describe('YourGamesMenuComponent', () => {
     await new Promise(r => setTimeout(r));
     fixture.detectChanges();
     expect(el.querySelector('#your-games-menu')).toBeNull();
-    expect(el.querySelector('[role="dialog"]')?.getAttribute('aria-labelledby')).toBe('your-games-title');
+    const dialog = el.querySelector('[role="dialog"]');
+    expect(dialog?.getAttribute('aria-labelledby')).toBe('your-games-title');
+    expect(dialog?.parentElement?.classList).not.toContain('qs-sheet-slide');
     // A click elsewhere on the page leaves the dialog to its own backdrop
     document.body.click();
     fixture.detectChanges();
     expect(el.querySelector('[role="dialog"]')).not.toBeNull();
     el.remove();
+  });
+  it('opens as the sliding bottom sheet on a phone', async () => {
+    const fixture = await setup();
+    const menu = fixture.componentInstance;
+    const el: HTMLElement = fixture.nativeElement;
+    menu.close();
+    await new Promise(r => setTimeout(r, 250));
+    const matchMedia = window.matchMedia;
+    window.matchMedia = (() => ({ matches: true })) as never;
+    try {
+      menu.toggle('external');
+      await new Promise(r => setTimeout(r));
+      fixture.detectChanges();
+      expect(el.querySelector('#your-games-menu')).toBeNull();
+      expect(el.querySelector('[role="dialog"]')?.parentElement?.classList).toContain('qs-sheet-slide');
+    } finally {
+      window.matchMedia = matchMedia;
+    }
   });
 });
