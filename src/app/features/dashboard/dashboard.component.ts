@@ -2,9 +2,7 @@ import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, effect, inject }
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
-  heroArrowRight,
   heroBars3,
-  heroChevronDown,
   heroLockClosed,
   heroLockOpen,
   heroMagnifyingGlass,
@@ -66,9 +64,7 @@ import { PlayersViewService } from './services/players-view.service';
     DashboardDialogsService,
     PlayersViewService,
     provideIcons({
-      heroArrowRight,
       heroBars3,
-      heroChevronDown,
       heroLockClosed,
       heroLockOpen,
       heroMagnifyingGlass,
