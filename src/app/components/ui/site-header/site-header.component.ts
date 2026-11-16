@@ -25,13 +25,26 @@ type SiteHeaderPosition = 'static' | 'headroom' | 'fixed';
     '[class]': 'hostClass()',
     '(focusin)': 'hidden.set(false)'
   },
+  // Phones: the full lockup at up to 160px, shrinking to fit beside the page's buttons; the square mark only when under 128px is left.
+  styles: `
+    .qs-logo-full { display: block; height: 1.5rem; width: auto; }
+    .qs-logo-mark { display: none; }
+    @media (max-width: 639.98px) {
+      .qs-logo-slot { container-type: inline-size; flex: 1 1 0%; min-width: 2rem; }
+      .qs-logo-full { height: auto; width: min(10rem, 100cqw); }
+      @container (max-width: 7.99rem) {
+        .qs-logo-full { display: none; }
+        .qs-logo-mark { display: block; }
+      }
+    }
+  `,
   template: `
     <header [class]="barClass()">
       <div class="mx-auto flex min-h-[60px] max-w-[1600px] flex-wrap items-center gap-3 px-4 py-2 sm:px-8">
         @if (heading() === 'h1') {
-          <h1><ng-container [ngTemplateOutlet]="logo"></ng-container></h1>
+          <h1 class="qs-logo-slot"><ng-container [ngTemplateOutlet]="logo"></ng-container></h1>
         } @else {
-          <p><ng-container [ngTemplateOutlet]="logo"></ng-container></p>
+          <p class="qs-logo-slot"><ng-container [ngTemplateOutlet]="logo"></ng-container></p>
         }
 
         @if (nav() === 'guides') {
@@ -78,8 +91,8 @@ type SiteHeaderPosition = 'static' | 'headroom' | 'fixed';
 
     <ng-template #logo>
       <a routerLink="/" (click)="logoClick.emit()" aria-label="QuarterScore home" class="flex min-h-11 items-center rounded-md">
-        <img src="assets/brand/lockup-horizontal-reversed.svg" alt="" width="192" height="24" class="hidden h-6 w-auto sm:block">
-        <img src="assets/brand/mark-reversed.svg" alt="" width="32" height="32" class="h-8 w-8 sm:hidden">
+        <img src="assets/brand/lockup-horizontal-reversed.svg" alt="" width="192" height="24" class="qs-logo-full">
+        <img src="assets/brand/mark-reversed.svg" alt="" width="32" height="32" class="qs-logo-mark h-8 w-8">
       </a>
     </ng-template>
   `
