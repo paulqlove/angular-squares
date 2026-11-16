@@ -3,12 +3,12 @@ import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroFolder } from '@ng-icons/heroicons/outline';
 
 import { ToastService } from '../../../../core/services/toast.service';
-import { DashboardDialogsService } from '../../services/dashboard-dialogs.service';
 import { DashboardGroupsService } from '../../services/dashboard-groups.service';
 import { DashboardSearchService } from '../../services/dashboard-search.service';
 import { DashboardStore } from '../../services/dashboard.store';
 import { PlayersViewService } from '../../services/players-view.service';
 import { GROUPS_OFF_HINT } from '../dashboard-groups/group-menu.component';
+import { NewBoardButtonComponent } from '../dashboard-returning-empty/new-board-button.component';
 import { DashboardSearchFieldComponent } from '../dashboard-search-field/dashboard-search-field.component';
 
 /**
@@ -20,13 +20,12 @@ import { DashboardSearchFieldComponent } from '../dashboard-search-field/dashboa
  */
 @Component({
   selector: 'div[appDashboardPhoneBar]',
-  imports: [NgIconComponent, DashboardSearchFieldComponent],
+  imports: [NgIconComponent, DashboardSearchFieldComponent, NewBoardButtonComponent],
   providers: [provideIcons({ heroFolder })],
   templateUrl: './dashboard-phone-bar.component.html',
   changeDetection: ChangeDetectionStrategy.Eager
 })
 export class DashboardPhoneBarComponent {
-  protected readonly dialogs: DashboardDialogsService = inject(DashboardDialogsService);
   /** Off on the Players tab; a picked group fills it ink. */
   protected readonly folderClass = computed<string>(() => {
     if (this.players.active()) return 'qs-ctrl-off';

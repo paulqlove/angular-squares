@@ -311,6 +311,8 @@ html, body {
     gap: 8px;
     min-height: 44px;
     padding: 0 18px;
+    /* Letter-spacing also trails the last letter; the same space in front keeps the words centered */
+    text-indent: 0.1em;
     border: 1px solid transparent;
     border-radius: var(--qs-r-btn);
     white-space: nowrap;
