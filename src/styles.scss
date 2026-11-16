@@ -322,6 +322,11 @@ html, body {
   /* Icons keep their glyph in the middle of their own box */
   .qs-btn ng-icon { text-indent: 0; }
   .qs-btn:disabled { opacity: .45; cursor: not-allowed; }
+  /* A dialog's button row (Edit game, Set up your board). On phones the dialog fills the screen, so the row clears the home bar. */
+  .qs-dialog-footer { border-top: 1px solid var(--qs-line); background: var(--qs-panel); padding: 1rem 1.5rem; }
+  @media (max-width: 639px) {
+    .qs-dialog-footer { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+  }
   .qs-btn-primary { background: var(--qs-accent); color: var(--qs-on-accent); }
   .qs-btn-primary:hover:not(:disabled) { background: var(--qs-accent-hover); }
   .qs-btn-ink { background: var(--qs-ink); color: var(--qs-bg); }

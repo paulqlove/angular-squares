@@ -9,7 +9,7 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
   host: { class: 'contents' },
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-<div class="flex items-center gap-2 border-t border-qs-line px-4 py-3 sm:px-6">
+<div class="qs-dialog-footer flex items-center gap-2">
   @if (firstStep()) {
     <button type="button" (click)="cancelled.emit()" class="qs-btn qs-btn-ghost px-3 text-qs-muted">Cancel</button>
   } @else {
