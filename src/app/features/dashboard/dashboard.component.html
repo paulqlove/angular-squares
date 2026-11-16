@@ -4,46 +4,19 @@
     <app-profile-menu walkthroughTarget="profile-dropdown" (tour)="startWalkthrough()"></app-profile-menu>
   </app-site-header>
 
-  <main class="mx-auto max-w-[1600px] px-4 sm:px-8 pt-6 pb-32 sm:pb-20 md:pt-8">
+  <main class="mx-auto max-w-[1600px] px-4 sm:px-8 pt-6 pb-32 sm:pb-28 md:pt-8">
     <!-- Phone, host with no boards: the code field moves up here, since the bottom bar holds only New board -->
     @if (store.emptyHost()) {
       <div appCodeField class="mb-8 block sm:hidden"></div>
     }
-    <!-- Heading + actions -->
-    <!-- A host with no boards keeps New board and Search on their own row under the title -->
-    <div class="flex flex-col gap-6" [class.lg:flex-row]="!store.emptyHost()" [class.lg:items-end]="!store.emptyHost()"
-      [class.lg:justify-between]="!store.emptyHost()" data-walkthrough="hero-section">
+    <!-- Heading. Search, the group picker and New board live in the bottom taskbar on every screen size. -->
+    <div data-walkthrough="hero-section">
       @if (store.firstEmpty()) {
         <div appFirstHostTitle [name]="store.firstName()"></div>
       } @else {
-        <div>
-          <p class="qs-eyebrow">Dashboard</p>
-          <h2 class="qs-title mt-3 text-4xl sm:text-5xl">Your <span class="text-qs-accent">games</span></h2>
-        </div>
+        <p class="qs-eyebrow">Dashboard</p>
+        <h2 class="qs-title mt-3 text-4xl sm:text-5xl">Your <span class="text-qs-accent">games</span></h2>
       }
-
-      <!-- From 640px up: one field that searches your boards or joins with a code, the group picker, then New board. Phones get the bottom bar instead. -->
-      <div class="hidden items-center gap-3 sm:flex sm:flex-row">
-        @if (store.emptyHost()) {
-          <button appNewBoardButton [label]="store.newBoardLabel()"></button>
-        }
-        <div role="search" class="relative w-[400px] min-w-0" data-walkthrough="join-game">
-          <div appDashboardSearchField class="qs-search min-w-0 flex-1" [where]="'desk'"></div>
-          @if (search.showCodeError()) {
-            <p id="code-error-desk" class="qs-error-in absolute left-0 top-full mt-2 text-sm text-qs-bad" role="alert">Game not found</p>
-          }
-        </div>
-
-        <!-- On the Players tab the picker stays put but switched off, so Search doesn't slide over -->
-        @if (store.groupPickerShows() && !store.emptyHost()) {
-          <app-group-menu [off]="players.active()" [rows]="store.groupRows()" [pickedId]="groups.pickedId()" [canManage]="groups.canEdit()"
-            (groupPicked)="groups.pickedId.set($event)" (manageGroups)="groups.openManage()"></app-group-menu>
-        }
-
-        @if (store.canCreateGame() && !store.emptyHost()) {
-          <button appNewBoardButton></button>
-        }
-      </div>
     </div>
 
     @if (!store.canCreateGame()) {
@@ -101,8 +74,11 @@
   <!-- No footer on phones, like the game page: the bottom bar docks at the end of the page, and main's 128px bottom padding keeps the last card clear of it -->
   <app-site-footer width="wide" class="block bg-qs-panel max-sm:hidden"></app-site-footer>
 
+  <!-- From 640px up: Search, the group picker and New board in a taskbar floating at the bottom -->
+  <div appDashboardDeskBar [class.qs-dock-off]="dialogs.barHidden()" [attr.aria-hidden]="dialogs.barHidden() ? 'true' : null"></div>
+
   <!-- Phone: the search-or-code field and New board in a bar along the bottom, lifted above the keyboard while the search is open.
-       A returning host with no boards gets New board alone, pinned along the bottom. -->
+       A host with no boards gets New board alone, pinned along the bottom, with the code field at the top of the page. -->
   @if (store.emptyHost()) {
     <div appNewBoardDock [label]="store.newBoardLabel()" [class.qs-dock-off]="dialogs.barHidden()" [attr.aria-hidden]="dialogs.barHidden() ? 'true' : null"></div>
   } @else {

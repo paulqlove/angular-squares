@@ -20,7 +20,8 @@ function freeHostWithNoBoards(facts: EmptyDashboardFacts, on: boolean): boolean 
 
 /**
  * True for a returning free host: no boards right now, but at least one game already counted this season.
- * A first-time host (nothing counted yet), a Season Pass or Admin host, and the season cap switched off all keep the first-board screen.
+ * A first-time host (nothing counted yet) gets the first-time screen instead; Season Pass and Admin hosts, and everyone
+ * while the season cap is switched off, keep the plain dashboard.
  */
 export function isReturningEmpty(facts: EmptyDashboardFacts, on: boolean = SEASON_LIMIT_ON): boolean {
   return freeHostWithNoBoards(facts, on) && (facts.used ?? 0) > 0;

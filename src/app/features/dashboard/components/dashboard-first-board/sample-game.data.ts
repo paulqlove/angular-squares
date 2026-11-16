@@ -1,18 +1,11 @@
+import { DEMO_PLAYERS, DemoPlayer } from '../../../../shared/demo-players';
+
 /** Made-up data for the first-time host's "What a game looks like" preview. Decorative only: nothing here is read or saved. */
 
 /** One square: the player's initials and palette color, or null for an open square. */
-export type SampleSquare = { initials: string; color: string } | null;
+export type SampleSquare = DemoPlayer | null;
 
-const AL = { initials: 'AL', color: 'qs-p-rose' };
-const SA = { initials: 'SA', color: 'qs-p-sky' };
-const JO = { initials: 'JO', color: 'qs-p-butter' };
-const MI = { initials: 'MI', color: 'qs-p-aqua' };
-const LE = { initials: 'LE', color: 'qs-p-orchid' };
-const CA = { initials: 'CA', color: 'qs-p-coral' };
-const RI = { initials: 'RI', color: 'qs-p-apricot' };
-const NI = { initials: 'NI', color: 'qs-p-lilac' };
-const MA = { initials: 'MA', color: 'qs-p-tan' };
-const PA = { initials: 'PA', color: 'qs-p-periwinkle' };
+const [AL, SA, JO, MI, LE, CA, RI, NI, MA, PA] = DEMO_PLAYERS;
 
 /** Numbers along the top (one team) and down the side (the other). */
 export const SAMPLE_COLUMNS: readonly number[] = [7, 3, 0, 9, 4];
@@ -27,9 +20,7 @@ export const SAMPLE_SQUARES: readonly (readonly SampleSquare[])[] = [
   [LE, CA, RI, null, null]
 ];
 
-export interface SamplePlayer {
-  initials: string;
-  color: string;
+export interface SamplePlayer extends DemoPlayer {
   name: string;
   squares: number;
   confirmed: boolean;

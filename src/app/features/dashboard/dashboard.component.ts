@@ -24,18 +24,16 @@ import { WalkthroughService } from '../../core/services/walkthrough.service';
 import { DockAtEndDirective } from '../../shared/directives/dock-at-end.directive';
 import { CreateGameFormComponent } from '../create/create-game-form.component';
 import { EditGameDialogComponent } from '../super-bowl-squares/components/edit-game-dialog/edit-game-dialog.component';
-import { GroupMenuComponent } from './components/dashboard-groups/group-menu.component';
+import { DashboardDeskBarComponent } from './components/dashboard-desk-bar/dashboard-desk-bar.component';
 import { DashboardHostingComponent } from './components/dashboard-hosting/dashboard-hosting.component';
 import { DashboardJoinedComponent } from './components/dashboard-joined/dashboard-joined.component';
 import { DashboardPhoneBarComponent } from './components/dashboard-phone-bar/dashboard-phone-bar.component';
-import { NewBoardButtonComponent } from './components/dashboard-returning-empty/new-board-button.component';
 import { CodeFieldComponent } from './components/dashboard-returning-empty/code-field.component';
 import { NewBoardDockComponent } from './components/dashboard-returning-empty/new-board-dock.component';
 import { SeasonTilesComponent } from './components/dashboard-returning-empty/season-tiles.component';
 import { FirstHostTitleComponent } from './components/dashboard-first-board/first-host-title.component';
 import { FreeGamesLineComponent } from './components/dashboard-first-board/free-games-line.component';
 import { SampleGameComponent } from './components/dashboard-first-board/sample-game.component';
-import { DashboardSearchFieldComponent } from './components/dashboard-search-field/dashboard-search-field.component';
 import { UpgradePassDialogComponent } from './components/upgrade-pass-dialog/upgrade-pass-dialog.component';
 import { DashboardDialogsService } from './services/dashboard-dialogs.service';
 import { DashboardEditService } from './services/dashboard-edit.service';
@@ -56,7 +54,7 @@ import { PlayersViewService } from './services/players-view.service';
   imports: [
     ModalComponent, NgIconComponent, SiteHeaderComponent, SiteFooterComponent, DockAtEndDirective, ProfileMenuComponent, ShareDialogComponent,
     CreateGameFormComponent, EditGameDialogComponent, UpgradePassDialogComponent, SeasonPassesDialogComponent, DashboardHostingComponent,
-    DashboardJoinedComponent, DashboardPhoneBarComponent, DashboardSearchFieldComponent, GroupMenuComponent, CodeFieldComponent, NewBoardButtonComponent,
+    DashboardJoinedComponent, DashboardPhoneBarComponent, CodeFieldComponent, DashboardDeskBarComponent,
     NewBoardDockComponent, SeasonTilesComponent, FirstHostTitleComponent, FreeGamesLineComponent, SampleGameComponent
   ],
   providers: [
