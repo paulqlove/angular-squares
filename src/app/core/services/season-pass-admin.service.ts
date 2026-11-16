@@ -34,7 +34,7 @@ export class SeasonPassAdminService {
   public readonly isAdmin: Signal<boolean> = inject(AuthService).isPreviewAdmin;
   public readonly isGrantingPass = signal<boolean>(false);
   public readonly isLoadingGiftedPasses = signal<boolean>(false);
-  public newGiftDays: number = 210;
+  public newGiftDays: number = 30;
   public newGiftEmail: string = '';
   public readonly updatingPassEmail = signal<string | null>(null);
 

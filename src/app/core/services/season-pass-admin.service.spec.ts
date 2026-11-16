@@ -42,6 +42,10 @@ describe('SeasonPassAdminService', () => {
     expect(service.canManagePasses()).toBe(false);
   });
 
+  it('gifts 30 days unless changed', () => {
+    expect(service.newGiftDays).toBe(30);
+  });
+
   it('opens the dialog and loads the gifted passes', async () => {
     service.openDialog();
     expect(service.dialogOpen()).toBe(true);
