@@ -174,3 +174,4 @@
 @if (dialogs.showUpgradeDialog()) {
   <app-upgrade-pass-dialog [trigger]="dialogs.upgradeTrigger()" [boardName]="dialogs.endedBoard()?.name ?? ''" [gamesLeft]="store.seasonGamesLeft()" (dismissed)="dialogs.closeUpgrade()" (resetOld)="dialogs.resetOldBoard()" (deleteOld)="dialogs.deleteOldBoard()" />
 }
+<app-season-passes-dialog />

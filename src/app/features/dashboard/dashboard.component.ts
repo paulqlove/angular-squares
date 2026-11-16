@@ -16,6 +16,7 @@ import { SiteHeaderComponent } from '../../components/ui/site-header/site-header
 import { SiteFooterComponent } from '../../shared/site-footer.component';
 import { ModalComponent } from '../../components/ui/modal/modal.component';
 import { ProfileMenuComponent } from '../../components/ui/profile-menu/profile-menu.component';
+import { SeasonPassesDialogComponent } from '../../components/ui/season-passes-dialog/season-passes-dialog.component';
 import { ShareDialogComponent } from '../../components/ui/share-dialog/share-dialog.component';
 import { AuthService } from '../../core/services/auth.service';
 import { PlanService } from '../../core/services/plan.service';
@@ -51,7 +52,7 @@ import { PlayersViewService } from './services/players-view.service';
   selector: 'app-dashboard',
   imports: [
     ModalComponent, NgIconComponent, SiteHeaderComponent, SiteFooterComponent, DockAtEndDirective, ProfileMenuComponent, ShareDialogComponent,
-    CreateGameFormComponent, EditGameDialogComponent, UpgradePassDialogComponent, DashboardHostingComponent,
+    CreateGameFormComponent, EditGameDialogComponent, UpgradePassDialogComponent, SeasonPassesDialogComponent, DashboardHostingComponent,
     DashboardJoinedComponent, DashboardPhoneBarComponent, DashboardSearchFieldComponent, GroupMenuComponent, CodeFieldComponent, NewBoardButtonComponent,
     NewBoardDockComponent, SeasonTilesComponent
   ],

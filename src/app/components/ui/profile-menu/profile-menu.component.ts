@@ -9,13 +9,12 @@ import { SanitizationService } from '../../../core/services/sanitization.service
 import { ThemeMode, ThemeService } from '../../../core/services/theme.service';
 import { PlanService } from '../../../core/services/plan.service';
 import { SeasonPassAdminService } from '../../../core/services/season-pass-admin.service';
-import { SeasonPassesDialogComponent } from '../season-passes-dialog/season-passes-dialog.component';
 import { ToggleComponent } from '../toggle/toggle.component';
 
 /** Header avatar chip with the profile menu: display name, theme, sign out. Shared by the dashboard and game page. */
 @Component({
   selector: 'app-profile-menu',
-  imports: [FormsModule, RouterLink, NgIconComponent, SeasonPassesDialogComponent, ToggleComponent],
+  imports: [FormsModule, RouterLink, NgIconComponent, ToggleComponent],
   providers: [provideIcons({ heroChevronDown, heroArrowRightOnRectangle, heroComputerDesktop, heroSun, heroMoon, heroQuestionMarkCircle, heroTv, heroPlayCircle, heroBookOpen, heroTicket })],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
@@ -156,7 +155,7 @@ import { ToggleComponent } from '../toggle/toggle.component';
               <button type="button" (click)="showProfileDropdown.set(false); passAdmin.openDialog()" class="qs-btn qs-btn-ghost w-full justify-start text-qs-ink">
                 <ng-icon name="heroTicket" class="text-base"></ng-icon>
                 <span class="flex-1 text-left">Season Passes</span>
-                @if (!passAdmin.isLoadingGiftedPasses()) {
+                @if (!passAdmin.isLoadingGiftedPasses() || passAdmin.giftedPasses().length) {
                   <span class="qs-label text-qs-muted">{{ passAdmin.giftedPasses().length }} gifted</span>
                 }
               </button>
@@ -187,8 +186,6 @@ import { ToggleComponent } from '../toggle/toggle.component';
           </div>
         </div>
       }
-      <!-- Outside the dropdown: the item's click closes the menu -->
-      <app-season-passes-dialog></app-season-passes-dialog>
     </div>
   `
 })

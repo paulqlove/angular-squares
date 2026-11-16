@@ -8,7 +8,7 @@ import { ModalComponent } from '../modal/modal.component';
 
 /**
  * Admin only: gifted Season Passes, opened from the profile menu's Season Passes item. A sheet on phones, a dialog from sm up.
- * The profile menu holds it outside its dropdown, since the dropdown closes on the click that opens this.
+ * Each page with the profile menu hosts it at page level, outside the header: the sticky header's stacking context would put the phone bars over it.
  */
 @Component({
   selector: 'app-season-passes-dialog',
