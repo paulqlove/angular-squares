@@ -274,7 +274,7 @@ Staggers are plain values, not tokens: 20ms between Your games rows (from the fi
 
 ### Buttons
 
-Mono, uppercase, 11.5px, letter spacing 0.1em, radius 6px, **min height 44px** on every surface (tap target), full width under 640px when it is the main action. The words sit centered: a 0.1em indent balances the letter spacing that trails the last letter, and a button with a leading icon centers icon and words as one. An icon a button names must be provided by that button's own component, never borrowed from a parent page, so it can't drop out and leave an empty slot.
+Mono, uppercase, 11.5px, letter spacing 0.1em, radius 6px, **min height 44px** on every surface (tap target), full width under 640px when it is the main action. The words sit centered: a 0.1em indent balances the letter spacing that trails the last letter, and a button with a leading icon centers icon and words as one. A component provides the icons it draws itself rather than borrowing them from the page around it, so one can't drop out and leave an empty slot.
 
 | Variant | Look | Use |
 |---|---|---|

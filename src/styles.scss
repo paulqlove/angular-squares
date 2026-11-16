@@ -319,6 +319,8 @@ html, body {
     cursor: pointer;
     transition: background-color var(--qs-t-fast) var(--qs-ease), color var(--qs-t-fast) var(--qs-ease), border-color var(--qs-t-fast) var(--qs-ease);
   }
+  /* Icons keep their glyph in the middle of their own box */
+  .qs-btn ng-icon { text-indent: 0; }
   .qs-btn:disabled { opacity: .45; cursor: not-allowed; }
   .qs-btn-primary { background: var(--qs-accent); color: var(--qs-on-accent); }
   .qs-btn-primary:hover:not(:disabled) { background: var(--qs-accent-hover); }

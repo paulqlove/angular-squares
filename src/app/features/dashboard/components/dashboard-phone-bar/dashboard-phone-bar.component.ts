@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { heroFolder } from '@ng-icons/heroicons/outline';
+import { heroFolder, heroMagnifyingGlass } from '@ng-icons/heroicons/outline';
 
 import { ToastService } from '../../../../core/services/toast.service';
 import { DashboardGroupsService } from '../../services/dashboard-groups.service';
@@ -21,7 +21,7 @@ import { DashboardSearchFieldComponent } from '../dashboard-search-field/dashboa
 @Component({
   selector: 'div[appDashboardPhoneBar]',
   imports: [NgIconComponent, DashboardSearchFieldComponent, NewBoardButtonComponent],
-  providers: [provideIcons({ heroFolder })],
+  providers: [provideIcons({ heroFolder, heroMagnifyingGlass })],
   templateUrl: './dashboard-phone-bar.component.html',
   changeDetection: ChangeDetectionStrategy.Eager
 })
