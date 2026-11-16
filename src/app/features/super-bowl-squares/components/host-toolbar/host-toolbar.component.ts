@@ -9,9 +9,9 @@ import { HostActionsService } from '../../services/host-actions.service';
 import { HostNextStep, hostNextStep } from '../../utils/host-next-step';
 
 /**
- * The floating host bar's toolbar. Phones: Games (opens Your games), one next-step button (Lock, Draw, Unlock), Players
- * and Edit; a co-host gets Games and Players, plus Edit once the owner has a group. Larger screens: Lock and draw, Draw or Clear numbers, Manage players and Edit
- * game. It renders inside the page's `.qs-dockable` element, so the bar keeps the element the dock styles and directive expect.
+ * The floating host bar's toolbar. Games (opens Your games) comes first at every size. Phones: then one next-step button
+ * (Lock, Draw, Unlock), Players and Edit; a co-host gets Games and Players, plus Edit once the owner has a group. Larger
+ * screens: then Lock and draw, Draw or Clear numbers, Manage players and Edit game. It renders inside the page's `.qs-dockable` element, so the bar keeps the element the dock styles and directive expect.
  */
 @Component({
   selector: 'div[appHostToolbar]',

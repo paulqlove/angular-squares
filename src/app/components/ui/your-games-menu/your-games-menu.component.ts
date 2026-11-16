@@ -23,8 +23,9 @@ const CLOSE_MS = 220;
 
 /**
  * Your Games, in the game page header: the five most recent games for hosts, players and guests alike, the one on screen
- * marked, then Join with a code and My dashboard. A popover on desktop and a bottom sheet on phones. Another control on the
- * page can open it with `toggle('external')`, as the game page's phone host bar does in place of the header button.
+ * marked, then Join with a code and My dashboard. Its header button opens a popover on desktop and a bottom sheet on phones.
+ * Another control on the page can open it with `toggle('external')`, as the game page's host bar does in place of the
+ * header button: a centred dialog on desktop and the same bottom sheet on phones.
  */
 @Component({
   selector: 'app-your-games-menu',
@@ -41,27 +42,28 @@ const CLOSE_MS = 220;
   `],
   template: `
     <div class="relative">
-      <button
-        #trigger
-        type="button"
-        (click)="toggle()"
-        [attr.aria-expanded]="open()"
-        aria-haspopup="true"
-        aria-controls="your-games-menu"
-        class="flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-btn p-2.5 text-qs-tile-muted transition-colors hover:bg-white/10 hover:text-qs-tile-ink sm:px-3"
-        [class.text-qs-tile-ink]="open()"
-        [class.max-sm:hidden]="!phoneTrigger()"
-        aria-label="Your games"
-      >
-        <ng-icon name="heroSquares2x2" class="text-xl"></ng-icon>
-        <span class="qs-label hidden sm:inline">Your games</span>
-        <!-- The wrapper hides the arrow on phones: ng-icon's own display: inline-block beats a hidden class on the icon. -->
-        <span class="hidden sm:inline-flex" aria-hidden="true">
-          <ng-icon name="heroChevronDown" class="yg-chevron text-sm" [class.rotate-180]="open()"></ng-icon>
-        </span>
-      </button>
+      @if (showTrigger()) {
+        <button
+          #trigger
+          type="button"
+          (click)="toggle()"
+          [attr.aria-expanded]="open()"
+          aria-haspopup="true"
+          aria-controls="your-games-menu"
+          class="flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-btn p-2.5 text-qs-tile-muted transition-colors hover:bg-white/10 hover:text-qs-tile-ink sm:px-3"
+          [class.text-qs-tile-ink]="open()"
+          aria-label="Your games"
+        >
+          <ng-icon name="heroSquares2x2" class="text-xl"></ng-icon>
+          <span class="qs-label hidden sm:inline">Your games</span>
+          <!-- The wrapper hides the arrow on phones: ng-icon's own display: inline-block beats a hidden class on the icon. -->
+          <span class="hidden sm:inline-flex" aria-hidden="true">
+            <ng-icon name="heroChevronDown" class="yg-chevron text-sm" [class.rotate-180]="open()"></ng-icon>
+          </span>
+        </button>
+      }
 
-      @if ((open() || closing()) && !phone()) {
+      @if ((open() || closing()) && !dialog()) {
         <div
           id="your-games-menu"
           class="yg-panel yg-pop absolute right-0 top-full z-50 mt-2 w-[360px] max-w-[calc(100vw-2rem)] rounded-[12px] border border-qs-line bg-qs-panel p-1.5 text-qs-ink shadow-pop"
@@ -72,8 +74,10 @@ const CLOSE_MS = 220;
         </div>
       }
 
-      <app-modal [open]="open() && phone()" labelledBy="your-games-title" phone="sheet" motion="slide" extraClass="yg-panel px-1.5 pt-2 text-qs-ink" (dismissed)="close()">
-        <span class="mx-auto mb-2 mt-0.5 block h-1 w-10 rounded bg-qs-line-strong" aria-hidden="true"></span>
+      <app-modal [open]="open() && dialog()" labelledBy="your-games-title" phone="sheet" [motion]="phone() ? 'slide' : 'pop'" extraClass="yg-panel px-1.5 pt-2 text-qs-ink" (dismissed)="close()">
+        @if (phone()) {
+          <span class="mx-auto mb-2 mt-0.5 block h-1 w-10 rounded bg-qs-line-strong" aria-hidden="true"></span>
+        }
         <div class="pb-4" style="--yg-start: 80ms">
           <ng-container *ngTemplateOutlet="body"></ng-container>
         </div>
@@ -198,8 +202,8 @@ const CLOSE_MS = 220;
 export class YourGamesMenuComponent {
   /** The game on screen, listed first and marked Viewing. */
   currentGameId = input.required<string>();
-  /** False hides the header button on phones, where another control opens the menu instead. */
-  phoneTrigger = input(true);
+  /** False hides the header button at every size, where another control opens the menu instead (the game page's host bar). */
+  showTrigger = input(true);
   /** My dashboard was tapped, with what opened the menu: its own button, or another control on the page. */
   dashboardClick = output<YourGamesOpener>();
 
@@ -208,30 +212,31 @@ export class YourGamesMenuComponent {
     if (!this.open()) return;
     this.open.set(false);
     clearTimeout(this.closeTimer);
-    // The popover stays on screen while it retracts; the phone sheet runs its own exit
-    this.closing.set(!this.phone());
+    // The popover stays on screen while it retracts; the dialog and the phone sheet run their own exit
+    this.closing.set(!this.dialog());
     this.closeTimer = setTimeout(() => {
       this.closing.set(false);
       this.joining.set(false);
       this.code.set('');
       this.notFound.set(false);
     }, CLOSE_MS);
-    if (returnFocus && !this.phone()) this.trigger()?.nativeElement.focus({ preventScroll: true });
+    // The dialog hands focus back to whatever opened it
+    if (returnFocus && !this.dialog()) this.trigger()?.nativeElement.focus({ preventScroll: true });
   }
 
   /**
-   * Closes the popover on a click anywhere else. The phone sheet closes from its own backdrop.
+   * Closes the popover on a click anywhere else. The dialog and the phone sheet close from their own backdrop.
    * Reads the click's path, not its target: Join with a code swaps its button for the code field before this runs,
    * so the target is no longer inside the menu.
    */
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event): void {
-    if (this.open() && !this.phone() && !event.composedPath().includes(this.host.nativeElement)) this.close(false);
+    if (this.open() && !this.dialog() && !event.composedPath().includes(this.host.nativeElement)) this.close(false);
   }
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
-    if (this.open() && !this.phone()) this.close();
+    if (this.open() && !this.dialog()) this.close();
   }
 
   toggle(openedBy: YourGamesOpener = 'trigger'): void {
@@ -244,6 +249,7 @@ export class YourGamesMenuComponent {
     clearTimeout(this.closeTimer);
     this.closing.set(false);
     this.phone.set(typeof window !== 'undefined' && !!window.matchMedia?.(PHONE_QUERY).matches);
+    this.dialog.set(this.phone() || openedBy === 'external');
     this.originX.set((this.trigger()?.nativeElement.offsetWidth ?? 120) / 2);
     this.open.set(true);
     setTimeout(() => this.focusFirst());
@@ -258,6 +264,8 @@ export class YourGamesMenuComponent {
   /** Guests can't host, so their Create goes to the public set-up page, which asks them to sign in when they finish. */
   protected createLink = computed(() => (this.auth.canCreateGame() ? '/dashboard' : '/create'));
   protected createQuery = computed(() => (this.auth.canCreateGame() ? { create: 'true' } : {}));
+  /** Set when the menu opens: the dialog (a bottom sheet on phones) rather than the header popover. */
+  protected dialog = signal(false);
   protected failed = signal(false);
   /** The footer falls in after the rows above it. */
   protected footerIndex = computed(() => (this.loaded() ? this.rows().length : 3));
@@ -268,7 +276,7 @@ export class YourGamesMenuComponent {
   protected open = signal(false);
   /** Half the button's width, so the popover grows from under the button's middle. */
   protected originX = signal(60);
-  /** Set when the menu opens: phones get the bottom sheet, wider screens the popover. */
+  /** Set when the menu opens: phones get the bottom sheet. */
   protected phone = signal(false);
   protected rows = signal<YourGameRow[]>([]);
 
