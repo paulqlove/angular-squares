@@ -114,7 +114,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.walkthroughService.resetCompletion('dashboard');
     const phone = window.innerWidth < 640;
     this.walkthroughService.start('dashboard', dashboardTourSteps(DASHBOARD_TOUR_STEPS,
-      { phone, codeAtTop: phone && this.store.emptyHost(), newBoardLabel: this.store.newBoardLabel() }));
+      { phone, host: this.store.canCreateGame(), codeAtTop: this.store.emptyHost(), newBoardLabel: this.store.newBoardLabel() }));
   }
 
   protected readonly dialogs: DashboardDialogsService = inject(DashboardDialogsService);

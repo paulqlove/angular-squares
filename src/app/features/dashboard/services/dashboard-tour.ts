@@ -32,20 +32,26 @@ export const DASHBOARD_TOUR_STEPS: WalkthroughStep[] = [
 /** What the tour needs to know about the screen it runs on. */
 export interface DashboardTourScreen {
   phone: boolean;
+  /** False for a guest, who has no New board and no games of their own to point at. */
+  host: boolean;
   /** Phone, host with no boards: the code field sits at the top of the page instead of in the bottom bar. */
   codeAtTop: boolean;
   /** New board's label, which reads Create your first board for a first-time host. */
   newBoardLabel: string;
 }
 
-/** The dashboard tour. On a phone, the create and join steps say where those controls are. */
+/** Steps a guest skips, since nothing on their dashboard matches them. */
+const HOST_ONLY = ['create-game', 'my-games'];
+
+/** The dashboard tour. A guest skips the host steps; on a phone, the create and join steps say where those controls are. */
 export function dashboardTourSteps(steps: WalkthroughStep[], screen: DashboardTourScreen): WalkthroughStep[] {
-  if (!screen.phone) return steps;
+  const shown = screen.host ? steps : steps.filter(step => !HOST_ONLY.includes(step.target));
+  if (!screen.phone) return shown;
   const phoneText: Record<string, Partial<WalkthroughStep>> = {
     'create-game': { description: `Tap ${screen.newBoardLabel} at the bottom of the screen to start your own squares board. You can choose a sport, set points per square, and invite friends.` },
     'join-game': screen.codeAtTop
       ? { description: 'Have a game code? Type it here at the top of the screen and tap Join.', position: 'bottom' }
       : { description: 'Have a game code? Tap Games & codes at the bottom of the screen, type the code, and tap Join.' }
   };
-  return steps.map(step => ({ ...step, ...phoneText[step.target] }));
+  return shown.map(step => ({ ...step, ...phoneText[step.target] }));
 }

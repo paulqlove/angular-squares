@@ -18,10 +18,15 @@ describe('dashboardTourSteps', () => {
     { target: 'create-game', title: 'Create', description: 'Click Create', position: 'top' },
     { target: 'join-game', title: 'Join', description: 'Enter a code', position: 'top' }
   ];
-  const phone: DashboardTourScreen = { phone: true, codeAtTop: false, newBoardLabel: 'New board' };
+  const phone: DashboardTourScreen = { phone: true, host: true, codeAtTop: false, newBoardLabel: 'New board' };
 
   it('leaves the desktop tour as it is', () => {
     expect(dashboardTourSteps(steps, { ...phone, phone: false })).toBe(steps);
+  });
+
+  it('skips the create and games steps for a guest, who has neither', () => {
+    expect(dashboardTourSteps(steps, { ...phone, phone: false, host: false }).map(step => step.target)).toEqual(['join-game']);
+    expect(dashboardTourSteps(steps, { ...phone, host: false }).map(step => step.target)).toEqual(['join-game']);
   });
 
   it('points phone users at the bottom bar for create and join', () => {
