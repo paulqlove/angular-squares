@@ -8,7 +8,6 @@ import {
   heroLockClosed,
   heroLockOpen,
   heroMagnifyingGlass,
-  heroPlus,
   heroShare,
   heroSquares2x2,
   heroTicket,
@@ -31,6 +30,10 @@ import { GroupMenuComponent } from './components/dashboard-groups/group-menu.com
 import { DashboardHostingComponent } from './components/dashboard-hosting/dashboard-hosting.component';
 import { DashboardJoinedComponent } from './components/dashboard-joined/dashboard-joined.component';
 import { DashboardPhoneBarComponent } from './components/dashboard-phone-bar/dashboard-phone-bar.component';
+import { NewBoardButtonComponent } from './components/dashboard-returning-empty/new-board-button.component';
+import { CodeFieldComponent } from './components/dashboard-returning-empty/code-field.component';
+import { NewBoardDockComponent } from './components/dashboard-returning-empty/new-board-dock.component';
+import { SeasonTilesComponent } from './components/dashboard-returning-empty/season-tiles.component';
 import { DashboardSearchFieldComponent } from './components/dashboard-search-field/dashboard-search-field.component';
 import { UpgradePassDialogComponent } from './components/upgrade-pass-dialog/upgrade-pass-dialog.component';
 import { DashboardAdminService } from './services/dashboard-admin.service';
@@ -53,7 +56,8 @@ import { PlayersViewService } from './services/players-view.service';
   imports: [
     ModalComponent, NgIconComponent, SiteHeaderComponent, SiteFooterComponent, DockAtEndDirective, ProfileMenuComponent, ShareDialogComponent,
     CreateGameFormComponent, EditGameDialogComponent, UpgradePassDialogComponent, DashboardAdminPanelComponent, DashboardHostingComponent,
-    DashboardJoinedComponent, DashboardPhoneBarComponent, DashboardSearchFieldComponent, GroupMenuComponent
+    DashboardJoinedComponent, DashboardPhoneBarComponent, DashboardSearchFieldComponent, GroupMenuComponent, CodeFieldComponent, NewBoardButtonComponent,
+    NewBoardDockComponent, SeasonTilesComponent
   ],
   providers: [
     DashboardStore,
@@ -71,7 +75,6 @@ import { PlayersViewService } from './services/players-view.service';
       heroLockClosed,
       heroLockOpen,
       heroMagnifyingGlass,
-      heroPlus,
       heroShare,
       heroSquares2x2,
       heroTicket,
