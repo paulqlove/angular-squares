@@ -112,7 +112,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     // The tour points at the search-or-code field and New board, which the open search covers on a phone
     if (this.search.searchOpen()) this.search.closeSearch();
     this.walkthroughService.resetCompletion('dashboard');
-    this.walkthroughService.start('dashboard', dashboardTourSteps(DASHBOARD_TOUR_STEPS, window.innerWidth < 640));
+    const phone = window.innerWidth < 640;
+    this.walkthroughService.start('dashboard', dashboardTourSteps(DASHBOARD_TOUR_STEPS,
+      { phone, host: this.store.canCreateGame(), noBoards: this.store.emptyHost(), newBoardLabel: this.store.newBoardLabel() }));
   }
 
   protected readonly dialogs: DashboardDialogsService = inject(DashboardDialogsService);

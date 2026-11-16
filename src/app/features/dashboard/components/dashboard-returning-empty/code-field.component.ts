@@ -15,11 +15,12 @@ import { DashboardSearchService } from '../../services/dashboard-search.service'
   providers: [provideIcons({ heroHashtag })],
   template: `
     <label for="code-field-top" class="qs-label text-qs-muted">Got a game code?</label>
-    <div class="mt-3 flex gap-2" role="search">
+    <!-- The tour's join step rings the field and Join together -->
+    <div class="mt-3 flex gap-2" role="search" data-walkthrough="join-game">
       <div class="qs-search min-w-0 flex-1">
         <ng-icon name="heroHashtag" class="qs-search-icon" aria-hidden="true"></ng-icon>
         <input id="code-field-top" type="text" placeholder="Game code" autocomplete="off" autocapitalize="characters" spellcheck="false"
-          enterkeyhint="go" data-walkthrough="join-game" [value]="search.gameSearch()" (input)="setCode($any($event.target))"
+          enterkeyhint="go" [value]="search.gameSearch()" (input)="setCode($any($event.target))"
           (keydown.enter)="search.onSearchEnter($event)" [attr.aria-invalid]="search.showCodeError() ? 'true' : null"
           [attr.aria-describedby]="search.showCodeError() ? 'code-error-top' : null" />
       </div>
