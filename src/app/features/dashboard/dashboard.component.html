@@ -11,7 +11,7 @@
       <div appCodeField class="mb-8 block sm:hidden"></div>
     }
     <!-- Heading. Search, the group picker and New board live in the bottom taskbar on every screen size. -->
-    <div data-walkthrough="hero-section">
+    <div>
       @if (store.firstEmpty()) {
         <div appFirstHostTitle [name]="store.firstName()"></div>
       } @else {
