@@ -36,8 +36,8 @@ export const GROUPS_OFF_HINT = 'Groups filter your boards';
         <ng-icon name="heroChevronDown" class="shrink-0 text-base transition-transform duration-150" [class.rotate-180]="open()" aria-hidden="true"></ng-icon>
       </button>
       @if (open() && !off()) {
-        <div role="menu" aria-label="Groups" animate.enter="qs-menu-enter" animate.leave="qs-menu-leave" class="absolute top-full z-30 mt-1.5 max-h-[60vh] w-[240px] overflow-y-auto rounded-inner border border-qs-line-strong bg-qs-panel p-1 shadow-pop"
-          [class]="alignRight() ? 'right-0 origin-top-right' : 'left-0 origin-top-left'">
+        <div role="menu" aria-label="Groups" animate.enter="qs-menu-enter" animate.leave="qs-menu-leave" class="absolute z-30 max-h-[60vh] w-[240px] overflow-y-auto rounded-inner border border-qs-line-strong bg-qs-panel p-1 shadow-pop"
+          [class]="menuClass()">
           <button type="button" role="menuitemradio" [attr.aria-checked]="!pickedRow()" class="qs-group-item" (click)="pick(null)">
             <span class="min-w-0 flex-1 truncate">All groups</span>
             <span class="qs-group-end">@if (!pickedRow()) { <ng-icon name="heroCheck" class="-mr-0.5 text-lg" aria-hidden="true"></ng-icon> }</span>
@@ -69,7 +69,15 @@ export const GROUPS_OFF_HINT = 'Groups filter your boards';
 })
 export class GroupMenuComponent {
   /** Opens the menu under the button's right edge, for a button near the right side of the screen. */
+  /** Which edge the menu lines up with, and whether it drops below the button or rises above it. */
+  protected readonly menuClass = computed<string>(() => {
+    // Whole class names, so Tailwind finds them
+    if (this.up()) return this.alignRight() ? 'right-0 bottom-full mb-1.5 origin-bottom-right' : 'left-0 bottom-full mb-1.5 origin-bottom-left';
+    return this.alignRight() ? 'right-0 top-full mt-1.5 origin-top-right' : 'left-0 top-full mt-1.5 origin-top-left';
+  });
   public readonly alignRight = input<boolean>(false);
+  /** Opens the menu above the button, for the bottom taskbar. */
+  public readonly up = input<boolean>(false);
   /** Shows Manage groups at the bottom of the menu. */
   public readonly canManage = input<boolean>(false);
   /** The 36px height of TV mode's header buttons, instead of the dashboard's 44px. */
