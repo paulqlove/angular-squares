@@ -34,8 +34,9 @@ export interface DashboardTourScreen {
   phone: boolean;
   /** False for a guest, who has no New board and no games of their own to point at. */
   host: boolean;
-  /** Phone, host with no boards: the code field sits at the top of the page instead of in the bottom bar. */
-  codeAtTop: boolean;
+  /** Host with no boards: nothing to search, so the join step is only about the code. On a phone their code field sits
+   * at the top of the page instead of in the bottom bar. */
+  noBoards: boolean;
   /** New board's label, which reads Create your first board for a first-time host. */
   newBoardLabel: string;
 }
@@ -43,15 +44,23 @@ export interface DashboardTourScreen {
 /** Steps a guest skips, since nothing on their dashboard matches them. */
 const HOST_ONLY = ['create-game', 'my-games'];
 
-/** The dashboard tour. A guest skips the host steps; on a phone, the create and join steps say where those controls are. */
+/** The dashboard tour. A guest skips the host steps; on a phone, the create and join steps say where those controls are;
+ * a host with no boards hears only about joining with a code. */
 export function dashboardTourSteps(steps: WalkthroughStep[], screen: DashboardTourScreen): WalkthroughStep[] {
   const shown = screen.host ? steps : steps.filter(step => !HOST_ONLY.includes(step.target));
-  if (!screen.phone) return shown;
-  const phoneText: Record<string, Partial<WalkthroughStep>> = {
+  const text = screen.phone ? phoneText(screen) : deskText(screen);
+  return shown.map(step => ({ ...step, ...text[step.target] }));
+}
+
+function deskText(screen: DashboardTourScreen): Record<string, Partial<WalkthroughStep>> {
+  return screen.noBoards ? { 'join-game': { description: 'Have a game code? Type it here and press Join.' } } : {};
+}
+
+function phoneText(screen: DashboardTourScreen): Record<string, Partial<WalkthroughStep>> {
+  return {
     'create-game': { description: `Tap ${screen.newBoardLabel} at the bottom of the screen to start your own squares board. You can choose a sport, set points per square, and invite friends.` },
-    'join-game': screen.codeAtTop
+    'join-game': screen.noBoards
       ? { description: 'Have a game code? Type it here at the top of the screen and tap Join.', position: 'bottom' }
       : { description: 'Have a game code? Tap Games & codes at the bottom of the screen, type the code, and tap Join.' }
   };
-  return shown.map(step => ({ ...step, ...phoneText[step.target] }));
 }

@@ -18,10 +18,16 @@ describe('dashboardTourSteps', () => {
     { target: 'create-game', title: 'Create', description: 'Click Create', position: 'top' },
     { target: 'join-game', title: 'Join', description: 'Enter a code', position: 'top' }
   ];
-  const phone: DashboardTourScreen = { phone: true, host: true, codeAtTop: false, newBoardLabel: 'New board' };
+  const phone: DashboardTourScreen = { phone: true, host: true, noBoards: false, newBoardLabel: 'New board' };
 
   it('leaves the desktop tour as it is', () => {
-    expect(dashboardTourSteps(steps, { ...phone, phone: false })).toBe(steps);
+    expect(dashboardTourSteps(steps, { ...phone, phone: false })).toEqual(steps);
+  });
+
+  it('tells a desktop host with no boards only about joining with a code', () => {
+    const join = dashboardTourSteps(steps, { ...phone, phone: false, noBoards: true })[2];
+    expect(join.description).toBe('Have a game code? Type it here and press Join.');
+    expect(join.position).toBe('top');
   });
 
   it('skips the create and games steps for a guest, who has neither', () => {
@@ -45,7 +51,7 @@ describe('dashboardTourSteps', () => {
   });
 
   it('points a phone host with no boards at the code field at the top', () => {
-    const join = dashboardTourSteps(steps, { ...phone, codeAtTop: true })[2];
+    const join = dashboardTourSteps(steps, { ...phone, noBoards: true })[2];
     expect(join.description).toContain('at the top of the screen');
     expect(join.description).not.toContain('bottom');
     expect(join.position).toBe('bottom');
