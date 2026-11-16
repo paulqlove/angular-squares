@@ -4,8 +4,8 @@ export const UNLINKED_BOARD_ACTIVE_MS = 48 * 60 * 60 * 1000;
 /** Free hosts can have this many active boards at once. */
 export const FREE_ACTIVE_BOARD_LIMIT = 1;
 
-/** What a host at their active-board limit sees: the free upgrade offer, or a plain note on a paid plan. */
-export type BoardLimitDialog = 'limit' | 'cap';
+/** What a host at a limit sees: the free upgrade offer, a plain note on a paid plan, or the free season cap. */
+export type BoardLimitDialog = 'limit' | 'cap' | 'season';
 
 /** The dialog for a host with this many active boards under this limit, or null while there is room. */
 export function boardLimitDialog(activeBoards: number, limit: number): BoardLimitDialog | null {

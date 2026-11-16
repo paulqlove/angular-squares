@@ -84,10 +84,12 @@ export class DashboardDialogsService {
     const board = this.endedBoard();
     const user = this.store.currentUser();
     if (!board || !user) return;
-    if (!await this.confirmService.ask({ title: 'Delete this game?', message: `${board.name} will be removed for everyone. This cannot be undone.`, confirmLabel: 'Delete game' })) return;
+    const message = `${board.name} will be removed for everyone. This cannot be undone.${this.store.seasonDeleteNote(board)}`;
+    if (!await this.confirmService.ask({ title: 'Delete this game?', message, confirmLabel: 'Delete game' })) return;
     try {
       await this.gameService.deleteGame(board.id, user.uid);
       this.store.myGames.update(games => games.filter(g => g.id !== board.id));
+      this.store.refreshSeasonCount();
       this.showUpgradeDialog.set(false);
       this.showCreateModal.set(true);
     } catch {
@@ -146,6 +148,7 @@ export class DashboardDialogsService {
     try {
       await this.gameService.resetGame(board.id, board.boardSize);
       this.store.updateMyGame(board.id, g => ({ ...g, squaresFilled: 0, playerCount: 0, confirmedCount: 0, isLocked: false }));
+      this.store.refreshSeasonCount();
       this.showUpgradeDialog.set(false);
       this.edit.openEditModal(board);
     } catch {

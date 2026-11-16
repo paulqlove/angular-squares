@@ -4,6 +4,7 @@ import { readAutoManage, readAutoManageResult } from './auto-manage';
 import { isListKey } from './open-lists';
 import { confirmedPlayers } from './paid-squares';
 import { readSquareLimit } from './square-limit';
+import type { SeasonGame } from './season-games';
 import { BoardSize, EspnLiveSnapshot, GameData, GameListItem, SportType, TvLink, getBoardDimensions } from './game-data';
 
 // Pure helpers that turn raw Realtime Database values into typed game data.
@@ -65,6 +66,7 @@ export function parseGameData(gameId: string, rawData: any, now: number = Date.n
     ownerId: rawData.ownerId || '',
     ownerName: rawData.ownerName || 'Unknown',
     createdAt: rawData.createdAt || now,
+    ...(typeof rawData.startedAt === 'number' ? { startedAt: rawData.startedAt } : {}),
     boardSize,
     // Squares are stored under `squares` but the app calls them selectedSquares.
     selectedSquares: { ...(rawData.squares || {}) },
@@ -221,6 +223,7 @@ export function toGameListItem(gameId: string, game: GameData, includeHostSettin
     homeTeam: game.homeTeam,
     awayTeam: game.awayTeam,
     createdAt: game.createdAt,
+    ...(game.startedAt ? { startedAt: game.startedAt } : {}),
     playerCount: playerNames.size,
     squaresFilled,
     isLocked: game.isLocked,
@@ -243,5 +246,15 @@ export function toGameListItem(gameId: string, game: GameData, includeHostSettin
         }
       : {}),
     confirmedCount
+  };
+}
+
+/** A raw games/{gameId} value as one game toward its owner's season: when it started and how many squares are claimed. */
+export function toSeasonGame(gameId: string, raw: { createdAt?: unknown; startedAt?: unknown; squares?: unknown }): SeasonGame {
+  return {
+    id: gameId,
+    createdAt: typeof raw.createdAt === 'number' ? raw.createdAt : 0,
+    ...(typeof raw.startedAt === 'number' ? { startedAt: raw.startedAt } : {}),
+    squaresFilled: raw.squares && typeof raw.squares === 'object' ? Object.keys(raw.squares).length : 0
   };
 }

@@ -107,3 +107,11 @@ Paul, Nov 15: "Hide them". A co-host's email used to sit on the game (`games/{id
 - Every co-host save writes `games/{id}/managerEmail: null`, so the old public copy goes away. `scripts/move-cohost-emails.mjs` moves the existing ones (dry run, then `--apply`).
 - `games/{id}/managerEmail` still accepts writes for now, so a phone still running an older app can create a game. Its email stays public and can't be claimed until the script runs again. Once old apps are gone, its `.validate` can be set to refuse anything but null.
 
+
+## seasonGames (free host games per season)
+
+`seasonGames/{ownerId}/{season}/{gameId}_{startedAt}` = `true`. The app saves a game here, before its board is deleted, reset or cleared, once anyone has claimed a square on it (`core/utils/season-games.ts`). The owner can add an entry but never change or remove one, so deleting a game with players doesn't free a free host's slot; admins can remove entries by hand. The owner and admins can read it. `season` is the year the season starts (`2026` runs July 1 2026 to June 30 2027) and the key must look like a board id, an underscore and a millisecond time. The app writes nothing here while `SEASON_LIMIT_ON` is false, so deploy these rules before turning it on.
+
+`games/{gameId}/startedAt` is when the board was last reset or cleared (a number). A board never reset started at `createdAt`.
+
+What a rule cannot express: rules can't count children, so the 3-a-season cap itself is checked in the app (`EntitlementService.assertUnderFreeBoardLimit`), like the one-at-a-time limit above.

@@ -123,6 +123,9 @@
         "createdAt": {
           ".validate": "newData.isNumber()"
         },
+        "startedAt": {
+          ".validate": "newData.isNumber() && newData.val() > 0"
+        },
         "adFreeUntil": {
           ".validate": "newData.isNumber() && newData.val() >= 0 && (newData.val() == 0 || root.child('admins').child(auth.uid).val() == true || (root.child('entitlements').child(auth.uid).child('expiresAt').isNumber() && newData.val() <= root.child('entitlements').child(auth.uid).child('expiresAt').val()) || (auth.token.email_verified == true && root.child('giftedSeasonPass').child(auth.token.email.toLowerCase().replace('.', ',')).child('expiresAt').isNumber() && newData.val() <= root.child('giftedSeasonPass').child(auth.token.email.toLowerCase().replace('.', ',')).child('expiresAt').val()))"
         },
@@ -310,6 +313,17 @@
         "otherBoardJoins": { ".validate": "newData.isNumber() && newData.val() == (data.exists() ? data.val() : 0) + 1 && newData.val() <= 100000" },
         "fullBoardViewsWithOpenBoards": { ".validate": "newData.isNumber() && newData.val() == (data.exists() ? data.val() : 0) + 1 && newData.val() <= 100000" },
         "$other": { ".validate": false }
+      }
+    },
+    "seasonGames": {
+      "$ownerId": {
+        ".read": "auth != null && (auth.uid == $ownerId || root.child('admins').child(auth.uid).val() == true)",
+        "$season": {
+          "$game": {
+            ".write": "auth != null && ((auth.uid == $ownerId && newData.val() == true) || root.child('admins').child(auth.uid).val() == true)",
+            ".validate": "newData.val() == true && $season.matches(/^20[0-9][0-9]$/) && $game.matches(/^[A-Za-z0-9]{4,16}_[0-9]{10,15}$/)"
+          }
+        }
       }
     },
     "upgradeViews": {

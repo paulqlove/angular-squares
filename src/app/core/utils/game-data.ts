@@ -46,6 +46,8 @@ export interface GameData {
   ownerId: string;
   ownerName: string;
   createdAt: number;
+  /** When the board was last reset (a new game on the same board). Absent until the first reset. */
+  startedAt?: number;
   /** Board size: 100 (10x10), 50 (5x10), or 25 (5x5). Defaults to 100. */
   boardSize?: BoardSize;
   selectedSquares: { [key: string]: string };
@@ -107,6 +109,8 @@ export interface GameListItem {
   homeTeam: string;
   awayTeam: string;
   createdAt: number;
+  /** When the board was last reset (a new game on the same board). Absent until the first reset. */
+  startedAt?: number;
   playerCount: number;
   squaresFilled: number;
   isLocked: boolean;
