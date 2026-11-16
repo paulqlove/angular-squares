@@ -6,7 +6,7 @@ Read this before designing or building any screen. These come from Paul's own fe
 
 1. **Group related controls.** A new control goes next to the controls it works with, not in a new row or section of its own. Example: the dashboard group picker sits in the Search and New board row, not in a chip row under Hosting.
 2. **On phones, secondary controls are icon-only, and nothing adds a row.** Fit new phone controls into a bar or row that already exists. Primary actions keep their label (New board, Lock). Every icon-only button needs an aria-label.
-3. **Put an action where the task already happens.** When a new spot takes over a job, remove the old spot so there's one way in. Example: the phone host bar's Games button took over the header games button's job, so the header button is hidden for hosts on phones.
+3. **Put an action where the task already happens.** When a new spot takes over a job, remove the old spot so there's one way in. Example: the host bar's Games button took over the header games button's job, so the header button is hidden for hosts at every size.
 4. **One icon, one meaning.** Don't reuse an icon for a different job on the same page.
 5. **A feature must be reachable where you need it.** If you can set something later, you can also set it when you create the thing. Example: a game's group can be picked in Create game, not only in Edit game.
 6. **Controls stay near what was clicked.** Avoid long mouse travel and layout shift.

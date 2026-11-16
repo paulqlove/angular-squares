@@ -1,11 +1,12 @@
 <div role="toolbar" [attr.aria-label]="state.isGameOwner() ? 'Host tools' : 'Co-host tools'"
   class="qs-bar-frame flex items-stretch gap-1 rounded-[12px] p-1.5 sm:items-center sm:gap-2 sm:p-2">
   <p class="qs-eyebrow qs-eyebrow-bar hidden px-2 lg:block">{{ state.isGameOwner() ? 'Host tools' : 'Co-host' }}</p>
-  <!-- Phones: Your games (other games, Join with a code, My dashboard) in thumb reach, first and away from Lock. It
-       replaces the header's button for hosts and co-hosts on phones. Larger screens use the header. -->
-  <button type="button" (click)="ui.openYourGames()" aria-haspopup="dialog" class="qs-btn qs-btn-ghost host-btn sm:hidden">
+  <!-- Your games (other games, Join with a code, My dashboard), first and away from Lock. It replaces the header's
+       button for hosts and co-hosts at every size: a bottom sheet on phones, a dialog on larger screens. From 640 to 767px
+       the bar is short on room, so Games is icon-only and Players and Edit take their phone labels. -->
+  <button type="button" (click)="ui.openYourGames()" aria-haspopup="dialog" class="qs-btn qs-btn-ghost host-btn">
     <ng-icon name="heroSquares2x2" class="text-base"></ng-icon>
-    <span>Games</span>
+    <span class="sm:max-md:sr-only">Games</span>
   </button>
   @if (state.isGameOwner()) {
     <!-- Phones: one next-step button. Clear and redraw live in Edit game. -->
@@ -35,13 +36,13 @@
   }
   <button type="button" (click)="players.onManagePayments()" class="qs-btn qs-btn-secondary host-btn">
     <ng-icon name="heroUsers" class="text-base"></ng-icon>
-    <span class="sm:hidden">Players</span><span class="hidden sm:inline">Manage players</span>
+    <span class="md:hidden">Players</span><span class="hidden md:inline">Manage players</span>
   </button>
   @if (state.isGameOwner() || groups.canPick()) {
     <!-- A co-host gets Edit game once the owner has a group: Show in my open boards and Group only -->
     <button type="button" (click)="state.isGameOwner() ? ui.showSettings.set(true) : groups.coHostEditOpen.set(true)" class="qs-btn qs-btn-ghost host-btn">
       <ng-icon name="heroPencilSquare" class="text-base"></ng-icon>
-      <span class="sm:hidden">Edit</span><span class="hidden sm:inline">Edit game</span>
+      <span class="md:hidden">Edit</span><span class="hidden md:inline">Edit game</span>
     </button>
   }
 </div>

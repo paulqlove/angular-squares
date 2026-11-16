@@ -31,7 +31,7 @@ export class GamePageUiService {
   public isPlayersListVisible: boolean = !(typeof window !== 'undefined' && window.matchMedia?.('(max-width: 1023px)').matches);
   /** Manage players; an imperative dialog, set by the page. */
   public paymentDialog: PaymentDialogComponent | undefined;
-  /** The header's Your games menu. The phone host bar's Games button opens it. */
+  /** The header's Your games menu. The host bar's Games button opens it. */
   public yourGamesMenu: YourGamesMenuComponent | undefined;
   /** The square a signed-out visitor tapped, claimed once they sign in. */
   public pendingSquare: { row: number; col: number } | null = null;
@@ -146,7 +146,7 @@ export class GamePageUiService {
     this.trackToDashboard(openedBy === 'external' ? 'host_bar' : 'header');
   }
 
-  /** The phone host bar's Games button: the header's Your games sheet, which hosts don't get a header button for on phones. */
+  /** The host bar's Games button: the header's Your games menu as a dialog (a sheet on phones). Hosts get no header button for it. */
   public openYourGames(): void {
     this.yourGamesMenu?.toggle('external');
   }

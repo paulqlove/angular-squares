@@ -4,6 +4,14 @@ This file records product and design decisions, newest first. To add one, put a 
 
 ---
 
+## D-040 · Hosts open Your games from the host bar at every size
+
+- **Date:** Nov 16 2026
+- **Decision:** The game page host bar's Games button shows on desktop too, first in the bar, and opens Your games as a centred dialog (the bottom sheet on phones, as before). Hosts and co-hosts no longer get the header's Your games button at any size; players and guests keep it.
+- **Options considered:** not recorded
+- **Why:** Paul asked for desktop to match the phone: "make it like mobile where the games is one of the buttons in the host taskbar and then a modal pop up pops up"
+- **Decided by:** Paul
+
 ## D-039 · Gifted Season Passes move into the profile menu
 
 - **Date:** Nov 16 2026
