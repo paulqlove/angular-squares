@@ -185,7 +185,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     faqs: [
       {
         question: 'Does QuarterScore cost money?',
-        answer: 'No. Creating a board and claiming squares is free. QuarterScore never collects, holds, or pays out money.'
+        answer: 'No. Hosting is free: one game at a time and 3 games a season. Claiming squares is always free. QuarterScore never collects, holds, or pays out money.'
       },
       {
         question: 'Do players need an account?',
@@ -408,7 +408,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       {
         heading: 'A board you can run every week',
         paragraphs: [
-          'Some groups play one game a week all season. Each game gets its own board and link, so old scores stay put.'
+          'Some groups play one game a week all season. Each game gets its own board and link, so old scores stay put. Free hosts get 3 games a season. The Season Pass is for groups that play every week.'
         ],
         bullets: [
           'No account for the people claiming squares.',
@@ -433,7 +433,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     id: 'nfl-playoff-squares',
     path: '/nfl-playoff-squares',
     title: 'NFL Playoff Squares — QuarterScore',
-    description: 'NFL playoff squares for wild card weekend, the divisional round, and the conference championships. One free board per game, same link style all January.',
+    description: 'NFL playoff squares for wild card weekend, the divisional round, and the conference championships. One board per game, same link style all January.',
     h1: 'NFL playoff squares',
     eyebrow: 'Postseason',
     lede: 'Playoff games are an easy reason to run another board. Give each game its own.',

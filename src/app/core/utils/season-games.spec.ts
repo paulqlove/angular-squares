@@ -19,8 +19,8 @@ describe('season games', () => {
   const now = Date.UTC(2026, 10, 15, 18, 0, 0);
   const game = (extra: Partial<SeasonGame> = {}): SeasonGame => ({ id: 'ABCDEF', createdAt: Date.UTC(2026, 10, 1), squaresFilled: 3, ...extra });
 
-  it('ships switched off, with 3 games for free hosts and no cap on paid plans', () => {
-    expect(SEASON_LIMIT_ON).toBe(false);
+  it('ships switched on, with 3 games for free hosts and no cap on paid plans', () => {
+    expect(SEASON_LIMIT_ON).toBe(true);
     expect(PLANS.free.seasonGames).toBe(3);
     expect(PLANS.season.seasonGames).toBe(Number.POSITIVE_INFINITY);
     expect(PLANS.admin.seasonGames).toBe(Number.POSITIVE_INFINITY);
