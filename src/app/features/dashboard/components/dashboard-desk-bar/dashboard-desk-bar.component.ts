@@ -19,7 +19,7 @@ import { DashboardSearchFieldComponent } from '../dashboard-search-field/dashboa
   imports: [DashboardSearchFieldComponent, GroupMenuComponent, NewBoardButtonComponent],
   host: { class: 'qs-dock no-print fixed inset-x-3 bottom-4 z-[90] mx-auto hidden max-w-fit sm:block' },
   template: `
-    <div role="toolbar" aria-label="Board actions" class="qs-bar-frame flex items-center gap-2 rounded-[12px] p-2">
+    <div role="toolbar" aria-label="Board actions" class="qs-bar-frame qs-bar-solid flex items-center gap-2 rounded-[12px] p-2">
       <div role="search" class="relative w-[360px] min-w-0" data-walkthrough="join-game">
         <div appDashboardSearchField class="qs-search min-w-0 flex-1" [where]="'desk'"></div>
         <!-- Above the field: under it would be off the bottom of the screen -->
