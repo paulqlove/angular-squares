@@ -7,33 +7,43 @@
   <div class="qs-swap col-start-1 row-start-1 flex items-stretch gap-1" [class.qs-swap-off]="search.searchOpen()" [class.qs-swap-left]="search.searchOpen()" [attr.aria-hidden]="search.searchOpen() ? 'true' : null">
     @if (players.active()) {
       <!-- Players tab: Find a player opens the filter sheet with the keyboard up. The chip under the heading shows a picked game. -->
-      <button type="button" (click)="players.openFilter()" class="qs-search min-w-0 flex-1 text-left" aria-label="Find a player or pick a game" [attr.tabindex]="search.searchOpen() ? -1 : null">
+      <button type="button" (click)="players.openFilter()" class="qs-search min-w-11 flex-1 text-left" aria-label="Find a player or pick a game" [attr.tabindex]="search.searchOpen() ? -1 : null">
         <ng-icon name="heroMagnifyingGlass" class="qs-search-icon" aria-hidden="true"></ng-icon>
         <span class="truncate text-base" [class.text-qs-muted]="!players.search()">{{ players.search() || 'Players &amp; games' }}</span>
       </button>
     } @else {
-      <button type="button" (click)="search.openSearch()" class="qs-search min-w-0 flex-1 text-left" data-walkthrough="join-game" aria-label="Search or enter a game code" [attr.tabindex]="search.searchOpen() ? -1 : null">
+      <button type="button" (click)="search.openSearch()" class="qs-search min-w-11 flex-1 text-left" data-walkthrough="join-game" aria-label="Search or enter a game code" [attr.tabindex]="search.searchOpen() ? -1 : null">
         <ng-icon name="heroMagnifyingGlass" class="qs-search-icon" aria-hidden="true"></ng-icon>
         <span class="truncate text-base text-qs-muted">Games &amp; codes</span>
       </button>
     }
-    <!-- On the Players tab the folder stays put but switched off, so the field doesn't grow; a tap says why -->
+    <!-- On the Players tab the folder stays put but switched off, so the field doesn't grow; a tap says why.
+         A picked group shows its name and its own × here (the search field gives up room first, then the name truncates). -->
     @if (store.groupPickerShows()) {
-      <button
-        type="button"
-        (click)="tapGroups()"
-        class="flex w-12 shrink-0 items-center justify-center rounded-btn border transition-colors"
-        [class]="folderClass()"
-        [attr.aria-disabled]="players.active() ? 'true' : null"
-        [attr.aria-label]="players.active() ? hint : 'Groups: ' + groups.pickedName()"
-        [attr.aria-haspopup]="players.active() ? null : 'dialog'"
-        [attr.tabindex]="search.searchOpen() ? -1 : null"
-      >
-        <ng-icon name="heroFolder" class="text-xl" aria-hidden="true"></ng-icon>
-      </button>
+      <div class="flex rounded-btn border transition-colors" [class]="folderClass()">
+        <button
+          type="button"
+          (click)="tapGroups()"
+          class="flex items-center gap-1.5"
+          [class]="groups.picked() ? 'min-w-0 flex-1 pl-2.5' : 'w-[46px] justify-center'"
+          [attr.aria-disabled]="players.active() ? 'true' : null"
+          [attr.aria-label]="players.active() ? hint : 'Groups: ' + groups.pickedName()"
+          [attr.aria-haspopup]="players.active() ? null : 'dialog'"
+          [attr.tabindex]="search.searchOpen() ? -1 : null"
+        >
+          <ng-icon name="heroFolder" class="shrink-0 text-xl" aria-hidden="true"></ng-icon>
+          @if (groups.picked(); as group) {
+            <span class="min-w-0 truncate text-base">{{ group.name }}</span>
+          }
+        </button>
+        @if (groups.picked(); as group) {
+          <button appGroupClear [name]="group.name" [off]="players.active()" (click)="clearGroup()" [attr.tabindex]="search.searchOpen() ? -1 : null"></button>
+        }
+      </div>
     }
     @if (store.canCreateGame()) {
-      <button appNewBoardButton class="shrink-0" [attr.tabindex]="search.searchOpen() ? -1 : null"></button>
+      <!-- Under 360px a picked group's name needs the room, so New board keeps its words and drops its plus -->
+      <button appNewBoardButton class="shrink-0" [tight]="!!groups.picked()" [attr.tabindex]="search.searchOpen() ? -1 : null"></button>
     }
   </div>
   <div class="qs-swap col-start-1 row-start-1 flex items-stretch gap-1" [class.qs-swap-off]="!search.searchOpen()" [class.qs-swap-right]="!search.searchOpen()" [attr.aria-hidden]="search.searchOpen() ? null : 'true'" role="search">

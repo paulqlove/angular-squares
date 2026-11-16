@@ -29,7 +29,7 @@ import { DashboardSearchFieldComponent } from '../dashboard-search-field/dashboa
       </div>
       <!-- On the Players tab the picker stays put but switched off, so Search doesn't slide over -->
       @if (store.groupPickerShows() && !store.emptyHost()) {
-        <app-group-menu [up]="true" [off]="players.active()" [rows]="store.groupRows()" [pickedId]="groups.pickedId()" [canManage]="groups.canEdit()"
+        <app-group-menu [up]="true" [clearable]="true" [off]="players.active()" [rows]="store.groupRows()" [pickedId]="groups.pickedId()" [canManage]="groups.canEdit()"
           (groupPicked)="groups.pickedId.set($event)" (manageGroups)="groups.openManage()"></app-group-menu>
       }
       @if (store.canCreateGame()) {

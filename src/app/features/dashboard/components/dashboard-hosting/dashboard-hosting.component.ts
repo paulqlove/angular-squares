@@ -11,7 +11,6 @@ import { DashboardViewService } from '../../services/dashboard-view.service';
 import { DashboardStore } from '../../services/dashboard.store';
 import { PlayersViewService } from '../../services/players-view.service';
 import { ValueSwapComponent } from '../../../../components/ui/value-swap/value-swap.component';
-import { GroupChipComponent } from '../dashboard-groups/group-chip.component';
 import { GroupPickSheetComponent } from '../dashboard-groups/group-pick-sheet.component';
 import { GroupsSheetComponent } from '../dashboard-groups/groups-sheet.component';
 import { DashboardViewToggleComponent } from '../dashboard-view-toggle/dashboard-view-toggle.component';
@@ -26,7 +25,7 @@ import { PlayersViewComponent } from '../players-view/players-view.component';
 @Component({
   selector: 'section[appDashboardHosting]',
   imports: [
-    NgIconComponent, DashboardViewToggleComponent, GameCardComponent, GroupChipComponent, GroupPickSheetComponent, GroupsSheetComponent,
+    NgIconComponent, DashboardViewToggleComponent, GameCardComponent, GroupPickSheetComponent, GroupsSheetComponent,
     PlayersViewComponent, ValueSwapComponent
   ],
   providers: [provideIcons({ heroPlus })],

@@ -3,6 +3,7 @@ import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroCheck, heroChevronDown, heroFolder } from '@ng-icons/heroicons/outline';
 
 import { GroupRow, gameCountLabel } from '../../../../core/utils/game-groups';
+import { GroupClearButtonComponent } from './group-clear-button.component';
 
 /** Why the group picker is off on the Players tab: desktop hover and a phone tap both say it. */
 export const GROUPS_OFF_HINT = 'Groups filter your boards';
@@ -15,15 +16,17 @@ export const GROUPS_OFF_HINT = 'Groups filter your boards';
  */
 @Component({
   selector: 'app-group-menu',
-  imports: [NgIconComponent],
+  imports: [NgIconComponent, GroupClearButtonComponent],
   providers: [provideIcons({ heroCheck, heroChevronDown, heroFolder })],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="relative">
+      <!-- With a clearable pick the frame holds the name and its own ×, each a separate tap target -->
+      <div class="flex w-[200px] rounded-btn border transition-colors" [class]="buttonClass()">
       <button
         type="button"
-        class="flex w-[200px] items-center gap-2 rounded-btn border px-3 text-base transition-colors"
-        [class]="buttonClass()"
+        class="flex min-w-0 flex-1 items-center gap-2 px-3 text-base"
+        [class.pr-2]="showClear()"
         [attr.aria-disabled]="off() ? 'true' : null"
         [attr.aria-haspopup]="off() ? null : 'menu'"
         [attr.aria-expanded]="off() ? null : open()"
@@ -35,6 +38,11 @@ export const GROUPS_OFF_HINT = 'Groups filter your boards';
         <span class="min-w-0 flex-1 truncate text-left">{{ pickedName() }}</span>
         <ng-icon name="heroChevronDown" class="shrink-0 text-base transition-transform duration-150" [class.rotate-180]="open()" aria-hidden="true"></ng-icon>
       </button>
+      @if (showClear()) {
+        <button appGroupClear class="border-l" [class]="off() ? 'border-qs-line' : 'border-qs-line-strong text-qs-muted hover:text-qs-ink'"
+          [name]="pickedName()" [off]="off()" [attr.title]="off() ? hint : null" (click)="clear()"></button>
+      }
+      </div>
       @if (open() && !off()) {
         <div role="menu" aria-label="Groups" animate.enter="qs-menu-enter" animate.leave="qs-menu-leave" class="absolute z-30 max-h-[60vh] w-[240px] overflow-y-auto rounded-inner border border-qs-line-strong bg-qs-panel p-1 shadow-pop"
           [class]="menuClass()">
@@ -80,6 +88,8 @@ export class GroupMenuComponent {
   public readonly up = input<boolean>(false);
   /** Shows Manage groups at the bottom of the menu. */
   public readonly canManage = input<boolean>(false);
+  /** Puts an × beside a picked group's name that goes back to All groups (the dashboard taskbar). */
+  public readonly clearable = input<boolean>(false);
   /** The 36px height of TV mode's header buttons, instead of the dashboard's 44px. */
   public readonly compact = input<boolean>(false);
   public readonly manageGroups = output<void>();
@@ -100,6 +110,7 @@ export class GroupMenuComponent {
   protected readonly open = signal<boolean>(false);
   protected readonly pickedRow = computed<GroupRow | undefined>(() => this.rows().find(row => row.id === this.pickedId()));
   protected readonly pickedName = computed<string>(() => this.pickedRow()?.name ?? 'All groups');
+  protected readonly showClear = computed<boolean>(() => this.clearable() && !!this.pickedRow());
   private readonly host: ElementRef<HTMLElement> = inject(ElementRef);
 
   @HostListener('document:click', ['$event'])
@@ -111,6 +122,13 @@ export class GroupMenuComponent {
   public onEscape(): void {
     if (!this.open()) return;
     this.setOpen(false);
+    this.host.nativeElement.querySelector('button')?.focus();
+  }
+
+  /** Back to All groups; focus stays on the Groups button, since the × goes away. */
+  protected clear(): void {
+    if (this.off()) return;
+    this.pick(null);
     this.host.nativeElement.querySelector('button')?.focus();
   }
 
