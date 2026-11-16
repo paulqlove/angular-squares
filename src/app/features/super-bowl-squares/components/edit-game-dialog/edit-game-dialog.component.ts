@@ -223,7 +223,7 @@ export interface EditGameValues {
         </div>
       </div>
 
-      <div class="flex items-center justify-end gap-3 border-t border-qs-line bg-qs-panel px-6 py-4 max-sm:pb-[max(1rem,env(safe-area-inset-bottom))]">
+      <div class="qs-dialog-footer flex items-center justify-end gap-3">
         <button type="button" (click)="close()" class="qs-btn qs-btn-ghost text-qs-muted">Cancel</button>
         <button type="button" (click)="save()" [disabled]="saving || (showSplit && canCustomSplit && !splitLocked && !splitValid())" class="qs-btn qs-btn-primary px-8 max-sm:flex-1">
           @if (saving) { Saving... } @else { Save changes }
