@@ -1,6 +1,7 @@
 /**
  * Decisions behind a Players card's games panel on a phone (docs/DESIGN.md, Players): where the panel sits in the
- * two-column grid, and how far to scroll once it has opened so it isn't left under the bottom bar.
+ * two-column grid, and how far to scroll once it has opened so the card and its panel aren't left under the bottom bar
+ * or above the screen.
  */
 
 /** Phone cards sit two to a row. */
@@ -31,4 +32,24 @@ export function revealScroll(panel: Span, visible: Span): number {
   if (panel.top >= visible.top && panel.bottom <= visible.bottom) return 0;
   if (panel.top < visible.top) return panel.top - visible.top;
   return Math.min(panel.bottom - visible.bottom, panel.top - visible.top);
+}
+
+/**
+ * The top of the bottom bar that shows, in px from the top of the viewport, or the screen height when none does. A bar
+ * hidden at this screen size (display: none) measures 0 tall at the very top, so it is skipped.
+ */
+export function shownBarTop(bars: readonly Span[], screenHeight: number): number {
+  const shown = bars.filter(bar => bar.bottom > bar.top);
+  return Math.min(screenHeight, ...shown.map(bar => bar.top));
+}
+
+/**
+ * How far to scroll, in px (positive is down), once an open card's panel has grown: the card and its panel come into
+ * view together, only as far as needed, and when they don't both fit the card's top lines up with the top, so its name
+ * and points stay on screen. Scrolling up brings the site header back, so then the card lines up under all of it.
+ */
+export function openCardScroll(card: Span, panel: Span, visible: Span, headerHeight: number): number {
+  const both = { top: card.top, bottom: panel.bottom };
+  const delta = revealScroll(both, visible);
+  return delta < 0 ? revealScroll(both, { top: headerHeight, bottom: visible.bottom }) : delta;
 }
