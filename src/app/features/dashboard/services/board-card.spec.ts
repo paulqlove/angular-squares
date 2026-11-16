@@ -1,5 +1,4 @@
 import { GameListItem } from '../../../core/services/game.service';
-import { formatPassExpiry } from './dashboard-admin.service';
 import { autoLockText, canLockFromCard, hasCardBar, isBoardQuiet, openCount } from './board-card';
 
 function board(extra: Partial<GameListItem> = {}): GameListItem {
@@ -35,14 +34,5 @@ describe('board card', () => {
 
   it('has no auto-lock text without Auto-lock and draw', () => {
     expect(autoLockText(board({ squaresFilled: 100 }))).toBe('');
-  });
-});
-
-describe('formatPassExpiry', () => {
-  const now = 1_700_000_000_000;
-  it('counts the days left, and says when a pass has run out', () => {
-    expect(formatPassExpiry(now + 86_400_000, now)).toBe('1 day left');
-    expect(formatPassExpiry(now + 3 * 86_400_000 - 1000, now)).toBe('3 days left');
-    expect(formatPassExpiry(now - 1, now)).toBe('Expired');
   });
 });

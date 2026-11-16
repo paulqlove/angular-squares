@@ -2,9 +2,7 @@ import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, effect, inject }
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
-  heroArrowRight,
   heroBars3,
-  heroChevronDown,
   heroLockClosed,
   heroLockOpen,
   heroMagnifyingGlass,
@@ -18,6 +16,7 @@ import { SiteHeaderComponent } from '../../components/ui/site-header/site-header
 import { SiteFooterComponent } from '../../shared/site-footer.component';
 import { ModalComponent } from '../../components/ui/modal/modal.component';
 import { ProfileMenuComponent } from '../../components/ui/profile-menu/profile-menu.component';
+import { SeasonPassesDialogComponent } from '../../components/ui/season-passes-dialog/season-passes-dialog.component';
 import { ShareDialogComponent } from '../../components/ui/share-dialog/share-dialog.component';
 import { AuthService } from '../../core/services/auth.service';
 import { PlanService } from '../../core/services/plan.service';
@@ -25,7 +24,6 @@ import { WalkthroughService } from '../../core/services/walkthrough.service';
 import { DockAtEndDirective } from '../../shared/directives/dock-at-end.directive';
 import { CreateGameFormComponent } from '../create/create-game-form.component';
 import { EditGameDialogComponent } from '../super-bowl-squares/components/edit-game-dialog/edit-game-dialog.component';
-import { DashboardAdminPanelComponent } from './components/dashboard-admin-panel/dashboard-admin-panel.component';
 import { GroupMenuComponent } from './components/dashboard-groups/group-menu.component';
 import { DashboardHostingComponent } from './components/dashboard-hosting/dashboard-hosting.component';
 import { DashboardJoinedComponent } from './components/dashboard-joined/dashboard-joined.component';
@@ -36,7 +34,6 @@ import { NewBoardDockComponent } from './components/dashboard-returning-empty/ne
 import { SeasonTilesComponent } from './components/dashboard-returning-empty/season-tiles.component';
 import { DashboardSearchFieldComponent } from './components/dashboard-search-field/dashboard-search-field.component';
 import { UpgradePassDialogComponent } from './components/upgrade-pass-dialog/upgrade-pass-dialog.component';
-import { DashboardAdminService } from './services/dashboard-admin.service';
 import { DashboardDialogsService } from './services/dashboard-dialogs.service';
 import { DashboardEditService } from './services/dashboard-edit.service';
 import { DashboardGroupsService } from './services/dashboard-groups.service';
@@ -55,7 +52,7 @@ import { PlayersViewService } from './services/players-view.service';
   selector: 'app-dashboard',
   imports: [
     ModalComponent, NgIconComponent, SiteHeaderComponent, SiteFooterComponent, DockAtEndDirective, ProfileMenuComponent, ShareDialogComponent,
-    CreateGameFormComponent, EditGameDialogComponent, UpgradePassDialogComponent, DashboardAdminPanelComponent, DashboardHostingComponent,
+    CreateGameFormComponent, EditGameDialogComponent, UpgradePassDialogComponent, SeasonPassesDialogComponent, DashboardHostingComponent,
     DashboardJoinedComponent, DashboardPhoneBarComponent, DashboardSearchFieldComponent, GroupMenuComponent, CodeFieldComponent, NewBoardButtonComponent,
     NewBoardDockComponent, SeasonTilesComponent
   ],
@@ -66,12 +63,9 @@ import { PlayersViewService } from './services/players-view.service';
     DashboardViewService,
     DashboardEditService,
     DashboardDialogsService,
-    DashboardAdminService,
     PlayersViewService,
     provideIcons({
-      heroArrowRight,
       heroBars3,
-      heroChevronDown,
       heroLockClosed,
       heroLockOpen,
       heroMagnifyingGlass,
@@ -104,10 +98,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (typeof document !== 'undefined') document.body.classList.add('has-phone-bar');
     this.store.loadMyGames();
     this.dialogs.loadAutoManageDefault();
-    // Preload gifted passes count for admins
-    if (this.admin.canManagePasses()) {
-      this.admin.loadGiftedPasses();
-    }
     const params = this.route.snapshot.queryParamMap;
     this.search.showMissingGame(params);
     this.dialogs.resumeCreateIntent(params);
@@ -124,7 +114,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.walkthroughService.start('dashboard', dashboardTourSteps(DASHBOARD_TOUR_STEPS, window.innerWidth < 640));
   }
 
-  protected readonly admin: DashboardAdminService = inject(DashboardAdminService);
   protected readonly dialogs: DashboardDialogsService = inject(DashboardDialogsService);
   protected readonly edit: DashboardEditService = inject(DashboardEditService);
   protected readonly groups: DashboardGroupsService = inject(DashboardGroupsService);
