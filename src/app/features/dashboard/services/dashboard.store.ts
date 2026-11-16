@@ -13,7 +13,7 @@ import { drawBoardNumbers } from '../../../core/utils/draw-numbers';
 import { GroupRow, gamesInGroup } from '../../../core/utils/game-groups';
 import { toGameListItem } from '../../../core/utils/game-parse';
 import { deleteCountNote, gamesLeft, seasonLimitApplies } from '../../../core/utils/season-games';
-import { isReturningEmpty } from '../utils/returning-empty';
+import { EmptyDashboardFacts, isFirstEmpty, isReturningEmpty } from '../utils/returning-empty';
 import { filterHostedGames } from './dashboard-filters';
 import { DashboardGroupsService } from './dashboard-groups.service';
 import { DashboardSearchService } from './dashboard-search.service';
@@ -47,13 +47,15 @@ export class DashboardStore {
   public readonly lockingIds = signal<ReadonlySet<string>>(new Set());
   public readonly myGames = signal<GameListItem[]>([]);
   /** A free host with no boards who already played this season: the returning-host empty dashboard shows. */
-  public readonly returningEmpty = computed<boolean>(() => isReturningEmpty({
-    boards: this.myGames().length,
-    cap: this.planService.features().seasonGames,
-    canHost: this.canCreateGame(),
-    loading: this.isLoadingGames(),
-    used: this.seasonGames.used()
-  }));
+  public readonly returningEmpty = computed<boolean>(() => isReturningEmpty(this.emptyFacts()));
+  /** A free host with no boards and nothing counted this season: the "Host your first squares game" dashboard shows. */
+  public readonly firstEmpty = computed<boolean>(() => isFirstEmpty(this.emptyFacts()));
+  /** Either empty dashboard: code field up top and New board pinned along the bottom on phones. */
+  public readonly emptyHost = computed<boolean>(() => this.returningEmpty() || this.firstEmpty());
+  /** The New board button's words on an empty dashboard. */
+  public readonly newBoardLabel = computed<string>(() => this.firstEmpty() ? 'Create your first board' : 'New board');
+  /** The first word of the signed-in name, for "Welcome, Sam", or '' with no name. */
+  public readonly firstName = computed<string>(() => this.currentUser()?.displayName?.trim().split(/\s+/)[0] ?? '');
   /** Every board this user hosts or co-hosts, in full, for the Players view. Newest first, hosted ones first. */
   public readonly runBoards = signal<GameData[]>([]);
   public readonly shareModalGameId = signal<string | null>(null);
@@ -217,4 +219,13 @@ export class DashboardStore {
   private readonly seasonGames: SeasonGamesService = inject(SeasonGamesService);
   private readonly teamLogos: TeamLogoService = inject(TeamLogoService);
   private readonly toastService: ToastService = inject(ToastService);
+
+  /** What picks the empty dashboard: boards, plan cap, sign-in, loading and this season's count. */
+  private readonly emptyFacts = computed<EmptyDashboardFacts>(() => ({
+    boards: this.myGames().length,
+    cap: this.planService.features().seasonGames,
+    canHost: this.canCreateGame(),
+    loading: this.isLoadingGames(),
+    used: this.seasonGames.used()
+  }));
 }

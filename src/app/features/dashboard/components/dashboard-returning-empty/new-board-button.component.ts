@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroPlus } from '@ng-icons/heroicons/outline';
 
@@ -17,9 +17,11 @@ import { DashboardDialogsService } from '../../services/dashboard-dialogs.servic
     '[attr.aria-busy]': 'dialogs.isCheckingBoardLimit()',
     '(click)': 'dialogs.openCreateModal($event)'
   },
-  template: '<ng-icon name="heroPlus" class="text-base" aria-hidden="true"></ng-icon>New board',
+  template: '<ng-icon name="heroPlus" class="text-base" aria-hidden="true"></ng-icon>{{ label() }}',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NewBoardButtonComponent {
+  /** The button's words: New board, or Create your first board for a first-time host. */
+  public readonly label = input<string>('New board');
   protected readonly dialogs: DashboardDialogsService = inject(DashboardDialogsService);
 }
