@@ -13,6 +13,7 @@ import { drawBoardNumbers } from '../../../core/utils/draw-numbers';
 import { GroupRow, gamesInGroup } from '../../../core/utils/game-groups';
 import { toGameListItem } from '../../../core/utils/game-parse';
 import { deleteCountNote, gamesLeft, seasonLimitApplies } from '../../../core/utils/season-games';
+import { isReturningEmpty } from '../utils/returning-empty';
 import { filterHostedGames } from './dashboard-filters';
 import { DashboardGroupsService } from './dashboard-groups.service';
 import { DashboardSearchService } from './dashboard-search.service';
@@ -45,6 +46,14 @@ export class DashboardStore {
   /** Boards whose Lock now is being saved. */
   public readonly lockingIds = signal<ReadonlySet<string>>(new Set());
   public readonly myGames = signal<GameListItem[]>([]);
+  /** A free host with no boards who already played this season: the returning-host empty dashboard shows. */
+  public readonly returningEmpty = computed<boolean>(() => isReturningEmpty({
+    boards: this.myGames().length,
+    cap: this.planService.features().seasonGames,
+    canHost: this.canCreateGame(),
+    loading: this.isLoadingGames(),
+    used: this.seasonGames.used()
+  }));
   /** Every board this user hosts or co-hosts, in full, for the Players view. Newest first, hosted ones first. */
   public readonly runBoards = signal<GameData[]>([]);
   public readonly shareModalGameId = signal<string | null>(null);
@@ -54,6 +63,8 @@ export class DashboardStore {
     const used = this.seasonGames.used();
     return seasonLimitApplies(cap) && used !== null ? gamesLeft(cap, used) : null;
   });
+  /** Games this host has used this season, or null until read. */
+  public readonly seasonGamesUsed = computed<number | null>(() => this.seasonGames.used());
   /** Hosted boards in the picked group matching the search, newest first. */
   public readonly visibleMyGames = computed<GameListItem[]>(() => {
     const search = this.search;
@@ -96,7 +107,9 @@ export class DashboardStore {
         this.myGames.set(owned);
         this.joinedGames.set(joinedRecords.map(game => toGameListItem(game.id as string, game, false)));
         this.runBoards.set([...ownedRecords, ...joinedRecords.filter(game => game.managerId === user.uid)]);
-        this.refreshSeasonCount();
+        // With no boards, which empty state shows hangs on the season count, so wait for it rather than swap screens
+        const seasonRead = this.refreshSeasonCount();
+        if (owned.length === 0) await seasonRead;
         const linked = owned.filter(game => !!game.espnEventId);
         if (linked.length > 0) {
           this.gameService.ensureLiveGameIndexes(linked.map(game => ({
@@ -164,11 +177,11 @@ export class DashboardStore {
   }
 
   /** Re-reads how many games this host has used this season, for the plan card and the limit dialogs. */
-  public refreshSeasonCount(): void {
+  public async refreshSeasonCount(): Promise<void> {
     const user = this.currentUser();
     if (!user || user.isGuest || !seasonLimitApplies(this.planService.features().seasonGames)) return;
     // A failed read hides the "games left" line rather than showing a wrong number.
-    this.seasonGames.usedThisSeason(user.uid, this.myGames()).catch(() => this.seasonGames.used.set(null));
+    await this.seasonGames.usedThisSeason(user.uid, this.myGames()).catch(() => this.seasonGames.used.set(null));
   }
 
   /** The extra delete-confirm sentence for a game with players that keeps counting this season, or ''. */

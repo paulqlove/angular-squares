@@ -1,0 +1,41 @@
+import { EmptyDashboardFacts, isReturningEmpty } from './returning-empty';
+
+describe('isReturningEmpty', () => {
+  const returning: EmptyDashboardFacts = { boards: 0, cap: 3, canHost: true, loading: false, used: 1 };
+
+  it('is true for a free host with no boards who has used a game this season', () => {
+    expect(isReturningEmpty(returning, true)).toBe(true);
+  });
+
+  it('is true when every free game is used', () => {
+    expect(isReturningEmpty({ ...returning, used: 3 }, true)).toBe(true);
+  });
+
+  it('is false for a first-time host with nothing counted', () => {
+    expect(isReturningEmpty({ ...returning, used: 0 }, true)).toBe(false);
+  });
+
+  it('is false until the season count is read, or when the read failed', () => {
+    expect(isReturningEmpty({ ...returning, used: null }, true)).toBe(false);
+  });
+
+  it('is false once the host has a board', () => {
+    expect(isReturningEmpty({ ...returning, boards: 1 }, true)).toBe(false);
+  });
+
+  it('is false while the boards load', () => {
+    expect(isReturningEmpty({ ...returning, loading: true }, true)).toBe(false);
+  });
+
+  it('is false for Season Pass and Admin hosts, who have no season cap', () => {
+    expect(isReturningEmpty({ ...returning, cap: Number.POSITIVE_INFINITY }, true)).toBe(false);
+  });
+
+  it('is false for a guest', () => {
+    expect(isReturningEmpty({ ...returning, canHost: false }, true)).toBe(false);
+  });
+
+  it('is false while the season cap is switched off', () => {
+    expect(isReturningEmpty(returning, false)).toBe(false);
+  });
+});

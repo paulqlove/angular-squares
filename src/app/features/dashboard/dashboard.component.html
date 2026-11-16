@@ -5,8 +5,14 @@
   </app-site-header>
 
   <main class="mx-auto max-w-[1600px] px-4 sm:px-8 pt-6 pb-32 sm:pb-20 md:pt-8">
+    <!-- Phone, returning host with no boards: the code field moves up here, since the bottom bar holds only New board -->
+    @if (store.returningEmpty()) {
+      <div appCodeField class="mb-8 block sm:hidden"></div>
+    }
     <!-- Heading + actions -->
-    <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between" data-walkthrough="hero-section">
+    <!-- A returning host with no boards keeps New board and Search on their own row under the title -->
+    <div class="flex flex-col gap-6" [class.lg:flex-row]="!store.returningEmpty()" [class.lg:items-end]="!store.returningEmpty()"
+      [class.lg:justify-between]="!store.returningEmpty()" data-walkthrough="hero-section">
       <div>
         <p class="qs-eyebrow">Dashboard</p>
         <h2 class="qs-title mt-3 text-4xl sm:text-5xl">Your <span class="text-qs-accent">games</span></h2>
@@ -14,6 +20,9 @@
 
       <!-- From 640px up: one field that searches your boards or joins with a code, the group picker, then New board. Phones get the bottom bar instead. -->
       <div class="hidden items-center gap-3 sm:flex sm:flex-row">
+        @if (store.returningEmpty()) {
+          <button appNewBoardButton></button>
+        }
         <div role="search" class="relative w-[400px] min-w-0" data-walkthrough="join-game">
           <div appDashboardSearchField class="qs-search min-w-0 flex-1" [where]="'desk'"></div>
           @if (search.showCodeError()) {
@@ -22,23 +31,13 @@
         </div>
 
         <!-- On the Players tab the picker stays put but switched off, so Search doesn't slide over -->
-        @if (store.groupPickerShows()) {
+        @if (store.groupPickerShows() && !store.returningEmpty()) {
           <app-group-menu [off]="players.active()" [rows]="store.groupRows()" [pickedId]="groups.pickedId()" [canManage]="groups.canEdit()"
             (groupPicked)="groups.pickedId.set($event)" (manageGroups)="groups.openManage()"></app-group-menu>
         }
 
-        @if (store.canCreateGame()) {
-          <button
-            type="button"
-            (click)="dialogs.openCreateModal($event)"
-            [disabled]="dialogs.isCheckingBoardLimit()"
-            [attr.aria-busy]="dialogs.isCheckingBoardLimit()"
-            class="qs-btn qs-btn-primary disabled:cursor-wait"
-            data-walkthrough="create-game"
-          >
-            <ng-icon name="heroPlus" class="text-base"></ng-icon>
-            New board
-          </button>
+        @if (store.canCreateGame() && !store.returningEmpty()) {
+          <button appNewBoardButton></button>
         }
       </div>
     </div>
@@ -55,8 +54,11 @@
 
     <!-- Hosting -->
     @if (store.canCreateGame()) {
-      <!-- Plan card: the upgrade entry point, so only free hosts see it. Season and Admin see their plan in the profile menu. -->
-      @if (planService.plan() !== 'season' && planService.plan() !== 'admin') {
+      <!-- Plan card: the upgrade entry point, so only free hosts see it. Season and Admin see their plan in the profile menu.
+           A returning free host with no boards gets the season tiles and the "No boards" card in its place. -->
+      @if (store.returningEmpty()) {
+        <div appSeasonTiles class="mt-8" data-walkthrough="my-games" [hosted]="store.seasonGamesUsed() ?? 0" [left]="store.seasonGamesLeft() ?? 0" (seeSeasonPass)="dialogs.openUpgrade($event)"></div>
+      } @else if (planService.plan() !== 'season' && planService.plan() !== 'admin') {
         <div class="qs-card mt-8 flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between" aria-label="Your plan">
           <div class="min-w-0">
             <p class="qs-label text-qs-muted">Your plan</p>
@@ -81,7 +83,10 @@
         <section appDashboardAdminPanel class="mt-8" aria-labelledby="admin-heading"></section>
       }
 
-      <section appDashboardHosting class="mt-8" data-walkthrough="my-games" aria-labelledby="hosting-heading"></section>
+      <!-- With no boards, a returning host's season tiles above stand in for Hosting -->
+      @if (!store.returningEmpty()) {
+        <section appDashboardHosting class="mt-8" data-walkthrough="my-games" aria-labelledby="hosting-heading"></section>
+      }
     }
 
     <!-- Joined -->
@@ -93,7 +98,11 @@
   <!-- No footer on phones, like the game page: the bottom bar docks at the end of the page, and main's 128px bottom padding keeps the last card clear of it -->
   <app-site-footer width="wide" class="block bg-qs-panel max-sm:hidden"></app-site-footer>
 
-  <!-- Phone: the search-or-code field and New board in a bar along the bottom, lifted above the keyboard while the search is open -->
+  <!-- Phone: the search-or-code field and New board in a bar along the bottom, lifted above the keyboard while the search is open.
+       A returning host with no boards gets New board alone, pinned along the bottom. -->
+  @if (store.returningEmpty()) {
+    <div appNewBoardDock [class.qs-dock-off]="dialogs.barHidden()" [attr.aria-hidden]="dialogs.barHidden() ? 'true' : null"></div>
+  } @else {
   <div
     appDashboardPhoneBar
     class="qs-dock qs-dockable no-print fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-[90] sm:hidden"
@@ -102,6 +111,7 @@
     [attr.aria-hidden]="dialogs.barHidden() || players.filterOpen() ? 'true' : null"
     [style.transform]="search.searchOpen() && search.keyboardLift() ? 'translateY(-' + search.keyboardLift() + 'px)' : null"
   ></div>
+  }
 
   <!-- Create Game Modal -->
   <app-modal [open]="dialogs.showCreateModal()" labelledBy="create-game-title" size="xl" phone="full" [backdropCloses]="false" extraClass="flex h-[min(44rem,calc(100dvh-2rem))] flex-col overflow-hidden" (dismissed)="dialogs.dismissCreateModal()">
