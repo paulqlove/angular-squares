@@ -1,6 +1,7 @@
 import { isPlatformBrowser } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ElementRef, Injector, PLATFORM_ID, afterNextRender, computed, effect, inject, untracked } from '@angular/core';
-import { NgIconComponent } from '@ng-icons/core';
+import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import { heroPlus } from '@ng-icons/heroicons/outline';
 
 import { captureLayout, glideToNewLayout } from '../../utils/flip-layout';
 import { DashboardDialogsService } from '../../services/dashboard-dialogs.service';
@@ -28,13 +29,14 @@ import { PlayersViewComponent } from '../players-view/players-view.component';
     NgIconComponent, DashboardViewToggleComponent, GameCardComponent, GroupChipComponent, GroupPickSheetComponent, GroupsSheetComponent,
     PlayersViewComponent, ValueSwapComponent
   ],
+  providers: [provideIcons({ heroPlus })],
   templateUrl: './dashboard-hosting.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
     /* Boards | Players: a two-button switch, ink fill on the one showing. */
     .qs-seg { display: inline-flex; gap: 2px; padding: 2px; border-radius: var(--qs-r-btn); background: var(--qs-panel-2); border: 1px solid var(--qs-line); }
     .qs-seg button { height: 40px; padding: 0 14px; border-radius: 6px; font-family: var(--qs-font-mono); font-size: 13px; font-weight: 500;
-      letter-spacing: .1em; text-transform: uppercase; color: var(--qs-muted); transition: background-color var(--qs-t-fast) var(--qs-ease), color var(--qs-t-fast) var(--qs-ease); }
+      letter-spacing: .1em; text-indent: .1em; text-transform: uppercase; color: var(--qs-muted); transition: background-color var(--qs-t-fast) var(--qs-ease), color var(--qs-t-fast) var(--qs-ease); }
     @media (hover: hover) { .qs-seg button:hover:not([aria-pressed="true"]) { color: var(--qs-ink); } }
     .qs-seg button[aria-pressed="true"] { background: var(--qs-ink); color: var(--qs-bg); }
   `]

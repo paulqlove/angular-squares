@@ -17,7 +17,8 @@ import { DashboardDialogsService } from '../../services/dashboard-dialogs.servic
     '[attr.aria-busy]': 'dialogs.isCheckingBoardLimit()',
     '(click)': 'dialogs.openCreateModal($event)'
   },
-  template: '<ng-icon name="heroPlus" class="text-base" aria-hidden="true"></ng-icon>{{ label() }}',
+  // The words drop their trailing letter-spacing (and the button's text indent), so plus and words sit centered as one
+  template: '<ng-icon name="heroPlus" class="text-base" aria-hidden="true"></ng-icon><span class="-mr-[0.1em] indent-0">{{ label() }}</span>',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NewBoardButtonComponent {
