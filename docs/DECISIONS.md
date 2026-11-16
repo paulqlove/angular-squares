@@ -4,6 +4,14 @@ This file records product and design decisions, newest first. To add one, put a 
 
 ---
 
+## D-039 · Gifted Season Passes move into the profile menu
+
+- **Date:** Nov 16 2026
+- **Decision:** The admin's gifted Season Passes leave the dashboard. The profile menu gets an Admin section above Sign out with one item, Season Passes, and the gifted count ("4 gifted"); it opens a dialog (a bottom sheet on phones) with the same Gift a pass form and the list of gifted passes, each with its status and an always-visible remove X. Tapping a status still makes that pass never expire. Admin account only. Creative's mockups; Paul's words, relayed: "the admin season passes on the my dashboard move that buried in the profile settings dropdown and where it triggers a modal and then I can just add or remove somebody from season passes that way", then "Build it".
+- **Options considered:** not recorded
+- **Why:** the admin tool cluttered the dashboard Paul uses as a host
+- **Decided by:** Paul
+
 ## D-038 · Free hosts: one game at a time and 3 games a season
 
 - **Date:** Nov 15 2026

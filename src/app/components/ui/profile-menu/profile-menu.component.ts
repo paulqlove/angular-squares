@@ -2,19 +2,21 @@ import { Component, ElementRef, Input, Output, EventEmitter, HostListener, Chang
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { heroChevronDown, heroArrowRightOnRectangle, heroComputerDesktop, heroSun, heroMoon, heroQuestionMarkCircle, heroTv, heroPlayCircle, heroBookOpen } from '@ng-icons/heroicons/outline';
+import { heroChevronDown, heroArrowRightOnRectangle, heroComputerDesktop, heroSun, heroMoon, heroQuestionMarkCircle, heroTv, heroPlayCircle, heroBookOpen, heroTicket } from '@ng-icons/heroicons/outline';
 import { AuthService } from '../../../core/services/auth.service';
 import { GameService } from '../../../core/services/game.service';
 import { SanitizationService } from '../../../core/services/sanitization.service';
 import { ThemeMode, ThemeService } from '../../../core/services/theme.service';
 import { PlanService } from '../../../core/services/plan.service';
+import { SeasonPassAdminService } from '../../../core/services/season-pass-admin.service';
+import { SeasonPassesDialogComponent } from '../season-passes-dialog/season-passes-dialog.component';
 import { ToggleComponent } from '../toggle/toggle.component';
 
 /** Header avatar chip with the profile menu: display name, theme, sign out. Shared by the dashboard and game page. */
 @Component({
   selector: 'app-profile-menu',
-  imports: [FormsModule, RouterLink, NgIconComponent, ToggleComponent],
-  providers: [provideIcons({ heroChevronDown, heroArrowRightOnRectangle, heroComputerDesktop, heroSun, heroMoon, heroQuestionMarkCircle, heroTv, heroPlayCircle, heroBookOpen })],
+  imports: [FormsModule, RouterLink, NgIconComponent, SeasonPassesDialogComponent, ToggleComponent],
+  providers: [provideIcons({ heroChevronDown, heroArrowRightOnRectangle, heroComputerDesktop, heroSun, heroMoon, heroQuestionMarkCircle, heroTv, heroPlayCircle, heroBookOpen, heroTicket })],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
         <div class="relative" [attr.data-walkthrough]="walkthroughTarget">
@@ -148,6 +150,19 @@ import { ToggleComponent } from '../toggle/toggle.component';
             </div>
           </div>
 
+          @if (passAdmin.canManagePasses()) {
+            <div class="border-t border-qs-line p-2">
+              <p class="qs-label px-3 pb-1 pt-1 text-qs-muted">Admin</p>
+              <button type="button" (click)="showProfileDropdown.set(false); passAdmin.openDialog()" class="qs-btn qs-btn-ghost w-full justify-start text-qs-ink">
+                <ng-icon name="heroTicket" class="text-base"></ng-icon>
+                <span class="flex-1 text-left">Season Passes</span>
+                @if (!passAdmin.isLoadingGiftedPasses()) {
+                  <span class="qs-label text-qs-muted">{{ passAdmin.giftedPasses().length }} gifted</span>
+                }
+              </button>
+            </div>
+          }
+
           <div class="border-t border-qs-line p-2">
             @if (showTourLink) {
               <button type="button" (click)="showProfileDropdown.set(false); tour.emit()" class="qs-btn qs-btn-ghost w-full justify-start text-qs-ink sm:hidden">
@@ -172,6 +187,8 @@ import { ToggleComponent } from '../toggle/toggle.component';
           </div>
         </div>
       }
+      <!-- Outside the dropdown: the item's click closes the menu -->
+      <app-season-passes-dialog></app-season-passes-dialog>
     </div>
   `
 })
@@ -191,6 +208,7 @@ export class ProfileMenuComponent {
   protected authService = inject(AuthService);
   protected themeService = inject(ThemeService);
   protected planService = inject(PlanService);
+  protected passAdmin = inject(SeasonPassAdminService);
   private gameService = inject(GameService);
   private router = inject(Router);
   private sanitizationService = inject(SanitizationService);
@@ -226,6 +244,7 @@ export class ProfileMenuComponent {
       this.profileName = this.currentUser()?.displayName || '';
       const uid = this.currentUser()?.uid;
       if (uid && this.planService.features().autoManage) this.gameService.getAutoManageDefault(uid).then(on => this.autoManageOn.set(on));
+      if (this.passAdmin.canManagePasses()) this.passAdmin.loadGiftedPasses();
     }
   }
 

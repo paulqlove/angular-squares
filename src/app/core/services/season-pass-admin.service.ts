@@ -1,12 +1,12 @@
 import { Injectable, Signal, computed, inject, signal } from '@angular/core';
 
-import { isNoExpiry } from '../../../core/plans';
-import { AuthService } from '../../../core/services/auth.service';
-import { ConfirmService } from '../../../core/services/confirm.service';
-import { GameService } from '../../../core/services/game.service';
-import { ToastService } from '../../../core/services/toast.service';
+import { isNoExpiry } from '../plans';
+import { AuthService } from './auth.service';
+import { ConfirmService } from './confirm.service';
+import { GameService } from './game.service';
+import { ToastService } from './toast.service';
 
-/** The only account that sees the gifted Season Pass panel. */
+/** The only account that sees the gifted Season Passes item and dialog. */
 const PASS_ADMIN_EMAIL = 'paulqlove@gmail.com';
 
 interface GiftedPass {
@@ -24,18 +24,18 @@ export function formatPassExpiry(expiresAt: number, now: number = Date.now()): s
   return `${days} days left`;
 }
 
-/** Admin: gifted Season Passes, granted, revoked and made permanent from the dashboard. Provided on the dashboard. */
-@Injectable()
-export class DashboardAdminService {
-  /** The gifted pass panel shows for the admin account only. */
+/** Admin: gifted Season Passes, granted, revoked and made permanent from the profile menu's Season Passes dialog. */
+@Injectable({ providedIn: 'root' })
+export class SeasonPassAdminService {
+  /** The Season Passes item and dialog show for the admin account only. */
   public readonly canManagePasses = computed<boolean>(() => this.isAdmin() && this.authService.currentUser()?.email?.toLowerCase() === PASS_ADMIN_EMAIL);
   public readonly giftedPasses = signal<GiftedPass[]>([]);
+  public readonly dialogOpen = signal<boolean>(false);
   public readonly isAdmin: Signal<boolean> = inject(AuthService).isPreviewAdmin;
   public readonly isGrantingPass = signal<boolean>(false);
   public readonly isLoadingGiftedPasses = signal<boolean>(false);
   public newGiftDays: number = 210;
   public newGiftEmail: string = '';
-  public readonly showAdminPanel = signal<boolean>(false);
   public readonly updatingPassEmail = signal<string | null>(null);
 
   public formatExpiry(expiresAt: number): string {
@@ -105,12 +105,9 @@ export class DashboardAdminService {
     }
   }
 
-  public toggleAdminPanel(): void {
-    const isOpen = !this.showAdminPanel();
-    this.showAdminPanel.set(isOpen);
-    if (isOpen) {
-      this.loadGiftedPasses();
-    }
+  public openDialog(): void {
+    this.dialogOpen.set(true);
+    this.loadGiftedPasses();
   }
 
   private readonly authService: AuthService = inject(AuthService);

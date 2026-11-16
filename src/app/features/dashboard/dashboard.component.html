@@ -78,11 +78,6 @@
         </div>
       }
 
-      <!-- Admin Panel: Gifted Season Passes (admin account only) -->
-      @if (admin.canManagePasses()) {
-        <section appDashboardAdminPanel class="mt-8" aria-labelledby="admin-heading"></section>
-      }
-
       <!-- With no boards, a returning host's season tiles above stand in for Hosting -->
       @if (!store.returningEmpty()) {
         <section appDashboardHosting class="mt-8" data-walkthrough="my-games" aria-labelledby="hosting-heading"></section>
