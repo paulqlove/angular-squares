@@ -82,3 +82,17 @@ export function deleteCountNote(game: SeasonGame, cap: number, now: number, on: 
 export function seasonLimitApplies(cap: number, on: boolean = SEASON_LIMIT_ON): boolean {
   return on && Number.isFinite(cap);
 }
+
+/** What Clear game does: clear as before, clear with a line that the new game will count, or open the season dialog instead. */
+export type ClearGameStep = 'clear' | 'note' | 'blocked';
+
+/** Clearing an empty board can't start a counted game, so only a board with players gets the line or the block. Null left means no cap. */
+export function clearGameStep(squaresFilled: number, left: number | null): ClearGameStep {
+  if (left === null || !gameCounts(squaresFilled)) return 'clear';
+  return left > 0 ? 'note' : 'blocked';
+}
+
+/** The extra line on the clear confirm for a host under the cap. */
+export function clearCountNote(left: number, cap: number): string {
+  return `Once someone claims a square, this counts as a new game. You have ${left} of ${cap} free games left this season.`;
+}

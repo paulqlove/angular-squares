@@ -24,6 +24,8 @@
   [linkedGameName]="state.espnEventId ? state.awayTeam + ' @ ' + state.homeTeam : ''"
   [showSplit]="true"
   [showClear]="true"
+  [clearNote]="host.clearNote()"
+  [clearBlocked]="host.clearStep() === 'blocked'"
   [canCustomSplit]="planService.features().customSplits"
   [splitLocked]="state.isRandomized"
   (closed)="ui.showSettings.set(false)"
@@ -32,5 +34,9 @@
 >
   <section appEditGameNumbers editGameTop></section>
 </app-edit-game-dialog>
+
+@if (host.showSeasonLimit()) {
+  <app-upgrade-pass-dialog trigger="season" [gamesLeft]="0" keepLabel="Keep this game" (dismissed)="host.showSeasonLimit.set(false)" />
+}
 
 <app-cohost-edit-dialog></app-cohost-edit-dialog>

@@ -2,6 +2,8 @@ import { PLANS } from '../plans';
 import {
   SEASON_LIMIT_ON,
   SeasonGame,
+  clearCountNote,
+  clearGameStep,
   deleteCountNote,
   gameCounts,
   gamesLeft,
@@ -82,5 +84,23 @@ describe('season games', () => {
     expect(deleteCountNote(game(), 3, now, false)).toBe('');
     expect(deleteCountNote(game(), Number.POSITIVE_INFINITY, now, true)).toBe('');
     expect(deleteCountNote(game({ createdAt: Date.UTC(2026, 2, 1) }), 3, now, true)).toBe('');
+  });
+
+  it('clears an empty board as before, whatever is left', () => {
+    expect(clearGameStep(0, 0)).toBe('clear');
+    expect(clearGameStep(0, 2)).toBe('clear');
+  });
+
+  it('clears as before while the cap is off or the plan has none', () => {
+    expect(clearGameStep(5, null)).toBe('clear');
+  });
+
+  it('adds the line under the cap and stops the clear at it, for a board with players', () => {
+    expect(clearGameStep(1, 2)).toBe('note');
+    expect(clearGameStep(1, 0)).toBe('blocked');
+  });
+
+  it('words the clear line with the games left', () => {
+    expect(clearCountNote(2, 3)).toBe('Once someone claims a square, this counts as a new game. You have 2 of 3 free games left this season.');
   });
 });
