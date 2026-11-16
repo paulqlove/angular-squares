@@ -7,6 +7,7 @@ import { DashboardGroupsService } from '../../services/dashboard-groups.service'
 import { DashboardSearchService } from '../../services/dashboard-search.service';
 import { DashboardStore } from '../../services/dashboard.store';
 import { PlayersViewService } from '../../services/players-view.service';
+import { GroupClearButtonComponent } from '../dashboard-groups/group-clear-button.component';
 import { GROUPS_OFF_HINT } from '../dashboard-groups/group-menu.component';
 import { NewBoardButtonComponent } from '../dashboard-returning-empty/new-board-button.component';
 import { DashboardSearchFieldComponent } from '../dashboard-search-field/dashboard-search-field.component';
@@ -20,7 +21,7 @@ import { DashboardSearchFieldComponent } from '../dashboard-search-field/dashboa
  */
 @Component({
   selector: 'div[appDashboardPhoneBar]',
-  imports: [NgIconComponent, DashboardSearchFieldComponent, NewBoardButtonComponent],
+  imports: [NgIconComponent, DashboardSearchFieldComponent, GroupClearButtonComponent, NewBoardButtonComponent],
   providers: [provideIcons({ heroFolder, heroMagnifyingGlass })],
   templateUrl: './dashboard-phone-bar.component.html',
   changeDetection: ChangeDetectionStrategy.Eager
@@ -28,8 +29,10 @@ import { DashboardSearchFieldComponent } from '../dashboard-search-field/dashboa
 export class DashboardPhoneBarComponent {
   /** Off on the Players tab; a picked group fills it ink. */
   protected readonly folderClass = computed<string>(() => {
-    if (this.players.active()) return 'qs-ctrl-off';
-    return this.groups.picked() ? 'border-qs-ink bg-qs-ink text-qs-bg' : 'border-qs-line-strong bg-qs-panel text-qs-ink';
+    // A picked group's name may shrink (to the folder, a letter and the ×) once the search field is down to its icon
+    const size = this.groups.picked() ? 'min-w-[100px] max-w-[9rem] flex-[0_1_auto]' : 'shrink-0';
+    if (this.players.active()) return `${size} qs-ctrl-off`;
+    return `${size} ${this.groups.picked() ? 'border-qs-ink bg-qs-ink text-qs-bg' : 'border-qs-line-strong bg-qs-panel text-qs-ink'}`;
   });
   protected readonly groups: DashboardGroupsService = inject(DashboardGroupsService);
   protected readonly hint = GROUPS_OFF_HINT;
@@ -38,6 +41,12 @@ export class DashboardPhoneBarComponent {
   protected readonly store: DashboardStore = inject(DashboardStore);
 
   private readonly toast: ToastService = inject(ToastService);
+
+  /** The × back to All groups. Off on the Players tab, where a tap says why, as the folder does. */
+  protected clearGroup(): void {
+    if (this.players.active()) this.toast.info(GROUPS_OFF_HINT);
+    else this.groups.pickedId.set(null);
+  }
 
   protected tapGroups(): void {
     if (this.players.active()) this.toast.info(GROUPS_OFF_HINT);
