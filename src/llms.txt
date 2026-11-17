@@ -14,7 +14,7 @@ Key facts:
 - Squares update in real time for everyone on the board.
 - The host locks the board, then the digits 0 through 9 are drawn at random for the rows and the columns, so nobody picks a digit.
 - Quarter winners are found automatically from the last digit of each team's score.
-- Boards can follow a live game: the score and clock come from ESPN, for NFL, NCAA football, UFL, NBA, WNBA and AFL games. Any other game works as a custom board with your own team names.
+- Boards can follow a live game: the score and clock come from ESPN, for NFL, NCAA football, UFL, NBA and WNBA games. Any other game works as a custom board with your own team names.
 - Points split 20, 20, 20 and 40 percent across the four quarters as standard. These are points, never money.
 - If a quarter's winning square is empty, the host chooses whether its points roll into the final quarter or are shared across the other quarters.
 - Hosts can mark players as checked in or paid, add a co-host, and leave a short note on the board.

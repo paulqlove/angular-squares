@@ -285,15 +285,19 @@ export class EditGameDialogComponent implements OnChanges {
   /** Split being edited, in percent (20 = 20%). */
   pct: SplitPercents = splitPercents(null);
   readonly smallerSizes: BoardSize[] = [50, 25];
-  readonly sportOptions: { value: SportType | 'custom'; label: string }[] = [
-    { value: 'nfl', label: 'NFL' },
-    { value: 'ncaaf', label: 'NCAA Football' },
-    { value: 'ufl', label: 'UFL' },
-    { value: 'nba', label: 'NBA' },
-    { value: 'wnba', label: 'WNBA' },
-    { value: 'afl', label: 'AFL' },
-    { value: 'custom', label: 'Custom' }
-  ];
+  /** AFL is no longer offered (Nov 17, 2026), except on a game already set to AFL, so it still reads right. */
+  get sportOptions(): { value: SportType | 'custom'; label: string }[] {
+    const options: { value: SportType | 'custom'; label: string }[] = [
+      { value: 'nfl', label: 'NFL' },
+      { value: 'ncaaf', label: 'NCAA Football' },
+      { value: 'ufl', label: 'UFL' },
+      { value: 'nba', label: 'NBA' },
+      { value: 'wnba', label: 'WNBA' }
+    ];
+    if (this.values.sport === 'afl') options.push({ value: 'afl', label: 'AFL' });
+    options.push({ value: 'custom', label: 'Custom' });
+    return options;
+  }
   draft: EditGameValues = { ...this.values };
 
   protected readonly groupedHint = GROUPED_SHOWN_HINT;
