@@ -366,7 +366,7 @@ export class WelcomeComponent implements OnInit {
             'Squares update in real time',
             'Numbers drawn at random after the board is locked',
             'Automatic quarter winners from live ESPN scores',
-            'NFL, NCAA football, UFL, NBA, WNBA and AFL games, or custom teams',
+            'NFL, NCAA football, UFL, NBA and WNBA games, or custom teams',
             'Choose what happens when a winning square is empty',
             'Check-in and paid tracking, co-hosts and a host note',
             'TV mode with a QR code to join and rotating boards',

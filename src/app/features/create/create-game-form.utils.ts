@@ -7,13 +7,13 @@ export const BOARD_SIZE_OPTIONS: readonly { value: BoardSize; label: string; des
   { value: 25, label: '25 squares', description: '5×5 grid' }
 ];
 
+/** New boards can't pick AFL (Nov 17, 2026); boards already on AFL keep working. */
 export const SPORT_OPTIONS: readonly { value: SportType | 'custom'; label: string }[] = [
   { value: 'nfl', label: 'NFL' },
   { value: 'ncaaf', label: 'NCAA' },
   { value: 'ufl', label: 'UFL' },
   { value: 'nba', label: 'NBA' },
   { value: 'wnba', label: 'WNBA' },
-  { value: 'afl', label: 'AFL' },
   { value: 'custom', label: 'Custom' }
 ];
 
