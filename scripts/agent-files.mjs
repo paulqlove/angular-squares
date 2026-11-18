@@ -31,6 +31,7 @@ const TOOL_PAGES = [
   { path: '/create', label: 'Create a free board', text: 'Set up a 100, 50 or 25 square board. The host signs in when the board is saved.' },
   { path: '/best-squares-numbers', label: 'Best squares numbers', text: 'How often each last-digit pair has shown up in historical scoring.' },
   { path: '/printable-football-squares', label: 'Printable football squares', text: 'A free blank 10 by 10 grid, a print view and a PDF.' },
+  { path: '/super-bowl-party-games', label: 'Super Bowl party games', text: 'Squares, a printable prop sheet, commercial bingo cards and games for people who do not watch football.' },
   { path: '/teams', label: 'Football squares by NFL team', text: 'A board page for each of the 32 NFL teams.' }
 ];
 
