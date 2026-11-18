@@ -1,14 +1,16 @@
-<div class="flex min-h-11 items-center justify-between gap-3 border-b border-qs-line pb-2">
+<!-- From 640px up the row is 53px tall with or without Grid / Compact: its 44px buttons, 8px under them and the 1px rule -->
+<div class="flex min-h-11 items-center sm:min-h-[53px] justify-between gap-3 border-b border-qs-line pb-2">
   <div class="flex min-w-0 items-baseline gap-2.5">
     <h3 id="hosting-heading" class="qs-section-title">Hosting</h3>
     @if (!store.isLoadingGames()) {
       <span class="qs-label whitespace-nowrap text-qs-muted" [class.max-sm:hidden]="players.available()">{{ countLabel() }}</span>
     }
   </div>
-  <!-- Boards | Players stays pinned at the right edge on both tabs; Grid / Compact comes and goes to its left -->
+  <!-- Boards | Players stays pinned at the right edge on both tabs; Grid / Compact comes and goes to its left.
+       With no boards there is nothing to lay out, so Grid / Compact waits and fades in with the first board. -->
   <div class="flex min-w-0 items-center gap-2">
-    @if (!players.active()) {
-      <div appDashboardViewToggle role="group" aria-label="Card view" class="hidden gap-0.5 sm:flex"></div>
+    @if (!players.active() && store.myGames().length > 0) {
+      <div appDashboardViewToggle role="group" aria-label="Card view" class="hidden gap-0.5 sm:flex" animate.enter="qs-row-in"></div>
     }
     @if (players.available()) {
       <div class="qs-seg" role="group" aria-label="Show">
