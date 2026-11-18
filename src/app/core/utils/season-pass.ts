@@ -1,4 +1,4 @@
-import { Entitlement, isActive, isNoExpiry } from '../plans';
+import { Entitlement, PLANS, isActive, isNoExpiry } from '../plans';
 import { SEASON_START_MONTH, seasonOf } from './season-games';
 
 /** The pass's last day as a long month and day, 'June 30', read in UTC like the season itself. */
@@ -19,3 +19,21 @@ export function passLastDay(entitlement: Entitlement | null, now: number = Date.
   if (!isActive(entitlement, now)) return lastDay(seasonEnd(now));
   return isNoExpiry(entitlement!.expiresAt) ? null : lastDay(entitlement!.expiresAt);
 }
+
+/** One thing the Season Pass unlocks, as the upgrade dialog and the welcome card name it. */
+export interface PassPerk {
+  /** boards: the active-board cap; seasonLimit: only named where the free season cap is the subject. */
+  id: 'liveScores' | 'boards' | 'seasonLimit' | 'customSplits' | 'autoManage' | 'openBoards' | 'squareLimit';
+  label: string;
+}
+
+/** What the Season Pass unlocks, in the order shown. The one list behind the upgrade dialog and the welcome card. */
+export const SEASON_PASS_PERKS: readonly PassPerk[] = [
+  { id: 'liveScores', label: 'Live scores' },
+  { id: 'boards', label: `Up to ${PLANS.season.activeBoards} boards at a time` },
+  { id: 'seasonLimit', label: 'No season game limit' },
+  { id: 'customSplits', label: 'Custom splits' },
+  { id: 'autoManage', label: 'Auto-lock and draw' },
+  { id: 'openBoards', label: 'Open boards list' },
+  { id: 'squareLimit', label: 'Limit squares per player' }
+];

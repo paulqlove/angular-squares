@@ -1,19 +1,20 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { heroPlus, heroXMark } from '@ng-icons/heroicons/outline';
+import { heroXMark } from '@ng-icons/heroicons/outline';
 
 import { PlanService } from '../../../../core/services/plan.service';
 import { SeasonWelcomeService } from '../../../../core/services/season-welcome.service';
-import { DashboardDialogsService } from '../../services/dashboard-dialogs.service';
+import { PassPerk, SEASON_PASS_PERKS } from '../../../../core/utils/season-pass';
 
 /**
- * The one-time welcome a Season Pass host sees at the top of the dashboard, after checkout: what the pass gives,
- * three steps and Create a board. The x closes it for good (SeasonWelcomeService). Sits on `<section appSeasonWelcome>`.
+ * The one-time welcome a Season Pass host sees at the top of the dashboard, after checkout: how long the pass runs and
+ * what it unlocks, from the same perk list as the upgrade dialog. No button; the x closes it for good
+ * (SeasonWelcomeService). Sits on `<section appSeasonWelcome>`.
  */
 @Component({
   selector: 'section[appSeasonWelcome]',
   imports: [NgIconComponent],
-  providers: [provideIcons({ heroPlus, heroXMark })],
+  providers: [provideIcons({ heroXMark })],
   host: { class: 'qs-card relative block p-5 sm:p-6', 'aria-labelledby': 'season-welcome-title' },
   template: `
     <button type="button" (click)="welcome.dismiss()" class="qs-btn qs-btn-ghost absolute right-2 top-2 w-11 px-0 text-qs-muted hover:text-qs-ink" aria-label="Close">
@@ -21,15 +22,11 @@ import { DashboardDialogsService } from '../../services/dashboard-dialogs.servic
     </button>
     <h2 id="season-welcome-title" class="qs-title pr-10 text-2xl sm:text-3xl">You're a Season Pass host</h2>
     <p class="mt-2 text-qs-muted">{{ summary() }}</p>
-    <ol class="mt-5 grid gap-3 sm:flex sm:flex-wrap sm:gap-x-10">
-      @for (step of steps; track $index) {
-        <li class="flex items-baseline gap-3"><span class="font-mono font-semibold text-qs-ink">{{ $index + 1 }}</span><span>{{ step }}</span></li>
+    <ul class="mt-4 flex flex-wrap gap-2" aria-label="Included">
+      @for (perk of perks; track perk.id) {
+        <li class="qs-badge qs-badge-ok">{{ perk.label }}</li>
       }
-    </ol>
-    <button type="button" (click)="dialogs.openCreateModal($event)" [disabled]="dialogs.isCheckingBoardLimit()" [attr.aria-busy]="dialogs.isCheckingBoardLimit()"
-      class="qs-btn qs-btn-primary mt-6 w-full disabled:cursor-wait sm:w-auto">
-      <ng-icon name="heroPlus" class="text-base" aria-hidden="true"></ng-icon><span class="-mr-[0.1em] indent-0">Create a board</span>
-    </button>
+    </ul>
   `,
   styles: [':host(.qs-welcome-leave) { animation: qs-fade-out var(--qs-t-fast) var(--qs-ease-in) both; pointer-events: none; }'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -42,8 +39,8 @@ export class SeasonWelcomeComponent {
     return lastDay ? `Good through ${lastDay}. ${limit}` : limit;
   });
 
-  protected readonly dialogs: DashboardDialogsService = inject(DashboardDialogsService);
-  protected readonly steps: readonly string[] = ['Create a board', 'Share the link', 'Lock to draw numbers'];
+  /** The dialog's perks, less the board cap the line above already says. */
+  protected readonly perks: readonly PassPerk[] = SEASON_PASS_PERKS.filter(perk => perk.id !== 'boards');
   protected readonly welcome: SeasonWelcomeService = inject(SeasonWelcomeService);
 
   private readonly planService: PlanService = inject(PlanService);

@@ -9,8 +9,8 @@ import { StatTileComponent } from './stat-tile.component';
 
 /**
  * Season Pass host with no boards: "0 of 25 running" and "Pass good through June 30" tiles, then a full-width start
- * card with New board and a small board on the right. The start card waits while the one-time welcome shows, since
- * the welcome already has Create a board. Sits on `<section appPassEmpty>`.
+ * card with New board and a small board on the right. The start card waits while the one-time welcome shows, and
+ * fades in once it's closed. Sits on `<section appPassEmpty>`.
  */
 @Component({
   selector: 'section[appPassEmpty]',

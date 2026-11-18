@@ -1,5 +1,5 @@
 import { NO_EXPIRY } from '../plans';
-import { passLastDay } from './season-pass';
+import { SEASON_PASS_PERKS, passLastDay } from './season-pass';
 
 describe('passLastDay', () => {
   const nov2026 = Date.UTC(2026, 10, 18);
@@ -19,5 +19,14 @@ describe('passLastDay', () => {
 
   it('has no last day for a pass that never ends', () => {
     expect(passLastDay({ plan: 'season', expiresAt: NO_EXPIRY }, nov2026)).toBeNull();
+  });
+});
+
+describe('SEASON_PASS_PERKS', () => {
+  it('names the perks in the upgrade dialog\'s words and order', () => {
+    expect(SEASON_PASS_PERKS.map(perk => perk.label)).toEqual([
+      'Live scores', 'Up to 25 boards at a time', 'No season game limit', 'Custom splits', 'Auto-lock and draw',
+      'Open boards list', 'Limit squares per player'
+    ]);
   });
 });
