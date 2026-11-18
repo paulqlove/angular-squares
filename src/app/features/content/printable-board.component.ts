@@ -91,7 +91,7 @@ import { ReadingEndComponent, ReadingHeaderComponent, ReadingPageComponent, Read
     template: `
     <app-reading-page [breadcrumbs]="breadcrumbs">
       <app-reading-header class="no-print" eyebrow="Free grid" title="Printable football squares"
-        lede="A blank 10 by 10 grid with no logos. Print it for the wall, or download the PDF. Write names first. Write the digits only after the draw.">
+        lede="A blank 10 by 10 squares template with no logos, for the Super Bowl or any game. Print it for the wall, or download the PDF. Write names first. Write the digits only after the draw.">
         <div actions class="mt-8">
           <a href="assets/printable-football-squares.pdf" download="printable-football-squares.pdf" class="qs-btn qs-btn-primary">Download PDF</a>
         </div>
@@ -195,8 +195,8 @@ export class PrintableBoardComponent {
 
   constructor() {
     this.seo.apply({
-      title: 'Printable Football Squares - Free 10 by 10 Grid - QuarterScore',
-      description: 'Printable football squares: a free blank 10 by 10 grid, a print view, and a PDF download. No logos. Draw the numbers after every name is written.',
+      title: 'Printable Football Squares Template: Free PDF Grid — QuarterScore',
+      description: 'Free printable football squares template: a blank 10 by 10 grid for the Super Bowl or any game, with a print view and a PDF download. No logos.',
       path: '/printable-football-squares',
       headline: 'Printable football squares',
       published: '2026-11-01',

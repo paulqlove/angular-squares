@@ -52,7 +52,23 @@
         }
       },
       {
-        "source": "!/@(.well-known|skills)/**",
+        "source": "/create",
+        "destination": "/spa.html"
+      },
+      {
+        "source": "/present",
+        "destination": "/spa.html"
+      },
+      {
+        "source": "/present/**",
+        "destination": "/spa.html"
+      },
+      {
+        "source": "/tv/**",
+        "destination": "/spa.html"
+      },
+      {
+        "source": "/auth/**",
         "destination": "/spa.html"
       }
     ],
