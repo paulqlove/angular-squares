@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { GameService } from './game.service';
 import { RolePreviewService } from './role-preview.service';
 import { Entitlement, PLANS, PlanFeatures, PlanId, daysLeft, isActive } from '../plans';
+import { passLastDay } from '../utils/season-pass';
 
 /** The signed-in host's plan for the UI. The database rules enforce the same limits. */
 @Injectable({ providedIn: 'root' })
@@ -28,6 +29,8 @@ export class PlanService {
   readonly daysLeft = computed(() => this.plan() === 'season' && this.rolePreview.plan() === 'actual'
     ? daysLeft(this.entitlement())
     : 0);
+  /** A Season Pass host's last day, 'June 30', or null on another plan or a pass that never ends. */
+  readonly passLastDay = computed<string | null>(() => this.plan() === 'season' ? passLastDay(this.entitlement()) : null);
 
   constructor() {
     // Load the real account's plan whenever the signed-in account changes.

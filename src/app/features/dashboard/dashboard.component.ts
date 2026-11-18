@@ -21,6 +21,7 @@ import { ShareDialogComponent } from '../../components/ui/share-dialog/share-dia
 import { AuthService } from '../../core/services/auth.service';
 import { CheckoutService } from '../../core/services/checkout.service';
 import { PlanService } from '../../core/services/plan.service';
+import { SeasonWelcomeService } from '../../core/services/season-welcome.service';
 import { WalkthroughService } from '../../core/services/walkthrough.service';
 import { DockAtEndDirective } from '../../shared/directives/dock-at-end.directive';
 import { CreateGameFormComponent } from '../create/create-game-form.component';
@@ -35,6 +36,7 @@ import { SeasonTilesComponent } from './components/dashboard-returning-empty/sea
 import { FirstHostTitleComponent } from './components/dashboard-first-board/first-host-title.component';
 import { FreeGamesLineComponent } from './components/dashboard-first-board/free-games-line.component';
 import { SampleGameComponent } from './components/dashboard-first-board/sample-game.component';
+import { SeasonWelcomeComponent } from './components/season-welcome/season-welcome.component';
 import { UpgradePassDialogComponent } from './components/upgrade-pass-dialog/upgrade-pass-dialog.component';
 import { DashboardDialogsService } from './services/dashboard-dialogs.service';
 import { DashboardEditService } from './services/dashboard-edit.service';
@@ -56,7 +58,8 @@ import { PlayersViewService } from './services/players-view.service';
     ModalComponent, NgIconComponent, SiteHeaderComponent, SiteFooterComponent, DockAtEndDirective, ProfileMenuComponent, ShareDialogComponent,
     CreateGameFormComponent, EditGameDialogComponent, UpgradePassDialogComponent, SeasonPassesDialogComponent, DashboardHostingComponent,
     DashboardJoinedComponent, DashboardPhoneBarComponent, CodeFieldComponent, DashboardDeskBarComponent,
-    NewBoardDockComponent, SeasonTilesComponent, FirstHostTitleComponent, FreeGamesLineComponent, SampleGameComponent
+    NewBoardDockComponent, SeasonTilesComponent, FirstHostTitleComponent, FreeGamesLineComponent, SampleGameComponent,
+    SeasonWelcomeComponent
   ],
   providers: [
     DashboardStore,
@@ -127,6 +130,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   protected readonly search: DashboardSearchService = inject(DashboardSearchService);
   protected readonly store: DashboardStore = inject(DashboardStore);
   protected readonly view: DashboardViewService = inject(DashboardViewService);
+  protected readonly welcome: SeasonWelcomeService = inject(SeasonWelcomeService);
 
   private readonly authService: AuthService = inject(AuthService);
   private readonly checkout: CheckoutService = inject(CheckoutService);

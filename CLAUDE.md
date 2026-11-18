@@ -110,6 +110,7 @@ games/{gameId}/
 
 users/{userId}/games/{gameId}/
   createdAt, name
+users/{userId}/seasonWelcomeSeen: true  (the Season Pass host closed the dashboard's one-time welcome)
 
 groupLists/{ownerId}/  ungrouped (write-once key), groups/{groupId}: { name, createdAt }  (owner + co-hosts read)
 coHosts/{ownerId}/{uid}: true  (owner writes when assigning a co-host)

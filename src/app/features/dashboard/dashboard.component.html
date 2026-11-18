@@ -20,6 +20,11 @@
       }
     </div>
 
+    <!-- After buying the Season Pass: a one-time welcome, until its x closes it for good -->
+    @if (welcome.shows()) {
+      <section appSeasonWelcome class="mt-6 sm:mt-8" animate.enter="qs-row-in" animate.leave="qs-welcome-leave"></section>
+    }
+
     @if (!store.canCreateGame()) {
       <div class="mt-8 flex flex-col gap-4 rounded-card border border-qs-line bg-qs-warn-soft p-5 sm:flex-row sm:items-center sm:justify-between">
         <p class="text-qs-warn">
