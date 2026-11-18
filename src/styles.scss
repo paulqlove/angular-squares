@@ -640,8 +640,9 @@ body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
   background: color-mix(in srgb, var(--qs-panel) 88%, transparent); box-shadow: var(--qs-shadow-pop); backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px); transition: opacity var(--qs-t-state) var(--qs-ease); }
 .qs-bar-frame > * { position: relative; }
-/* Over the footer's panel fill the 88% frame blends in, so the dashboard taskbar draws it solid with a stronger edge */
-.qs-bar-solid::before { background: var(--qs-panel); border-color: var(--qs-line-strong); backdrop-filter: none; -webkit-backdrop-filter: none; }
+/* Over the footer's panel fill the 88% frame blends in, so the dashboard taskbar draws it solid. Its edge stays the
+   game page bar's lighter --qs-line (Nov 18, 2026), so the two bars match */
+.qs-bar-solid::before { background: var(--qs-panel); backdrop-filter: none; -webkit-backdrop-filter: none; }
 /* Low specificity, so the dashboard bar's own hide transition (.qs-dock-off > *) still wins while it hides */
 :where(.qs-dockable) > .qs-bar-frame { transition: translate var(--qs-t-state) var(--qs-ease), transform var(--qs-t-state) var(--qs-ease-decel); }
 .qs-dockable::before { content: ''; position: absolute; left: -0.75rem; right: -0.75rem; top: 4px;
