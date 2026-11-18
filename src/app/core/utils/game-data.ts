@@ -24,6 +24,8 @@ export function getBoardDimensions(size: BoardSize): { rows: number; cols: numbe
 export interface TvLink {
   boards: string[];
   interval: number;
+  /** The host's group the TV follows (its More-tab list key) and the host's uid. Missing on links with a fixed set of boards. */
+  follow?: { group: string; owner: string };
 }
 
 export interface EspnLiveSnapshot {
@@ -44,6 +46,8 @@ export interface GameData {
   ownerId: string;
   ownerName: string;
   createdAt: number;
+  /** When the board was last reset (a new game on the same board). Absent until the first reset. */
+  startedAt?: number;
   /** Board size: 100 (10x10), 50 (5x10), or 25 (5x5). Defaults to 100. */
   boardSize?: BoardSize;
   selectedSquares: { [key: string]: string };
@@ -79,6 +83,7 @@ export interface GameData {
   espnSport?: SportType | null;
   espnLive?: EspnLiveSnapshot;
   managerId?: string;
+  /** A co-host added by email. Never on the game itself: the owner's dashboard reads it from `gameCoHosts/{ownerId}`. */
   managerEmail?: string;
   managerName?: string;
   playerUserIds?: { [name: string]: string };
@@ -104,6 +109,8 @@ export interface GameListItem {
   homeTeam: string;
   awayTeam: string;
   createdAt: number;
+  /** When the board was last reset (a new game on the same board). Absent until the first reset. */
+  startedAt?: number;
   playerCount: number;
   squaresFilled: number;
   isLocked: boolean;
@@ -113,6 +120,7 @@ export interface GameListItem {
   /** Board size: 100 (10x10), 50 (5x10), or 25 (5x5). Defaults to 100. */
   boardSize: BoardSize;
   managerId?: string;
+  /** A co-host added by email. Never on the game itself: the owner's dashboard reads it from `gameCoHosts/{ownerId}`. */
   managerEmail?: string;
   managerName?: string;
   espnEventId?: string;

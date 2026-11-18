@@ -185,7 +185,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     faqs: [
       {
         question: 'Does QuarterScore cost money?',
-        answer: 'No. Creating a board and claiming squares is free. QuarterScore never collects, holds, or pays out money.'
+        answer: 'No. Hosting is free: one game at a time and 3 games a season. Claiming squares is always free. QuarterScore never collects, holds, or pays out money.'
       },
       {
         question: 'Do players need an account?',
@@ -329,7 +329,8 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       { path: '/best-squares-numbers', label: 'Best numbers', text: 'Every digit pair, from 7 and 0 down to 2 and 2.' },
       { path: '/printable-football-squares', label: 'Printable board', text: 'A blank 100-square grid to print or download.' },
       { path: '/faq', label: 'FAQ', text: 'Accounts, privacy, and money.' },
-      { path: '/football-squares-on-tv', label: 'Football squares on TV', text: 'Put the board on a big screen.' }
+      { path: '/football-squares-on-tv', label: 'Football squares on TV', text: 'Put the board on a big screen.' },
+      { path: '/football-squares-fundraiser', label: 'Donation squares', text: 'Running the board as a fundraiser? Formats where the cause wins.' }
     ],
     cta: {
       path: '/create',
@@ -407,7 +408,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       {
         heading: 'A board you can run every week',
         paragraphs: [
-          'Some groups play one game a week all season. Each game gets its own board and link, so old scores stay put.'
+          'Some groups play one game a week all season. Each game gets its own board and link, so old scores stay put. Free hosts get 3 games a season. The Season Pass is for groups that play every week.'
         ],
         bullets: [
           'No account for the people claiming squares.',
@@ -432,7 +433,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     id: 'nfl-playoff-squares',
     path: '/nfl-playoff-squares',
     title: 'NFL Playoff Squares — QuarterScore',
-    description: 'NFL playoff squares for wild card weekend, the divisional round, and the conference championships. One free board per game, same link style all January.',
+    description: 'NFL playoff squares for wild card weekend, the divisional round, and the conference championships. One board per game, same link style all January.',
     h1: 'NFL playoff squares',
     eyebrow: 'Postseason',
     lede: 'Playoff games are an easy reason to run another board. Give each game its own.',

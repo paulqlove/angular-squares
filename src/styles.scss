@@ -311,13 +311,22 @@ html, body {
     gap: 8px;
     min-height: 44px;
     padding: 0 18px;
+    /* Letter-spacing also trails the last letter; the same space in front keeps the words centered */
+    text-indent: 0.1em;
     border: 1px solid transparent;
     border-radius: var(--qs-r-btn);
     white-space: nowrap;
     cursor: pointer;
     transition: background-color var(--qs-t-fast) var(--qs-ease), color var(--qs-t-fast) var(--qs-ease), border-color var(--qs-t-fast) var(--qs-ease);
   }
+  /* Icons keep their glyph in the middle of their own box */
+  .qs-btn ng-icon { text-indent: 0; }
   .qs-btn:disabled { opacity: .45; cursor: not-allowed; }
+  /* A dialog's button row (Edit game, Set up your board). On phones the dialog fills the screen, so the row clears the home bar. */
+  .qs-dialog-footer { border-top: 1px solid var(--qs-line); background: var(--qs-panel); padding: 1rem 1.5rem; }
+  @media (max-width: 639px) {
+    .qs-dialog-footer { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+  }
   .qs-btn-primary { background: var(--qs-accent); color: var(--qs-on-accent); }
   .qs-btn-primary:hover:not(:disabled) { background: var(--qs-accent-hover); }
   .qs-btn-ink { background: var(--qs-ink); color: var(--qs-bg); }
@@ -327,6 +336,8 @@ html, body {
   .qs-btn-ghost { background: transparent; color: inherit; }
   .qs-btn-ghost:hover:not(:disabled) { background: color-mix(in srgb, currentColor 10%, transparent); }
   .qs-btn-danger { background: var(--qs-bad-soft); color: var(--qs-bad); }
+  /* A control kept in its spot but off in this view. Set with aria-disabled, not disabled, so hover and tap can still say why. */
+  .qs-ctrl-off { background: var(--qs-panel); border-color: var(--qs-line); color: color-mix(in srgb, var(--qs-ink) 40%, var(--qs-panel)); cursor: not-allowed; }
 
   .qs-tab {
     @apply qs-btn;
@@ -629,6 +640,8 @@ body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
   background: color-mix(in srgb, var(--qs-panel) 88%, transparent); box-shadow: var(--qs-shadow-pop); backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px); transition: opacity var(--qs-t-state) var(--qs-ease); }
 .qs-bar-frame > * { position: relative; }
+/* Over the footer's panel fill the 88% frame blends in, so the dashboard taskbar draws it solid with a stronger edge */
+.qs-bar-solid::before { background: var(--qs-panel); border-color: var(--qs-line-strong); backdrop-filter: none; -webkit-backdrop-filter: none; }
 /* Low specificity, so the dashboard bar's own hide transition (.qs-dock-off > *) still wins while it hides */
 :where(.qs-dockable) > .qs-bar-frame { transition: translate var(--qs-t-state) var(--qs-ease), transform var(--qs-t-state) var(--qs-ease-decel); }
 .qs-dockable::before { content: ''; position: absolute; left: -0.75rem; right: -0.75rem; top: 4px;

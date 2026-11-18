@@ -270,6 +270,40 @@ describe('player maps', () => {
     await assertFails(write(guest(), { [`${G}/playerUserIds/Alice`]: null }));
   });
 
+  describe('a name the host put on the board with no account linked', () => {
+    beforeEach(async () => {
+      await seed({
+        [`${G}/squares/0-3`]: 'Carl',
+        [`${G}/playerColors/Carl`]: 'bg-amber-200',
+        [`${G}/paidPlayers/2`]: 'Carl'
+      });
+    });
+
+    it('a guest cannot link it to themselves', async () => {
+      await assertFails(write(guest(), { [`${G}/playerUserIds/Carl`]: 'guest' }));
+    });
+
+    it('a guest cannot link it and then move its squares and paid mark to their own name', async () => {
+      await assertFails(write(guest(), { [`${G}/playerUserIds/Carl`]: 'guest' }));
+      await assertFails(write(guest(), { [`${G}/squares/0-3`]: 'Guesty', [`${G}/paidPlayers/2`]: 'Guesty' }));
+    });
+
+    it('a guest cannot take it while the game is locked either', async () => {
+      await seed({ [`${G}/isLocked`]: true });
+      await assertFails(write(guest(), { [`${G}/playerUserIds/Carl`]: 'guest' }));
+      await assertFails(write(guest(), { [`${G}/squares/0-3`]: 'Guesty', [`${G}/paidPlayers/2`]: 'Guesty' }));
+    });
+
+    it('the host can still link it to a player', async () => {
+      await assertSucceeds(write(owner(), { [`${G}/playerUserIds/Carl`]: 'guest' }));
+    });
+
+    it('once the host removes the player, anyone can use the name fresh', async () => {
+      await seed({ [`${G}/squares/0-3`]: null, [`${G}/playerColors/Carl`]: null, [`${G}/paidPlayers/2`]: null });
+      await assertSucceeds(write(guest(), { [`${G}/squares/5-5`]: 'Carl', [`${G}/playerUserIds/Carl`]: 'guest' }));
+    });
+  });
+
   it('a player cannot wipe the whole name mapping node', async () => {
     await assertFails(set(player(), `${G}/playerUserIds`, null));
   });
@@ -854,6 +888,49 @@ describe('users/usage counters', () => {
   });
 });
 
+describe('seasonGames (free games per season)', () => {
+  const ENTRY = `seasonGames/owner/2026/${GAME}_1790000000000`;
+
+  it('the owner can save a game toward their season, and save it again', async () => {
+    await assertSucceeds(set(owner(), ENTRY, true));
+    await assertSucceeds(set(owner(), ENTRY, true));
+  });
+
+  it('the owner cannot remove or change a saved game, so deleting a board does not free a slot', async () => {
+    await seed({ [ENTRY]: true });
+    await assertFails(set(owner(), ENTRY, null));
+    await assertFails(set(owner(), 'seasonGames/owner/2026', null));
+    await assertFails(set(owner(), 'seasonGames/owner', null));
+    await assertFails(set(owner(), ENTRY, false));
+  });
+
+  it('nobody else can add to or read a host\'s season', async () => {
+    await assertFails(set(player(), ENTRY, true));
+    await assertFails(read(player(), 'seasonGames/owner/2026'));
+    await assertFails(read(visitor(), 'seasonGames/owner/2026'));
+    await assertSucceeds(read(owner(), 'seasonGames/owner/2026'));
+  });
+
+  it('an admin can read and remove entries', async () => {
+    await seed({ [ENTRY]: true, 'admins/boss': true });
+    const admin = env.authenticatedContext('boss');
+    await assertSucceeds(read(admin, 'seasonGames/owner/2026'));
+    await assertSucceeds(set(admin, ENTRY, null));
+  });
+
+  it('rejects a bad season, a bad key or a value other than true', async () => {
+    await assertFails(set(owner(), `seasonGames/owner/26/${GAME}_1790000000000`, true));
+    await assertFails(set(owner(), 'seasonGames/owner/2026/not a key', true));
+    await assertFails(set(owner(), `seasonGames/owner/2026/${GAME}_1790000000000`, 1));
+  });
+
+  it('games/startedAt takes a positive number from the owner', async () => {
+    await assertSucceeds(set(owner(), `${G}/startedAt`, Date.now()));
+    await assertFails(set(owner(), `${G}/startedAt`, 'today'));
+    await assertFails(set(player(), `${G}/startedAt`, Date.now()));
+  });
+});
+
 describe('users/firstTouch', () => {
   it('a user can save their own first touch', async () => {
     await assertSucceeds(set(player(), 'users/alice/firstTouch', { at: Date.now(), path: '/team/chiefs', ref: 'google.com' }));
@@ -933,6 +1010,33 @@ describe('tvLinks (office TV link)', () => {
     await assertFails(set(player(), `tvLinks/${TOKEN}`, link({ extra: 1 })));
   });
 
+  it('a link can follow one of the owner\'s own groups, and only that', async () => {
+    const WORK = 'WorkGroupKey00000001';
+    await seed({ ...claim, [`groupLists/alice/groups/${WORK}`]: { name: 'Work', createdAt: 1 }, [`groupLists/bob/groups/BobsGroupKey00000001`]: { name: 'Bob', createdAt: 1 } });
+    await assertSucceeds(set(player(), `tvLinks/${TOKEN}`, link({ group: WORK, owner: 'alice' })));
+    await assertFails(set(player(), `tvLinks/${TOKEN}`, link({ group: WORK })));
+    await assertFails(set(player(), `tvLinks/${TOKEN}`, link({ group: WORK, owner: 'bob' })));
+    await assertFails(set(player(), `tvLinks/${TOKEN}`, link({ group: 'BobsGroupKey00000001', owner: 'alice' })));
+    await assertFails(set(player(), `tvLinks/${TOKEN}`, link({ group: 'MissingGroupKey00001', owner: 'alice' })));
+    await assertFails(set(player(), `tvLinks/${TOKEN}`, link({ group: 'bad key!', owner: 'alice' })));
+    await assertFails(set(player(), `tvLinks/${TOKEN}`, link({ group: 12, owner: 'alice' })));
+  });
+
+  it('a signed-out TV following a group reads its link and the group\'s board list, but not the group\'s name or co-hosts', async () => {
+    const WORK = 'WorkGroupKey00000001';
+    await seed({
+      ...claim,
+      [`tvLinks/${TOKEN}`]: link({ group: WORK, owner: 'alice' }),
+      [`groupLists/alice/groups/${WORK}`]: { name: 'Work', createdAt: 1 },
+      [`groupCoHosts/alice/${WORK}`]: { email: 'cohost@example.com' },
+      [`openLists/${WORK}/AAAAAA`]: 'alice'
+    });
+    await assertSucceeds(read(visitor(), `tvLinks/${TOKEN}`));
+    await assertSucceeds(read(visitor(), `openLists/${WORK}`));
+    await assertFails(read(visitor(), `groupLists/alice/groups/${WORK}`));
+    await assertFails(read(visitor(), 'groupCoHosts/alice'));
+  });
+
   it('rejects a short or odd token', async () => {
     await assertFails(set(player(), 'users/alice/tvToken', 'short'));
     await assertFails(set(player(), 'users/alice/tvToken', 'has spaces and symbols!!!'));
@@ -964,7 +1068,7 @@ describe('a guest who signs in', () => {
   });
 });
 
-describe('game groups (groupLists, coHosts, openLists)', () => {
+describe('game groups (groupLists, groupCoHosts, coHosts, openLists)', () => {
   const UNGROUPED = 'ungroupedKey0000000001';
   const CHURCH = 'churchGroupKey00000001';
   const WORK = 'workGroupKey0000000001';
@@ -1019,6 +1123,10 @@ describe('game groups (groupLists, coHosts, openLists)', () => {
       await assertFails(set(owner(), 'groupLists/owner/other', 'x'));
     });
 
+    it('a group no longer holds its co-host', async () => {
+      await assertFails(set(owner(), `groupLists/owner/groups/${CHURCH}/coHost`, { email: 'dana@email.com' }));
+    });
+
     it('co-hosts and strangers cannot change the owner\'s groups', async () => {
       await assertFails(set(cohost(), 'groupLists/owner/groups/newGroupKey00000000001', group('Mine')));
       await assertFails(set(cohost(), `groupLists/owner/groups/${CHURCH}/name`, 'Mine'));
@@ -1032,6 +1140,52 @@ describe('game groups (groupLists, coHosts, openLists)', () => {
       await assertSucceeds(set(owner(), 'groupLists/owner/ungrouped', 'freshUngroupedKey00001'));
       await assertFails(set(owner(), 'groupLists/owner/ungrouped', 'otherUngroupedKey00001'));
       await assertFails(set(owner(), 'groupLists/owner/ungrouped', null));
+    });
+  });
+
+  describe('groupCoHosts', () => {
+    const path = `groupCoHosts/owner/${CHURCH}`;
+
+    it('only the owner can read a group\'s co-host: not their co-hosts, players or strangers', async () => {
+      await seed({ [path]: { email: 'dana@email.com' } });
+      await assertSucceeds(read(owner(), 'groupCoHosts/owner'));
+      await assertSucceeds(read(owner(), path));
+      await assertFails(read(cohost(), 'groupCoHosts/owner'));
+      await assertFails(read(cohost(), path));
+      await assertFails(read(stranger(), path));
+      await assertFails(read(player(), path));
+      await assertFails(read(visitor(), path));
+      await assertFails(read(owner(), 'groupCoHosts'));
+    });
+
+    it('a Season Pass owner can set and remove a group\'s co-host, and give it to games in one write', async () => {
+      await assertSucceeds(set(owner(), path, { email: 'dana@email.com' }));
+      await assertSucceeds(write(owner(), {
+        [path]: { email: 'lee@email.com' },
+        [`${G}/managerId`]: '',
+        [`${G}/managerEmail`]: null,
+        [`${G}/managerName`]: '',
+        [`gameCoHosts/owner/${GAME}`]: 'lee@email.com'
+      }));
+      await assertSucceeds(set(owner(), path, null));
+    });
+
+    it('a new group and its co-host go in one write; deleting the group clears it in one write', async () => {
+      const id = 'newGroupKey00000000001';
+      await assertSucceeds(write(owner(), { [`groupLists/owner/groups/${id}`]: group('Family'), [`groupCoHosts/owner/${id}`]: { email: 'dana@email.com' } }));
+      await assertSucceeds(write(owner(), { [`groupLists/owner/groups/${id}`]: null, [`groupCoHosts/owner/${id}`]: null }));
+    });
+
+    it('needs the owner, a Season Pass, an existing group and an email', async () => {
+      await assertFails(set(cohost(), path, { email: 'dana@email.com' }));
+      await assertFails(set(stranger(), path, { email: 'dana@email.com' }));
+      await assertFails(set(owner(), 'groupCoHosts/owner/missingGroupKey000001', { email: 'dana@email.com' }));
+      await assertFails(set(owner(), path, { email: 'not an email' }));
+      await assertFails(set(owner(), path, { email: `${'x'.repeat(250)}@a.co` }));
+      await assertFails(set(owner(), path, { email: 'dana@email.com', uid: 'x' }));
+      await assertFails(set(owner(), path, 'dana@email.com'));
+      await seed({ 'entitlements/owner': null });
+      await assertFails(set(owner(), path, { email: 'dana@email.com' }));
     });
   });
 
@@ -1127,5 +1281,160 @@ describe('game groups (groupLists, coHosts, openLists)', () => {
         [`openLists/${WORK}/${GAME}`]: 'owner'
       }));
     });
+  });
+});
+
+describe('a co-host added by email', () => {
+  const INVITED = 'game02';
+  const I = `games/${INVITED}`;
+  const dana = (verified = true, email = 'dana@example.com') => env.authenticatedContext('dana', { email, email_verified: verified });
+  const claim = (ctx: RulesTestContext, uid = 'dana') => set(ctx, `${I}/managerId`, uid);
+
+  beforeEach(async () => {
+    const { managerId: _none, ...game } = baseGame();
+    await seed({ [I]: game, [`gameCoHosts/owner/${INVITED}`]: 'Dana@Example.com', 'groupLists/owner': { ungrouped: 'ungroupedKey0000000001' }, 'games/other1': baseGame({ ownerId: 'stranger', managerId: 'dana' }) });
+  });
+
+  it('the person who signs in with that verified email becomes the co-host, ignoring case', async () => {
+    await assertSucceeds(claim(dana()));
+    await assertSucceeds(set(dana(), `${I}/name`, 'Dana runs this'));
+  });
+
+  it('can take an empty co-host slot the app cleared to ""', async () => {
+    await seed({ [`${I}/managerId`]: '' });
+    await assertSucceeds(claim(dana()));
+  });
+
+  it('an unverified email, a different email or a guest cannot claim it', async () => {
+    await assertFails(claim(dana(false)));
+    await assertFails(claim(dana(true, 'eve@example.com')));
+    await assertFails(claim(guest(), 'guest'));
+    await assertFails(claim(player(), 'alice'));
+  });
+
+  it('cannot claim it for another account, or take a slot someone already holds', async () => {
+    await assertFails(claim(dana(), 'eve'));
+    await seed({ [`${I}/managerId`]: 'cohost' });
+    await assertFails(claim(dana()));
+  });
+
+  it('a game with no co-host email cannot be claimed, and the old public field no longer counts', async () => {
+    await seed({ [`gameCoHosts/owner/${INVITED}`]: null });
+    await assertFails(claim(dana()));
+    await seed({ [`${I}/managerEmail`]: 'dana@example.com' });
+    await assertFails(claim(dana()));
+  });
+
+  it('an email saved for another owner\'s game id does not count', async () => {
+    await seed({ [`gameCoHosts/owner/${INVITED}`]: null, [`gameCoHosts/stranger/${INVITED}`]: 'dana@example.com' });
+    await assertFails(claim(dana()));
+  });
+
+  it('the claimed co-host can mark themselves to read group names, only through a game they co-host for that owner', async () => {
+    await assertFails(set(dana(), 'coHosts/owner/dana', INVITED));
+    await assertFails(read(dana(), 'groupLists/owner'));
+    await assertSucceeds(claim(dana()));
+    await assertFails(set(dana(), 'coHosts/owner/dana', 'other1'));
+    await assertFails(set(dana(), 'coHosts/owner/dana', true));
+    await assertFails(set(dana(), 'coHosts/owner/eve', INVITED));
+    await assertSucceeds(set(dana(), 'coHosts/owner/dana', INVITED));
+    await assertSucceeds(read(dana(), 'groupLists/owner'));
+  });
+
+  it('the mark stops working once the owner removes them, and never replaces the owner\'s own mark', async () => {
+    await seed({ [`${I}/managerId`]: 'dana', 'coHosts/owner/dana': INVITED });
+    await assertSucceeds(read(dana(), 'groupLists/owner'));
+    await seed({ [`${I}/managerId`]: '' });
+    await assertFails(read(dana(), 'groupLists/owner'));
+    await seed({ [`${I}/managerId`]: 'dana', 'coHosts/owner/dana': true });
+    await assertFails(set(dana(), 'coHosts/owner/dana', INVITED));
+  });
+});
+
+describe('gameCoHosts: a game\'s co-host email, hidden from everyone but the owner and that person', () => {
+  const path = `gameCoHosts/owner/${GAME}`;
+  const dana = (verified = true, email = 'dana@example.com') => env.authenticatedContext('dana', { email, email_verified: verified });
+  const stranger = () => env.authenticatedContext('stranger');
+
+  beforeEach(async () => {
+    await seed({ [path]: 'Dana@Example.com', 'gameCoHosts/owner/game09': 'lee@example.com' });
+  });
+
+  it('the owner can read every game\'s co-host email, one or all', async () => {
+    await assertSucceeds(read(owner(), 'gameCoHosts/owner'));
+    await assertSucceeds(read(owner(), path));
+  });
+
+  it('a player, a guest, a co-host, a stranger and a signed-out visitor cannot read it', async () => {
+    for (const ctx of [player(), guest(), cohost(), stranger(), visitor()]) {
+      await assertFails(read(ctx, path));
+      await assertFails(read(ctx, 'gameCoHosts/owner'));
+    }
+    await assertFails(read(owner(), 'gameCoHosts'));
+  });
+
+  it('the person it names can read only their own invite, with a verified email, ignoring case', async () => {
+    await assertSucceeds(read(dana(), path));
+    await assertFails(read(dana(), 'gameCoHosts/owner/game09'));
+    await assertFails(read(dana(), 'gameCoHosts/owner'));
+    await assertFails(read(dana(false), path));
+    await assertFails(read(dana(true, 'eve@example.com'), path));
+  });
+
+  it('the game no longer shows the email to anyone reading it', async () => {
+    const game = await read(visitor(), G);
+    expect(game.val().managerEmail).toBeUndefined();
+  });
+
+  it('only the owner can set, change or clear it, and only on their own game', async () => {
+    await assertSucceeds(set(owner(), path, 'kim@example.com'));
+    await assertSucceeds(write(owner(), { [path]: null, [`${G}/managerId`]: 'cohost', [`${G}/managerName`]: 'Cory' }));
+    for (const ctx of [cohost(), player(), stranger(), dana(), visitor()]) {
+      await assertFails(set(ctx, path, 'eve@example.com'));
+    }
+    await seed({ 'games/theirs': baseGame({ ownerId: 'stranger' }) });
+    await assertFails(set(owner(), 'gameCoHosts/owner/theirs', 'kim@example.com'));
+    await assertFails(set(owner(), 'gameCoHosts/owner/nogame', 'kim@example.com'));
+  });
+
+  it('must be text of 1 to 254 characters', async () => {
+    await assertFails(set(owner(), path, ''));
+    await assertFails(set(owner(), path, `${'x'.repeat(250)}@a.co`));
+    await assertFails(set(owner(), path, { email: 'kim@example.com' }));
+  });
+
+  it('a new game and its co-host email go in one write, and deleting the game clears it in one write', async () => {
+    await seed({ 'entitlements/owner': null });
+    const fresh = { ...baseGame({ managerId: '' }), squares: {}, playerUserIds: {}, playerColors: {}, paidPlayers: [] };
+    await assertSucceeds(write(owner(), { 'games/game05': fresh, 'gameCoHosts/owner/game05': 'kim@example.com' }));
+    await assertSucceeds(write(owner(), { 'games/game05': null, 'gameCoHosts/owner/game05': null }));
+  });
+});
+
+describe('purchases (Season Pass sales, written only by the Stripe webhook)', () => {
+  const admin = () => env.authenticatedContext('boss');
+  const sale = { uid: 'alice', amount: 599, currency: 'usd', paymentIntentId: 'pi_1', createdAt: 1, expiresAt: 2, status: 'paid' };
+
+  beforeEach(async () => {
+    await seed({ 'admins/boss': true, 'purchases/cs_1': sale });
+  });
+
+  it('an admin can read sales', async () => {
+    await assertSucceeds(read(admin(), 'purchases'));
+    await assertSucceeds(read(admin(), 'purchases/cs_1'));
+  });
+
+  it('nobody else can read a sale, not even the buyer', async () => {
+    await assertFails(read(player(), 'purchases/cs_1'));
+    await assertFails(read(owner(), 'purchases'));
+    await assertFails(read(guest(), 'purchases/cs_1'));
+    await assertFails(read(visitor(), 'purchases/cs_1'));
+  });
+
+  it('nobody can write a sale from the app, an admin included', async () => {
+    await assertFails(set(player(), 'purchases/cs_2', { ...sale, paymentIntentId: 'pi_2' }));
+    await assertFails(set(player(), 'purchases/cs_1/status', 'paid'));
+    await assertFails(set(admin(), 'purchases/cs_2', sale));
+    await assertFails(set(admin(), 'purchases/cs_1', null));
   });
 });

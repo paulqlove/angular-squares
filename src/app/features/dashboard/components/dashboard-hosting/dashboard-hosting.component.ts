@@ -1,15 +1,18 @@
 import { isPlatformBrowser } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ElementRef, Injector, PLATFORM_ID, afterNextRender, computed, effect, inject, untracked } from '@angular/core';
-import { NgIconComponent } from '@ng-icons/core';
+import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import { heroPlus } from '@ng-icons/heroicons/outline';
 
 import { captureLayout, glideToNewLayout } from '../../utils/flip-layout';
 import { DashboardDialogsService } from '../../services/dashboard-dialogs.service';
+import { DashboardGroupsService } from '../../services/dashboard-groups.service';
 import { DashboardSearchService } from '../../services/dashboard-search.service';
 import { DashboardViewService } from '../../services/dashboard-view.service';
 import { DashboardStore } from '../../services/dashboard.store';
 import { PlayersViewService } from '../../services/players-view.service';
 import { ValueSwapComponent } from '../../../../components/ui/value-swap/value-swap.component';
-import { DashboardGroupsComponent } from '../dashboard-groups/dashboard-groups.component';
+import { GroupPickSheetComponent } from '../dashboard-groups/group-pick-sheet.component';
+import { GroupsSheetComponent } from '../dashboard-groups/groups-sheet.component';
 import { DashboardViewToggleComponent } from '../dashboard-view-toggle/dashboard-view-toggle.component';
 import { GameCardComponent } from '../game-card/game-card.component';
 import { PlayersViewComponent } from '../players-view/players-view.component';
@@ -21,14 +24,18 @@ import { PlayersViewComponent } from '../players-view/players-view.component';
  */
 @Component({
   selector: 'section[appDashboardHosting]',
-  imports: [NgIconComponent, DashboardGroupsComponent, DashboardViewToggleComponent, GameCardComponent, PlayersViewComponent, ValueSwapComponent],
+  imports: [
+    NgIconComponent, DashboardViewToggleComponent, GameCardComponent, GroupPickSheetComponent, GroupsSheetComponent,
+    PlayersViewComponent, ValueSwapComponent
+  ],
+  providers: [provideIcons({ heroPlus })],
   templateUrl: './dashboard-hosting.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
     /* Boards | Players: a two-button switch, ink fill on the one showing. */
     .qs-seg { display: inline-flex; gap: 2px; padding: 2px; border-radius: var(--qs-r-btn); background: var(--qs-panel-2); border: 1px solid var(--qs-line); }
     .qs-seg button { height: 40px; padding: 0 14px; border-radius: 6px; font-family: var(--qs-font-mono); font-size: 13px; font-weight: 500;
-      letter-spacing: .1em; text-transform: uppercase; color: var(--qs-muted); transition: background-color var(--qs-t-fast) var(--qs-ease), color var(--qs-t-fast) var(--qs-ease); }
+      letter-spacing: .1em; text-indent: .1em; text-transform: uppercase; color: var(--qs-muted); transition: background-color var(--qs-t-fast) var(--qs-ease), color var(--qs-t-fast) var(--qs-ease); }
     @media (hover: hover) { .qs-seg button:hover:not([aria-pressed="true"]) { color: var(--qs-ink); } }
     .qs-seg button[aria-pressed="true"] { background: var(--qs-ink); color: var(--qs-bg); }
   `]
@@ -47,10 +54,13 @@ export class DashboardHostingComponent {
     });
   }
 
-  /** "10 games", or "3 of 10 games" while the search narrows the list. The Players view counts co-hosted boards too. */
+  /**
+   * "10 games", or "3 of 10 games" while the search narrows the list. A picked group counts its own games only.
+   * The Players view counts co-hosted boards too.
+   */
   public readonly countLabel = computed<string>(() => {
     if (this.players.active()) return `${this.players.boards().length} games`;
-    const all = this.store.myGames().length;
+    const all = this.store.groupGames().length;
     const shown = this.store.visibleMyGames().length;
     return `${shown === all ? all : shown + ' of ' + all} ${all === 1 ? 'game' : 'games'}`;
   });
@@ -58,6 +68,7 @@ export class DashboardHostingComponent {
   public readonly skeletons: ReadonlyArray<number> = [0, 1, 2];
 
   protected readonly dialogs: DashboardDialogsService = inject(DashboardDialogsService);
+  protected readonly groups: DashboardGroupsService = inject(DashboardGroupsService);
   protected readonly players: PlayersViewService = inject(PlayersViewService);
   protected readonly search: DashboardSearchService = inject(DashboardSearchService);
   protected readonly store: DashboardStore = inject(DashboardStore);

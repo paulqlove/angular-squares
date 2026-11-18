@@ -1,4 +1,4 @@
-import { cleanGroupName, deleteGroupMessage, deleteGroupUpdates, groupChanged, groupCounts, groupOf, parseGroups, pickerValue } from './game-groups';
+import { cleanGroupName, deleteGroupMessage, deleteGroupUpdates, gameCountLabel, gamesInGroup, groupChanged, groupCounts, groupOf, groupRows, inGroup, parseGroups, pickerValue } from './game-groups';
 
 const CHURCH = 'ChurchGroupKey000001';
 const WORK = 'WorkGroupKey00000001';
@@ -22,6 +22,20 @@ describe('game groups', () => {
     expect(cleanGroupName('x'.repeat(40)).length).toBe(30);
   });
 
+  it('narrows boards to the picked group, or keeps them all with no group picked', () => {
+    const boards = [{ id: 'a', ownerId: 'o', openListId: CHURCH }, { id: 'b', ownerId: 'o', openListId: WORK }, { id: 'c', ownerId: 'o' }];
+    expect(gamesInGroup(boards, CHURCH).map(b => b.id)).toEqual(['a']);
+    expect(gamesInGroup(boards, 'GoneGroupKey00000001')).toEqual([]);
+    expect(gamesInGroup(boards, null)).toBe(boards);
+    expect(gamesInGroup(boards, undefined)).toBe(boards);
+  });
+
+  it('labels a group\'s size', () => {
+    expect(gameCountLabel(1)).toBe('1 game');
+    expect(gameCountLabel(0)).toBe('0 games');
+    expect(gameCountLabel(2)).toBe('2 games');
+  });
+
   it('counts boards per group and finds a board\'s group', () => {
     const boards = [{ id: 'a', ownerId: 'o', openListId: CHURCH }, { id: 'b', ownerId: 'o', openListId: CHURCH }, { id: 'c', ownerId: 'o', openListId: NONE }, { id: 'd', ownerId: 'o' }];
     const counts = groupCounts(boards);
@@ -33,6 +47,12 @@ describe('game groups', () => {
     expect(groupOf(groups, boards[3])).toBeUndefined();
   });
 
+  it('lists each group in order with its board count, 0 for an empty group', () => {
+    const groups = [{ id: CHURCH, name: 'Church', createdAt: 1 }, { id: WORK, name: 'Work', createdAt: 2 }];
+    const boards = [{ id: 'a', ownerId: 'o', openListId: CHURCH }, { id: 'b', ownerId: 'o', openListId: CHURCH }, { id: 'c', ownerId: 'o' }];
+    expect(groupRows(groups, boards).map(r => [r.name, r.count])).toEqual([['Church', 2], ['Work', 0]]);
+  });
+
   it('deletes a group and moves only its boards to No group, keeping each More switch', () => {
     const updates = deleteGroupUpdates('o', CHURCH, NONE, [
       { id: 'a', ownerId: 'o', openListId: CHURCH, showInOpenBoards: true },
@@ -41,6 +61,7 @@ describe('game groups', () => {
     ]);
     expect(updates).toEqual({
       [`groupLists/o/groups/${CHURCH}`]: null,
+      [`groupCoHosts/o/${CHURCH}`]: null,
       'games/a/openListId': NONE,
       'games/a/showInOpenBoards': true,
       [`openLists/${NONE}/a`]: 'o',
@@ -75,5 +96,18 @@ describe('group picker', () => {
     expect(groupChanged(groups, NONE, { groupId: CHURCH })).toBe(true);
     expect(groupChanged(groups, CHURCH, { groupId: null })).toBe(true);
     expect(groupChanged(groups, NONE, { groupId: null, newName: 'Gym' })).toBe(true);
+  });
+});
+
+describe('inGroup', () => {
+  it('is true on a group, or on a new group once it has a name', () => {
+    expect(inGroup({ groupId: CHURCH })).toBe(true);
+    expect(inGroup({ groupId: null, newName: 'Gym' })).toBe(true);
+  });
+
+  it('is false on No group, a new group with no name yet, or no picker', () => {
+    expect(inGroup({ groupId: null })).toBe(false);
+    expect(inGroup({ groupId: null, newName: '  ' })).toBe(false);
+    expect(inGroup(undefined)).toBe(false);
   });
 });

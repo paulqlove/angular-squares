@@ -10,6 +10,7 @@ import {
   readEspnLive,
   readGameIndexVisits,
   readTvLink,
+  toSeasonGame,
   renamePlayerInGame,
   sortGameIdsNewestFirst,
   toGameListItem
@@ -125,6 +126,9 @@ describe('game parse helpers', () => {
     expect(readTvLink({ boards: '', interval: 10 })).toBeNull();
     expect(readTvLink({ boards: 'A,,B', interval: 20 })).toEqual({ boards: ['A', 'B'], interval: 20 });
     expect(readTvLink({ boards: 'A', interval: 15 })).toEqual({ boards: ['A'], interval: 30 });
+    expect(readTvLink({ boards: 'A', interval: 10, group: 'WorkGroupKey00000001', owner: 'host' })).toEqual({ boards: ['A'], interval: 10, follow: { group: 'WorkGroupKey00000001', owner: 'host' } });
+    expect(readTvLink({ boards: 'A', interval: 10, group: 'bad key!', owner: 'host' })).toEqual({ boards: ['A'], interval: 10 });
+    expect(readTvLink({ boards: 'A', interval: 10, group: 'WorkGroupKey00000001' })).toEqual({ boards: ['A'], interval: 10 });
   });
 
   describe('renamePlayerInGame', () => {
@@ -146,6 +150,24 @@ describe('game parse helpers', () => {
         paidPlayers: ['Michael', 'Ann'],
         playerUserIds: { Michael: 'uid1' }
       });
+    });
+  });
+
+  describe('toSeasonGame', () => {
+    it('reads when the game started and how many squares are claimed', () => {
+      expect(toSeasonGame('ABC123', { createdAt: 9, startedAt: 20, squares: { '0-0': 'Ann', '1-1': 'Bo' } }))
+        .toEqual({ id: 'ABC123', createdAt: 9, startedAt: 20, squaresFilled: 2 });
+    });
+
+    it('leaves startedAt out on a board never reset, and counts no squares when there are none', () => {
+      expect(toSeasonGame('ABC123', { createdAt: 9 })).toEqual({ id: 'ABC123', createdAt: 9, squaresFilled: 0 });
+    });
+
+    it('carries startedAt through parseGameData and onto the list item', () => {
+      const parsed = parseGameData('ABC123', { createdAt: 9, startedAt: 20 });
+      expect(parsed.startedAt).toBe(20);
+      expect(toGameListItem('ABC123', parsed, true).startedAt).toBe(20);
+      expect('startedAt' in parseGameData('ABC123', { createdAt: 9 })).toBe(false);
     });
   });
 

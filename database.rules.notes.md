@@ -37,6 +37,8 @@ The client check is the limit players and hosts actually hit. The rule stops a s
 
 A host presses **Copy office link** in TV mode. The client creates a random token (16 bytes, base64url) and stores it privately at `users/{uid}/tvToken`, then publishes `tvLinks/{token}` = `{ boards, interval, updatedAt }`. `boards` is a comma-separated string of up to 20 six-character board ids (a rules regex caps it; the rules language cannot count children). `interval` is 10, 20, 30 or 60. Anyone holding the token can read that one node (a TV with no sign-in); nobody can list `tvLinks`. Each token is claimed once at `tvTokenOwners/{token}` = the owner's uid (unreadable, and a claim can never be overwritten or taken by another account); only that account can write or delete `tvLinks/{token}`. A claim can only be released after its link is deleted, and only signed-in (non-guest) accounts can claim or publish. `users/{uid}/tvToken` is just the owner's own copy for lookup and grants no rights. Known and accepted: one signed-in account can still create many claims and links (the rules cannot cap per account); the weekly report flags this, see docs/FUTURE.md "Office TV link: watch for abuse". (Found in the automated security review: checking only `users/{uid}/tvToken` let anyone who had seen a link copy its token into their own record and then overwrite it.) The link holds board ids only, no account id or name. Turn it off by deleting `tvLinks/{token}` first, then clearing `users/{uid}/tvToken` and `tvTokenOwners/{token}` in one update; the next link gets a new token. Board data itself is already public by game id. Deploy rules before the client.
 
+**Following a group (Nov 15, Paul: "Make it follow live").** A link copied while a group is picked also stores `group` = that group's key and `owner` = the writer's uid. The rules accept `group` only when it is one of the writer's own groups (`groupLists/{auth.uid}/groups/{group}` exists) and `owner` is the writer. The TV then watches `openLists/{group}` and rotates the saved boards still in the group plus boards the owner added since, at most 20; entries whose value is not `owner` are ignored. Nothing new becomes readable: the list was already readable by key, its values are owner uids, the uid is already public on every board (`games/{id}/ownerId`), and the group key on `games/{id}/openListId`. Group names (`groupLists`, signed-in only) and co-host emails (`groupCoHosts`, owner only) stay closed, and rules tests check both. While the list has none of the owner's boards (an emptied group), the TV keeps the saved boards. Older grouped boards that were never shown in More have no list entry, so a following TV leaves them out until `scripts/show-grouped-games.mjs --apply` runs. Links without `group` work as before. Deploy rules before the client: an old rule set rejects the new keys, so Copy TV link with a group picked would fail.
+
 ## notifyMe
 
 `notifyMe/{pushId}` is write-only create for a signed-in user. Reads, updates, and deletes are denied. The node must be `email`, `timestamp`, `uid`, and `source`, plus the optional `prefilled` (boolean) and `trigger` (`limit` or `pass`). `email` matches an email shape and is at most 254 characters. `uid` must be `auth.uid`. `source` is at most 64 characters. `timestamp` is a number within a day of `now`. The push id is at most 128 characters.
@@ -46,7 +48,7 @@ A host presses **Copy office link** in TV mode. The client creates a random toke
 Owner and co-host (`managerId`) keep full write through the game-level rule. Other signed-in users (including anonymous guests) get per-key rules only, so they can never write or wipe a whole node:
 
 - `squares/{r-c}`: claim an empty square only under a name that `playerUserIds` maps to `auth.uid` after the write (the claim can register the name in the same update). Clear only a square whose name maps to `auth.uid`. Claim and clear are denied while `isLocked`. Renaming one of your own squares to another of your names is allowed even when locked.
-- `playerUserIds/{name}`: add a name mapped to `auth.uid`, or delete your own mapping. Never change someone else's.
+- `playerUserIds/{name}`: add a name mapped to `auth.uid`, or delete your own mapping. Never change someone else's. A player can only add a name that has no color yet. Every name on the board gets a color (any viewer assigns missing ones), so a name with a color is already on the board, for example one the host typed in. Linking it to your account would hand you its squares and paid mark, so only the owner or co-host can link it. A brand-new name gets its color after the first square is claimed, and a rename moves the color in the same write, so neither is affected. When the host removes a player, the color goes with them and the name is free again.
 - `playerColors/{name}`: add a color for a name that has none (any viewer assigns missing colors), or change your own.
 - `paidPlayers/{i}`: only rename an existing entry from one of your names to another (player rename). Adding, removing, or touching someone else's entry is owner/co-host only.
 
@@ -54,7 +56,7 @@ Owner and co-host (`managerId`) keep full write through the game-level rule. Oth
 
 `GameService.updateGame` writes these fields as per-key diffs against the current server value, because a whole-object write is checked only at the parent and would be denied.
 
-Gaps: a name with no `playerUserIds` mapping (legacy squares) can be claimed by the first user who registers it. Name ownership is by exact key, so a square whose case differs from its mapping key cannot be cleared or renamed by the player.
+Gaps: a name with squares but no `playerUserIds` mapping and no color yet (a board nobody has opened since it was written) can still be claimed by the first user who registers it. A player on an old board whose name was never linked can't link it themselves any more; the host can. Anyone can still register a name that isn't on the board yet; if the host later picks squares for that name, they go to that account (as before). Name ownership is by exact key, so a square whose case differs from its mapping key cannot be cleared or renamed by the player.
 
 ## Paid plans (entitlements, adFreeUntil, quarterSplit)
 
@@ -77,9 +79,39 @@ A Season Pass host can sort boards into groups (Church, Work). A board's **More*
 
 - `groupLists/{ownerId}` = `{ ungrouped, groups/{groupId}: { name, createdAt } }`. `ungrouped` is a random key (16 to 40 of `A-Za-z0-9_-`) the owner writes once and can never change or delete, because boards point at it. Groups need a live Season Pass (or admin) to create, rename or delete, so they freeze when the pass ends. Names 1 to 30 characters. Readable by the owner, their co-hosts and admins only, so players never see a group name.
 - `coHosts/{ownerId}/{uid}: true`, written by the owner when they make someone a co-host, so co-hosts can read the owner's group names for the Edit game picker. Only the owner reads or writes it.
+- `groupCoHosts/{ownerId}/{groupId}` = `{ email }`: a group's co-host (Nov 2026). Only the owner can read it, not their co-hosts or admins (Paul: "Only me"). Written with the same Season Pass rule as the group, only while the group exists; deleting a group clears it in the same update. Saving it may also give the email to the group's games, in `gameCoHosts` (below), not on the games.
 - `games/{id}/openListId`: the list this board belongs to, either one of its owner's group ids or the owner's `ungrouped` key. The rule checks it against the owner's `groupLists` as they stand after the write, so deleting a group and moving its boards to No group can go in one update.
 - `openLists/{listId}/{boardId}` = the board's ownerId, present while **Show in my open boards** is on. Anyone can read one list if they know its key (a board link shows only its own key), nobody can list `openLists`. Only the board's owner or co-host can add or remove the entry, and only in the list the board points at. The value must be the board's owner, so the app can drop entries a stranger copied into a list.
 - Why: `openBoards/{ownerId}` was readable by anyone holding one board link, because every board shows its ownerId. That exposed every open board of the host. `openBoards` was kept while older app builds aged out and is now gone from the rules; the one-time move (`scripts/migrate-open-lists.mjs`) copied it into the lists first.
+- A board in a group is always shown in its More tab (D-036). The app enforces this, not the rules: `.validate` never runs on a delete, so a rule can't stop the switch or the list entry from being cleared.
 - A host could create a group id equal to someone else's (ids are not globally claimed). The `openLists` value check plus the app's owner filter keep such entries out of another host's More tab.
 
 Deploy these rules before the app that writes them.
+
+## A co-host added by email (games/{id}/managerId claim)
+
+Co-host powers follow `games/{id}/managerId`. A co-host picked from the players gets it at once. One typed by email (Create game's or Edit game's Co-host, or a group's co-host) is stored by email only, so they had no powers. Now, when that person opens the game signed in, the app writes their own uid as `managerId`.
+
+- `games/{id}/managerId` (claim): a signed-in user may set it to their own uid only while it is empty or `''`, the game's `gameCoHosts/{ownerId}/{id}` is a string, and it equals `auth.token.email` ignoring case, with `auth.token.email_verified == true`. Google and the emailed sign-in link both give a verified email; an email typed without proving it never matches. The email is kept, so a group co-host change still finds the game.
+- `coHosts/{ownerId}/{uid}`: besides the owner's `true`, the co-host may write their own entry as the id of a game of that owner where they are `managerId`, written in the same update as the claim. It can never replace the owner's `true`. `groupLists/{ownerId}` reads with it only while that game's `managerId` is still them, so removing the co-host also ends the read.
+- Not used: `emailIndex`. Any signed-in user can write any email there, so it can't prove who owns an address.
+
+Deploy these rules before the app that writes them. An older app never claims; the claim simply waits for the new one.
+
+## A game's co-host email is hidden (gameCoHosts)
+
+Paul, Nov 15: "Hide them". A co-host's email used to sit on the game (`games/{id}/managerEmail`), which anyone who can open the game can read.
+
+- `gameCoHosts/{ownerId}/{gameId}` = the email (text, 1 to 254 characters). The owner reads all of theirs. One entry is also readable by the person it names, signed in with a verified email that matches ignoring case, so the app can check their invite before the claim. Players, guests, other co-hosts, strangers and signed-out visitors can't read it.
+- Only the owner writes it, and only for a game whose `ownerId` is them (checked on the data after the write, so a new game and its email go in one update). Deleting the game clears it in the same update.
+- Every co-host save writes `games/{id}/managerEmail: null`, so the old public copy goes away. `scripts/move-cohost-emails.mjs` moves the existing ones (dry run, then `--apply`).
+- `games/{id}/managerEmail` still accepts writes for now, so a phone still running an older app can create a game. Its email stays public and can't be claimed until the script runs again. Once old apps are gone, its `.validate` can be set to refuse anything but null.
+
+
+## seasonGames (free host games per season)
+
+`seasonGames/{ownerId}/{season}/{gameId}_{startedAt}` = `true`. The app saves a game here, before its board is deleted, reset or cleared, once anyone has claimed a square on it (`core/utils/season-games.ts`). The owner can add an entry but never change or remove one, so deleting a game with players doesn't free a free host's slot; admins can remove entries by hand. The owner and admins can read it. `season` is the year the season starts (`2026` runs July 1 2026 to June 30 2027) and the key must look like a board id, an underscore and a millisecond time. The app writes nothing here while `SEASON_LIMIT_ON` is false, so deploy these rules before turning it on.
+
+`games/{gameId}/startedAt` is when the board was last reset or cleared (a number). A board never reset started at `createdAt`.
+
+What a rule cannot express: rules can't count children, so the 3-a-season cap itself is checked in the app (`EntitlementService.assertUnderFreeBoardLimit`), like the one-at-a-time limit above.

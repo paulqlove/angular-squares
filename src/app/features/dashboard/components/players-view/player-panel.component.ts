@@ -2,7 +2,7 @@ import { afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyR
 
 import { PHONE_QUERY, REDUCED_MOTION_QUERY } from '../../../../shared/media-queries';
 import { PlayerSummary } from '../../services/players-across-games';
-import { revealScroll } from '../../utils/player-panel-motion';
+import { openCardScroll, shownBarTop } from '../../utils/player-panel-motion';
 import { PlayerGamesComponent } from './player-games.component';
 
 /** The open grows over --qs-t-state; the reveal scroll waits for it. A switch eases the height over the same time.
@@ -15,9 +15,9 @@ const EASE_DECEL = 'cubic-bezier(.2,0,0,1)'; // --qs-ease-decel
  * the Players view with animate.enter="qs-panel-open" and animate.leave="qs-panel-close". It grows from nothing over
  * 200ms and the cards below glide down; its games fade in 40ms in, rising 4px. Closing, they fade in 80ms while it
  * folds away over 160ms. Switching to the other card in the row keeps the panel: the games crossfade and only the
- * difference in height eases. Once open, if its bottom is under the bottom bar or off screen, the page scrolls it into
- * view once. The height moves on purpose here (docs/DECISIONS.md, D-030). Reduced motion: the height changes at once
- * and the games fade over 120ms.
+ * difference in height eases. Once open, if the card and its panel aren't both in view, the page scrolls them in once,
+ * keeping the card's name and points on screen. The height moves on purpose here (docs/DECISIONS.md, D-030). Reduced
+ * motion: the height changes at once and the games fade over 120ms.
  */
 @Component({
   selector: 'div[appPlayerPanel]',
@@ -97,13 +97,17 @@ export class PlayerPanelComponent implements OnChanges {
     stack.animate([{ height: `${from}px`, overflow: 'hidden' }, { height: `${to}px`, overflow: 'hidden' }], { duration: OPEN_MS, easing: EASE_DECEL });
   }
 
-  /** Scrolls the opened panel into view once, above the bottom bar, unless it's already in view. */
+  /** Scrolls the open card and its panel into view once, between the site header and the bottom bar, unless they are. */
   private reveal(): void {
     if (!matchMedia(PHONE_QUERY).matches) return;
-    const bar = document.querySelector<HTMLElement>('.qs-dock:not(.qs-dock-off)');
-    const visibleBottom = bar?.getBoundingClientRect().top ?? window.innerHeight;
-    const panel = this.host.nativeElement.getBoundingClientRect();
-    const delta = revealScroll(panel, { top: 0, bottom: Math.min(visibleBottom, window.innerHeight) });
+    const host = this.host.nativeElement;
+    const card = host.parentElement?.querySelector<HTMLElement>('.qs-card-open');
+    if (!card) return;
+    const bars = Array.from(document.querySelectorAll<HTMLElement>('.qs-dock:not(.qs-dock-off)'), bar => bar.getBoundingClientRect());
+    const covered = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--qs-headroom-h')) || 0;
+    const header = document.querySelector<HTMLElement>('app-site-header')?.offsetHeight ?? 0;
+    const visible = { top: covered, bottom: shownBarTop(bars, window.innerHeight) };
+    const delta = openCardScroll(card.getBoundingClientRect(), host.getBoundingClientRect(), visible, header);
     if (delta) window.scrollBy({ top: delta, behavior: matchMedia(REDUCED_MOTION_QUERY).matches ? 'instant' : 'smooth' });
   }
 }

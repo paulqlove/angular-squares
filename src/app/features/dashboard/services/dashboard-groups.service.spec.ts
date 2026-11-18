@@ -13,9 +13,10 @@ const NONE = 'NoGroupKey0000000001';
 
 describe('DashboardGroupsService', () => {
   let service: DashboardGroupsService;
-  let api: { getGroups: ReturnType<typeof vi.fn>; createGroup: ReturnType<typeof vi.fn>; renameGroup: ReturnType<typeof vi.fn>; deleteGroup: ReturnType<typeof vi.fn> };
+  let api: { getGroups: ReturnType<typeof vi.fn>; createGroup: ReturnType<typeof vi.fn>; renameGroup: ReturnType<typeof vi.fn>; deleteGroup: ReturnType<typeof vi.fn>; saveChoice: ReturnType<typeof vi.fn>; setGroupCoHost: ReturnType<typeof vi.fn> };
   let ask: ReturnType<typeof vi.fn>;
   let toastError: ReturnType<typeof vi.fn>;
+  let toastWarning: ReturnType<typeof vi.fn>;
   const features = signal({ gameGroups: true });
   const boards = [
     { id: 'a', ownerId: 'o', openListId: CHURCH },
@@ -28,10 +29,13 @@ describe('DashboardGroupsService', () => {
       getGroups: vi.fn().mockResolvedValue([{ id: CHURCH, name: 'Church', createdAt: 1 }, { id: WORK, name: 'Work', createdAt: 2 }]),
       createGroup: vi.fn().mockResolvedValue({ id: 'NewGroupKey000000001', name: 'Gym', createdAt: 3 }),
       renameGroup: vi.fn().mockResolvedValue(undefined),
-      deleteGroup: vi.fn().mockResolvedValue(NONE)
+      deleteGroup: vi.fn().mockResolvedValue(NONE),
+      saveChoice: vi.fn().mockResolvedValue({ listId: CHURCH }),
+      setGroupCoHost: vi.fn().mockResolvedValue(undefined)
     };
     ask = vi.fn().mockResolvedValue(true);
     toastError = vi.fn();
+    toastWarning = vi.fn();
     features.set({ gameGroups: true });
     TestBed.configureTestingModule({
       providers: [
@@ -39,7 +43,7 @@ describe('DashboardGroupsService', () => {
         { provide: GameGroupsService, useValue: api },
         { provide: ConfirmService, useValue: { ask } },
         { provide: PlanService, useValue: { features } },
-        { provide: ToastService, useValue: { error: toastError } }
+        { provide: ToastService, useValue: { error: toastError, warning: toastWarning } }
       ]
     });
     service = TestBed.inject(DashboardGroupsService);
@@ -50,6 +54,23 @@ describe('DashboardGroupsService', () => {
     expect(service.rows(boards).map(r => [r.name, r.count])).toEqual([['Church', 2], ['Work', 0]]);
     expect(service.nameOf(boards[0])).toBe('Church');
     expect(service.nameOf(boards[2])).toBeUndefined();
+  });
+
+  it('picks a group for Hosting, and falls back to All groups once that group is deleted', async () => {
+    expect(service.picked()).toBeUndefined();
+    expect(service.pickedName()).toBe('All groups');
+    service.pickedId.set(CHURCH);
+    expect(service.picked()?.name).toBe('Church');
+    expect(service.pickedName()).toBe('Church');
+    await service.remove('o', service.groups()[0], boards);
+    expect(service.picked()).toBeUndefined();
+  });
+
+  it('Manage groups swaps the pick sheet for the Groups sheet', () => {
+    service.pickSheetOpen.set(true);
+    service.openManage();
+    expect(service.pickSheetOpen()).toBe(false);
+    expect(service.sheetOpen()).toBe(true);
   });
 
   it('only a Season Pass owner can change groups', () => {
@@ -89,5 +110,76 @@ describe('DashboardGroupsService', () => {
     expect(await service.remove('o', service.groups()[0], boards)).toBeNull();
     expect(toastError).toHaveBeenCalledWith('Could not delete the group. Try again.');
     expect(service.groups()).toHaveLength(2);
+  });
+
+  describe('filing a board Create game just made', () => {
+    const made = { id: 'new', ownerId: 'o', openListId: NONE, showInOpenBoards: true };
+
+    it('files it into the picked group, and adds a group named in the picker', async () => {
+      expect(await service.fileNewBoard(made, { groupId: CHURCH })).toBe(true);
+      expect(api.saveChoice).toHaveBeenCalledWith(made, { groupId: CHURCH });
+      api.saveChoice.mockResolvedValueOnce({ listId: 'NewGroupKey000000001', created: { id: 'NewGroupKey000000001', name: 'Gym', createdAt: 3 } });
+      await service.fileNewBoard(made, { groupId: null, newName: 'Gym' });
+      expect(service.groups().map(g => g.name)).toEqual(['Church', 'Work', 'Gym']);
+    });
+
+    it('writes nothing for No group, a blank new name, no picker or no Season Pass', async () => {
+      await service.fileNewBoard(made, { groupId: null });
+      await service.fileNewBoard(made, { groupId: null, newName: '  ' });
+      await service.fileNewBoard(made, undefined);
+      features.set({ gameGroups: false });
+      await service.fileNewBoard(made, { groupId: CHURCH });
+      expect(api.saveChoice).not.toHaveBeenCalled();
+    });
+
+    it('warns and keeps going when the group could not be set', async () => {
+      api.saveChoice.mockRejectedValueOnce(new Error('permission_denied'));
+      expect(await service.fileNewBoard(made, { groupId: WORK })).toBe(false);
+      expect(toastWarning).toHaveBeenCalledWith('Board created, but its group could not be set. Try again in Edit.');
+    });
+  });
+
+  describe('group co-host', () => {
+    const games = [
+      { id: 'a', name: 'Week 12', openListId: CHURCH },
+      { id: 'b', name: 'Overflow', openListId: CHURCH, managerId: 'sam', managerName: 'Sam Lee' },
+      { id: 'c', name: 'Old', openListId: CHURCH, managerEmail: 'Dana@email.com' },
+      { id: 'd', name: 'Office', openListId: WORK }
+    ];
+    const church = () => service.groups()[0];
+
+    it('saves the co-host and gives it only to the group\'s games with no co-host', async () => {
+      const saved = await service.saveCoHost('o', church(), '  dana@email.com ', games);
+      expect(api.setGroupCoHost).toHaveBeenCalledWith('o', CHURCH, { email: 'dana@email.com' }, { addTo: ['a'], clearFrom: [] });
+      expect(saved).toEqual({ email: 'dana@email.com', addTo: ['a'], clearFrom: [] });
+      expect(church().coHost).toEqual({ email: 'dana@email.com' });
+      expect(ask).not.toHaveBeenCalled();
+    });
+
+    it('removing asks, and clears it only from the games whose co-host it is', async () => {
+      service.groups.update(gs => gs.map(g => g.id === CHURCH ? { ...g, coHost: { email: 'dana@email.com' } } : g));
+      await service.saveCoHost('o', church(), '', games);
+      expect(ask).toHaveBeenCalledWith(expect.objectContaining({ title: 'Also remove dana@email.com from 1 Church game?', cancelLabel: 'Keep on games' }));
+      expect(api.setGroupCoHost).toHaveBeenCalledWith('o', CHURCH, null, { addTo: [], clearFrom: ['c'] });
+      expect(church().coHost).toBeUndefined();
+    });
+
+    it('saying no to the question still removes the group\'s co-host but keeps it on the games', async () => {
+      ask.mockResolvedValueOnce(false);
+      service.groups.update(gs => gs.map(g => g.id === CHURCH ? { ...g, coHost: { email: 'dana@email.com' } } : g));
+      await service.saveCoHost('o', church(), '', games);
+      expect(api.setGroupCoHost).toHaveBeenCalledWith('o', CHURCH, null, { addTo: [], clearFrom: [] });
+    });
+
+    it('an empty field on a group with no co-host just closes, and a failed save says so', async () => {
+      service.editingCoHost.set(CHURCH);
+      expect(await service.saveCoHost('o', church(), ' ', games)).toBeNull();
+      expect(api.setGroupCoHost).not.toHaveBeenCalled();
+      expect(service.editingCoHost()).toBeNull();
+      api.setGroupCoHost.mockRejectedValueOnce(new Error('permission_denied'));
+      expect(await service.saveCoHost('o', church(), 'dana@email.com', games)).toBeNull();
+      expect(toastError).toHaveBeenCalledWith('Could not save the co-host. Try again.');
+      expect(church().coHost).toBeUndefined();
+    });
   });
 });

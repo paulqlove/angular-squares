@@ -3,8 +3,10 @@ import { get, onValue, ref, remove, set, update } from 'firebase/database';
 import { Observable } from 'rxjs';
 import { TvLink } from '../utils/game-data';
 import { readTvLink } from '../utils/game-parse';
+import { MAX_TV_BOARDS } from '../utils/tv-follow';
 import { AuthService } from './auth.service';
 import { GameDatabaseService } from './game-database.service';
+import { TvGroupFollower } from './tv-group-follower';
 
 /**
  * Share and TV links: the board link, the single-board TV link, and the rotating TV link
@@ -46,8 +48,11 @@ export class TvLinkService {
     await update(ref(this.database.db), { [`users/${userId}/tvToken`]: null, [`tvTokenOwners/${token}`]: null });
   }
 
-  /** Create the host's token if needed and publish the boards and interval under it. Pressing it again updates the TVs. */
-  public async saveTvLink(userId: string, boardIds: string[], interval: number): Promise<string> {
+  /**
+   * Create the host's token if needed and publish the boards and interval under it. Pressing it again updates the TVs.
+   * With a group, the TVs also follow that group's boards as they are added or removed.
+   */
+  public async saveTvLink(userId: string, boardIds: string[], interval: number, group: string | null = null): Promise<string> {
     if (!this.database.isBrowser) throw new Error('Cannot save a TV link on the server');
     if (this.authService.blockPreviewWrite()) throw new Error('Preview only');
     let token = await this.getTvToken(userId);
@@ -57,25 +62,38 @@ export class TvLinkService {
       await update(ref(this.database.db), { [`users/${userId}/tvToken`]: token, [`tvTokenOwners/${token}`]: userId });
     }
     await set(ref(this.database.db, `tvLinks/${token}`), {
-      boards: boardIds.slice(0, 20).join(','),
+      boards: boardIds.slice(0, MAX_TV_BOARDS).join(','),
       interval,
-      updatedAt: Date.now()
+      updatedAt: Date.now(),
+      ...(group ? { group, owner: userId } : {})
     });
     return token;
   }
 
-  /** Live boards and interval for a TV link. null when the link is off or unknown. */
+  /**
+   * Live boards and interval for a TV link. null when the link is off or unknown. A link that follows a group also
+   * watches that group's More-tab list, so boards added to or removed from the group reach the TV.
+   */
   public watchTvLink(token: string): Observable<TvLink | null> {
     return new Observable<TvLink | null>(subscriber => {
       if (!this.database.isBrowser) {
         subscriber.next(null);
         return undefined;
       }
-      return onValue(
-        ref(this.database.db, `tvLinks/${token}`),
-        snapshot => subscriber.next(readTvLink(snapshot.val())),
-        () => subscriber.next(null)
+      const db = this.database.db;
+      const follow = new TvGroupFollower(
+        (path, next) => onValue(ref(db, path), snapshot => next(snapshot.val()), () => next(null)),
+        link => subscriber.next(link)
       );
+      const off = onValue(
+        ref(this.database.db, `tvLinks/${token}`),
+        snapshot => follow.link(readTvLink(snapshot.val())),
+        () => follow.link(null)
+      );
+      return () => {
+        off();
+        follow.stop();
+      };
     });
   }
 

@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { get, increment, ref, set, update } from 'firebase/database';
 import { AUTO_MANAGE_DELAY_MS, AutoManageSettings } from '../utils/auto-manage';
 import { normalizeSport } from '../utils/game-parse';
-import { OpenBoardRow, openBoardRows } from '../utils/open-boards';
+import { OpenBoardRow, findOpenBoardRows } from '../utils/open-boards';
 import { OpenListTarget, fileBoardUpdates, isListKey, listedBoardIds, newListKey } from '../utils/open-lists';
 import { AuthService } from './auth.service';
 import { EspnService } from './espn.service';
@@ -36,7 +36,7 @@ export class BoardSettingsService {
     try {
       const snap = await get(ref(this.database.db, `openLists/${board.openListId}`));
       const ids = listedBoardIds(snap.val(), board.ownerId, board.id);
-      return openBoardRows(await Promise.all(ids.map(id => this.records.getGame(id))), board.id, board.ownerId);
+      return await findOpenBoardRows(ids, id => this.records.getGame(id), board.id, board.ownerId);
     } catch {
       return [];
     }

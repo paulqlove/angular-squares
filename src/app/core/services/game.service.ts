@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Entitlement, EmptyQuarterRule, QuarterSplit } from '../plans';
 import type { AutoManageSettings } from '../utils/auto-manage';
+import type { GameManager } from '../utils/group-cohost';
 import { BoardSize, GameChange, GameData, SportType, TvLink } from '../utils/game-data';
 import type { OpenBoardRow } from '../utils/open-boards';
 import type { OpenListTarget } from '../utils/open-lists';
@@ -51,6 +52,11 @@ export class GameService {
   /** Read-only check used by the dashboard and by createGame. Does not write, delete, or rewrite any existing board. */
   public assertUnderFreeBoardLimit(ownerId: string): Promise<void> {
     return this.entitlements.assertUnderFreeBoardLimit(ownerId);
+  }
+
+  /** Free games this host has left this season, or null when the season cap doesn't apply. */
+  public seasonGamesLeft(ownerId: string): Promise<number | null> {
+    return this.entitlements.seasonGamesLeft(ownerId);
   }
 
   public createGame(
@@ -215,9 +221,9 @@ export class GameService {
     return this.seasonPass.revokeSeasonPass(email);
   }
 
-  /** Publish the boards and interval under the host's TV token, creating it if needed. */
-  public saveTvLink(userId: string, boardIds: string[], interval: number): Promise<string> {
-    return this.tvLinks.saveTvLink(userId, boardIds, interval);
+  /** Publish the boards and interval (and the group to follow, if any) under the host's TV token, creating it if needed. */
+  public saveTvLink(userId: string, boardIds: string[], interval: number, group: string | null = null): Promise<string> {
+    return this.tvLinks.saveTvLink(userId, boardIds, interval, group);
   }
 
   /** The host turns auto-manage on or off. The server runs the board 5 minutes after kickoff. */
@@ -263,8 +269,9 @@ export class GameService {
     return this.records.updateGame(gameId, data);
   }
 
-  public updateGameManager(gameId: string, managerId: string | null, managerEmail: string | null, managerName: string | null = null): Promise<void> {
-    return this.lifecycle.updateGameManager(gameId, managerId, managerEmail, managerName);
+  /** Sets a game's co-host, or clears it when every field is empty. The owner's uid is where an email is kept. */
+  public updateGameManager(gameId: string, ownerId: string, manager: GameManager): Promise<void> {
+    return this.lifecycle.updateGameManager(gameId, ownerId, manager);
   }
 
   /** Saves several boards in one update: all or none. */

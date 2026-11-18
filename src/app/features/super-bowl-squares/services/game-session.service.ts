@@ -1,10 +1,12 @@
-import { inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { effect, inject, Injectable, PLATFORM_ID, untracked } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
+import { CoHostClaimService } from '../../../core/services/cohost-claim.service';
 import { GameData, GameService } from '../../../core/services/game.service';
 import { boardArrowStep } from '../../../core/utils/board-keys';
+import type { CoHostInviteGame } from '../../../core/utils/cohost-claim';
 import { normalizeGameCode } from '../../../core/utils/game-code';
 import type { OpenBoardRow } from '../../../core/utils/open-boards';
 import { recordRecentVisit } from '../../../core/utils/recent-games';
@@ -22,6 +24,17 @@ import { PlayerNameService } from './player-name.service';
  */
 @Injectable()
 export class GameSessionService {
+  // Constructor
+
+  constructor() {
+    // A co-host added by email gets the role when the board loads with them signed in, or when they sign in on it
+    effect(() => {
+      const invite = { ownerId: this.state.ownerId(), managerId: this.state.managerId() ?? undefined };
+      if (!this.state.currentUser()) return;
+      untracked(() => this.claimCoHostInvite(invite));
+    });
+  }
+
   // Public functions
 
   /** Starts following the route's board once Firebase has loaded (it loads with the game route, not the landing page). */
@@ -74,6 +87,7 @@ export class GameSessionService {
 
   private adStampDone: boolean = false;
   private readonly authService: AuthService = inject(AuthService);
+  private readonly coHostClaim: CoHostClaimService = inject(CoHostClaimService);
   private readonly draw: NumberDrawService = inject(NumberDrawService);
   private readonly espn: EspnSyncService = inject(EspnSyncService);
   private readonly gameService: GameService = inject(GameService);
@@ -92,6 +106,13 @@ export class GameSessionService {
   private readonly ui: GamePageUiService = inject(GamePageUiService);
 
   // Private functions
+
+  /** Only for the board whose data is on screen: on a switch the id moves before the new board's data lands. */
+  private claimCoHostInvite(invite: Omit<CoHostInviteGame, 'managerEmail'>): void {
+    const state = this.state;
+    if (!state.gameId || state.boardOnScreen !== state.gameId) return;
+    void this.coHostClaim.claimIfInvited(state.gameId, { ...invite, name: state.gameName });
+  }
 
   /** Applies one game snapshot to the page, in the order the page has always used. */
   private applySnapshot(data: GameData): void {

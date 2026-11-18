@@ -7,13 +7,13 @@
   </main>
 } @else {
   <!-- Main Game View -->
-  <app-site-header position="fixed" heading="p">
+  <app-site-header position="fixed" heading="p" (logoClick)="ui.trackToDashboard('header')">
     <button type="button" (click)="ui.showShareModal.set(true)" data-walkthrough="share" class="flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-btn p-2.5 text-qs-tile-muted transition-colors hover:bg-white/10 hover:text-qs-tile-ink sm:px-3" aria-label="Share">
       <ng-icon name="heroShare" class="text-xl"></ng-icon>
       <span class="qs-label hidden sm:inline">Share</span>
     </button>
     @if (state.currentUser()) {
-      <app-your-games-menu [currentGameId]="state.gameId"></app-your-games-menu>
+      <app-your-games-menu [currentGameId]="state.gameId" [showTrigger]="!state.isHost()" (dashboardClick)="ui.trackYourGamesToDashboard($event)"></app-your-games-menu>
     }
     <app-help-menu (tour)="ui.startWalkthrough()"></app-help-menu>
     @if (state.currentUser()) {
@@ -96,3 +96,4 @@
 
   <app-game-page-dialogs></app-game-page-dialogs>
 }
+<app-season-passes-dialog />

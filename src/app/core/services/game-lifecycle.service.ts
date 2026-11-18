@@ -3,6 +3,7 @@ import { get, increment, ref, remove, set, update } from 'firebase/database';
 import { DEFAULT_EMPTY_QUARTER_RULE, EmptyQuarterRule, QuarterSplit } from '../plans';
 import { BoardSize, GameData, SportType, getBoardDimensions } from '../utils/game-data';
 import { generateGameId, isLinkableEspnId } from '../utils/game-parse';
+import { GameManager, coHostWrites } from '../utils/group-cohost';
 import { isListKey } from '../utils/open-lists';
 import { shuffleSquares, smallerBoardSizes } from '../utils/shuffle-squares';
 import { AuthService } from './auth.service';
@@ -11,6 +12,7 @@ import { EntitlementService } from './entitlement.service';
 import { GameDatabaseService } from './game-database.service';
 import { GameRecordService } from './game-record.service';
 import { LiveGameIndexService } from './live-game-index.service';
+import { SeasonGamesService } from './season-games.service';
 
 /**
  * A board's life: create, reset, resize, hand to a manager, and delete,
@@ -78,12 +80,15 @@ export class GameLifecycleService {
       emptyQuarterRule: emptyQuarterRule || DEFAULT_EMPTY_QUARTER_RULE,
       ...(espnEventId ? { espnEventId } : {}),
       ...(espnSport ? { espnSport } : {}),
-      ...(managerEmail ? { managerEmail } : {}),
       ...(openListId ? { openListId } : {})
     };
 
-    const gameRef = ref(this.database.db, `games/${gameId}`);
-    await set(gameRef, defaultGameData);
+    // A co-host's email is saved where only the owner (and that email's account) can read it, in the same write.
+    const email = managerEmail?.trim();
+    await update(ref(this.database.db), {
+      [`games/${gameId}`]: defaultGameData,
+      ...(email ? { [`gameCoHosts/${ownerId}/${gameId}`]: email } : {})
+    });
 
     // Also add to user's games list
     const userGameRef = ref(this.database.db, `users/${ownerId}/games/${gameId}`);
@@ -114,6 +119,7 @@ export class GameLifecycleService {
   public async deleteGame(gameId: string, ownerId: string): Promise<void> {
     if (!this.database.isBrowser) return;
     if (this.authService.blockPreviewWrite()) throw new Error('Preview only');
+    await this.seasonGames.recordBoard(gameId);
     const [espnSnap, listSnap] = await Promise.all([
       get(ref(this.database.db, `games/${gameId}/espnEventId`)),
       get(ref(this.database.db, `games/${gameId}/openListId`))
@@ -121,6 +127,7 @@ export class GameLifecycleService {
     const updates: Record<string, unknown> = {
       [`games/${gameId}`]: null,
       [`users/${ownerId}/games/${gameId}`]: null,
+      [`gameCoHosts/${ownerId}/${gameId}`]: null,
     };
     const listId = listSnap.val();
     if (isListKey(listId)) updates[`openLists/${listId}/${gameId}`] = null;
@@ -132,10 +139,15 @@ export class GameLifecycleService {
     await this.bumpUsage(ownerId, 'deletes');
   }
 
-  /** Clears a board for reuse (same as the Clear game button in the game settings). Keeps name, owner and any linked game. */
+  /**
+   * Clears a board for reuse (same as the Clear game button in the game settings). Keeps name, owner and any linked game.
+   * The cleared board is a new game toward the season (startedAt), and the old one stays counted if it had players.
+   */
   public async resetGame(gameId: string, boardSize: BoardSize): Promise<void> {
     const { rows, cols } = getBoardDimensions(boardSize);
+    await this.seasonGames.recordBoard(gameId);
     await this.records.updateGame(gameId, {
+      startedAt: Date.now(),
       selectedSquares: {},
       homeNumbers: Array(cols).fill(null),
       awayNumbers: Array(rows).fill(null),
@@ -178,15 +190,11 @@ export class GameLifecycleService {
     return smallerBoardSizes(boardSize, squaresFilled, isRandomized);
   }
 
-  // Update game manager
-  public async updateGameManager(gameId: string, managerId: string | null, managerEmail: string | null, managerName: string | null = null): Promise<void> {
+  /** Sets a game's co-host (all empty for none). Only the owner can: the email is saved under their uid. */
+  public async updateGameManager(gameId: string, ownerId: string, manager: GameManager): Promise<void> {
     if (!this.database.isBrowser) return;
     if (this.authService.blockPreviewWrite()) throw new Error('Preview only');
-    await update(ref(this.database.db), {
-      [`games/${gameId}/managerId`]: managerId || '',
-      [`games/${gameId}/managerEmail`]: managerEmail || '',
-      [`games/${gameId}/managerName`]: managerName || ''
-    });
+    await update(ref(this.database.db), coHostWrites(ownerId, gameId, manager));
   }
 
   private readonly authService: AuthService = inject(AuthService);
@@ -195,6 +203,7 @@ export class GameLifecycleService {
   private readonly entitlements: EntitlementService = inject(EntitlementService);
   private readonly liveGameIndex: LiveGameIndexService = inject(LiveGameIndexService);
   private readonly records: GameRecordService = inject(GameRecordService);
+  private readonly seasonGames: SeasonGamesService = inject(SeasonGamesService);
 
   // Lifetime counters per host, read in the console to see who reuses or churns boards.
   // Best effort: a failed write never blocks the create, reset or delete.

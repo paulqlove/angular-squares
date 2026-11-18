@@ -29,6 +29,27 @@ describe('EditGameDialogComponent', () => {
     expect(t).not.toContain('Clear game');
   });
 
+  it('shows the clear line when given one, and asks for a second tap as before', () => {
+    const f = open({ showClear: true, clearNote: 'You have 2 of 3 free games left this season.' });
+    expect(text(f)).toContain('You have 2 of 3 free games left this season.');
+    let cleared = false;
+    f.componentInstance.clearGame.subscribe(() => (cleared = true));
+    f.componentInstance.onClearClick();
+    expect(cleared).toBe(false);
+    f.componentInstance.onClearClick();
+    expect(cleared).toBe(true);
+  });
+
+  it('hands a blocked Clear game to the host on the first tap and closes', () => {
+    const f = open({ showClear: true, clearBlocked: true });
+    let cleared = false, closed = false;
+    f.componentInstance.clearGame.subscribe(() => (cleared = true));
+    f.componentInstance.closed.subscribe(() => (closed = true));
+    f.componentInstance.onClearClick();
+    expect(cleared).toBe(true);
+    expect(closed).toBe(true);
+  });
+
   it('emits the draft on save and stays open when closeOnSave is false', () => {
     const f = open({ showGameFields: true, closeOnSave: false, values: { awayTeam: '', homeTeam: '', pricePerSquare: 1, hostNote: '', quarterSplit: null, emptyQuarterRule: 'final', newBoardSize: null, showInOpenBoards: false, autoManage: false, maxSquaresPerPlayer: null, name: 'Party' } });
     let saved: unknown, closed = false;
@@ -37,5 +58,27 @@ describe('EditGameDialogComponent', () => {
     f.componentInstance.save();
     expect((saved as { name: string }).name).toBe('Party');
     expect(closed).toBe(false);
+  });
+
+  const base = { awayTeam: '', homeTeam: '', pricePerSquare: 1, hostNote: '', quarterSplit: null, emptyQuarterRule: 'final' as const, newBoardSize: null, autoManage: false, maxSquaresPerPlayer: null };
+
+  it('locks Show in my open boards on while a group is picked, and unlocks it on No group', () => {
+    const f = open({ canShowInOpenBoards: true, groups: [{ id: 'ChurchGroupKey000001', name: 'Church', createdAt: 1 }], values: { ...base, showInOpenBoards: false, group: { groupId: null } } });
+    const c = f.componentInstance;
+    const toggle = () => (f.nativeElement as HTMLElement).querySelector('button[role="switch"]') as HTMLButtonElement;
+    c.pickGroup({ groupId: 'ChurchGroupKey000001' });
+    f.detectChanges();
+    expect(c.draft.showInOpenBoards).toBe(true);
+    expect(toggle().disabled).toBe(true);
+    expect(text(f)).toContain('Games in a group always show in open boards.');
+    c.pickGroup({ groupId: null });
+    f.detectChanges();
+    expect(c.draft.showInOpenBoards).toBe(true);
+    expect(toggle().disabled).toBe(false);
+  });
+
+  it('opens a game already in a group with the switch on', () => {
+    const c = open({ values: { ...base, showInOpenBoards: false, group: { groupId: 'ChurchGroupKey000001' } } }).componentInstance;
+    expect(c.draft.showInOpenBoards).toBe(true);
   });
 });

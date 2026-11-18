@@ -14,7 +14,7 @@ This file collects the text of every guide on https://quarterscore.com/ so an as
 - Squares update in real time for everyone on the board.
 - The host locks the board, then the digits 0 through 9 are drawn at random for the rows and the columns, so nobody picks a digit.
 - Quarter winners are found automatically from the last digit of each team's score.
-- Boards can follow a live game: the score and clock come from ESPN, for NFL, NCAA football, UFL, NBA, WNBA and AFL games. Any other game works as a custom board with your own team names.
+- Boards can follow a live game: the score and clock come from ESPN, for NFL, NCAA football, UFL, NBA and WNBA games. Any other game works as a custom board with your own team names.
 - Points split 20, 20, 20 and 40 percent across the four quarters as standard. These are points, never money.
 - If a quarter's winning square is empty, the host chooses whether its points roll into the final quarter or are shared across the other quarters.
 - Hosts can mark players as checked in or paid, add a co-host, and leave a short note on the board.
@@ -91,7 +91,7 @@ The rules page walks through the grid, the draw, and how a quarter winner is cho
 
 **Does QuarterScore cost money?**
 
-No. Creating a board and claiming squares is free. QuarterScore never collects, holds, or pays out money.
+No. Hosting is free: one game at a time and 3 games a season. Claiming squares is always free. QuarterScore never collects, holds, or pays out money.
 
 **Do players need an account?**
 
@@ -221,7 +221,7 @@ Create a board and choose NFL. Add the two teams and send the link. Friends type
 
 ### A board you can run every week
 
-Some groups play one game a week all season. Each game gets its own board and link, so old scores stay put.
+Some groups play one game a week all season. Each game gets its own board and link, so old scores stay put. Free hosts get 3 games a season. The Season Pass is for groups that play every week.
 
 - No account for the people claiming squares.
 - A code for anyone standing in the room.

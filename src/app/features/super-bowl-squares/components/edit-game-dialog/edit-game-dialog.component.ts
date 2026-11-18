@@ -13,7 +13,7 @@ import { autoRunLabel } from '../../../../core/utils/auto-manage';
 import { ToggleComponent } from '../../../../components/ui/toggle/toggle.component';
 import { EmptyQuarterRuleComponent } from '../../../../components/ui/empty-quarter-rule/empty-quarter-rule.component';
 import { GroupPickerComponent } from '../../../../components/ui/group-picker/group-picker.component';
-import type { GameGroup, GroupChoice } from '../../../../core/utils/game-groups';
+import { GROUPED_SHOWN_HINT, GameGroup, GroupChoice, inGroup } from '../../../../core/utils/game-groups';
 import { CoHostCandidate, EditGameCoHostComponent } from './edit-game-cohost.component';
 import { EditGameEspnPickComponent } from './edit-game-espn-pick.component';
 import { EditGameSplitComponent } from './edit-game-split.component';
@@ -35,6 +35,8 @@ export interface EditGameValues {
   maxSquaresPerPlayer: number | null;
   /** Where the Group picker was left; set by the caller to the board's group when the picker shows. */
   group?: GroupChoice;
+  /** The picked group's co-host goes on this game (it had none) when saved. */
+  coHostFromGroup?: boolean;
   /** Only used with showGameFields (the dashboard). */
   name?: string;
   sport?: SportType | 'custom';
@@ -61,6 +63,7 @@ export interface EditGameValues {
 
       <div class="min-h-0 flex-1 overflow-y-auto px-6 py-5 [scrollbar-gutter:stable]">
         <div class="flex flex-col gap-10">
+          <ng-content select="[editGameTop]"></ng-content>
 
           <section class="flex flex-col gap-5">
             <h4 class="qs-eyebrow qs-eyebrow-bar !flex border-b border-qs-line pb-2.5 text-[13px] font-semibold text-qs-ink">Game</h4>
@@ -182,14 +185,14 @@ export interface EditGameValues {
                 <div class="flex min-h-11 items-start justify-between gap-4">
                   <div class="min-w-0">
                     <p class="qs-label text-qs-ink">Show in my open boards</p>
-                    <p class="mt-1.5 text-xs text-qs-muted">Players on your other boards can see and join this one.</p>
+                    <p class="mt-1.5 text-xs text-qs-muted">{{ grouped ? groupedHint : 'Players on your other boards can see and join this one.' }}</p>
                   </div>
-                  <app-toggle [checked]="draft.showInOpenBoards" (onChange)="draft.showInOpenBoards = $event"></app-toggle>
+                  <app-toggle [checked]="draft.showInOpenBoards" [disabled]="grouped" (onChange)="draft.showInOpenBoards = $event"></app-toggle>
                 </div>
               }
 
               @if (draft.group && groupsShown) {
-                <app-group-picker [groups]="groups" [value]="draft.group.groupId" [allowNew]="canNewGroup" (changed)="draft.group = $event"></app-group-picker>
+                <app-group-picker [groups]="groups" [value]="draft.group.groupId" [allowNew]="canNewGroup" (changed)="pickGroup($event)"></app-group-picker>
               }
 
               <div class="flex flex-col gap-2">
@@ -198,7 +201,7 @@ export interface EditGameValues {
               </div>
 
               @if (showGameFields) {
-                <app-edit-game-cohost [players]="players" [coHostName]="coHostName" (assigned)="coHostAssign.emit($event)" (removed)="coHostRemove.emit()"></app-edit-game-cohost>
+                <app-edit-game-cohost [players]="players" [coHostName]="coHostName" [coHostEmail]="coHostEmail" [group]="pickedGroup()" [(fillFromGroup)]="draft.coHostFromGroup" (assigned)="coHostAssign.emit($event)" (removed)="coHostRemove.emit()" (useGroup)="coHostUseGroup.emit($event)"></app-edit-game-cohost>
               }
             </div>
           </details>
@@ -207,6 +210,9 @@ export interface EditGameValues {
             <div class="rounded-inner border border-qs-line p-4">
               <p class="qs-label text-qs-bad">Danger zone</p>
               <p class="mt-1 text-sm text-qs-muted">Clears squares, numbers, scores and settings. This can't be undone.</p>
+              @if (clearNote) {
+                <p class="mt-1 text-sm text-qs-muted">{{ clearNote }}</p>
+              }
               <button type="button" (click)="onClearClick()" class="qs-btn qs-btn-danger mt-3">
                 <ng-icon name="heroTrash" class="text-base"></ng-icon>
                 {{ confirmingClear ? 'Tap again to clear' : 'Clear game' }}
@@ -217,7 +223,7 @@ export interface EditGameValues {
         </div>
       </div>
 
-      <div class="flex items-center justify-end gap-3 border-t border-qs-line bg-qs-panel px-6 py-4 max-sm:pb-[max(1rem,env(safe-area-inset-bottom))]">
+      <div class="qs-dialog-footer flex items-center justify-end gap-3">
         <button type="button" (click)="close()" class="qs-btn qs-btn-ghost text-qs-muted">Cancel</button>
         <button type="button" (click)="save()" [disabled]="saving || (showSplit && canCustomSplit && !splitLocked && !splitValid())" class="qs-btn qs-btn-primary px-8 max-sm:flex-1">
           @if (saving) { Saving... } @else { Save changes }
@@ -250,6 +256,10 @@ export class EditGameDialogComponent implements OnChanges {
   @Input() linkedGameName = '';
   @Input() showSplit = false;
   @Input() showClear = false;
+  /** One more line under the clear warning, such as how many free games are left this season. */
+  @Input() clearNote = '';
+  /** Clear game can't go ahead (season cap): the first tap goes straight to the host, who shows why, and Edit game closes. */
+  @Input() clearBlocked = false;
   /** False keeps the dialog open until the host closes it (the dashboard closes after a good save). */
   @Input() closeOnSave = true;
   @Input() saving = false;
@@ -259,6 +269,8 @@ export class EditGameDialogComponent implements OnChanges {
   @Input() players: CoHostCandidate[] = [];
   /** Current co-host, empty for none. */
   @Input() coHostName = '';
+  /** Current co-host's email, when they were typed by email. */
+  @Input() coHostEmail = '';
   @Input() values: EditGameValues = { awayTeam: '', homeTeam: '', pricePerSquare: 10, hostNote: '', quarterSplit: null, emptyQuarterRule: DEFAULT_EMPTY_QUARTER_RULE, newBoardSize: null, showInOpenBoards: false, autoManage: false, maxSquaresPerPlayer: null };
 
   @Output() closed = new EventEmitter<void>();
@@ -267,21 +279,33 @@ export class EditGameDialogComponent implements OnChanges {
   @Output() sportChange = new EventEmitter<SportType | 'custom'>();
   @Output() coHostAssign = new EventEmitter<CoHostCandidate>();
   @Output() coHostRemove = new EventEmitter<void>();
+  @Output() coHostUseGroup = new EventEmitter<string>();
 
   confirmingClear = false;
   /** Split being edited, in percent (20 = 20%). */
   pct: SplitPercents = splitPercents(null);
   readonly smallerSizes: BoardSize[] = [50, 25];
-  readonly sportOptions: { value: SportType | 'custom'; label: string }[] = [
-    { value: 'nfl', label: 'NFL' },
-    { value: 'ncaaf', label: 'NCAA Football' },
-    { value: 'ufl', label: 'UFL' },
-    { value: 'nba', label: 'NBA' },
-    { value: 'wnba', label: 'WNBA' },
-    { value: 'afl', label: 'AFL' },
-    { value: 'custom', label: 'Custom' }
-  ];
+  /** AFL is no longer offered (Nov 17, 2026), except on a game already set to AFL, so it still reads right. */
+  get sportOptions(): { value: SportType | 'custom'; label: string }[] {
+    const options: { value: SportType | 'custom'; label: string }[] = [
+      { value: 'nfl', label: 'NFL' },
+      { value: 'ncaaf', label: 'NCAA Football' },
+      { value: 'ufl', label: 'UFL' },
+      { value: 'nba', label: 'NBA' },
+      { value: 'wnba', label: 'WNBA' }
+    ];
+    if (this.values.sport === 'afl') options.push({ value: 'afl', label: 'AFL' });
+    options.push({ value: 'custom', label: 'Custom' });
+    return options;
+  }
   draft: EditGameValues = { ...this.values };
+
+  protected readonly groupedHint = GROUPED_SHOWN_HINT;
+
+  /** The picker is on a group, so Show in my open boards is locked on. */
+  get grouped(): boolean {
+    return inGroup(this.draft.group);
+  }
 
   /** The picker needs something to pick: a group, or New group... */
   get groupsShown(): boolean {
@@ -290,7 +314,8 @@ export class EditGameDialogComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['isOpen']?.currentValue) {
-      this.draft = { ...this.values };
+      // A game filed in a group before the switch was locked on shows (and saves) as on
+      this.draft = { ...this.values, showInOpenBoards: this.values.showInOpenBoards || inGroup(this.values.group) };
       this.confirmingClear = false;
       this.pct = splitPercents(this.values.quarterSplit);
     }
@@ -317,12 +342,28 @@ export class EditGameDialogComponent implements OnChanges {
   }
 
   onClearClick(): void {
+    if (this.clearBlocked) {
+      this.clearGame.emit();
+      this.close();
+      return;
+    }
     if (!this.confirmingClear) {
       this.confirmingClear = true;
       return;
     }
     this.clearGame.emit();
     this.close();
+  }
+
+  pickGroup(choice: GroupChoice): void {
+    if (inGroup(choice)) this.draft.showInOpenBoards = true;
+    this.draft.group = choice;
+    this.draft.coHostFromGroup = !this.coHostName && !!this.pickedGroup()?.coHost;
+  }
+
+  /** The group the picker is on, if it is one of the owner's groups. */
+  pickedGroup(): GameGroup | undefined {
+    return this.groups.find(g => g.id === this.draft.group?.groupId);
   }
 
   save(): void {

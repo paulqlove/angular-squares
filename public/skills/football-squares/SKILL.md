@@ -15,7 +15,7 @@ There is no public API. Everything below is done by the person in their own brow
 - Boards have 100, 50 or 25 squares. A board is shared by its link or a six-character game code, and games are not listed publicly.
 - Squares update in real time for everyone on the board.
 - The host locks the board, then the digits 0 through 9 are drawn at random for the rows and the columns.
-- Live score and clock come from ESPN for NFL, NCAA football, UFL, NBA, WNBA and AFL games. Any other game works as a custom board with typed team names.
+- Live score and clock come from ESPN for NFL, NCAA football, UFL, NBA and WNBA games. Any other game works as a custom board with typed team names.
 - Points split 20, 20, 20 and 40 percent across the quarters as standard. These are points, never money.
 - TV mode shows the board, the score, each quarter winner and a QR code to join, and can rotate through several boards.
 

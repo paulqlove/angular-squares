@@ -6,6 +6,7 @@ import { AdSlotComponent } from '../../components/ui/ad-slot/ad-slot.component';
 import { SiteHeaderComponent } from '../../components/ui/site-header/site-header.component';
 import { HelpMenuComponent } from '../../components/ui/help-menu/help-menu.component';
 import { ProfileMenuComponent } from '../../components/ui/profile-menu/profile-menu.component';
+import { SeasonPassesDialogComponent } from '../../components/ui/season-passes-dialog/season-passes-dialog.component';
 import { YourGamesMenuComponent } from '../../components/ui/your-games-menu/your-games-menu.component';
 import { DockAtEndDirective } from '../../shared/directives/dock-at-end.directive';
 import { BoardSectionComponent } from './components/board-section/board-section.component';
@@ -50,6 +51,7 @@ import { SquarePickerService } from './services/square-picker.service';
     PaymentDialogComponent,
     PlayersSectionComponent,
     ProfileMenuComponent,
+    SeasonPassesDialogComponent,
     WinnersAndPayoutsComponent,
     YourGamesMenuComponent
   ],
@@ -126,6 +128,12 @@ export class SuperBowlSquaresComponent implements OnInit, OnDestroy {
   }
 
   protected readonly players: GamePlayersService = inject(GamePlayersService);
+  /** Your games, in the header. On phones the host bar's Games button opens it for hosts and co-hosts. */
+  @ViewChild(YourGamesMenuComponent)
+  protected set yourGames(menu: YourGamesMenuComponent | undefined) {
+    this.ui.yourGamesMenu = menu;
+  }
+
   /** The board's state. Read by the template and by dev tools (`ng.getComponent(...).state`). */
   protected readonly state: GameStateService = inject(GameStateService);
   protected readonly ui: GamePageUiService = inject(GamePageUiService);

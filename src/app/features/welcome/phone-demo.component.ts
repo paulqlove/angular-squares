@@ -1,24 +1,10 @@
 import { Component, ChangeDetectionStrategy, DestroyRef, ElementRef, afterNextRender, inject, signal } from '@angular/core';
 
-interface DemoPlayer {
-  initials: string;
-  color: string;
-}
+import { DEMO_PLAYERS, DemoPlayer } from '../../shared/demo-players';
 
 type Phase = 'filling' | 'drawing' | 'locked';
 
-const PLAYERS: DemoPlayer[] = [
-  { initials: 'AL', color: 'qs-p-rose' },
-  { initials: 'SA', color: 'qs-p-sky' },
-  { initials: 'JO', color: 'qs-p-butter' },
-  { initials: 'MI', color: 'qs-p-aqua' },
-  { initials: 'LE', color: 'qs-p-orchid' },
-  { initials: 'CA', color: 'qs-p-coral' },
-  { initials: 'RI', color: 'qs-p-apricot' },
-  { initials: 'NI', color: 'qs-p-lilac' },
-  { initials: 'MA', color: 'qs-p-tan' },
-  { initials: 'PA', color: 'qs-p-periwinkle' }
-];
+const PLAYERS = DEMO_PLAYERS;
 
 const FILL_STEP_MS = 35;
 const FLICKER_MS = 70;

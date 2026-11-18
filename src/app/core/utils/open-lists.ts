@@ -6,8 +6,8 @@
 
 const KEY_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 const KEY_LENGTH = 20;
-/** The More tab reads at most this many boards. */
-export const MAX_OPEN_BOARDS = 10;
+/** The most list entries the More tab reads, a page at a time, to find the boards it shows. */
+export const MAX_OPEN_BOARDS = 30;
 
 /** A board the More-tab writes act on. */
 export interface OpenListTarget {

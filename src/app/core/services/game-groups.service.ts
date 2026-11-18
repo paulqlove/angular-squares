@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { get, ref, set, update } from 'firebase/database';
 import { GameGroup, GroupChoice, GroupedBoard, cleanGroupName, deleteGroupUpdates, parseGroups } from '../utils/game-groups';
-import { fileBoardUpdates, newListKey } from '../utils/open-lists';
+import { GroupCoHost, groupCoHostUpdates, validCoHost } from '../utils/group-cohost';
+import { fileBoardUpdates, isListKey, newListKey } from '../utils/open-lists';
 import { AuthService } from './auth.service';
 import { BoardSettingsService } from './board-settings.service';
 import { GameDatabaseService } from './game-database.service';
@@ -14,27 +15,60 @@ import { GameDatabaseService } from './game-database.service';
   providedIn: 'root'
 })
 export class GameGroupsService {
-  /** The owner's groups, oldest first. Empty on any error or for a reader the rules turn away. */
+  /**
+   * The owner's groups, oldest first. Empty on any error or for a reader the rules turn away. Each group's co-host
+   * is read only for the owner: co-hosts get the groups without them, as the rules allow.
+   */
   public async getGroups(ownerId: string): Promise<GameGroup[]> {
     if (!this.database.isBrowser || !ownerId) return [];
     try {
-      return parseGroups(await this.read(`groupLists/${ownerId}/groups`));
+      const isOwner = this.authService.currentUser()?.uid === ownerId;
+      const [groups, coHosts] = await Promise.all([
+        this.read(`groupLists/${ownerId}/groups`),
+        isOwner ? this.read(`groupCoHosts/${ownerId}`).catch(() => null) : null
+      ]);
+      return parseGroups(groups, coHosts);
     } catch {
       return [];
     }
   }
 
-  public async createGroup(ownerId: string, name: string): Promise<GameGroup> {
+  /**
+   * Which list each board is filed in (`games/{id}/openListId`: a group or the No group key), one small field per
+   * board, read together. A board with none, or whose read fails, is left out.
+   */
+  public async listIdsOf(boardIds: string[]): Promise<Map<string, string>> {
+    if (!this.database.isBrowser) return new Map();
+    const ids = await Promise.all(boardIds.map(id => this.read(`games/${id}/openListId`).catch(() => null)));
+    return new Map(boardIds.flatMap((id, i) => isListKey(ids[i]) ? [[id, ids[i]] as [string, string]] : []));
+  }
+
+  /** Makes a group, with its co-host when one is given (Create game's new group), in one write. */
+  public async createGroup(ownerId: string, name: string, coHost?: GroupCoHost): Promise<GameGroup> {
     this.guardWrite();
     const group: GameGroup = { id: newListKey(), name, createdAt: Date.now() };
-    await this.save(`groupLists/${ownerId}/groups/${group.id}`, { name: group.name, createdAt: group.createdAt });
-    return group;
+    const stored = { name: group.name, createdAt: group.createdAt };
+    if (!coHost) {
+      await this.save(`groupLists/${ownerId}/groups/${group.id}`, stored);
+      return group;
+    }
+    await this.patch({ [`groupLists/${ownerId}/groups/${group.id}`]: stored, [`groupCoHosts/${ownerId}/${group.id}`]: coHost });
+    return { ...group, coHost };
   }
 
   /** Renames in place: every board in the group keeps pointing at the same id, so nothing else changes. */
   public async renameGroup(ownerId: string, groupId: string, name: string): Promise<void> {
     this.guardWrite();
     await this.save(`groupLists/${ownerId}/groups/${groupId}/name`, name);
+  }
+
+  /**
+   * Sets a group's co-host (null removes it) in one write, giving it to the games in `addTo` and clearing it
+   * from the games in `clearFrom`. The caller picks the games (group-cohost utils), so no game's own co-host is replaced.
+   */
+  public async setGroupCoHost(ownerId: string, groupId: string, coHost: GroupCoHost | null, games: { addTo: string[]; clearFrom: string[] }): Promise<void> {
+    this.guardWrite();
+    await this.patch(groupCoHostUpdates(ownerId, groupId, coHost, games));
   }
 
   /** Deletes a group and moves its boards to No group in one write. `boards` are the owner's boards. Returns the No group key. */
@@ -45,11 +79,14 @@ export class GameGroupsService {
     return ungrouped;
   }
 
-  /** Files a board into a group, or into No group when `groupId` is null. Returns the board's new list id. */
+  /**
+   * Files a board into a group, or into No group when `groupId` is null. A board in a group is always shown in
+   * its More tab; No group keeps the board's switch. Returns the board's new list id.
+   */
   public async fileBoard(board: GroupedBoard, groupId: string | null): Promise<string> {
     this.guardWrite();
     const listId = groupId ?? await this.boardSettings.ungroupedKey(board.ownerId);
-    await this.patch(fileBoardUpdates(board, listId, !!board.showInOpenBoards));
+    await this.patch(fileBoardUpdates(board, listId, !!groupId || !!board.showInOpenBoards));
     return listId;
   }
 
@@ -59,7 +96,8 @@ export class GameGroupsService {
    */
   public async saveChoice(board: GroupedBoard, choice: GroupChoice): Promise<{ listId: string; created?: GameGroup }> {
     const name = cleanGroupName(choice.newName ?? '');
-    const created = name ? await this.createGroup(board.ownerId, name) : undefined;
+    const email = validCoHost(choice.newCoHost);
+    const created = name ? await this.createGroup(board.ownerId, name, email ? { email } : undefined) : undefined;
     const listId = await this.fileBoard(board, created?.id ?? choice.groupId);
     return { listId, created };
   }

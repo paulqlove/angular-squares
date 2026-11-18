@@ -4,37 +4,20 @@
     <app-profile-menu walkthroughTarget="profile-dropdown" (tour)="startWalkthrough()"></app-profile-menu>
   </app-site-header>
 
-  <main class="mx-auto max-w-[1600px] px-4 sm:px-8 pt-6 pb-32 sm:pb-20 md:pt-8">
-    <!-- Heading + actions -->
-    <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between" data-walkthrough="hero-section">
-      <div>
+  <!-- From 640px up, main fills the screen under the 60px header, so on a short, wide window the footer starts below the fold -->
+  <main class="mx-auto max-w-[1600px] px-4 sm:px-8 pt-6 pb-32 sm:min-h-[calc(100dvh-60px)] sm:pb-28 md:pt-8 print:min-h-0">
+    <!-- Phone, host with no boards: the code field moves up here, since the bottom bar holds only New board -->
+    @if (store.emptyHost()) {
+      <div appCodeField class="mb-8 block sm:hidden"></div>
+    }
+    <!-- Heading. Search, the group picker and New board live in the bottom taskbar on every screen size. -->
+    <div>
+      @if (store.firstEmpty()) {
+        <div appFirstHostTitle [name]="store.firstName()"></div>
+      } @else {
         <p class="qs-eyebrow">Dashboard</p>
         <h2 class="qs-title mt-3 text-4xl sm:text-5xl">Your <span class="text-qs-accent">games</span></h2>
-      </div>
-
-      <!-- From 640px up: one field that searches your boards or joins with a code, then New board. Phones get the bottom bar instead. -->
-      <div class="hidden items-center gap-3 sm:flex sm:flex-row">
-        <div role="search" class="relative w-[400px] min-w-0" data-walkthrough="join-game">
-          <div appDashboardSearchField class="qs-search min-w-0 flex-1" [where]="'desk'"></div>
-          @if (search.showCodeError()) {
-            <p id="code-error-desk" class="qs-error-in absolute left-0 top-full mt-2 text-sm text-qs-bad" role="alert">Game not found</p>
-          }
-        </div>
-
-        @if (store.canCreateGame()) {
-          <button
-            type="button"
-            (click)="dialogs.openCreateModal($event)"
-            [disabled]="dialogs.isCheckingBoardLimit()"
-            [attr.aria-busy]="dialogs.isCheckingBoardLimit()"
-            class="qs-btn qs-btn-primary disabled:cursor-wait"
-            data-walkthrough="create-game"
-          >
-            <ng-icon name="heroPlus" class="text-base"></ng-icon>
-            New board
-          </button>
-        }
-      </div>
+      }
     </div>
 
     @if (!store.canCreateGame()) {
@@ -49,8 +32,15 @@
 
     <!-- Hosting -->
     @if (store.canCreateGame()) {
-      <!-- Plan card: the upgrade entry point, so only free hosts see it. Season and Admin see their plan in the profile menu. -->
-      @if (planService.plan() !== 'season' && planService.plan() !== 'admin') {
+      <!-- Plan card: the upgrade entry point, so only free hosts see it. Season and Admin see their plan in the profile menu.
+           A returning free host with no boards gets the season tiles and the "No boards" card in its place,
+           and a first-time free host gets the free games line and the sample game. -->
+      @if (store.returningEmpty()) {
+        <div appSeasonTiles class="mt-8" data-walkthrough="my-games" [hosted]="store.seasonGamesUsed() ?? 0" [left]="store.seasonGamesLeft() ?? 0" (seeSeasonPass)="dialogs.openUpgrade($event)"></div>
+      } @else if (store.firstEmpty()) {
+        <div appFreeGamesLine class="mt-4" [left]="store.seasonGamesLeft() ?? 0" (seeSeasonPass)="dialogs.openUpgrade($event)"></div>
+        <section appSampleGame class="mt-8 sm:mt-10" data-walkthrough="my-games"></section>
+      } @else if (planService.plan() !== 'season' && planService.plan() !== 'admin') {
         <div class="qs-card mt-8 flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between" aria-label="Your plan">
           <div class="min-w-0">
             <p class="qs-label text-qs-muted">Your plan</p>
@@ -60,6 +50,9 @@
                 <span class="qs-label align-middle text-qs-muted">· {{ planService.daysLeft() }} days left</span>
               }
             </p>
+            @if (store.seasonGamesLeft() !== null) {
+              <p class="mt-1 text-base text-qs-muted">{{ store.seasonGamesLeft() }} of {{ planService.features().seasonGames }} free games left this season</p>
+            }
           </div>
           <button type="button" (click)="dialogs.openUpgrade($event)" class="qs-btn qs-btn-secondary shrink-0">
             See Season Pass
@@ -67,12 +60,10 @@
         </div>
       }
 
-      <!-- Admin Panel: Gifted Season Passes (admin account only) -->
-      @if (admin.canManagePasses()) {
-        <section appDashboardAdminPanel class="mt-8" aria-labelledby="admin-heading"></section>
+      <!-- With no boards, the season tiles or the sample game above stand in for Hosting -->
+      @if (!store.emptyHost()) {
+        <section appDashboardHosting class="mt-8" data-walkthrough="my-games" aria-labelledby="hosting-heading"></section>
       }
-
-      <section appDashboardHosting class="mt-8" data-walkthrough="my-games" aria-labelledby="hosting-heading"></section>
     }
 
     <!-- Joined -->
@@ -81,10 +72,18 @@
     }
   </main>
 
-  <!-- No footer on phones, like the game page: the bottom bar docks at the end of the page, and main's 128px bottom padding keeps the last card clear of it -->
-  <app-site-footer width="wide" class="block bg-qs-panel max-sm:hidden"></app-site-footer>
+  <!-- No footer on phones, like the game page: the bottom bar docks at the end of the page, and main's 128px bottom padding keeps the last card clear of it.
+       From 640px up, 96px under the footer lets its last lines scroll clear of the floating taskbar. -->
+  <app-site-footer width="wide" class="block bg-qs-panel max-sm:hidden sm:pb-24 print:pb-0"></app-site-footer>
 
-  <!-- Phone: the search-or-code field and New board in a bar along the bottom, lifted above the keyboard while the search is open -->
+  <!-- From 640px up: Search, the group picker and New board in a taskbar floating at the bottom -->
+  <div appDashboardDeskBar [class.qs-dock-off]="dialogs.barHidden()" [attr.aria-hidden]="dialogs.barHidden() ? 'true' : null"></div>
+
+  <!-- Phone: the search-or-code field and New board in a bar along the bottom, lifted above the keyboard while the search is open.
+       A host with no boards gets New board alone, pinned along the bottom, with the code field at the top of the page. -->
+  @if (store.emptyHost()) {
+    <div appNewBoardDock [label]="store.newBoardLabel()" [class.qs-dock-off]="dialogs.barHidden()" [attr.aria-hidden]="dialogs.barHidden() ? 'true' : null"></div>
+  } @else {
   <div
     appDashboardPhoneBar
     class="qs-dock qs-dockable no-print fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-[90] sm:hidden"
@@ -93,6 +92,7 @@
     [attr.aria-hidden]="dialogs.barHidden() || players.filterOpen() ? 'true' : null"
     [style.transform]="search.searchOpen() && search.keyboardLift() ? 'translateY(-' + search.keyboardLift() + 'px)' : null"
   ></div>
+  }
 
   <!-- Create Game Modal -->
   <app-modal [open]="dialogs.showCreateModal()" labelledBy="create-game-title" size="xl" phone="full" [backdropCloses]="false" extraClass="flex h-[min(44rem,calc(100dvh-2rem))] flex-col overflow-hidden" (dismissed)="dialogs.dismissCreateModal()">
@@ -117,6 +117,8 @@
       [autoManageAllowed]="planService.features().autoManage"
       [autoManageDefault]="dialogs.autoManageDefault()"
       [squareLimitAllowed]="planService.features().squareLimit"
+      [groupsAllowed]="planService.features().gameGroups"
+      [groups]="groups.groups()"
       [isCreating]="dialogs.isCreating()"
       (cancelled)="dialogs.closeCreateModal()"
       (submitted)="dialogs.createGame($event)"
@@ -145,14 +147,17 @@
     [canLimitSquares]="planService.features().squareLimit && !!edit.editingGame()"
     [players]="edit.editGamePlayers()"
     [coHostName]="edit.coHostName()"
+    [coHostEmail]="edit.editingGame()?.managerEmail ?? ''"
     (closed)="edit.closeEditModal()"
     (saved)="edit.saveGameEdits($event)"
     (sportChange)="edit.fetchEditEspnGames($event)"
     (coHostAssign)="edit.assignManagerFromPlayer($event)"
     (coHostRemove)="edit.removeManager()"
+    (coHostUseGroup)="edit.useGroupCoHost($event)"
   ></app-edit-game-dialog>
 
 </div>
 @if (dialogs.showUpgradeDialog()) {
-  <app-upgrade-pass-dialog [trigger]="dialogs.upgradeTrigger()" [boardName]="dialogs.endedBoard()?.name ?? ''" (dismissed)="dialogs.closeUpgrade()" (resetOld)="dialogs.resetOldBoard()" (deleteOld)="dialogs.deleteOldBoard()" />
+  <app-upgrade-pass-dialog [trigger]="dialogs.upgradeTrigger()" [boardName]="dialogs.endedBoard()?.name ?? ''" [gamesLeft]="store.seasonGamesLeft()" (dismissed)="dialogs.closeUpgrade()" (resetOld)="dialogs.resetOldBoard()" (deleteOld)="dialogs.deleteOldBoard()" />
 }
+<app-season-passes-dialog />

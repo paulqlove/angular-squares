@@ -4,6 +4,7 @@ import { readAutoManage, readAutoManageResult } from './auto-manage';
 import { isListKey } from './open-lists';
 import { confirmedPlayers } from './paid-squares';
 import { readSquareLimit } from './square-limit';
+import type { SeasonGame } from './season-games';
 import { BoardSize, EspnLiveSnapshot, GameData, GameListItem, SportType, TvLink, getBoardDimensions } from './game-data';
 
 // Pure helpers that turn raw Realtime Database values into typed game data.
@@ -65,6 +66,7 @@ export function parseGameData(gameId: string, rawData: any, now: number = Date.n
     ownerId: rawData.ownerId || '',
     ownerName: rawData.ownerName || 'Unknown',
     createdAt: rawData.createdAt || now,
+    ...(typeof rawData.startedAt === 'number' ? { startedAt: rawData.startedAt } : {}),
     boardSize,
     // Squares are stored under `squares` but the app calls them selectedSquares.
     selectedSquares: { ...(rawData.squares || {}) },
@@ -95,7 +97,6 @@ export function parseGameData(gameId: string, rawData: any, now: number = Date.n
     espnSport: rawData.espnSport || undefined,
     espnLive: readEspnLive(rawData.espnLive),
     managerId: rawData.managerId || undefined,
-    managerEmail: rawData.managerEmail || undefined,
     managerName: rawData.managerName || undefined,
     adFreeUntil: rawData.adFreeUntil || 0,
     quarterSplit: rawData.quarterSplit || null,
@@ -191,11 +192,12 @@ export function readGameIndexVisits(value: unknown, field: 'createdAt' | 'joined
 
 /** Reads a tvLinks/{token} value. null when the link is off or lists no boards. */
 export function readTvLink(value: unknown): TvLink | null {
-  const link = value as { boards?: unknown; interval?: unknown } | null;
+  const link = value as { boards?: unknown; interval?: unknown; group?: unknown; owner?: unknown } | null;
   const boards = typeof link?.boards === 'string' ? link.boards.split(',').filter(Boolean) : [];
   if (!link || !boards.length) return null;
   const interval = TV_INTERVALS.includes(Number(link.interval)) ? Number(link.interval) : 30;
-  return { boards, interval };
+  const follows = isListKey(link.group) && typeof link.owner === 'string' && !!link.owner;
+  return follows ? { boards, interval, follow: { group: link.group as string, owner: link.owner as string } } : { boards, interval };
 }
 
 /** Board ids from a users/{uid}/games value, newest first (same order as the dashboard). */
@@ -221,6 +223,7 @@ export function toGameListItem(gameId: string, game: GameData, includeHostSettin
     homeTeam: game.homeTeam,
     awayTeam: game.awayTeam,
     createdAt: game.createdAt,
+    ...(game.startedAt ? { startedAt: game.startedAt } : {}),
     playerCount: playerNames.size,
     squaresFilled,
     isLocked: game.isLocked,
@@ -243,5 +246,15 @@ export function toGameListItem(gameId: string, game: GameData, includeHostSettin
         }
       : {}),
     confirmedCount
+  };
+}
+
+/** A raw games/{gameId} value as one game toward its owner's season: when it started and how many squares are claimed. */
+export function toSeasonGame(gameId: string, raw: { createdAt?: unknown; startedAt?: unknown; squares?: unknown }): SeasonGame {
+  return {
+    id: gameId,
+    createdAt: typeof raw.createdAt === 'number' ? raw.createdAt : 0,
+    ...(typeof raw.startedAt === 'number' ? { startedAt: raw.startedAt } : {}),
+    squaresFilled: raw.squares && typeof raw.squares === 'object' ? Object.keys(raw.squares).length : 0
   };
 }

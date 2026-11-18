@@ -4,11 +4,16 @@ import { CardMenuItem } from '../../../components/ui/card-menu/card-menu.compone
 import { AuthService, AuthUser } from '../../../core/services/auth.service';
 import { ConfirmService } from '../../../core/services/confirm.service';
 import { GameData, GameListItem, GameService } from '../../../core/services/game.service';
+import { PlanService } from '../../../core/services/plan.service';
+import { SeasonGamesService } from '../../../core/services/season-games.service';
 import { TeamLogoService } from '../../../core/services/team-logo.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { BoardGroup, groupBoards } from '../../../core/utils/board-groups';
 import { drawBoardNumbers } from '../../../core/utils/draw-numbers';
+import { GroupRow, gamesInGroup } from '../../../core/utils/game-groups';
 import { toGameListItem } from '../../../core/utils/game-parse';
+import { deleteCountNote, gamesLeft, seasonLimitApplies } from '../../../core/utils/season-games';
+import { EmptyDashboardFacts, isFirstEmpty, isReturningEmpty } from '../utils/returning-empty';
 import { filterHostedGames } from './dashboard-filters';
 import { DashboardGroupsService } from './dashboard-groups.service';
 import { DashboardSearchService } from './dashboard-search.service';
@@ -25,6 +30,13 @@ export class DashboardStore {
   /** How a card comes in: a 160ms fade when the boards first load, then nothing, so search and Boards | Players feel instant. */
   public readonly cardEnter = signal<string>('qs-row-in');
   public readonly currentUser: Signal<AuthUser | null> = inject(AuthService).currentUser;
+  /** Hosted boards in the group picked in the group picker, or all of them under All groups. */
+  public readonly groupGames = computed<GameListItem[]>(() => gamesInGroup(this.myGames(), this.groups.picked()?.id));
+  /** The group picker shows once the owner has a group, or has a board and can make a group. */
+  public readonly groupPickerShows = computed<boolean>(() =>
+    !this.isLoadingGames() && (this.groups.groups().length > 0 || (this.groups.canEdit() && this.myGames().length > 0)));
+  /** Each of the owner's groups with how many hosted boards are filed in it. */
+  public readonly groupRows = computed<GroupRow[]>(() => this.groups.rows(this.myGames()));
   public readonly hostMenu: CardMenuItem[] = [{ id: 'edit', label: 'Edit game' }, { id: 'delete', label: 'Delete game', danger: true }];
   public readonly isLoadingGames = signal<boolean>(true);
   public readonly joinedGames = signal<GameListItem[]>([]);
@@ -34,13 +46,31 @@ export class DashboardStore {
   /** Boards whose Lock now is being saved. */
   public readonly lockingIds = signal<ReadonlySet<string>>(new Set());
   public readonly myGames = signal<GameListItem[]>([]);
+  /** A free host with no boards who already played this season: the returning-host empty dashboard shows. */
+  public readonly returningEmpty = computed<boolean>(() => isReturningEmpty(this.emptyFacts()));
+  /** A free host with no boards and nothing counted this season: the "Host your first squares game" dashboard shows. */
+  public readonly firstEmpty = computed<boolean>(() => isFirstEmpty(this.emptyFacts()));
+  /** Either empty dashboard: code field up top and New board pinned along the bottom on phones. */
+  public readonly emptyHost = computed<boolean>(() => this.returningEmpty() || this.firstEmpty());
+  /** The New board button's words on an empty dashboard. */
+  public readonly newBoardLabel = computed<string>(() => this.firstEmpty() ? 'Create your first board' : 'New board');
+  /** The first word of the signed-in name, for "Welcome, Sam", or '' with no name. */
+  public readonly firstName = computed<string>(() => this.currentUser()?.displayName?.trim().split(/\s+/)[0] ?? '');
   /** Every board this user hosts or co-hosts, in full, for the Players view. Newest first, hosted ones first. */
   public readonly runBoards = signal<GameData[]>([]);
   public readonly shareModalGameId = signal<string | null>(null);
-  /** Hosted boards matching the search, newest first. */
+  /** "N of 3 free games left this season" for a free host while the season cap is on, else null. */
+  public readonly seasonGamesLeft = computed<number | null>(() => {
+    const cap = this.planService.features().seasonGames;
+    const used = this.seasonGames.used();
+    return seasonLimitApplies(cap) && used !== null ? gamesLeft(cap, used) : null;
+  });
+  /** Games this host has used this season, or null until read. */
+  public readonly seasonGamesUsed = computed<number | null>(() => this.seasonGames.used());
+  /** Hosted boards in the picked group matching the search, newest first. */
   public readonly visibleMyGames = computed<GameListItem[]>(() => {
     const search = this.search;
-    return filterHostedGames(this.myGames(), search.gameSearch(), !!search.codeMatch() || search.showCodeError(), {
+    return filterHostedGames(this.groupGames(), search.gameSearch(), !!search.codeMatch() || search.showCodeError(), {
       teamsOf: g => this.teamLogos.teams(g),
       groupNameOf: g => this.groups.nameOf(g)
     });
@@ -50,12 +80,14 @@ export class DashboardStore {
     const user = this.currentUser();
     if (!user) return;
 
-    const name = this.myGames().find(g => g.id === gameId)?.name ?? 'This game';
-    if (await this.confirmService.ask({ title: 'Delete this game?', message: `${name} will be removed for everyone. This cannot be undone.`, confirmLabel: 'Delete game' })) {
+    const game = this.myGames().find(g => g.id === gameId);
+    const message = `${game?.name ?? 'This game'} will be removed for everyone. This cannot be undone.${game ? this.seasonDeleteNote(game) : ''}`;
+    if (await this.confirmService.ask({ title: 'Delete this game?', message, confirmLabel: 'Delete game' })) {
       try {
         await this.gameService.deleteGame(gameId, user.uid);
         this.myGames.update(games => games.filter(g => g.id !== gameId));
         this.runBoards.update(boards => boards.filter(b => b.id !== gameId));
+        this.refreshSeasonCount();
       } catch {
         this.toastService.error('Could not delete the game. Try again.');
       }
@@ -77,6 +109,9 @@ export class DashboardStore {
         this.myGames.set(owned);
         this.joinedGames.set(joinedRecords.map(game => toGameListItem(game.id as string, game, false)));
         this.runBoards.set([...ownedRecords, ...joinedRecords.filter(game => game.managerId === user.uid)]);
+        // With no boards, which empty state shows hangs on the season count, so wait for it rather than swap screens
+        const seasonRead = this.refreshSeasonCount();
+        if (owned.length === 0) await seasonRead;
         const linked = owned.filter(game => !!game.espnEventId);
         if (linked.length > 0) {
           this.gameService.ensureLiveGameIndexes(linked.map(game => ({
@@ -143,6 +178,20 @@ export class DashboardStore {
     }
   }
 
+  /** Re-reads how many games this host has used this season, for the plan card and the limit dialogs. */
+  public async refreshSeasonCount(): Promise<void> {
+    const user = this.currentUser();
+    if (!user || user.isGuest || !seasonLimitApplies(this.planService.features().seasonGames)) return;
+    // A failed read hides the "games left" line rather than showing a wrong number.
+    await this.seasonGames.usedThisSeason(user.uid, this.myGames()).catch(() => this.seasonGames.used.set(null));
+  }
+
+  /** The extra delete-confirm sentence for a game with players that keeps counting this season, or ''. */
+  public seasonDeleteNote(game: GameListItem): string {
+    const note = deleteCountNote(game, this.planService.features().seasonGames, Date.now());
+    return note ? ` ${note}` : '';
+  }
+
   public shareGame(gameId: string): void {
     this.shareModalGameId.set(gameId);
   }
@@ -151,7 +200,8 @@ export class DashboardStore {
   public setRunBoard(board: GameData): void {
     this.runBoards.update(boards => boards.map(b => b.id === board.id ? board : b));
     const item = (joined: boolean) => toGameListItem(board.id as string, board, !joined);
-    this.myGames.update(games => games.map(g => g.id === board.id ? item(false) : g));
+    // The co-host's email isn't on the board itself (only the owner can read it), so the card keeps the one it has.
+    this.myGames.update(games => games.map(g => g.id === board.id ? { ...item(false), managerEmail: g.managerEmail } : g));
     this.joinedGames.update(games => games.map(g => g.id === board.id ? item(true) : g));
   }
 
@@ -164,7 +214,18 @@ export class DashboardStore {
   private readonly gameService: GameService = inject(GameService);
   private readonly groups: DashboardGroupsService = inject(DashboardGroupsService);
   private readonly injector: Injector = inject(Injector);
+  private readonly planService: PlanService = inject(PlanService);
   private readonly search: DashboardSearchService = inject(DashboardSearchService);
+  private readonly seasonGames: SeasonGamesService = inject(SeasonGamesService);
   private readonly teamLogos: TeamLogoService = inject(TeamLogoService);
   private readonly toastService: ToastService = inject(ToastService);
+
+  /** What picks the empty dashboard: boards, plan cap, sign-in, loading and this season's count. */
+  private readonly emptyFacts = computed<EmptyDashboardFacts>(() => ({
+    boards: this.myGames().length,
+    cap: this.planService.features().seasonGames,
+    canHost: this.canCreateGame(),
+    loading: this.isLoadingGames(),
+    used: this.seasonGames.used()
+  }));
 }

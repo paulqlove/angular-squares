@@ -9,11 +9,13 @@ import { PlanService } from '../../../core/services/plan.service';
 import { SanitizationService } from '../../../core/services/sanitization.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { buildCreateGameValues, clearCreateDraft, isPendingAutoSubmit, loadCreateDraft, saveCreateDraft } from '../../../core/utils/create-game-draft';
+import { asksAboutEndedBoard } from '../../../core/utils/board-activity';
+import type { GroupChoice } from '../../../core/utils/game-groups';
 import { CreateGameSubmit } from '../../create/create-game-form.component';
+import type { UpgradeTrigger } from '../components/upgrade-pass-dialog/upgrade-pass-dialog.component';
 import { DashboardEditService } from './dashboard-edit.service';
+import { DashboardGroupsService } from './dashboard-groups.service';
 import { DashboardStore } from './dashboard.store';
-
-type UpgradeTrigger = 'limit' | 'pass' | 'ended';
 
 /** New board and Season Pass: the create form, the board-limit check, and the upgrade dialog. Provided on the dashboard. */
 @Injectable()
@@ -57,7 +59,7 @@ export class DashboardDialogsService {
         user.uid, user.displayName || 'Unknown', values.name, values.espnEventId, values.homeTeam, values.awayTeam, values.price,
         values.espnSport, values.manager, values.hostNote, values.boardSize, values.quarterSplit, values.emptyQuarterRule
       );
-      await this.applyCreateExtras(gameId, user.uid, values);
+      await this.applyCreateExtras(gameId, user.uid, values, submit.group);
       this.showCreateModal.set(false);
       clearCreateDraft();
       this.router.navigate(['/game', gameId]);
@@ -66,7 +68,7 @@ export class DashboardDialogsService {
       saveCreateDraft({ ...draft, autoSubmit: false });
       if (error instanceof ActiveBoardLimitError) {
         this.showCreateModal.set(false);
-        this.openUpgradeDialog('limit');
+        this.openUpgradeDialog(error.dialog);
       } else {
         console.error('[Dashboard] Create game failed', (error as { code?: string })?.code ?? error);
         this.toastService.error('Could not create the game. Try again.');
@@ -82,10 +84,12 @@ export class DashboardDialogsService {
     const board = this.endedBoard();
     const user = this.store.currentUser();
     if (!board || !user) return;
-    if (!await this.confirmService.ask({ title: 'Delete this game?', message: `${board.name} will be removed for everyone. This cannot be undone.`, confirmLabel: 'Delete game' })) return;
+    const message = `${board.name} will be removed for everyone. This cannot be undone.${this.store.seasonDeleteNote(board)}`;
+    if (!await this.confirmService.ask({ title: 'Delete this game?', message, confirmLabel: 'Delete game' })) return;
     try {
       await this.gameService.deleteGame(board.id, user.uid);
       this.store.myGames.update(games => games.filter(g => g.id !== board.id));
+      this.store.refreshSeasonCount();
       this.showUpgradeDialog.set(false);
       this.showCreateModal.set(true);
     } catch {
@@ -122,7 +126,7 @@ export class DashboardDialogsService {
       this.showCreateModal.set(true);
     } catch (error) {
       if (error instanceof ActiveBoardLimitError) {
-        this.openUpgradeDialog('limit');
+        this.openUpgradeDialog(error.dialog);
       } else {
         this.toastService.error('Could not check your boards. Try again.');
       }
@@ -144,6 +148,7 @@ export class DashboardDialogsService {
     try {
       await this.gameService.resetGame(board.id, board.boardSize);
       this.store.updateMyGame(board.id, g => ({ ...g, squaresFilled: 0, playerCount: 0, confirmedCount: 0, isLocked: false }));
+      this.store.refreshSeasonCount();
       this.showUpgradeDialog.set(false);
       this.edit.openEditModal(board);
     } catch {
@@ -175,6 +180,7 @@ export class DashboardDialogsService {
   private readonly confirmService: ConfirmService = inject(ConfirmService);
   private readonly edit: DashboardEditService = inject(DashboardEditService);
   private readonly gameService: GameService = inject(GameService);
+  private readonly groups: DashboardGroupsService = inject(DashboardGroupsService);
   private readonly planService: PlanService = inject(PlanService);
   private readonly router: Router = inject(Router);
   private readonly sanitizationService: SanitizationService = inject(SanitizationService);
@@ -183,14 +189,17 @@ export class DashboardDialogsService {
   private upgradeReturnFocus: HTMLElement | null = null;
 
   /** The settings saved after the board exists. Each one failing only warns: the board is already made. */
-  private async applyCreateExtras(gameId: string, uid: string, values: CreateGameSubmit['values']): Promise<void> {
+  private async applyCreateExtras(gameId: string, uid: string, values: CreateGameSubmit['values'], group?: GroupChoice): Promise<void> {
+    let shownIn: string | undefined;
     if (values.showInOpenBoards) {
       try {
-        await this.gameService.setShowInOpenBoards({ id: gameId, ownerId: uid }, true);
+        shownIn = await this.gameService.setShowInOpenBoards({ id: gameId, ownerId: uid }, true);
       } catch {
         this.toastService.warning('Board created, but Show in my open boards could not be turned on. Try again in Edit.');
       }
     }
+    // After the switch, so the board moves its More entry from No group into the group
+    await this.groups.fileNewBoard({ id: gameId, ownerId: uid, openListId: shownIn, showInOpenBoards: !!shownIn }, group);
     if (values.maxSquaresPerPlayer && this.planService.features().squareLimit) {
       try {
         await this.gameService.setSquareLimit(gameId, values.maxSquaresPerPlayer);
@@ -233,7 +242,7 @@ export class DashboardDialogsService {
       this.showCreateModal.set(true);
     } catch (error) {
       if (error instanceof ActiveBoardLimitError) {
-        this.openUpgradeDialog('limit');
+        this.openUpgradeDialog(error.dialog);
       } else {
         // Never fail silently: say so, and open the form with the saved entries.
         console.error('[Dashboard] Could not finish the create', (error as { code?: string })?.code ?? error);
@@ -252,11 +261,11 @@ export class DashboardDialogsService {
 
   /**
    * A free host whose only board has ended: ask them to reset or delete it before starting another.
-   * Returns true when the dialog was opened. Paid plans with room, and admins, are not affected.
+   * Returns true when the dialog was opened. Paid plans and admins are not affected.
    */
   private showEndedBoardDialog(): boolean {
     const owned = this.store.myGames();
-    if (owned.length === 0 || owned.length < this.planService.features().activeBoards) return false;
+    if (!asksAboutEndedBoard(owned.length, this.planService.features().activeBoards)) return false;
     this.endedBoard.set(owned[0]);
     this.openUpgradeDialog('ended');
     return true;

@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+**Before any UI work (design or build), read [docs/ux-rules.md](docs/ux-rules.md) and [docs/DESIGN.md](docs/DESIGN.md).**
+
 ## Project Overview
 
 Football Squares (Super Bowl Squares) - A real-time multiplayer game for managing squares pools. Built with Angular 17 (standalone components), Firebase (Auth + Realtime Database), and Tailwind CSS.
@@ -13,6 +15,8 @@ npm start          # Dev server at localhost:4200
 npm run build      # Production build to dist/angular-squares/
 npm test           # Run Karma + Jasmine tests
 ```
+
+**PR screenshots (dev only, Linux):** `node scripts/screenshot.mjs <url> <out-prefix> [--dark]` saves `<out-prefix>-phone.png` (412 px wide) and `<out-prefix>-desktop.png` (1440 px). Install Chromium first with `npm i --no-save @sparticuz/chromium` (kept out of package.json so CI never downloads it). The script drives it over Chromium's DevTools protocol, with no driver package, so it takes a still of a page as it loads: no taps, scrolling or sign-in. Point it at a local build (`npm run build`, then serve `dist/angular-squares/browser`) or a PR preview. Previews use the live database, so only open pages; never script writes.
 
 ## Architecture
 
@@ -102,6 +106,7 @@ games/{gameId}/
   espnLive: clock, period, status, per-quarter linescores (written by Cloud Functions)
 
   openListId (the board's More list: one of the owner's groups or their No group key)
+  startedAt (when the board was last reset or cleared; a new game toward the season)
 
 users/{userId}/games/{gameId}/
   createdAt, name
@@ -110,8 +115,12 @@ groupLists/{ownerId}/  ungrouped (write-once key), groups/{groupId}: { name, cre
 coHosts/{ownerId}/{uid}: true  (owner writes when assigning a co-host)
 openLists/{listId}/{boardId}: ownerId  (shown boards; read one list by key, never listable)
 
+seasonGames/{ownerId}/{season}/{gameId}_{startedAt}: true  (free host's games with players this season; owner adds, never removes)
+
 liveGames/{espnId}/{boardId}/
   sport
+
+purchases/{checkoutSessionId}: { uid, amount, currency, paymentIntentId, createdAt, expiresAt, status: 'paid' | 'refunded' }  (Season Pass sales; written only by the stripeWebhook function, admins read)
 ```
 
 ## Game Logic

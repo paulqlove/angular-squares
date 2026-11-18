@@ -4,6 +4,78 @@ This file records product and design decisions, newest first. To add one, put a 
 
 ---
 
+## D-040 · Hosts open Your games from the host bar at every size
+
+- **Date:** Nov 16 2026
+- **Decision:** The game page host bar's Games button shows on desktop too, first in the bar, and opens Your games as a centred dialog (the bottom sheet on phones, as before). Hosts and co-hosts no longer get the header's Your games button at any size; players and guests keep it.
+- **Options considered:** not recorded
+- **Why:** Paul asked for desktop to match the phone: "make it like mobile where the games is one of the buttons in the host taskbar and then a modal pop up pops up"
+- **Decided by:** Paul
+
+## D-039 · Gifted Season Passes move into the profile menu
+
+- **Date:** Nov 16 2026
+- **Decision:** The admin's gifted Season Passes leave the dashboard. The profile menu gets an Admin section above Sign out with one item, Season Passes, and the gifted count ("4 gifted"); it opens a dialog (a bottom sheet on phones) with the same Gift a pass form and the list of gifted passes, each with its status and an always-visible remove X. Tapping a status still makes that pass never expire. Admin account only. Creative's mockups; Paul's words, relayed: "the admin season passes on the my dashboard move that buried in the profile settings dropdown and where it triggers a modal and then I can just add or remove somebody from season passes that way", then "Build it".
+- **Options considered:** not recorded
+- **Why:** the admin tool cluttered the dashboard Paul uses as a host
+- **Decided by:** Paul
+
+## D-038 · Free hosts: one game at a time and 3 games a season
+
+- **Date:** Nov 15 2026
+- **Decision:** Free hosts keep one game open at a time and can run 3 games per season. A game counts once anyone has claimed a square on it, and the count is saved on the server, so deleting a game with players doesn't free a slot and an empty game never takes one. Delete stays allowed. A reset (or Clear game) starts a new game on the same board under the same rule; the game before it already counted if it had players. A board that's already running is never locked or blocked: the cap only stops a new board, a reset, or Clear game on a board with players. At the cap, Clear game opens the season dialog with a "Keep this game" button instead; under it, the clear warning says the cleared board will count (Creative, spec section 6). Season Pass and Admin are unchanged. Copy is Creative's (free-limit spec, mockups l1 to l3). Built behind `SEASON_LIMIT_ON` in `core/utils/season-games.ts`, on since #396; the season runs July 1 to June 30 (Paul confirmed: "Yes, July to June"). Paul's words, relayed: "I actually agree with you on setting a max number of games for a free user and only being able to host one game at a time." Then: "3 per season". On a deleted game nobody joined: "Yes, don't count it".
+- **Options considered:** counting every game made, deleted or not; not counting empty games (picked)
+- **Why:** empty test boards shouldn't use up a free host's season
+- **Decided by:** Paul
+
+## D-037 · Groups stays in place, switched off, on the Players tab
+
+- **Date:** Nov 15 2026
+- **Decision:** On the dashboard's Players tab the group picker (the desktop dropdown and the phone folder button) stays where it is but switched off, so Search and the phone's field don't move between tabs. Hovering it on desktop shows "Groups filter your boards"; tapping it on a phone shows the same words as a toast. On the Boards tab it works as before. Grid / Compact keeps hiding on Players, since Boards | Players is pinned to the right edge and nothing moves. Creative's pick; Paul's word, relayed: "Build it".
+- **Options considered:** hide Groups on Players (moves Search 212px on desktop and grows the phone field 52px); disable it in place
+- **Why:** a control that disappears shifts the row; switched off, the row stays still
+- **Decided by:** Paul
+
+## D-036 · A game in a group always shows in that group's More tab
+
+- **Date:** Nov 15 2026
+- **Decision:** When a host or co-host picks a group for a game (Create game, Edit game on the game page or the dashboard, or the co-host's Edit game), Show in my open boards turns on and stays locked on, with the hint "Games in a group always show in open boards." Picking No group unlocks the switch and keeps it on. Deleting a group moves its games to No group with the switch as it was. A game filed in a group earlier with the switch off opens in Edit game with it on, and saves it on; `scripts/show-grouped-games.mjs` fixes the rest in one go. The app holds this rule (the Group picker and `GameGroupsService.fileBoard`), not the database rules. Builds on D-031. Paul's words, relayed: "If a game is assigned a group then it should automatically be made public. Where it's viewable with other games within that group." and "Lock it on".
+- **Options considered:** switch turns on but stays editable (built first, Nov 15, then replaced by Paul's "Lock it on")
+- **Why:** a grouped game that stays out of More can't be found from the group's other games, which is what the group is for
+- **Decided by:** Paul
+
+## D-035 · Group picker joins the Search and New board row
+
+- **Date:** Nov 15 2026
+- **Decision:** The Groups chip row under Hosting (from D-031's dashboard work) goes away. From 640px up a 200px Group dropdown sits between Search and New board: folder icon, the current choice (All groups or the group's name) and a chevron; its menu lists All groups, each group with its game count, then Manage groups (Season Pass only), which opens the Groups sheet. On a phone a 48px icon-only folder button sits in the bottom bar between Games & codes and New board and opens a short Groups sheet with the same rows. A picked group fills the phone button ink, and a chip with the group's name and an x sits by the Hosting heading (just under it when the Boards | Players switch is there). Picking a group filters Hosting for real; search works inside it; Joined is never filtered. The picker shows only when the owner has a group or can make one. Mockups w1, w2, p1 to p3 from Creative. Paul's words, relayed: "The group redesign, I think should be moved in the same section as the search in Newboard on desktop and on mobile. And make it icon only on mobile." Approved: "Yeah, that works. Build that out and give me a preview link."
+- **Options considered:** not recorded
+- **Why:** not recorded beyond Paul's words above
+- **Decided by:** Paul
+
+## D-034 · Season Pass hosts at the cap get a plain limit note
+
+- **Date:** Nov 15 2026
+- **Decision:** A Season Pass host (or an admin previewing Season Pass) with 25 active boards who tries to make another sees "You're at your 25-board limit" and a Done button: no price, no upgrade offer, no email signup, and no upgrade-view count. Free hosts at their one-board limit keep the "Board 1 is live" upgrade dialog exactly as before. The "Your last game is over" reset-or-delete dialog is now free-only too, so a Season Pass host who owns 25 or more boards but has fewer than 25 active can make a new one. The 25 cap is unchanged. Paul's words, relayed: "Yes, fix it".
+- **Options considered:** not recorded
+- **Why:** the free plan's upgrade offer made no sense to someone who already has the Season Pass
+- **Decided by:** Paul
+
+## D-033 · Share winners shows the picture, not the code or TV link
+
+- **Date:** Nov 15 2026
+- **Decision:** On a finished game the Share dialog drops the Game code block and the TV link, and shows the winners picture itself in their place: square at full dialog width, 8px radius, 1px line border, above the Share winners button. While it draws, a same-size panel reads "Drawing the picture…"; if the draw fails it reads "Couldn't make the picture. Tap Share winners to try again." Share game on live games is unchanged.
+- **Options considered:** Creative's s1 (picture preview) with s2 (drawing state)
+- **Why:** the code and TV link don't matter once a game is over. Paul's words, relayed: "On games that are completed where it says share winners, I think the TV link in game codes are irrelevant and not needed. Maybe it would be a good opportunity to just go ahead and show an image of what the winner's image will look like." Approved: "Build it".
+- **Decided by:** Paul
+
+## D-032 · Phone host bar: Games in the bar, one next-step button
+
+- **Date:** Nov 15 2026
+- **Decision:** On a phone the game page's host bar is Games · Lock · Players · Edit (co-host: Games · Players). Games opens the existing Your games sheet (other games, Join with a code, My dashboard), and on phones hosts and co-hosts get no header Your games button; players and guests keep it. This replaces the first pick, a Dashboard button in the bar (Creative's d2, superseded by d4 and d5; Paul, relayed: "Yes, go with creatives pick on the host bar and players and guests."). Draw/Clear numbers leaves the phone bar; Lock becomes the next step (Lock and draw, Draw if locked without numbers, Unlock once drawn), and Clear and redraw move to a Numbers row at the top of Edit game. Clear stays disabled while the board is locked, as on desktop (Paul, relayed: "currently clear is disabled if the board is locked"). Desktop is unchanged. Both ways back to the dashboard are tracked as `game_to_dashboard`: `host_bar` for My dashboard in the sheet the bar opened, `header` otherwise.
+- **Options considered:** a Dashboard button in the bar (d2) and one Games button in the bar (d4, d5); Creative picked d4
+- **Why:** reaching the header to get back to the dashboard is a chore on a phone. Paul's words, relayed: "the mock-ups look good and are a go for everything."
+- **Decided by:** Paul
+
 ## D-031 · Game groups decide each game's More tab
 
 - **Date:** Nov 15 2026

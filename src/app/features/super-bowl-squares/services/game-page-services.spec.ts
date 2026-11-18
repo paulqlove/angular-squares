@@ -1,5 +1,6 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { AnalyticsService } from '../../../core/services/analytics.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ConfirmService } from '../../../core/services/confirm.service';
 import { EspnService } from '../../../core/services/espn.service';
@@ -24,6 +25,7 @@ describe('game page services', () => {
   let user: ReturnType<typeof signal<{ uid: string; displayName: string | null; isGuest: boolean; email: null; photoURL: null } | null>>;
   let updateGame: ReturnType<typeof vi.fn>;
   let getGame: ReturnType<typeof vi.fn>;
+  let track: ReturnType<typeof vi.fn>;
   let toast: { error: ReturnType<typeof vi.fn>; success: ReturnType<typeof vi.fn>; warning: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
@@ -31,14 +33,25 @@ describe('game page services', () => {
     updateGame = vi.fn(() => Promise.resolve());
     getGame = vi.fn();
     toast = { error: vi.fn(), success: vi.fn(), warning: vi.fn() };
+    track = vi.fn();
     TestBed.configureTestingModule({
       providers: [
         EspnSyncService, GamePageGroupsService, GamePageUiService, GamePlayersService, GameScoringService, GameStateService, HostActionsService,
         NumberDrawService, PlayerNameService, SquarePickerService,
-        { provide: AuthService, useValue: { currentUser: user, previewRole: signal('actual'), isPreviewAdmin: signal(false) } },
+        {
+          provide: AuthService,
+          useValue: {
+            currentUser: user,
+            previewRole: signal('actual'),
+            isPreviewAdmin: signal(false),
+            updateGuestName: (name: string) => user.set({ ...user()!, displayName: name }),
+            updateDisplayName: (name: string) => Promise.resolve(user.set({ ...user()!, displayName: name }))
+          }
+        },
         { provide: PlanService, useValue: { features: signal({ autoManage: true, activeBoards: 3, adFree: false, customSplits: true, squareLimit: true }), plan: signal('free') } },
         { provide: GameService, useValue: { updateGame, addJoinedGame: vi.fn() } },
         { provide: ToastService, useValue: toast },
+        { provide: AnalyticsService, useValue: { track } },
         { provide: ConfirmService, useValue: { ask: () => Promise.resolve(true) } },
         { provide: EspnService, useValue: { getGame, isEventFinal: () => Promise.resolve(null) } }
       ]
@@ -136,6 +149,7 @@ describe('game page services', () => {
       updateGame.mockReturnValueOnce(Promise.reject(new Error('denied')));
       await TestBed.inject(SquarePickerService).onSquareClick({ row: 0, col: 0 });
       expect(state.selectedSquares).toEqual({});
+      expect(state.playerUserIds).toEqual({});
       expect(toast.error).toHaveBeenCalled();
     });
   });
@@ -255,6 +269,26 @@ describe('game page services', () => {
       expect(state.isLocked).toBe(false);
     });
 
+    it('draws from the next-step button on a board locked without numbers', async () => {
+      const state = hostedBoard();
+      state.isLocked = true;
+      state.isRandomized = false;
+      vi.spyOn(TestBed.inject(NumberDrawService), 'playNumberRevealAnimation').mockImplementation(() => undefined);
+      await TestBed.inject(HostActionsService).runNextStep();
+      expect(state.isLocked).toBe(true);
+      expect(state.isRandomized).toBe(true);
+      expect(state.homeNumbers.slice().sort()).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    });
+
+    it('unlocks from the next-step button once the numbers are drawn', async () => {
+      const state = hostedBoard();
+      state.isLocked = true;
+      await TestBed.inject(HostActionsService).runNextStep();
+      expect(state.isLocked).toBe(false);
+      expect(state.isRandomized).toBe(true);
+      expect(updateGame).toHaveBeenCalledWith('G1', { isLocked: false });
+    });
+
     it('clears drawn numbers and their winners', async () => {
       const state = hostedBoard();
       state.winners = { q1: 'Kim' };
@@ -262,6 +296,35 @@ describe('game page services', () => {
       expect(state.isRandomized).toBe(false);
       expect(state.winners).toEqual({});
       expect(state.homeNumbers).toEqual(Array(10).fill(null));
+    });
+  });
+
+  describe('GamePageUiService', () => {
+    it('counts the way back to the dashboard and where it was tapped', () => {
+      TestBed.inject(GamePageUiService).trackToDashboard('host_bar');
+      expect(track).toHaveBeenCalledWith('game_to_dashboard', { from: 'host_bar' });
+    });
+
+    it('does not count a signed-out visitor, whose logo tap goes to the home page', () => {
+      user.set(null);
+      TestBed.inject(GamePageUiService).trackToDashboard('header');
+      expect(track).not.toHaveBeenCalled();
+    });
+
+    it('opens the header\'s Your games from the host bar and counts its My dashboard as the host bar\'s', () => {
+      const ui = TestBed.inject(GamePageUiService);
+      const toggle = vi.fn();
+      ui.yourGamesMenu = { toggle } as never;
+      ui.openYourGames();
+      expect(toggle).toHaveBeenCalledWith('external');
+      ui.trackYourGamesToDashboard('external');
+      expect(track).toHaveBeenLastCalledWith('game_to_dashboard', { from: 'host_bar' });
+      ui.trackYourGamesToDashboard('trigger');
+      expect(track).toHaveBeenLastCalledWith('game_to_dashboard', { from: 'header' });
+    });
+
+    it('does nothing from the host bar when the header has no Your games menu', () => {
+      expect(() => TestBed.inject(GamePageUiService).openYourGames()).not.toThrow();
     });
   });
 
@@ -311,6 +374,52 @@ describe('game page services', () => {
       state.playerUserIds = { Paul: 'host-1' };
       names.checkDuplicateName();
       expect(names.duplicateNameWarning()).toBeNull();
+    });
+
+    it("lets a guest who was refused a name switch to a new one at once, leaving the host's squares where they are", async () => {
+      const state = hostedBoard();
+      user.set({ uid: 'guest-1', displayName: 'Carl', isGuest: true, email: null, photoURL: null });
+      state.selectedSquares = { '0-0': 'Carl' };
+      state.playerColors = { Carl: 'qs-p-sky' };
+      state.playerUserIds = { Carl: 'host-1' };
+      const names = TestBed.inject(PlayerNameService);
+      names.currentPlayer = 'Carl';
+      expect(names.duplicateNameWarning()).toBe('"Carl" is already in use');
+      names.editingName = 'Dana';
+      await names.saveNameEdit();
+      expect(updateGame).not.toHaveBeenCalled();
+      expect(state.selectedSquares).toEqual({ '0-0': 'Carl' });
+      expect(state.currentPlayerName).toBe('Dana');
+      expect(names.duplicateNameWarning()).toBeNull();
+      expect(toast.error).not.toHaveBeenCalled();
+    });
+
+    it('carries a player’s own squares over to their new name', async () => {
+      const state = hostedBoard();
+      user.set({ uid: 'guest-1', displayName: 'Carl', isGuest: true, email: null, photoURL: null });
+      state.selectedSquares = { '0-0': 'Carl' };
+      state.playerUserIds = { Carl: 'guest-1' };
+      const names = TestBed.inject(PlayerNameService);
+      names.currentPlayer = 'Carl';
+      names.editingName = 'Dana';
+      await names.saveNameEdit();
+      expect(updateGame).toHaveBeenCalledWith('G1', expect.objectContaining({ selectedSquares: { '0-0': 'Dana' }, playerUserIds: { Dana: 'guest-1' } }));
+      expect(state.currentPlayerName).toBe('Dana');
+    });
+  });
+
+  describe('GamePlayersService name link', () => {
+    it('keeps a refused name link out of the page, so it does not ride along in later saves', async () => {
+      const state = hostedBoard();
+      user.set({ uid: 'guest-1', displayName: 'Carl', isGuest: true, email: null, photoURL: null });
+      state.selectedSquares = { '0-0': 'Carl' };
+      state.currentPlayerName = 'Carl';
+      updateGame.mockReturnValueOnce(Promise.reject(new Error('denied')));
+      TestBed.inject(GamePlayersService).backfillPlayerUserId();
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(updateGame).toHaveBeenCalledWith('G1', { playerUserIds: { Carl: 'guest-1' } });
+      expect(state.playerUserIds).toEqual({});
     });
   });
 });

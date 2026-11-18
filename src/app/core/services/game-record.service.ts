@@ -129,6 +129,9 @@ export class GameRecordService {
     if (data.isRandomized !== undefined) {
       updates[`${prefix}/isRandomized`] = data.isRandomized;
     }
+    if (data.startedAt !== undefined) {
+      updates[`${prefix}/startedAt`] = data.startedAt;
+    }
     if (data.isLocked !== undefined) {
       updates[`${prefix}/isLocked`] = data.isLocked;
     }
@@ -164,9 +167,6 @@ export class GameRecordService {
     }
     if (data.managerId !== undefined) {
       updates[`${prefix}/managerId`] = data.managerId;
-    }
-    if (data.managerEmail !== undefined) {
-      updates[`${prefix}/managerEmail`] = data.managerEmail;
     }
     if (data.managerName !== undefined) {
       updates[`${prefix}/managerName`] = data.managerName;
