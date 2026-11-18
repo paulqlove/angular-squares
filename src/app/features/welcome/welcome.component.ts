@@ -201,7 +201,9 @@ interface Feature {
             <a routerLink="/teams" class="qs-btn qs-btn-secondary">View all teams</a>
           </div>
           <p class="mt-4 max-w-2xl text-lg text-qs-muted">
-            Create a squares board themed for your favorite NFL team.
+            Create a squares board themed for your favorite NFL team. Any game works with
+            <a routerLink="/nfl-squares" class="font-medium text-qs-accent underline underline-offset-2">NFL squares</a>, and
+            <a routerLink="/super-bowl-squares" class="font-medium text-qs-accent underline underline-offset-2">Super Bowl squares</a> is ready for February.
           </p>
 
           <div class="mt-10 grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 md:gap-3">
