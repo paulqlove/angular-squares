@@ -1402,3 +1402,31 @@ describe('gameCoHosts: a game\'s co-host email, hidden from everyone but the own
     await assertSucceeds(write(owner(), { 'games/game05': null, 'gameCoHosts/owner/game05': null }));
   });
 });
+
+describe('purchases (Season Pass sales, written only by the Stripe webhook)', () => {
+  const admin = () => env.authenticatedContext('boss');
+  const sale = { uid: 'alice', amount: 599, currency: 'usd', paymentIntentId: 'pi_1', createdAt: 1, expiresAt: 2, status: 'paid' };
+
+  beforeEach(async () => {
+    await seed({ 'admins/boss': true, 'purchases/cs_1': sale });
+  });
+
+  it('an admin can read sales', async () => {
+    await assertSucceeds(read(admin(), 'purchases'));
+    await assertSucceeds(read(admin(), 'purchases/cs_1'));
+  });
+
+  it('nobody else can read a sale, not even the buyer', async () => {
+    await assertFails(read(player(), 'purchases/cs_1'));
+    await assertFails(read(owner(), 'purchases'));
+    await assertFails(read(guest(), 'purchases/cs_1'));
+    await assertFails(read(visitor(), 'purchases/cs_1'));
+  });
+
+  it('nobody can write a sale from the app, an admin included', async () => {
+    await assertFails(set(player(), 'purchases/cs_2', { ...sale, paymentIntentId: 'pi_2' }));
+    await assertFails(set(player(), 'purchases/cs_1/status', 'paid'));
+    await assertFails(set(admin(), 'purchases/cs_2', sale));
+    await assertFails(set(admin(), 'purchases/cs_1', null));
+  });
+});
