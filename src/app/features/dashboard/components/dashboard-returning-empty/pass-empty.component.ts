@@ -30,8 +30,9 @@ import { StatTileComponent } from './stat-tile.component';
         <!-- Phones already have New board in the bar along the bottom -->
         <button appNewBoardButton [walkthrough]="false" class="mt-5 max-sm:hidden"></button>
       </div>
-      <!-- The board starts inside the card and runs off its right and bottom edges -->
-      <div class="relative h-44 min-w-0 flex-1 overflow-hidden max-sm:ml-5 sm:mt-6 sm:h-auto sm:min-h-[15rem] lg:min-h-[17rem]">
+      <!-- The board starts inside the card and runs off its right and bottom edges. flex-1 only from 640px: in the
+           phone column it would set the height to 0, since the board inside is absolute and gives it no height -->
+      <div class="relative h-44 min-w-0 overflow-hidden max-sm:ml-5 sm:mt-6 sm:h-auto sm:min-h-[15rem] sm:flex-1 lg:min-h-[17rem]">
         <div appGiantBoard class="h-full"></div>
       </div>
     </div>
