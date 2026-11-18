@@ -630,6 +630,9 @@ body:has(.slide-in-from-right, .slide-in-from-left) { overflow-x: clip; }
 .qs-dock-enter > * { animation: qs-dock-in var(--qs-t-state) var(--qs-ease-decel) backwards; }
 .qs-dock-enter { animation: qs-fade-in var(--qs-t-state) var(--qs-ease-decel) backwards; }
 .qs-dock-leave { animation: qs-dock-out var(--qs-t-fast) var(--qs-ease-exit) both; pointer-events: none; }
+/* From 640px a player card's games float over the cards below it (z-10). While one is open the bottom bars drop
+   under it, still over the rest of the page, so the open list is never hidden behind the bar (Nov 18, 2026) */
+@media (min-width: 640px) { body:has(.qs-card-open) .qs-dock { z-index: 5; } }
 /* Floating bottom bars (dashboard phone bar, game page host tools). The frame (border, 88% fill, blur, shadow) is drawn
    by .qs-bar-frame::before so it can fade on its own. On phones, at the end of the page, appDockAtEnd adds .qs-docked:
    a solid strip flush with the sides and bottom fades in behind the bar, the frame fades out and the buttons drop 12px
