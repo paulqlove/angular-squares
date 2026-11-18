@@ -19,6 +19,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { CheckoutService } from '../../../../core/services/checkout.service';
 import { GameService } from '../../../../core/services/game.service';
 import { PLANS } from '../../../../core/plans';
+import { SEASON_PASS_PERKS } from '../../../../core/utils/season-pass';
 import {
   BoardLimitDialog,
   NOTIFY_EMAIL_MAX_LENGTH,
@@ -100,15 +101,11 @@ export type UpgradeTrigger = BoardLimitDialog | 'pass' | 'ended';
         <p [attr.id]="seasonCopy ? null : 'upgrade-summary'" class="qs-label mt-3 text-qs-muted">One time · through June 30, 2027</p>
 
         <ul class="mt-5 flex flex-wrap gap-2" aria-label="Included">
-          <li class="qs-badge qs-badge-ok">Live scores</li>
-          <li class="qs-badge qs-badge-ok">Up to 25 boards at a time</li>
-          @if (seasonCopy) {
-            <li class="qs-badge qs-badge-ok">No season game limit</li>
+          @for (perk of perks; track perk.id) {
+            @if (perk.id !== 'seasonLimit' || seasonCopy) {
+              <li class="qs-badge qs-badge-ok">{{ perk.label }}</li>
+            }
           }
-          <li class="qs-badge qs-badge-ok">Custom splits</li>
-          <li class="qs-badge qs-badge-ok">Auto-lock and draw</li>
-          <li class="qs-badge qs-badge-ok">Open boards list</li>
-          <li class="qs-badge qs-badge-ok">Limit squares per player</li>
         </ul>
       }
 
@@ -215,6 +212,8 @@ export class UpgradePassDialogComponent implements AfterViewInit {
 
   /** Buying shows in place of Notify me once checkout is on (or for the admin, to test it). */
   protected readonly checkoutOn: boolean;
+  /** What the pass unlocks; "No season game limit" shows only in the season versions. */
+  protected readonly perks = SEASON_PASS_PERKS;
   /** The cap named in the 'cap' version. Season Pass is the only plan with a cap above Free. */
   protected readonly seasonBoards: number = PLANS.season.activeBoards;
   /** The free plan's games per season, named in the season copy. */
