@@ -96,8 +96,8 @@ export const PARTY_FAQS: PartyFaq[] = [
     answer: 'Each guest gets a different card. Mark a square when an ad shows that thing. Five in a row across, down or corner to corner wins. The center square is free.'
   },
   {
-    question: 'Are these games OK for kids?',
-    answer: 'Yes. The prop sheet and bingo cards are all ages. For squares, a 25-square board gives each kid several squares, so everyone has a chance every quarter.'
+    question: 'What Super Bowl games work for kids?',
+    answer: 'Commercial bingo and the prop sheet are all ages, and younger kids can mark bingo squares with stickers. For squares, a 25-square board gives each kid several squares, so everyone has a chance every quarter.'
   },
   {
     question: 'Do these games cost anything?',

@@ -113,14 +113,14 @@ const FIRST_PRINT_SEEDS = Array.from({ length: PRINT_CARD_COUNT }, (_, index) =>
         </nav>
       </app-reading-header>
 
-      <app-reading-section class="no-print" heading="Super Bowl squares" headingId="squares">
+      <app-reading-section class="no-print" heading="Start with Super Bowl squares" headingId="squares">
         <p>Squares is the game most parties already know. Everyone claims a square on a 10 by 10 grid, the digits 0 through 9 are drawn for each team, and the last digit of each score picks a winner every quarter. It takes a minute to explain and keeps the whole room watching to the end.</p>
         <p>Make the board now, before the matchup is set, and send one link. Guests claim a square by typing a name, with no account. On game day, put it on the TV and the live score finds each quarter’s winner. The full rules are on <a routerLink="/super-bowl-squares" class="font-medium text-qs-accent underline underline-offset-2">Super Bowl squares</a>.</p>
         <a [routerLink]="signedIn() ? '/dashboard' : '/create'" class="qs-btn qs-btn-primary">Start a free board</a>
       </app-reading-section>
 
-      <app-reading-section heading="Printable prop sheet" headingId="prop-sheet">
-        <p class="no-print">Hand one out as people arrive. Everyone circles one answer per line before kickoff. Each right answer is a point, and the total score guess breaks a tie.</p>
+      <app-reading-section heading="Printable Super Bowl prop sheet" headingId="prop-sheet">
+        <p class="no-print">Hand one out as people arrive. Everyone circles one answer per line before kickoff. Each right answer is a point, and the total score guess breaks a tie. Some groups call this a prop bet sheet. This one is played for points, with no money involved.</p>
         <button type="button" class="qs-btn qs-btn-secondary no-print" (click)="print('props')">Print prop sheet</button>
 
         <div wide class="party-sheet rounded-card border border-qs-line bg-qs-panel p-5 sm:p-8"
@@ -150,8 +150,8 @@ const FIRST_PRINT_SEEDS = Array.from({ length: PRINT_CARD_COUNT }, (_, index) =>
         </div>
       </app-reading-section>
 
-      <app-reading-section heading="Commercial bingo" headingId="commercial-bingo">
-        <p class="no-print">Made for the guests who are there for the ads. Mark a square when a commercial shows it. Five in a row across, down or corner to corner wins. Tap squares to mark them on your phone, or print a stack of different cards.</p>
+      <app-reading-section heading="Super Bowl commercial bingo cards" headingId="commercial-bingo">
+        <p class="no-print">Made for the guests who are there for the ads. Mark a square when a commercial shows it. Five in a row across, down or corner to corner wins. Tap squares to mark them on your phone, or print a stack of free bingo cards, each one different.</p>
         <div class="no-print flex flex-wrap gap-3">
           <button type="button" class="qs-btn qs-btn-secondary" (click)="shuffle()">Shuffle</button>
           <button type="button" class="qs-btn qs-btn-secondary" (click)="print('bingo')">Print {{ printCount }} cards</button>
@@ -261,7 +261,7 @@ export class PartyGamesComponent {
 
   constructor() {
     this.seo.apply({
-      title: 'Super Bowl Party Games and Ideas 2027: Squares, Props, Bingo — QuarterScore',
+      title: 'Super Bowl Party Games and Ideas 2027: Free Printables — QuarterScore',
       description: 'Free Super Bowl party games and ideas for 2027: an online squares board, a printable prop sheet, commercial bingo cards and easy party ideas for people who don’t watch football.',
       path: PATH,
       headline: 'Super Bowl party games and ideas 2027',
