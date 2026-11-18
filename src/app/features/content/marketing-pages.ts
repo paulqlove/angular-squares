@@ -259,9 +259,9 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
   'super-bowl-squares': {
     id: 'super-bowl-squares',
     path: '/super-bowl-squares',
-    title: 'Super Bowl Squares 2027: Free Board and Rules — QuarterScore',
-    description: 'Free Super Bowl squares for February 14, 2027. Make the board before the teams are set, share one link, and get the rules, best numbers and a printable.',
-    h1: 'Super Bowl squares',
+    title: 'Super Bowl Squares 2027: Free Online Board and Rules — QuarterScore',
+    description: 'Free Super Bowl squares for February 14, 2027. Make a 100, 50 or 25 square board before the teams are set, share one link, and see who wins each quarter.',
+    h1: 'Super Bowl squares 2027',
     notice: 'QuarterScore is not affiliated with, endorsed by, or sponsored by the NFL, NBA, or NCAA. Team and event names are used only to describe the games.',
     eyebrow: 'Super Bowl LXI',
     lede: 'Make the board before either team is known. Add the team names when the matchup is announced and keep the same link. It is free, and players do not need an account.',
@@ -279,8 +279,14 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
         heading: 'How Super Bowl squares works',
         paragraphs: [
           'Pick a board: 100 squares for a big party or office, 50 for a medium group, 25 for a small one. Friends claim squares by name. When the board fills, the host locks it and draws the digits 0 through 9 for each team, so nobody can choose a number.',
-          'At the end of each quarter, take the last digit of each team’s score. A score of 24 to 17 lands on the square where 4 and 7 meet. On 50 and 25 square boards, a side uses digit pairs, so one square covers more than one score.',
-          'The suggested split is 20, 20, 20 and 40 percent of the points, with the final quarter worth the most. It is a label for bragging rights, not money.'
+          'At the end of each quarter, take the last digit of each team’s score. A score of 24 to 17 lands on the square where 4 and 7 meet. On 50 and 25 square boards, a side uses digit pairs, so one square covers more than one score.'
+        ]
+      },
+      {
+        heading: 'How the points split by quarter',
+        paragraphs: [
+          'Each quarter has its own winning square. The standard split is 20 percent of the points for the first, second and third quarters and 40 percent for the final score, so the last square is worth the most. Many groups call this the payout. On QuarterScore it is points, never money.',
+          'If the winning square is one nobody claimed, the host picks the rule when making the board: roll those points into the final quarter, or share them across the other quarters. QuarterScore moves the points for you.'
         ]
       },
       {
@@ -298,9 +304,9 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
         video: HOWTO_VIDEOS.createBoard
       },
       {
-        heading: 'Which numbers come up most',
+        heading: 'Best and worst Super Bowl squares numbers',
         paragraphs: [
-          'In the historical table, 7 and 0 is the most common pair, at about 3.5 percent of final scores either way round. 2 and 2 almost never comes up. An average square is 1 percent.',
+          'In the historical table, 7 and 0 is the most common pair, at about 3.5 percent of final scores. Next come 4 and 7 at 2.9 percent and 0 and 3 at 2.8 percent. 2 and 2 almost never comes up, and 5 and 5 is about 0.1 percent. An average square is 1 percent.',
           'The digits are drawn after names go on, so a good pair is luck. [Best numbers](/best-squares-numbers) has the full table.'
         ]
       },
@@ -320,11 +326,39 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       {
         heading: 'Rules to post early',
         paragraphs: [
-          'Write down what you will do with overtime, with a square nobody claimed, and with a quarter that ends on the same digits as the one before. The how-to-play page is the short version you can send with the link.'
+          'Write down what you will do with overtime, with a square nobody claimed, and with a quarter that ends on the same digits as the one before. The how-to-play page is the short version you can send with the link.',
+          'Want practice before February? [NFL squares](/nfl-squares) runs the same board for any regular-season or playoff game.'
         ]
       }
     ],
+    faqs: [
+      {
+        question: 'When is Super Bowl LXI?',
+        answer: 'Sunday, February 14, 2027, with kickoff at 6:30 p.m. ET at SoFi Stadium in Inglewood.'
+      },
+      {
+        question: 'Can I make a Super Bowl squares board before the teams are set?',
+        answer: 'Yes. Squares does not need the teams. Make the board now and share the link. When the matchup is announced, add the team names and keep the same link.'
+      },
+      {
+        question: 'How many squares should a Super Bowl board have?',
+        answer: 'Use 100 squares for a big party or office, 50 for a medium group and 25 for a small one. Smaller boards fill faster, and each square covers more scores.'
+      },
+      {
+        question: 'How do Super Bowl squares pay out each quarter?',
+        answer: 'Each quarter’s square gets a share of the points: 20 percent for each of the first three quarters and 40 percent for the final score. QuarterScore never collects, holds, or pays out money.'
+      },
+      {
+        question: 'What are the best numbers for Super Bowl squares?',
+        answer: '7 and 0 comes up most often in past scores, at about 3.5 percent, then 4 and 7 and 0 and 3. The digits are drawn after everyone claims a square, so nobody can choose them.'
+      },
+      {
+        question: 'Does overtime count toward the final square?',
+        answer: 'Most groups count overtime toward the final score, so the last square uses the score at the end of the game. Post your rule on the board before kickoff.'
+      }
+    ],
     related: [
+      { path: '/nfl-squares', label: 'NFL squares', text: 'The same board for any game of the season.' },
       { path: '/how-to-play', label: 'How to play', text: 'The full rules, including overtime and empty squares.' },
       { path: '/best-squares-numbers', label: 'Best numbers', text: 'Every digit pair, from 7 and 0 down to 2 and 2.' },
       { path: '/printable-football-squares', label: 'Printable board', text: 'A blank 100-square grid to print or download.' },
@@ -392,29 +426,78 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
   'nfl-squares': {
     id: 'nfl-squares',
     path: '/nfl-squares',
-    title: 'NFL Squares for Any Game — QuarterScore',
-    description: 'NFL squares on a free 10 by 10 board. Share a link, claim squares by name, and follow each quarter without a spreadsheet.',
-    h1: 'NFL squares',
+    title: 'NFL Squares: Free Online Board for Any Game — QuarterScore',
+    description: 'Free NFL squares for any game this season. Pick 100, 50 or 25 squares, share one link, and see who wins each quarter. Rules, best numbers and FAQ.',
+    h1: 'NFL squares for any game',
     eyebrow: 'Any week of the season',
     lede: 'The same 10 by 10 board works for a Thursday game, a Sunday slate, or a one-off with friends. Pick the game, share the link, and draw the numbers when the squares are claimed.',
     published: '2026-11-01',
     sections: [
       {
-        heading: 'What you set up',
+        heading: 'How NFL squares works',
         paragraphs: [
-          'Create a board and choose NFL. Add the two teams and send the link. Friends type their names on open squares. When you are ready, lock the board and draw the numbers. Each quarter, the last digit of each score points at one square.'
+          'A board is a grid of 100, 50 or 25 squares. One team runs down the side and the other across the top. Friends claim squares by name. When the squares are claimed, the host locks the board and draws the digits 0 through 9 for each team, so nobody picks a number.',
+          'At the end of each quarter, take the last digit of each team’s score. A score of 24 to 17 lands on the square where 4 and 7 meet. On 50 and 25 square boards, a side uses digit pairs, so one square covers two or more scores.'
+        ]
+      },
+      {
+        heading: 'How the points split by quarter',
+        paragraphs: [
+          'Each quarter has its own winning square. The standard split is 20 percent of the points for the first, second and third quarters and 40 percent for the final score. Many groups call this the payout. On QuarterScore it is points, never money.',
+          'If the winning square is one nobody claimed, the host picks the rule when making the board: roll those points into the final quarter, or share them across the other quarters.'
+        ]
+      },
+      {
+        heading: 'Best and worst numbers for NFL squares',
+        paragraphs: [
+          'Football scores move in 3s and 7s, so some last digits come up far more than others. In past scores, 7 and 0 is the most common pair at about 3.5 percent, then 4 and 7 at 2.9 percent and 0 and 3 at 2.8 percent. 2 and 2 almost never comes up. An average square is 1 percent.',
+          'The digits are drawn after names go on, so a good pair is luck. [Best numbers](/best-squares-numbers) has the full table, and the Hit rate tab shows it on your own board after the draw.'
+        ]
+      },
+      {
+        heading: 'Run NFL squares on QuarterScore',
+        paragraphs: [
+          'Create a board and choose NFL. Add the two teams and send the link. Friends type their names on open squares. When you are ready, lock the board and draw the numbers. Each quarter, the last digit of each score points at one square.',
+          'Every team has its own page with its upcoming games and a printable board. [Pick your team](/teams) to start from its next game.'
         ]
       },
       {
         heading: 'A board you can run every week',
         paragraphs: [
-          'Some groups play one game a week all season. Each game gets its own board and link, so old scores stay put. Free hosts get 3 games a season. The Season Pass is for groups that play every week.'
+          'Some groups play one game a week all season. Each game gets its own board and link, so old scores stay put. Free hosts get 3 games a season. The Season Pass is for groups that play every week.',
+          'In February the same board becomes [Super Bowl squares](/super-bowl-squares), and you can make it before the matchup is set.'
         ],
         bullets: [
           'No account for the people claiming squares.',
           'A code for anyone standing in the room.',
           'A Hit rate tab after the draw, from the same table as the best-numbers page.'
         ]
+      }
+    ],
+    faqs: [
+      {
+        question: 'What are NFL squares?',
+        answer: 'NFL squares is a game played on a grid during a football game. Each square matches one pair of last digits, one for each team. When a quarter ends, the square that matches the score wins that quarter.'
+      },
+      {
+        question: 'How do you win NFL squares?',
+        answer: 'Take the last digit of each team’s score at the end of a quarter. Find the row for one team’s digit and the column for the other’s. The name on the square where they meet wins the quarter.'
+      },
+      {
+        question: 'What happens if nobody claimed the winning square?',
+        answer: 'That quarter has no winner. The host picks the rule when making the board: its points roll into the final quarter, or they are shared across the other quarters.'
+      },
+      {
+        question: 'Can I run squares for more than one NFL game?',
+        answer: 'Yes. Each game gets its own board and link. Free hosts get one game at a time and 3 games a season. The Season Pass is for groups that play every week.'
+      },
+      {
+        question: 'Do players need an account?',
+        answer: 'No. Anyone with the link can claim a square by typing a name. Only the host signs in, to save and run the board.'
+      },
+      {
+        question: 'Is there a printable NFL squares sheet?',
+        answer: 'Yes. The printable page has a blank 100-square grid to print or save as a PDF, and each team page has a board for its next game.'
       }
     ],
     related: [

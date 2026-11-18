@@ -129,7 +129,11 @@ import { ScheduledGame, formatKickoff } from './schedule.model';
 
           <!-- The rules, as four steps -->
           <app-reading-section [heading]="'How ' + team.name + ' squares work'">
-            <p>Claim a square and watch the score. You don't need to know football.</p>
+            <p>
+              Claim a square and watch the score. You don't need to know football. The same rules run every
+              <a routerLink="/nfl-squares" class="font-medium text-qs-accent underline underline-offset-2">NFL squares</a> board and the
+              <a routerLink="/super-bowl-squares" class="font-medium text-qs-accent underline underline-offset-2">Super Bowl squares</a> board.
+            </p>
             <ol wide class="grid gap-y-8 border-y border-qs-line py-6 sm:grid-cols-2 lg:col-span-2 lg:grid-cols-4 lg:gap-y-0">
               @for (step of steps(); track step.name; let index = $index) {
                 <li class="lg:border-l lg:border-qs-line lg:px-6 lg:first:border-l-0 lg:first:pl-0 lg:last:pr-0">
@@ -197,6 +201,7 @@ export class TeamPageComponent implements OnInit {
     { path: '/teams', label: 'All NFL teams', text: 'Pick any team and run a board for its next game.' },
     { path: '/how-to-play', label: 'How to play', text: 'The full rules for football squares.' },
     { path: '/best-squares-numbers', label: 'Best numbers', text: 'Which squares hit most often in past games.' },
+    { path: '/nfl-squares', label: 'NFL squares', text: 'Rules, points by quarter and the best numbers.' },
     { path: '/super-bowl-squares', label: 'Super Bowl squares', text: 'The free board, rules and TV mode for the big game.' }
   ];
   /** The four rules steps, with the team's name in the example. */
