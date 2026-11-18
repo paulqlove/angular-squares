@@ -49,6 +49,13 @@ const FIRST_PRINT_SEEDS = Array.from({ length: PRINT_CARD_COUNT }, (_, index) =>
         font-size: 0.8125rem;
       }
     }
+    /* Full width of the page on desktop: wider than tall, so the card doesn't run a screen and a half down. */
+    @media (min-width: 1024px) {
+      .bingo-cell {
+        aspect-ratio: 4 / 3;
+        font-size: 0.9375rem;
+      }
+    }
     @media print {
       /* Light-theme ink, so a dark-theme page doesn't print pale text on white. */
       .party-sheet {
@@ -85,6 +92,7 @@ const FIRST_PRINT_SEEDS = Array.from({ length: PRINT_CARD_COUNT }, (_, index) =>
         width: 4.6in;
       }
       .print-card .bingo-cell {
+        aspect-ratio: 1;
         border-right: 1pt solid #000;
         border-bottom: 1pt solid #000;
         background: #fff !important;
@@ -157,7 +165,7 @@ const FIRST_PRINT_SEEDS = Array.from({ length: PRINT_CARD_COUNT }, (_, index) =>
           <button type="button" class="qs-btn qs-btn-secondary" (click)="print('bingo')">Print {{ printCount }} cards</button>
         </div>
 
-        <div wide class="no-print max-w-[34rem]">
+        <div wide class="no-print">
           <div class="bingo-grid overflow-hidden rounded-card border border-qs-line bg-qs-line" role="group" aria-label="Commercial bingo card">
             @for (cell of card(); track $index) {
               @if (cell === free) {
@@ -175,10 +183,11 @@ const FIRST_PRINT_SEEDS = Array.from({ length: PRINT_CARD_COUNT }, (_, index) =>
         <div wide class="party-sheet hidden print:block" [class.print-target]="printing() === 'bingo'">
           @for (sheet of printCards(); track $index) {
             <div class="print-card">
-              <div class="mb-2 flex w-[4.6in] items-center justify-between">
-                <span class="text-sm font-semibold">Super Bowl commercial bingo</span>
+              <div class="flex w-[4.6in] items-center justify-between">
+                <img src="assets/brand/lockup-horizontal.svg" alt="QuarterScore" width="128" height="16" class="h-4 w-auto">
                 <span class="text-xs">quarterscore.com</span>
               </div>
+              <p class="mb-2 mt-2 text-sm font-semibold">Super Bowl commercial bingo</p>
               <div class="bingo-grid">
                 @for (cell of sheet; track $index) {
                   <div class="bingo-cell" [class.font-semibold]="cell === free">{{ cell }}</div>
