@@ -7,9 +7,9 @@ export const environment = {
   demoGameId: 'DEMO00',
   // Free hosts' boards show an ad slot. Off until an ad network is set up; the admin still sees a placeholder.
   adsEnabled: false,
-  // Season Pass checkout (Stripe). Off until the Stripe functions are deployed and tested; the admin can buy
-  // while it is off, to test it. See docs/FUNCTIONS.md, Season Pass checkout.
-  checkoutEnabled: false,
+  // Season Pass checkout (Stripe). On for every signed-in host. While the functions hold Stripe test keys,
+  // only Stripe's test cards work and nobody is charged; live keys make it real. See docs/FUNCTIONS.md.
+  checkoutEnabled: true,
   firebase: {
     apiKey: 'AIzaSyBij6Rm7noCjgQVLvclvqRc34UtY2wQLsE',
     authDomain: 'quarterscore.com',

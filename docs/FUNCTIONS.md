@@ -139,6 +139,8 @@ Logic: `functions/src/season-pass.ts` and `stripe-events.ts` (pure, unit-tested)
 2. Create the product "Season Pass" with a one-time $5.99 USD price, tax behavior **inclusive**, and a tax code marked eligible for Managed Payments. Copy its `price_...` id.
 3. Add a webhook endpoint `https://us-central1-squares-4e4f7.cloudfunctions.net/stripeWebhook` with events `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `charge.refunded`. Copy its signing secret.
 4. From the repo on `main`: `npx firebase-tools functions:secrets:set STRIPE_SECRET_KEY --project squares-4e4f7` and `npx firebase-tools functions:secrets:set STRIPE_WEBHOOK_SECRET --project squares-4e4f7` (each prompts for the value; nothing is stored in the repo).
-5. `npx firebase-tools deploy --only database,functions:createCheckoutSession,functions:stripeWebhook --project squares-4e4f7`. The first deploy asks for `STRIPE_PRICE_ID` and saves it in `functions/.env.squares-4e4f7` (not a secret). Paste the price id from step 1 there, the one that starts with `price_`; checkout refuses anything else and logs why.
+5. `npx firebase-tools deploy --only database,functions:createCheckoutSession,functions:stripeWebhook --project squares-4e4f7`. The first deploy asks for `STRIPE_PRICE_ID` and saves it in `functions/.env.squares-4e4f7` (not a secret). Paste the price id from step 2 there, the one that starts with `price_`; checkout refuses anything else and logs why.
 
 The browser needs no Stripe key: it calls `createCheckoutSession` and goes to the returned URL. For live mode, repeat steps 2 to 4 with live keys, then redeploy.
+
+The buy button follows `checkoutEnabled` in `src/environments/` (on since Nov 18, 2026, so testers can buy). While the functions hold test keys, only Stripe's test cards work and nobody is charged; once live keys are set, it sells for real. To hide it again, set the flag to false; the admin still sees it.
