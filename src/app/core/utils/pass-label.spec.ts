@@ -1,5 +1,5 @@
 import { DAY_MS, NO_EXPIRY } from '../plans';
-import { passGoodThrough } from './pass-label';
+import { ownPassLabel, passGoodThrough } from './pass-label';
 
 const NOW = Date.UTC(2026, 10, 18, 3, 0);
 const CENTRAL = 'America/Chicago';
@@ -21,5 +21,29 @@ describe('passGoodThrough', () => {
 
   it('says a pass that never expires never expires', () => {
     expect(passGoodThrough(NO_EXPIRY, NOW, CENTRAL)).toBe('Never expires');
+  });
+});
+
+describe('ownPassLabel', () => {
+  const host = { admin: false, previewing: false };
+  const paid = { plan: 'season' as const, expiresAt: Date.UTC(2027, 6, 1) };
+
+  it('shows a host their own active pass', () => {
+    expect(ownPassLabel(paid, host, NOW, CENTRAL)).toBe('Good through June 30');
+  });
+
+  it('shows nothing for a pass that has ended, even one that ended a minute ago', () => {
+    expect(ownPassLabel({ plan: 'season', expiresAt: Date.UTC(2026, 10, 18, 0, 0) }, host, NOW, CENTRAL)).toBeNull();
+    expect(ownPassLabel({ plan: 'season', expiresAt: NOW - 60_000 }, host, NOW, CENTRAL)).toBeNull();
+  });
+
+  it('shows nothing while an admin previews the Season Pass plan', () => {
+    expect(ownPassLabel(null, { admin: true, previewing: true }, NOW, CENTRAL)).toBeNull();
+    expect(ownPassLabel(paid, { admin: true, previewing: true }, NOW, CENTRAL)).toBeNull();
+  });
+
+  it('shows nothing on an admin account or with no pass', () => {
+    expect(ownPassLabel(paid, { admin: true, previewing: false }, NOW, CENTRAL)).toBeNull();
+    expect(ownPassLabel(null, host, NOW, CENTRAL)).toBeNull();
   });
 });

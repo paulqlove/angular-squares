@@ -10,7 +10,7 @@ import { ThemeMode, ThemeService } from '../../../core/services/theme.service';
 import { PlanService } from '../../../core/services/plan.service';
 import { SeasonPassAdminService } from '../../../core/services/season-pass-admin.service';
 import { ToggleComponent } from '../toggle/toggle.component';
-import { passGoodThrough } from '../../../core/utils/pass-label';
+import { ownPassLabel } from '../../../core/utils/pass-label';
 
 /** Header avatar chip with the profile menu: display name, theme, sign out. Shared by the dashboard and game page. */
 @Component({
@@ -146,12 +146,12 @@ import { passGoodThrough } from '../../../core/utils/pass-label';
             </div>
           </div>
 
-          @if (planService.plan() === 'season') {
+          @if (ownPass(); as passLabel) {
             <div class="border-t border-qs-line p-2">
               <p class="qs-label px-3 pb-1 pt-1 text-qs-muted">Season Pass</p>
               <p class="qs-label flex min-h-11 items-center gap-2 px-[18px] text-qs-ink">
                 <ng-icon name="heroTicket" class="text-base"></ng-icon>
-                {{ passGoodThrough() }}
+                {{ passLabel }}
               </p>
             </div>
           }
@@ -222,9 +222,12 @@ export class ProfileMenuComponent {
   profileName = '';
   showProfileDropdown = signal(false);
   /** "Good through June 30" in the Season Pass section. An admin viewing as a Season Pass host may have no pass of their own. */
-  passGoodThrough = computed(() => {
-    const entitlement = this.planService.entitlement();
-    return entitlement ? passGoodThrough(entitlement.expiresAt) : 'Active';
+  /** The host's own Season Pass line, checked against the clock each time the menu opens, so a tab left open past the
+   *  pass's end never shows it. Hidden for admins and while previewing a plan. */
+  ownPass = computed(() => {
+    if (!this.showProfileDropdown()) return null;
+    const viewer = { admin: this.planService.isAdmin(), previewing: this.planService.previewing() };
+    return ownPassLabel(this.planService.entitlement(), viewer, Date.now());
   });
   autoManageOn = signal(true);
   readonly themeOptions: { value: ThemeMode; label: string; icon: string }[] = [

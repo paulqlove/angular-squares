@@ -14,12 +14,14 @@ export class PlanService {
 
   readonly entitlement = signal<Entitlement | null>(null);
   private admin = signal(false);
+  /** True for an admin account. */
+  readonly isAdmin = this.admin.asReadonly();
+  /** True while an admin previews another plan from the View-as switcher. */
+  readonly previewing = computed(() => this.authService.isPreviewAdmin() && this.rolePreview.plan() !== 'actual');
 
   /** Free, Season Pass or Admin. The admin can preview any plan from the View-as switcher. */
   readonly plan = computed<PlanId>(() => {
-    if (this.authService.isPreviewAdmin() && this.rolePreview.plan() !== 'actual') {
-      return this.rolePreview.plan() as PlanId;
-    }
+    if (this.previewing()) return this.rolePreview.plan() as PlanId;
     if (this.admin()) return 'admin';
     const entitlement = this.entitlement();
     return isActive(entitlement) ? 'season' : 'free';
