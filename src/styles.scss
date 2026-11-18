@@ -868,6 +868,26 @@ button:active:not(:disabled) .turn-icon { transform: rotate(120deg); transition-
   }
 }
 
+/* Party games page: print only the prop sheet or the bingo cards (the element marked .print-target). */
+@media print {
+  html.print-party body *:not(:has(.print-target)):not(.print-target):not(.print-target *) {
+    display: none !important;
+  }
+
+  html.print-party body *:has(.print-target) {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+  }
+
+  html.print-party .print-target {
+    display: block !important;
+    margin: 0 !important;
+  }
+}
+
 @media print and (orientation: portrait) {
   .print-grid td {
     height: 0.6in;

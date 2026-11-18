@@ -1,6 +1,7 @@
 /
 /best-squares-numbers
 /printable-football-squares
+/super-bowl-party-games
 /teams
 /team/buffalo-bills
 /team/miami-dolphins

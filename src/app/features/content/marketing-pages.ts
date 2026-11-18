@@ -272,7 +272,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
         heading: 'Make the board before the matchup is set',
         paragraphs: [
           'Squares does not need the teams. Friends claim a square by name, then you draw the digits. When the matchup is announced, add the team names and keep the same link.',
-          'February 14 is also Valentine’s Day in 2027. One board still works for a party that mixes fans and people who came for the snacks. Nobody has to understand the sport.'
+          'February 14 is also Valentine’s Day in 2027. One board still works for a party that mixes fans and people who came for the snacks. Nobody has to understand the sport. For the rest of the night, these [Super Bowl party ideas](/super-bowl-party-games) add a prop sheet and commercial bingo.'
         ]
       },
       {
@@ -359,6 +359,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     ],
     related: [
       { path: '/nfl-squares', label: 'NFL squares', text: 'The same board for any game of the season.' },
+      { path: '/super-bowl-party-games', label: 'Super Bowl party games and ideas', text: 'A prop sheet and commercial bingo to play beside the board.' },
       { path: '/how-to-play', label: 'How to play', text: 'The full rules, including overtime and empty squares.' },
       { path: '/best-squares-numbers', label: 'Best numbers', text: 'Every digit pair, from 7 and 0 down to 2 and 2.' },
       { path: '/printable-football-squares', label: 'Printable board', text: 'A blank 100-square grid to print or download.' },
@@ -491,7 +492,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
         heading: 'A board you can run every week',
         paragraphs: [
           'Some groups play one game a week all season. Each game gets its own board and link, so old scores stay put. Free hosts get 3 games a season. The Season Pass is for groups that play every week.',
-          'In February the same board becomes [Super Bowl squares](/super-bowl-squares), and you can make it before the matchup is set.'
+          'In February the same board becomes [Super Bowl squares](/super-bowl-squares), and you can make it before the matchup is set. Hosting the party? Our [Super Bowl party ideas](/super-bowl-party-games) add a prop sheet and commercial bingo.'
         ],
         bullets: [
           'No account for the people claiming squares.',
@@ -529,6 +530,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     related: [
       { path: '/nfl-playoff-squares', label: 'NFL playoff squares', text: 'Wild card weekend through the conference games.' },
       { path: '/super-bowl-squares', label: 'Super Bowl squares', text: 'The February 14, 2027 board.' },
+      { path: '/super-bowl-party-games', label: 'Super Bowl party ideas', text: 'Props and commercial bingo for the big game.' },
       { path: '/how-to-play', label: 'How to play', text: 'Rules, overtime, and empty squares.' },
       { path: '/best-squares-numbers', label: 'Best numbers', text: 'Why 0, 7, 3, and 4 show up so often.' }
     ],
