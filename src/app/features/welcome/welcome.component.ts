@@ -428,7 +428,7 @@ export class WelcomeComponent implements OnInit {
     {
       icon: 'heroShare',
       title: 'Easy Sharing',
-      description: 'Share with a 6-digit code or direct link. Players don\'t need accounts.'
+      description: 'Share with a 6-character code or direct link. Players don\'t need accounts.'
     },
     {
       icon: 'heroChartBar',

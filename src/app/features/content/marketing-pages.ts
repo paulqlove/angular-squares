@@ -313,7 +313,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       {
         heading: 'Print a paper Super Bowl squares board',
         paragraphs: [
-          'Want paper on the wall too? The [printable page](/printable-football-squares) has a blank 100-square grid to print or download. Write names first, then draw the numbers.'
+          'Want paper on the wall too? The [printable Super Bowl squares template](/printable-football-squares) is a blank 100-square grid to print or download. Write names first, then draw the numbers.'
         ]
       },
       {
@@ -375,17 +375,21 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
   'thanksgiving-football-squares': {
     id: 'thanksgiving-football-squares',
     path: '/thanksgiving-football-squares',
-    title: 'Thanksgiving Football Squares — QuarterScore',
-    description: 'Football squares for Thanksgiving: a free board for the table, one game or three, with a link guests can open between dinner and dessert.',
+    title: 'Thanksgiving Football Squares 2026: Free Online Board — QuarterScore',
+    description: 'Free Thanksgiving football squares for 2026: an online board for each game, prize ideas for the family, and a printable grid for the fridge.',
     h1: 'Thanksgiving football squares',
     eyebrow: 'Game day',
     lede: 'A full slate of games and a house full of people. Squares gives everyone a reason to watch, including guests who do not follow the sport.',
-    heroHtml: pageFacts([['Date', 'Thursday, November 26, 2026'], ['Games', `${SCHEDULE.thanksgiving.length} this week`]]),
+    heroHtml: pageFacts([
+      ['Date', 'Thursday, November 26, 2026'],
+      // A failed schedule fetch at build time leaves no games, and "0 this week" would read as no football.
+      ...(SCHEDULE.thanksgiving.length > 0 ? [['Games', `${SCHEDULE.thanksgiving.length} this week`] as [string, string]] : [])
+    ]),
     published: '2026-11-01',
     sections: [
       ...(SCHEDULE.thanksgiving.length > 0 ? [{
         heading: 'Thanksgiving week games',
-        paragraphs: ['Pick one game or run a board for each.'],
+        paragraphs: ['Each board follows one game. Pick the one your table will watch, or give each game its own board.'],
         bullets: SCHEDULE.thanksgiving.map(game =>
           `${game.awayTeamFull} at ${game.homeTeamFull}: ${formatKickoff(game.date)}${game.network ? ` on ${game.network}` : ''}`)
       }] : []),
@@ -396,7 +400,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
         ]
       },
       {
-        heading: 'Rewards that fit the day',
+        heading: 'Thanksgiving squares prize ideas',
         paragraphs: [
           'First pick of leftovers, a pass on dishes, or picking the next movie is plenty. Say it out loud before you draw numbers.'
         ],
@@ -414,8 +418,30 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     ],
     related: [
       { path: '/how-to-play', label: 'How to play', text: 'Explain the grid in two minutes.' },
-      { path: '/printable-football-squares', label: 'Printable board', text: 'Tape a paper grid to the fridge.' },
+      { path: '/printable-football-squares', label: 'Printable squares template', text: 'Tape a paper grid to the fridge.' },
       { path: '/nfl-squares', label: 'NFL squares', text: 'The same board for any Sunday game.' },
+    ],
+    faqs: [
+      {
+        question: 'How do Thanksgiving football squares work?',
+        answer: 'The board is a 10 by 10 grid. Each guest claims squares, then the digits 0 to 9 are drawn for each team. At the end of each quarter, the last digit of each team\u2019s score points to one square, and the name on it wins that quarter.'
+      },
+      {
+        question: 'Can I run squares for every Thanksgiving game?',
+        answer: 'Yes. Each game gets its own board and link. Free hosts get one game at a time and 3 games a season. The Season Pass runs several boards at once.'
+      },
+      {
+        question: 'What are good Thanksgiving squares prizes?',
+        answer: 'Keep it to the day: first pick of leftovers, a pass on dishes, the last slice of pie, or choosing the next movie. Agree on it before the numbers are drawn.'
+      },
+      {
+        question: 'Do guests need an account?',
+        answer: 'No. Anyone with the link can claim a square by typing a name. Only the host signs in, to save and run the board.'
+      },
+      {
+        question: 'Is there a printable Thanksgiving squares sheet?',
+        answer: 'Yes. The printable page has a blank 10 by 10 grid to print or save as a PDF. Write the teams across the top and down the side.'
+      }
     ],
     cta: {
       path: '/create',
@@ -515,7 +541,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
   'nfl-playoff-squares': {
     id: 'nfl-playoff-squares',
     path: '/nfl-playoff-squares',
-    title: 'NFL Playoff Squares — QuarterScore',
+    title: 'NFL Playoff Squares: Free Board for Each Playoff Game — QuarterScore',
     description: 'NFL playoff squares for wild card weekend, the divisional round, and the conference championships. One board per game, same link style all January.',
     h1: 'NFL playoff squares',
     eyebrow: 'Postseason',
@@ -551,7 +577,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
   'college-football-squares': {
     id: 'college-football-squares',
     path: '/college-football-squares',
-    title: 'College Football Squares — QuarterScore',
+    title: 'College Football Squares: Free Online Board — QuarterScore',
     description: 'College football squares for bowl games and the playoff. Create a free NCAA board, share one link, and score each quarter from the last digits.',
     h1: 'College football squares',
     eyebrow: 'Bowls and the playoff',
@@ -634,7 +660,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
   'nba-squares': {
     id: 'nba-squares',
     path: '/nba-squares',
-    title: 'NBA Squares — QuarterScore',
+    title: 'NBA Squares: Free Basketball Squares Board — QuarterScore',
     description: 'NBA squares uses the same last-digit board as football. Create a free basketball game, share the link, and follow each quarter.',
     h1: 'NBA squares',
     eyebrow: 'After the football season',
