@@ -26,7 +26,7 @@ describe('SEASON_PASS_PERKS', () => {
   it('names the perks in the upgrade dialog\'s words and order', () => {
     expect(SEASON_PASS_PERKS.map(perk => perk.label)).toEqual([
       'Live scores', 'Up to 25 boards at a time', 'No season game limit', 'Custom splits', 'Auto-lock and draw',
-      'Open boards list', 'Limit squares per player'
+      'Open boards list', 'Create groups'
     ]);
   });
 });

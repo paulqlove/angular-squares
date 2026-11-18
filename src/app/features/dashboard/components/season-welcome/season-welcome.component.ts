@@ -19,10 +19,10 @@ const PERK_ICONS: Readonly<Record<PassPerk['id'], string>> = {
   autoManage: 'heroLockClosed',
   boards: 'heroSquares2x2',
   customSplits: 'heroChartPie',
+  groups: 'heroUsers',
   liveScores: 'heroTv',
   openBoards: 'heroSquares2x2',
-  seasonLimit: 'heroCalendarDays',
-  squareLimit: 'heroUsers'
+  seasonLimit: 'heroCalendarDays'
 };
 
 /**
