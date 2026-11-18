@@ -48,7 +48,7 @@ import { ToggleComponent } from '../toggle/toggle.component';
           animate.leave="qs-menu-leave"
           class="absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-card border border-qs-line bg-qs-panel text-qs-ink shadow-pop origin-top-right"
         >
-          <div class="flex items-center gap-3 border-b border-qs-line p-4">
+          <div class="flex items-start gap-3 border-b border-qs-line p-4">
             @if (currentUser()?.photoURL) {
               <img [src]="currentUser()?.photoURL ?? ''" alt="" class="h-10 w-10 rounded-full" />
             } @else {
@@ -59,15 +59,13 @@ import { ToggleComponent } from '../toggle/toggle.component';
             <div class="min-w-0 flex-1">
               <p class="truncate font-semibold">{{ currentUser()?.displayName || 'No name set' }}</p>
               <p class="truncate text-sm text-qs-muted">{{ currentUser()?.email || 'Guest account' }}</p>
+              <!-- The plan badge sits on its own line so the name and email get the full width. -->
+              @if (currentUser()?.isGuest) {
+                <span class="qs-badge qs-badge-warn mt-2">Guest</span>
+              } @else if (planService.plan() !== 'free') {
+                <span class="qs-badge qs-badge-ok mt-2">{{ planService.features().label }}</span>
+              }
             </div>
-            @if (currentUser()?.isGuest) {
-              <span class="qs-badge qs-badge-warn">Guest</span>
-            }
-            @else if (planService.plan() !== 'free') {
-              <span class="qs-badge qs-badge-ok shrink-0" [title]="planService.daysLeft() ? planService.daysLeft() + ' days left' : ''">
-                {{ planService.features().label }}{{ planService.daysLeft() ? ' · ' + planService.daysLeft() + 'd' : '' }}
-              </span>
-            }
           </div>
 
           <div class="border-b border-qs-line p-2">
