@@ -31,6 +31,7 @@ import { DashboardJoinedComponent } from './components/dashboard-joined/dashboar
 import { DashboardPhoneBarComponent } from './components/dashboard-phone-bar/dashboard-phone-bar.component';
 import { CodeFieldComponent } from './components/dashboard-returning-empty/code-field.component';
 import { NewBoardDockComponent } from './components/dashboard-returning-empty/new-board-dock.component';
+import { PassEmptyComponent } from './components/dashboard-returning-empty/pass-empty.component';
 import { SeasonTilesComponent } from './components/dashboard-returning-empty/season-tiles.component';
 import { FirstHostTitleComponent } from './components/dashboard-first-board/first-host-title.component';
 import { FreeGamesLineComponent } from './components/dashboard-first-board/free-games-line.component';
@@ -57,7 +58,7 @@ import { PlayersViewService } from './services/players-view.service';
     ModalComponent, NgIconComponent, SiteHeaderComponent, SiteFooterComponent, DockAtEndDirective, ProfileMenuComponent, ShareDialogComponent,
     CreateGameFormComponent, EditGameDialogComponent, UpgradePassDialogComponent, SeasonPassesDialogComponent, DashboardHostingComponent,
     DashboardJoinedComponent, DashboardPhoneBarComponent, CodeFieldComponent, DashboardDeskBarComponent,
-    NewBoardDockComponent, SeasonTilesComponent, FirstHostTitleComponent, FreeGamesLineComponent, SampleGameComponent,
+    NewBoardDockComponent, PassEmptyComponent, SeasonTilesComponent, FirstHostTitleComponent, FreeGamesLineComponent, SampleGameComponent,
     SeasonWelcomeComponent
   ],
   providers: [
