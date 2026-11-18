@@ -108,3 +108,23 @@ export function checkoutRefusal(buyer: Buyer, passEndsAt: number, now: number): 
 export function giftKey(email: string): string {
   return email.toLowerCase().replace(/\./g, ",");
 }
+
+/**
+ * One log line for a failed Stripe call: Stripe's error type, code, param, message and request id, which Cloud
+ * Run's stderr shows (it drops logger fields). Stripe's messages never hold a full key; anything key-shaped is
+ * masked anyway.
+ */
+export function stripeErrorSummary(error: unknown): string {
+  const e = (error ?? {}) as Record<string, unknown>;
+  const parts = (["type", "code", "param", "statusCode", "requestId"] as const)
+    .filter((field) => e[field] !== undefined && e[field] !== null && e[field] !== "")
+    .map((field) => `${field}=${String(e[field])}`);
+  const message = typeof e["message"] === "string" ? e["message"] : String(error);
+  const masked = message.replace(/\b(sk|rk|pk|whsec)_(test_|live_)?[A-Za-z0-9]+/g, "$1_***");
+  return [...parts, `message=${masked}`].join(" ");
+}
+
+/** A Stripe Price id (price_...). STRIPE_PRICE_ID is typed in at deploy, so a pasted key or secret is caught here. */
+export function isPriceId(value: unknown): boolean {
+  return typeof value === "string" && /^price_[A-Za-z0-9]+$/.test(value);
+}

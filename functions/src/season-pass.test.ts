@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { checkoutRefusal, checkoutReturnUrls, giftKey, grantedEntitlement, purchaseFromSession, refundedEntitlement, seasonPassExpiry, SessionLike } from "./season-pass";
+import { checkoutRefusal, checkoutReturnUrls, giftKey, grantedEntitlement, purchaseFromSession, refundedEntitlement, seasonPassExpiry, SessionLike, isPriceId, stripeErrorSummary } from "./season-pass";
 
 const NOV = Date.parse("2026-11-18T15:00:00Z");
 const JULY_2027 = Date.UTC(2027, 6, 1);
@@ -82,5 +82,32 @@ describe("checkoutRefusal and giftKey", () => {
   });
   it("keys gifts the way the app does", () => {
     assert.equal(giftKey("Paul.Q@Mail.Example.com"), "paul,q@mail,example,com");
+  });
+});
+
+describe("stripeErrorSummary", () => {
+  it("puts Stripe's error fields in the log text", () => {
+    const error = Object.assign(new Error("No such price: 'price_123'"), {
+      type: "StripeInvalidRequestError", code: "resource_missing", param: "line_items[0][price]", statusCode: 400, requestId: "req_abc",
+    });
+    assert.equal(
+      stripeErrorSummary(error),
+      "type=StripeInvalidRequestError code=resource_missing param=line_items[0][price] statusCode=400 requestId=req_abc message=No such price: 'price_123'",
+    );
+  });
+  it("masks anything shaped like a key and handles non-errors", () => {
+    assert.equal(stripeErrorSummary(new Error("Invalid API Key provided: sk_test_abc123")), "message=Invalid API Key provided: sk_***");
+    assert.equal(stripeErrorSummary("boom"), "message=boom");
+    assert.equal(stripeErrorSummary(undefined), "message=undefined");
+  });
+});
+
+describe("isPriceId", () => {
+  it("accepts a Stripe price id and nothing else", () => {
+    assert.equal(isPriceId("price_1AbC23"), true);
+    assert.equal(isPriceId("whsec_abc123"), false);
+    assert.equal(isPriceId("sk_test_abc123"), false);
+    assert.equal(isPriceId(""), false);
+    assert.equal(isPriceId(undefined), false);
   });
 });

@@ -11,7 +11,7 @@ import { fetchScoreboard } from "./espn";
 import { syncLiveScores } from "./sync";
 import { runDueAutoManage } from "./auto-manage-run";
 import { PREVIEW_PATHS, PreviewFields, previewFields } from "./preview-card";
-import { checkoutRefusal, Entitlement, giftKey, PurchaseRecord } from "./season-pass";
+import { checkoutRefusal, Entitlement, giftKey, PurchaseRecord, isPriceId, stripeErrorSummary } from "./season-pass";
 import { StripeEventDeps } from "./stripe-events";
 
 const DEFAULT_DATABASE_URL = "https://squares-4e4f7-default-rtdb.firebaseio.com";
@@ -206,14 +206,20 @@ export const createCheckoutSession = onCall(
     const refusal = checkoutRefusal(buyer, buyer.uid ? await passEndsAt(buyer.uid, buyer.email, buyer.emailVerified) : 0, Date.now());
     if (refusal) throw new HttpsError(refusal.includes("already") ? "already-exists" : "unauthenticated", refusal);
 
+    const priceId = STRIPE_PRICE_ID.value();
+    if (!isPriceId(priceId)) {
+      // Never log the value: a pasted key or secret is the usual mistake.
+      logger.error("checkout misconfigured: STRIPE_PRICE_ID is not a Stripe price id (price_...). Fix functions/.env.squares-4e4f7 and redeploy.");
+      throw new HttpsError("unavailable", "Checkout isn't available right now. Try again in a minute.");
+    }
     const { createCheckoutUrl } = await import("./stripe-checkout");
     try {
-      const url = await createCheckoutUrl(STRIPE_SECRET_KEY.value(), STRIPE_PRICE_ID.value(), {
+      const url = await createCheckoutUrl(STRIPE_SECRET_KEY.value(), priceId, {
         uid: buyer.uid!, email: buyer.email, origin: request.rawRequest.headers.origin,
       });
       return { url };
     } catch (error) {
-      logger.error("checkout session failed", { message: (error as Error).message });
+      logger.error(`checkout session failed: ${stripeErrorSummary(error)}`);
       throw new HttpsError("unavailable", "Checkout isn't available right now. Try again in a minute.");
     }
   }
