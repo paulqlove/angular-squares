@@ -16,6 +16,7 @@ import { FormsModule } from '@angular/forms';
 import { ModalComponent } from '../../../../components/ui/modal/modal.component';
 import { AnalyticsService } from '../../../../core/services/analytics.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { CheckoutService } from '../../../../core/services/checkout.service';
 import { GameService } from '../../../../core/services/game.service';
 import { PLANS } from '../../../../core/plans';
 import {
@@ -36,7 +37,7 @@ export type UpgradeTrigger = BoardLimitDialog | 'pass' | 'ended';
     <app-modal [open]="true" labelledBy="upgrade-title" [describedBy]="trigger === 'cap' ? null : 'upgrade-summary'" [level]="2" phone="center" extraClass="max-h-[calc(100dvh-2rem)] overflow-y-auto p-5 text-qs-ink sm:p-7" (dismissed)="dismiss()">
       <div class="flex items-start justify-between gap-3">
         @if (trigger !== 'cap') {
-          <p class="qs-eyebrow qs-eyebrow-bar">{{ trigger === 'ended' ? 'Free board' : 'Season Pass / Coming soon' }}</p>
+          <p class="qs-eyebrow qs-eyebrow-bar">{{ trigger === 'ended' ? 'Free board' : checkoutOn ? 'Season Pass' : 'Season Pass / Coming soon' }}</p>
         }
         <button
           type="button"
@@ -113,6 +114,27 @@ export type UpgradeTrigger = BoardLimitDialog | 'pass' | 'ended';
 
       @if (trigger !== 'cap') {
       <div class="mt-6 border-t border-qs-line pt-5">
+        @if (checkoutOn) {
+          @if (trigger === 'ended') {
+            <p class="mb-3 text-base text-qs-ink">Want more active boards? Get the Season Pass.</p>
+          }
+          <button
+            type="button"
+            class="qs-btn w-full"
+            [class.qs-btn-primary]="trigger !== 'ended'"
+            [class.qs-btn-secondary]="trigger === 'ended'"
+            [disabled]="isBuying()"
+            [attr.aria-busy]="isBuying()"
+            [attr.aria-describedby]="buyError() ? 'upgrade-buy-error upgrade-buy-note' : 'upgrade-buy-note'"
+            (click)="buy()"
+          >
+            {{ isBuying() ? 'Opening checkout…' : 'Get Season Pass · $5.99' }}
+          </button>
+          @if (buyError()) {
+            <p id="upgrade-buy-error" role="alert" class="mt-2 text-sm font-medium text-qs-bad">{{ buyError() }}</p>
+          }
+          <p id="upgrade-buy-note" class="qs-label mt-3 normal-case tracking-normal text-qs-muted">Secure checkout by Stripe. Sales tax included.</p>
+        } @else {
         @if (trigger === 'ended') {
           <p class="mb-3 text-base text-qs-ink">Want more active boards? Leave your email.</p>
         }
@@ -156,6 +178,7 @@ export type UpgradeTrigger = BoardLimitDialog | 'pass' | 'ended';
             <p id="upgrade-pass-note" class="qs-label mt-3 normal-case tracking-normal text-qs-muted">One email when it's ready. Nothing else.</p>
           </form>
         }
+        }
         @if (trigger === 'season') {
           <p class="qs-label mt-2 normal-case leading-snug tracking-normal text-qs-muted">Games you delete before anyone joins don't count.</p>
         }
@@ -183,11 +206,15 @@ export class UpgradePassDialogComponent implements AfterViewInit {
   @ViewChild('emailInput') emailInput?: ElementRef<HTMLInputElement>;
   @ViewChild('status') status?: ElementRef<HTMLElement>;
 
+  buyError = signal<string | null>(null);
   email = '';
   emailError = signal<string | null>(null);
+  isBuying = signal(false);
   isSubmitting = signal(false);
   submitted = signal(false);
 
+  /** Buying shows in place of Notify me once checkout is on (or for the admin, to test it). */
+  protected readonly checkoutOn: boolean;
   /** The cap named in the 'cap' version. Season Pass is the only plan with a cap above Free. */
   protected readonly seasonBoards: number = PLANS.season.activeBoards;
   /** The free plan's games per season, named in the season copy. */
@@ -200,11 +227,13 @@ export class UpgradePassDialogComponent implements AfterViewInit {
 
   private analytics = inject(AnalyticsService);
   private authService = inject(AuthService);
+  private checkout = inject(CheckoutService);
   private gameService = inject(GameService);
   private platformId = inject(PLATFORM_ID);
   private prefilledEmail = '';
 
   constructor() {
+    this.checkoutOn = this.checkout.available();
     const user = this.authService.currentUser();
     if (user && !user.isGuest && user.email) {
       this.email = user.email;
@@ -220,6 +249,20 @@ export class UpgradePassDialogComponent implements AfterViewInit {
     if (this.trigger !== 'ended' && this.trigger !== 'cap' && user && !user.isGuest && !this.authService.isPreviewAdmin()) {
       // The season cap is a limit view too, so the fake-door read counts it with 'limit'.
       void this.gameService.recordUpgradeView(user.uid, this.trigger === 'pass' ? 'pass' : 'limit');
+    }
+  }
+
+  /** Sends the host to Stripe Checkout; a refusal (a guest, a pass already running) shows under the button. */
+  async buy(): Promise<void> {
+    if (this.isBuying()) return;
+    this.buyError.set(null);
+    this.isBuying.set(true);
+    this.analytics.track('season_pass_checkout_start', { trigger: this.trigger });
+    try {
+      await this.checkout.start();
+    } catch (error) {
+      this.buyError.set(error instanceof Error ? error.message : "Checkout isn't available right now. Try again in a minute.");
+      this.isBuying.set(false);
     }
   }
 

@@ -19,6 +19,7 @@ import { ProfileMenuComponent } from '../../components/ui/profile-menu/profile-m
 import { SeasonPassesDialogComponent } from '../../components/ui/season-passes-dialog/season-passes-dialog.component';
 import { ShareDialogComponent } from '../../components/ui/share-dialog/share-dialog.component';
 import { AuthService } from '../../core/services/auth.service';
+import { CheckoutService } from '../../core/services/checkout.service';
 import { PlanService } from '../../core/services/plan.service';
 import { WalkthroughService } from '../../core/services/walkthrough.service';
 import { DockAtEndDirective } from '../../shared/directives/dock-at-end.directive';
@@ -102,6 +103,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const params = this.route.snapshot.queryParamMap;
     this.search.showMissingGame(params);
     this.dialogs.resumeCreateIntent(params);
+    void this.checkout.finishReturn(params.get('pass'));
   }
 
   public async signOut(): Promise<void> {
@@ -127,6 +129,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   protected readonly view: DashboardViewService = inject(DashboardViewService);
 
   private readonly authService: AuthService = inject(AuthService);
+  private readonly checkout: CheckoutService = inject(CheckoutService);
   private readonly route: ActivatedRoute = inject(ActivatedRoute);
   private readonly router: Router = inject(Router);
   private readonly walkthroughService: WalkthroughService = inject(WalkthroughService);
