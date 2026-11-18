@@ -20,14 +20,14 @@ export function passLastDay(entitlement: Entitlement | null, now: number = Date.
   return isNoExpiry(entitlement!.expiresAt) ? null : lastDay(entitlement!.expiresAt);
 }
 
-/** One thing the Season Pass unlocks, as the upgrade dialog and the welcome card name it. */
+/** One thing the Season Pass unlocks, as the upgrade dialog and the welcome dialog name it. */
 export interface PassPerk {
   /** boards: the active-board cap; seasonLimit: only named where the free season cap is the subject. */
-  id: 'liveScores' | 'boards' | 'seasonLimit' | 'customSplits' | 'autoManage' | 'openBoards' | 'squareLimit';
+  id: 'liveScores' | 'boards' | 'seasonLimit' | 'customSplits' | 'autoManage' | 'openBoards' | 'groups';
   label: string;
 }
 
-/** What the Season Pass unlocks, in the order shown. The one list behind the upgrade dialog and the welcome card. */
+/** What the Season Pass unlocks, in the order shown. The one list behind the upgrade dialog and the welcome dialog. */
 export const SEASON_PASS_PERKS: readonly PassPerk[] = [
   { id: 'liveScores', label: 'Live scores' },
   { id: 'boards', label: `Up to ${PLANS.season.activeBoards} boards at a time` },
@@ -35,5 +35,5 @@ export const SEASON_PASS_PERKS: readonly PassPerk[] = [
   { id: 'customSplits', label: 'Custom splits' },
   { id: 'autoManage', label: 'Auto-lock and draw' },
   { id: 'openBoards', label: 'Open boards list' },
-  { id: 'squareLimit', label: 'Limit squares per player' }
+  { id: 'groups', label: 'Create groups' }
 ];
