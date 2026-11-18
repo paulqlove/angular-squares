@@ -13,7 +13,7 @@ import { drawBoardNumbers } from '../../../core/utils/draw-numbers';
 import { GroupRow, gamesInGroup } from '../../../core/utils/game-groups';
 import { toGameListItem } from '../../../core/utils/game-parse';
 import { deleteCountNote, gamesLeft, seasonLimitApplies } from '../../../core/utils/season-games';
-import { EmptyDashboardFacts, isFirstEmpty, isReturningEmpty } from '../utils/returning-empty';
+import { EmptyDashboardFacts, isFirstEmpty, isPassEmpty, isReturningEmpty } from '../utils/returning-empty';
 import { filterHostedGames } from './dashboard-filters';
 import { DashboardGroupsService } from './dashboard-groups.service';
 import { DashboardSearchService } from './dashboard-search.service';
@@ -50,8 +50,10 @@ export class DashboardStore {
   public readonly returningEmpty = computed<boolean>(() => isReturningEmpty(this.emptyFacts()));
   /** A free host with no boards and nothing counted this season: the "Host your first squares game" dashboard shows. */
   public readonly firstEmpty = computed<boolean>(() => isFirstEmpty(this.emptyFacts()));
-  /** Either empty dashboard: code field up top and New board pinned along the bottom on phones. */
-  public readonly emptyHost = computed<boolean>(() => this.returningEmpty() || this.firstEmpty());
+  /** A Season Pass host with no boards: the Season Pass tiles and the start card show. */
+  public readonly passEmpty = computed<boolean>(() => isPassEmpty(this.emptyFacts(), this.planService.plan()));
+  /** Any empty dashboard: code field up top and New board pinned along the bottom on phones. */
+  public readonly emptyHost = computed<boolean>(() => this.returningEmpty() || this.firstEmpty() || this.passEmpty());
   /** The New board button's words on an empty dashboard. */
   public readonly newBoardLabel = computed<string>(() => this.firstEmpty() ? 'Create your first board' : 'New board');
   /** The first word of the signed-in name, for "Welcome, Sam", or '' with no name. */

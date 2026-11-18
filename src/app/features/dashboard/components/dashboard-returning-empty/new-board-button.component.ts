@@ -12,7 +12,7 @@ import { DashboardDialogsService } from '../../services/dashboard-dialogs.servic
   host: {
     type: 'button',
     class: 'qs-btn qs-btn-primary disabled:cursor-wait',
-    'data-walkthrough': 'create-game',
+    '[attr.data-walkthrough]': 'walkthrough() ? "create-game" : null',
     '[disabled]': 'dialogs.isCheckingBoardLimit()',
     '[attr.aria-busy]': 'dialogs.isCheckingBoardLimit()',
     '(click)': 'dialogs.openCreateModal($event)'
@@ -25,6 +25,8 @@ import { DashboardDialogsService } from '../../services/dashboard-dialogs.servic
 export class NewBoardButtonComponent {
   /** The button's words: New board, or Create your first board for a first-time host. */
   public readonly label = input<string>('New board');
+  /** False for a second New board on the page, so the tour still points at the one in the bottom bar. */
+  public readonly walkthrough = input<boolean>(true);
   /** Under 360px, drops the plus so the phone bar has room for a picked group's name. */
   public readonly tight = input<boolean>(false);
   protected readonly dialogs: DashboardDialogsService = inject(DashboardDialogsService);

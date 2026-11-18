@@ -1,3 +1,4 @@
+import { PlanId } from '../../../core/plans';
 import { SEASON_LIMIT_ON, seasonLimitApplies } from '../../../core/utils/season-games';
 
 /** What the dashboard knows when it picks the Hosting empty state. */
@@ -33,4 +34,9 @@ export function isReturningEmpty(facts: EmptyDashboardFacts, on: boolean = SEASO
  */
 export function isFirstEmpty(facts: EmptyDashboardFacts, on: boolean = SEASON_LIMIT_ON): boolean {
   return freeHostWithNoBoards(facts, on) && facts.used === 0;
+}
+
+/** True for a Season Pass host, loaded, with no boards right now: the Season Pass tiles and start card show. */
+export function isPassEmpty(facts: EmptyDashboardFacts, plan: PlanId): boolean {
+  return plan === 'season' && facts.canHost && !facts.loading && facts.boards === 0;
 }

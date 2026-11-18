@@ -1,4 +1,4 @@
-import { EmptyDashboardFacts, isFirstEmpty, isReturningEmpty } from './returning-empty';
+import { EmptyDashboardFacts, isFirstEmpty, isPassEmpty, isReturningEmpty } from './returning-empty';
 
 describe('isReturningEmpty', () => {
   const returning: EmptyDashboardFacts = { boards: 0, cap: 3, canHost: true, loading: false, used: 1 };
@@ -79,5 +79,24 @@ describe('isFirstEmpty', () => {
     for (const used of [null, 0, 1, 3]) {
       expect(isFirstEmpty({ ...first, used }, true) && isReturningEmpty({ ...first, used }, true)).toBe(false);
     }
+  });
+});
+
+describe('isPassEmpty', () => {
+  const empty: EmptyDashboardFacts = { boards: 0, cap: Infinity, canHost: true, loading: false, used: null };
+
+  it('is true for a Season Pass host with no boards', () => {
+    expect(isPassEmpty(empty, 'season')).toBe(true);
+  });
+
+  it('is false on Free and Admin, which keep their own screens', () => {
+    expect(isPassEmpty(empty, 'free')).toBe(false);
+    expect(isPassEmpty(empty, 'admin')).toBe(false);
+  });
+
+  it('is false once there is a board, while the boards load, and for a guest', () => {
+    expect(isPassEmpty({ ...empty, boards: 1 }, 'season')).toBe(false);
+    expect(isPassEmpty({ ...empty, loading: true }, 'season')).toBe(false);
+    expect(isPassEmpty({ ...empty, canHost: false }, 'season')).toBe(false);
   });
 });

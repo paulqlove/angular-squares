@@ -39,9 +39,12 @@
     @if (store.canCreateGame()) {
       <!-- Plan card: the upgrade entry point, so only free hosts see it. Season and Admin see their plan in the profile menu.
            A returning free host with no boards gets the season tiles and the "No boards" card in its place,
-           and a first-time free host gets the free games line and the sample game. -->
+           a first-time free host gets the free games line and the sample game, and a Season Pass host with no boards
+           gets the pass tiles and the start card. -->
       @if (store.returningEmpty()) {
         <div appSeasonTiles class="mt-8" data-walkthrough="my-games" [hosted]="store.seasonGamesUsed() ?? 0" [left]="store.seasonGamesLeft() ?? 0" (seeSeasonPass)="dialogs.openUpgrade($event)"></div>
+      } @else if (store.passEmpty()) {
+        <section appPassEmpty class="mt-8" data-walkthrough="my-games"></section>
       } @else if (store.firstEmpty()) {
         <div appFreeGamesLine class="mt-4" [left]="store.seasonGamesLeft() ?? 0" (seeSeasonPass)="dialogs.openUpgrade($event)"></div>
         <section appSampleGame class="mt-8 sm:mt-10" data-walkthrough="my-games"></section>
@@ -65,7 +68,7 @@
         </div>
       }
 
-      <!-- With no boards, the season tiles or the sample game above stand in for Hosting -->
+      <!-- With no boards, the tiles or the sample game above stand in for Hosting -->
       @if (!store.emptyHost()) {
         <section appDashboardHosting class="mt-8" data-walkthrough="my-games" aria-labelledby="hosting-heading"></section>
       }
