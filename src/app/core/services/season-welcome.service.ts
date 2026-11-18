@@ -6,7 +6,7 @@ import { PlanService } from './plan.service';
 import { ToastService } from './toast.service';
 
 /**
- * The one-time "You're a Season Pass host" card on the dashboard. It shows to a Season Pass host until they close it;
+ * The one-time "You're a Season Pass host" dialog on the dashboard. It shows to a Season Pass host until they close it;
  * closing saves users/{uid}/seasonWelcomeSeen, so it never shows again on any device.
  */
 @Injectable({ providedIn: 'root' })
@@ -22,10 +22,10 @@ export class SeasonWelcomeService {
     });
   }
 
-  /** True while the card should show: a Season Pass host who hasn't closed it yet. */
+  /** True while the welcome should show: a Season Pass host who hasn't closed it yet. */
   public readonly shows = computed<boolean>(() => this.planService.plan() === 'season' && this.seen() === false);
 
-  /** Closes the card for good. A failed save keeps it closed for now; it may come back on the next visit. */
+  /** Closes the welcome for good. A failed save keeps it closed for now; it may come back on the next visit. */
   public async dismiss(): Promise<void> {
     const uid = this.authService.realUser()?.uid;
     this.seen.set(true);
@@ -51,7 +51,7 @@ export class SeasonWelcomeService {
   private readonly planService: PlanService = inject(PlanService);
   /** The account whose flag was read, so it's read once. */
   private readonly readFor = signal<string | null>(null);
-  /** Whether this account closed the card: null until read, or when the read failed (then the card stays away). */
+  /** Whether this account closed the welcome: null until read, or when the read failed (then the welcome stays away). */
   private readonly seen = signal<boolean | null>(null);
   private readonly toast: ToastService = inject(ToastService);
 
@@ -61,7 +61,7 @@ export class SeasonWelcomeService {
       const value = await this.read(`users/${uid}/seasonWelcomeSeen`);
       if (this.readFor() === uid) this.seen.set(value === true);
     } catch {
-      // Unreadable flag: leave the card away rather than show it to someone who already closed it
+      // Unreadable flag: leave the welcome away rather than show it to someone who already closed it
     }
   }
 }
