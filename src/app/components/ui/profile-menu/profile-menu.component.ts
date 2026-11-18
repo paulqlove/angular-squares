@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, Output, EventEmitter, HostListener, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, ElementRef, Input, Output, EventEmitter, HostListener, ChangeDetectionStrategy, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
@@ -10,6 +10,7 @@ import { ThemeMode, ThemeService } from '../../../core/services/theme.service';
 import { PlanService } from '../../../core/services/plan.service';
 import { SeasonPassAdminService } from '../../../core/services/season-pass-admin.service';
 import { ToggleComponent } from '../toggle/toggle.component';
+import { passGoodThrough } from '../../../core/utils/pass-label';
 
 /** Header avatar chip with the profile menu: display name, theme, sign out. Shared by the dashboard and game page. */
 @Component({
@@ -48,7 +49,7 @@ import { ToggleComponent } from '../toggle/toggle.component';
           animate.leave="qs-menu-leave"
           class="absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-card border border-qs-line bg-qs-panel text-qs-ink shadow-pop origin-top-right"
         >
-          <div class="flex items-center gap-3 border-b border-qs-line p-4">
+          <div class="flex items-start gap-3 border-b border-qs-line p-4">
             @if (currentUser()?.photoURL) {
               <img [src]="currentUser()?.photoURL ?? ''" alt="" class="h-10 w-10 rounded-full" />
             } @else {
@@ -59,15 +60,11 @@ import { ToggleComponent } from '../toggle/toggle.component';
             <div class="min-w-0 flex-1">
               <p class="truncate font-semibold">{{ currentUser()?.displayName || 'No name set' }}</p>
               <p class="truncate text-sm text-qs-muted">{{ currentUser()?.email || 'Guest account' }}</p>
+              <!-- The Guest badge sits on its own line so the name and email get the full width. The Season Pass has its own section below. -->
+              @if (currentUser()?.isGuest) {
+                <span class="qs-badge qs-badge-warn mt-2">Guest</span>
+              }
             </div>
-            @if (currentUser()?.isGuest) {
-              <span class="qs-badge qs-badge-warn">Guest</span>
-            }
-            @else if (planService.plan() !== 'free') {
-              <span class="qs-badge qs-badge-ok shrink-0" [title]="planService.daysLeft() ? planService.daysLeft() + ' days left' : ''">
-                {{ planService.features().label }}{{ planService.daysLeft() ? ' · ' + planService.daysLeft() + 'd' : '' }}
-              </span>
-            }
           </div>
 
           <div class="border-b border-qs-line p-2">
@@ -149,6 +146,16 @@ import { ToggleComponent } from '../toggle/toggle.component';
             </div>
           </div>
 
+          @if (planService.plan() === 'season') {
+            <div class="border-t border-qs-line p-2">
+              <p class="qs-label px-3 pb-1 pt-1 text-qs-muted">Season Pass</p>
+              <p class="qs-label flex min-h-11 items-center gap-2 px-[18px] text-qs-ink">
+                <ng-icon name="heroTicket" class="text-base"></ng-icon>
+                {{ passGoodThrough() }}
+              </p>
+            </div>
+          }
+
           @if (passAdmin.canManagePasses()) {
             <div class="border-t border-qs-line p-2">
               <p class="qs-label px-3 pb-1 pt-1 text-qs-muted">Admin</p>
@@ -214,6 +221,11 @@ export class ProfileMenuComponent {
   isSavingProfile = signal(false);
   profileName = '';
   showProfileDropdown = signal(false);
+  /** "Good through June 30" in the Season Pass section. An admin viewing as a Season Pass host may have no pass of their own. */
+  passGoodThrough = computed(() => {
+    const entitlement = this.planService.entitlement();
+    return entitlement ? passGoodThrough(entitlement.expiresAt) : 'Active';
+  });
   autoManageOn = signal(true);
   readonly themeOptions: { value: ThemeMode; label: string; icon: string }[] = [
     { value: 'system', label: 'Auto', icon: 'heroComputerDesktop' },
