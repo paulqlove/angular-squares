@@ -204,7 +204,7 @@ interface Feature {
             Create a squares board themed for your favorite NFL team. Any game works with
             <a routerLink="/nfl-squares" class="font-medium text-qs-accent underline underline-offset-2">NFL squares</a>, and
             <a routerLink="/super-bowl-squares" class="font-medium text-qs-accent underline underline-offset-2">Super Bowl squares</a> is ready for February, with
-            <a routerLink="/super-bowl-party-games" class="font-medium text-qs-accent underline underline-offset-2">party games</a> for the rest of the room.
+            <a routerLink="/super-bowl-party-games" class="font-medium text-qs-accent underline underline-offset-2">party ideas</a> for the rest of the room.
           </p>
 
           <div class="mt-10 grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 md:gap-3">

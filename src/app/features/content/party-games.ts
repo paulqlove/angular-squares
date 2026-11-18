@@ -80,6 +80,10 @@ export const PARTY_FAQS: PartyFaq[] = [
     answer: 'Super Bowl squares is the classic, because it takes a minute to learn and stays live all game. Add a prop sheet before kickoff and commercial bingo for guests who are there for the ads.'
   },
   {
+    question: 'What are some easy Super Bowl party ideas?',
+    answer: 'Put a squares board on the TV, hand out a prop sheet as guests arrive and leave bingo cards by the snacks. A snack draft and an ad ballot give non-fans something to root for. Each one takes a few minutes to set up and costs nothing.'
+  },
+  {
     question: 'What can people who don’t watch football play?',
     answer: 'Commercial bingo and the halftime picks need no football at all. Squares works too: the score picks the winner, so nobody has to follow the plays.'
   },

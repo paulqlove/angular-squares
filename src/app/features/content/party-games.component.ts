@@ -96,8 +96,8 @@ const FIRST_PRINT_SEEDS = Array.from({ length: PRINT_CARD_COUNT }, (_, index) =>
   `,
   template: `
     <app-reading-page [breadcrumbs]="breadcrumbs">
-      <app-reading-header eyebrow="Super Bowl LXI" title="Super Bowl party games 2027"
-        lede="Four games for the whole room on February 14: squares, a prop sheet, commercial bingo and a few for guests who came for the snacks. All free, all printable, all for points.">
+      <app-reading-header eyebrow="Super Bowl LXI" title="Super Bowl party games and ideas 2027"
+        lede="Party games and ideas for the whole room on February 14: squares, a prop sheet, commercial bingo and easy ideas for guests who came for the snacks. All free, all printable, all for points.">
         <nav hero aria-label="Games on this page" class="no-print">
           <p class="qs-label text-qs-muted">The games</p>
           <ol class="mt-3 divide-y divide-qs-line border-y border-qs-line">
@@ -189,7 +189,7 @@ const FIRST_PRINT_SEEDS = Array.from({ length: PRINT_CARD_COUNT }, (_, index) =>
         </div>
       </app-reading-section>
 
-      <app-reading-section class="no-print" heading="Games for people who don’t watch football" headingId="non-fan-games">
+      <app-reading-section class="no-print" heading="Party ideas for people who don’t watch football" headingId="non-fan-games">
         <ul class="space-y-3">
           <li><strong class="text-qs-ink">Halftime picks:</strong> before the show, everyone writes down the opening song, how many outfits the headliner wears and whether a guest shows up. Closest guesses win.</li>
           <li><strong class="text-qs-ink">Ad ballot:</strong> rate every commercial from 1 to 5 in a shared note. Crown the night’s best ad after the final whistle.</li>
@@ -222,7 +222,7 @@ export class PartyGamesComponent {
 
   public readonly breadcrumbs = [
     { name: 'Home', path: '/' },
-    { name: 'Super Bowl party games', path: PATH }
+    { name: 'Super Bowl party games and ideas', path: PATH }
   ];
   public readonly cta: PageCta = {
     path: '/create',
@@ -235,7 +235,7 @@ export class PartyGamesComponent {
     { id: 'squares', label: 'Super Bowl squares' },
     { id: 'prop-sheet', label: 'Printable prop sheet' },
     { id: 'commercial-bingo', label: 'Commercial bingo' },
-    { id: 'non-fan-games', label: 'Games for non-fans' }
+    { id: 'non-fan-games', label: 'Ideas for non-fans' }
   ];
   public readonly path = PATH;
   public readonly printCount = PRINT_CARD_COUNT;
@@ -261,10 +261,10 @@ export class PartyGamesComponent {
 
   constructor() {
     this.seo.apply({
-      title: 'Super Bowl Party Games 2027: Squares, Props and Bingo — QuarterScore',
-      description: 'Free Super Bowl party games for 2027: an online squares board, a printable prop sheet, commercial bingo cards and easy games for people who don’t watch football.',
+      title: 'Super Bowl Party Games and Ideas 2027: Squares, Props, Bingo — QuarterScore',
+      description: 'Free Super Bowl party games and ideas for 2027: an online squares board, a printable prop sheet, commercial bingo cards and easy party ideas for people who don’t watch football.',
       path: PATH,
-      headline: 'Super Bowl party games 2027',
+      headline: 'Super Bowl party games and ideas 2027',
       published: '2026-11-18',
       breadcrumbs: this.breadcrumbs,
       extraJsonLd: [{
