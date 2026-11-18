@@ -195,6 +195,9 @@
         "autoManageOff": {
           ".validate": "newData.isBoolean()"
         },
+        "seasonWelcomeSeen": {
+          ".validate": "newData.isBoolean()"
+        },
         "tvToken": {
           ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9_-]{20,64}$/)"
         },

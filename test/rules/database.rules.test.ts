@@ -566,6 +566,12 @@ describe('users', () => {
     await assertFails(read(visitor(), 'users/alice'));
   });
 
+  it('a user can mark the Season Pass welcome as seen, as a true or false only', async () => {
+    await assertSucceeds(set(player(), 'users/alice/seasonWelcomeSeen', true));
+    await assertFails(set(player(), 'users/alice/seasonWelcomeSeen', 'yes'));
+    await assertFails(set(player(), 'users/bob/seasonWelcomeSeen', true));
+  });
+
   it('a user can set a well-formed active board id', async () => {
     await assertSucceeds(set(player(), 'users/alice/activeBoardId', 'game01'));
   });
