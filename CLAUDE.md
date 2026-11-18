@@ -119,6 +119,8 @@ seasonGames/{ownerId}/{season}/{gameId}_{startedAt}: true  (free host's games wi
 
 liveGames/{espnId}/{boardId}/
   sport
+
+purchases/{checkoutSessionId}: { uid, amount, currency, paymentIntentId, createdAt, expiresAt, status: 'paid' | 'refunded' }  (Season Pass sales; written only by the stripeWebhook function, admins read)
 ```
 
 ## Game Logic

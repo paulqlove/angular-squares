@@ -3,7 +3,7 @@ import { getDatabase } from "firebase-admin/database";
 import { logger } from "firebase-functions";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { HttpsError, onCall, onRequest } from "firebase-functions/v2/https";
-import { defineSecret } from "firebase-functions/params";
+import { defineSecret, defineString } from "firebase-functions/params";
 import { getAuth } from "firebase-admin/auth";
 import { createHash } from "node:crypto";
 import { continueUrl, directLink, isValidEmail, renderEmail, withAccountHint } from "./signin-email";
@@ -11,6 +11,8 @@ import { fetchScoreboard } from "./espn";
 import { syncLiveScores } from "./sync";
 import { runDueAutoManage } from "./auto-manage-run";
 import { PREVIEW_PATHS, PreviewFields, previewFields } from "./preview-card";
+import { checkoutRefusal, Entitlement, giftKey, PurchaseRecord } from "./season-pass";
+import { StripeEventDeps } from "./stripe-events";
 
 const DEFAULT_DATABASE_URL = "https://squares-4e4f7-default-rtdb.firebaseio.com";
 
@@ -172,5 +174,104 @@ export const gamePage = onRequest(
       },
       log: (message, details) => logger.warn(message, details),
     });
+  }
+);
+
+const STRIPE_SECRET_KEY = defineSecret("STRIPE_SECRET_KEY");
+const STRIPE_WEBHOOK_SECRET = defineSecret("STRIPE_WEBHOOK_SECRET");
+/** The $5.99 Season Pass price (price_...), set tax-inclusive in the Stripe dashboard. Not a secret: asked for at deploy. */
+const STRIPE_PRICE_ID = defineString("STRIPE_PRICE_ID", { description: "Stripe price id for the Season Pass (price_...)" });
+
+/** When the caller's longest pass ends, paid or gifted (0 when they have none). */
+async function passEndsAt(uid: string, email: string | undefined, emailVerified: boolean): Promise<number> {
+  const db = getDatabase();
+  const [paid, gifted] = await Promise.all([
+    db.ref(`entitlements/${uid}/expiresAt`).get(),
+    email && emailVerified ? db.ref(`giftedSeasonPass/${giftKey(email)}/expiresAt`).get() : null,
+  ]);
+  const ends = [paid.val(), gifted?.val()].filter((value): value is number => typeof value === "number");
+  return Math.max(0, ...ends);
+}
+
+/**
+ * Starts a Season Pass purchase: returns the Stripe Checkout page to send the host to. The pass itself is only
+ * granted by stripeWebhook once Stripe says the payment went through, never by the browser.
+ * Deploy by hand: firebase deploy --only functions:createCheckoutSession
+ */
+export const createCheckoutSession = onCall(
+  { region: "us-central1", secrets: [STRIPE_SECRET_KEY], memory: "256MiB", maxInstances: 5, timeoutSeconds: 15, invoker: "public" },
+  async (request) => {
+    const token = request.auth?.token;
+    const buyer = { uid: request.auth?.uid, provider: token?.firebase?.sign_in_provider, email: token?.email, emailVerified: token?.email_verified === true };
+    const refusal = checkoutRefusal(buyer, buyer.uid ? await passEndsAt(buyer.uid, buyer.email, buyer.emailVerified) : 0, Date.now());
+    if (refusal) throw new HttpsError(refusal.includes("already") ? "already-exists" : "unauthenticated", refusal);
+
+    const { createCheckoutUrl } = await import("./stripe-checkout");
+    try {
+      const url = await createCheckoutUrl(STRIPE_SECRET_KEY.value(), STRIPE_PRICE_ID.value(), {
+        uid: buyer.uid!, email: buyer.email, origin: request.rawRequest.headers.origin,
+      });
+      return { url };
+    } catch (error) {
+      logger.error("checkout session failed", { message: (error as Error).message });
+      throw new HttpsError("unavailable", "Checkout isn't available right now. Try again in a minute.");
+    }
+  }
+);
+
+/** The webhook's database steps (stripe-events.ts explains each). Only this function writes purchases. */
+function stripeEventDeps(): StripeEventDeps {
+  const db = getDatabase();
+  return {
+    savePurchase: async (sessionId, purchase) => {
+      const result = await db.ref(`purchases/${sessionId}`).transaction((current: PurchaseRecord | null) => current ?? purchase);
+      return result.snapshot.val() as PurchaseRecord;
+    },
+    findPurchaseByPaymentIntent: async (paymentIntentId) => {
+      const found = (await db.ref("purchases").orderByChild("paymentIntentId").equalTo(paymentIntentId).limitToFirst(1).get()).val();
+      const [entry] = Object.entries((found ?? {}) as Record<string, PurchaseRecord>);
+      return entry ? { sessionId: entry[0], purchase: entry[1] } : null;
+    },
+    markRefunded: async (sessionId) => {
+      await db.ref(`purchases/${sessionId}/status`).set("refunded");
+    },
+    readEntitlement: async (uid) => (await db.ref(`entitlements/${uid}`).get()).val() as Partial<Entitlement> | null,
+    writeEntitlement: async (uid, entitlement) => {
+      await db.ref(`entitlements/${uid}`).set(entitlement);
+    },
+    now: () => Date.now(),
+  };
+}
+
+/**
+ * Stripe's webhook endpoint: grants the Season Pass on a paid checkout and ends it on a full refund.
+ * A bad signature gets 400 (not from Stripe); a failure gets 500 so Stripe retries the event later.
+ * Deploy by hand: firebase deploy --only functions:stripeWebhook
+ */
+export const stripeWebhook = onRequest(
+  { region: "us-central1", secrets: [STRIPE_WEBHOOK_SECRET], memory: "256MiB", maxInstances: 5, timeoutSeconds: 30, invoker: "public" },
+  async (req, res) => {
+    if (req.method !== "POST") {
+      res.status(405).send("POST only");
+      return;
+    }
+    const { verifiedEvent } = await import("./stripe-checkout");
+    const { handleStripeEvent } = await import("./stripe-events");
+    let event;
+    try {
+      event = verifiedEvent(req.rawBody, req.headers["stripe-signature"], STRIPE_WEBHOOK_SECRET.value());
+    } catch (error) {
+      logger.warn("stripe webhook signature rejected", { message: (error as Error).message });
+      res.status(400).send("Bad signature");
+      return;
+    }
+    try {
+      const result = await handleStripeEvent(event, stripeEventDeps());
+      logger.info("stripe event", { id: event.id, type: event.type, result });
+      res.status(200).json({ received: true });
+    } catch (error) {
+      logger.error("stripe event failed", { id: event.id, type: event.type, message: (error as Error).message });
+      res.status(500).send("Try again");
+    }
   }
 );

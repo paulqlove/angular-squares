@@ -124,3 +124,21 @@ A guest is a Firebase anonymous account, and their squares are recorded under th
 
 - **Cost and speed:** every game page view now runs this function (one small read and one fetch of `game.html`). Warm, that adds tens of milliseconds; a cold start adds about a second. Invocations stay far inside the free tier. `minInstances: 1` would remove cold starts but bills an always-on instance, so it is left off.
 - **Deploy order:** `firebase deploy --only functions:gamePage,functions:gamePreviewImage` **before** merging the Hosting rewrite. Preview channels call the live functions, so the rewrite PR's preview only works after this deploy, and merging it first would break every game link.
+
+## Season Pass checkout (Stripe, Nov 18, 2026)
+
+Two functions sell the $5.99 Season Pass through Stripe Checkout with Managed Payments (Stripe is the seller of record and handles sales tax; the price is tax-inclusive). Every pass ends June 30 of the season it is bought in.
+
+- **`createCheckoutSession`** (callable): a signed-in, non-guest host with no running pass (paid or gifted) gets a Stripe Checkout URL. It never grants anything.
+- **`stripeWebhook`** (HTTPS): checks Stripe's signature, then on `checkout.session.completed` or `checkout.session.async_payment_succeeded` (paid) writes `purchases/{sessionId}` once and sets `entitlements/{uid}` to `{ plan: 'season', expiresAt: July 1 }`. On a full `charge.refunded` it marks the purchase refunded and ends the pass now, unless the host's pass no longer comes from that purchase. Partial refunds change nothing. Repeated or out-of-order events are safe.
+
+Logic: `functions/src/season-pass.ts` and `stripe-events.ts` (pure, unit-tested); Stripe calls in `stripe-checkout.ts`, loaded on first use.
+
+**One-time setup (Paul, in Stripe test mode first):**
+1. Activate Managed Payments (Settings, Managed Payments).
+2. Create the product "Season Pass" with a one-time $5.99 USD price, tax behavior **inclusive**, and a tax code marked eligible for Managed Payments. Copy its `price_...` id.
+3. Add a webhook endpoint `https://us-central1-squares-4e4f7.cloudfunctions.net/stripeWebhook` with events `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `charge.refunded`. Copy its signing secret.
+4. From the repo on `main`: `npx firebase-tools functions:secrets:set STRIPE_SECRET_KEY --project squares-4e4f7` and `npx firebase-tools functions:secrets:set STRIPE_WEBHOOK_SECRET --project squares-4e4f7` (each prompts for the value; nothing is stored in the repo).
+5. `npx firebase-tools deploy --only database,functions:createCheckoutSession,functions:stripeWebhook --project squares-4e4f7`. The first deploy asks for `STRIPE_PRICE_ID` and saves it in `functions/.env.squares-4e4f7` (not a secret).
+
+The browser needs no Stripe key: it calls `createCheckoutSession` and goes to the returned URL. For live mode, repeat steps 2 to 4 with live keys, then redeploy.

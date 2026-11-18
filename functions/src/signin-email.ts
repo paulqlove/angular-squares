@@ -3,7 +3,7 @@ import { escapeHtml } from "./html";
 /** Pure helpers for the branded sign-in email. The Cloud Function in index.ts wires them up. */
 
 export const SITE = "https://quarterscore.com";
-const ALLOWED_ORIGINS = [SITE, "https://squares-4e4f7.web.app", "http://localhost:4200", "http://localhost:4300"];
+export const ALLOWED_ORIGINS = [SITE, "https://squares-4e4f7.web.app", "http://localhost:4200", "http://localhost:4300"];
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function isValidEmail(email: unknown): email is string {
