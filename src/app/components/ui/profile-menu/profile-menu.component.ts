@@ -47,7 +47,7 @@ import { ownPassLabel } from '../../../core/utils/pass-label';
           id="profile-menu"
           animate.enter="qs-menu-enter"
           animate.leave="qs-menu-leave"
-          class="absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-card border border-qs-line bg-qs-panel text-qs-ink shadow-pop origin-top-right"
+          class="absolute right-0 z-50 mt-2 max-h-[calc(100dvh-5rem)] w-80 max-w-[calc(100vw-2rem)] overflow-y-auto overscroll-contain rounded-card border border-qs-line bg-qs-panel text-qs-ink shadow-pop origin-top-right"
         >
           <div class="flex items-start gap-3 border-b border-qs-line p-4">
             @if (currentUser()?.photoURL) {
