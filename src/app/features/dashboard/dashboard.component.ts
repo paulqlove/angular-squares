@@ -21,7 +21,6 @@ import { ShareDialogComponent } from '../../components/ui/share-dialog/share-dia
 import { AuthService } from '../../core/services/auth.service';
 import { CheckoutService } from '../../core/services/checkout.service';
 import { PlanService } from '../../core/services/plan.service';
-import { SeasonWelcomeService } from '../../core/services/season-welcome.service';
 import { WalkthroughService } from '../../core/services/walkthrough.service';
 import { DockAtEndDirective } from '../../shared/directives/dock-at-end.directive';
 import { CreateGameFormComponent } from '../create/create-game-form.component';
@@ -131,7 +130,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   protected readonly search: DashboardSearchService = inject(DashboardSearchService);
   protected readonly store: DashboardStore = inject(DashboardStore);
   protected readonly view: DashboardViewService = inject(DashboardViewService);
-  protected readonly welcome: SeasonWelcomeService = inject(SeasonWelcomeService);
 
   private readonly authService: AuthService = inject(AuthService);
   private readonly checkout: CheckoutService = inject(CheckoutService);

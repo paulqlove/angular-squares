@@ -20,11 +20,6 @@
       }
     </div>
 
-    <!-- After buying the Season Pass: a one-time welcome, until its x closes it for good -->
-    @if (welcome.shows()) {
-      <section appSeasonWelcome class="mt-6 sm:mt-8" animate.enter="qs-row-in" animate.leave="qs-welcome-leave"></section>
-    }
-
     @if (!store.canCreateGame()) {
       <div class="mt-8 flex flex-col gap-4 rounded-card border border-qs-line bg-qs-warn-soft p-5 sm:flex-row sm:items-center sm:justify-between">
         <p class="text-qs-warn">
@@ -101,6 +96,9 @@
     [style.transform]="search.searchOpen() && search.keyboardLift() ? 'translateY(-' + search.keyboardLift() + 'px)' : null"
   ></div>
   }
+
+  <!-- After buying the Season Pass: a one-time welcome dialog, until it's closed for good -->
+  <app-season-welcome />
 
   <!-- Create Game Modal -->
   <app-modal [open]="dialogs.showCreateModal()" labelledBy="create-game-title" size="xl" phone="full" [backdropCloses]="false" extraClass="flex h-[min(44rem,calc(100dvh-2rem))] flex-col overflow-hidden" (dismissed)="dialogs.dismissCreateModal()">
