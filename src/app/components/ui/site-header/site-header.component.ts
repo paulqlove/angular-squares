@@ -155,7 +155,8 @@ export class SiteHeaderComponent implements OnInit {
     // Reading pages print without the bar; the app pages print as they always have.
     const base = this.nav() === 'guides' ? 'no-print block' : 'block';
     if (this.position() !== 'headroom') return base;
-    const slide = `${base} sticky top-0 z-40 transition-transform duration-200 motion-reduce:transition-none`;
+    // While the profile menu is open the bar rises over the dashboard's bottom bars (z-90), so the menu isn't hidden under them
+    const slide = `${base} sticky top-0 z-40 has-[#profile-menu]:z-[95] transition-transform duration-200 motion-reduce:transition-none`;
     return this.hidden() ? `${slide} -translate-y-full` : slide;
   });
 
