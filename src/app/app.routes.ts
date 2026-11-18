@@ -68,6 +68,11 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/content/printable-board.component').then(m => m.PrintableBoardComponent)
   },
+  {
+    path: 'super-bowl-party-games',
+    loadComponent: () =>
+      import('./features/content/party-games.component').then(m => m.PartyGamesComponent)
+  },
   marketingRoute('thanksgiving-football-squares'),
   marketingRoute('nfl-squares'),
   marketingRoute('nfl-playoff-squares'),
