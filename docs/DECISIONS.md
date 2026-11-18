@@ -4,6 +4,14 @@ This file records product and design decisions, newest first. To add one, put a 
 
 ---
 
+## D-041 · Board sizes stay free
+
+- **Date:** Nov 18 2026
+- **Decision:** 100, 50 and 25 square boards stay free for every host. The Season Pass is not gated on board size; it keeps selling on game limits and perks. Auto-manage resize stays a Season Pass perk. Paul's words, relayed: "Keep sizes free".
+- **Options considered:** gating 50 and 25 square boards behind the Season Pass; keeping every size free (picked)
+- **Why:** small groups need 25 and 50 square boards, and the homepage, /nfl-squares and /super-bowl-squares promise free 100, 50 or 25 square boards. CFO, Marketing, CCO, Skeptic and Sales all advised against gating.
+- **Decided by:** Paul
+
 ## D-040 · Hosts open Your games from the host bar at every size
 
 - **Date:** Nov 16 2026
