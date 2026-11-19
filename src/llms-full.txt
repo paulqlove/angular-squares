@@ -113,6 +113,10 @@ The host opens the game and taps Edit game (Edit on a phone). Change the name, t
 
 The host taps Manage players (Players on a phone) to see everyone on the board. Confirm a player, or remove one to open their squares back up. Then tap Done.
 
+**What does Show in my open boards do?**
+
+It lists a game in the More tab of your other games, so players can hop between them. They see its name, teams, points per square and open squares. Open boards and groups come with the Season Pass. Groups keep games apart, like Work and Friends. Picking a group turns open boards on, and only the games in that group list each other. Players never see group names.
+
 **Are games private?**
 
 A game is reached by its link or six-character code. It is not listed in a public directory. Anyone who has the code can open the board, so share it only with your group.

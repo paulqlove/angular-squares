@@ -6,6 +6,8 @@ import { DropdownComponent, DropdownOption } from '../dropdown/dropdown.componen
 
 const NO_GROUP = '';
 const NEW_GROUP = '+new';
+/** Under the picker wherever it shows (Paul, Nov 19: "Add the hint and FAQ"). */
+export const GROUP_PICKER_HINT = 'Use groups to keep games apart, like Work and Friends. Games in a group link to each other in the More tab.';
 
 /**
  * Edit game's Group picker (Creative's g3 and g4): the owner's groups, No group, and for the owner New group...,
@@ -20,6 +22,7 @@ const NEW_GROUP = '+new';
     <div class="flex flex-col gap-2">
       <span id="group-picker-label" class="qs-label text-qs-muted">Group</span>
       <app-dropdown class="block" [fill]="true" ariaLabel="Group" [options]="options()" [value]="selected()" (valueChange)="pick($event)"></app-dropdown>
+      <p class="text-xs text-qs-muted">{{ hint }}</p>
       @if (selected() === newGroup) {
         <input
           type="text"
@@ -71,6 +74,7 @@ export class GroupPickerComponent {
     const email = cleanCoHostEmail(this.newCoHost());
     return this.leftCoHost() && !!email && !looksLikeEmail(email);
   });
+  protected readonly hint = GROUP_PICKER_HINT;
   protected readonly leftCoHost = signal<boolean>(false);
   protected readonly maxEmail = COHOST_EMAIL_MAX;
   protected readonly maxName = GROUP_NAME_MAX;
