@@ -7,41 +7,24 @@ import { AuthService } from '../../core/services/auth.service';
 import { SeoService } from '../../core/services/seo.service';
 import { SiteFooterComponent } from '../../shared/site-footer.component';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import {
-  heroSquares2x2,
-  heroUserGroup,
-  heroTrophy,
-  heroCheckCircle,
-  heroShare,
-  heroChartBar,
-  heroArrowRight
-} from '@ng-icons/heroicons/outline';
+import { heroArrowRight } from '@ng-icons/heroicons/outline';
 import { SiteHeaderComponent } from '../../components/ui/site-header/site-header.component';
 import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.component';
 import { PhoneDemoComponent } from './phone-demo.component';
-import { NFL_TEAMS, getTeamLogo, NflTeam } from '../content/teams-data';
-
-interface Feature {
-  icon: string;
-  title: string;
-  description: string;
-  id?: string;
-  link?: { path: string; label: string };
-}
+import { ReadingSectionComponent } from '../content/reading-layout.components';
+import { HomeBoardSizesComponent } from './home-board-sizes.component';
+import { HomeFeaturesComponent } from './home-features.component';
+import { HomeHowItWorksComponent } from './home-how-it-works.component';
+import { HomeTeamsComponent } from './home-teams.component';
 
 @Component({
     selector: 'app-welcome',
-    imports: [RouterLink, NgIconComponent, SiteHeaderComponent, AuthModalComponent, PhoneDemoComponent, SiteFooterComponent],
+    imports: [
+        RouterLink, NgIconComponent, SiteHeaderComponent, AuthModalComponent, PhoneDemoComponent, SiteFooterComponent,
+        ReadingSectionComponent, HomeFeaturesComponent, HomeBoardSizesComponent, HomeTeamsComponent, HomeHowItWorksComponent
+    ],
     providers: [
-        provideIcons({
-            heroSquares2x2,
-            heroUserGroup,
-            heroTrophy,
-            heroCheckCircle,
-            heroShare,
-            heroChartBar,
-            heroArrowRight
-        })
+        provideIcons({ heroArrowRight })
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
@@ -139,117 +122,36 @@ interface Feature {
         </div>
       </section>
 
-      <!-- Features -->
-      <section class="border-t border-qs-line py-16 md:py-24">
-        <div class="mx-auto max-w-[1600px] px-4 sm:px-8">
-          <p class="qs-eyebrow">Section 01 / Features</p>
-          <h2 class="qs-title mt-3 text-3xl md:text-4xl">Everything you need for game <span class="text-qs-accent">day.</span></h2>
+      <div class="mx-auto max-w-[1600px] px-4 pb-24 sm:px-8">
+        <app-reading-section heading="Everything for game day" class="!mt-0">
+          <p>The board, the players and the winners, all on one page.</p>
+          <app-home-features wide></app-home-features>
+        </app-reading-section>
 
-          <div class="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
-            @for (feature of features; track feature.title; let i = $index) {
-              <div [attr.id]="feature.id || null" class="qs-card p-6 transition-colors hover:border-qs-ink">
-                <div class="flex items-center justify-between">
-                  <div class="w-10 h-10 bg-qs-accent-soft rounded-inner flex items-center justify-center">
-                    <ng-icon [name]="feature.icon" class="text-xl text-qs-accent"></ng-icon>
-                  </div>
-                  <span class="qs-label text-qs-muted">{{ (i + 1).toString().padStart(2, '0') }}</span>
-                </div>
-                <h3 class="qs-title mt-5 text-xl">{{ feature.title }}</h3>
-                <p class="mt-2 text-qs-muted">{{ feature.description }}</p>
-                @if (feature.link) {
-                  <a [routerLink]="feature.link.path" class="mt-3 inline-flex min-h-11 items-center font-medium text-qs-accent underline underline-offset-2">
-                    {{ feature.link.label }}
-                  </a>
-                }
-              </div>
-            }
+        <app-reading-section heading="Pick a board size">
+          <p>A 100-square board for a big group, 50 or 25 when fewer people play.</p>
+          <app-home-board-sizes wide></app-home-board-sizes>
+        </app-reading-section>
+
+        <app-reading-section heading="Start with your team">
+          <p>Every NFL team has its own board page.</p>
+          <a routerLink="/teams" class="qs-btn qs-btn-secondary">View all teams</a>
+          <app-home-teams wide></app-home-teams>
+        </app-reading-section>
+
+        <app-reading-section id="how-it-works" heading="How it works">
+          <p>Three steps from setup to the final whistle.</p>
+          <a routerLink="/how-to-play" class="qs-btn qs-btn-secondary">Read the full rules</a>
+          <app-home-how-it-works wide></app-home-how-it-works>
+        </app-reading-section>
+
+        <section class="mt-20 grid gap-x-16 border-t border-qs-line pt-8 lg:grid-cols-[14rem_minmax(0,1fr)]">
+          <div class="max-w-[40rem] lg:col-start-2">
+            <p class="qs-body text-[1.0625rem] leading-[1.7]">Make your board and share the link. It's free.</p>
+            <a routerLink="/create" class="qs-btn qs-btn-primary mt-6 w-full sm:w-auto px-6">Create a board</a>
           </div>
-        </div>
-      </section>
-
-      <!-- Board Sizes -->
-      <section class="border-t border-qs-line py-16 md:py-24">
-        <div class="mx-auto max-w-[1600px] px-4 sm:px-8">
-          <p class="qs-eyebrow">Section 02 / Board sizes</p>
-          <h2 class="qs-title mt-3 text-3xl md:text-4xl">Pick the right size for your <span class="text-qs-accent">group.</span></h2>
-          <p class="mt-4 max-w-2xl text-lg text-qs-muted">
-            Not every party has 100 people. Choose from three board sizes to match your crowd.
-          </p>
-
-          <div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
-            @for (board of boardSizes; track board.size) {
-              <div class="qs-card p-6 flex flex-col">
-                <div class="flex items-center justify-between">
-                  <span class="qs-title text-4xl text-qs-accent">{{ board.size }}</span>
-                  <span class="qs-badge">{{ board.grid }}</span>
-                </div>
-                <h3 class="qs-title mt-4 text-xl">{{ board.title }}</h3>
-                <p class="mt-2 text-qs-muted flex-1">{{ board.description }}</p>
-                <p class="mt-4 text-sm text-qs-muted">{{ board.numbers }}</p>
-              </div>
-            }
-          </div>
-        </div>
-      </section>
-
-      <!-- Pick Your Team -->
-      <section class="border-t border-qs-line py-16 md:py-24">
-        <div class="mx-auto max-w-[1600px] px-4 sm:px-8">
-          <p class="qs-eyebrow">Section 03 / Pick your team</p>
-          <div class="mt-3 flex flex-wrap items-end justify-between gap-4">
-            <h2 class="qs-title text-3xl md:text-4xl">Start with your <span class="text-qs-accent">team.</span></h2>
-            <a routerLink="/teams" class="qs-btn qs-btn-secondary">View all teams</a>
-          </div>
-          <p class="mt-4 max-w-2xl text-lg text-qs-muted">
-            Create a squares board themed for your favorite NFL team. Any game works with
-            <a routerLink="/nfl-squares" class="font-medium text-qs-accent underline underline-offset-2">NFL squares</a>, and
-            <a routerLink="/super-bowl-squares" class="font-medium text-qs-accent underline underline-offset-2">Super Bowl squares</a> is ready for February, with
-            <a routerLink="/super-bowl-party-games" class="font-medium text-qs-accent underline underline-offset-2">party ideas</a> for the rest of the room.
-          </p>
-
-          <div class="mt-10 grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 md:gap-3">
-            @for (team of teams; track team.slug) {
-              <a
-                [routerLink]="'/team/' + team.slug"
-                class="group relative aspect-square overflow-hidden rounded-lg transition-transform hover:scale-105 hover:z-10"
-                [style.background]="'linear-gradient(135deg, ' + team.primaryColor + ' 0%, ' + team.secondaryColor + ' 100%)'"
-                [attr.aria-label]="team.city + ' ' + team.name"
-              >
-                <img
-                  [src]="getLogoUrl(team)"
-                  alt=""
-                  class="absolute inset-0 m-auto h-3/4 w-3/4 object-contain drop-shadow-md"
-                  loading="lazy"
-                >
-                <span class="absolute inset-x-0 bottom-0 bg-black/60 px-1 py-1 text-center text-[9px] font-medium text-white opacity-0 transition-opacity group-hover:opacity-100 sm:text-[10px]">
-                  {{ team.name }}
-                </span>
-              </a>
-            }
-          </div>
-        </div>
-      </section>
-
-      <!-- How It Works -->
-      <section id="how-it-works" class="border-t border-qs-line bg-qs-panel-2 py-16 md:py-24">
-        <div class="mx-auto max-w-[1600px] px-4 sm:px-8">
-          <p class="qs-eyebrow">Section 04 / How it works</p>
-          <div class="mt-3 flex flex-wrap items-end justify-between gap-4">
-            <h2 class="qs-title text-3xl md:text-4xl">Three steps to kickoff.</h2>
-            <a routerLink="/how-to-play" class="qs-btn qs-btn-secondary">Read the full rules</a>
-          </div>
-
-          <div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
-            @for (step of steps; track step.title; let i = $index) {
-              <div class="qs-card p-6">
-                <p class="qs-eyebrow qs-eyebrow-bar">Step {{ '0' + (i + 1) }} / 03</p>
-                <h3 class="qs-title mt-4 text-xl">{{ step.title }}</h3>
-                <p class="mt-2 text-qs-muted">{{ step.description }}</p>
-              </div>
-            }
-          </div>
-        </div>
-      </section>
+        </section>
+      </div>
       </main>
 
       <app-site-footer width="wide"></app-site-footer>
@@ -275,38 +177,6 @@ export class WelcomeComponent implements OnInit {
   private seo = inject(SeoService);
 
   isAuthenticated = this.authService.isAuthenticated;
-
-  readonly steps = [
-    { title: 'Create a board', description: 'Pick your teams and create a board in seconds. No sign-in to start' },
-    { title: 'Share the link', description: 'Send the unique game code or link to your friends and family' },
-    { title: 'Play and win', description: 'Claim your squares, watch the game, and see who wins each quarter' }
-  ];
-
-  readonly boardSizes = [
-    {
-      size: 100,
-      grid: '10 × 10',
-      title: 'Classic Board',
-      description: 'The traditional football squares game. Each square gets one digit pair (0-9 for each team). Best for large groups.',
-      numbers: 'Single digits 0–9 on each axis'
-    },
-    {
-      size: 50,
-      grid: '5 × 10',
-      title: 'Half Board',
-      description: 'Five rows, ten columns. The away team uses paired digits (0-1, 2-3, etc.) while home uses single digits.',
-      numbers: 'Away: paired (0,1 / 2,3 / ...) · Home: single 0–9'
-    },
-    {
-      size: 25,
-      grid: '5 × 5',
-      title: 'Quarter Board',
-      description: 'Perfect for small groups. Both teams use paired digits, so each square covers four possible score combinations.',
-      numbers: 'Both axes use paired digits (0,1 / 2,3 / ...)'
-    }
-  ];
-
-  readonly teams = NFL_TEAMS;
 
   constructor() {
     effect(() => {
@@ -405,41 +275,6 @@ export class WelcomeComponent implements OnInit {
   showAuthModal = signal(false);
   showJoinCode = signal(false);
 
-  features: Feature[] = [
-    {
-      icon: 'heroSquares2x2',
-      title: '100, 50, or 25 Squares',
-      description: 'Classic 10x10 grid or smaller boards for fewer players. Paired digits on compact boards.'
-    },
-    {
-      icon: 'heroUserGroup',
-      title: 'Real-time Multiplayer',
-      description: 'Everyone sees squares claimed instantly. No refreshing needed.'
-    },
-    {
-      icon: 'heroTrophy',
-      title: 'Auto Winners',
-      description: 'Winners calculated automatically as scores update each quarter'
-    },
-    {
-      icon: 'heroCheckCircle',
-      title: 'Player Check-in',
-      description: 'Host confirms who\'s in with one tap.'
-    },
-    {
-      icon: 'heroShare',
-      title: 'Easy Sharing',
-      description: 'Share with a 6-character code or direct link. Players don\'t need accounts.'
-    },
-    {
-      icon: 'heroChartBar',
-      title: 'Square hit rates',
-      description: 'See which squares win most often based on NFL history',
-      id: 'probability-heatmap',
-      link: { path: '/best-squares-numbers', label: 'See the full number table' }
-    }
-  ];
-
   onAuthenticated(): void {
     this.showAuthModal.set(false);
   }
@@ -469,10 +304,6 @@ export class WelcomeComponent implements OnInit {
   openJoinCode(): void {
     this.showJoinCode.set(true);
     setTimeout(() => this.joinInput?.nativeElement.focus());
-  }
-
-  getLogoUrl(team: NflTeam): string {
-    return getTeamLogo(team, 100);
   }
 
   private pendingJoinCode = '';
