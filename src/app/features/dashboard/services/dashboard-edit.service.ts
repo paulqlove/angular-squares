@@ -2,6 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { DEFAULT_EMPTY_QUARTER_RULE } from '../../../core/plans';
 import { EspnGame, EspnService, SportType } from '../../../core/services/espn.service';
+import { CoHostPlayer, GameCoHostService } from '../../../core/services/game-cohost.service';
 import { GameData, GameListItem, GameService } from '../../../core/services/game.service';
 import { PlanService } from '../../../core/services/plan.service';
 import { SanitizationService } from '../../../core/services/sanitization.service';
@@ -12,8 +13,6 @@ import { groupChanged, pickerValue } from '../../../core/utils/game-groups';
 import { coHostLabel, hasCoHost } from '../../../core/utils/group-cohost';
 import { DashboardGroupsService } from './dashboard-groups.service';
 import { DashboardStore } from './dashboard.store';
-
-type EditablePlayer = { name: string; uid: string };
 
 /** The settings saved one by one after the main save, as they ended up: a failure keeps the board's old value. */
 interface AppliedExtras {
@@ -55,25 +54,20 @@ export class DashboardEditService {
   });
   public readonly editBoardRandomized = signal<boolean>(false);
   public readonly editEspnGames = signal<EspnGame[]>([]);
-  public readonly editGamePlayers = signal<EditablePlayer[]>([]);
+  public readonly editGamePlayers = signal<CoHostPlayer[]>([]);
   public readonly editingGame = signal<GameListItem | null>(null);
   public readonly editValues = signal<EditGameValues>({ awayTeam: '', homeTeam: '', pricePerSquare: 10, hostNote: '', quarterSplit: null, emptyQuarterRule: DEFAULT_EMPTY_QUARTER_RULE, newBoardSize: null, showInOpenBoards: false, autoManage: false, maxSquaresPerPlayer: null });
   public readonly isLoadingEditEspnGames = signal<boolean>(false);
   public readonly isSavingGame = signal<boolean>(false);
   public readonly showEditModal = signal<boolean>(false);
 
-  public async assignManagerFromPlayer(player: EditablePlayer): Promise<void> {
+  public async assignManagerFromPlayer(player: CoHostPlayer): Promise<void> {
     const game = this.editingGame();
     if (!game) return;
 
-    try {
-      await this.gameService.updateGameManager(game.id, game.ownerId, { managerId: player.uid, managerName: player.name });
-      this.markCoHost(game, player.uid, true);
-      this.editingGame.set({ ...game, managerId: player.uid, managerName: player.name, managerEmail: undefined });
-      this.store.updateMyGame(game.id, g => ({ ...g, managerId: player.uid, managerName: player.name, managerEmail: undefined }));
-    } catch {
-      this.toastService.error('Could not assign the co-host. Try again.');
-    }
+    if (!await this.coHost.assignPlayer(game, player)) return;
+    this.editingGame.set({ ...game, managerId: player.uid, managerName: player.name, managerEmail: undefined });
+    this.store.updateMyGame(game.id, g => ({ ...g, managerId: player.uid, managerName: player.name, managerEmail: undefined }));
   }
 
   public closeEditModal(): void {
@@ -168,6 +162,7 @@ export class DashboardEditService {
     }
   }
 
+  private readonly coHost: GameCoHostService = inject(GameCoHostService);
   private readonly espnService: EspnService = inject(EspnService);
   private readonly gameGroups: GameGroupsService = inject(GameGroupsService);
   private readonly gameService: GameService = inject(GameService);
@@ -196,15 +191,7 @@ export class DashboardEditService {
   private async loadPlayers(gameId: string): Promise<void> {
     const fullGame = await this.gameService.getGame(gameId);
     this.editBoardRandomized.set(!!fullGame?.isRandomized);
-    if (fullGame?.playerUserIds) {
-      const currentUid = this.store.currentUser()?.uid;
-      const players = Object.entries(fullGame.playerUserIds)
-        .filter(([, uid]) => uid !== currentUid)
-        .map(([name, uid]) => ({ name, uid }));
-      this.editGamePlayers.set(players);
-    } else {
-      this.editGamePlayers.set([]);
-    }
+    this.editGamePlayers.set(this.coHost.players(fullGame?.playerUserIds, this.store.currentUser()?.uid));
   }
 
   /** Auto-lock and draw saves on its own, after the main save. */
@@ -249,34 +236,18 @@ export class DashboardEditService {
   private async saveGroupCoHost(game: GameListItem, v: EditGameValues, listId: string | undefined): Promise<Pick<AppliedExtras, 'managerEmail'>> {
     const email = listId ? this.groups.groups().find(g => g.id === listId)?.coHost?.email : undefined;
     if (!v.coHostFromGroup || !email || hasCoHost(game)) return {};
-    try {
-      await this.gameService.updateGameManager(game.id, game.ownerId, { managerEmail: email });
-      return { managerEmail: email };
-    } catch {
-      this.toastService.warning('Saved, but the group\'s co-host could not be added. Try again in a moment.');
-      return {};
-    }
+    return await this.coHost.addGroupCoHost(game, email) ? { managerEmail: email } : {};
   }
 
-  /** Keeps the owner's co-host list in step, so a co-host can read group names. Dropped only when they co-host no other game. Best effort. */
-  /** Replaces the game's co-host with one known only by email, or with none (null), and unmarks the old one. */
+  /** Replaces the game's co-host with one known only by email, or with none (null). The old one keeps their mark while they co-host another game. */
   private async swapCoHost(email: string | null, failed: string): Promise<void> {
     const game = this.editingGame();
     if (!game) return;
+    const elsewhere = (uid: string): boolean => this.store.myGames().some(g => g.id !== game.id && g.managerId === uid);
+    if (!await this.coHost.replace(game, email, failed, elsewhere)) return;
     const changed = { managerId: undefined, managerEmail: email ?? undefined, managerName: undefined };
-    try {
-      await this.gameService.updateGameManager(game.id, game.ownerId, { managerEmail: email });
-      if (game.managerId) this.markCoHost(game, game.managerId, false);
-      this.editingGame.set({ ...game, ...changed });
-      this.store.updateMyGame(game.id, g => ({ ...g, ...changed }));
-    } catch {
-      this.toastService.error(failed);
-    }
-  }
-
-  private markCoHost(game: GameListItem, uid: string, on: boolean): void {
-    if (!on && this.store.myGames().some(g => g.id !== game.id && g.managerId === uid)) return;
-    this.gameGroups.setCoHost(game.ownerId, uid, on).catch(() => undefined);
+    this.editingGame.set({ ...game, ...changed });
+    this.store.updateMyGame(game.id, g => ({ ...g, ...changed }));
   }
 
   private async saveShowInOpenBoards(game: GameListItem, v: EditGameValues): Promise<Pick<AppliedExtras, 'showInOpenBoards' | 'openListId'>> {

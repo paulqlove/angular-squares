@@ -200,7 +200,7 @@ export interface EditGameValues {
                 <input id="edit-game-note" type="text" [(ngModel)]="draft.hostNote" maxlength="140" placeholder="Rules, deadline, how to enter" class="qs-input" />
               </div>
 
-              @if (showGameFields) {
+              @if (showGameFields || showCoHost) {
                 <app-edit-game-cohost [players]="players" [coHostName]="coHostName" [coHostEmail]="coHostEmail" [group]="pickedGroup()" [(fillFromGroup)]="draft.coHostFromGroup" (assigned)="coHostAssign.emit($event)" (removed)="coHostRemove.emit()" (useGroup)="coHostUseGroup.emit($event)"></app-edit-game-cohost>
               }
             </div>
@@ -252,6 +252,8 @@ export class EditGameDialogComponent implements OnChanges {
   @Input() splitLocked = false;
   /** Dashboard: name, sport, ESPN game and co-host. */
   @Input() showGameFields = false;
+  /** The Co-host field without the dashboard's other game fields: the game page, for its owner. */
+  @Input() showCoHost = false;
   /** Game page, linked to ESPN: the teams come from the game, so show them read-only. */
   @Input() linkedGameName = '';
   @Input() showSplit = false;
