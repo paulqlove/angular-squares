@@ -5,7 +5,7 @@ import { SEASON_LIMIT_ON, seasonLimitApplies } from '../../../core/utils/season-
 export interface EmptyDashboardFacts {
   /** Boards the host has right now. */
   boards: number;
-  /** Free games a season on the host's plan: 3 on Free, unlimited on Season Pass and Admin. */
+  /** Free games a season on the host's plan: 1 on Free, unlimited on Season Pass and Admin. */
   cap: number;
   /** Signed in and not a guest. */
   canHost: boolean;

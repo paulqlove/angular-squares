@@ -4,6 +4,14 @@ This file records product and design decisions, newest first. To add one, put a 
 
 ---
 
+## D-042 · Free hosts: 1 game a season, not 3
+
+- **Date:** Nov 18 2026
+- **Decision:** Free hosts can run 1 game per season instead of 3 (`PLANS.free.seasonGames`). Everything else in D-038 stays: one game open at a time, a game counts once anyone claims a square, a deleted game nobody joined doesn't count, a running board is never locked, and the season runs July 1 to June 30. Site copy, FAQs, the season dialog and the clear and delete notes now say one free game. Paul's words: "I think we should do only one free game, not three, because this is such a one-off event. If somebody wants more than one, they pay up a very low cost." Then: "change the rules and copy where it says 3 free games".
+- **Options considered:** keep 3 games a season; 1 game a season (picked)
+- **Why:** most groups play one big game, so a second game is what the Season Pass is for
+- **Decided by:** Paul
+
 ## D-041 · Board sizes stay free
 
 - **Date:** Nov 18 2026
@@ -28,7 +36,7 @@ This file records product and design decisions, newest first. To add one, put a 
 - **Why:** the admin tool cluttered the dashboard Paul uses as a host
 - **Decided by:** Paul
 
-## D-038 · Free hosts: one game at a time and 3 games a season
+## D-038 · Free hosts: one game at a time and 3 games a season (now 1, see D-042)
 
 - **Date:** Nov 15 2026
 - **Decision:** Free hosts keep one game open at a time and can run 3 games per season. A game counts once anyone has claimed a square on it, and the count is saved on the server, so deleting a game with players doesn't free a slot and an empty game never takes one. Delete stays allowed. A reset (or Clear game) starts a new game on the same board under the same rule; the game before it already counted if it had players. A board that's already running is never locked or blocked: the cap only stops a new board, a reset, or Clear game on a board with players. At the cap, Clear game opens the season dialog with a "Keep this game" button instead; under it, the clear warning says the cleared board will count (Creative, spec section 6). Season Pass and Admin are unchanged. Copy is Creative's (free-limit spec, mockups l1 to l3). Built behind `SEASON_LIMIT_ON` in `core/utils/season-games.ts`, on since #396; the season runs July 1 to June 30 (Paul confirmed: "Yes, July to June"). Paul's words, relayed: "I actually agree with you on setting a max number of games for a free user and only being able to host one game at a time." Then: "3 per season". On a deleted game nobody joined: "Yes, don't count it".

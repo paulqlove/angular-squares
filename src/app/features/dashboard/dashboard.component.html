@@ -54,7 +54,7 @@
               }
             </p>
             @if (store.seasonGamesLeft() !== null) {
-              <p class="mt-1 text-base text-qs-muted">{{ store.seasonGamesLeft() }} of {{ planService.features().seasonGames }} free games left this season</p>
+              <p class="mt-1 text-base text-qs-muted">{{ store.seasonGamesLeftText() }} left this season</p>
             }
           </div>
           <button type="button" (click)="dialogs.openUpgrade($event)" class="qs-btn qs-btn-secondary shrink-0">

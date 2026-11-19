@@ -30,8 +30,8 @@ describe('EditGameDialogComponent', () => {
   });
 
   it('shows the clear line when given one, and asks for a second tap as before', () => {
-    const f = open({ showClear: true, clearNote: 'You have 2 of 3 free games left this season.' });
-    expect(text(f)).toContain('You have 2 of 3 free games left this season.');
+    const f = open({ showClear: true, clearNote: 'You have 1 free game left this season.' });
+    expect(text(f)).toContain('You have 1 free game left this season.');
     let cleared = false;
     f.componentInstance.clearGame.subscribe(() => (cleared = true));
     f.componentInstance.onClearClick();
