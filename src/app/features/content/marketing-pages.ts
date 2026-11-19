@@ -211,6 +211,10 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
         video: HOWTO_VIDEOS.managePlayers
       },
       {
+        question: 'What does Show in my open boards do?',
+        answer: 'It lists a game in the More tab of your other games, so players can hop between them. They see its name, teams, points per square and open squares. Open boards and groups come with the Season Pass. Groups keep games apart, like Work and Friends. Picking a group turns open boards on, and only the games in that group list each other. Players never see group names.'
+      },
+      {
         question: 'Are games private?',
         answer: 'A game is reached by its link or six-character code. It is not listed in a public directory. Anyone who has the code can open the board, so share it only with your group.'
       },
