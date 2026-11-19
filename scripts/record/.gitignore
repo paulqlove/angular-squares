@@ -1,0 +1,5 @@
+node_modules/
+# The demo host's saved sign-in and the ledger of demo boards. Never commit.
+.auth/
+# Recordings
+out/
