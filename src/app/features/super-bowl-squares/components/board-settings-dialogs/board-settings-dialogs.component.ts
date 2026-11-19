@@ -4,6 +4,7 @@ import { autoRunLabel } from '../../../../core/utils/auto-manage';
 import { CoHostEditDialogComponent } from '../cohost-edit-dialog/cohost-edit-dialog.component';
 import { EditGameDialogComponent } from '../edit-game-dialog/edit-game-dialog.component';
 import { EditGameNumbersComponent } from '../edit-game-numbers/edit-game-numbers.component';
+import { GamePageCoHostService } from '../../services/game-page-cohost.service';
 import { GamePageGroupsService } from '../../services/game-page-groups.service';
 import { ShrinkBoardDialogComponent } from '../shrink-board-dialog/shrink-board-dialog.component';
 import { UpgradePassDialogComponent } from '../../../dashboard/components/upgrade-pass-dialog/upgrade-pass-dialog.component';
@@ -23,6 +24,7 @@ export class BoardSettingsDialogsComponent {
   // Protected properties
 
   protected readonly autoRunLabel: typeof autoRunLabel = autoRunLabel;
+  protected readonly coHost: GamePageCoHostService = inject(GamePageCoHostService);
   protected readonly groups: GamePageGroupsService = inject(GamePageGroupsService);
   protected readonly host: HostActionsService = inject(HostActionsService);
   protected readonly planService: PlanService = inject(PlanService);

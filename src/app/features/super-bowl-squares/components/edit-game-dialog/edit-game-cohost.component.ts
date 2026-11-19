@@ -11,7 +11,7 @@ export interface CoHostCandidate {
 }
 
 /**
- * Edit game's Co-host field on the dashboard: the current co-host with Remove, or a search of the board's players.
+ * Edit game's Co-host field, on the dashboard and the game page: the current co-host with Remove, or a search of the board's players.
  * With a group picked that has a co-host (K4): a game with none shows the group's, saved with the game; a game with
  * its own keeps it, with a line offering the group's instead.
  */

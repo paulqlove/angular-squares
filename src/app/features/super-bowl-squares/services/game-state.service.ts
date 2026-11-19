@@ -78,6 +78,8 @@ export class GameStateService {
   /** Event id the summary feed says is final. Past games drop off the scoreboard feed, so this covers them. */
   public readonly linkedFinalEventId: WritableSignal<string | null> = signal(null);
   public readonly managerId: WritableSignal<string | null> = signal(null);
+  /** The co-host's name when they were picked from the players. */
+  public readonly managerName: WritableSignal<string | null> = signal(null);
   /** Season Pass: most squares one name can claim here (undefined = no limit). */
   public maxSquaresPerPlayer: number | undefined;
   public readonly openBoards: WritableSignal<OpenBoardRow[]> = signal([]);
@@ -182,6 +184,7 @@ export class GameStateService {
     this.latestEspnLive = data.espnLive || null;
     this.ownerId.set(data.ownerId || '');
     this.managerId.set(data.managerId || null);
+    this.managerName.set(data.managerName || null);
     return noteChanged;
   }
 

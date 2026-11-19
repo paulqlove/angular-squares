@@ -4,6 +4,7 @@ import { AnalyticsService } from '../../../core/services/analytics.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ConfirmService } from '../../../core/services/confirm.service';
 import { EspnService } from '../../../core/services/espn.service';
+import { GameCoHostService } from '../../../core/services/game-cohost.service';
 import { GameService } from '../../../core/services/game.service';
 import { PlanService } from '../../../core/services/plan.service';
 import { ToastService } from '../../../core/services/toast.service';
@@ -12,6 +13,7 @@ import { GamePageUiService } from './game-page-ui.service';
 import { GamePlayersService } from './game-players.service';
 import { GameScoringService } from './game-scoring.service';
 import { GameStateService } from './game-state.service';
+import { GamePageCoHostService } from './game-page-cohost.service';
 import { GamePageGroupsService } from './game-page-groups.service';
 import { HostActionsService } from './host-actions.service';
 import { NumberDrawService } from './number-draw.service';
@@ -27,6 +29,8 @@ describe('game page services', () => {
   let getGame: ReturnType<typeof vi.fn>;
   let track: ReturnType<typeof vi.fn>;
   let toast: { error: ReturnType<typeof vi.fn>; success: ReturnType<typeof vi.fn>; warning: ReturnType<typeof vi.fn> };
+  let coHost: { addGroupCoHost: ReturnType<typeof vi.fn>; assignPlayer: ReturnType<typeof vi.fn>; email: ReturnType<typeof vi.fn>; players: ReturnType<typeof vi.fn>; replace: ReturnType<typeof vi.fn> };
+  let getUserGameRecords: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     user = signal({ uid: 'host-1', displayName: 'Paul', isGuest: false, email: null, photoURL: null });
@@ -34,9 +38,11 @@ describe('game page services', () => {
     getGame = vi.fn();
     toast = { error: vi.fn(), success: vi.fn(), warning: vi.fn() };
     track = vi.fn();
+    coHost = { addGroupCoHost: vi.fn().mockResolvedValue(true), assignPlayer: vi.fn().mockResolvedValue(true), email: vi.fn().mockResolvedValue(''), players: vi.fn().mockReturnValue([]), replace: vi.fn().mockResolvedValue(true) };
+    getUserGameRecords = vi.fn().mockResolvedValue([]);
     TestBed.configureTestingModule({
       providers: [
-        EspnSyncService, GamePageGroupsService, GamePageUiService, GamePlayersService, GameScoringService, GameStateService, HostActionsService,
+        EspnSyncService, GamePageCoHostService, GamePageGroupsService, GamePageUiService, GamePlayersService, GameScoringService, GameStateService, HostActionsService,
         NumberDrawService, PlayerNameService, SquarePickerService,
         {
           provide: AuthService,
@@ -49,7 +55,8 @@ describe('game page services', () => {
           }
         },
         { provide: PlanService, useValue: { features: signal({ autoManage: true, activeBoards: 3, adFree: false, customSplits: true, squareLimit: true }), plan: signal('free') } },
-        { provide: GameService, useValue: { updateGame, addJoinedGame: vi.fn() } },
+        { provide: GameService, useValue: { updateGame, addJoinedGame: vi.fn(), getUserGameRecords } },
+        { provide: GameCoHostService, useValue: coHost },
         { provide: ToastService, useValue: toast },
         { provide: AnalyticsService, useValue: { track } },
         { provide: ConfirmService, useValue: { ask: () => Promise.resolve(true) } },
@@ -296,6 +303,73 @@ describe('game page services', () => {
       expect(state.isRandomized).toBe(false);
       expect(state.winners).toEqual({});
       expect(state.homeNumbers).toEqual(Array(10).fill(null));
+    });
+  });
+
+  describe('GamePageCoHostService', () => {
+    const setUp = () => {
+      const state = TestBed.inject(GameStateService);
+      state.gameId = 'G1';
+      state.gameOwnerId = 'host-1';
+      return { state, service: TestBed.inject(GamePageCoHostService) };
+    };
+
+    it('names the co-host picked from players, and is empty with none', () => {
+      const { state, service } = setUp();
+      expect(service.name()).toBe('');
+      state.managerId.set('p-2');
+      state.managerName.set('Sam');
+      expect(service.name()).toBe('Sam');
+    });
+
+    it('assigns a player as co-host and shows them at once', async () => {
+      const { state, service } = setUp();
+      await service.assign({ name: 'Sam', uid: 'p-2' });
+      expect(coHost.assignPlayer).toHaveBeenCalledWith({ id: 'G1', ownerId: 'host-1', managerId: null }, { name: 'Sam', uid: 'p-2' });
+      expect(state.managerId()).toBe('p-2');
+      expect(service.name()).toBe('Sam');
+    });
+
+    it('removes the co-host, keeping their mark while they co-host another of the owner\'s games', async () => {
+      const { state, service } = setUp();
+      state.managerId.set('p-2');
+      await service.remove();
+      const [game, email, , elsewhere] = coHost.replace.mock.calls[0];
+      expect(game).toEqual({ id: 'G1', ownerId: 'host-1', managerId: 'p-2' });
+      expect(email).toBeNull();
+      expect(service.name()).toBe('');
+      getUserGameRecords.mockResolvedValue([{ id: 'G1', managerId: 'p-2' }, { id: 'G2', managerId: 'p-2' }]);
+      expect(await elsewhere('p-2')).toBe(true);
+      getUserGameRecords.mockResolvedValue([{ id: 'G1', managerId: 'p-2' }]);
+      expect(await elsewhere('p-2')).toBe(false);
+    });
+
+    it('uses the group\'s co-host by email and shows the email', async () => {
+      const { service } = setUp();
+      await service.useGroup('sam@example.com');
+      expect(coHost.replace.mock.calls[0][1]).toBe('sam@example.com');
+      expect(service.name()).toBe('sam@example.com');
+    });
+
+    it('adds the group\'s co-host on save only when the dialog showed it and the game has none', async () => {
+      const { state, service } = setUp();
+      await service.addGroupCoHost(false, 'sam@example.com');
+      await service.addGroupCoHost(true, undefined);
+      expect(coHost.addGroupCoHost).not.toHaveBeenCalled();
+      state.managerId.set('p-2');
+      await service.addGroupCoHost(true, 'sam@example.com');
+      expect(coHost.addGroupCoHost).not.toHaveBeenCalled();
+      state.managerId.set(null);
+      await service.addGroupCoHost(true, 'sam@example.com');
+      expect(coHost.addGroupCoHost).toHaveBeenCalledTimes(1);
+      expect(service.email()).toBe('sam@example.com');
+    });
+
+    it('offers the board\'s players other than the owner', () => {
+      const { state, service } = setUp();
+      state.playerUserIds = { Paul: 'host-1', Sam: 'p-2' };
+      service.players();
+      expect(coHost.players).toHaveBeenCalledWith({ Paul: 'host-1', Sam: 'p-2' }, 'host-1');
     });
   });
 

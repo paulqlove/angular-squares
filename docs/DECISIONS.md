@@ -4,6 +4,14 @@ This file records product and design decisions, newest first. To add one, put a 
 
 ---
 
+## D-044 · Co-host in the game page's Edit game
+
+- **Date:** Nov 19 2026
+- **Decision:** Edit game on the game page has the same Co-host field as the dashboard's, for the game's owner only: pick a player, remove the co-host, or use the group's co-host. Both pages share one co-host service. The co-host's email is read only when the owner opens Edit game, so the email rules from Nov 15 stay as they are: "Hide them" for game co-host emails and "Only me" for group co-hosts. Paul's words: "Add it to the game page".
+- **Options considered:** not recorded
+- **Why:** hosts looked for the co-host inside the game and couldn't find it
+- **Decided by:** Paul
+
 ## D-043 · Admin can reset a host's free games
 
 - **Date:** Nov 19 2026

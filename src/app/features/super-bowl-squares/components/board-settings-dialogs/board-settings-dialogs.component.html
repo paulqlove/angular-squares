@@ -28,9 +28,16 @@
   [clearBlocked]="host.clearStep() === 'blocked'"
   [canCustomSplit]="planService.features().customSplits"
   [splitLocked]="state.isRandomized"
+  [showCoHost]="state.isGameOwner()"
+  [players]="coHost.players()"
+  [coHostName]="coHost.name()"
+  [coHostEmail]="coHost.email()"
   (closed)="ui.showSettings.set(false)"
   (saved)="host.onEditGameSaved($event)"
   (clearGame)="host.onClearGame(true)"
+  (coHostAssign)="coHost.assign($event)"
+  (coHostRemove)="coHost.remove()"
+  (coHostUseGroup)="coHost.useGroup($event)"
 >
   <section appEditGameNumbers editGameTop></section>
 </app-edit-game-dialog>

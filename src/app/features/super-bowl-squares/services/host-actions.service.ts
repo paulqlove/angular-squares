@@ -11,6 +11,7 @@ import { clearCountNote, clearGameStep } from '../../../core/utils/season-games'
 import type { EditGameValues } from '../components/edit-game-dialog/edit-game-dialog.component';
 import { emptyScores } from '../utils/board-math';
 import { hostNextStep } from '../utils/host-next-step';
+import { GamePageCoHostService } from './game-page-cohost.service';
 import { GamePageGroupsService } from './game-page-groups.service';
 import { GamePageUiService } from './game-page-ui.service';
 import { GameStateService } from './game-state.service';
@@ -165,6 +166,7 @@ export class HostActionsService {
 
   // Private properties
 
+  private readonly coHost: GamePageCoHostService = inject(GamePageCoHostService);
   private readonly confirmService: ConfirmService = inject(ConfirmService);
   /** The season count read when Edit game last opened, while it's in flight or done. */
   private seasonLoad: Promise<void> | null = null;
@@ -217,6 +219,7 @@ export class HostActionsService {
       }
     }
     if (!await this.groups.saveChoice(values.group)) return false;
+    await this.coHost.addGroupCoHost(values.coHostFromGroup, this.groups.groups().find(g => g.id === state.openListId)?.coHost?.email);
     if (state.isGameOwner() && this.planService.features().squareLimit && (values.maxSquaresPerPlayer ?? undefined) !== state.maxSquaresPerPlayer) {
       try {
         await this.gameService.setSquareLimit(state.gameId, values.maxSquaresPerPlayer);
