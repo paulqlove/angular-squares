@@ -7,7 +7,7 @@ import { SeasonPassAdminService } from '../../../core/services/season-pass-admin
 import { ModalComponent } from '../modal/modal.component';
 
 /**
- * Admin only: gifted Season Passes, opened from the profile menu's Season Passes item. A sheet on phones, a dialog from sm up.
+ * Admin only: gifted Season Passes and the free-games reset, opened from the profile menu's Season Passes item. A sheet on phones, a dialog from sm up.
  * Each page with the profile menu hosts it at page level, outside the header: the sticky header's stacking context would put the phone bars over it.
  */
 @Component({
@@ -40,6 +40,30 @@ import { ModalComponent } from '../modal/modal.component';
               {{ admin.isGrantingPass() ? 'Adding...' : 'Add' }}
             </button>
           </form>
+
+          <p id="reset-free-games-label" class="qs-label mb-2 mt-6 text-qs-muted">Reset free games</p>
+          <form class="grid grid-cols-[1fr_auto] gap-2" aria-labelledby="reset-free-games-label" (submit)="$event.preventDefault(); admin.resetFreeGames()">
+            <input
+              type="email"
+              name="resetEmail"
+              [(ngModel)]="admin.resetEmail"
+              (ngModelChange)="admin.onResetEmailChange()"
+              placeholder="Email address"
+              aria-label="Email address to reset"
+              class="qs-input"
+              [class.qs-input-error]="admin.resetUserMissing()"
+              [attr.aria-invalid]="admin.resetUserMissing()"
+              [attr.aria-describedby]="admin.resetUserMissing() ? 'reset-free-games-help' : null"
+            />
+            <button type="submit" class="qs-btn qs-btn-secondary px-6" [disabled]="admin.isResettingFreeGames() || !admin.resetEmail.trim()">
+              {{ admin.isResettingFreeGames() ? 'Resetting...' : 'Reset' }}
+            </button>
+          </form>
+          @if (admin.resetUserMissing()) {
+            <p id="reset-free-games-help" class="mt-1.5 text-sm text-qs-bad">User doesn't exist</p>
+          } @else if (admin.resetDoneEmail(); as done) {
+            <p class="mt-1.5 text-sm text-qs-ok" role="status">Free games reset to 0 for {{ done }}</p>
+          }
 
           @if (admin.isLoadingGiftedPasses() && admin.giftedPasses().length === 0) {
             <div class="mt-6 h-20 animate-pulse rounded-card bg-qs-panel-2"></div>

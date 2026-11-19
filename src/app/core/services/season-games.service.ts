@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { get, ref, set } from 'firebase/database';
+import { get, ref, serverTimestamp, set } from 'firebase/database';
 import { toSeasonGame } from '../utils/game-parse';
-import { SEASON_LIMIT_ON, SeasonGame, gamesUsed, seasonGamePath, seasonOf } from '../utils/season-games';
+import { SEASON_LIMIT_ON, SeasonGame, gamesUsed, seasonGamePath, seasonOf, seasonResetPath } from '../utils/season-games';
 import { GameDatabaseService } from './game-database.service';
 
 /**
@@ -26,11 +26,25 @@ export class SeasonGamesService {
     if (path) await set(ref(this.database.db, path), true);
   }
 
-  /** Games used this season: the saved ones plus the host's boards that have players now. Also updates `used`. */
+  /**
+   * Admin only: sets a host's free games this season back to 0. Saves the time of the reset, so games that started before it stop counting.
+   * The rules let only an admin write it.
+   */
+  public async resetSeason(ownerId: string): Promise<void> {
+    await set(ref(this.database.db, seasonResetPath(ownerId, seasonOf(Date.now()))), serverTimestamp());
+  }
+
+  /** Games used this season: the saved ones plus the host's boards that have players now, since any admin reset. Also updates `used`. */
   public async usedThisSeason(ownerId: string, boards: readonly SeasonGame[]): Promise<number> {
     const now = Date.now();
-    const snapshot = await get(ref(this.database.db, `seasonGames/${ownerId}/${seasonOf(now)}`));
-    const count = gamesUsed(Object.keys(snapshot.val() ?? {}), boards, now);
+    const season = seasonOf(now);
+    const [saved, reset] = await Promise.all([
+      get(ref(this.database.db, `seasonGames/${ownerId}/${season}`)),
+      // A failed reset read (rules not deployed yet) means no reset, so the cap check never blocks on it.
+      get(ref(this.database.db, seasonResetPath(ownerId, season))).catch(() => null)
+    ]);
+    const resetAt = typeof reset?.val() === 'number' ? reset.val() : 0;
+    const count = gamesUsed(Object.keys(saved.val() ?? {}), boards, now, resetAt);
     this.used.set(count);
     return count;
   }

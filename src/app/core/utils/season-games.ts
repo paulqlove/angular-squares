@@ -57,12 +57,26 @@ export function seasonGamePath(ownerId: string, game: SeasonGame): string | null
   return `seasonGames/${ownerId}/${seasonOf(gameStart(game))}/${seasonGameKey(game)}`;
 }
 
-/** Games used this season: the ones already saved, plus the host's boards with players that aren't saved yet. */
-export function gamesUsed(saved: readonly string[], boards: readonly SeasonGame[], now: number): number {
+/** Where an admin's reset of a host's season is saved: the time of the reset. Games that started before it stop counting. */
+export function seasonResetPath(ownerId: string, season: string): string {
+  return `seasonResets/${ownerId}/${season}`;
+}
+
+/** When a saved game started, read from its key (the number after the last underscore). 0 when the key has none. */
+export function savedGameStart(key: string): number {
+  const start = Number(key.slice(key.lastIndexOf('_') + 1));
+  return Number.isFinite(start) ? start : 0;
+}
+
+/**
+ * Games used this season: the ones already saved, plus the host's boards with players that aren't saved yet.
+ * After an admin reset, only games that started at or after resetAt count.
+ */
+export function gamesUsed(saved: readonly string[], boards: readonly SeasonGame[], now: number, resetAt: number = 0): number {
   const season = seasonOf(now);
-  const used = new Set(saved);
+  const used = new Set(saved.filter(key => savedGameStart(key) >= resetAt));
   for (const board of boards) {
-    if (isCounted(board) && seasonOf(gameStart(board)) === season) used.add(seasonGameKey(board));
+    if (isCounted(board) && seasonOf(gameStart(board)) === season && gameStart(board) >= resetAt) used.add(seasonGameKey(board));
   }
   return used.size;
 }
