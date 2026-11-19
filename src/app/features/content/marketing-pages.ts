@@ -185,7 +185,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
     faqs: [
       {
         question: 'Does QuarterScore cost money?',
-        answer: 'No. Hosting is free: one game at a time and 3 games a season. Claiming squares is always free. QuarterScore never collects, holds, or pays out money.'
+        answer: 'Hosting one game a season is free, and claiming squares is always free. Hosts who run more games get the Season Pass, a one-time $5.99. QuarterScore never collects, holds, or pays out money.'
       },
       {
         question: 'Do players need an account?',
@@ -429,7 +429,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       },
       {
         question: 'Can I run squares for every Thanksgiving game?',
-        answer: 'Yes. Each game gets its own board and link. Free hosts get one game at a time and 3 games a season. The Season Pass runs several boards at once.'
+        answer: 'Yes. Each game gets its own board and link. Free hosts get one game a season. The Season Pass runs all three games at once.'
       },
       {
         question: 'What are good Thanksgiving squares prizes?',
@@ -491,7 +491,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       {
         heading: 'A board you can run every week',
         paragraphs: [
-          'Some groups play one game a week all season. Each game gets its own board and link, so old scores stay put. Free hosts get 3 games a season. The Season Pass is for groups that play every week.',
+          'Some groups play one game a week all season. Each game gets its own board and link, so old scores stay put. Free hosts get one game a season. The Season Pass is for groups that play every week.',
           'In February the same board becomes [Super Bowl squares](/super-bowl-squares), and you can make it before the matchup is set. Hosting the party? Our [Super Bowl party ideas](/super-bowl-party-games) add a prop sheet and commercial bingo.'
         ],
         bullets: [
@@ -516,7 +516,7 @@ export const MARKETING_PAGES: Record<string, MarketingPage> = {
       },
       {
         question: 'Can I run squares for more than one NFL game?',
-        answer: 'Yes. Each game gets its own board and link. Free hosts get one game at a time and 3 games a season. The Season Pass is for groups that play every week.'
+        answer: 'Yes. Each game gets its own board and link. Free hosts get one game a season. The Season Pass is for groups that play every week.'
       },
       {
         question: 'Do players need an account?',

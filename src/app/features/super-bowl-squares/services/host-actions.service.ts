@@ -5,7 +5,7 @@ import { PlanService } from '../../../core/services/plan.service';
 import { SanitizationService } from '../../../core/services/sanitization.service';
 import { SeasonGamesService } from '../../../core/services/season-games.service';
 import { ToastService } from '../../../core/services/toast.service';
-import { PLANS, splitFractions } from '../../../core/plans';
+import { splitFractions } from '../../../core/plans';
 import { drawBoardNumbers } from '../../../core/utils/draw-numbers';
 import { clearCountNote, clearGameStep } from '../../../core/utils/season-games';
 import type { EditGameValues } from '../components/edit-game-dialog/edit-game-dialog.component';
@@ -35,7 +35,7 @@ export class HostActionsService {
   /** What Clear game does for this board right now: clear, clear with a line, or open the season dialog. */
   public readonly clearStep = computed(() => clearGameStep(this.state.squaresPicked(), this.seasonGamesLeft()));
   /** The extra clear line for a host under the cap, else ''. */
-  public readonly clearNote = computed(() => this.clearStep() === 'note' ? clearCountNote(this.seasonGamesLeft() ?? 0, PLANS.free.seasonGames) : '');
+  public readonly clearNote = computed(() => this.clearStep() === 'note' ? clearCountNote(this.seasonGamesLeft() ?? 0) : '');
 
   // Public functions
 

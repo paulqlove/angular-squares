@@ -5,6 +5,7 @@ import {
   clearCountNote,
   clearGameStep,
   deleteCountNote,
+  freeGamesText,
   gameCounts,
   gamesLeft,
   gamesUsed,
@@ -19,9 +20,9 @@ describe('season games', () => {
   const now = Date.UTC(2026, 10, 15, 18, 0, 0);
   const game = (extra: Partial<SeasonGame> = {}): SeasonGame => ({ id: 'ABCDEF', createdAt: Date.UTC(2026, 10, 1), squaresFilled: 3, ...extra });
 
-  it('ships switched on, with 3 games for free hosts and no cap on paid plans', () => {
+  it('ships switched on, with 1 game for free hosts and no cap on paid plans', () => {
     expect(SEASON_LIMIT_ON).toBe(true);
-    expect(PLANS.free.seasonGames).toBe(3);
+    expect(PLANS.free.seasonGames).toBe(1);
     expect(PLANS.season.seasonGames).toBe(Number.POSITIVE_INFINITY);
     expect(PLANS.admin.seasonGames).toBe(Number.POSITIVE_INFINITY);
   });
@@ -79,7 +80,8 @@ describe('season games', () => {
   });
 
   it('warns on delete only for a game with players this season', () => {
-    expect(deleteCountNote(game(), 3, now, true)).toBe('This game has players, so it still counts as 1 of your 3 free games this season.');
+    expect(deleteCountNote(game(), 1, now, true)).toBe('This game has players, so it still counts toward your 1 free game this season.');
+    expect(deleteCountNote(game(), 3, now, true)).toBe('This game has players, so it still counts toward your 3 free games this season.');
     expect(deleteCountNote(game({ squaresFilled: 0 }), 3, now, true)).toBe('');
     expect(deleteCountNote(game(), 3, now, false)).toBe('');
     expect(deleteCountNote(game(), Number.POSITIVE_INFINITY, now, true)).toBe('');
@@ -101,6 +103,13 @@ describe('season games', () => {
   });
 
   it('words the clear line with the games left', () => {
-    expect(clearCountNote(2, 3)).toBe('Once someone claims a square, this counts as a new game. You have 2 of 3 free games left this season.');
+    expect(clearCountNote(1)).toBe('Once someone claims a square, this counts as a new game. You have 1 free game left this season.');
+    expect(clearCountNote(2)).toBe('Once someone claims a square, this counts as a new game. You have 2 free games left this season.');
+  });
+
+  it('names one free game in the singular', () => {
+    expect(freeGamesText(0)).toBe('0 free games');
+    expect(freeGamesText(1)).toBe('1 free game');
+    expect(freeGamesText(3)).toBe('3 free games');
   });
 });

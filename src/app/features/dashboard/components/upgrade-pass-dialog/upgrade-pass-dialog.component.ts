@@ -19,6 +19,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { CheckoutService } from '../../../../core/services/checkout.service';
 import { GameService } from '../../../../core/services/game.service';
 import { PLANS } from '../../../../core/plans';
+import { freeGamesText } from '../../../../core/utils/season-games';
 import { SEASON_PASS_PERKS } from '../../../../core/utils/season-pass';
 import {
   BoardLimitDialog,
@@ -58,7 +59,7 @@ export type UpgradeTrigger = BoardLimitDialog | 'pass' | 'ended';
         } @else if (trigger === 'cap') {
           You're at your {{ seasonBoards }}-board <span class="text-qs-accent">limit</span>
         } @else if (trigger === 'season') {
-          You've used your {{ freeSeasonGames }} free games this <span class="text-qs-accent">season</span>
+          You've used your {{ freeGames }} this <span class="text-qs-accent">season</span>
         } @else if (trigger === 'limit') {
           Board 1 is live. Want a <span class="text-qs-accent">second</span>?
         } @else {
@@ -73,7 +74,7 @@ export type UpgradeTrigger = BoardLimitDialog | 'pass' | 'ended';
           } @else {
             Free hosts run one game at a time.
             @if (gamesLeft < freeSeasonGames) {
-              You have {{ gamesLeft }} of {{ freeSeasonGames }} free games left this season.
+              You have {{ gamesLeftText }} left this season.
             }
           }
           Reset {{ boardName ? '"' + boardName + '"' : 'it' }} for your next game, or delete it to start fresh.
@@ -88,12 +89,12 @@ export type UpgradeTrigger = BoardLimitDialog | 'pass' | 'ended';
         </div>
       } @else {
         @if (trigger === 'season') {
-          <p id="upgrade-summary" class="mt-4 text-base text-qs-muted">Free hosts get {{ freeSeasonGames }} games a season. The Season Pass runs as many as you want.</p>
+          <p id="upgrade-summary" class="mt-4 text-base text-qs-muted">Free hosts get {{ freeGames }} a season. The Season Pass runs as many as you want.</p>
         } @else if (trigger === 'limit' && gamesLeft !== null) {
           <p id="upgrade-summary" class="mt-4 text-base text-qs-muted">
             Free hosts run one game at a time.
             @if (gamesLeft > 0) {
-              You have {{ gamesLeft }} of {{ freeSeasonGames }} free games left this season.
+              You have {{ gamesLeftText }} left this season.
             }
           </p>
         }
@@ -216,8 +217,15 @@ export class UpgradePassDialogComponent implements AfterViewInit {
   protected readonly perks = SEASON_PASS_PERKS;
   /** The cap named in the 'cap' version. Season Pass is the only plan with a cap above Free. */
   protected readonly seasonBoards: number = PLANS.season.activeBoards;
-  /** The free plan's games per season, named in the season copy. */
+  /** "1 free game": the free plan's games per season, named in the season copy. */
+  protected readonly freeGames: string = freeGamesText(PLANS.free.seasonGames);
+  /** The free plan's games per season, to tell whether any are used. */
   protected readonly freeSeasonGames: number = PLANS.free.seasonGames;
+
+  /** "1 free game" left this season, for the season lines. */
+  protected get gamesLeftText(): string {
+    return freeGamesText(this.gamesLeft ?? 0);
+  }
 
   /** The season versions: the cap was hit, or the one-at-a-time limit while the cap is on. */
   protected get seasonCopy(): boolean {

@@ -75,7 +75,7 @@ export function gamesLeft(cap: number, used: number): number {
 /** The delete-confirm line for a game that stays counted after it's deleted, or '' when there's nothing to say. */
 export function deleteCountNote(game: SeasonGame, cap: number, now: number, on: boolean = SEASON_LIMIT_ON): string {
   if (!seasonLimitApplies(cap, on) || !isCounted(game) || seasonOf(gameStart(game)) !== seasonOf(now)) return '';
-  return `This game has players, so it still counts as 1 of your ${cap} free games this season.`;
+  return `This game has players, so it still counts toward your ${freeGamesText(cap)} this season.`;
 }
 
 /** True when the cap applies: the switch is on and the plan has a finite cap. */
@@ -93,6 +93,11 @@ export function clearGameStep(squaresFilled: number, left: number | null): Clear
 }
 
 /** The extra line on the clear confirm for a host under the cap. */
-export function clearCountNote(left: number, cap: number): string {
-  return `Once someone claims a square, this counts as a new game. You have ${left} of ${cap} free games left this season.`;
+export function clearCountNote(left: number): string {
+  return `Once someone claims a square, this counts as a new game. You have ${freeGamesText(left)} left this season.`;
+}
+
+/** "1 free game" or "3 free games", for every line that names a count of free games. */
+export function freeGamesText(count: number): string {
+  return `${count} free ${count === 1 ? 'game' : 'games'}`;
 }

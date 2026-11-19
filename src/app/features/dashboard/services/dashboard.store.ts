@@ -12,7 +12,7 @@ import { BoardGroup, groupBoards } from '../../../core/utils/board-groups';
 import { drawBoardNumbers } from '../../../core/utils/draw-numbers';
 import { GroupRow, gamesInGroup } from '../../../core/utils/game-groups';
 import { toGameListItem } from '../../../core/utils/game-parse';
-import { deleteCountNote, gamesLeft, seasonLimitApplies } from '../../../core/utils/season-games';
+import { deleteCountNote, freeGamesText, gamesLeft, seasonLimitApplies } from '../../../core/utils/season-games';
 import { EmptyDashboardFacts, isFirstEmpty, isPassEmpty, isReturningEmpty } from '../utils/returning-empty';
 import { filterHostedGames } from './dashboard-filters';
 import { DashboardGroupsService } from './dashboard-groups.service';
@@ -61,12 +61,14 @@ export class DashboardStore {
   /** Every board this user hosts or co-hosts, in full, for the Players view. Newest first, hosted ones first. */
   public readonly runBoards = signal<GameData[]>([]);
   public readonly shareModalGameId = signal<string | null>(null);
-  /** "N of 3 free games left this season" for a free host while the season cap is on, else null. */
+  /** Free games left this season for a free host while the season cap is on, else null. */
   public readonly seasonGamesLeft = computed<number | null>(() => {
     const cap = this.planService.features().seasonGames;
     const used = this.seasonGames.used();
     return seasonLimitApplies(cap) && used !== null ? gamesLeft(cap, used) : null;
   });
+  /** "1 free game" or "0 free games" for the line under the dashboard title. */
+  public readonly seasonGamesLeftText = computed<string>(() => freeGamesText(this.seasonGamesLeft() ?? 0));
   /** Games this host has used this season, or null until read. */
   public readonly seasonGamesUsed = computed<number | null>(() => this.seasonGames.used());
   /** Hosted boards in the picked group matching the search, newest first. */
