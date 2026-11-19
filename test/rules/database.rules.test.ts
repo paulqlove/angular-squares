@@ -930,6 +930,25 @@ describe('seasonGames (free games per season)', () => {
     await assertFails(set(owner(), `seasonGames/owner/2026/${GAME}_1790000000000`, 1));
   });
 
+  it('only an admin can reset a host\'s season, and only to a time that has passed', async () => {
+    await seed({ 'admins/boss': true });
+    const admin = env.authenticatedContext('boss');
+    await assertSucceeds(set(admin, 'seasonResets/owner/2026', Date.now() - 1000));
+    await assertFails(set(admin, 'seasonResets/owner/2026', Date.now() + 86_400_000));
+    await assertFails(set(admin, 'seasonResets/owner/26', Date.now() - 1000));
+    await assertFails(set(admin, 'seasonResets/owner/2026', 'today'));
+    await assertFails(set(owner(), 'seasonResets/owner/2026', Date.now() - 1000));
+    await assertFails(set(player(), 'seasonResets/owner/2026', Date.now() - 1000));
+  });
+
+  it('the host and an admin can read a season reset, nobody else', async () => {
+    await seed({ 'admins/boss': true, 'seasonResets/owner/2026': 1790000000000 });
+    await assertSucceeds(read(owner(), 'seasonResets/owner/2026'));
+    await assertSucceeds(read(env.authenticatedContext('boss'), 'seasonResets/owner/2026'));
+    await assertFails(read(player(), 'seasonResets/owner/2026'));
+    await assertFails(read(visitor(), 'seasonResets/owner/2026'));
+  });
+
   it('games/startedAt takes a positive number from the owner', async () => {
     await assertSucceeds(set(owner(), `${G}/startedAt`, Date.now()));
     await assertFails(set(owner(), `${G}/startedAt`, 'today'));

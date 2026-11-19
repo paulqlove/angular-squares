@@ -4,6 +4,7 @@ import { isNoExpiry } from '../plans';
 import { AuthService } from './auth.service';
 import { ConfirmService } from './confirm.service';
 import { GameService } from './game.service';
+import { SeasonGamesService } from './season-games.service';
 import { ToastService } from './toast.service';
 
 /** The only account that sees the gifted Season Passes item and dialog. */
@@ -24,7 +25,7 @@ export function formatPassExpiry(expiresAt: number, now: number = Date.now()): s
   return `${days} days left`;
 }
 
-/** Admin: gifted Season Passes, granted, revoked and made permanent from the profile menu's Season Passes dialog. */
+/** Admin: gifted Season Passes, granted, revoked and made permanent, and free games reset, from the profile menu's Season Passes dialog. */
 @Injectable({ providedIn: 'root' })
 export class SeasonPassAdminService {
   /** The Season Passes item and dialog show for the admin account only. */
@@ -34,8 +35,14 @@ export class SeasonPassAdminService {
   public readonly isAdmin: Signal<boolean> = inject(AuthService).isPreviewAdmin;
   public readonly isGrantingPass = signal<boolean>(false);
   public readonly isLoadingGiftedPasses = signal<boolean>(false);
+  public readonly isResettingFreeGames = signal<boolean>(false);
   public newGiftDays: number = 30;
   public newGiftEmail: string = '';
+  /** The email whose free games were just reset, for the short success line. Null otherwise. */
+  public readonly resetDoneEmail = signal<string | null>(null);
+  public resetEmail: string = '';
+  /** True when the last reset email matched no account: a red ring and "User doesn't exist" under the field. */
+  public readonly resetUserMissing = signal<boolean>(false);
   public readonly updatingPassEmail = signal<string | null>(null);
 
   public formatExpiry(expiresAt: number): string {
@@ -94,6 +101,38 @@ export class SeasonPassAdminService {
     }
   }
 
+  /** Clears the not-found ring and the success line once the email is edited. */
+  public onResetEmailChange(): void {
+    this.resetUserMissing.set(false);
+    this.resetDoneEmail.set(null);
+  }
+
+  /** Sets the free games used this season back to 0 for the account with this email. */
+  public async resetFreeGames(): Promise<void> {
+    const email = this.resetEmail.trim().toLowerCase();
+    if (!email) return;
+    this.resetDoneEmail.set(null);
+    if (!email.includes('@')) {
+      this.resetUserMissing.set(true);
+      return;
+    }
+    this.isResettingFreeGames.set(true);
+    try {
+      const uid = await this.authService.lookupUserByEmail(email);
+      if (!uid) {
+        this.resetUserMissing.set(true);
+        return;
+      }
+      await this.seasonGamesService.resetSeason(uid);
+      this.resetEmail = '';
+      this.resetDoneEmail.set(email);
+    } catch {
+      this.toastService.error('Could not reset free games. Try again.');
+    } finally {
+      this.isResettingFreeGames.set(false);
+    }
+  }
+
   public async revokePass(email: string): Promise<void> {
     if (!await this.confirmService.ask({ title: 'Revoke season pass?', message: email, confirmLabel: 'Revoke pass' })) return;
     try {
@@ -113,5 +152,6 @@ export class SeasonPassAdminService {
   private readonly authService: AuthService = inject(AuthService);
   private readonly confirmService: ConfirmService = inject(ConfirmService);
   private readonly gameService: GameService = inject(GameService);
+  private readonly seasonGamesService: SeasonGamesService = inject(SeasonGamesService);
   private readonly toastService: ToastService = inject(ToastService);
 }

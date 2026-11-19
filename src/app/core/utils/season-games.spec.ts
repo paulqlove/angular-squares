@@ -10,10 +10,12 @@ import {
   gamesLeft,
   gamesUsed,
   isCounted,
+  savedGameStart,
   seasonGameKey,
   seasonGamePath,
   seasonLimitApplies,
-  seasonOf
+  seasonOf,
+  seasonResetPath
 } from './season-games';
 
 describe('season games', () => {
@@ -66,6 +68,20 @@ describe('season games', () => {
     expect(gamesUsed([], [game({ squaresFilled: 0 })], now)).toBe(0);
     expect(gamesUsed([], [game({ createdAt: Date.UTC(2026, 2, 1) })], now)).toBe(0);
     expect(gamesUsed([], [game({ createdAt: Date.UTC(2026, 2, 1), startedAt: Date.UTC(2026, 8, 1) })], now)).toBe(1);
+  });
+
+  it('after an admin reset, counts only games that started since', () => {
+    const resetAt = Date.UTC(2026, 10, 10);
+    const saved = [seasonGameKey(game()), `NEW456_${Date.UTC(2026, 10, 12)}`];
+    expect(gamesUsed(saved, [game()], now, resetAt)).toBe(1);
+    expect(gamesUsed([], [game(), game({ id: 'LATER1', startedAt: Date.UTC(2026, 10, 11) })], now, resetAt)).toBe(1);
+    expect(gamesUsed([seasonGameKey(game())], [game()], now, resetAt)).toBe(0);
+  });
+
+  it('reads a saved game\'s start from its key, and saves a reset per host and season', () => {
+    expect(savedGameStart('ABCDEF_1790000000000')).toBe(1790000000000);
+    expect(savedGameStart('bad')).toBe(0);
+    expect(seasonResetPath('host1', '2026')).toBe('seasonResets/host1/2026');
   });
 
   it('never shows fewer than 0 games left', () => {

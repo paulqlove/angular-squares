@@ -4,6 +4,14 @@ This file records product and design decisions, newest first. To add one, put a 
 
 ---
 
+## D-043 · Admin can reset a host's free games
+
+- **Date:** Nov 19 2026
+- **Decision:** The admin Season Passes dialog has a "Reset free games" field. Enter a host's email and their free games used this season go back to 0. The reset saves its time at `seasonResets/{uid}/{season}`, and only games that started after it count, so boards that already have players stop counting too. Only an admin can write it (database rules). An email with no account gets a red ring and "User doesn't exist" under the field, with no new screen. The one-game-open-at-a-time limit is unchanged. Paul's words: "i want a way to be able to reset a users free games used back to 0 by entering there email. I don't need to see all the users".
+- **Options considered:** delete the host's saved games (doesn't reach boards that still have players); save a reset time (picked)
+- **Why:** a reset time sets the count to 0 in one write and keeps the saved games as history
+- **Decided by:** Paul
+
 ## D-042 · Free hosts: 1 game a season, not 3
 
 - **Date:** Nov 18 2026
