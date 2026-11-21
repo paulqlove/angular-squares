@@ -69,6 +69,9 @@ export const NFL_TEAMS: NflTeam[] = [
   { name: '49ers', city: 'San Francisco', slug: 'san-francisco-49ers', abbreviation: 'SF', espnId: '25', conference: 'NFC', division: 'West', primaryColor: '#AA0000', secondaryColor: '#B3995D' }
 ];
 
+/** Teams that host a game every Thanksgiving. */
+export const THANKSGIVING_HOSTS: readonly string[] = ['dallas-cowboys', 'detroit-lions'];
+
 export function getTeamBySlug(slug: string): NflTeam | undefined {
   return NFL_TEAMS.find(t => t.slug === slug);
 }

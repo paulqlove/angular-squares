@@ -7,7 +7,7 @@ import { ContentShellComponent } from './content-shell.component';
 import { AuthModalComponent } from '../../components/ui/auth-modal/auth-modal.component';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroPrinter } from '@ng-icons/heroicons/outline';
-import { NflTeam, getTeamBySlug, NFL_TEAMS, teamBadge } from './teams-data';
+import { NflTeam, getTeamBySlug, NFL_TEAMS, teamBadge, THANKSGIVING_HOSTS } from './teams-data';
 import { ReadingEndComponent, ReadingSectionComponent } from './reading-layout.components';
 import { PageCta, RelatedLink } from './marketing-pages';
 import { TeamHelmetComponent } from '../../shared/team-helmet.component';
@@ -133,6 +133,10 @@ import { ScheduledGame, formatKickoff } from './schedule.model';
               Claim a square and watch the score. You don't need to know football. The same rules run every
               <a routerLink="/nfl-squares" class="font-medium text-qs-accent underline underline-offset-2">NFL squares</a> board and the
               <a routerLink="/super-bowl-squares" class="font-medium text-qs-accent underline underline-offset-2">Super Bowl squares</a> board.
+              @if (hostsThanksgiving) {
+                The {{ team.name }} host a game every Thanksgiving, so there's a
+                <a routerLink="/thanksgiving-football-squares" class="font-medium text-qs-accent underline underline-offset-2">Thanksgiving football squares</a> board for the whole table.
+              }
             </p>
             <ol wide class="grid gap-y-8 border-y border-qs-line py-6 sm:grid-cols-2 lg:col-span-2 lg:grid-cols-4 lg:gap-y-0">
               @for (step of steps(); track step.name; let index = $index) {
@@ -216,6 +220,7 @@ export class TeamPageComponent implements OnInit {
   });
   public breadcrumbs: { name: string; path: string }[] = [];
   public divisionRivals: NflTeam[] = [];
+  public hostsThanksgiving: boolean = false;
   public games = signal<EspnGame[]>([]);
   public showAuthModal = signal(false);
   public readonly digits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -263,6 +268,8 @@ export class TeamPageComponent implements OnInit {
       { name: 'Teams', path: '/teams' },
       { name: `${this.team.city} ${this.team.name}`, path: `/team/${slug}` }
     ];
+
+    this.hostsThanksgiving = THANKSGIVING_HOSTS.includes(slug);
 
     this.divisionRivals = NFL_TEAMS.filter(
       t => t.conference === this.team!.conference &&
