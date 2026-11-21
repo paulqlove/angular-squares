@@ -19,7 +19,7 @@ describe('open-lists', () => {
 
   it('keeps only the owner\'s boards, never the one on screen, at most thirty', () => {
     const list: Record<string, unknown> = { here: 'owner', a: 'owner', legacy: true, intruder: 'someone-else' };
-    expect(listedBoardIds(list, 'owner', 'here')).toEqual(['a', 'legacy']);
+    expect(listedBoardIds(list, 'owner', 'here')).toEqual(['a']);
     expect(listedBoardIds(null, 'owner', 'here')).toEqual([]);
     const many = Object.fromEntries(Array.from({ length: 35 }, (_, i) => [`b${i}`, 'owner']));
     expect(listedBoardIds(many, 'owner', 'x').length).toBe(MAX_OPEN_BOARDS);

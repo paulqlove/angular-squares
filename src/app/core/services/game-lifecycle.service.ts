@@ -127,7 +127,6 @@ export class GameLifecycleService {
     const updates: Record<string, unknown> = {
       [`games/${gameId}`]: null,
       [`users/${ownerId}/games/${gameId}`]: null,
-      [`openBoards/${ownerId}/${gameId}`]: null,
       [`gameCoHosts/${ownerId}/${gameId}`]: null,
     };
     const listId = listSnap.val();
