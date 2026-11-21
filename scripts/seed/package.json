@@ -1,0 +1,9 @@
+{
+  "name": "quarterscore-seed",
+  "private": true,
+  "type": "module",
+  "description": "Seeds and removes test boards in the live database. See README.md.",
+  "dependencies": {
+    "firebase-admin": "^13.5.0"
+  }
+}
